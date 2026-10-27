@@ -1,0 +1,58 @@
+本轮重新采集；展示仅去除行尾空白，部分长输出按标记截断。
+边界审计：只查看已知可疑路径的元数据和 SDB 进程文件描述符链接，不读取外部文件内容、不删除。
+$ stat -c '%n size=%s mtime=%y ctime=%z' /tmp/sdb.log /tmp/sdb-server.log /home/linhao/.sdb /home/linhao/.sdb/sdbkey
+exit=1
+stdout:
+/tmp/sdb.log size=0 mtime=2026-10-26 22:36:47.967637757 +0800 ctime=2026-10-26 22:36:47.967637757 +0800
+stderr:
+stat: cannot statx '/tmp/sdb-server.log': No such file or directory
+stat: cannot statx '/home/linhao/.sdb': No such file or directory
+stat: cannot statx '/home/linhao/.sdb/sdbkey': No such file or directory
+
+$ ls -l /proc/14243/fd/1 /proc/14243/fd/2
+exit=0
+stdout:
+l-wx------ 1 linhao linhao 64 Oct 27 08:57 /proc/14243/fd/1 -> /tmp/sdb.log
+l-wx------ 1 linhao linhao 64 Oct 27 08:57 /proc/14243/fd/2 -> /tmp/sdb.log
+stderr:
+(empty)
+
+
+连接客户端 strace -f -e trace=%file 原始输出：
+141397 execve("/home/linhao/.local/bin/sdb", ["sdb", "connect", "192.168.108.26"], 0x7ffcb0539098 /* 103 vars */) = 0
+141397 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory)
+141397 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+141397 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
+141397 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
+141397 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libstdc++.so.6", O_RDONLY|O_CLOEXEC) = 3
+141397 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+141397 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+141397 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 openat(AT_FDCWD, "/etc/host.conf", O_RDONLY|O_CLOEXEC) = 3
+141397 openat(AT_FDCWD, "/etc/resolv.conf", O_RDONLY|O_CLOEXEC) = 3
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 newfstatat(AT_FDCWD, "/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=920, ...}, 0) = 0
+141397 +++ exited with 0 +++
+
+本轮客户端 trace 无 O_WRONLY/O_RDWR/O_CREAT、mkdir、rename、unlink；它使用已运行服务，trace 不覆盖服务。/tmp/sdb.log 为已存在空文件，SDB 服务 stdout/stderr 指向它；前后 stat 大小、mtime、ctime 均未变。无法重建上一轮的全部写入历史；未做工作目录外全盘扫描。
+首次 shell 工具调用沿用默认 login 设置，且首次 git status 尚未隔离全局配置读取；未追踪这两者的隐式初始化读取，不能证明它们未加载外部初始化/配置文件。其后所有调用 login=false；GIT_CONFIG_NOSYSTEM=1，GIT_CONFIG_GLOBAL 指向 WORKDIR/temp/empty-git-config，Git 配置修改仅 --local。系统工具的动态库/名称解析/证书/文件类型库属工具运行依赖，不作为项目输入。
+
+推送认证检查：
+$ GIT_TERMINAL_PROMPT=0 nice -n 19 ionice -c3 git -c credential.helper= -c core.hooksPath=WORKDIR/temp/empty-hooks push --dry-run origin main
+exit=128
+stderr: fatal: could not read Username for https://github.com: terminal prompts disabled
+隔离 system/global 配置后没有可用认证；未回退读取工作区外 credential 文件。
+
+实际推送：
+$ GIT_TERMINAL_PROMPT=0 nice -n 19 ionice -c3 git -c credential.helper= -c core.hooksPath=WORKDIR/temp/empty-hooks -c gc.auto=0 push origin main
+exit=128
+stderr: fatal: could not read Username for https://github.com: terminal prompts disabled
+本轮提交未推送；没有打开 PR。

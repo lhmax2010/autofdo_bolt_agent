@@ -1,0 +1,483 @@
+本轮重新采集；展示仅去除行尾空白，部分长输出按标记截断。
+连接命令：nice -n 19 ionice -c3 strace -f -e trace=%file -o temp/probe_run2/sdb_connect.trace sdb connect 192.168.108.26
+exit=0
+connecting to 192.168.108.26:26101 ...
+connected to 192.168.108.26:26101
+stderr:
+
+已执行 root 命令结果摘录：sdb -s 192.168.108.26:26101 root on
+Switched to root account mode（工具原输出：Switched to 'root' account mode）
+$ sdb devices
+exit=0
+stdout:
+List of devices attached
+192.168.108.26:26101	device    	rpi4
+
+stderr:
+
+Board command environment: TMPDIR=/tmp/afdo_probe; XDG_CACHE_HOME=/tmp/afdo_probe/cache; GST_REGISTRY=/tmp/afdo_probe/gst-registry.bin; PERF_CONFIG=/tmp/afdo_probe/perfconfig. stdout/stderr captured separately under /tmp/afdo_probe then read by SDB.
+INIT mkdir -p /tmp/afdo_probe; : > /tmp/afdo_probe/perfconfig
+SDB_EXIT=0
+
+=== identity ===
+COMMAND: cat /proc/device-tree/model; uname -m; uname -r; cat /etc/os-release; id
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+Raspberry Pi 4 Model B Rev 1.5[NUL]armv7l
+6.12.80-arm-rpi4-v7l
+NAME=Tizen
+VERSION="11.0.0 (Tizen11.0/Unified)"
+ID=tizen
+VERSION_ID=11.0.0
+PRETTY_NAME="Tizen 11.0.0 (Tizen11.0/Unified)"
+ANSI_COLOR="0;36"
+CPE_NAME="cpe:/o:tizen:tizen:11.0.0"
+BUILD_ID=tizen-unified-toolchain_20261022.054557_tizen-headed-armv7l
+uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context="User::Shell"
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== cpu ===
+COMMAND: cat /proc/cpuinfo | grep -E 'CPU part|Features|model name|Hardware|Revision'
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+model name	: ARMv7 Processor rev 3 (v7l)
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32
+CPU part	: 0xd08
+model name	: ARMv7 Processor rev 3 (v7l)
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32
+CPU part	: 0xd08
+model name	: ARMv7 Processor rev 3 (v7l)
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32
+CPU part	: 0xd08
+model name	: ARMv7 Processor rev 3 (v7l)
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32
+CPU part	: 0xd08
+Hardware	: BCM2835
+Revision	: c03115
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== memory ===
+COMMAND: free -m
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+               total        used        free      shared  buff/cache   available
+Mem:            3883         531        3199         215         409        3351
+Swap:           1553           0        1552
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== tmp_space ===
+COMMAND: df -h /tmp
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+Filesystem            Size  Used Avail Use% Mounted on
+tmpfs                 1.9G   24K  1.9G   1% /tmp
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== perf_path ===
+COMMAND: which perf
+SDB_EXIT=0
+REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+/bin/sh: which: command not found
+
+SDB_STDERR: (empty)
+=== perf_version ===
+COMMAND: perf --version
+SDB_EXIT=0
+REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+/bin/sh: perf: command not found
+
+SDB_STDERR: (empty)
+=== events ===
+COMMAND: ls /sys/bus/event_source/devices/
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+breakpoint
+kprobe
+software
+tracepoint
+uprobe
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== coresight ===
+COMMAND: ls /sys/bus/coresight/devices/
+SDB_EXIT=0
+REMOTE_EXIT=2
+STDOUT:
+
+STDERR:
+ls: cannot access /sys/bus/coresight/devices/: No such file or directory
+
+SDB_STDERR: (empty)
+=== paranoid ===
+COMMAND: cat /proc/sys/kernel/perf_event_paranoid
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+2
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== dmesg ===
+COMMAND: dmesg | grep -i -E 'spe|brbe|coresight|etm|pmu'
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+[    0.000244] CPU0: Spectre BHB: enabling loop workaround for all CPUs
+[    0.516349] xor: measuring software checksum speed
+[    1.140403] xhci_hcd 0000:01:00.0: Host supports USB 3.0 SuperSpeed
+[    1.328945] mmc1: new high speed SDIO card at address 0001
+[    1.404901] usb 1-1: new high-speed USB device number 2 using xhci_hcd
+[    1.507950] mmc0: new ultra high speed DDR50 SDXC card at address 0001
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== config ===
+COMMAND: if [ -r /proc/config.gz ]; then zcat /proc/config.gz; else cat /boot/config-*; fi | grep -E 'PERF_EVENTS|HW_PERF_EVENTS|ARM_PMU|CORESIGHT|ARM_SPE|ARM64_BRBE|KALLSYMS|DEBUG_INFO|AUTOFDO|PROPELLER'
+SDB_EXIT=0
+REMOTE_EXIT=1
+STDOUT:
+
+STDERR:
+cat: /boot/config-*: No such file or directory
+
+SDB_STDERR: (empty)
+=== cycles_record ===
+COMMAND: nice -n 19 ionice -c3 perf --buildid-dir /tmp/afdo_probe/buildid record -e cycles -a -o /tmp/afdo_probe/p1.data -- sleep 3
+SDB_EXIT=0
+REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+ionice: failed to execute perf: No such file or directory
+
+SDB_STDERR: (empty)
+=== cycles_report ===
+COMMAND: nice -n 19 ionice -c3 perf --buildid-dir /tmp/afdo_probe/buildid report -i /tmp/afdo_probe/p1.data --stdio --sort dso
+SDB_EXIT=0
+REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+ionice: failed to execute perf: No such file or directory
+
+SDB_STDERR: (empty)
+=== branch_record ===
+COMMAND: nice -n 19 ionice -c3 perf --buildid-dir /tmp/afdo_probe/buildid record -e cycles -b -o /tmp/afdo_probe/p2.data -- sleep 1
+SDB_EXIT=0
+REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+ionice: failed to execute perf: No such file or directory
+
+SDB_STDERR: (empty)
+=== branch_script ===
+COMMAND: nice -n 19 ionice -c3 perf --buildid-dir /tmp/afdo_probe/buildid script -i /tmp/afdo_probe/p2.data -F brstack
+SDB_EXIT=0
+REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+ionice: failed to execute perf: No such file or directory
+
+SDB_STDERR: (empty)
+=== hardware_list ===
+COMMAND: nice -n 19 ionice -c3 perf --buildid-dir /tmp/afdo_probe/buildid list hw
+SDB_EXIT=0
+REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+ionice: failed to execute perf: No such file or directory
+
+SDB_STDERR: (empty)
+=== aux_sources ===
+COMMAND: ls -d /sys/bus/event_source/devices/cs_etm /sys/bus/event_source/devices/arm_spe* 2>/dev/null
+SDB_EXIT=0
+REMOTE_EXIT=2
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== commands ===
+COMMAND: command -v ffmpeg ffprobe gst-launch-1.0 gst-inspect-1.0
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+/usr/bin/gst-launch-1.0
+/usr/bin/gst-inspect-1.0
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== avdec_h264 ===
+COMMAND: nice -n 19 ionice -c3 gst-inspect-1.0 avdec_h264
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+Factory Details:
+  Rank                     primary (256)
+  Long-name                libav H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 decoder
+  Klass                    Codec/Decoder/Video
+  Description              libav h264 decoder
+  Author                   Wim Taymans <wim.taymans@gmail.com>, Ronald Bultje <rbultje@ronald.bitfreak.net>, Edward Hervey <bilboed@bilboed.com>
+  Documentation            https://gstreamer.freedesktop.org/documentation/libav/avdec_h264.html
+
+Plugin Details:
+  Name                     libav
+  Description              All libav codecs and formats (system install)
+  Filename                 /usr/lib/gstreamer-1.0/libgstlibav.so
+  Version                  1.24.11
+  License                  LGPL
+  Source module            gst-libav
+  Documentation            https://gstreamer.freedesktop.org/documentation/libav/
+  Source release date      2025-01-06
+  Binary package           GStreamer FFMPEG Plug-ins source release
+  Origin URL               Unknown package origin
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstVideoDecoder
+                         +----GstFFMpegVidDec
+                               +----avdec_h264
+
+Pad Templates:
+  SINK template: 'sink'
+    Availability: Always
+    Capabilities:
+      video/x-h264
+              alignment: au
+          stream-format: { (string)avc, (string)byte-stream }
+      video/x-h264
+              alignment: nal
+          stream-format: byte-stream
+
+  SRC template: 'src'
+    Availability: Always
+    Capabilities:
+      video/x-raw
+                 format: { (string)I420, (string)YUY2, (string)RGB, (string)BGR, (string)Y42B, (string)Y444, (string)YUV9, (string)Y41B, (string)GRAY8, (string)RGB8P, (string)I420, (string)Y42B, (string)Y444, (string)UYVY, (string)NV12, (string)NV21, (string)ARGB, (string)RGBA, (string)ABGR, (string)BGRA, (string)GRAY16_BE, (string)GRAY16_LE, (string)A420, (string)RGB16, (string)RGB15, (string)I420_10BE, (string)I420_10LE, (string)I422_10BE, (string)I422_10LE, (string)Y444_10BE, (string)Y444_10LE, (string)GBR, (string)GBR_10BE, (string)GBR_10LE, (string)A420_10BE, (string)A420_10LE, (string)A422_10BE, (string)A422_10LE, (string)A444_10BE, (string)A444_10LE, (string)GBRA, (string)xRGB, (string)RGBx, (string)xBGR, (string)BGRx, (string)I420_12BE, (string)I420_12LE, (string)I422_12BE, (string)I422_12LE, (string)Y444_12BE, (string)Y444_12LE, (string)GBR_12BE, (string)GBR_12LE, (string)P010_10LE, (string)GBRA_12BE, (string)GBRA_12LE, (string)GBRA_10BE, (string)GBRA_10LE, (string)VUYA, (string)P012_LE, (string)Y212_LE, (string)Y410, (string)Y412_LE }
+      video/x-raw(format:Interlaced)
+                 format: { (string)I420, (string)YUY2, (string)RGB, (string)BGR, (string)Y42B, (string)Y444, (string)YUV9, (string)Y41B, (string)GRAY8, (string)RGB8P, (string)I420, (string)Y42B, (string)Y444, (string)UYVY, (string)NV12, (string)NV21, (string)ARGB, (string)RGBA, (string)ABGR, (string)BGRA, (string)GRAY16_BE, (string)GRAY16_LE, (string)A420, (string)RGB16, (string)RGB15, (string)I420_10BE, (string)I420_10LE, (string)I422_10BE, (string)I422_10LE, (string)Y444_10BE, (string)Y444_10LE, (string)GBR, (string)GBR_10BE, (string)GBR_10LE, (string)A420_10BE, (string)A420_10LE, (string)A422_10BE, (string)A422_10LE, (string)A444_10BE, (string)A444_10LE, (string)GBRA, (string)xRGB, (string)RGBx, (string)xBGR, (string)BGRx, (string)I420_12BE, (string)I420_12LE, (string)I422_12BE, (string)I422_12LE, (string)Y444_12BE, (string)Y444_12LE, (string)GBR_12BE, (string)GBR_12LE, (string)P010_10LE, (string)GBRA_12BE, (string)GBRA_12LE, (string)GBRA_10BE, (string)GBRA_10LE, (string)VUYA, (string)P012_LE, (string)Y212_LE, (string)Y410, (string)Y412_LE }
+         interlace-mode: alternate
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SINK: 'sink'
+    Pad Template: 'sink'
+  SRC: 'src'
+    Pad Template: 'src'
+
+Element Properties:
+
+  automatic-request-sync-point-flags: Flags to use when automatically requesting sync points
+                        flags: readable, writable
+                        Flags "GstVideoDecoderRequestSyncPointFlags" Default: 0x00000003, "corrupt-output+discard-input"
+                           (0x00000001): discard-input    - GST_VIDEO_DECODER_REQUEST_SYNC_POINT_DISCARD_INPUT
+                           (0x00000002): corrupt-output   - GST_VIDEO_DECODER_REQUEST_SYNC_POINT_CORRUPT_OUTPUT
+
+  automatic-request-sync-points: Automatically request sync points when it would be useful
+                        flags: readable, writable
+                        Boolean. Default: false
+
+  debug-mv            : Whether to print motion vectors on top of the image (deprecated, non-functional)
+                        flags: readable, writable, deprecated
+                        Boolean. Default: false
+
+  direct-rendering    : Enable direct rendering
+                        flags: readable, writable
+                        Boolean. Default: true
+
+  discard-corrupted-frames: Discard frames marked as corrupted instead of outputting them
+                        flags: readable, writable
+                        Boolean. Default: false
+
+  lowres              : At which resolution to decode images
+                        flags: readable, writable
+                        Enum "GstLibAVVidDecLowres" Default: 0, "full"
+                           (0): full             - 0
+                           (1): 1/2-size         - 1
+                           (2): 1/4-size         - 2
+
+  max-errors          : Max consecutive decoder errors before returning flow error
+                        flags: readable, writable
+                        Integer. Range: -1 - 2147483647 Default: -1
+
+  max-threads         : Maximum number of worker threads to spawn. (0 = auto)
+                        flags: readable, writable
+                        Integer. Range: 0 - 2147483647 Default: 0
+
+  min-force-key-unit-interval: Minimum interval between force-keyunit requests in nanoseconds
+                        flags: readable, writable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0
+
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "avdec_h264-0"
+
+  output-corrupt      : Whether libav should output frames even if corrupted
+                        flags: readable, writable
+                        Boolean. Default: true
+
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+
+  qos                 : Handle Quality-of-Service events from downstream
+                        flags: readable, writable
+                        Boolean. Default: true
+
+  skip-frame          : Which types of frames to skip during decoding
+                        flags: readable, writable
+                        Enum "GstLibAVVidDecSkipFrame" Default: 0, "Skip nothing"
+                           (0): Skip nothing     - 0
+                           (1): Skip B-frames    - 1
+                           (2): Skip IDCT/Dequantization - 2
+                           (5): Skip everything  - 5
+
+  std-compliance      : Standard compliance mode to use
+                        flags: readable, writable
+                        Enum "GstAvCodecCompliance" Default: 2147483647, "auto"
+                           (2147483647): auto             - The decoder automatically decides. If the pipeline is live, it will use `normal` mode, and `strict` otherwise.
+                           (2): very-strict      - VeryStrict: Strictly conform to an older more strict version of the spec or reference software
+                           (1): strict           - Strict: Strictly conform to all the things in the spec no matter what consequences
+                           (0): normal           - Normal
+                           (-1): unofficial       - Unofficial: Allow unofficial extensions (decoder will not differentiate this with "normal")
+                           (-2): experimental     - Experimental: Allow nonstandardized experimental things (decoder will not differentiate this with "normal")
+
+  thread-type         : Multithreading methods to use
+                        flags: readable, writable
+                        Flags "GstLibAVVidDecThreadType" Default: 0x00000000, "auto"
+                           (0x00000000): auto             - Auto
+                           (0x00000001): frame            - Frame
+                           (0x00000002): slice            - Slice
+
+
+STDERR:
+
+(gst-plugin-scanner:8958): GStreamer-WARNING **: 18:08:51.709: Failed to load plugin '/usr/lib/gstreamer-1.0/libgstcairo.so': libGLESv2.so.2: cannot open shared object file: No such file or directory
+
+SDB_STDERR: (empty)
+=== videos ===
+COMMAND: find /root -maxdepth 1 -type f \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.avi' -o -iname '*.mov' -o -iname '*.webm' -o -iname '*.h264' -o -iname '*.ts' -o -iname '*.yuv' \) -printf '%f %s bytes\n'
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: (empty)
+=== libs ===
+COMMAND: find /usr/lib /usr/lib64 /lib /lib64 -maxdepth 3 -name 'libavcodec.so*' -o -name 'libgstreamer-1.0.so*'
+SDB_EXIT=0
+REMOTE_EXIT=1
+STDOUT:
+/usr/lib/libgstreamer-1.0.so.0.2411.0
+/usr/lib/libavcodec.so.62
+/usr/lib/libgstreamer-1.0.so.0
+/usr/lib/libavcodec.so.62.11.100
+
+STDERR:
+find: `/usr/lib64': No such file or directory
+find: `/lib64': No such file or directory
+
+SDB_STDERR: (empty)
+COMMAND: command -v perf
+SDB_EXIT=0
+REMOTE_EXIT=1
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: (empty)
+COMMAND: command -v ffmpeg
+SDB_EXIT=0
+REMOTE_EXIT=1
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: (empty)
+COMMAND: command -v ffprobe
+SDB_EXIT=0
+REMOTE_EXIT=1
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: (empty)
+COMMAND: ls -ld /proc/config.gz
+SDB_EXIT=0
+REMOTE_EXIT=2
+STDOUT:
+
+STDERR:
+ls: cannot access /proc/config.gz: No such file or directory
+
+SDB_STDERR: (empty)
+COMMAND: ls -la /root | grep -i -E '\.(mp4|mkv|avi|mov|webm|h264|ts|yuv)( ->.*)?$'
+SDB_EXIT=0
+REMOTE_EXIT=1
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: (empty)
+COMMAND: readlink -f /usr/lib/libavcodec.so.62; readlink -f /usr/lib/libgstreamer-1.0.so.0
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+/usr/lib/libavcodec.so.62.11.100
+/usr/lib/libgstreamer-1.0.so.0.2411.0
+
+STDERR:
+
+SDB_STDERR: (empty)
+COMMAND: ls -la /tmp/afdo_probe
+SDB_EXIT=0
+REMOTE_EXIT=0
+STDOUT:
+total 368
+drwxrwxrwx  2 root root    120 Oct 27 18:08 .
+drwxrwxrwt 13 root root    780 Oct 27 18:10 ..
+-rw-rw-rw-  1 root root      0 Oct 27 18:10 command.stderr
+-rw-rw-rw-  1 root root      0 Oct 27 18:10 command.stdout
+-rw-------  1 root root 375559 Oct 27 18:08 gst-registry.bin
+-rw-rw-rw-  1 root root      0 Oct 27 18:08 perfconfig
+
+STDERR:
+
+SDB_STDERR: (empty)
+COMMAND: export TMPDIR=/tmp/afdo_probe; rm -rf -- /tmp/afdo_probe; test ! -e /tmp/afdo_probe; printf "CLEANUP_VERIFY_EXIT=%s\n" "$?"
+SDB_EXIT=0
+CLEANUP_VERIFY_EXIT=0
+
+SDB_STDERR: (empty)

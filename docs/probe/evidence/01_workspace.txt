@@ -1,94 +1,15 @@
-摘录格式说明：仅移除行尾空白；保留原始命令输出内容与源文件行号。
-探测日期：2026-10-27（Asia/Shanghai；会话日期）
-工作目录：/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
-
-初始盘点摘录（创建任何产出之前的工具输出）：
-$ find . -maxdepth 2 -mindepth 1 -printf '%y %p\n' | head -160
-stdout: (empty)
-$ ls -la
-total 8
-drwxrwxr-x  2 linhao linhao 4096 Oct 26 22:36 .
-drwxrwxr-x 31 linhao linhao 4096 Oct 26 22:24 ..
-初始无 .git、docs/STATUS.md、config/、src/、内核源码或 GBS root。
-
-$ git ls-remote origin
-exit_code=0
-stdout:
-(empty)
-stderr:
-(empty)
-
-$ find . -maxdepth 2 -mindepth 1 -not -path './.git/*' -printf '%y %p
-'
-exit_code=0
-stdout:
-d ./temp
-d ./temp/CodingSystem
-f ./.gitignore
-d ./.git
-d ./docs
-d ./docs/probe
-stderr:
-(empty)
-
-$ ls -ld docs/STATUS.md
-exit_code=2
-stdout:
-(empty)
-stderr:
-ls: cannot access 'docs/STATUS.md': No such file or directory
-
-$ ls -ld config/gbs_llvm.conf
-exit_code=2
-stdout:
-(empty)
-stderr:
-ls: cannot access 'config/gbs_llvm.conf': No such file or directory
-
-$ ls -ld linux-rpi
-exit_code=2
-stdout:
-(empty)
-stderr:
-ls: cannot access 'linux-rpi': No such file or directory
-
-$ ls -ld src/llvm
-exit_code=2
-stdout:
-(empty)
-stderr:
-ls: cannot access 'src/llvm': No such file or directory
-
-$ ls -ld src/ffmpeg
-exit_code=2
-stdout:
-(empty)
-stderr:
-ls: cannot access 'src/ffmpeg': No such file or directory
-
-$ ls -ld src/gstreamer
-exit_code=2
-stdout:
-(empty)
-stderr:
-ls: cannot access 'src/gstreamer': No such file or directory
-
-$ ls -ld src/chromium
-exit_code=2
-stdout:
-(empty)
-stderr:
-ls: cannot access 'src/chromium': No such file or directory
-
-上列为初始化后、撰写报告前复核；初始空目录证明不局限于这些惯用路径。未扫描工作目录外的源代码或构建根。
-
-=== 补入材料后的复核（初始盘点之后，2026-10-27） ===
+本轮重新采集；展示仅去除行尾空白，部分长输出按标记截断。
+新一轮独立探测；旧提交 e90492e 的探测结论作废。日期 2026-10-27 Asia/Shanghai。
+所有命令前 export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp。
 $ find . -maxdepth 2 -mindepth 1 -not -path './.git/*' -not -path './temp/*' -printf '%y %p
 '
-exit_code=0
+exit=0
 stdout:
 d ./src
+d ./src/linux-rpi
 d ./src/llvm
+d ./src/gstreamer
+d ./src/ffmpeg
 d ./temp
 f ./gbs_llvm.conf
 f ./.gitignore
@@ -98,24 +19,177 @@ d ./docs
 d ./docs/probe
 f ./docs/STATUS.md
 d ./config
+f ./config/gbs_llvm.conf
+f ./config/gbs_gcc.conf
 stderr:
 (empty)
 
-$ ls -ld config/gbs_llvm.conf
-exit_code=2
+$ find src -mindepth 2 -maxdepth 2 -printf '%y %p
+'
+exit=0
 stdout:
-(empty)
+d src/linux-rpi/init
+f src/linux-rpi/.clang-format
+d src/linux-rpi/kernel
+d src/linux-rpi/samples
+f src/linux-rpi/.cocciconfig
+d src/linux-rpi/.github
+d src/linux-rpi/security
+d src/linux-rpi/net
+f src/linux-rpi/.clippy.toml
+d src/linux-rpi/rust
+d src/linux-rpi/usr
+f src/linux-rpi/.gitattributes
+d src/linux-rpi/arch
+f src/linux-rpi/Kconfig
+f src/linux-rpi/build-rpi.sh
+d src/linux-rpi/fs
+d src/linux-rpi/virt
+d src/linux-rpi/crypto
+d src/linux-rpi/Documentation
+f src/linux-rpi/CREDITS
+d src/linux-rpi/tools
+d src/linux-rpi/mm
+d src/linux-rpi/certs
+f src/linux-rpi/MAINTAINERS
+d src/linux-rpi/rpi
+f src/linux-rpi/Kbuild
+f src/linux-rpi/.gitignore
+d src/linux-rpi/include
+d src/linux-rpi/drivers
+d src/linux-rpi/sound
+d src/linux-rpi/ipc
+d src/linux-rpi/lib
+d src/linux-rpi/.git
+d src/linux-rpi/packaging
+d src/linux-rpi/io_uring
+f src/linux-rpi/Makefile
+d src/linux-rpi/block
+f src/linux-rpi/.rustfmt.toml
+f src/linux-rpi/.get_maintainer.ignore
+d src/linux-rpi/LICENSES
+f src/linux-rpi/.mailmap
+f src/linux-rpi/README.md
+f src/linux-rpi/.editorconfig
+d src/linux-rpi/scripts
+f src/linux-rpi/COPYING
+f src/linux-rpi/README
+f src/linux-rpi/.gbs.conf
+f src/llvm/.clang-format
+d src/llvm/utils
+d src/llvm/cmake
+d src/llvm/libclc
+d src/llvm/.github
+f src/llvm/LICENSE.TXT
+d src/llvm/clang
+f src/llvm/.gitattributes
+f src/llvm/CODE_OF_CONDUCT.md
+d src/llvm/llvm-libgcc
+d src/llvm/mlir
+d src/llvm/cross-project-tests
+d src/llvm/runtimes
+d src/llvm/libsycl
+d src/llvm/libc
+d src/llvm/libunwind
+d src/llvm/flang-rt
+f src/llvm/pyproject.toml
+d src/llvm/.ci
+d src/llvm/flang
+d src/llvm/llvm
+f src/llvm/.gitignore
+d src/llvm/bolt
+f src/llvm/CONTRIBUTING.md
+d src/llvm/libcxx
+d src/llvm/lldb
+d src/llvm/.git
+f src/llvm/.clang-tidy
+f src/llvm/SECURITY.md
+d src/llvm/packaging
+d src/llvm/polly
+d src/llvm/compiler-rt
+d src/llvm/offload
+d src/llvm/openmp
+f src/llvm/.mailmap
+f src/llvm/README.md
+d src/llvm/clang-tools-extra
+d src/llvm/libcxxabi
+f src/llvm/.git-blame-ignore-revs
+d src/llvm/third-party
+d src/llvm/lld
+d src/llvm/orc-rt
+f src/llvm/.clang-format-ignore
+f src/gstreamer/meson.build
+d src/gstreamer/subprojects
+f src/gstreamer/gst-env.py
+d src/gstreamer/.vscode
+f src/gstreamer/.gitmodules
+d src/gstreamer/data
+d src/gstreamer/tests
+d src/gstreamer/ci
+f src/gstreamer/.gitattributes
+f src/gstreamer/LICENSE
+d src/gstreamer/girs
+d src/gstreamer/.gitlab
+f src/gstreamer/.gitignore
+f src/gstreamer/.gitlab-ci.yml
+d src/gstreamer/.git
+d src/gstreamer/packaging
+f src/gstreamer/meson_options.txt
+f src/gstreamer/.gitlint
+f src/gstreamer/README.md
+f src/gstreamer/.editorconfig
+f src/gstreamer/.gitlab-image-tags.yml
+f src/gstreamer/.indent_cpp_list
+d src/gstreamer/scripts
+f src/gstreamer/.gbs.conf
+f src/gstreamer/.git-blame-ignore-revs
+f src/gstreamer/.indentignore
+f src/ffmpeg/RELEASE
+d src/ffmpeg/tests
+f src/ffmpeg/VERSION
+d src/ffmpeg/presets
+d src/ffmpeg/libavcodec
+f src/ffmpeg/configure
+d src/ffmpeg/compat
+d src/ffmpeg/libavfilter
+f src/ffmpeg/CREDITS
+d src/ffmpeg/tools
+f src/ffmpeg/MAINTAINERS
+d src/ffmpeg/doc
+f src/ffmpeg/COPYING.LGPLv2.1
+f src/ffmpeg/COPYING.GPLv3
+f src/ffmpeg/Changelog
+f src/ffmpeg/COPYING.LGPLv3
+f src/ffmpeg/CONTRIBUTING.md
+d src/ffmpeg/.git
+d src/ffmpeg/libavdevice
+f src/ffmpeg/FUNDING.json
+f src/ffmpeg/RELEASE_NOTES
+d src/ffmpeg/packaging
+f src/ffmpeg/Makefile
+d src/ffmpeg/libavutil
+f src/ffmpeg/LICENSE.md
+f src/ffmpeg/.mailmap
+f src/ffmpeg/README.md
+d src/ffmpeg/libswscale
+d src/ffmpeg/ffbuild
+f src/ffmpeg/COPYING.GPLv2
+d src/ffmpeg/libavformat
+f src/ffmpeg/INSTALL.md
+d src/ffmpeg/libswresample
+d src/ffmpeg/.forgejo
+d src/ffmpeg/fftools
 stderr:
-ls: cannot access 'config/gbs_llvm.conf': No such file or directory
+(empty)
 
-$ nl -ba gbs_llvm.conf
-exit_code=0
+$ nl -ba config/gbs_llvm.conf
+exit=0
 stdout:
      1	[general]
      2	# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
-     3	tmpdir = /home/linhao/Toolchain/development/linux_kernel_optimization/temp
+     3	tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp
      4	profile = profile.tizen_unified_standard
-     5	buildroot = /home/linhao/Toolchain/development/linux_kernel_optimization/temp/GBS-ROOT-TIZEN-LLVM-CODES
+     5	buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-TIZEN-LLVM-CODES
      6
      7	[profile.tizen_unified_standard]
      8	repos = repo.base-standard, repo.unified-standard
@@ -132,20 +206,49 @@ stdout:
 stderr:
 (empty)
 
-$ git -C src/llvm rev-parse HEAD
-exit_code=128
+$ nl -ba config/gbs_gcc.conf
+exit=0
 stdout:
-HEAD
+     1	[general]
+     2	# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+     3	tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp
+     4	profile = profile.tizen_unified_standard
+     5	buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-TOOLCHAIN-GCC-CODES
+     6
+     7	[profile.tizen_unified_standard]
+     8	repos = repo.base-standard, repo.unified-standard
+     9
+    10	[repo.base-standard]
+    11	url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base/reference/repos/standard/packages/
+    12	# url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base/tizen-base_20260219.223706/repos/standard/packages/
+    13	# url=http://download.tizen.org/SBS/TIZEN/Tizen/Tizen-Base-Dev/tizen-base-dev_20260325.020522/repos/standard/packages/
+    14	# url=http://109.123.100.71/test_files/gcc/tizen-base-dev_20260325.020522/repos/standard/packages
+    15	#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260711.094822/repos/standard/packages
+    16
+    17	[repo.unified-standard]
+    18	url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified/reference/repos/standard/packages/
+    19	# url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified/tizen-unified_20260309.210600/repos/standard/packages/
+    20	#url=	http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260710.134244/repos/standard/packages/
 stderr:
-fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
-Use '--' to separate paths from revisions, like this:
-'git <command> [<revision>...] -- [<file>...]'
+(empty)
 
-$ ls -ld /home/linhao/Toolchain/development/linux_kernel_optimization/temp/GBS-ROOT-TIZEN-LLVM-CODES
-exit_code=2
+$ ls -ld temp/GBS-ROOT-TIZEN-LLVM-CODES
+exit=2
 stdout:
 (empty)
 stderr:
-ls: cannot access '/home/linhao/Toolchain/development/linux_kernel_optimization/temp/GBS-ROOT-TIZEN-LLVM-CODES': No such file or directory
+ls: cannot access 'temp/GBS-ROOT-TIZEN-LLVM-CODES': No such file or directory
 
-结论更新：根目录 gbs_llvm.conf 已提供，按其两个启用 URL 查询 repodata；不移动或修改用户配置。config/gbs_llvm.conf 仍不存在。src/llvm 克隆未完成，尚无有效 HEAD 或可读源码。配置所指 GBS root 不存在，仅对该明确路径执行只读 ls。
+$ ls -ld temp/GBS-ROOT-TOOLCHAIN-GCC-CODES
+exit=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'temp/GBS-ROOT-TOOLCHAIN-GCC-CODES': No such file or directory
+
+$ git config --local --get remote.origin.url
+exit=0
+stdout:
+https://github.com/lhmax2010/autofdo_bolt_agent.git
+stderr:
+(empty)

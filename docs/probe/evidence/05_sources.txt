@@ -1,0 +1,1007 @@
+本轮重新采集；展示仅去除行尾空白，部分长输出按标记截断。
+$ git -c core.fsmonitor=false -C src/linux-rpi rev-parse HEAD
+exit=0
+stdout:
+42aeefac58edeb081aff440f0b60be71cbe49755
+
+stderr:
+
+$ git -c core.fsmonitor=false -C src/linux-rpi diff --name-only -- packaging
+exit=0
+stdout:
+
+stderr:
+
+$ git -c core.fsmonitor=false -C src/llvm rev-parse HEAD
+exit=0
+stdout:
+f999bd406c0a70fe8107aa992164fe6945c5d46a
+
+stderr:
+
+$ git -c core.fsmonitor=false -C src/llvm diff --name-only -- packaging
+exit=0
+stdout:
+
+stderr:
+
+$ git -c core.fsmonitor=false -C src/ffmpeg rev-parse HEAD
+exit=0
+stdout:
+5fe76358596f66e955f005094e6f34ca525ab23d
+
+stderr:
+
+$ git -c core.fsmonitor=false -C src/ffmpeg diff --name-only -- packaging
+exit=0
+stdout:
+
+stderr:
+
+$ git -c core.fsmonitor=false -C src/gstreamer rev-parse HEAD
+exit=0
+stdout:
+68850298263d0bff872ca72aaffe8551fcdd33e2
+
+stderr:
+
+$ git -c core.fsmonitor=false -C src/gstreamer diff --name-only -- packaging
+exit=0
+stdout:
+
+stderr:
+
+
+READ src/linux-rpi/Makefile (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: # SPDX-License-Identifier: GPL-2.0
+2: VERSION = 6
+3: PATCHLEVEL = 12
+4: SUBLEVEL = 80
+5: EXTRAVERSION =
+6: NAME = Baby Opossum Posse
+361: include $(srctree)/scripts/subarch.include
+362:
+363: # Cross compiling and selecting different set of gcc/bin-utils
+364: # ---------------------------------------------------------------------------
+365: #
+366: # When performing cross compilation for other architectures ARCH shall be set
+367: # to the target architecture. (See arch/* for the possibilities).
+368: # ARCH can be set during invocation of make:
+369: # make ARCH=arm64
+370: # Another way is to have ARCH set in the environment.
+371: # The default ARCH is the host where make is executed.
+372:
+373: # CROSS_COMPILE specify the prefix used for all executables used
+374: # during compilation. Only gcc and related bin-utils executables
+375: # are prefixed with $(CROSS_COMPILE).
+376: # CROSS_COMPILE can be set on the command line
+377: # make CROSS_COMPILE=aarch64-linux-gnu-
+378: # Alternatively CROSS_COMPILE can be set in the environment.
+379: # Default value for CROSS_COMPILE is not to prefix executables
+380: # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
+381: ARCH		?= $(SUBARCH)
+
+READ src/linux-rpi/packaging/linux-rpi.spec (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: # Ignore double dash in version for rpmbuild
+2: %define _wrong_version_format_terminate_build 0
+3:
+4: %define config_name tizen_bcm2711_defconfig
+5: %ifarch aarch64
+6: %define buildarch arm64
+7: %else
+8: %define buildarch arm
+9: %endif
+10: %define target_board rpi4
+11: %define variant %{buildarch}-%{target_board}
+12:
+13: Name: rpi4-linux-kernel
+14: Summary: The Linux Kernel for Raspberry Pi4
+15: Version: 6.12.80
+16: Release: 0
+17: License: GPL-2.0
+18: ExclusiveArch: %{arm} aarch64
+165: %{?_toolchain:
+166: %if %{toolchain_is clang}
+167: export LLVM=1
+168: %endif
+169: }
+170:
+171: # LSM configuration fragment selection
+172: %if "%{?dev_sel}" == "1"
+173: %define lsm_fragment kernel/configs/selinux.config
+174: %else
+175: %if "%{?dev_wos}" == "1"
+176: %define lsm_fragment kernel/configs/nosmack.config
+177: %endif
+178: %endif
+179:
+180: for target in %{variant} %{variant}-rt; do
+181:     echo "-${target}" > localversion-tizen
+182:
+183:     # extract uapi headers
+184:     make O=build/${target} headers_install %{?_smp_mflags}
+185:
+186:     # Set config file
+187:     BASE_CONFIG="arch/%{buildarch}/configs/%{config_name}"
+188:     EXTRA_FRAGMENTS=""
+189:
+190:     case $target in
+191: 	%{variant})
+192: 	    EXTRA_FRAGMENTS="%{?lsm_fragment}"
+193: 	;;
+194: 	%{variant}-rt)
+195: 	    EXTRA_FRAGMENTS="kernel/configs/rt.config %{?lsm_fragment}"
+196: 	;;
+197:     esac
+198:
+199:     mkdir -p build/${target}
+200:     ./scripts/kconfig/merge_config.sh -m -O build/${target} ${BASE_CONFIG} ${EXTRA_FRAGMENTS}
+201:     make O=build/${target} olddefconfig %{?_smp_mflags}
+202:
+203:     if [ "${target}" = "%{variant}" ]; then
+204:         # Build perf
+205:         # WERROR=0 make O=build/${target} -s -C tools/lib/traceevent %{?_smp_mflags}
+206:         WERROR=0 make O=build/${target} -s -C tools/perf EXTRA_CFLAGS="-fPIE" %{?_smp_mflags} NO_LIBTRACEEVENT=1 NO_JEVENTS=1
+207:
+208:         # Build bpftool
+209:         WERROR=0 make O=build/${target} -s -C tools/bpf/bpftool %{?_smp_mflags}
+210:     fi
+211:
+212:     # Build Image/Image.gz
+213:     make O=build/${target} %{?_smp_mflags}
+245: %ifarch aarch64
+246: install -m 644 rpi/boot/config_64bit.txt %{buildroot}/boot/config.txt
+247: %else
+248: install -m 644 rpi/boot/config.txt %{buildroot}/boot/
+249: %endif
+
+READ src/linux-rpi/arch/arm/configs/tizen_bcm2711_defconfig (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+30: CONFIG_SCHED_AUTOGROUP=y
+31: CONFIG_BLK_DEV_INITRD=y
+32: CONFIG_EXPERT=y
+33: CONFIG_PROFILING=y
+34: CONFIG_ARCH_BCM=y
+35: CONFIG_ARCH_BCM2835=y
+36: CONFIG_ARM_LPAE=y
+37: # CONFIG_CACHE_L2X0 is not set
+38: CONFIG_SMP=y
+39: CONFIG_HIGHMEM=y
+40: CONFIG_UACCESS_WITH_MEMCPY=y
+
+READ src/linux-rpi/arch/arm64/configs/tizen_bcm2711_defconfig (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+30: CONFIG_USER_NS=y
+31: CONFIG_SCHED_AUTOGROUP=y
+32: CONFIG_BLK_DEV_INITRD=y
+33: CONFIG_EXPERT=y
+34: CONFIG_PROFILING=y
+35: CONFIG_ARCH_BCM=y
+36: CONFIG_ARCH_BCM2835=y
+37: CONFIG_ARCH_BRCMSTB=y
+38: # CONFIG_CAVIUM_ERRATUM_22375 is not set
+39: # CONFIG_CAVIUM_ERRATUM_23154 is not set
+40: # CONFIG_CAVIUM_ERRATUM_27456 is not set
+295: CONFIG_SPI_DW_DMA=y
+296: CONFIG_SPI_DW_MMIO=y
+297: CONFIG_SPI_SPIDEV=y
+298: CONFIG_PINCTRL_RP1=y
+299: CONFIG_PINCTRL_BCM2712=y
+300: CONFIG_GPIO_SYSFS=y
+301: CONFIG_GPIO_BCM_VIRT=y
+480: CONFIG_CLK_RASPBERRYPI=y
+481: CONFIG_MAILBOX=y
+482: CONFIG_BCM2835_MBOX=y
+483: CONFIG_BCM2712_IOMMU=y
+484: CONFIG_RASPBERRYPI_POWER=y
+485: CONFIG_PWM=y
+486: CONFIG_PWM_BCM2835=y
+487: CONFIG_PWM_BRCMSTB=y
+488: CONFIG_PWM_RP1=y
+489: CONFIG_BCM2712_MIP=y
+490: CONFIG_ANDROID_BINDER_IPC=y
+
+READ src/linux-rpi/rpi/boot/config_64bit.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+38: [pi4]
+39: # Automatically load overlays for detected DSI displays
+40: display_auto_detect=1
+41:
+42: # Enable DRM VC4 V3D driver
+43: dtoverlay=vc4-kms-v3d-pi4,cma-320
+44: max_framebuffers=2
+45:
+46: # Disable ID_SC and ID_SD pins to use UART2
+47: force_eeprom_read=0
+48:
+49: # Set gpio pins to Input, Pullup mode.
+50: gpio=6,12,13,16,25=ip,pu
+51:
+52: # Enable serial
+53: enable_uart=1
+54:
+55: [pi5]
+56: # Enable DRM VC4 V3D driver
+57: dtoverlay=vc4-kms-v3d-pi5
+58: max_framebuffers=2
+59:
+60: # Enable Standard Uart GPIO14/15
+61: dtoverlay=uart0-pi5
+62:
+63: # Enable PCIE GEN3 for AI hat
+64: dtparam=pciex1
+65: dtparam=pciex1_gen=3
+66:
+67: [all]
+68: # Enable serial
+69: uart_2ndstage=1
+70:
+71: # Run in 64-bit mode
+72: arm_64bit=1
+73:
+74: kernel=u-boot.bin
+
+READ src/linux-rpi/arch/arm64/boot/dts/broadcom/Makefile (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+20: dtb-$(CONFIG_ARCH_BCM2835) += bcm2710-rpi-3-b.dtb
+21: dtb-$(CONFIG_ARCH_BCM2835) += bcm2710-rpi-3-b-plus.dtb
+22: dtb-$(CONFIG_ARCH_BCM2835) += bcm2710-rpi-cm0.dtb
+23: dtb-$(CONFIG_ARCH_BCM2835) += bcm2710-rpi-cm3.dtb
+24: dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-cm4.dtb
+25: dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-cm4s.dtb
+26: dtb-$(CONFIG_ARCH_BCM2835) += bcm2712-rpi-5-b.dtb
+27: dtb-$(CONFIG_ARCH_BCM2835) += bcm2712d0-rpi-5-b.dtb
+28: dtb-$(CONFIG_ARCH_BCM2835) += bcm2712-rpi-500.dtb
+29: dtb-$(CONFIG_ARCH_BCM2835) += bcm2712-rpi-cm5-cm5io.dtb
+30: dtb-$(CONFIG_ARCH_BCM2835) += bcm2712-rpi-cm5-cm4io.dtb
+31: dtb-$(CONFIG_ARCH_BCM2835) += bcm2712-rpi-cm5l-cm5io.dtb
+32: dtb-$(CONFIG_ARCH_BCM2835) += bcm2712-rpi-cm5l-cm4io.dtb
+
+READ src/llvm/packaging/llvm.spec (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+11: %if %{defined _toolchain}
+12: %define _toolchain_override clang
+13: %define llvm_release_build 0
+14: %else
+15: %define llvm_release_build 1
+16: %endif
+17:
+18: %define llvm_version 22
+32: Name:      llvm
+33: Summary:   The LLVM Project is a collection of modular and reusable compiler and toolchain technologies
+34: Version:   22.1.8
+35: Release:   1
+75: %package devel
+76: Summary: Libraries and Header Files for LLVM %{version}
+77: Requires: %{name} = %{version}
+78:
+79: %description devel
+80: This package contains library and header files needed to develop
+81: new native programs that use the LLVM infrastructure.
+82:
+83: %package static-devel
+84: Summary: Static libraries for LLVM
+85: Requires: %{name} = %{version}
+86:
+87: %description static-devel
+88: This package contains static libraries needed to develop new
+89: native programs that use the LLVM infrastructure.
+90:
+91: %package -n libllvm
+92: Summary: LLVM shared libraries
+93:
+94: %description -n libllvm
+95: Shared libraries for the LLVM compiler infrastructure.
+96:
+97: %package -n clang
+98: Summary: Clang %{version} (C Language family frontend for LLVM)
+99: License: NCSA
+100: Requires: llvm = %{version}-%{release}
+101: Provides: libclang.so.%{version}
+102:
+103: %description -n clang
+104: A new front-end for the C family of languages is in development.
+105:
+106: %package -n clang-devel
+107: Summary: Clang %{version} Development Library
+108: Requires: clang = %{version}-%{release}
+109:
+110: %description -n clang-devel
+111: This package contains the clang (C language) frontend for LLVM.
+112: (development files)
+113:
+114: %package -n lldb
+115: Summary: LLDB
+116: License: NCSA
+117:
+118: %description -n lldb
+119: LLDB is a next generation, high-performance debugger. It is built as a set
+120: of reusable components which highly leverage existing libraries in the
+121: larger LLVM Project, such as the Clang expression parser and LLVM
+122: disassembler.
+123:
+124: %package -n lldb-devel
+125: Summary: Development header files for LLDB
+126: Requires: lldb = %{version}-%{release}
+127:
+128: %description -n lldb-devel
+129: The package contains header files for the LLDB debugger.
+130:
+131: %package -n compiler-rt
+132: Summary: Compiler runtime libraries
+133:
+134: %description -n compiler-rt
+135: Compiler runtime libraries
+136:
+137: %package -n libomp
+138: Summary:    OpenMP runtime
+139:
+140: %description -n libomp
+141: OpenMP runtime.
+142:
+143: %package -n libomp-devel
+144: Summary:    Development files for the OpenMP runtime
+145:
+146: %description -n libomp-devel
+147: Development files for the OpenMP runtime.
+148:
+149: %package -n python-clang
+150: Summary: Python bindings to parts of the Clang library
+151:
+198: cmake \
+199:     -G Ninja \
+200:     -DTIZEN=1 \
+201:     -DCMAKE_C_COMPILER=%__cc \
+202:     -DCMAKE_CXX_COMPILER=%__cxx \
+203:     -DLLVM_HOST_TRIPLE=%{_host} \
+204:     -DLLVM_DEFAULT_TARGET_TRIPLE=%{_host} \
+205:     -DLLVM_TARGET_TRIPLE_ENV=%{_host} \
+206:     -DCMAKE_ASM_FLAGS="$CFLAGS" \
+207:     -DCMAKE_C_FLAGS="$CFLAGS" \
+208:     -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+209: %if %{defined _toolchain}
+210:     -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+211:     -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+212:     -DLLVM_USE_LINKER=lld \
+213: %endif
+214:     -DLLVM_ENABLE_ASSERTIONS=No \
+215:     -DLLVM_ENABLE_RTTI=ON \
+216: %ifarch x86_64 i686
+217:     -DCMAKE_BUILD_TYPE=Release \
+218:     -DLLVM_TARGETS_TO_BUILD='X86;ARM;AArch64;BPF' \
+219: %endif
+220: %ifarch armv7l
+221:     -DCMAKE_BUILD_TYPE=MinSizeRel \
+222:     -DLLVM_TARGETS_TO_BUILD='ARM;BPF' \
+223:     -DLLVM_TARGET_ARCH="ARM" \
+224: %endif
+225: %ifarch aarch64
+226:     -DCMAKE_BUILD_TYPE=Release \
+227:     -DLLVM_TARGETS_TO_BUILD='AArch64;BPF' \
+228:     -DLLVM_TARGET_ARCH="AArch64" \
+229: %endif
+230: %ifarch riscv64
+231:     -DCMAKE_BUILD_TYPE=Release \
+232:     -DLLVM_TARGETS_TO_BUILD='RISCV;BPF' \
+233: %endif
+234:     -DCLANG_ENABLE_ARCMT=OFF \
+235:     -DLLVM_BUILD_LLVM_DYLIB=ON \
+236:     -DCLANG_BUILD_CLANG_DYLIB=ON \
+237: %if %{defined _toolchain}
+238:     -DLLVM_LINK_LLVM_DYLIB=ON \
+239:     -DCLANG_LINK_CLANG_DYLIB=ON \
+240: %endif
+241:     -DLLVM_ENABLE_PROJECTS="clang;lldb;clang-tools-extra;lld;compiler-rt;openmp" \
+242:     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
+243:     -DLLVM_BUILD_EXAMPLES=OFF \
+244:     -DLLVM_INCLUDE_EXAMPLES=OFF \
+245:     -DLLVM_BUILD_TESTS=OFF \
+246:     -DLLVM_INCLUDE_TESTS=OFF \
+247:     -DLLVM_ENABLE_DOXYGEN=OFF \
+248:     -DLLVM_BUILD_DOCS=OFF \
+249:     -DLLVM_INCLUDE_DOCS=OFF \
+250:     -DLLVM_OPTIMIZED_TABLEGEN=ON \
+251:     -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+252:     -DLLVM_LIBDIR_SUFFIX=`echo %{_lib} | sed s/lib//g` \
+253:     -DCLANG_RESOURCE_DIR="../%{_lib}/clang/%{llvm_version}" \
+254:     -DLLVM_BINUTILS_INCDIR=/usr/include \
+255:     -DLLVM_PARALLEL_COMPILE_JOBS=6 \
+256:     -DLLVM_PARALLEL_LINK_JOBS=2 \
+386: %files
+387: %manifest %{name}.manifest
+388: %defattr(-,root,root,-)
+389: %{_prefix}/bin/analyze-build
+390: %{_prefix}/bin/bugpoint
+391: %{_prefix}/bin/clang-linker-wrapper
+392: %{_prefix}/bin/clang-offload-packager
+393: %{_prefix}/bin/clang-repl
+394: %{_prefix}/bin/intercept-build
+395: %{_prefix}/bin/llc
+396: %{_prefix}/bin/lld
+397: %{_prefix}/bin/ld.lld
+398: %{_prefix}/bin/ld64.lld
+399: %{_prefix}/bin/lld-link
+400: %{_prefix}/bin/wasm-ld
+435: %{_prefix}/bin/llvm-mt
+436: %{_prefix}/bin/llvm-nm
+437: %{_prefix}/bin/llvm-objdump
+438: %{_prefix}/bin/llvm-opt-report
+439: %{_prefix}/bin/llvm-otool
+440: %{_prefix}/bin/llvm-remarkutil
+441: %{_prefix}/bin/llvm-pdbutil
+442: %{_prefix}/bin/llvm-profdata
+443: %{_prefix}/bin/llvm-profgen
+444: %{_prefix}/bin/llvm-ranlib
+445: %{_prefix}/bin/llvm-readelf
+446: %{_prefix}/bin/llvm-readobj
+590: %files -n compiler-rt
+591: %manifest %{name}.manifest
+592: %defattr(-,root,root,-)
+593: %{_libdir}/clang/%{llvm_version}/include/sanitizer/*
+594: %{_libdir}/clang/%{llvm_version}/*
+
+READ src/llvm/cmake/Modules/LLVMVersion.cmake (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: # The LLVM Version number information
+2:
+3: if(NOT DEFINED LLVM_VERSION_MAJOR)
+4:   set(LLVM_VERSION_MAJOR 22)
+5: endif()
+6: if(NOT DEFINED LLVM_VERSION_MINOR)
+7:   set(LLVM_VERSION_MINOR 1)
+8: endif()
+9: if(NOT DEFINED LLVM_VERSION_PATCH)
+10:   set(LLVM_VERSION_PATCH 8)
+11: endif()
+12: if(NOT DEFINED LLVM_VERSION_SUFFIX)
+
+READ src/llvm/llvm/CMakeLists.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+831: #
+832: # This is primarily to support building smaller or faster project files.
+833: option(LLVM_INCLUDE_TOOLS "Generate build targets for the LLVM tools." ON)
+834: option(LLVM_BUILD_TOOLS
+835:   "Build the LLVM tools. If OFF, just generate build targets." ON)
+836:
+837: option(LLVM_INCLUDE_UTILS "Generate build targets for the LLVM utils." ON)
+1364: add_subdirectory(projects)
+1365:
+1366: if( LLVM_INCLUDE_TOOLS )
+1367:   add_subdirectory(tools)
+1368: endif()
+1369:
+1370: # We need to setup KillTheDoctor before setting up the runtimes build because
+
+READ src/llvm/llvm/tools/CMakeLists.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+40: add_llvm_tool_subdirectory(llvm-lto)
+41: add_llvm_tool_subdirectory(llvm-profdata)
+42:
+43: # Projects supported via LLVM_EXTERNAL_*_SOURCE_DIR need to be explicitly
+44: # specified.
+45: add_llvm_external_project(lld)
+46: add_llvm_external_project(mlir)
+47: # ClangIR and Flang depend on mlir, lldb and Flang depend on clang, sort them
+48: # accordingly so place them afterwards
+49: add_llvm_external_project(clang)
+50: add_llvm_external_project(flang)
+51: add_llvm_external_project(lldb)
+52: add_llvm_external_project(bolt)
+53:
+54: # Automatically add remaining sub-directories containing a 'CMakeLists.txt'
+55: # file as external projects.
+56: add_llvm_implicit_projects()
+
+READ src/llvm/llvm/tools/llvm-profgen/CMakeLists.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1:
+2: set(LLVM_LINK_COMPONENTS
+3:   AllTargetsDescs
+4:   AllTargetsDisassemblers
+5:   AllTargetsInfos
+6:   DebugInfoDWARF
+7:   Core
+8:   MC
+9:   IPO
+10:   MCDisassembler
+11:   Object
+12:   ProfileData
+13:   Support
+14:   Symbolize
+15:   TargetParser
+16:   )
+17:
+18: add_llvm_tool(llvm-profgen
+19:   llvm-profgen.cpp
+20:   PerfReader.cpp
+21:   CSPreInliner.cpp
+22:   ProfiledBinary.cpp
+23:   ProfileGenerator.cpp
+24:   MissingFrameInferrer.cpp
+25:   )
+
+READ src/llvm/bolt/CMakeLists.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+87: set(BOLT_ENABLE_RUNTIME_default OFF)
+88: if ((CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"
+89:     OR CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$"
+90:     OR CMAKE_SYSTEM_PROCESSOR STREQUAL "riscv64")
+91:     AND (CMAKE_SYSTEM_NAME STREQUAL "Linux"
+92:       OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+93:     AND (NOT CMAKE_CROSSCOMPILING))
+94:   set(BOLT_ENABLE_RUNTIME_default ON)
+95: endif()
+96: option(BOLT_ENABLE_RUNTIME "Enable BOLT runtime" ${BOLT_ENABLE_RUNTIME_default})
+143: if (BOLT_ENABLE_RUNTIME)
+144:   message(STATUS "Building BOLT runtime libraries for ${CMAKE_SYSTEM_PROCESSOR}")
+145:   set(extra_args "")
+146:   if(CMAKE_SYSROOT)
+147:     list(APPEND extra_args -DCMAKE_SYSROOT=${CMAKE_SYSROOT})
+148:   endif()
+149:
+150:   include(ExternalProject)
+151:   ExternalProject_Add(bolt_rt
+152:     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/runtime"
+153:     STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/bolt_rt-stamps
+154:     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bolt_rt-bins
+155:     CMAKE_ARGS -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+156:                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+157:                -DCMAKE_BUILD_TYPE=Release
+158:                -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+159:                -DLLVM_LIBDIR_SUFFIX=${LLVM_LIBDIR_SUFFIX}
+160:                -DLLVM_LIBRARY_DIR=${LLVM_LIBRARY_DIR}
+161:                -DBOLT_BUILT_STANDALONE=${BOLT_BUILT_STANDALONE}
+162:                ${extra_args}
+
+READ src/llvm/compiler-rt/CMakeLists.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+70: mark_as_advanced(COMPILER_RT_BUILD_XRAY)
+71: option(COMPILER_RT_BUILD_LIBFUZZER "Build libFuzzer" ON)
+72: mark_as_advanced(COMPILER_RT_BUILD_LIBFUZZER)
+73: option(COMPILER_RT_BUILD_PROFILE "Build profile runtime" ON)
+74: mark_as_advanced(COMPILER_RT_BUILD_PROFILE)
+75: option(COMPILER_RT_BUILD_CTX_PROFILE "Build ctx profile runtime" ON)
+
+READ src/llvm/compiler-rt/lib/CMakeLists.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+50: endif()
+51:
+52: if(COMPILER_RT_BUILD_PROFILE)
+53:   compiler_rt_build_runtime(profile)
+54: endif()
+55:
+
+READ src/llvm/compiler-rt/lib/profile/CMakeLists.txt (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+175:
+176: if(APPLE)
+177:   add_compiler_rt_runtime(clang_rt.profile
+178:     STATIC
+179:     OS ${PROFILE_SUPPORTED_OS}
+180:     ARCHS ${PROFILE_SUPPORTED_ARCH}
+181:     CFLAGS ${EXTRA_FLAGS}
+182:     SOURCES ${PROFILE_SOURCES}
+183:     ADDITIONAL_HEADERS ${PROFILE_HEADERS}
+184:     PARENT_TARGET profile)
+185: else()
+186:   add_compiler_rt_runtime(clang_rt.profile
+187:     STATIC
+188:     ARCHS ${PROFILE_SUPPORTED_ARCH}
+189:     CFLAGS ${EXTRA_FLAGS}
+190:     SOURCES ${PROFILE_SOURCES}
+191:     ADDITIONAL_HEADERS ${PROFILE_HEADERS}
+192:     PARENT_TARGET profile)
+193: endif()
+
+READ src/ffmpeg/packaging/ffmpeg.spec (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: Name:       ffmpeg
+2: Summary:    AV codec lib
+3: Version:    8.0.1
+4: Release:    1
+139: # basic functions
+140: export CONFIGURE_OPTIONS="--enable-shared \
+141: --disable-static --disable-devices \
+142: --disable-version3 --disable-nonfree --disable-gpl \
+143: --disable-doc --disable-zlib --disable-network \
+144: --disable-programs --enable-ffmpeg \
+145: --disable-avdevice \
+146: --enable-swscale --disable-x86asm --enable-swresample \
+147: --enable-neon --disable-stripping \
+148: %{?asan:--disable-asm} \
+149: "
+225: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 "
+226:
+227: %ifarch %{arm} aarch64
+228: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--disable-mmx "
+229: %else
+230: %endif
+231:
+232: CFLAGS="%{optflags} -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "; export CFLAGS
+233: export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV"
+234:
+235: %ifarch %{arm}
+236: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--extra-cflags=-mfpu=neon"
+237: %endif
+238:
+239: export AR=%{__ar} RANLIB=%{__ranlib}
+240: export CC=%{__cc} CXX=%{__cxx}
+241:
+242: ./configure \
+243:     --prefix=%{_prefix} \
+244:     --libdir=%{_libdir} \
+245:     --shlibdir=%{_libdir} \
+246:     --datadir=%{_datadir}/%{name} \
+247:     $CONFIGURE_OPTIONS
+
+READ src/ffmpeg/configure (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+4219: enable stripping
+4220: enable version_tracking
+4221:
+4222: enable asm
+4223: enable debug
+4224: enable doc
+4225: enable faan faandct faanidct
+4226: enable iamf
+4227: enable large_tests
+4228: enable optimizations
+5060:     elif $_cc -v 2>&1 | grep -qi ^gcc; then
+5061:         _type=gcc
+5062:         gcc_version=$($_cc --version | head -n1)
+5063:         gcc_basever=$($_cc -dumpversion)
+5064:         gcc_pkg_ver=$(expr "$gcc_version" : '[^ ]* \(([^)]*)\)')
+5065:         gcc_ext_ver=$(expr "$gcc_version" : ".*$gcc_pkg_ver $gcc_basever \\(.*\\)")
+5066:         _ident=$(cleanws "gcc $gcc_basever $gcc_pkg_ver $gcc_ext_ver")
+5067:         case $gcc_basever in
+5068:             2) ;;
+5069:             2.*) ;;
+5070:             *) _depflags='-MMD -MF $(@:.o=.d) -MT $@' ;;
+5071:         esac
+5072:         if [ "$first" = true ]; then
+5073:             case $gcc_basever in
+5074:                 4.2*)
+5075:                 warn "gcc 4.2 is outdated and may miscompile FFmpeg. Please use a newer compiler." ;;
+5076:             esac
+5077:         fi
+5078:         _cflags_speed='-O3'
+5079:         _cflags_size='-Os'
+5098:         $_cc --arm_linux_configure                 \
+5099:              --arm_linux_config_file="$armcc_conf" \
+5100:              --configure_sysroot="$sysroot"        \
+5101:              --configure_cpp_headers="$sysinclude" >>$logfile 2>&1 ||
+5102:              die "Error creating armcc configuration file."
+5103:         $_cc --vsn | grep -q RVCT && armcc_opt=rvct || armcc_opt=armcc
+5104:         _flags="--arm_linux_config_file=$armcc_conf --translate_gcc"
+5105:         as_default="${cross_prefix}gcc"
+5106:         _depflags='-MMD'
+5107:         _cflags_speed='-O3'
+5108:         _cflags_size='-Os'
+5109:     elif $_cc -v 2>&1 | grep -q clang && ! $_cc -? > /dev/null 2>&1; then
+5110:         _type=clang
+5111:         _ident=$($_cc --version 2>/dev/null | head -n1)
+5112:         _depflags='-MMD -MF $(@:.o=.d) -MT $@'
+5113:         _cflags_speed='-O3'
+5114:         _cflags_size='-Oz'
+5115:     elif $_cc -V 2>&1 | grep -q Sun; then
+5116:         _type=suncc
+5117:         _ident=$($_cc -V 2>&1 | head -n1 | cut -d' ' -f 2-)
+7689: if [ -z "$optflags" ]; then
+7690:     if enabled small; then
+7691:         optflags=$cflags_size
+7692:     elif enabled optimizations; then
+7693:         optflags=$cflags_speed
+7694:     else
+7695:         optflags=$cflags_noopt
+7696:     fi
+7697: fi
+7698:
+7699: check_optflags(){
+7700:     check_cflags "$@"
+7701:     [ -n "$lto" ] && check_ldflags "$@"
+7702: }
+7703:
+7704: check_optflags $optflags
+
+READ src/gstreamer/packaging/gstreamer.spec (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+12: ## how to build each plugin :
+13: ## add define option at gbs build cmd like [ --define "plugin bad" ]
+14: ## if not, all the source code in subprojects will be built
+15: #######################################################################
+16:
+17: %if 0%{?plugin:1}
+18:   %if "%{plugin}" == "core"
+19:     %define _name gstreamer
+20:     %define _core_opt ""
+21:   %endif
+22:   %if "%{plugin}" == "base" || "%{plugin}" == "good" || "%{plugin}" == "bad" || "%{plugin}" == "ugly"
+23:     %define _name gst-plugins-%{plugin}
+24:     %define _base_opt ""
+25:     %define _good_opt ""
+26:     %define _bad_opt ""
+27:     %define _ugly_opt ""
+28:   %endif
+29:   %if "%{plugin}" == "libav"
+30:     %define _name gst-%{plugin}
+31:     %define _libav_opt ""
+32:   %endif
+33:   %if "%{plugin}" == "rs"
+34:     %define _name gst-rtsp-server
+35:     %define _rs_opt ""
+36:   %endif
+37:   %if "%{plugin}" == "es"
+38:     %define _name gst-editing-services
+39:     %define _es_opt ""
+40:   %endif
+41:
+42:   %define _source_path subprojects/%{_name}
+43:
+44: %else
+45:
+46:   %define plugin all
+47:   %define _name gstreamer
+48:   %define _source_path .
+49:
+50:   # plugin option prefix
+51:   %define _core_opt gstreamer:
+52:   %define _base_opt gst-plugins-base:
+53:   %define _good_opt gst-plugins-good:
+54:   %define _bad_opt gst-plugins-bad:
+55:   %define _ugly_opt gst-plugins-ugly:
+56:   %define _libav_opt gst-libav:
+57:   %define _rs_opt gst-rtsp-server:
+58:   %define _es_opt gst-editing-services:
+59:
+60: %endif
+61:
+62: Name:           %{_name}
+63: Version:        1.24.11
+64: Release:        42
+388: ## Package info of libav Plugin
+389: #######################################################
+390:
+391: %if "%{plugin}" == "all"
+392: %package -n gst-libav
+393: Summary:        Libav plugin for GStreamer
+394: Group:          Multimedia/Framework
+395: %endif
+396:
+397: %if "%{plugin}" == "all" || "%{plugin}" == "libav"
+398:
+399: BuildRequires:  bzip2-devel
+400: BuildRequires:  gettext
+401: BuildRequires:  which
+402: BuildRequires:  yasm
+403: BuildRequires:  pkgconfig(libavcodec)
+404: BuildRequires:  pkgconfig(libavfilter)
+405: BuildRequires:  pkgconfig(libavformat)
+406: BuildRequires:  pkgconfig(libavutil)
+407: BuildRequires:  pkgconfig(orc-0.4)
+408: BuildRequires:  pkgconfig(theora)
+409: BuildRequires:  pkgconfig(vorbis)
+410: BuildRequires:  pkgconfig(zlib)
+411:
+412: %description -n gst-libav
+413: This GStreamer plugin supports a large number of audio and video compression
+414: formats through the use of the libav library.  The plugin contains GStreamer
+415: elements for decoding 90+ formats (AVI, MPEG, OGG, Matroska, ASF, ...),
+416: demuxing 30+ formats and colorspace conversion.
+417:
+418: %endif
+507: %build
+508:
+509: %if "%{plugin}" != "all"
+510: _gst_saved_dir=$(pwd)
+511: cd %{_source_path}
+512: %endif
+513:
+514: mkdir -p build
+515: export CFLAGS="%{optflags} \
+516:   -fno-strict-aliasing\
+517:   -fstack-protector-strong\
+518:   -Wl,-z,relro\
+519: %if "%{tizen_profile_name}" == "tv"
+520:   -Wno-declaration-after-statement\
+521: %endif
+522:   -D_FORTIFY_SOURCE=2"
+523: export CXXFLAGS="$CXXFLAGS -Wno-error"
+524: export LDFLAGS="$LDFLAGS -pthread"
+525:
+526: meson --auto-features=disabled --prefix=/usr --libdir=%{_libdir} --datadir=%{_datadir} --sysconfdir=%{_hal_sysconfdir} \
+527: %if "%{plugin}" == "all"
+528:   %if "%{tizen_profile_name}" == "tv"
+529:     -D ges=disabled \
+530:   %endif # profile
+531:   -D webrtc=enabled \
+532: %endif # plugin
+533: %if "%{plugin}" == "all" || "%{plugin}" == "core"
+534:   -D %{_core_opt}check=enabled \
+535:   -D %{_core_opt}coretracers=enabled \
+536:   -D %{_core_opt}extra-checks=enabled \
+537:   -D %{_core_opt}tools=enabled \
+538:   %if "%{tizen_profile_name}" == "tv"
+539:     -D %{_core_opt}tv-profile=true \
+540:   %endif # profile
+541:   %if "%{_enable_introspection}" == "1"
+542:     -D %{_core_opt}introspection=enabled \
+543:   %endif # introspection
+704: %if "%{plugin}" == "all" || "%{plugin}" == "libav"
+705:   %if "%{tizen_profile_name}" == "tv"
+706:     -D %{_libav_opt}tv-profile=true \
+707:   %endif # profile
+708: %endif # plugin
+1208: ######################## gst-libav ###########################
+1209:
+1210: %if "%{plugin}" == "all" || "%{plugin}" == "libav"
+1211:
+1212: %files -n gst-libav
+1213: %manifest gst-libav.manifest
+1214: %defattr(-,root,root,-)
+1215: %license subprojects/gst-libav/COPYING
+1216: %{_lib_gstreamer_dir}/libgstlibav.so
+1217:
+
+READ src/gstreamer/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gstreamer-full', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : ['buildtype=debugoptimized',
+5:                      # Needed due to https://github.com/mesonbuild/meson/issues/1889,
+6:                      # but this can cause problems in the future. Remove it
+7:                      # when it's no longer necessary.
+8:                      'cpp_std=c++14'])
+
+READ src/gstreamer/subprojects/gst-libav/ext/libav/gstavviddec.c (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+2797:     /* construct the type */
+2798:     if (!strcmp (in_plugin->name, "hevc")) {
+2799:       plugin_name = g_strdup ("h265");
+2800:     } else {
+2801:       plugin_name = g_strdup ((gchar *) in_plugin->name);
+2802:     }
+2803:     g_strdelimit (plugin_name, NULL, '_');
+2804:     type_name = g_strdup_printf ("avdec_%s", plugin_name);
+
+READ src/gstreamer/subprojects/gstreamer/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gstreamer', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : [ 'warning_level=1',
+5:                       'buildtype=debugoptimized' ])
+6:
+
+READ src/gstreamer/subprojects/gst-plugins-base/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gst-plugins-base', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : [ 'warning_level=1',
+5:                       'buildtype=debugoptimized' ])
+6:
+
+READ src/gstreamer/subprojects/gst-plugins-good/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gst-plugins-good', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : [ 'warning_level=1',
+5:                       'buildtype=debugoptimized' ])
+6:
+
+READ src/gstreamer/subprojects/gst-plugins-bad/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gst-plugins-bad', 'c', 'cpp',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : [ 'warning_level=1',
+5:                       'buildtype=debugoptimized' ])
+6:
+
+READ src/gstreamer/subprojects/gst-plugins-ugly/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gst-plugins-ugly', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : [ 'warning_level=1',
+5:                       'buildtype=debugoptimized' ])
+6:
+
+READ src/gstreamer/subprojects/gst-libav/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gst-libav', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : [ 'warning_level=1',
+5:                       'buildtype=debugoptimized' ])
+6:
+
+READ src/gstreamer/subprojects/gst-rtsp-server/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gst-rtsp-server', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : ['warning_level=1', 'buildtype=debugoptimized'])
+5:
+6: gst_version = meson.project_version()
+
+READ src/gstreamer/subprojects/gst-editing-services/meson.build (Python line-numbered excerpts; equivalent to nl -ba + sed -n ranges)
+1: project('gst-editing-services', 'c',
+2:   version : '1.24.11',
+3:   meson_version : '>= 1.1',
+4:   default_options : [ 'warning_level=1',
+5:                       'buildtype=debugoptimized' ])
+6:
+$ rg -n 'AUTOFDO_CLANG|PROPELLER_CLANG' src/linux-rpi/arch/Kconfig
+exit=1
+stdout:
+
+stderr:
+
+$ rg -n 'select ARCH_SUPPORTS_(AUTOFDO|PROPELLER)_CLANG' src/linux-rpi/arch
+exit=1
+stdout:
+
+stderr:
+
+$ rg -n '^%package|^Name:|^Version:' src/ffmpeg/packaging/ffmpeg.spec src/gstreamer/packaging/gstreamer.spec
+exit=0
+stdout:
+src/gstreamer/packaging/gstreamer.spec:62:Name:           %{_name}
+src/gstreamer/packaging/gstreamer.spec:63:Version:        1.24.11
+src/gstreamer/packaging/gstreamer.spec:96:%package -n gstreamer-utils
+src/gstreamer/packaging/gstreamer.spec:111:%package -n gstreamer-devel
+src/gstreamer/packaging/gstreamer.spec:137:%package -n gst-plugins-base
+src/gstreamer/packaging/gstreamer.spec:192:%package -n gst-plugins-base-extension-adder
+src/gstreamer/packaging/gstreamer.spec:202:%package -n gst-plugins-base-devel
+src/gstreamer/packaging/gstreamer.spec:217:%package -n gst-plugins-good
+src/gstreamer/packaging/gstreamer.spec:262:%package -n gst-plugins-good-extra
+src/gstreamer/packaging/gstreamer.spec:273:%package -n gst-plugins-good-cairo
+src/gstreamer/packaging/gstreamer.spec:285:%package -n gst-plugins-good-v4l2
+src/gstreamer/packaging/gstreamer.spec:303:%package -n gst-plugins-bad
+src/gstreamer/packaging/gstreamer.spec:346:%package -n gst-plugins-bad-devel
+src/gstreamer/packaging/gstreamer.spec:365:%package -n gst-plugins-ugly
+src/gstreamer/packaging/gstreamer.spec:392:%package -n gst-libav
+src/gstreamer/packaging/gstreamer.spec:425:%package -n gst-rtsp-server
+src/gstreamer/packaging/gstreamer.spec:441:%package -n gst-rtsp-server-devel
+src/gstreamer/packaging/gstreamer.spec:457:%package -n gst-editing-services
+src/gstreamer/packaging/gstreamer.spec:474:%package -n gst-editing-services-devel
+src/ffmpeg/packaging/ffmpeg.spec:1:Name:       ffmpeg
+src/ffmpeg/packaging/ffmpeg.spec:3:Version:    8.0.1
+src/ffmpeg/packaging/ffmpeg.spec:30:%package -n libavcodec
+src/ffmpeg/packaging/ffmpeg.spec:37:%package -n libavcodec-devel
+src/ffmpeg/packaging/ffmpeg.spec:45:%package -n libavformat
+src/ffmpeg/packaging/ffmpeg.spec:52:%package -n libavformat-devel
+src/ffmpeg/packaging/ffmpeg.spec:60:%package -n libavutil
+src/ffmpeg/packaging/ffmpeg.spec:67:%package -n libavutil-devel
+src/ffmpeg/packaging/ffmpeg.spec:75:%package -n libavfilter
+src/ffmpeg/packaging/ffmpeg.spec:82:%package -n libavfilter-devel
+src/ffmpeg/packaging/ffmpeg.spec:90:%package -n libswscale
+src/ffmpeg/packaging/ffmpeg.spec:97:%package -n libswscale-devel
+src/ffmpeg/packaging/ffmpeg.spec:105:%package -n libswresample
+src/ffmpeg/packaging/ffmpeg.spec:112:%package -n libswresample-devel
+src/ffmpeg/packaging/ffmpeg.spec:120:%package -n doc
+src/ffmpeg/packaging/ffmpeg.spec:127:%package -n ffmpeg-tool
+
+stderr:
+
+$ rg -n 'CC=|CXX=|CFLAGS|CXXFLAGS|LDFLAGS|lto|LTO|buildtype|optimization|fuse-ld' src/ffmpeg/packaging/ffmpeg.spec src/gstreamer/packaging/gstreamer.spec
+exit=0
+stdout:
+src/gstreamer/packaging/gstreamer.spec:515:export CFLAGS="%{optflags} \
+src/gstreamer/packaging/gstreamer.spec:523:export CXXFLAGS="$CXXFLAGS -Wno-error"
+src/gstreamer/packaging/gstreamer.spec:524:export LDFLAGS="$LDFLAGS -pthread"
+src/ffmpeg/packaging/ffmpeg.spec:232:CFLAGS="%{optflags} -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "; export CFLAGS
+src/ffmpeg/packaging/ffmpeg.spec:233:export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV"
+src/ffmpeg/packaging/ffmpeg.spec:240:export CC=%{__cc} CXX=%{__cxx}
+
+stderr:
+
+
+READ src/linux-rpi/packaging/linux-rpi.spec
+47: %package -n %{variant}-linux-kernel
+48: License: GPL-2.0
+49: Summary: Tizen kernel for %{target_board}
+50: Group: System/Kernel
+51: Provides: %{variant}-kernel-uname-r = %{fullVersion}
+52: Provides: linux-kernel = %{version}_%{release}
+53:
+54: %description -n %{variant}-linux-kernel
+55: This package contains the Linux kernel for Tizen (arch %{buildarch}, target board %{target_board})
+56:
+57: %package -n %{variant}-rt-linux-kernel
+58: License: GPL-2.0
+59: Summary: Tizen kernel for %{target_board}
+60: Group: System/Kernel
+61: Provides: %{variant}-kernel-uname-r = %{fullVersion}_rt
+62: Provides: linux-kernel = %{version}_%{release}_rt
+63:
+64: %description -n %{variant}-rt-linux-kernel
+65: This package contains the Linux kernel for Tizen (arch %{buildarch}, target board %{target_board})
+
+READ src/linux-rpi/packaging/linux-rpi.spec
+135: %package -n linux-kernel-perf
+136: Summary: The perf performance counter tool
+137: Group: System/Kernel
+138: Provides: perf = %{version}
+139:
+140: %description -n linux-kernel-perf
+141: This package provides the "perf" tool that can be used to monitor performance
+142: counter events as well as various kernel internal events.
