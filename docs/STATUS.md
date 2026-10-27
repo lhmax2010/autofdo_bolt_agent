@@ -23,15 +23,30 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 本次补充探测授权范围（2026-10-27）
+## 当前任务授权：PMUv3 内核构建准备（第一段）
+
+- 仅准备源码分支/worktree、构建配置和一键脚本，Agent **不连接开发板，不执行任何构建，不运行构建脚本**；只用 bash -n 做语法检查。
+- 不修改 config/ 下两份用户配置，不修改 src/linux-rpi 检出的文件；唯一源码改动放 temp/linux-rpi-pmuv3 的 afdo/pmuv3 分支。开始/结束原工作树状态必须为空。
+- 优先使用本地镜像精确基线 21645b17c0d913e2ba7e10fbc9c993d286b3f57d，不 fetch；本地已存在。内核分支只本地提交，不推送。
+- 用户自行运行固定快照的 GBS 构建；专用 HOME、buildroot、tmpdir/cache/log 均在 WORKDIR/temp，隔离只施加到 GBS 及子进程。结果仓库 commit/push 用正常环境。
+- 第二段等用户通知构建结束后，Agent 再核对产物并写安装/备份/回退说明；安装、重启和板上验收由用户执行，Agent 不操作开发板。
+- 只提交 scripts/build_pmuv3_kernel.sh、docs/kernel/01_pmuv3_build.md 与本次 STATUS 更新。temp/、src/ 不提交。
+
+## 历史授权：补充探测（已结束，不能据此继续连接开发板）
 
 用户最新指令覆盖前一版板上安装授权：允许使用镜像配套 Base-Toolchain 仓库（先查 builddata/manifest/build.xml；查不到才用 config/gbs_llvm.conf 的 Base reference 并注明近似），核对 perf 构建依赖与 libLLVM version-release；只在本机 temp/rpms 用 rpm2cpio/cpio 解包，在板上 /tmp/afdo_probe 部署 perf/所需动态库，以 LD_LIBRARY_PATH 指定临时库目录。**不安装 RPM，不推送/安装 perl，不 remount、不重启。** 推送前查 /tmp 空间，推送后必须用 ldd 或 LD_DEBUG 验证；未解析成功则记录并停止。记录每个推送文件、来源包/版本/仓库/SHA-256，结束清理并比较 RPM 数量。仍只授权本机内核配置目标（O=WORKDIR/temp/，不编译内核），禁止安装主机工具；媒体制作/解码/采样沿用原授权。
 
 # 项目状态
 
-更新：2026-10-27（Asia/Shanghai）。阶段：设计前环境探测。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-27（Asia/Shanghai）。阶段：PMUv3 内核构建准备完成，等待用户执行脚本。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
+
+- 当前第一段：已完成精确基线 worktree、单行 PMUv3 配置提交、固定工具链快照/专用 HOME、前台预检及后台结束标记脚本；不启动构建。
+- 用户运行 `/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/build_pmuv3_kernel.sh` 后通知结果。
+- 第二段：先确认 ALL-END OK，再核对 RPM 中配置和基线差异，编写 docs/kernel/02_pmuv3_install.md；此文件尚未生成。
+
+以下为前序探测计划与持续纪律：
 
 - 初轮读取 WORKDIR/src、WORKDIR/config 已提供材料；先两层盘点，不写 Agent 实现。本次补充轮的配置生成和板上 RPM 授权范围见上文。
 - 按 model 确认 RPi4，检查 root、系统/内核、perf、媒体素材和实体库静态元数据。
@@ -42,7 +57,17 @@
 
 ## 进度
 
-### 补充轮（当前）
+### 内核构建准备（当前；第一段完成）
+
+- 精确镜像提交 21645b17c0d913e2ba7e10fbc9c993d286b3f57d 在本地存在，未 fetch。原 src/linux-rpi 仍为 42aeefac58edeb081aff440f0b60be71cbe49755，前后 status 为空。
+- temp/linux-rpi-pmuv3 / afdo/pmuv3 的内核本地提交：c27f160de761bb55f64672ceac642698a6e93684。仅 ARM 普通 defconfig 增加 CONFIG_ARM_PMUV3=y，一文件一行；已提交且工作树干净。内核提交未推送。
+- temp/gbs/gbs_rpi4_image.conf 已固定 Unified 20261022.054557 与 Base 20261020.074527；temp/gbs-home/.gbs.conf 最小配置已准备。config/ 原文件哈希不变。
+- spec 无禁用 RT 的宏，脚本将构建普通+RT（只有普通配置加 PMUv3）。当前 nproc=20，运行时计算一半核数，GBS --threads 1。
+- 已核查官方同版本 gbs 2.1.0 / depanneur 0.16.30 源码：随包 sudoers 为构建命令授予 NOPASSWD，脚本跳过 sudo -v；受保护的实际策略未读取/提权验证，异常时后台失败退出，不交互等待。
+- 脚本只有 bash -n 静态语法检查（通过），没有执行。尚无本次构建日志、结束状态或 RPM。第二段未开始。
+- 说明与完整内核 diff：[01_pmuv3_build.md](kernel/01_pmuv3_build.md)；脚本：[build_pmuv3_kernel.sh](../scripts/build_pmuv3_kernel.sh)。
+
+### 补充轮（历史）
 
 - [02_rpi4_pmu_probe.md](probe/02_rpi4_pmu_probe.md) 与证据 08–13 已整理；本轮部分完成，主机 flex 缺失和板上 /tmp noexec 两个阻塞保持开放。
 - 官方 BBB 片源、60 秒 720p/1080p H.264 视频、SHA-256/ffprobe/来源授权记录完成；[media/README.md](../media/README.md)。MP4 本地保留但忽略，不提交。
@@ -70,6 +95,9 @@
 
 ## 已闭合结论（附证据路径）
 
+- 镜像精确源码基线可用，afdo/pmuv3 只有一行配置新增；原源码和两份用户 GBS 配置未改。基线/提交/diff/核查命令见 [01_pmuv3_build.md](kernel/01_pmuv3_build.md)。
+- spec 无只构建普通版宏；预期十个显式二进制包，RT 配置不变。GBS/depanneur 随包 sudo 调用与 NOPASSWD 策略源码位置同上；实际构建与实际 sudo 授权尚未运行验证。
+
 - 配套 Base 快照已明确；libllvm 22.1.8-1.6 与 perf 实际构建日志一致，ABI/包校验通过；perl 为附带测试脚本解释器依赖。[12_perf_dependencies.txt](probe/evidence/12_perf_dependencies.txt)
 - 临时路径 /tmp 的 noexec 阻止 perf 执行和加载器映射；ldd 无法完成全部 NEEDED 验证。推送文件已删除，RPM 前后同为 1252 且包集不变。[13_perf_deployment.txt](probe/evidence/13_perf_deployment.txt)
 
@@ -90,13 +118,18 @@
 
 ## 待人工裁决
 
+- 当前等待用户在终端运行第一段脚本并通知 status/log。Agent 不自行启动构建；构建成功也不自动安装或连接板。
+
 - 用户需要提供符合写入边界且允许执行/映射的测试路径或预置 perf 的镜像。当前 /tmp 为 noexec；不能在“不 remount、不安装、不写其他路径”的范围内继续采样。Base 仓库授权已解决，无需再次确认。
-- 主机缺 flex（bison 也未在 PATH 找到）；需用户提供工具或可信生成的两份配置。本轮没有安装主机工具。
-- 如何取得与运行镜像对应的内核配置，确认 ARM_PMUV3 候选原因；本轮没有修改配置、构建/部署内核或重启。
+- 历史直接 make 配置仍受主机 flex/bison 缺失限制；新 GBS 方案由 spec 的 BuildRequires 在隔离构建根解决依赖，尚未启动，未安装主机工具。
+- 原运行镜像完整配置仍待核验；第一段已在独立 worktree 准备 ARM_PMUV3=y 改动，但没有构建、部署或重启。
 - 是否提供保留 .comment/build-id 的原始构建库及明确 debug 仓库配置。
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
+
+- 用户执行构建、实际工具链/依赖解析与产物清单、普通版配置差异验证、安装/备份/回退说明；第二段等待用户通知。
+- 脚本中断/退出处理目前只静态审查，未运行验证。SIGKILL/断电/不可写磁盘无法保证 ALL-END；缺标记按未完成处理。
 
 - RPi4 perf 临时运行及完整动态库解析、cpu-clock/cycles 样本、分支负对照、媒体 perf 报告/计时、ETM/SPE trace 内容、BRBE 能力：/tmp noexec 阻塞，采样未执行；不再计划 RPM 安装。
 - 各包最终 CC/CXX、%{optflags}、外部 LTO/链接器参数与已运行镜像对应关系：无 GBS root/构建日志，不能静态补全。
