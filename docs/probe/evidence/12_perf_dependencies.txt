@@ -1,0 +1,222 @@
+RPi4 perf 临时部署续测：仓库、版本、静态依赖。原始完整输出留在 temp/perf_resume/。
+
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261022.054557/builddata/manifest/ => HTTP 200，列出 standard.xml；manifest 中 linux-rpi revision 为 21645b17c0d913e2ba7e10fbc9c993d286b3f57d。
+
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261022.054557/build.xml => HTTP 200：
+
+1: <?xml version="1.0" ?>
+
+2: <build version="1.0">
+
+3:   <id>tizen-unified-toolchain_20261022.054557</id>
+
+4:   <base_id url="http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/">tizen-base-toolchain_20261020.074527</base_id>
+
+5:   <buildtargets>
+
+6:     <buildtarget name="standard">
+
+7:       <archs>
+
+8:         <arch>aarch64</arch>
+
+9:         <arch>x86_64</arch>
+
+10:         <arch>armv7l</arch>
+
+11:         <arch>riscv64</arch>
+
+12:       </archs>
+
+13:       <repo type="binary">repos/standard/packages</repo>
+
+14:       <repo type="debug">repos/standard/debug</repo>
+
+15:       <repo type="source">repos/standard/source</repo>
+
+16:     </buildtarget>
+
+17:   </buildtargets>
+
+18: </build>
+
+Base 由 build.xml 的 base_id 确定；没有使用 reference 近似源。
+
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261022.054557/builddata/buildlogs/standard/armv7l/succeeded/linux-rpi.buildlog.txt => HTTP 200：
+
+114: [   10s] [79/130] keeping libllvm-22.1.8-1.6
+
+154: [   11s] [119/130] keeping llvm-22.1.8-1.6
+
+158: [   11s] [123/130] keeping llvm-devel-22.1.8-1.6
+
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261020.074527/repos/standard/packages/repodata/repomd.xml: HTTP 200, 3558 bytes
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261020.074527/repos/standard/packages/repodata/6b0d394650fb3d0bc93bd788574e02403c75ea80151c12739d383f481d37af1f-primary.xml.gz: HTTP 200, 351117 bytes
+primary checksum: 6b0d394650fb3d0bc93bd788574e02403c75ea80151c12739d383f481d37af1f PASS
+primary open-checksum: 1a01742a86929730cc7921c986a971932abe7ae06f101f191c43e1d62597c12d PASS
+
+
+PRIMARY matched provider: {
+  "name": "libllvm",
+  "arch": "armv7l",
+  "version": {
+    "epoch": "0",
+    "ver": "22.1.8",
+    "rel": "1.6",
+    "vcs": "platform/upstream/llvm#120afe9cd158e5de9fe26d4282785c5d59c657bc"
+  },
+  "location": "armv7l/libllvm-22.1.8-1.6.armv7l.rpm",
+  "checksum": "c22c4d7e2d18926f7aa918b14e24733ad92cba3db9f6b32ffd436650ede97407",
+  "provides": [
+    {
+      "name": "libLLVM.so.22.1"
+    },
+    {
+      "name": "libLLVM.so.22.1(LLVM_22.1)"
+    },
+    {
+      "name": "libllvm",
+      "flags": "EQ",
+      "epoch": "0",
+      "ver": "22.1.8",
+      "rel": "1.6"
+    },
+    {
+      "name": "libllvm(armv7l-32)",
+      "flags": "EQ",
+      "epoch": "0",
+      "ver": "22.1.8",
+      "rel": "1.6"
+    }
+  ]
+}
+
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261020.074527/repos/standard/packages/armv7l/libllvm-22.1.8-1.6.armv7l.rpm
+COMMAND: nice -n 19 ionice -c3 curl -fSL --connect-timeout 20 --max-time 300 [above URL] -o temp/rpms/libllvm-22.1.8-1.6.armv7l.rpm
+EXIT=0
+
+RPM=temp/rpms/libllvm-22.1.8-1.6.armv7l.rpm
+SHA256=c22c4d7e2d18926f7aa918b14e24733ad92cba3db9f6b32ffd436650ede97407 PASS
+libllvm 22.1.8-1.6 armv7l
+EXIT=0
+
+
+perf RPM --requires: libLLVM.so.22.1; libLLVM.so.22.1(LLVM_22.1); no package version-release equality constraint. libllvm version-release 22.1.8-1.6 EXACTLY matches perf build log, ABI/Provides also match. No mismatch.
+
+COMMAND: nice -n 19 ionice -c3 bash -o pipefail -c 'rpm2cpio temp/rpms/linux-kernel-perf-6.12.80-0.armv7l.rpm | (cd temp/rpms/perf-extract && cpio -idm --no-absolute-filenames)'
+EXIT=0
+STDERR: 6725 blocks
+
+
+COMMAND: nice -n 19 ionice -c3 bash -o pipefail -c 'rpm2cpio temp/rpms/libllvm-22.1.8-1.6.armv7l.rpm | (cd temp/rpms/llvm-extract && cpio -idm --no-absolute-filenames)'
+EXIT=0
+STDERR: 65708 blocks
+
+
+All regular ELF files inside perf RPM (ELF magic scan, including trace hardlink); readelf -d output truncated ONLY to all NEEDED entries:
+
+COMMAND: readelf -d temp/rpms/perf-extract/usr/bin/perf
+EXIT=0
+ 0x00000001 (NEEDED)                     Shared library: [libunwind.so.8]
+ 0x00000001 (NEEDED)                     Shared library: [libunwind-arm.so.8]
+ 0x00000001 (NEEDED)                     Shared library: [libpthread.so.0]
+ 0x00000001 (NEEDED)                     Shared library: [librt.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so.2]
+ 0x00000001 (NEEDED)                     Shared library: [libz.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libelf.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libdw.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libcrypto.so.3]
+ 0x00000001 (NEEDED)                     Shared library: [libLLVM.so.22.1]
+ 0x00000001 (NEEDED)                     Shared library: [libstdc++.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [liblzma.so.5]
+ 0x00000001 (NEEDED)                     Shared library: [libgcc_s.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [ld-linux.so.3]
+STDERR: (empty)
+
+COMMAND: readelf -d temp/rpms/perf-extract/usr/bin/trace
+EXIT=0
+ 0x00000001 (NEEDED)                     Shared library: [libunwind.so.8]
+ 0x00000001 (NEEDED)                     Shared library: [libunwind-arm.so.8]
+ 0x00000001 (NEEDED)                     Shared library: [libpthread.so.0]
+ 0x00000001 (NEEDED)                     Shared library: [librt.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so.2]
+ 0x00000001 (NEEDED)                     Shared library: [libz.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libelf.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libdw.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libcrypto.so.3]
+ 0x00000001 (NEEDED)                     Shared library: [libLLVM.so.22.1]
+ 0x00000001 (NEEDED)                     Shared library: [libstdc++.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [liblzma.so.5]
+ 0x00000001 (NEEDED)                     Shared library: [libgcc_s.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [ld-linux.so.3]
+STDERR: (empty)
+
+COMMAND: readelf -d temp/rpms/perf-extract/usr/libexec/perf-core/dlfilters/dlfilter-show-cycles.so
+EXIT=0
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+STDERR: (empty)
+
+COMMAND: readelf -d temp/rpms/perf-extract/usr/libexec/perf-core/dlfilters/dlfilter-test-api-v0.so
+EXIT=0
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+STDERR: (empty)
+
+COMMAND: readelf -d temp/rpms/perf-extract/usr/libexec/perf-core/dlfilters/dlfilter-test-api-v2.so
+EXIT=0
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+STDERR: (empty)
+
+Perl shebangs (all matching files):
+
+SHEBANG usr/libexec/perf-core/tests/shell/common/check_all_lines_matched.pl: #!/usr/bin/perl
+
+SHEBANG usr/libexec/perf-core/tests/shell/common/check_all_patterns_found.pl: #!/usr/bin/perl
+
+SHEBANG usr/libexec/perf-core/tests/shell/common/check_errors_whitelisted.pl: #!/usr/bin/perl
+
+SHEBANG usr/libexec/perf-core/tests/shell/common/check_no_patterns_found.pl: #!/usr/bin/perl
+
+COMMAND: rpm -qp --requires temp/rpms/linux-kernel-perf-6.12.80-0.armv7l.rpm
+EXIT=0; selected requirements: /usr/bin/perl; libLLVM.so.22.1; libLLVM.so.22.1(LLVM_22.1). Full output: evidence/10_perf_package.txt and temp/perf_resume/perf_elf_shebang.txt.
+STDERR: (empty)
+
+COMMAND: rpm -qp --scripts temp/rpms/linux-kernel-perf-6.12.80-0.armv7l.rpm
+EXIT=0; STDOUT/STDERR: (empty)
+
+COMMAND: readelf -d temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1
+EXIT=0
+ 0x00000001 (NEEDED)                     Shared library: [librt.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so.2]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [libz.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libxml2.so.16]
+ 0x00000001 (NEEDED)                     Shared library: [libstdc++.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [libgcc_s.so.1]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+ 0x00000001 (NEEDED)                     Shared library: [ld-linux.so.3]
+ 0x0000000e (SONAME)                     Library soname: [libLLVM.so.22.1]
+STDERR: (empty)
+
+Local deployment hashes (RPM hash rechecked against prior primary; ELF files individually hashed):
+
+[
+  {
+    "file": "temp/rpms/linux-kernel-perf-6.12.80-0.armv7l.rpm",
+    "bytes": 1116064,
+    "sha256": "b6e48f1cd4f996b2101b9af167700f5a56ffa28acb02125098660ffa82b30323"
+  },
+  {
+    "file": "temp/rpms/perf-extract/usr/bin/perf",
+    "bytes": 2992296,
+    "sha256": "41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138"
+  },
+  {
+    "file": "temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1",
+    "bytes": 33641876,
+    "sha256": "49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e"
+  }
+]

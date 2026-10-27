@@ -1,0 +1,142 @@
+RPi4 临时部署验证，2026-10-27。所有板上探测 shell 环境：HOME=/tmp/afdo_probe/home TMPDIR=/tmp/afdo_probe PERF_CONFIG=/tmp/afdo_probe/perfconfig GST_REGISTRY=/tmp/afdo_probe/gst-registry.bin XDG_CACHE_HOME=/tmp/afdo_probe/cache LD_LIBRARY_PATH=/tmp/afdo_probe/lib。
+
+sdb connect 192.168.108.26 => 192.168.108.26:26101 is already connected；model 核实后才创建临时目录。
+
+=== start ===
+COMMAND: cat /proc/device-tree/model; uname -m; cat /etc/os-release; id; df -h /tmp; rpm -qa | wc -l
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+Raspberry Pi 4 Model B Rev 1.5[NUL]armv7l
+NAME=Tizen
+VERSION="11.0.0 (Tizen11.0/Unified)"
+ID=tizen
+VERSION_ID=11.0.0
+PRETTY_NAME="Tizen 11.0.0 (Tizen11.0/Unified)"
+ANSI_COLOR="0;36"
+CPE_NAME="cpe:/o:tizen:tizen:11.0.0"
+BUILD_ID=tizen-unified-toolchain_20261022.054557_tizen-headed-armv7l
+uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context="User::Shell"
+Filesystem            Size  Used Avail Use% Mounted on
+tmpfs                 1.9G   28K  1.9G   1% /tmp
+1252
+
+STDERR:
+
+SDB_STDERR:
+
+
+=== space_before_push ===
+COMMAND: df -h /tmp; command -v ldd; ls -l /usr/lib/libxml2.so.16*; command -v perl; test ! -x /usr/bin/perl
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+Filesystem            Size  Used Avail Use% Mounted on
+tmpfs                 1.9G   24K  1.9G   1% /tmp
+/usr/bin/ldd
+lrwxrwxrwx 1 root root     17 Oct 21 05:33 /usr/lib/libxml2.so.16 -> libxml2.so.16.1.1
+-rwxr-xr-x 1 root root 866416 Oct 21 05:33 /usr/lib/libxml2.so.16.1.1
+
+STDERR:
+
+SDB_STDERR:
+
+
+=== ldd ===
+COMMAND: chmod 755 /tmp/afdo_probe/perf; ldd /tmp/afdo_probe/perf
+SDB_EXIT=0; REMOTE_EXIT=1
+STDOUT:
+
+STDERR:
+ldd: warning: you do not have execution permission for `/tmp/afdo_probe/perf'
+	not a dynamic executable
+
+SDB_STDERR:
+
+
+=== deployed_hashes ===
+COMMAND: sha256sum /tmp/afdo_probe/perf /tmp/afdo_probe/lib/libLLVM.so.22.1
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /tmp/afdo_probe/perf
+49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /tmp/afdo_probe/lib/libLLVM.so.22.1
+
+STDERR:
+
+SDB_STDERR:
+
+
+=== exec_diagnostic ===
+COMMAND: ls -l /tmp/afdo_probe/perf; ls -lZ /tmp/afdo_probe/perf /usr/bin/ls; mount | grep -E " /tmp | / "; command -v chsmack; cat /proc/self/attr/current; ls -l /lib/ld-linux.so.3
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+-rwxr-xr-x 1 root root 2992296 Oct 22 16:03 /tmp/afdo_probe/perf
+-rwxr-xr-x 1 root root System 2992296 Oct 22 16:03 /tmp/afdo_probe/perf
+-rwxr-xr-x 1 root root _        57368 Oct 21 06:21 /usr/bin/ls
+/dev/mmcblk0p2 on / type ext4 (rw,relatime,mb_optimize_scan=0)
+tmpfs on /tmp type tmpfs (rw,nosuid,nodev,noexec)
+/usr/bin/chsmack
+User::Shell-rwxr-xr-x 1 root root 187668 Oct 21 03:31 /lib/ld-linux.so.3
+
+STDERR:
+
+SDB_STDERR:
+
+
+=== loader_debug ===
+COMMAND: LD_DEBUG=libs /tmp/afdo_probe/perf --buildid-dir /tmp/afdo_probe/buildid --version
+SDB_EXIT=0; REMOTE_EXIT=126
+STDOUT:
+
+STDERR:
+/bin/sh: /tmp/afdo_probe/perf: Permission denied
+
+SDB_STDERR:
+
+
+=== loader_list ===
+COMMAND: LD_DEBUG=libs /lib/ld-linux.so.3 --list /tmp/afdo_probe/perf
+SDB_EXIT=0; REMOTE_EXIT=127
+STDOUT:
+
+STDERR:
+/tmp/afdo_probe/perf: error while loading shared libraries: /tmp/afdo_probe/perf: failed to map segment from shared object
+
+SDB_STDERR:
+
+
+=== end_count ===
+COMMAND: nice -n 19 ionice -c3 rpm -qa | wc -l
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+1252
+
+STDERR:
+
+SDB_STDERR:
+
+
+Push commands (after df check, before ldd):
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push temp/rpms/perf-extract/usr/bin/perf /tmp/afdo_probe/perf
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1 /tmp/afdo_probe/lib/libLLVM.so.22.1
+Both exit=0, 1 file pushed; bytes=2992296 and 33641876. No other files pushed. No Perl/scripts/other libraries pushed.
+
+COMMAND before and after: nice -n 19 ionice -c3 rpm -qa
+Both REMOTE_EXIT=0; full sets saved in temp/perf_resume/rpm_{before,after}.json. Comparison:
+RPM_BEFORE_COUNT=1252
+RPM_AFTER_COUNT=1252
+ADDED=[]
+REMOVED=[]
+
+
+COMMAND: sdb -s 192.168.108.26:26101 shell "rm -rf -- /tmp/afdo_probe; rc=$?; echo REMOVE_EXIT=$rc; test ! -e /tmp/afdo_probe; echo ABSENT_TEST_EXIT=$?"
+SDB_EXIT=0
+STDOUT:
+REMOVE_EXIT=0
+ABSENT_TEST_EXIT=0
+
+STDERR:
+
+
+No rpm install/remove/test transaction this continuation. No remount, no chmod/chsmack outside /tmp/afdo_probe. All sampling commands NOT RUN: loader cannot execute/map perf from noexec /tmp. ldd failure is NOT proof that the ELF is static or damaged; readelf confirms PT_DYNAMIC/NEEDED.
+
+Boundary metadata check: stat --format=... /tmp/sdb.log => size=0 mtime=2026-10-26 22:36:47.967637757 +0800 (unchanged); not deleted.
+nice -n 19 ionice -c3 git -C src/linux-rpi status --porcelain => exit=0 stdout empty.
