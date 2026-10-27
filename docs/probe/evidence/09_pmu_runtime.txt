@@ -1,0 +1,138 @@
+展示保留命令、真实退出码与 stderr；行尾空白已清理。
+Board environment: HOME=/tmp/afdo_probe/home TMPDIR=/tmp/afdo_probe PERF_CONFIG=/tmp/afdo_probe/perfconfig GST_REGISTRY=/tmp/afdo_probe/gst-registry.bin XDG_CACHE_HOME=/tmp/afdo_probe/cache
+=== runtime ===
+COMMAND: cat /proc/device-tree/model; uname -m; uname -r; cat /etc/os-release; id; mount | grep " / "; command -v nice ionice timeout time rpm
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+Raspberry Pi 4 Model B Rev 1.5[NUL]armv7l
+6.12.80-arm-rpi4-v7l
+NAME=Tizen
+VERSION="11.0.0 (Tizen11.0/Unified)"
+ID=tizen
+VERSION_ID=11.0.0
+PRETTY_NAME="Tizen 11.0.0 (Tizen11.0/Unified)"
+ANSI_COLOR="0;36"
+CPE_NAME="cpe:/o:tizen:tizen:11.0.0"
+BUILD_ID=tizen-unified-toolchain_20261022.054557_tizen-headed-armv7l
+uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context="User::Shell"
+/dev/mmcblk0p2 on / type ext4 (rw,relatime,mb_optimize_scan=0)
+/usr/bin/nice
+/usr/bin/ionice
+time
+/usr/bin/rpm
+
+STDERR:
+
+SDB_STDERR:
+
+=== pmu_dmesg ===
+COMMAND: dmesg | grep -i -E 'perfevents|hw perf|pmu'
+SDB_EXIT=0; REMOTE_EXIT=1
+STDOUT:
+
+STDERR:
+
+SDB_STDERR:
+
+=== dt_nodes ===
+COMMAND: find /proc/device-tree -maxdepth 2 \( -iname '*pmu*' -o -iname '*etm*' -o -iname '*coresight*' \) -print; for p in $(find /proc/device-tree -maxdepth 2 \( -iname '*pmu*' -o -iname '*etm*' -o -iname '*coresight*' \)); do echo NODE=$p; if [ -f "$p/compatible" ]; then cat "$p/compatible"; echo; fi; if [ -f "$p/status" ]; then cat "$p/status"; echo; else echo STATUS_PROPERTY_ABSENT; fi; done
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+
+STDERR:
+
+SDB_STDERR:
+
+=== sysfs ===
+COMMAND: ls /sys/devices/ | grep -i -E 'armv|pmu'; ls /sys/bus/event_source/devices/; ls -ld /sys/bus/platform/devices/pmu* /sys/bus/platform/drivers/armv8-pmu /sys/bus/platform/drivers/arm-pmu; ls -l /sys/bus/platform/devices/pmu*/driver
+SDB_EXIT=0; REMOTE_EXIT=2
+STDOUT:
+breakpoint
+kprobe
+software
+tracepoint
+uprobe
+lrwxrwxrwx 1 root root 0 Oct 27 19:11 /sys/bus/platform/devices/pmu -> ../../../devices/platform/pmu
+
+STDERR:
+ls: cannot access /sys/bus/platform/drivers/armv8-pmu: No such file or directory
+ls: cannot access /sys/bus/platform/drivers/arm-pmu: No such file or directory
+ls: cannot access /sys/bus/platform/devices/pmu*/driver: No such file or directory
+
+SDB_STDERR:
+
+=== dt_follow ===
+COMMAND: ls -ld /proc/device-tree; readlink -f /proc/device-tree; find -H /proc/device-tree -maxdepth 2 \( -iname '*pmu*' -o -iname '*etm*' -o -iname '*coresight*' \) -print; for p in $(find -H /proc/device-tree -maxdepth 2 \( -iname '*pmu*' -o -iname '*etm*' -o -iname '*coresight*' \)); do echo NODE=$p; cat "$p/compatible"; echo; if [ -f "$p/status" ]; then cat "$p/status"; echo; else echo STATUS_PROPERTY_ABSENT; fi; done
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+lrwxrwxrwx 1 root root 29 Jan  1  1970 /proc/device-tree -> /sys/firmware/devicetree/base
+/sys/firmware/devicetree/base
+/proc/device-tree/pmu
+NODE=/proc/device-tree/pmu
+arm,cortex-a72-pmu[NUL]
+STATUS_PROPERTY_ABSENT
+
+STDERR:
+
+SDB_STDERR:
+
+=== pmu_binding ===
+COMMAND: cat /sys/bus/platform/devices/pmu/modalias; cat /sys/bus/platform/devices/pmu/uevent; ls -ld /sys/bus/platform/drivers/*pmu*; grep -E 'armv8pmu|armv7pmu|armpmu' /proc/kallsyms | head -25
+SDB_EXIT=0; REMOTE_EXIT=0
+STDOUT:
+of:NpmuT(null)Carm,cortex-a72-pmu
+OF_NAME=pmu
+OF_FULLNAME=/pmu
+OF_COMPATIBLE_0=arm,cortex-a72-pmu
+OF_COMPATIBLE_N=1
+MODALIAS=of:NpmuT(null)Carm,cortex-a72-pmu
+drwxr-xr-x 2 root root 0 Jan  1  1970 /sys/bus/platform/drivers/armv7-pmu
+c0f5200c T armpmu_map_event
+c0f520dc T armpmu_event_set_period
+c0f521cc T armpmu_event_update
+c0f522b8 T armpmu_free_irq
+c0f52350 T armpmu_request_irq
+c0f52630 t armpmu_dispatch_irq
+c0f526e8 T armpmu_alloc
+c0f528a0 t armpmu_enable
+c0f528fc t armpmu_disable
+c0f52948 t armpmu_event_init
+c0f52bec t armpmu_add
+c0f52cdc t armpmu_del
+c0f52d34 t armpmu_start
+c0f52e98 t armpmu_stop
+c0f52fac t armpmu_read
+c0f53098 t armpmu_filter
+c0f530cc T armpmu_free
+c0f530f4 T armpmu_register
+c0f53248 t armpmu_free_pmuirq
+c0f53280 t armpmu_free_pmunmi
+c0f532b8 t armpmu_enable_percpu_pmuirq
+c0f532dc t armpmu_free_percpu_pmuirq
+c0f5337c t armpmu_enable_percpu_pmunmi
+c0f533b0 t armpmu_disable_percpu_pmunmi
+c0f533d8 t armpmu_free_percpu_pmunmi
+
+STDERR:
+
+SDB_STDERR:
+
+=== perf_absent_final ===
+COMMAND: command -v perf; rpm -q linux-kernel-perf
+SDB_EXIT=0; REMOTE_EXIT=1
+STDOUT:
+package linux-kernel-perf is not installed
+
+STDERR:
+
+SDB_STDERR:
+
+INSTALLED_ADDED=[]
+INSTALLED_REMOVED=[]
+COMMAND: rm -rf -- /tmp/afdo_probe; result=$?; printf "REMOVE_EXIT=%s\n" "$result"; test ! -e /tmp/afdo_probe; printf "ABSENT_TEST_EXIT=%s\n" "$?"
+SDB_EXIT=0
+STDOUT:
+REMOVE_EXIT=0
+ABSENT_TEST_EXIT=0
+
+STDERR:

@@ -23,13 +23,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 本次补充探测授权范围（2026-10-27）
+
+用户后续明确授权：本机只运行内核配置生成目标（O=WORKDIR/temp/，不编译内核）；在 RPi4 下载匹配镜像的 perf RPM、校验、测试依赖，并在根原本可写时安装 perf 及同仓库必要依赖，超过 5 个依赖包停止；根只读时只在 /tmp/afdo_probe 临时解包运行，不 remount。可用本机已有 libx264 制作两段媒体并在板上执行解码/采样。此授权覆盖先前本轮“不编译、不安装”的相应部分；仍禁止主机安装工具、内核构建/部署/重启。跨仓库补依赖尚未获准。板上测试目录结束时删除，若未来实际安装 RPM，另记完整新增包及卸载方案。
+
 # 项目状态
 
-更新：2026-10-27（Asia/Shanghai）。阶段：设计前环境探测。**旧提交 e90492e 的探测结论全部作废；本轮从头重新采集。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-27（Asia/Shanghai）。阶段：设计前环境探测。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 读取 WORKDIR/src、WORKDIR/config 已提供材料；先两层盘点，不编译、不安装、不写 Agent 实现。
+- 初轮读取 WORKDIR/src、WORKDIR/config 已提供材料；先两层盘点，不写 Agent 实现。本次补充轮的配置生成和板上 RPM 授权范围见上文。
 - 按 model 确认 RPi4，检查 root、系统/内核、perf、媒体素材和实体库静态元数据。
 - 下载两个配置共四个启用仓库的 primary/filelists，核对三架构工具包及源码构建声明。
 - 重新克隆 CodingSystem、固定 commit 核查契约与实现边界。
@@ -37,6 +41,19 @@
 - 所有耗时命令 nice -n 19 ionice -c3，不并行大任务。
 
 ## 进度
+
+### 补充轮（当前）
+
+- [02_rpi4_pmu_probe.md](probe/02_rpi4_pmu_probe.md) 与证据 08–11 已整理；本轮部分完成，两个阻塞保持开放。
+- 官方 BBB 片源、60 秒 720p/1080p H.264 视频、SHA-256/ffprobe/来源授权记录完成；[media/README.md](../media/README.md)。MP4 本地保留但忽略，不提交。
+- 两份 defconfig 配置生成均因主机缺 flex exit=2，未生成 .config；仅 temp/ 下产生配置辅助对象，内核源码开始/结束均干净。
+- RPi4 运行 DT 的 A72 PMU 节点及 platform 设备存在，未绑定驱动；只有 armv7-pmu，没有 armv8-pmu 注册。ARM_PMUV3 缺失是高可信候选原因，实际运行配置尚未闭合。
+- 同镜像快照 perf RPM 下载/校验成功；板上 --test 缺 /usr/bin/perl 和 libLLVM.so.22.1，同一仓库没有提供者。尚未获准使用配套 Base 仓库，实际安装 0 包。
+- 720p 和 1080p avdec_h264 管线均到 EOS，real=14.323s / 27.359s；perf 不可用，所有采样/报告/分支栈测试未执行。
+- 板上 /tmp/afdo_probe 已清理并验证不存在；rpm -qa 前后新增/删除集合均为空。没有 perf.data 生成或拉回。
+- 新证据 34,207 字节，所有 evidence 合计 170,387 字节，低于 200KB；只提交报告/证据/README/.gitignore/本状态文件。推送使用正常既有认证，不开 PR。
+
+### 初轮（历史，补充轮结论优先）
 
 - 已重新盘点，四个源码树和两份 config 文件就绪；配置指向的工作区内 GBS root 不存在。
 - 已连接 192.168.108.26:26101，model=Raspberry Pi 4 Model B Rev 1.5，armv7l，root 成功。
@@ -50,6 +67,11 @@
 
 ## 已闭合结论（附证据路径）
 
+- 补充轮配置生成失败且源码未改；最终配置未知，不以默认值替代。[08_pmu_config.txt](probe/evidence/08_pmu_config.txt)
+- 运行 DT 包含有效 A72 PMU 节点、平台设备未绑定，仅 armv7-pmu 注册；排除了“无节点/节点 disabled”，但未证明中断/固件无其他问题。[09_pmu_runtime.txt](probe/evidence/09_pmu_runtime.txt)
+- 镜像同期 perf RPM SHA-256 校验通过，依赖测试失败，同库没有缺失依赖提供者；实际安装 0 包。[10_perf_package.txt](probe/evidence/10_perf_package.txt)
+- 已建立 60 秒两档 BBB H.264 素材并完成 avdec_h264 解码基线；首轮“没有执行解码”的结论由本轮结果补齐。[11_media_smoke.txt](probe/evidence/11_media_smoke.txt)
+
 - 输入材料及配置已就绪，无 GBS root。[01_workspace.txt](probe/evidence/01_workspace.txt)
 - RPi4：Tizen 11.0.0，内核 6.12.80-arm-rpi4-v7l；uid=0；perf 不在 PATH；无硬件 PMU/cs_etm/arm_spe 事件源，运行内核配置不可取得。[02_rpi4.txt](probe/evidence/02_rpi4.txt)
 - avdec_h264 可发现；ffmpeg/ffprobe 命令及 /root 常见后缀视频未发现。只验证插件存在，没有执行解码 benchmark。[02_rpi4.txt](probe/evidence/02_rpi4.txt)
@@ -62,14 +84,15 @@
 
 ## 待人工裁决
 
-- 后续是否提供已带 perf、可读内核配置和硬件 PMU 事件的镜像；本轮不安装、不重启、不变更内核。
-- 提供 ffprobe/视频素材或其他可用媒体场景；当前不具备视频元信息检查条件。
+- 是否允许使用 config/gbs_llvm.conf 配套 Base-Toolchain 仓库补齐 perf 依赖。已提出澄清，未收到批准；按“同一仓库”约束保持停止，不修改认证或绕过依赖。
+- 主机缺 flex（bison 也未在 PATH 找到）；需用户提供工具或可信生成的两份配置。本轮没有安装主机工具。
+- 如何取得与运行镜像对应的内核配置，确认 ARM_PMUV3 候选原因；本轮没有修改配置、构建/部署内核或重启。
 - 是否提供保留 .comment/build-id 的原始构建库及明确 debug 仓库配置。
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
 
-- RPi4 cycles 实际样本、分支负对照、ETM/SPE trace 内容、BRBE 能力：当前工具/事件/配置不足。
+- RPi4 perf 安装及 cpu-clock/cycles 实际样本、分支负对照、媒体 perf 报告/计时、ETM/SPE trace 内容、BRBE 能力：依赖范围未解决，采样未执行。
 - 各包最终 CC/CXX、%{optflags}、外部 LTO/链接器参数与已运行镜像对应关系：无 GBS root/构建日志，不能静态补全。
 - RPi5 实机：明确下一轮；本轮没有连接或探测。
 - CodingSystem 业务指南、最终契约与实际实现的后续进展。
