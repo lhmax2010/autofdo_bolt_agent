@@ -1,0 +1,151 @@
+摘录格式说明：仅移除行尾空白；保留原始命令输出内容与源文件行号。
+探测日期：2026-10-27（Asia/Shanghai；会话日期）
+工作目录：/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+
+初始盘点摘录（创建任何产出之前的工具输出）：
+$ find . -maxdepth 2 -mindepth 1 -printf '%y %p\n' | head -160
+stdout: (empty)
+$ ls -la
+total 8
+drwxrwxr-x  2 linhao linhao 4096 Oct 26 22:36 .
+drwxrwxr-x 31 linhao linhao 4096 Oct 26 22:24 ..
+初始无 .git、docs/STATUS.md、config/、src/、内核源码或 GBS root。
+
+$ git ls-remote origin
+exit_code=0
+stdout:
+(empty)
+stderr:
+(empty)
+
+$ find . -maxdepth 2 -mindepth 1 -not -path './.git/*' -printf '%y %p
+'
+exit_code=0
+stdout:
+d ./temp
+d ./temp/CodingSystem
+f ./.gitignore
+d ./.git
+d ./docs
+d ./docs/probe
+stderr:
+(empty)
+
+$ ls -ld docs/STATUS.md
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'docs/STATUS.md': No such file or directory
+
+$ ls -ld config/gbs_llvm.conf
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'config/gbs_llvm.conf': No such file or directory
+
+$ ls -ld linux-rpi
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'linux-rpi': No such file or directory
+
+$ ls -ld src/llvm
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'src/llvm': No such file or directory
+
+$ ls -ld src/ffmpeg
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'src/ffmpeg': No such file or directory
+
+$ ls -ld src/gstreamer
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'src/gstreamer': No such file or directory
+
+$ ls -ld src/chromium
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'src/chromium': No such file or directory
+
+上列为初始化后、撰写报告前复核；初始空目录证明不局限于这些惯用路径。未扫描工作目录外的源代码或构建根。
+
+=== 补入材料后的复核（初始盘点之后，2026-10-27） ===
+$ find . -maxdepth 2 -mindepth 1 -not -path './.git/*' -not -path './temp/*' -printf '%y %p
+'
+exit_code=0
+stdout:
+d ./src
+d ./src/llvm
+d ./temp
+f ./gbs_llvm.conf
+f ./.gitignore
+d ./.git
+f ./gbs_gcc.conf
+d ./docs
+d ./docs/probe
+f ./docs/STATUS.md
+d ./config
+stderr:
+(empty)
+
+$ ls -ld config/gbs_llvm.conf
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access 'config/gbs_llvm.conf': No such file or directory
+
+$ nl -ba gbs_llvm.conf
+exit_code=0
+stdout:
+     1	[general]
+     2	# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+     3	tmpdir = /home/linhao/Toolchain/development/linux_kernel_optimization/temp
+     4	profile = profile.tizen_unified_standard
+     5	buildroot = /home/linhao/Toolchain/development/linux_kernel_optimization/temp/GBS-ROOT-TIZEN-LLVM-CODES
+     6
+     7	[profile.tizen_unified_standard]
+     8	repos = repo.base-standard, repo.unified-standard
+     9
+    10	[repo.base-standard]
+    11	url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/reference/repos/standard/packages/
+    12	#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260722.045200/repos/standard/packages/
+    13	#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260804.124315/repos/standard/packages/
+    14
+    15	[repo.unified-standard]
+    16	url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/reference/repos/standard/packages/
+    17	#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260725.003315/repos/standard/packages/
+    18	#url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260804.223836/repos/standard/packages/
+stderr:
+(empty)
+
+$ git -C src/llvm rev-parse HEAD
+exit_code=128
+stdout:
+HEAD
+stderr:
+fatal: ambiguous argument 'HEAD': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+
+$ ls -ld /home/linhao/Toolchain/development/linux_kernel_optimization/temp/GBS-ROOT-TIZEN-LLVM-CODES
+exit_code=2
+stdout:
+(empty)
+stderr:
+ls: cannot access '/home/linhao/Toolchain/development/linux_kernel_optimization/temp/GBS-ROOT-TIZEN-LLVM-CODES': No such file or directory
+
+结论更新：根目录 gbs_llvm.conf 已提供，按其两个启用 URL 查询 repodata；不移动或修改用户配置。config/gbs_llvm.conf 仍不存在。src/llvm 克隆未完成，尚无有效 HEAD 或可读源码。配置所指 GBS root 不存在，仅对该明确路径执行只读 ls。
