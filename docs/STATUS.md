@@ -15,6 +15,14 @@
    - 检查上一次中断的执行有没有在 WORKDIR 外留下文件；有就列进"边界例外"，不要自行删除。
 4. 开发板上无法写入 WORKDIR，所以板上只允许写 /tmp/afdo_probe/，结束时删除。
 
+## 长期规则澄清（用户后续指令；优先于上述文字的歧义解释）
+
+1. "不得使用 WORKDIR 以外的任何文件"约束的是项目的输入与产出：源码、配置、数据、脚本只能取自 WORKDIR，生成的文件只能落在 WORKDIR。它不禁止使用本机已有的 GitHub 推送认证。
+2. 环境隔离（例如改 HOME、GIT_CONFIG_NOSYSTEM 等）只用于 gbs 相关命令（export、build 及其派生进程），本轮没有 gbs 命令，因此本轮不需要任何隔离。
+3. 本项目结果仓库（autofdo_bolt_agent）的 git commit 与 git push 一律在正常环境下执行，使用本机已有的 GitHub 认证。提交署名仍用 git config --local 设置的 Hao Lin <hao.lin@samsung.com>，不修改全局 git 配置。
+
+推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
+
 # 项目状态
 
 更新：2026-10-27（Asia/Shanghai）。阶段：设计前环境探测。**旧提交 e90492e 的探测结论全部作废；本轮从头重新采集。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
@@ -38,7 +46,7 @@
 - 内核/LLVM/FFmpeg/GStreamer spec 和相关源码检查完成；实际构建环境的宏展开保持未知。
 - CodingSystem 重新克隆，当前 HEAD=287d51c674e2b7d38605098338ff94fc8bb4e4fa；只读，无修改/推送。
 - 新报告与证据已重写；原始证据合计限于 300KB 内。报告：[probe/01_env_probe_report.md](probe/01_env_probe_report.md)。
-- 推送认证待解决：隔离全局配置并禁用外部 credential helper 后，git push --dry-run 和实际 git push origin main 均返回 exit 128（无法读取 GitHub 用户名）。本轮报告已在本地提交，尚未发布；远端 main 仍是作废的旧报告。已向用户请求仓库内认证，未读取工作区外凭据。
+- 推送规则已澄清：先前 exit 128 发生在主动禁用全局配置与 credential helper 的环境，不能据此判定本机认证失效。本次在正常环境提交长期规则与状态更新，并用原有 GitHub 认证推送全部未推送提交；不修改认证配置、不再请求仓库内凭据。推送结果以执行日志及远端 HEAD 校验为准。
 
 ## 已闭合结论（附证据路径）
 
@@ -50,11 +58,10 @@
 - 内核源码 6.12.80 无 AUTOFDO_CLANG/PROPELLER_CLANG 配置和架构 select；同一源包包含 arm/arm64 的 tizen_bcm2711_defconfig 路径，arm64 配置及启动文件覆盖 pi5，但 RPi5 实机未验证。[05_sources.txt](probe/evidence/05_sources.txt)
 - LLVM spec 未启用 bolt，lld 在 llvm 主包，profgen/profile runtime 有构建和打包声明；FFmpeg 正常非 ASan 路径保留 ARM 汇编/NEON；GStreamer 的 gst-libav 源码与包声明已提供。[05_sources.txt](probe/evidence/05_sources.txt)
 - 框架 HLD draft frozen，契约 v0.11 复审中，业务指南缺失，代码目录只有占位；不能称框架已实现。[06_codingsystem.txt](probe/evidence/06_codingsystem.txt)
-- 已确认外部遗留 /tmp/sdb.log，由现存 SDB 服务持有，当前 0 B、前后时间未变；没有删除。首次 shell/Git 隐式初始化读取未追踪，不能证明无外部配置读取；后续已隔离。[07_boundary.txt](probe/evidence/07_boundary.txt)
+- 已确认外部遗留 /tmp/sdb.log，由现存 SDB 服务持有，当前 0 B、前后时间未变；没有删除。首次 shell/Git 隐式初始化读取未追踪，作为历史审计限制保留；用户已澄清正常系统工具初始化及已有 GitHub 认证不属于项目输入边界限制，后续结果仓库 commit/push 不隔离。[07_boundary.txt](probe/evidence/07_boundary.txt)
 
 ## 待人工裁决
 
-- 在不读取 WORKDIR 外认证配置/数据的前提下，提供可用的仓库本地 GitHub 推送认证；不要在聊天中发送令牌。当前推送受认证阻塞。
 - 后续是否提供已带 perf、可读内核配置和硬件 PMU 事件的镜像；本轮不安装、不重启、不变更内核。
 - 提供 ffprobe/视频素材或其他可用媒体场景；当前不具备视频元信息检查条件。
 - 是否提供保留 .comment/build-id 的原始构建库及明确 debug 仓库配置。

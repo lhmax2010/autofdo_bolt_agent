@@ -8,7 +8,7 @@ WORKDIR=`/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/`。开场�
 
 命令：`find . -maxdepth 2 -mindepth 1 -not -path './.git/*' -not -path './temp/*' -printf '%y %p\n'`；`find src -mindepth 2 -maxdepth 2 -printf '%y %p\n'`；`nl -ba config/gbs_{llvm,gcc}.conf`；`ls -ld temp/GBS-ROOT-TIZEN-LLVM-CODES temp/GBS-ROOT-TOOLCHAIN-GCC-CODES`。关键输出：四个源码树和两份配置存在，两个 GBS root 均 ENOENT。**结论：源码/配置检查支持；构建根未提供。** 证据：[01_workspace.txt](evidence/01_workspace.txt)。
 
-所有命令先 export `TMPDIR=WORKDIR/temp/tmp`；耗时操作使用 `nice -n 19 ionice -c3`，没有并行大任务。除首次启动调用的审计限制外，后续 shell 均关闭 login 初始化，Git 禁用 system/global 配置读取并只修改 local 配置。下载、临时记录及分析辅助数据均在 `temp/`。只读公共仓库重新克隆到 `temp/CodingSystem`；旧克隆移到 `temp/CodingSystem_invalidated_run1`，没有用于本轮证据。边界例外详见 §7，不能把执行结论概括为“绝无边界例外”。
+所有命令先 export `TMPDIR=WORKDIR/temp/tmp`；耗时操作使用 `nice -n 19 ionice -c3`，没有并行大任务。探测阶段曾关闭 login 初始化并禁用 Git system/global 配置读取；后续用户澄清该隔离仅用于 gbs，结果仓库 commit/push 已恢复正常环境并使用已有认证，Git 配置修改仍仅 local。下载、临时记录及分析辅助数据均在 `temp/`。只读公共仓库重新克隆到 `temp/CodingSystem`；旧克隆移到 `temp/CodingSystem_invalidated_run1`，没有用于本轮证据。边界例外详见 §7，不能把执行结论概括为“绝无边界例外”。
 
 “支持”表示本次检查有肯定证据；“不支持（当前环境）”不外推为硬件永久不具备能力；“未知”表示缺工具、缺数据或无法判定。仓库“未找到”仅覆盖本次完整元数据快照。未展开的 RPM 宏不能冒充实际构建参数；本轮没有执行 configure/CMake/Meson 或编译。
 
@@ -276,6 +276,8 @@ Benchmark：输入通用 TaskInput，fixture 消费 BuildReport；构建产物 h
 本项目 profile schema、训练与验证场景、二进制身份关联和包仓 profile 提交流程仍需后续设计，现有通用 BuildReport/BenchReport 不能替代完整业务指南。此为据上述字段及缺失指南作出的范围判断，不是已实现接口。
 
 ## 7. 边界例外
+
+后续规则澄清：工作目录边界约束项目输入/产出，不禁止已有 GitHub 认证；隔离仅用于 gbs，本轮没有 gbs。结果仓库 commit/push 在正常环境执行。下表保留探测时的事实与审计限制，首次系统初始化读取不再作为已证实的项目输入越界；外部 SDB 日志仍列为边界例外。长期规则见 `docs/STATUS.md` 开头。
 
 证据：[07_boundary.txt](evidence/07_boundary.txt)。用户同时要求“不读取工作目录外文件”及“检查上一轮外部遗留”；本次对已知 SDB 路径仅做 stat 和进程 fd 符号链接的元数据检查，不读取外部日志/配置内容，不扫描其他项目目录、不删除外部文件。
 

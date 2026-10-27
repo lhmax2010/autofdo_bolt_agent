@@ -56,3 +56,6 @@ $ GIT_TERMINAL_PROMPT=0 nice -n 19 ionice -c3 git -c credential.helper= -c core.
 exit=128
 stderr: fatal: could not read Username for https://github.com: terminal prompts disabled
 本轮提交未推送；没有打开 PR。
+
+后续用户规则澄清（上述失败记录仅代表此前隔离环境）：
+项目输入/产出必须在 WORKDIR；本机已有 GitHub 认证允许正常使用。隔离仅用于 gbs，本轮无 gbs。结果仓库 git commit/push 在正常环境执行，沿用已有认证，不修改认证配置或全局 Git 配置。此前“本轮提交未推送”为当时状态，后续交付以正常环境 push 与远端 HEAD 校验为准。
