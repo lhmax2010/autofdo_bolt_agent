@@ -1,0 +1,559 @@
+Baseline build evidence. Workdir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+
+COMMAND git -C src/llvm rev-parse HEAD
+EXIT 0
+f999bd406c0a70fe8107aa992164fe6945c5d46a
+(empty stderr)
+
+COMMAND git -C temp/llvm-profgen-enh branch --show-current
+EXIT 0
+afdo/profgen-enhance
+(empty stderr)
+
+COMMAND git -C temp/llvm-profgen-enh diff --stat
+EXIT 0
+(empty stdout)
+(empty stderr)
+
+COMMAND git -C temp/autofdo rev-parse HEAD
+EXIT 0
+f95d1a170dfe24ec5ce4117aa4b0f6d836841703
+(empty stderr)
+
+START source status: temp/profgen-prep/source_status_before.txt
+(empty)
+
+FILE temp/gbs/gbs_llvm_x86_baseline.conf
+[general]
+# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs-tmp-llvm-x86
+profile = profile.tizen_unified_standard
+buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86
+
+[profile.tizen_unified_standard]
+repos = repo.base-standard, repo.unified-standard
+
+[repo.base-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/
+
+[repo.unified-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/
+
+FILE temp/profgen-prep/logs/preflight_processes.txt
+TIME 2026-10-28T20:33:42+08:00
+    PID    PPID STAT     ELAPSED %CPU   RSS COMMAND         COMMAND
+
+HEAVY_COUNT 0
+
+FILE temp/profgen-prep/worker.py
+import os,subprocess,time,datetime,pathlib,signal,json
+W=pathlib.Path('/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent')
+D=W/'temp/profgen-prep'; L=D/'logs'; status=L/'baseline.status'
+def now():return datetime.datetime.now().astimezone().isoformat(timespec='seconds')
+def capture(cmd):
+ p=subprocess.run(cmd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+ return '$ '+' '.join(cmd)+'\n'+p.stdout+'EXIT '+str(p.returncode)+'\n'
+def resources():
+ with (L/'resources.txt').open('a') as f:
+  f.write('TIME '+now()+'\n'+capture(['free','-m'])+capture(['uptime']))
+def heavy():
+ p=subprocess.run(['ps','-eo','pid,ppid,stat,etime,pcpu,rss,comm,args'],text=True,stdout=subprocess.PIPE,check=True)
+ lines=p.stdout.splitlines(); hits=[]
+ for line in lines[1:]:
+  v=line.split(None,7)
+  if len(v)<7:continue
+  comm=v[6]
+  if comm in ('ninja','ninja-build','make','gmake','gbs','depanneur','cc1','cc1plus','ld.lld','lld') or (comm.startswith('clang') and not comm.startswith('clangd')):hits.append(line)
+ with (L/'preflight_processes.txt').open('a') as f:f.write('TIME '+now()+'\n'+lines[0]+'\n'+'\n'.join(hits)+'\nHEAVY_COUNT '+str(len(hits))+'\n')
+ return hits
+start=now(); rc='NOT_STARTED'; outcome='FAILED'; proc=None
+try:
+ while heavy():
+  status.write_text('START '+start+'\nPHASE WAITING_OTHER_BUILDS\n');time.sleep(600)
+ resources()
+ assert not pathlib.Path('/etc/gbs.conf').exists(),'/etc/gbs.conf exists'
+ assert (W/'temp/gbs-home/.gbs.conf').is_file()
+ jobs=max(1,int(subprocess.check_output(['nproc'],text=True))//2)
+ env=os.environ.copy();env.update(HOME=str(W/'temp/gbs-home'),GIT_CONFIG_NOSYSTEM='1',TMPDIR=str(W/'temp/gbs-tmp-llvm-x86'))
+ cmd=['setsid','--wait','nice','-n','19','ionice','-c3','gbs','-c',str(W/'temp/gbs/gbs_llvm_x86_baseline.conf'),'build','-A','x86_64','--spec','llvm.spec','--incremental','--threads','1','--define',f'_smp_mflags -j{jobs}','--define',f'mlgo_build_jobs {jobs}']
+ buildstart=now();print('BUILD_START',buildstart,'COMMAND',repr(cmd),flush=True)
+ proc=subprocess.Popen(cmd,cwd=W/'temp/llvm-profgen-enh',env=env)
+ status.write_text(f'START {start}\nBUILD_START {buildstart}\nPHASE BUILDING\nWORKER_PID {os.getpid()}\nGBS_PID {proc.pid}\nJOBS {jobs}\n')
+ while True:
+  try:rc=proc.wait(timeout=600);break
+  except subprocess.TimeoutExpired:resources()
+ resources()
+ outcome='OK' if rc==0 else 'FAILED'
+finally:
+ end=now(); lines=[f'START {start}',f'BUILD_START {locals().get("buildstart","NOT_STARTED")}',f'END {end}',f'GBS_EXIT {rc}']
+ if rc==0:
+  for rpm in sorted((W/'temp/GBS-ROOT-LLVM-X86/local/repos').rglob('*.rpm')):
+   lines.append(capture(['nice','-n','19','ionice','-c3','sha256sum',str(rpm)]).rstrip())
+ lines.append(f'ALL-END {end} {outcome}');status.write_text('\n'.join(lines)+'\n');print('\n'.join(lines),flush=True)
+
+FILE temp/llvm-profgen-enh/build/CMakeCache.txt (selected original line numbers)
+364: CMAKE_BUILD_TYPE:STRING=Release
+373: CMAKE_CXX_COMPILER:STRING=/bin/x86_64-tizen-linux-gnu-clang++
+385: CMAKE_CXX_FLAGS:STRING=-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument -momit-leaf-frame-pointer  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -fdiagnostics-color=never -m64 -march=nehalem -msse4.2 -mfpmath=sse -fasynchronous-unwind-tables -fno-omit-frame-pointer -g
+409: CMAKE_C_COMPILER:STRING=/bin/x86_64-tizen-linux-gnu-clang
+421: CMAKE_C_FLAGS:STRING=-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument -momit-leaf-frame-pointer  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -fdiagnostics-color=never -m64 -march=nehalem -msse4.2 -mfpmath=sse -fasynchronous-unwind-tables -fno-omit-frame-pointer -g
+499: CMAKE_INSTALL_PREFIX:PATH=/usr
+1241: LLVM_BUILD_INSTRUMENTED:STRING=OFF
+1381: LLVM_ENABLE_LTO:STRING=OFF
+1415: LLVM_ENABLE_PROJECTS:STRING=clang;lldb;clang-tools-extra;lld;compiler-rt;openmp
+1693: LLVM_PARALLEL_COMPILE_JOBS:STRING=6
+1696: LLVM_PARALLEL_LINK_JOBS:STRING=2
+1704: LLVM_PROFDATA_FILE:FILEPATH=
+1729: LLVM_TARGETS_TO_BUILD:STRING=X86;ARM;AArch64;BPF
+2580: CMAKE_HOME_DIRECTORY:INTERNAL=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm
+
+FILE temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/.build.command
+#!/bin/sh -x
+set -e
+ "rpmbuild" "--define" "_smp_mflags -j10" "--define" "mlgo_build_jobs 10" "--define" "_srcdefattr (-,root,root)" "--nosignature" "--target=x86_64" "--define" "_build_create_debug 1" "--short-circuit" "-bc" "/home/abuild/rpmbuild/SOURCES/llvm.spec"
+ "rpmbuild" "--define" "_smp_mflags -j10" "--define" "mlgo_build_jobs 10" "--define" "_srcdefattr (-,root,root)" "--nosignature" "--target=x86_64" "--define" "_build_create_debug 1" "--short-circuit" "-bi" "/home/abuild/rpmbuild/SOURCES/llvm.spec"
+ "rpmbuild" "--define" "_smp_mflags -j10" "--define" "mlgo_build_jobs 10" "--define" "_srcdefattr (-,root,root)" "--nosignature" "--target=x86_64" "--define" "_build_create_debug 1" "--short-circuit" "-bb" "/home/abuild/rpmbuild/SOURCES/llvm.spec"
+ "rpmbuild" "--define" "_smp_mflags -j10" "--define" "mlgo_build_jobs 10" "--define" "_srcdefattr (-,root,root)" "--nosignature" "--target=x86_64" "--define" "_build_create_debug 1" "--short-circuit" "-bs" "/home/abuild/rpmbuild/SOURCES/llvm.spec"
+
+FINAL BUILD STATUS (original paths/output)
+START 2026-10-28T20:33:42+08:00
+BUILD_START 2026-10-28T20:33:42+08:00
+END 2026-10-28T21:33:09+08:00
+GBS_EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-22.1.8-1.x86_64.rpm
+46725a77f733fcc152e7f30b9062f7a2aa1f82179f8ed6242ec783e26e4384cc  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-debuginfo-22.1.8-1.x86_64.rpm
+5bde462c558616f378026ec0677ec7ce43842535c325b73e9b171d8357ae2a11  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-devel-22.1.8-1.x86_64.rpm
+0f25b1ad76fe57ca5685ff87499ded56037f97532591ec04147fb20d4f0851f0  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-devel-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-devel-debuginfo-22.1.8-1.x86_64.rpm
+6f3b91d9475f08fff36d88e294fb2b1dc1373affc64049c20108480daae56848  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/clang-devel-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/compiler-rt-22.1.8-1.x86_64.rpm
+860077cbdef4ee83d955b3f4f9baeeb5c852c47c4ccd2e7ee45a62172c80731d  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/compiler-rt-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+2d7d257edb146f1bac44db23817b53d4d7d23de1e716554ebaef60172a128ca4  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libllvm-22.1.8-1.x86_64.rpm
+d23f5f15d6a89c694ac7e6b674dbf35de842470b82a5de7f5a46888170265eeb  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libllvm-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libllvm-debuginfo-22.1.8-1.x86_64.rpm
+27f2db63c5fea45c907ebd9ab9b0449dc7f72c9aa3b072caf62ef6eb0a5c0fbe  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libllvm-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libomp-22.1.8-1.x86_64.rpm
+61dab037f38d0b32e435e852742d34ba07943556366c319c2e033e18b7ec2ffb  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libomp-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libomp-debuginfo-22.1.8-1.x86_64.rpm
+b6e1bd21a12f97d633ece0fabef8c8aee8a454097fc4942acbfd150bc0082afb  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libomp-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libomp-devel-22.1.8-1.x86_64.rpm
+1fa596f65d909ebced98a91beb9cfb5622c3a3d2f17c21981d05b8dd0cf5e046  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/libomp-devel-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-22.1.8-1.x86_64.rpm
+f84d85d703b4f61f3e1959a39c91757ea90d5458c90d1c76f35a9db04ad0c3f9  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-debuginfo-22.1.8-1.x86_64.rpm
+abbac0d23a2eeb559c239822b8bcc246131513cf7389c30af823ad17885893fa  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-devel-22.1.8-1.x86_64.rpm
+036ce604ba7b7d9597a1c7192b767cc433250d109fd88cd63370b1477e8b7256  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-devel-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+91318bb1dcf2b6cd83b8f04a41f54daa241a1e7d0ed8c631772d30c95c3ee885  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-22.1.8-1.x86_64.rpm
+da0d9eda7864af5dfd0892d5200bfe6b726b0ce3172956eb750462c48ac9422b  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-debuginfo-22.1.8-1.x86_64.rpm
+3bfd6853cc7367071941d940599658d5606697d984b1b850ea67af8da65b5d0d  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-debugsource-22.1.8-1.x86_64.rpm
+a34ca717563bece2b2aaf21eb2eb7eca1eda0d45b91213aee1b57b99e637e85c  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-debugsource-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-devel-22.1.8-1.x86_64.rpm
+72154b4c2c10a82900892e57c33c2e261e56e7148f376abba6a210880c0a4ad5  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-devel-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-devel-debuginfo-22.1.8-1.x86_64.rpm
+6f782039e67d067fc693d44d1f08ecaa5f5b4f4d624140423312b8b04301f5ea  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-devel-debuginfo-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-static-devel-22.1.8-1.x86_64.rpm
+9a531b47ce3c53fcb4e30f14b6a0beceecb7ecb86bda8d8dd71ff6b287ef6c69  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-static-devel-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/python-clang-22.1.8-1.x86_64.rpm
+194cec207aa500237e486a1ec60822875384cfcc2080521b607b3c83bea53bf3  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/python-clang-22.1.8-1.x86_64.rpm
+EXIT 0
+$ nice -n 19 ionice -c3 sha256sum /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS/llvm-22.1.8-1.src.rpm
+f9b43d8da92c0134ad98cecae9334949a49ca665c2ec717ec67c470fe2bd654f  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS/llvm-22.1.8-1.src.rpm
+EXIT 0
+ALL-END 2026-10-28T21:33:09+08:00 OK
+
+
+RESOURCE SAMPLES (free -m and uptime)
+TIME 2026-10-28T20:33:42+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       12096        5381         909       15803       19444
+Swap:           4095        4079          16
+EXIT 0
+$ uptime
+ 20:33:42 up 22:11,  1 user,  load average: 2.35, 3.13, 2.63
+EXIT 0
+TIME 2026-10-28T20:43:42+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       13027        2532         903       17342       18513
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 20:43:42 up 22:21,  1 user,  load average: 7.99, 6.19, 4.12
+EXIT 0
+TIME 2026-10-28T20:53:42+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       14876        1720         862       16364       16663
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 20:53:42 up 22:31,  1 user,  load average: 10.43, 10.58, 7.16
+EXIT 0
+TIME 2026-10-28T21:03:42+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       13408        1632         902       17876       18132
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 21:03:42 up 22:41,  1 user,  load average: 7.85, 8.05, 7.35
+EXIT 0
+TIME 2026-10-28T21:13:42+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       13231        2581         882       17068       18309
+Swap:           4095        4091           4
+EXIT 0
+$ uptime
+ 21:13:42 up 22:51,  1 user,  load average: 11.10, 8.47, 7.71
+EXIT 0
+TIME 2026-10-28T21:23:42+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       12050       13057         817        7708       19490
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 21:23:42 up 23:01,  1 user,  load average: 15.11, 10.56, 9.17
+EXIT 0
+TIME 2026-10-28T21:33:09+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       12783       12400         869        7684       18757
+Swap:           4095        3352         743
+EXIT 0
+$ uptime
+ 21:33:09 up 23:10,  1 user,  load average: 10.83, 8.20, 8.15
+EXIT 0
+
+
+GBS LOG FINAL 30 LINES BEFORE WRAPPER MANIFEST (original line numbers)
+17912: [ 3342s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-debuginfo-22.1.8-1.x86_64.rpm
+17913: [ 3342s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.cBZJWV
+17914: [ 3342s] + umask 022
+17915: [ 3342s] + cd /home/abuild/rpmbuild/BUILD
+17916: [ 3342s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+17917: [ 3344s] + cd llvm-22.1.8
+17918: [ 3344s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+17919: [ 3344s] + exit 0
+17920: [ 3344s] + rpmbuild --define '_smp_mflags -j10' --define 'mlgo_build_jobs 10' --define '_srcdefattr (-,root,root)' --nosignature --target=x86_64 --define '_build_create_debug 1' --short-circuit -bs /home/abuild/rpmbuild/SOURCES/llvm.spec
+17921: [ 3346s] Building target platforms: x86_64
+17922: [ 3346s] Building for target x86_64
+17923: [ 3346s] Wrote: /home/abuild/rpmbuild/SRPMS/llvm-22.1.8-1.src.rpm
+17924: [ 3346s] ... checking for files with abuild user/group
+17925: [ 3347s]
+17926: [ 3347s] linhao-linux finished "build llvm.spec" at Wed Oct 28 13:33:06 UTC 2026.
+17927: [ 3347s]
+17928: info: finished building llvm
+17929: info: updating local repo
+17930: info: *** Build Status Summary ***
+17931: === Total succeeded built packages: (1) ===
+17932: info: generated html format report:
+17933:      /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/index.html
+17934: info: generated RPM packages can be found from local repo:
+17935:      /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS
+17936: info: generated source RPM packages can be found from local repo:
+17937:      /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS
+17938: info: build logs can be found in:
+17939:      /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs
+17940: info: build roots located in:
+17941:      /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.*
+
+LAST NINJA TARGET
+10811: [ 2395s] [7633/7633] Linking CXX executable bin/llvm-exegesis
+
+VERIFY platform readelf version
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/readelf --version
+EXIT 0
+STDOUT:
+GNU readelf (GNU Binutils) 2.43
+Copyright (C) 2024 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) any later version.
+This program has absolutely no warranty.
+
+STDERR:
+
+
+VERIFY new profgen ELF header
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/readelf -h /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen
+EXIT 0
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Version:                           0x1
+  Entry point address:               0x18620
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          10379464 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         11
+  Size of section headers:           64 (bytes)
+  Number of section headers:         39
+  Section header string table index: 37
+
+STDERR:
+
+
+VERIFY new profgen build id
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen
+EXIT 0
+STDOUT:
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.2.0
+
+STDERR:
+
+
+VERIFY new profgen NEEDED
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/readelf -d /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen
+EXIT 0
+STDOUT:
+
+Dynamic section at offset 0x5e438 contains 31 entries:
+  Tag        Type                         Name/Value
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib64:/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/lib64:]
+ 0x0000000000000001 (NEEDED)             Shared library: [libLLVM.so.22.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000006ffffffb (FLAGS_1)            Flags: PIE
+ 0x0000000000000015 (DEBUG)              0x0
+ 0x0000000000000007 (RELA)               0x9398
+ 0x0000000000000008 (RELASZ)             8712 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          234
+ 0x0000000000000017 (JMPREL)             0xb5a0
+ 0x0000000000000002 (PLTRELSZ)           4944 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x617c8
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x2e8
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x2b94
+ 0x000000000000000a (STRSZ)              26625 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x28b8
+ 0x0000000000000019 (INIT_ARRAY)         0x5f8b8
+ 0x000000000000001b (INIT_ARRAYSZ)       56 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x5f8b0
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000000000000c (INIT)               0x5db98
+ 0x000000000000000d (FINI)               0x5dbb0
+ 0x000000006ffffff0 (VERSYM)             0x24a8
+ 0x000000006ffffffe (VERNEED)            0x2778
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x0000000000000000 (NULL)               0x0
+
+STDERR:
+
+
+VERIFY new profgen dependency resolution
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 --list /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen
+EXIT 0
+STDOUT:
+	linux-vdso.so.1 (0x000072dd920c1000)
+	libLLVM.so.22.1 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64/libLLVM.so.22.1 (0x000072dd8d000000)
+	libstdc++.so.6 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/libstdc++.so.6 (0x000072dd8cc00000)
+	libm.so.6 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/libm.so.6 (0x000072dd8cf1d000)
+	libgcc_s.so.1 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/libgcc_s.so.1 (0x000072dd8cef1000)
+	libc.so.6 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/libc.so.6 (0x000072dd8ca24000)
+	librt.so.1 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/librt.so.1 (0x000072dd9204c000)
+	libdl.so.2 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/libdl.so.2 (0x000072dd92047000)
+	libz.so.1 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/libz.so.1 (0x000072dd8ceda000)
+	libxml2.so.16 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/libxml2.so.16 (0x000072dd8c8e0000)
+	/lib64/ld-linux-x86-64.so.2 => /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 (0x000072dd920c3000)
+
+STDERR:
+
+
+VERIFY new profgen version
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen --version
+EXIT 0
+STDOUT:
+LLVM (http://llvm.org/):
+  LLVM version 22.1.8
+  Optimized build.
+
+STDERR:
+
+
+VERIFY llvm RPM identity
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/rpm -qp --qf '%{NAME} %{VERSION}-%{RELEASE}.%{ARCH}
+' /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-22.1.8-1.x86_64.rpm
+EXIT 0
+STDOUT:
+llvm 22.1.8-1.x86_64
+
+STDERR:
+
+
+VERIFY llvm RPM requirements
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/rpm -qp --requires /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-22.1.8-1.x86_64.rpm
+EXIT 1
+STDOUT:
+
+STDERR:
+rpm: --requires: unknown option
+
+
+VERIFY llvm RPM requirements via query tags
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/rpm -qp --qf '[%{REQUIRENAME} %{REQUIREFLAGS} %{REQUIREVERSION}
+]' /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-22.1.8-1.x86_64.rpm
+EXIT 0
+STDOUT:
+/usr/bin/env 16384
+ld-linux-x86-64.so.2()(64bit) 16384
+ld-linux-x86-64.so.2(GLIBC_2.3)(64bit) 16384
+ld-linux-x86-64.so.2(GLIBC_2.35)(64bit) 16384
+libLLVM.so.22.1()(64bit) 16384
+libLLVM.so.22.1(LLVM_22.1)(64bit) 16384
+libc.so.6()(64bit) 16384
+libc.so.6(GLIBC_2.11)(64bit) 16384
+libc.so.6(GLIBC_2.14)(64bit) 16384
+libc.so.6(GLIBC_2.15)(64bit) 16384
+libc.so.6(GLIBC_2.16)(64bit) 16384
+libc.so.6(GLIBC_2.2.5)(64bit) 16384
+libc.so.6(GLIBC_2.3)(64bit) 16384
+libc.so.6(GLIBC_2.3.4)(64bit) 16384
+libc.so.6(GLIBC_2.32)(64bit) 16384
+libc.so.6(GLIBC_2.33)(64bit) 16384
+libc.so.6(GLIBC_2.34)(64bit) 16384
+libc.so.6(GLIBC_2.36)(64bit) 16384
+libc.so.6(GLIBC_2.38)(64bit) 16384
+libc.so.6(GLIBC_2.4)(64bit) 16384
+libc.so.6(GLIBC_2.7)(64bit) 16384
+libc.so.6(GLIBC_2.9)(64bit) 16384
+libclang-cpp.so.22.1()(64bit) 16384
+libclang-cpp.so.22.1(LLVM_22.1)(64bit) 16384
+libdl.so.2()(64bit) 16384
+libgcc_s.so.1()(64bit) 16384
+libgcc_s.so.1(GCC_3.0)(64bit) 16384
+libgcc_s.so.1(GCC_3.3)(64bit) 16384
+liblldb.so.22.1()(64bit) 16384
+liblldb.so.22.1(LLVM_22.1)(64bit) 16384
+libllvm 8 22.1.8-1
+liblzma.so.5()(64bit) 16384
+libm.so.6()(64bit) 16384
+libm.so.6(GLIBC_2.2.5)(64bit) 16384
+libm.so.6(GLIBC_2.29)(64bit) 16384
+libm.so.6(GLIBC_2.38)(64bit) 16384
+librt.so.1()(64bit) 16384
+libstdc++.so.6()(64bit) 16384
+libstdc++.so.6(CXXABI_1.3)(64bit) 16384
+libstdc++.so.6(CXXABI_1.3.11)(64bit) 16384
+libstdc++.so.6(CXXABI_1.3.13)(64bit) 16384
+libstdc++.so.6(CXXABI_1.3.3)(64bit) 16384
+libstdc++.so.6(CXXABI_1.3.5)(64bit) 16384
+libstdc++.so.6(CXXABI_1.3.7)(64bit) 16384
+libstdc++.so.6(CXXABI_1.3.8)(64bit) 16384
+libstdc++.so.6(CXXABI_1.3.9)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.11)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.14)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.15)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.17)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.18)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.19)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.20)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.21)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.22)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.29)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.30)(64bit) 16384
+libstdc++.so.6(GLIBCXX_3.4.9)(64bit) 16384
+libxml2.so.16()(64bit) 16384
+libz.so.1()(64bit) 16384
+libz.so.1(ZLIB_1.2.0)(64bit) 16384
+libz.so.1(ZLIB_1.2.2)(64bit) 16384
+rpmlib(CompressedFileNames) 16777226 3.0.4-1
+rpmlib(FileDigests) 16777226 4.6.0-1
+rpmlib(PayloadFilesHavePrefix) 16777226 4.0-1
+rpmlib(PayloadIsXz) 16777226 5.2-1
+rpmlib(ShortCircuited) 16777226 4.9.0-1
+rtld(GNU_HASH) 16384
+
+STDERR:
+
+
+The optional RPM --requires query failed; verification helper stopped with AssertionError. GBS had already exited 0 and the new llvm-profgen --version had exited 0. Replacing only the read-only query with RPM array tags succeeded; no build retry or source/configuration changes.
+
+
+source_status_before.txt
+
+
+source_status_after.txt
+
+
+worktree_diff_after.txt
+
+
+worktree_status_after.txt
+?? debugfiles.list
+?? debuglinks.list
+?? debugsourcefiles.list
+?? debugsources.list
+?? elfbins.list
+?? llvm-debuginfo.manifest
+?? llvm-debugsource.manifest
+?? llvm.manifest
+?? mlgo_verify_assets/
+
+
+autofdo_status_after.txt
+
+
+profgen_sha.txt
+a31073338f9315a0fd6d2934e36431d9135086882ebfb07bd1bda7c36d7f9f1e  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen
+
+FINAL SOURCE STATE COMMANDS
+$ git -C src/llvm status --porcelain
+EXIT 0
+$ git -C src/llvm rev-parse HEAD
+f999bd406c0a70fe8107aa992164fe6945c5d46a
+EXIT 0
+$ git -C temp/llvm-profgen-enh diff --exit-code
+EXIT 0
+$ git -C temp/llvm-profgen-enh branch --show-current
+afdo/profgen-enhance
+EXIT 0

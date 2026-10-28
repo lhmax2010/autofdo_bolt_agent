@@ -1,0 +1,558 @@
+Selected original lines; blank and standalone // comment lines omitted for size. Full captures: temp/profgen-prep/01_incremental_source.txt.full.
+Read-only source excerpts; original file line numbers. LLVM f999bd406c0a70fe8107aa992164fe6945c5d46a; Google AutoFDO f95d1a170dfe24ec5ce4117aa4b0f6d836841703.
+
+FILE: temp/pmuv3-prep/gbs-source/BUILD/gitbuildsys/cmd_build.py
+228:     if args.debug:
+229:         cmd_opts += ['--debug']
+230:     if args.incremental:
+231:         cmd_opts += ['--incremental']
+232:     if args.no_configure:
+233:         cmd_opts += ['--no-configure']
+234:     if args.keep_packs:
+622:     if args.clean:
+623:         cmd += ['--clean']
+625:     # check & prepare repos and build conf
+626:     if not args.noinit:
+627:         cmd += prepare_repos_and_build_conf(args, buildarch, profile)
+628:     else:
+629:         cmd += ['--noinit']
+816:     if args.commit and args.include_all:
+817:         raise Usage('--commit can\'t be specified together with '\
+818:                     '--include-all')
+819:     if args.noinit and (args.clean or args.clean_once):
+820:         raise Usage('--noinit can\'t be specified together with '\
+821:                     '--clean or --clean-once')
+823:     workdir = args.gitdir
+
+FILE: temp/pmuv3-prep/gbs-source/BUILD/tools/gbs
+262:     group = parser.add_argument_group('speed up building options')
+263:     group.add_argument('--incremental', action='store_true',
+264:                        help='build a package from the local git tree '
+265:                         'incremental. If the build fails, changes can be done '
+266:                         'directly to the source and build can continue from '
+267:                         'where it stopped')
+268:     group.add_argument('--no-configure', action='store_true',
+269:                         help='this option disables running configure scripts '
+270:                         'and auto generation of auto-tools to make incremental '
+271:                         'build possible. This requires the configure scripts '
+272:                         'in the spec to be referenced using the %%configure, '
+273:                         '%%reconfigure and %%autogen macros')
+274:     group.add_argument('--noinit', action='store_true',
+275:                         help='working in offline mode. Start building directly')
+276:     group.add_argument('--ccache', action="store_true",
+277:                         help='use ccache to speed up rebuilds')
+295:     group.add_argument('--packaging-dir',
+296:                         help='directory containing packaging files')
+297:     group.add_argument('--spec', type=basename_type,
+298:                         help='specify a spec file to use. It should be a file '
+299:                         'name that GBS will find it in packaging dir')
+300:     group.add_argument('--upstream-branch', help='upstream branch')
+
+FILE: temp/pmuv3-prep/gbs-source/BUILD/docs/GBS.rst
+912: '''''''''''''''''''
+914: Starting from gbs 0.10, the gbs build subcommand supports building incrementally, which can be enabled by specifying the '--incremental' option.
+916: This mode is designed for development and verification of single packages. It is not intended to replace the standard mode. Only one package can be built at a time using this mode.
+918: This mode will set up the build environment in multiple steps, finishing by mounting the local Git tree of a package in the chroot build environment.
+920: **Note**: Because gbs will mount your git tree to the build root, be very careful when you remove your build root. You need to make sure you've already umounted the source tree manually before you remove it.
+922: This has the following benefits:
+924: 1. The build environment uses the latest source code and changes to source do not trigger a new build environment (in the chroot).
+925: 2. The Git source tree becomes the source of the builds.  Any change made in the Git repository followed by invocation of the build script will build the changed sources
+926: 3. If the build fails for some reason, the build script will continue from the spot where it has failed, once the code has been changed to fix the problem causing the failure.
+928: This mode is, in many ways, similar to traditional code development, where changes are made to sources, followed by running `make` to test and compile the changes. However, it enables development using the build environment of the target, instead of the host OS.
+930: This method has some limitations, mostly related to packaging and how the sources are maintained.  Among others, it depends on how the RPM spec file is composed:
+932: 1. It does not support patches in the spec file. All source has to be maintained as part of the Git tree
+933: 2. It requires a clean packaging workflow.  Exotic workflows in the spec files might not work well, because this mode expects the following model:
+935:    a. Code preparation (%prep)
+936:    b. Code building (%build)
+937:    c. Code installation (%install)
+939: 3. Because we run the %build section every time, if the %build script has configuration scripts (auto-tools), binaries might be regenerated, causing a complete build every time.  To avoid this, you are encouraged to use the following macros, which can be overridden using the `--no-configure` option:
+941:    a. %configure: runs the configure script with pre-defined paths and options.
+942:    b. %reconfigure: regenerates the scripts and runs %configure
+943:    c. %autogen: runs the autogen script
+1001: From the buildlog, we can see that only log.c has been re-compiled. That's the incremental build behavior.
+1003: `--noinit` option can be used together with `--incremental` to make a build more quickly, like:
+1005: ::
+1007:   $ gbs build --incremental --noinit
+
+FILE: temp/pmuv3-prep/BUILD/depanneur
+319:     --incremental
+320:       Build a package from the local git tree directly.
+321:       This option does not produce packages now, it is very
+322:       helpful when debugging build failures and helps with
+323:       speeding up development.
+324:       This option options mounts the local tree in the build
+325:       environment and builds using sources in the git tree,
+326:       if the build fails, changes can be done directly to the
+327:       source and build can continue from where it stopped.
+329:     --no-configure
+330:       This option disables running configure scripts and auto-
+331:       generation of auto-tools to make incremental build possible
+332:       It requires the configure scripts in the spec to be refereneced
+333:       using the %configure, %reconfigre and %autogen macros.
+491:     close (CF);
+492: }
+494: if ($incremental == 1 && $style ne 'git') {
+495:     error("incremental build only support git style packages");
+496: }
+497: if ($style ne 'git' && $style ne 'obs' && $style ne 'tar') {
+498:     error("style should be 'git' or 'obs'");
+528: # don't check and re-initialize build roots, and run rpmbuild directly
+529: if ($noinit == 1) {
+530:     # check previours dist config from build root
+531:     my $scratch = "$scratch_dir.0";  # always use the first build root '0'
+532:     if (! -e "$scratch") {
+533:         error("build root:$scratch does not exist. Please build without --noinit first");
+534:     }
+536:     open(my $file, '<', "$scratch/.guessed_dist") ||
+537:         die "read dist name failed: $!";
+538:     $dist = readline($file);
+539:     close($file);
+540:     chomp $dist;
+541:     # get dist info e.g.
+542:     # /var/tmp/usr-gbs/tizen3.0_ivi.conf
+543:     $dist =~ s!^.*/(.*)\.conf!$1!;
+544:     $dist_configs= "$scratch";
+545:     if (! -e "$dist_configs/$dist.conf") {
+546:         error("build root broken caused by missing build conf. Please build without --noinit first");
+547:     }
+2048:     push @args, "sudo /usr/bin/build";
+2049:     push @args, "--uid $zuid:$zgid" if ($zuid != 0 && $zgid != 0);
+2050:     my $nprocessors = 2;
+2051:     if ($^O eq "linux") {
+2052:         $nprocessors = int(int(sysconf(SC_NPROCESSORS_ONLN))/int($MAX_THREADS));
+2053:         if ($nprocessors < 1) {
+2054:             $nprocessors = 1;
+2055:         }
+2056:     } else {
+2057:         warning("depanneur only support linux platform");
+2058:     }
+2059:     my $target_arch=`$build_dir/queryconfig target --dist '$dist' --configdir '$dist_configs' --archpath '$arch'`;
+2060:     chomp $target_arch;
+2061:     if ($target_arch eq "") {
+2062:         push @args, "--target $arch";
+2063:     } else {
+2064:         push @args, "--target $target_arch";
+2065:     }
+2066:     push @args, "--jobs " . $nprocessors * 2;
+2067:     push @args, "--no-init" if ($noinit == 1);
+2068:     push @args, "--keep-packs" if ($keep_packs == 1);
+2069:     push @args, "--use-higher-deps" if ($use_higher_deps == 1);
+2070:     push @args, "--cachedir '$cache_dir'";
+2071:     push @args, "--dist '$dist_configs'/$dist.conf";
+2072:     push @args, "--arch '$archpath'";
+2151:     push @args, "--debug" if ($disable_debuginfo != 1);
+2152:     push @args, "--root '$scratch'";
+2153:     if ($noinit == 1 && -e "'$scratch'/not-ready") {
+2154:         error("build root is not ready , --noinit is not allowed");
+2155:     }
+2156:     push @args, "--clean" if (-e "'$scratch'/not-ready");
+2157:     push @args, $redirect;
+2158:     for my $define (@defines) {
+2159:         push @args, "--define '$define'";
+2160:     }
+2162:     my $cmd = "";
+2163:     my $builddir;
+2164:     if ($not_ex) {
+2165:         my $base_source = get_source_base_name($to_build{$name}->{source});
+2166:         $builddir = "$scratch/home/abuild/rpmbuild/BUILD/$base_source";
+2167:     } else {
+2168:         $builddir = "$scratch/home/abuild/rpmbuild/BUILD/$name-$version";
+2169:     }
+2170:     my $source_tar = "";
+2171:     if (exists $to_build{$name}->{source}) {
+2172:         $source_tar = "$to_build{$name}->{project_base_path}/$packaging_dir/$to_build{$name}->{source}";
+2173:     }
+2174:     if ($incremental == 1) {
+2175:         info("doing incremental build");
+2176:         @args_inc = @args;
+2177:         my $buildcmd = "";
+2178:         if ( ! -d "$builddir" || grep($_ eq "--clean", @args_inc)){
+2179:             debug("Build directory does not exist");
+2180:             push @args_inc, "--no-build";
+2181:             push @args_inc, "--clean" if (! grep($_ eq "--clean", @args_inc));
+2182:             $cmd = join(" ", @args_inc);
+2183:             return -1 if (my_system($cmd) != 0);
+2184:         } else {
+2185:             debug("build directory exists");
+2186:         }
+2188:         # More incremental options
+2189:         if ($run_configure == 1 ) {
+2190:             push @args, "--define '%configure echo'";
+2191:             push @args, "--define '%reconfigure echo'";
+2192:             push @args, "--define '%autogen echo'";
+2193:         }
+2194:         push @args, "--root '$scratch'";
+2195:         push @args, "--no-topdir-cleanup";
+2196:         push @args, "--no-init";
+2197:         @args = grep { $_ ne "--clean"} @args;
+2198:         push @args, "--short-circuit --stage=\"-bs\"";
+2200:         my $project_base_path = $to_build{$name}->{project_base_path};
+2201:         if (! -e "$builddir") {
+2202:             my_system("sudo /bin/mkdir -p '$builddir'");
+2203:         }
+2204:         my $mount = "sudo /bin/mount -o bind '$project_base_path' '$builddir'";
+2205:         my_system($mount);
+2206:         my $tmp_dir = abs_path(tempdir(CLEANUP=>1));
+2207:         my_system("tar -zcf '$source_tar' '$tmp_dir'") if ("$source_tar" ne "");
+2208:     }
+2210:     if ($not_ex) {
+2211:         if ( -d "$builddir") {
+2212:             my_system("rm -rf '$builddir'");
+2213:         }
+2214:         my $otherdir = "$scratch/home/abuild/rpmbuild/OTHER/";
+2215:         if ( ! -d "$otherdir") {
+2216:             my_system("sudo /bin/mkdir -p '$otherdir'");
+2217:         }
+2218:         my $project_base_path = $to_build{$name}->{project_base_path};
+2219:         my_system("sudo /bin/mkdir -p '$builddir'");
+2220:         my $mount = "sudo /bin/mount -o bind '$project_base_path' '$builddir'";
+2221:         my_system($mount);
+2222:         my $packaing_files = dirname($to_build{$name}->{filename});
+2223:         my_system("cp -a $packaing_files/* $project_base_path/");
+2224:         my $tmp_dir = abs_path(tempdir(CLEANUP=>1));
+2225:         my_system("tar -zcf $source_tar $tmp_dir") if ($source_tar ne "");
+2226:         push @args, "--short-circuit --stage=\"-bs\"";
+2227:         push @args, "--no-topdir-cleanup";
+2228:     } else {
+2229:         push @args, "--stage=\"-bb\"" if (($skip_srcrpm == 1) || defined($to_build{$name}->{skipsrcrpm}));
+2230:     }
+2232:     $cmd = join(" ", @args);
+2233:     #debug($cmd);
+2234:     my $ret = my_system ($cmd);
+2236:     if ($incremental == 1) {
+2237:         #FIXME: more safe way needed to remove this fake source tar
+2238:         my_system("rm -f '$source_tar'") if ($source_tar ne "");
+2239:         safe_umount($builddir) if ($incremental == 1);
+2240:     }
+2241:     if ($not_ex) {
+2242:         my_system("rm -f '$source_tar'") if ($source_tar ne "");
+2243:         safe_umount($builddir)
+2244:     }
+2246:     # Save build config to build root for --noinit use
+2247:     my_system("sudo /bin/cp '$dist_configs/$dist.conf' '$scratch'/$dist.conf") if ($noinit == 0);
+2250:         # Set the real path of RPMS and SRPMS
+2251:         my $rpmdirpath;
+2252:         my $srcrpmdirpath;
+2253:         # Set the real path of RPMS and SRPMS
+2254:         if ($vmtype eq "kvm") {
+2255:             $rpmdirpath = "/.build.packages/RPMS";
+2256:             $srcrpmdirpath = "/.build.packages/SRPMS";
+2257:         } else {
+2258:             $rpmdirpath = `sudo chroot '$scratch' su -c "rpm --eval %{_rpmdir} 2>/dev/null" - abuild`;
+2259:             $srcrpmdirpath = `sudo chroot '$scratch' su -c "rpm --eval %{_srcrpmdir} 2>/dev/null" - abuild`;
+2260:         }
+2261:         chomp($rpmdirpath);
+2262:         chomp($srcrpmdirpath);
+2263:         mkdir_p "$success_logs_path/$name-$version-$release";
+2264:         if (-e "$logpath") {
+2265:             my_system ("sudo /bin/mv '$logpath' '$success_logs_path'/$name-$version-$release/log.txt");
+2276: #            if (my @srpms = bsd_glob "$scratch/$srcrpmdirpath/*.rpm") {
+2277:             if (my @srpms = (`find "$scratch/$srcrpmdirpath" -type f -name "*.rpm" 2>/dev/null`)) {
+2278:                 #remove old srpms in local repo
+2279:                 #copy the new ones to local repo
+2280:                 update_repo_with_rpms(\%srpmpaths, @srpms);
+2281:                 if ($skip_srcrpm == 0){
+2282:                    foreach (@srpms) {
+2283:                        $_ =~ s/\n//;
+2284:                        my_system ("sudo ln '$_' '$srpm_repo_path'");
+2285:                    }
+2286:                 }
+2287:             } elsif ($skip_srcrpm == 1){
+2288:                         my_system("/bin/rm -rf '$srpm_repo_path'/*.rpm");
+2289:             }
+2290: #            if (my @rpms = bsd_glob "$scratch/$rpmdirpath/*/*.rpm") {
+2291:             if (my @rpms = (`find "$scratch/$rpmdirpath" -type f -name "*.rpm" 2>/dev/null`)) {
+2292:                 #remove old rpms in local repo
+2293:                 #remove old rpms in local repo
+2294:                 #copy the new ones to local repo
+2295:                 update_repo_with_rpms (\%rpmpaths, @rpms);
+2296:                 foreach (@rpms) {
+2297:                     $_ =~ s/\n//;
+2298:                     my_system ("sudo ln '$_' '$rpm_repo_path'");
+2299:                 }
+2300:             }
+2301:         }
+2302:         info("finished building $name");
+2303:         $packages_built = 1;
+2304:         return 0;
+2305:     } else {
+2940:     if (@pre_packs == 0) {
+2941:         error("No source package found at $package_path");
+2942:     }
+2943:     if ($incremental == 0) {
+2944:         info("prepare sources...");
+2945:         read_not_export($not_export_cf);
+3010:     } else {
+3011:         foreach my $p (@pre_packs) {
+3012:             my $specs = $p->{"filename"};
+3013:             my $new_p;
+3014:             $new_p->{"project_base_path"} = $p->{"project_base_path"};
+3015:             $new_p->{"packaging_dir"} = $p->{"packaging_dir"};
+3016:             $new_p->{"upstream_branch"} = $p->{"upstream_branch"};
+3017:             $new_p->{"upstream_tag"} = $p->{"upstream_tag"};
+3018:             my @spec_list = split(",", $specs);
+3019:             foreach my $spec (@spec_list) {
+3020:                 $new_p->{"filename"} = $spec;
+3021:                 push @packs, $new_p;
+3022:             }
+3023:         }
+3024:     }
+3140: if ($incremental == 1 && scalar(keys %to_build) > 1) {
+3141:     error("incremental build only support building one package");
+3142: }
+3144: if ($noinit == 1 && scalar(keys %to_build) > 1) {
+3145:     error("--noinit build only support building one package");
+3146: }
+3207: # only one package need to be built, do it directly
+3208: if ($noinit == 1 || $incremental == 1) {
+3209:     my $ret = 0;
+3210:     for my $pkg (keys %to_build) {
+3211:         $ret = worker_thread($pkg, 0, 1);
+3212:         last;
+3213:     }
+3214:     update_repo();
+3215:     build_report();
+3216:     exit $ret;
+3217: }
+
+FILE: temp/profgen-prep/build-source/build-20160629/build-recipe-spec
+148:     # su involves a shell which would require even more
+149:     # complicated quoting to bypass than this
+150: 	if test "$SHORT_CIRCUIT" = false ; then
+151: 	    rpmbopts[${#rpmbopts[@]}]="$BUILD_RPM_BUILD_STAGE"
+152: 	    toshellscript $rpmbuild \
+153: 	            "${definesnstuff[@]}" \
+154: 	            "${rpmbopts[@]}" \
+155: 	            "$TOPDIR/SOURCES/$RECIPEFILE" \
+156: 	            > $BUILD_ROOT/.build.command
+157: 	else
+158: 	    rpmbopts[${#rpmbopts[@]}]='--short-circuit'
+159: 	    buildopts="-bc -bi -bb -bs"
+160: 	    cmds=""
+161: 	    echo "#!/bin/sh -x" >$BUILD_ROOT/.build.command
+162: 	    echo "set -e" >>$BUILD_ROOT/.build.command
+163: 	    for opt in $buildopts
+164: 	    do
+165: 	        shellquote $rpmbuild  \
+166: 	                "${definesnstuff[@]}" \
+167: 	                "${rpmbopts[@]}" $opt \
+168: 	                "$TOPDIR/SOURCES/$RECIPEFILE" \
+169: 	                >> $BUILD_ROOT/.build.command
+170: 	        echo >>$BUILD_ROOT/.build.command
+171: 	        [ "$opt" == "$BUILD_RPM_BUILD_STAGE" ] && break
+172: 	    done
+173: 	fi
+175:     chmod 755 $BUILD_ROOT/.build.command
+176:     check_exit
+177:     if test -n "$RUN_SHELL"; then
+178: 	chroot $BUILD_ROOT su -
+179:     else
+180: 	chroot $BUILD_ROOT su -s $CHROOT_SHELL -c /.build.command - $BUILD_USER < /dev/null && BUILD_SUCCEEDED=true
+
+FILE: src/llvm/packaging/llvm.spec
+1: %define keepstatic 1
+3: # MLGO AOT support for LLVM MLGO (Ahead-of-Time compilation)
+4: # TODO: switch back to a project_config-controlled macro after MLGO is enabled
+5: # for all required arches.
+6: # %%bcond_with mlgo
+7: %ifarch armv7l aarch64 x86_64
+8: %bcond_without mlgo
+9: %endif
+11: %if %{defined _toolchain}
+12: %define _toolchain_override clang
+13: %define llvm_release_build 0
+14: %else
+15: %define llvm_release_build 1
+16: %endif
+32: Name:      llvm
+33: Summary:   The LLVM Project is a collection of modular and reusable compiler and toolchain technologies
+34: Version:   22.1.8
+35: Release:   1
+36: Group:     Development/Toolchain
+37: License:   NCSA
+38: Source0:   %{name}-%{version}.tar.gz
+39: Source1001: llvm.manifest
+41: # Bundled MLGO AOT assets for the inliner and regalloc models.
+42: # These override build-time AOT compilation, avoiding the need for TensorFlow
+43: # Python in GBS.
+44: Source1002: mlgo_arm_model.tar.gz
+45: Source1003: mlgo_aarch_model.tar.gz
+46: Source1004: mlgo_x86_model.tar.gz
+48: %{!?mlgo_build_jobs: %define mlgo_build_jobs 6}
+49: %{!?mlgo_verify_configure_only: %define mlgo_verify_configure_only 0}
+51: BuildRequires: cmake
+52: BuildRequires: python3
+53: BuildRequires: python3-devel
+54: BuildRequires: patchelf
+55: BuildRequires: binutils-devel
+56: BuildRequires: libxml2-devel
+57: %if 0%{llvm_release_build}
+58: BuildRequires: sed
+59: %endif
+60: BuildRequires: ninja
+155: %prep
+156: %setup -q
+157: %if %{with mlgo}
+158: mkdir -p mlgo_verify_assets
+159: %ifarch armv7l
+160: tar -C mlgo_verify_assets -xzf %{SOURCE1002}
+161: %endif
+162: %ifarch aarch64
+163: tar -C mlgo_verify_assets -xzf %{SOURCE1003}
+164: %endif
+165: %ifarch x86_64
+166: tar -C mlgo_verify_assets -xzf %{SOURCE1004}
+167: %endif
+168: %endif
+170: %build
+171: %if 0%{llvm_release_build}
+172: # Not to build debug info
+173: RELCFLAGS=$(echo $CFLAGS | sed -e 's*\(^\|[[:space:]]\)-g\([[:digit:]]\+\|gdb\|dwarf-[[:digit:]]\)\?* *g')
+174: export CFLAGS=${RELCFLAGS}
+175: RELCXXFLAGS=$(echo $CXXFLAGS | sed -e 's*\(^\|[[:space:]]\)-g\([[:digit:]]\+\|gdb\|dwarf-[[:digit:]]\)\?* *g')
+176: export CXXFLAGS=${RELCXXFLAGS}
+177: RELFFLAGS=$(echo $FFLAGS | sed -e 's*\(^\|[[:space:]]\)-g\([[:digit:]]\+\|gdb\)|dwarf-[[:digit:]]\\?* *g')
+178: export FFLAGS=${RELFFLAGS}
+179: %endif
+181: cp %{SOURCE1001} .
+182: %{?asan:%gcc_unforce_options}
+184: %ifarch armv7l
+185: export QEMU_RESERVED_VA=0x100000000
+186: %endif
+188: # Set up MLGO AOT model paths from bundled verify assets
+189: %if %{with mlgo}
+190: MLGO_AOT_DIR="$PWD/mlgo_verify_assets"
+191: MLGO_BUILD_DIR="$PWD/build"
+192: MLGO_RUNTIME_OBJECTS="${MLGO_AOT_DIR}/xla_runtime_objects/xla_compiled_cpu_function.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/cpu_function_runtime.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/custom_call_status.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/executable_run_options.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/runtime_single_threaded_matmul_f32.cc.o"
+193: MLGO_REQUIRED_RUNTIME_OBJECTS="xla_compiled_cpu_function.cc.o cpu_function_runtime.cc.o custom_call_status.cc.o executable_run_options.cc.o runtime_single_threaded_matmul_f32.cc.o"
+194: %endif
+196: mkdir -p build
+197: cd build
+198: cmake \
+199:     -G Ninja \
+200:     -DTIZEN=1 \
+201:     -DCMAKE_C_COMPILER=%__cc \
+202:     -DCMAKE_CXX_COMPILER=%__cxx \
+203:     -DLLVM_HOST_TRIPLE=%{_host} \
+204:     -DLLVM_DEFAULT_TARGET_TRIPLE=%{_host} \
+205:     -DLLVM_TARGET_TRIPLE_ENV=%{_host} \
+206:     -DCMAKE_ASM_FLAGS="$CFLAGS" \
+207:     -DCMAKE_C_FLAGS="$CFLAGS" \
+208:     -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+209: %if %{defined _toolchain}
+210:     -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+211:     -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+212:     -DLLVM_USE_LINKER=lld \
+213: %endif
+214:     -DLLVM_ENABLE_ASSERTIONS=No \
+215:     -DLLVM_ENABLE_RTTI=ON \
+216: %ifarch x86_64 i686
+217:     -DCMAKE_BUILD_TYPE=Release \
+218:     -DLLVM_TARGETS_TO_BUILD='X86;ARM;AArch64;BPF' \
+219: %endif
+220: %ifarch armv7l
+221:     -DCMAKE_BUILD_TYPE=MinSizeRel \
+222:     -DLLVM_TARGETS_TO_BUILD='ARM;BPF' \
+223:     -DLLVM_TARGET_ARCH="ARM" \
+224: %endif
+225: %ifarch aarch64
+226:     -DCMAKE_BUILD_TYPE=Release \
+227:     -DLLVM_TARGETS_TO_BUILD='AArch64;BPF' \
+228:     -DLLVM_TARGET_ARCH="AArch64" \
+229: %endif
+230: %ifarch riscv64
+231:     -DCMAKE_BUILD_TYPE=Release \
+232:     -DLLVM_TARGETS_TO_BUILD='RISCV;BPF' \
+233: %endif
+234:     -DCLANG_ENABLE_ARCMT=OFF \
+235:     -DLLVM_BUILD_LLVM_DYLIB=ON \
+236:     -DCLANG_BUILD_CLANG_DYLIB=ON \
+237: %if %{defined _toolchain}
+238:     -DLLVM_LINK_LLVM_DYLIB=ON \
+239:     -DCLANG_LINK_CLANG_DYLIB=ON \
+240: %endif
+241:     -DLLVM_ENABLE_PROJECTS="clang;lldb;clang-tools-extra;lld;compiler-rt;openmp" \
+242:     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
+243:     -DLLVM_BUILD_EXAMPLES=OFF \
+244:     -DLLVM_INCLUDE_EXAMPLES=OFF \
+245:     -DLLVM_BUILD_TESTS=OFF \
+246:     -DLLVM_INCLUDE_TESTS=OFF \
+247:     -DLLVM_ENABLE_DOXYGEN=OFF \
+248:     -DLLVM_BUILD_DOCS=OFF \
+249:     -DLLVM_INCLUDE_DOCS=OFF \
+250:     -DLLVM_OPTIMIZED_TABLEGEN=ON \
+251:     -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+252:     -DLLVM_LIBDIR_SUFFIX=`echo %{_lib} | sed s/lib//g` \
+253:     -DCLANG_RESOURCE_DIR="../%{_lib}/clang/%{llvm_version}" \
+254:     -DLLVM_BINUTILS_INCDIR=/usr/include \
+255:     -DLLVM_PARALLEL_COMPILE_JOBS=6 \
+256:     -DLLVM_PARALLEL_LINK_JOBS=2 \
+257: %if %{with mlgo}
+258: %ifarch armv7l aarch64 x86_64
+259:     -DTENSORFLOW_AOT_PATH="${MLGO_AOT_DIR}/mlgo_sysroot" \
+260:     -DLLVM_MLGO_EXPORT_TF_XLA_RUNTIME=OFF \
+261:     -DLLVM_MLGO_EMBED_TF_XLA_RUNTIME_OBJECTS="${MLGO_RUNTIME_OBJECTS}" \
+262:     -DLLVM_OVERRIDE_MODEL_HEADER_INLINERSIZEMODEL="${MLGO_AOT_DIR}/InlinerSizeModel.h" \
+263:     -DLLVM_OVERRIDE_MODEL_OBJECT_INLINERSIZEMODEL="${MLGO_AOT_DIR}/InlinerSizeModel.o" \
+264:     -DLLVM_OVERRIDE_MODEL_HEADER_REGALLOCEVICTMODEL="${MLGO_AOT_DIR}/RegAllocEvictModel.h" \
+265:     -DLLVM_OVERRIDE_MODEL_OBJECT_REGALLOCEVICTMODEL="${MLGO_AOT_DIR}/RegAllocEvictModel.o" \
+266: %else
+267:     -DLLVM_INLINER_MODEL_PATH=none \
+268:     -DLLVM_RAEVICT_MODEL_PATH=none \
+269: %endif
+270: %else
+271:     -DLLVM_INLINER_MODEL_PATH=none \
+272:     -DLLVM_RAEVICT_MODEL_PATH=none \
+273: %endif
+274:     ../llvm
+276: %if 0%{mlgo_verify_configure_only}
+277:   # ---- configure-only probe: guard against §0 traps; check sentinels, GBS exit code non-0 is expected ----
+278:   # Note: %%build does not guarantee set -e, so each assertion explicitly uses '|| { ...; exit 1; }'
+279:   # Assertion 0: MLGO_BUILD_DIR is correct (fail immediately with clear error if wrong)
+280:   test -f CMakeCache.txt || \
+281:     { echo "FATAL: MLGO_BUILD_DIR wrong (CMakeCache.txt not found in $(pwd))"; exit 1; }
+282: %if %{with mlgo}
+283:   # Assertion 1: override actually took effect (COPYONLY artifacts exist from configure stage)
+329:   cmake --build . --target tf_xla_runtime || \
+330:     { echo "FATAL: tf_xla_runtime build failed"; exit 1; }
+331:   MLGO_PROBE_ROOT="$PWD/mlgo_probe_root"
+332:   rm -rf "${MLGO_PROBE_ROOT}"
+333:   mkdir -p "${MLGO_PROBE_ROOT}"
+334:   DESTDIR="${MLGO_PROBE_ROOT}" cmake --install . \
+335:     --prefix /usr --component tf_xla_runtime --verbose
+336:   ! find "${MLGO_PROBE_ROOT}" -name libtf_xla_runtime.a | grep -q . || \
+337:     { echo "FATAL: tf_xla_runtime archive should not be installed"; exit 1; }
+338: %endif
+339:   echo MLGO_VERIFY_CONFIGURE_PASS
+340:   exit 86
+341: %endif
+343: # Full build using ninja (already in build/ directory after cd build)
+344: ninja -j %{mlgo_build_jobs}
+346: %install
+347: cd build
+348: cmake -DCMAKE_INSTALL_PREFIX=%{buildroot}/usr -P cmake_install.cmake
+376: rm -rf %{buildroot}%{_libdir}/debug/*
+377: rm -rf %{buildroot}/usr/lib/libear/*
+378: rm -rf %{buildroot}/usr/lib/libscanbuild/*
+440: %{_prefix}/bin/llvm-remarkutil
+441: %{_prefix}/bin/llvm-pdbutil
+442: %{_prefix}/bin/llvm-profdata
+443: %{_prefix}/bin/llvm-profgen
+444: %{_prefix}/bin/llvm-ranlib
+
+FILE: src/llvm/llvm/cmake/modules/TensorFlowCompile.cmake
+74:   set(prefix ${CMAKE_CURRENT_BINARY_DIR}/${fname})
+75:   set(obj_file ${prefix}.o)
+76:   set(hdr_file ${prefix}.h)
+77:   string(TOUPPER ${fname} fname_allcaps)
+78:   set(override_header ${LLVM_OVERRIDE_MODEL_HEADER_${fname_allcaps}})
+79:   set(override_object ${LLVM_OVERRIDE_MODEL_OBJECT_${fname_allcaps}})
+80:   # If the user specified overrides, that indicates intent to use AOT and we
+81:   # don't care what the model path is
+82:   if (EXISTS "${override_header}" AND EXISTS "${override_object}")
+83:     configure_file(${override_header} ${hdr_file} COPYONLY)
+84:     configure_file(${override_object} ${obj_file} COPYONLY)
+85:     message(STATUS "Using provided header " ${hdr_file} " and object " ${obj_file} "
+86:       files for model " ${fname})
+87:     set(GENERATED_OBJS ${GENERATED_OBJS} ${obj_file})
+88:     set(GENERATED_HEADERS ${GENERATED_HEADERS} ${hdr_file})

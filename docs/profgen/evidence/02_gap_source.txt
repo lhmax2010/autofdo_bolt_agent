@@ -1,0 +1,1649 @@
+Selected original lines; blank and standalone // comment lines omitted for size. Full captures: temp/profgen-prep/02_gap_source.txt.full.
+Read-only source excerpts; original file line numbers. LLVM f999bd406c0a70fe8107aa992164fe6945c5d46a; Google AutoFDO f95d1a170dfe24ec5ce4117aa4b0f6d836841703.
+
+FILE: temp/autofdo/create_llvm_prof.cc
+30: ABSL_FLAG(std::string, profile, "perf.data",
+31:           "Input profile file name. When --format=propeller, this accepts "
+32:           "multiple profile file names concatnated by ';' and if the file name "
+33:           "has prefix \"@\", then the profile is treated as a list file whose "
+34:           "lines are interpreted as input profile paths.");
+35: ABSL_FLAG(std::string, profiler, "perf",
+36:           "Input profile type. Possible values: perf (LBR), text, prefetch, or "
+37:           "perf_spe.");
+38: ABSL_FLAG(std::string, prefetch_hints, "", "Input cache prefetch hints");
+39: ABSL_FLAG(std::string, out, "", "Output profile file name");
+40: ABSL_FLAG(std::string, gcov, "",
+41:           "Output profile file name. Alias for --out; used for "
+42:           "flag compatibility with create_gcov");
+43: ABSL_FLAG(std::string, binary, "a.out", "Binary file name");
+48: ABSL_FLAG(std::string, format, "text",
+49:           "LLVM profile format to emit. Possible values are 'text', "
+50:           "'binary', 'extbinary' or 'propeller'. The binary format is a "
+51:           "more compact representation, but the text format is human "
+52:           "readable and more likely to be compatible with older versions "
+53:           "of LLVM. extbinary format is also a binary format but more "
+54:           "easily to be extended. propeller format is used exclusively by "
+55:           "post linker optimizer.");
+56: ABSL_FLAG(std::string, propeller_symorder, "",
+90: ABSL_FLAG(bool, prof_sym_list, false,
+91:           "Generate profile symbol list from the binary. The symbol list will "
+92:           "be kept and saved in the profile. The option can only be enabled "
+93:           "when --format=extbinary.");
+94: ABSL_FLAG(bool, http, false,
+95:           "Enable http to server statusz requests.");
+102: ABSL_FLAG(bool, ignore_build_id, false,
+103:           "Ignore build id, use file name to match data in perfdata file.");
+130: static devtools_crosstool_autofdo::ProfileType GetProfileTypeFromFlag() {
+131:   if (absl::GetFlag(FLAGS_profiler) == "perf")
+132:     return devtools_crosstool_autofdo::ProfileType::PERF_LBR;
+133:   if (absl::GetFlag(FLAGS_profiler) == "perf_spe")
+134:     return devtools_crosstool_autofdo::ProfileType::PERF_SPE;
+136:   return devtools_crosstool_autofdo::ProfileType::PROFILE_TYPE_UNSPECIFIED;
+137: }
+139: devtools_crosstool_autofdo::PropellerOptions CreatePropellerOptionsFromFlags() {
+140:   devtools_crosstool_autofdo::PropellerOptionsBuilder option_builder;
+141:   std::string pstr = absl::GetFlag(FLAGS_profile);
+142:   if (!pstr.empty() && pstr[0] == '@') {
+143:     std::ifstream fin(pstr.substr(1));
+144:     std::string pf;
+145:     while (std::getline(fin, pf)) {
+146:       if (!pf.empty() && pf[0] != '#') {
+147:         option_builder.AddInputProfiles(
+148:             devtools_crosstool_autofdo::InputProfileBuilder()
+149:                 .SetName(pf)
+150:                 .SetType(GetProfileTypeFromFlag()));
+151:       }
+152:     }
+153:   } else {
+154:     std::vector<std::string> perf_files = absl::StrSplit(pstr, ';');
+155:     for (const std::string &pf : perf_files)
+156:       if (!pf.empty())
+213:   if (absl::GetFlag(FLAGS_out).empty()) {
+214:     LOG(ERROR) << "Need a name for the generated LLVM profile file.";
+215:     LOG(ERROR) << "Use --gcov or --out to specify an output file.";
+216:     return 1;
+217:   }
+219:   if (absl::GetFlag(FLAGS_ignore_build_id) &&
+220:       absl::GetFlag(FLAGS_format) != "propeller") {
+221:     LOG(ERROR)
+222:         << "\"--ignore_build_id\" is only valid when \"--format=propeller\".";
+223:     return 1;
+224:   }
+228:   if (absl::GetFlag(FLAGS_format) == "propeller") {
+229:     if (absl::GetFlag(FLAGS_propeller_split_only) &&
+230:         absl::GetFlag(FLAGS_propeller_layout_only)) {
+231:       LOG(ERROR) << "Only one of --propeller_layout_only and "
+232:                     "--propeller_split_only can be used.";
+233:       return 1;
+234:     }
+235:     absl::Status status = devtools_crosstool_autofdo::GeneratePropellerProfiles(
+236:         CreatePropellerOptionsFromFlags());
+237:     if (!status.ok()) {
+238:       LOG(ERROR) << status;
+239:       return 1;
+240:     }
+241:     return 0;
+242:   }
+246:   if (absl::StrContains(absl::GetFlag(FLAGS_profile), ";")) {
+247:     LOG(ERROR) << "Multiple profiles are only supported under "
+248:                   "--format=propeller. (Please check ';' in the filename)";
+249:     return 1;
+250:   }
+252:   if (!absl::GetFlag(FLAGS_profile).empty() &&
+253:       absl::GetFlag(FLAGS_profile)[0] == '@') {
+254:     LOG(ERROR) << "Profile list file is only supported under "
+255:                   "--format=propeller. (Please check '@' in the filename)";
+260:       nullptr);
+261:   if (absl::GetFlag(FLAGS_format) == "text") {
+262:     writer = std::make_unique<devtools_crosstool_autofdo::LLVMProfileWriter>(
+263:         llvm::sampleprof::SPF_Text);
+264:   } else if (absl::GetFlag(FLAGS_format) == "binary") {
+265:     writer = std::make_unique<devtools_crosstool_autofdo::LLVMProfileWriter>(
+266:         llvm::sampleprof::SPF_Binary);
+267:   } else if (absl::GetFlag(FLAGS_format) == "extbinary") {
+268:     writer = std::make_unique<devtools_crosstool_autofdo::LLVMProfileWriter>(
+269:         llvm::sampleprof::SPF_Ext_Binary);
+270:   } else {
+271:     LOG(ERROR)
+272:         << "--format=" << absl::GetFlag(FLAGS_format) << " is not supported. "
+273:         << "Use one of 'text', 'binary', 'propeller' or 'extbinary' format";
+274:     return 1;
+275:   }
+277:   if (absl::GetFlag(FLAGS_prof_sym_list) &&
+278:       absl::GetFlag(FLAGS_format) != "extbinary") {
+279:     LOG(ERROR) << "--prof_sym_list is enabled, --format must be extbinary";
+280:     return 1;
+281:   }
+283:   devtools_crosstool_autofdo::ProfileCreator creator(
+284:       absl::GetFlag(FLAGS_binary));
+285:   absl::SetFlag(&FLAGS_use_discriminator_encoding, true);
+286:   if (creator.CreateProfile(absl::GetFlag(FLAGS_profile),
+287:                             absl::GetFlag(FLAGS_profiler), writer.get(),
+288:                             absl::GetFlag(FLAGS_out),
+289:                             absl::GetFlag(FLAGS_prof_sym_list))) {
+290:     return 0;
+
+FILE: temp/autofdo/profile.cc
+31: ABSL_FLAG(bool, use_lbr, true,
+32:             "Whether to use lbr profile.");
+33: ABSL_FLAG(bool, llc_misses, false, "The profile represents llc misses.");
+53: void Profile::AggregatePerFunctionProfile(bool check_lbr_entry) {
+54:   const AddressCountMap *count_map = &sample_reader_->address_count_map();
+55:   for (const auto &[addr, count] : *count_map) {
+56:     uint64_t vaddr = symbol_map_->get_static_vaddr(addr);
+57:     ProfileMaps *maps = GetProfileMaps(vaddr);
+58:     if (maps != nullptr) {
+59:       maps->address_count_map[vaddr] += count;
+60:     }
+155:   InstructionMap inst_map(addr2line_, symbol_map_);
+157:   inst_map.BuildPerFunctionInstructionMap(func_name, maps.start_addr,
+158:                                           maps.end_addr);
+161:   symbol_map_->AddSymbolTimestamp (func_name, maps.timestamp);
+163:   AddressCountMap map;
+164:   const AddressCountMap *map_ptr;
+165:   if (absl::GetFlag(FLAGS_use_lbr)) {
+166:     if (maps.range_count_map.empty()) {
+167:       LOG(WARNING) << "use_lbr was enabled but range_count_map was empty!";
+168:       return;
+169:     }
+170:     for (const auto &[range, count] : maps.range_count_map) {
+171:       for (uint64_t addr = range.first;
+172:            inst_map.lookup(addr) && addr <= range.second; ++addr) {
+173:         map[addr] += count;
+174:       }
+175:     }
+176:     map_ptr = &map;
+177:   } else {
+178:     map_ptr = &maps.address_count_map;
+179:   }
+181:   for (const auto &[address, count] : *map_ptr) {
+182:     const InstructionMap::InstInfo *info = inst_map.lookup(address);
+183:     if (info == nullptr) {
+184:       continue;
+185:     }
+186:     if (!info->source_stack.empty()) {
+189:       symbol_map_->AddSourceCount(func_name, info->source_stack, count, 0,
+190:                                   info->source_stack[0].DuplicationFactor(),
+191:                                   SymbolMap::PERFDATA);
+192:     }
+193:   }
+195:   for (const auto &[branch, count] : maps.branch_count_map) {
+196:     const InstructionMap::InstInfo *info = inst_map.lookup(branch.first);
+197:     if (info == nullptr) {
+198:       continue;
+199:     }
+200:     const std::string *callee =
+201:         symbol_map_->GetSymbolNameByStartAddr(branch.second);
+202:     if (!callee) {
+203:       continue;
+204:     }
+205:     if (symbol_map_->map().count(*callee)) {
+206:       symbol_map_->AddSymbolEntryCount(*callee, count);
+207:       symbol_map_->AddIndirectCallTarget(func_name, info->source_stack, *callee,
+208:                                          count, SymbolMap::PERFDATA);
+209:     }
+217: void Profile::ComputeProfile(bool check_lbr_entry) {
+218:   symbol_map_->CalculateThresholdFromTotalCount(
+219:       sample_reader_->GetTotalCount());
+220:   AggregatePerFunctionProfile(check_lbr_entry);
+246:     absl::flat_hash_map<std::string, uint64_t> symbol_counts;
+247:     for (const auto &[name, profile] : symbol_profile_maps_) {
+248:       symbol_counts[symbol_map_->GetOriginalName(name)] +=
+249:           profile->GetAggregatedCount();
+250:     }
+256:     for (const auto &[name, ignored] : symbol_profile_maps_) {
+257:       const uint64_t count =
+258:           symbol_counts.at(symbol_map_->GetOriginalName(name));
+259:       if (symbol_map_->ShouldEmit(count)) {
+260:         symbol_map_->AddSymbol(name);
+261:       }
+262:     }
+264:     for (const auto &[name, profile] : symbol_profile_maps_) {
+265:       const uint64_t count =
+266:           symbol_counts.at(symbol_map_->GetOriginalName(name));
+267:       if (symbol_map_->ShouldEmit(count)) {
+268:         ProcessPerFunctionProfile(name, *profile);
+269:       }
+270:     }
+271:     symbol_map_->ElideSuffixesAndMerge();
+272:     symbol_map_->ComputeWorkingSets();
+273:   }
+
+FILE: temp/autofdo/sample_reader.cc
+44: bool PerfDataSampleReader::MatchBinary(
+45:     const quipper::ParsedEvent::DSOAndOffset &dso_and_offset) {
+48:   auto match_cache_it = match_cache_.find(dso_and_offset.dso_info_);
+49:   if (match_cache_it != match_cache_.end()) {
+50:     return match_cache_it->second;
+51:   }
+52:   bool is_found = false;
+53:   if (focus_bins_.empty()) {
+54:     is_found = std::regex_search(dso_and_offset.dso_name().c_str(), re_);
+55:   } else {
+56:     std::string name = dso_and_offset.dso_name();
+57:     if (!name.empty()) {
+58:       for (const auto &binary_path : focus_bins_) {
+59:         if (name == binary_path) {
+60:           is_found = true;
+61:           break;
+62:         }
+63:       }
+64:     }
+65:   }
+66:   match_cache_[dso_and_offset.dso_info_] = is_found;
+67:   return is_found;
+68: }
+71: void PerfDataSampleReader::GetFileNameFromBuildID(
+72:     const quipper::PerfReader *reader) {
+73:   std::map<std::string, std::string> name_buildid_map;
+74:   reader->GetFilenamesToBuildIDs(&name_buildid_map);
+76:   focus_bins_.clear();
+77:   for (const auto &name_buildid : name_buildid_map) {
+78:     if (name_buildid.second == build_id_) {
+86:       const size_t vmlinux_len = std::strlen("vmlinux");
+87:       if (name_buildid.first == "[kernel.kallsyms]" ||
+88:           (name_buildid.first.size() >= vmlinux_len &&
+89:            !name_buildid.first.compare(name_buildid.first.size() - vmlinux_len,
+90:                                        vmlinux_len, "vmlinux"))) {
+91:         focus_bins_.insert("[kernel.kallsyms]");
+92:         focus_bins_.insert("[kernel.kallsyms]_stext");
+93:         focus_bins_.insert("[kernel.kallsyms]_text");
+94:         is_kernel_ = true;
+95:       } else {
+96:         focus_bins_.insert(name_buildid.first);
+97:       }
+98:     }
+99:   }
+100:   if (focus_bins_.empty()) {
+101:     LOG(ERROR) << "Cannot find binary with buildid " << build_id_;
+102:   }
+103: }
+127: uint64_t SampleReader::GetTotalSampleCount() const {
+128:   uint64_t ret = 0;
+130:   if (!range_count_map_.empty()) {
+131:     for (const auto &[range, count] : range_count_map_) {
+132:       ret += count;
+133:     }
+134:   } else {
+135:     for (const auto &[addr, count] : address_count_map_) {
+136:       ret += count;
+137:     }
+138:   }
+139:   return ret;
+140: }
+142: bool SampleReader::ReadAndSetTotalCount() {
+143:   if (!Read()) {
+144:     return false;
+145:   }
+146:   if (!range_count_map_.empty()) {
+147:     for (const auto &[range, count] : range_count_map_) {
+148:       total_count_ += count * (1 + range.second - range.first);
+149:     }
+150:   } else {
+151:     for (const auto &[addr, count] : address_count_map_) {
+152:       total_count_ += count;
+153:     }
+154:   }
+155:   return true;
+160: bool TextSampleReaderWriter::Append(const std::string &profile_file) {
+161:   FILE *fp = fopen(profile_file.c_str(), "r");
+162:   if (fp == nullptr) {
+163:     LOG(ERROR) << "Cannot open " << profile_file << " to read";
+164:     return false;
+165:   }
+166:   uint64_t num_records;
+169:   if (1 != fscanf(fp, "%" SCNu64 "\n", &num_records)) {
+170:     LOG(ERROR) << "Error reading from " << profile_file;
+171:     fclose(fp);
+172:     return false;
+173:   }
+174:   for (int i = 0; i < num_records; i++) {
+175:     uint64_t from, to, count;
+176:     if (3 != fscanf(fp, "%" SCNx64 "-%" SCNx64 ":%" SCNu64 "\n", &from, &to,
+177:                     &count)) {
+178:       LOG(ERROR) << "Error reading from " << profile_file;
+179:       fclose(fp);
+180:       return false;
+181:     }
+182:     range_count_map_[Range(from, to)] += count;
+183:   }
+186:   if (1 != fscanf(fp, "%" SCNu64 "\n", &num_records)) {
+187:     LOG(ERROR) << "Error reading from " << profile_file;
+188:     fclose(fp);
+189:     return false;
+190:   }
+191:   for (int i = 0; i < num_records; i++) {
+192:     uint64_t addr, count;
+193:     if (2 != fscanf(fp, "%" SCNx64 ":%" SCNu64 "\n", &addr, &count)) {
+194:       LOG(ERROR) << "Error reading from " << profile_file;
+195:       fclose(fp);
+196:       return false;
+197:     }
+198:     address_count_map_[addr] += count;
+199:   }
+202:   if (1 != fscanf(fp, "%" SCNu64 "\n", &num_records)) {
+203:     LOG(ERROR) << "Error reading from " << profile_file;
+204:     fclose(fp);
+205:     return false;
+206:   }
+207:   for (int i = 0; i < num_records; i++) {
+208:     uint64_t from, to, count;
+209:     if (3 != fscanf(fp, "%" SCNx64 "->%" SCNx64 ":%" SCNu64 "\n", &from, &to,
+210:                     &count)) {
+211:       LOG(ERROR) << "Error reading from " << profile_file;
+212:       fclose(fp);
+213:       return false;
+214:     }
+215:     branch_count_map_[Branch(from, to)] += count;
+216:   }
+270:   quipper::PerfReader reader;
+271:   quipper::PerfParser parser(&reader);
+272:   if (!reader.ReadFile(profile_file) || !parser.ParseRawEvents()) {
+273:     return false;
+274:   }
+279:   if (!build_id_.empty()) {
+280:     GetFileNameFromBuildID(&reader);
+281:     if (focus_bins_.empty()) {
+286:       return true;
+287:     }
+288:   } else {
+289:     LOG(INFO) << "No buildid found in binary";
+290:   }
+292:   for (const auto &event : parser.parsed_events()) {
+293:     if (!event.event_ptr ||
+294:         event.event_ptr->header().type() != quipper::PERF_RECORD_SAMPLE) {
+295:       continue;
+296:     }
+297:     if (MatchBinary(event.dso_and_offset)) {
+298:       address_count_map_[event.dso_and_offset.offset()]++;
+299:       uint64_t address = event.dso_and_offset.offset();
+300:       uint64_t timestamp = event.event_ptr->timestamp();
+301:       address_timestamp_map_.insert({address, timestamp});
+302:     }
+303:     int start_index = 0;
+304:     while (start_index < event.branch_stack.size() &&
+305:            event.branch_stack[start_index].spec ==
+306:                quipper::PERF_BR_SPEC_WRONG_PATH) {
+307:       start_index++;
+308:     }
+309:     if (event.branch_stack.size() > start_index &&
+310:         MatchBinary(event.branch_stack[start_index].to) &&
+
+FILE: temp/autofdo/profile_creator.cc
+43: ABSL_FLAG(bool, disassemble_arm_branches, true,
+44:           "Tell the SPE sample reader to disassemble the binary to identify "
+45:           "branch instructions.");
+46: AUTOFDO_PROFILE_SYMBOL_LIST_FLAGS;
+47: #endif
+49: ABSL_FLAG(std::string, focus_binary_re, "",
+50:           "RE for the focused binary file name");
+118: bool ProfileCreator::CreateProfile(const std::string &input_profile_name,
+119:                                    const std::string &profiler,
+120:                                    ProfileWriter *writer,
+121:                                    const std::string &output_profile_name,
+122:                                    bool store_sym_list_in_profile,
+123:                                    bool check_lbr_entry) {
+124:   SymbolMap symbol_map(binary_);
+126:   writer->setSymbolMap(&symbol_map);
+127:   if (profiler == "prefetch") {
+128:     symbol_map.set_ignore_thresholds(true);
+129:     if (!ConvertPrefetchHints(input_profile_name, &symbol_map)) return false;
+130:   } else {
+131:     if (!ReadSample(input_profile_name, profiler)) return false;
+132:     symbol_map.ReadLoadableExecSegmentInfo(IsKernelSample());
+133:     if (!ComputeProfile(&symbol_map, check_lbr_entry)) return false;
+134:   }
+136: #if !defined(HAVE_LLVM)
+139:   if (absl::GetFlag(FLAGS_use_two_pass_aggregation)) {
+140:     symbol_map.CollapseCopyIDs();
+141:   }
+142: #endif
+144: #if defined(HAVE_LLVM)
+148:   std::unique_ptr<llvm::sampleprof::ProfileSymbolList> prof_sym_list;
+149:   NameSizeList name_size_list;
+150:   if (store_sym_list_in_profile) {
+151:     prof_sym_list = std::make_unique<llvm::sampleprof::ProfileSymbolList>();
+152:     name_size_list = symbol_map.collectNamesForProfSymList();
+153:     fillProfileSymbolList(prof_sym_list.get(), name_size_list, &symbol_map,
+154:                           absl::GetFlag(FLAGS_symbol_list_size_coverage_ratio));
+155:     prof_sym_list->setToCompress(absl::GetFlag(FLAGS_compress_symbol_list));
+156:     auto *llvm_profile_writer = static_cast<LLVMProfileWriter *>(writer);
+157:     auto *sample_profile_writer =
+158:         llvm_profile_writer->CreateSampleWriter(output_profile_name);
+159:     if (!sample_profile_writer) return false;
+160:     sample_profile_writer->setProfileSymbolList(prof_sym_list.get());
+161:   }
+162: #endif
+164:   return writer->WriteToFile(output_profile_name);
+167: bool ProfileCreator::ReadSample(absl::string_view input_profile_name,
+168:                                 const std::string &profiler) {
+169:   if (profiler == "perf" || profiler == "perf_spe") {
+170:     std::string focus_binary_re;
+171:     std::string build_id;
+173:     if (!absl::GetFlag(FLAGS_focus_binary_re).empty()) {
+174:       focus_binary_re = absl::GetFlag(FLAGS_focus_binary_re);
+175:     } else {
+176:       char *dup_name = strdup(binary_.c_str());
+177:       char *strip_ptr = strstr(dup_name, ".unstripped");
+178:       if (strip_ptr) {
+179:         *strip_ptr = 0;
+180:       }
+181:       const char *file_base_name = basename(dup_name);
+182:       CHECK(file_base_name) << "Cannot find basename for: " << binary_;
+183:       focus_binary_re = std::string(".*/") + file_base_name + "$";
+184:       free(dup_name);
+186:       ElfReader reader(binary_);
+190:       const size_t kMinPerfBuildIDStringLength = 40;
+191:       build_id = reader.GetBuildId();
+192:       if (!build_id.empty() && build_id.length() < kMinPerfBuildIDStringLength)
+193:         build_id.resize(kMinPerfBuildIDStringLength, '0');
+194:     }
+196:     if (profiler == "perf_spe") {
+197: #if defined(HAVE_LLVM)
+198:       sample_reader_ = new PerfSpeDataSampleReader(
+199:           absl::GetFlag(FLAGS_disassemble_arm_branches)
+200:               ? PerfSpeDataSampleReader::BranchIdStrategy::kDisassembly
+201:               : PerfSpeDataSampleReader::BranchIdStrategy::kSampling,
+202:           input_profile_name, focus_binary_re, binary_);
+203: #else
+204:       sample_reader_ = new SimpleSpeDataSampleReader(input_profile_name, binary_);
+205: #endif
+206:     } else {
+207:       sample_reader_ = new PerfDataSampleReader(input_profile_name,
+208:                                                 focus_binary_re, build_id);
+209:     }
+210:   } else if (profiler == "text") {
+211:     sample_reader_ = new TextSampleReaderWriter(input_profile_name);
+212:   } else {
+213:     LOG(ERROR) << "Unsupported profiler type: " << profiler;
+214:     return false;
+215:   }
+216:   if (!sample_reader_->ReadAndSetTotalCount()) {
+232: bool ProfileCreator::ConvertPrefetchHints(const std::string &profile_file,
+233:                                           SymbolMap *symbol_map) {
+238:   if (!CheckAndAssignAddr2Line(symbol_map, Addr2line::Create(binary_)))
+239:     return false;
+240:   PrefetchHints hints = ReadPrefetchHints(profile_file);
+241:   absl::btree_map<uint64_t, uint8_t> repeated_prefetches_indices;
+242:   for (auto &hint : hints) {
+243:     uint64_t pc = hint.address;
+244:     int64_t delta = hint.delta;
+245:     const std::string *name = nullptr;
+246:     if (!symbol_map->GetSymbolInfoByAddr(pc, &name, nullptr, nullptr)) {
+247:       LOG(INFO) << "Instruction address not found:" << std::hex << pc;
+248:       continue;
+249:     }
+250:     uint8_t prefetch_index = repeated_prefetches_indices[pc]++;
+252:     SourceStack stack;
+253:     symbol_map->get_addr2line()->GetInlineStack(pc, &stack);
+255:     if (!symbol_map->EnsureEntryInFuncForSymbol(*name, pc)) continue;
+261:     if (!symbol_map->AddIndirectCallTarget(
+262:             *name, stack,
+263:             "__prefetch_" + hint.type + "_" + std::to_string(prefetch_index),
+264:             static_cast<uint64_t>(delta))) {
+265:       LOG(WARNING) << "Ignoring address " << std::hex << pc
+266:                    << ". Could not add an indirect call target. Likely the "
+267:                       "inline stack is empty for this address.";
+268:     }
+269:   }
+270:   symbol_map->ElideSuffixesAndMerge();
+271:   return true;
+282: bool MergeSample(const std::vector<std::string> &input_files,
+283:                  const std::string &input_profiler, absl::string_view binary,
+284:                  absl::string_view output_file) {
+285:   TextSampleReaderWriter writer(output_file);
+286:   if (writer.IsFileExist()) {
+287:     if (!writer.ReadAndSetTotalCount()) {
+288:       return false;
+289:     }
+290:   }
+292:   LOG(INFO) << "Merging " << input_files.size() << " " << input_profiler
+293:             << " files";
+294:   ProfileCreator creator(binary);
+295:   for (const auto &input_file : input_files) {
+298:     if (input_file.empty()) continue;
+300:     LOG_EVERY_N(INFO, 100) << "Merging " << input_file;
+301:     if (!creator.ReadSample(input_file, input_profiler)) return false;
+302:     writer.Merge(creator.sample_reader());
+303:   }
+304:   LOG(INFO) << "Merged " << input_files.size() << " " << input_profiler
+305:             << " files";
+306:   return writer.Write(nullptr);
+307: }
+
+FILE: temp/autofdo/symbol_map.cc
+45: ABSL_FLAG(int32_t, dump_cutoff_percent, 2,
+46:           "functions that has total count lower than this percentage of "
+47:           "the max function count will not show in the dump");
+48: ABSL_FLAG(double, sample_threshold_frac, 0.0,
+49:           "Sample threshold ratio. The threshold of total function count"
+50:           " is determined by max_sample_count * sample_threshold_frac.");
+51: ABSL_FLAG(std::string, suffix_elision_policy, "selected",
+52:           "Policy for eliding/merging profile entries for symbols with "
+53:           "suffixed names: one of 'all' [default], 'selected', 'none'.");
+54: ABSL_FLAG(bool, demangle_symbol_names, false,
+55:           "Demangle symbol names in function profile diff output");
+56: ABSL_FLAG(bool, use_discriminator_encoding, false,
+57:           "Tell the symbol map that the discriminator encoding is enabled in "
+58:           "the profile.");
+59: ABSL_FLAG(bool, use_two_pass_aggregation, false,
+60:           "GCOV-only (gcov_version>=3, non-LLVM): pass 1 MAX per "
+61:           "(line, base, copy_id); pass 2 SUM after stripping copy_id in "
+62:           "ProfileCreator before write.");
+63: ABSL_FLAG(bool, use_discriminator_multiply_factor, true,
+64:           "Tell the symbol map whether to use discriminator multiply factors.");
+65: #if defined(HAVE_LLVM)
+66: ABSL_FLAG(bool, use_fs_discriminator, false,
+67:           "Tell the symbol map whether to use FS discriminators.");
+68: ABSL_FLAG(bool, use_base_only_in_fs_discriminator, false,
+69:           "Tell the symbol map to only use base discriminators in fsprofile.");
+70: #endif
+420: void SymbolMap::CalculateThresholdFromTotalCount(int64_t total_count) {
+421:   count_threshold_ = total_count * absl::GetFlag(FLAGS_sample_threshold_frac);
+422:   if (count_threshold_ < kMinSamples) {
+423:     count_threshold_ = kMinSamples;
+424:   }
+425: }
+427: void SymbolMap::CalculateThreshold() {
+429:   CHECK_EQ(count_threshold_, 0);
+430:   int64_t total_count = 0;
+431:   absl::flat_hash_set<std::string> visited;
+432:   for (const auto &name_symbol : map_) {
+433:     if (visited.insert(name_symbol.second->name()).second) {
+434:       total_count += name_symbol.second->total_count;
+435:     }
+436:   }
+437:   count_threshold_ = total_count * absl::GetFlag(FLAGS_sample_threshold_frac);
+438:   if (count_threshold_ < kMinSamples) {
+439:     count_threshold_ = kMinSamples;
+440:   }
+506: void SymbolMap::ReadLoadableExecSegmentInfo(bool is_kernel) {
+507:   ElfReader elf_reader(binary_);
+508:   if (is_kernel) {
+509:     LOG(INFO) << "Binary=" << binary_ << " is considered as a kernel image";
+510:   }
+511:   std::vector<ElfReader::SegmentInfo> si_vec =
+512:       elf_reader.GetSegmentInfo();
+516:   bool KernelFirstLoadableExecSegment = false;
+517:   uint64_t KernelFirstLoadableExecSegmentOffset = 0;
+518:   for (const auto &info : si_vec) {
+519:     if ((info.type == PT_LOAD) && (info.flags & PF_X)) {
+520:       uint64_t Offset = info.offset;
+521:       if (is_kernel && !KernelFirstLoadableExecSegment) {
+522:         KernelFirstLoadableExecSegment = true;
+523:         KernelFirstLoadableExecSegmentOffset = Offset;
+524:       }
+525:       Offset -= KernelFirstLoadableExecSegmentOffset;
+526:       add_loadable_exec_segment(Offset, info.vaddr);
+527:       LOG(INFO) << "Adding loadable exec segment: offset=" << std::hex << Offset
+528:                 << " vaddr=" << info.vaddr;
+529:     }
+530:   }
+532:   if (si_vec.empty() && IsKernelModule(binary_)) {
+538:     ElfReader::SectionInfo info;
+539:     if (elf_reader.GetSectionInfoByName(".text", &info) != nullptr) {
+540:       add_loadable_exec_segment(info.offset, info.addr);
+541:     }
+542:   }
+616: void SymbolMap::AddSourceCount(absl::string_view symbol_name,
+617:                                const SourceStack &src, uint64_t count,
+618:                                uint64_t num_inst, uint32_t duplication,
+619:                                DataSource data_source) {
+620:   bool use_discriminator_encoding =
+621:       absl::GetFlag(FLAGS_use_discriminator_encoding);
+622:   if (duplication != 1 &&
+623:       absl::GetFlag(FLAGS_use_discriminator_multiply_factor))
+624:     count *= duplication;
+625:   Symbol *symbol = TraverseInlineStack(symbol_name, src, count, data_source);
+626:   if (!symbol) return;
+627:   bool need_conversion = (data_source == PERFDATA || data_source == AFDOPROTO);
+628:   if (need_conversion && src[0].HasInvalidInfo()) return;
+636:   bool use_two_pass = absl::GetFlag(FLAGS_use_two_pass_aggregation);
+639:   uint64_t offset;
+640:   if (use_two_pass) {
+642:     offset = src[0].OffsetWithCopyID();
+643:   } else {
+645:     offset = src[0].Offset(use_discriminator_encoding);
+646:   }
+649:   if (need_conversion) {
+650:     if (count > symbol->pos_counts[offset].count) {
+651:       symbol->pos_counts[offset].count = count;
+652:     }
+653:   } else {
+654:     symbol->pos_counts[offset].count += count;
+655:   }
+656:   symbol->pos_counts[offset].num_inst += num_inst;
+
+FILE: temp/autofdo/source_info.h
+66:   uint64_t OffsetWithCopyID() const {
+67: #if defined(HAVE_LLVM)
+70:     return Offset(false);  // Use full discriminator
+71: #else
+73:     uint32_t disc = StripMultiplicity(discriminator);
+74:     return (static_cast<uint64_t>(line - start_line) << 32) | disc;
+75: #endif
+76:   }
+78:   uint32_t DuplicationFactor() const {
+79: #if defined(HAVE_LLVM)
+80:     if (use_fs_discriminator) return 1;
+81:     return llvm::DILocation::getDuplicationFactorFromDiscriminator(
+82:         discriminator);
+83: #else
+85:     if (discriminator == 0) return 1;
+86:     return GetMultiplicity(discriminator);
+87: #endif
+88:   }
+90:   bool HasInvalidInfo() const {
+91:     if (start_line == 0 || line == 0) return true;
+92:     return false;
+
+FILE: temp/autofdo/instruction_map.cc
+18: void InstructionMap::BuildPerFunctionInstructionMap(absl::string_view name,
+19:                                                     uint64_t start_addr,
+20:                                                     uint64_t end_addr) {
+21:   if (start_addr >= end_addr) {
+22:     return;
+23:   }
+26:   CHECK(inst_map_.empty());
+28:   start_addr_ = start_addr;
+31:   inst_map_.resize(end_addr - start_addr);
+32:   for (uint64_t addr = start_addr; addr < end_addr; addr++) {
+33:     InstInfo *info = &inst_map_[addr - start_addr];
+34:     addr2line_->GetInlineStack(addr, &info->source_stack);
+35:     if (!info->source_stack.empty()) {
+36:       symbol_map_->AddSourceCount(name, info->source_stack, 0, 1, 1,
+37:                                   SymbolMap::PERFDATA);
+38:     }
+39:   }
+
+FILE: temp/autofdo/spe_sample_reader.cc
+128: bool IsAArch64(const BinaryContent& binary_content) {
+129:   return binary_content.object_file != nullptr &&
+130:          binary_content.object_file->getArch() ==
+131:              llvm::Triple::ArchType::aarch64;
+132: }
+159: absl::StatusOr<PerfDataReader> PerfSpeDataSampleReader::CreatePerfDataReader(
+160:     absl::string_view profile_file, const BinaryContent& binary_content) const {
+162:   ASSIGN_OR_RETURN(PerfDataProvider::BufferHandle perf_data,
+163:                    FetchPerfData(profile_file));
+165:   std::set<std::string> filenames;
+166:   std::vector<absl::string_view> match_mmap_names;
+168:   if (binary_content.build_id.empty()) {
+170:     quipper::PerfReader reader;
+172:     reader.SetEventTypesToSkipWhenSerializing(
+173:         {quipper::PERF_RECORD_SAMPLE, quipper::PERF_RECORD_FORK,
+174:          quipper::PERF_RECORD_COMM, quipper::PERF_RECORD_AUXTRACE});
+176:     reader.ReadFromPointer(perf_data.buffer->getBufferStart(),
+177:                            perf_data.buffer->getBufferSize());
+178:     reader.GetFilenamesAsSet(&filenames);
+180:     absl::c_copy_if(filenames, std::back_inserter(match_mmap_names),
+181:                     [this](const std::string& filename) -> bool {
+182:                       return std::regex_search(filename.c_str(), mmap_regex_);
+183:                     });
+184:   }
+186:   ASSIGN_OR_RETURN(BinaryMMaps binary_mmaps,
+187:                    SelectMMaps(perf_data, match_mmap_names, binary_content));
+188:   return PerfDataReader(std::move(perf_data), std::move(binary_mmaps),
+189:                         &binary_content);
+204: absl::StatusOr<AutofdoRangeSample>
+205: PerfSpeDataSampleReader::GenerateAutofdoProfile(
+206:     absl::string_view profile_file) {
+207:   ASSIGN_OR_RETURN(std::unique_ptr<BinaryContent> binary_content,
+208:                    GetBinaryContent(binary_file_));
+210:   if (!IsAArch64(*binary_content)) {
+211:     return absl::InvalidArgumentError(
+212:         absl::StrCat("Binary ", binary_content->file_name, " is not AArch64"));
+213:   }
+215:   ASSIGN_OR_RETURN(PerfDataReader perf_data_reader,
+216:                    CreatePerfDataReader(profile_file, *binary_content));
+218:   BranchFrequencies branch_frequencies;
+219:   RETURN_IF_ERROR(perf_data_reader.AggregateSpe(branch_frequencies));
+221:   SymbolMap symbol_map(binary_file_);
+222:   symbol_map.ReadLoadableExecSegmentInfo(perf_data_reader.IsKernelMode());
+224:   ASSIGN_OR_RETURN(std::unique_ptr<BranchIdentifier> branch_identifier,
+225:                    CreateBranchIdentifier(branch_id_strategy_, *binary_content,
+226:                                           branch_frequencies));
+228:   return ConvertBranchFrequenciesToAutofdoRangeSample(
+229:       branch_frequencies, *branch_identifier,
+230:       [&symbol_map](int64_t addr) -> int64_t {
+231:         return symbol_map.GetFileOffsetFromStaticVaddr(addr);
+232:       },
+233:       /*instruction_size=*/4);
+234: }
+236: void PerfSpeDataSampleReader::AddBranchesAndRanges(
+237:     const AutofdoRangeSample& sample) {
+238:   for (const auto& [branch, count] : sample.branch_counts) {
+239:     branch_count_map_[branch] += count;
+240:   }
+241:   for (const auto& [range, count] : sample.range_counts) {
+242:     range_count_map_[range] += count;
+243:   }
+
+FILE: temp/autofdo/perfdata_reader.cc
+348:   quipper::PerfReader perf_reader;
+351:   perf_reader.SetEventTypesToSkipWhenSerializing(
+352:       {quipper::PERF_RECORD_SAMPLE, quipper::PERF_RECORD_MMAP,
+353:        quipper::PERF_RECORD_FORK, quipper::PERF_RECORD_COMM});
+354:   perf_reader.SetSampleCallback(callback);
+355:   if (!perf_reader.ReadFromPointer(perf_data_.buffer->getBufferStart(),
+356:                                    perf_data_.buffer->getBufferSize())) {
+357:     LOG(FATAL) << "Failed to read perf data file: " << perf_data_.description;
+358:   }
+359: }
+361: absl::Status PerfDataReader::ReadWithSpeRecordCallBack(
+362:     absl::FunctionRef<void(const quipper::ArmSpeDecoder::Record &, int)>
+363:         callback) const {
+364:   quipper::PerfReader perf_reader;
+367:   perf_reader.SetEventTypesToSkipWhenSerializing(
+368:       {quipper::PERF_RECORD_SAMPLE, quipper::PERF_RECORD_MMAP,
+369:        quipper::PERF_RECORD_FORK, quipper::PERF_RECORD_COMM});
+370:   if (!perf_reader.ReadFromPointer(perf_data_.buffer->getBufferStart(),
+371:                                    perf_data_.buffer->getBufferSize())) {
+372:     LOG(FATAL) << "Failed to read perf data file: " << perf_data_.description;
+373:   }
+375:   SpeTidPidProvider spe_pid_provider(perf_reader.events());
+376:   for (const quipper::PerfDataProto_PerfEvent &event : perf_reader.events()) {
+377:     if (!event.has_auxtrace_event()) continue;
+378:     quipper::ArmSpeDecoder::Record record;
+379:     quipper::ArmSpeDecoder decoder(event.auxtrace_event().trace_data(),
+380:                                    /*is_cross_endian=*/false);
+381:     while (decoder.NextRecord(&record)) {
+382:       absl::StatusOr<int> pid = spe_pid_provider.GetPid(record);
+383:       if (!pid.ok()) continue;
+384:       callback(record, *pid);
+385:     }
+386:   }
+387:   return absl::OkStatus();
+388: }
+390: void PerfDataReader::AggregateLBR(LbrAggregation *result) const {
+391:   const bool is_kernel_mode = IsKernelMode();
+392:   if (is_kernel_mode) LOG(WARNING) << "Input binary is kernel";
+393:   ReadWithSampleCallBack([&](const quipper::PerfDataProto::SampleEvent &event) {
+426: absl::Status PerfDataReader::AggregateSpe(BranchFrequencies &result) const {
+427:   const bool is_kernel_mode = IsKernelMode();
+428:   if (is_kernel_mode) LOG(WARNING) << "Input binary is kernel";
+429:   return ReadWithSpeRecordCallBack(
+430:       [&](const quipper::ArmSpeDecoder::Record &record, int pid) {
+433:         if (is_kernel_mode) pid = kKernelPid;
+435:         if (binary_mmaps_.count(pid) == 0) return;
+436:         if (!record.event.retired || !record.op.is_br_eret) return;
+438:         uint64_t from_addr = RuntimeAddressToBinaryAddress(pid, record.ip.addr);
+443:         if (record.op.br_eret.br_cond && record.event.cond_not_taken) {
+444:           ++result.not_taken_branch_counters[{.address = from_addr}];
+445:           return;
+446:         }
+447:         uint64_t to_addr =
+448:             RuntimeAddressToBinaryAddress(pid, record.tgt_br_ip.addr);
+449:         ++result.taken_branch_counters[{.from = from_addr, .to = to_addr}];
+450:       });
+451: }
+453: bool PerfDataReader::IsKernelMode() const {
+454:   return binary_mmaps_.count(kKernelPid) > 0;
+455: }
+457: absl::StatusOr<PerfDataReader> BuildPerfDataReader(
+458:     PerfDataProvider::BufferHandle perf_data,
+459:     const BinaryContent *binary_content, absl::string_view match_mmap_name) {
+460:   auto match_mmap_names = absl::MakeConstSpan(
+
+FILE: temp/autofdo/profile_symbol_list.cc
+30: void fillProfileSymbolList(llvm::sampleprof::ProfileSymbolList *prof_sym_list,
+31:                            const NameSizeList &name_size_list,
+32:                            const SymbolMap *symbol_map,
+33:                            double symbol_list_size_coverage_ratio) {
+48:   std::vector<uint64_t> sizes;
+49:   uint64_t total_size = 0;
+50:   for (const auto &symbol_entry : name_size_list) {
+51:     uint64_t symbol_size = symbol_entry.second;
+52:     sizes.push_back(symbol_size);
+53:     total_size += symbol_size;
+54:   }
+55:   std::sort(sizes.begin(), sizes.end(), std::greater<>());
+56:   uint64_t total_threshold = total_size * symbol_list_size_coverage_ratio;
+57:   if (sizes[0] > total_threshold) {
+60:     return;
+61:   }
+63:   std::vector<uint64_t> psum(sizes.size());
+64:   std::partial_sum(sizes.begin(), sizes.end(), psum.begin());
+65:   auto lower = std::lower_bound(psum.begin(), psum.end(), total_threshold,
+66:                                 std::less<>());
+67:   uint64_t cutoff = sizes[std::distance(psum.begin(), lower)];
+71:   for (const auto &symbol_entry : name_size_list) {
+72:     if (symbol_entry.second >= cutoff) {
+73:       const llvm::StringRef &name = symbol_entry.first;
+74:       std::string original_name = symbol_map->GetOriginalName(name.data());
+75:       if (original_name == name) {
+76:         prof_sym_list->add(name);
+77:         continue;
+78:       }
+79:       prof_sym_list->add(original_name, true);
+80:     }
+
+FILE: temp/autofdo/addr2line.cc
+56: Addr2line *Addr2line::Create(absl::string_view binary_name) {
+57:   Addr2line *addr2line = new LLVMAddr2line(binary_name);
+58:   if (!addr2line->Prepare()) {
+59:     delete addr2line;
+60:     return nullptr;
+61:   } else {
+62:     return addr2line;
+63:   }
+64: }
+66: LLVMAddr2line::LLVMAddr2line(absl::string_view binary_name)
+67:     : Addr2line(binary_name), binary_(GetOwningBinary(binary_name)) {}
+69: bool LLVMAddr2line::Prepare() {
+70:   if (!binary_.getBinary()) return false;
+71:   dwarf_info_ = llvm::DWARFContext::create(*binary_.getBinary());
+72:   for (auto &unit : dwarf_info_->compile_units()) {
+73:     unit_map_[unit->getOffset()] = unit.get();
+74:   }
+75:   return true;
+76: }
+78: void LLVMAddr2line::GetInlineStack(uint64_t address, SourceStack *stack) const {
+79:   auto cu_iter =
+80:       unit_map_.find(dwarf_info_->getDebugAranges()->findAddress(address));
+81:   if (cu_iter == unit_map_.end()) return;
+82:   const llvm::DWARFDebugLine::LineTable *line_table =
+83:       dwarf_info_->getLineTableForUnit(cu_iter->second);
+84:   if (line_table == nullptr) {
+85:     LOG_EVERY_N(WARNING, 1000) << "Missed line table.";
+113:   uint32_t row_index = line_table->lookupAddress({address, section_index});
+114:   uint32_t file = (row_index == -1U ? -1U : line_table->Rows[row_index].File);
+115:   uint32_t line = (row_index == -1U ? 0 : line_table->Rows[row_index].Line);
+116:   uint32_t discriminator =
+117:       (row_index == -1U ? 0 : line_table->Rows[row_index].Discriminator);
+118:   stack->reserve(InlinedChain.size());
+119:   for (const llvm::DWARFDie &FunctionDIE : InlinedChain) {
+120:     const char *function_name =
+121:         FunctionDIE.getSubroutineName(llvm::DINameKind::LinkageName);
+122:     uint32_t start_line = FunctionDIE.getDeclLine();
+123:     llvm::StringRef file_name;
+124:     llvm::StringRef dir_name;
+125:     if (line_table->hasFileAtIndex(file)) {
+126:       const auto &entry = line_table->Prologue.getFileNameEntry(file);
+127:       file_name = llvm::dwarf::toString(entry.Name).value();
+128:       if (entry.DirIdx > 0 &&
+129:           entry.DirIdx <= line_table->Prologue.IncludeDirectories.size())
+130:         dir_name =
+131:             llvm::dwarf::toString(
+132:                 line_table->Prologue.IncludeDirectories[entry.DirIdx - 1])
+133:                 .value();
+134:     }
+135:     stack->emplace_back(function_name, dir_name, file_name, start_line, line,
+136:                         discriminator);
+137:     uint32_t col;
+138:     FunctionDIE.getCallerFrame(file, line, col, discriminator);
+
+FILE: temp/autofdo/llvm_profile_writer.cc
+78: void LLVMProfileBuilder::VisitTopSymbol(const std::string &name,
+79:                                         const Symbol *node) {
+80:   llvm::StringRef name_ref = GetNameRef(name);
+81:   llvm::sampleprof::FunctionSamples &profile = profiles_[name_ref];
+82:   if (std::error_code EC = llvm::mergeSampleProfErrors(
+83:           result_, profile.addHeadSamples(node->head_count)))
+84:     LOG(FATAL) << "Error updating head samples for '" << name
+85:                << "': " << EC.message();
+87:   if (std::error_code EC = llvm::mergeSampleProfErrors(
+88:           result_, profile.addTotalSamples(node->total_count)))
+89:     LOG(FATAL) << "Error updating total samples for '" << name
+90:                << "': " << EC.message();
+128:   for (const auto &pos_count : node->pos_counts) {
+129:     uint64_t offset = pos_count.first;
+130:     uint32_t line = SourceInfo::GetLineNumberFromOffset(offset);
+131:     uint32_t discriminator = SourceInfo::GetDiscriminatorFromOffset(offset);
+132:     const auto &num_samples = pos_count.second.count;
+133:     if (std::error_code EC = llvm::mergeSampleProfErrors(
+134:             result_, profile.addBodySamples(line, discriminator, num_samples)))
+135:       LOG(FATAL) << "Error updating body samples for '" << node->info.func_name
+136:                  << "': " << EC.message();
+142:     const auto &target_map = pos_count.second.target_map;
+143:     for (const auto &target_count : target_map) {
+144:       if (std::error_code EC = llvm::mergeSampleProfErrors(
+145:               result_,
+146:               profile.addCalledTargetSamples(
+147:                   line, discriminator,
+148:                   llvm::sampleprof::FunctionId(llvm::StringRef(
+149:                       target_count.first.data(), target_count.first.size())),
+150:                   target_count.second)))
+151:         LOG(FATAL) << "Error updating called target samples for '"
+
+FILE: temp/autofdo/sample_merger.cc
+15: ABSL_FLAG(std::string, profile, "data.profile",
+16:           "Input profile filename. Use this flag if you only have a single "
+17:           "profile to merge. Otherwise prefer --profiles flag");
+18: ABSL_FLAG(
+19:     std::vector<std::string>, profiles, {},
+20:     "Input profile filenames. All files are merged into the --output_file");
+21: ABSL_FLAG(std::string, profiler, "perf", "Profile type");
+22: ABSL_FLAG(std::string, output_file, "data.txt", "Merged profile file name");
+23: ABSL_FLAG(std::string, binary, "data.binary", "Binary file name");
+25: int main(int argc, char **argv) {
+26:   absl::SetProgramUsageMessage(argv[0]);
+27:   absl::ParseCommandLine(argc, argv);
+29:   std::vector<std::string> profiles = absl::GetFlag(FLAGS_profiles);
+30:   if (profiles.empty()) {
+31:     profiles.push_back(absl::GetFlag(FLAGS_profile));
+32:   }
+33:   if (devtools_crosstool_autofdo::MergeSample(
+34:           profiles, absl::GetFlag(FLAGS_profiler), absl::GetFlag(FLAGS_binary),
+35:           absl::GetFlag(FLAGS_output_file))) {
+36:     return 0;
+37:   } else {
+38:     return 1;
+39:   }
+40: }
+
+FILE: temp/autofdo/create_gcov.cc
+25: #include "third_party/abseil/absl/flags/usage.h"
+27: ABSL_FLAG(std::string, profile, "perf.data",
+28:               "Profile file name");
+29: ABSL_FLAG(std::string, profiler, "perf",
+30:               "Profile type");
+31: ABSL_FLAG(std::string, gcov, "fbdata.afdo",
+32:               "Output file name");
+33: ABSL_FLAG(std::string, binary, "data.binary",
+34:               "Binary file name");
+36: int main(int argc, char **argv) {
+37:   absl::SetProgramUsageMessage(argv[0]);
+38:   absl::ParseCommandLine(argc, argv);
+40:   devtools_crosstool_autofdo::AutoFDOProfileWriter writer(
+41:       absl::GetFlag(FLAGS_gcov_version));
+42:   devtools_crosstool_autofdo::ProfileCreator creator(
+43:       absl::GetFlag(FLAGS_binary));
+46:   if (absl::GetFlag(FLAGS_gcov_version) >= 3) {
+47:     absl::SetFlag(&FLAGS_use_discriminator_encoding, true);
+48:     absl::SetFlag(&FLAGS_use_two_pass_aggregation, true);
+49:   }
+51:   if (creator.CreateProfile(absl::GetFlag(FLAGS_profile),
+52:                             absl::GetFlag(FLAGS_profiler), &writer,
+53:                             absl::GetFlag(FLAGS_gcov))) {
+54:     return 0;
+55:   } else {
+56:     return -1;
+57:   }
+58: }
+
+FILE: temp/autofdo/.gitmodules
+1: [submodule "third_party/abseil"]
+2: 	path = third_party/abseil
+3: 	url = https://github.com/abseil/abseil-cpp.git
+4: [submodule "third_party/perf_data_converter"]
+5: 	path = third_party/perf_data_converter
+6: 	url = https://github.com/google/perf_data_converter.git
+7: [submodule "third_party/glog"]
+8: 	path = third_party/glog
+9: 	url = https://github.com/google/glog.git
+10: [submodule "third_party/googletest"]
+11: 	path = third_party/googletest
+12: 	url = https://github.com/google/googletest.git
+13: [submodule "third_party/llvm-project"]
+14: 	path = third_party/llvm-project
+15: 	url = https://github.com/llvm/llvm-project.git
+
+FILE: src/llvm/llvm/tools/llvm-profgen/llvm-profgen.cpp
+32: static cl::opt<std::string> PerfScriptFilename(
+33:     "perfscript", cl::value_desc("perfscript"),
+34:     cl::desc("Path of perf-script trace created by Linux perf tool with "
+35:              "`script` command(the raw perf.data should be profiled with -b)"),
+36:     cl::cat(ProfGenCategory));
+37: static cl::alias PSA("ps", cl::desc("Alias for --perfscript"),
+38:                      cl::aliasopt(PerfScriptFilename));
+40: static cl::opt<std::string> PerfDataFilename(
+41:     "perfdata", cl::value_desc("perfdata"),
+42:     cl::desc("Path of raw perf data created by Linux perf tool (it should be "
+43:              "profiled with -b)"),
+44:     cl::cat(ProfGenCategory));
+45: static cl::alias PDA("pd", cl::desc("Alias for --perfdata"),
+46:                      cl::aliasopt(PerfDataFilename));
+48: static cl::opt<std::string> UnsymbolizedProfFilename(
+49:     "unsymbolized-profile", cl::value_desc("unsymbolized profile"),
+50:     cl::desc("Path of the unsymbolized profile created by "
+51:              "`llvm-profgen` with `--skip-symbolization`"),
+52:     cl::cat(ProfGenCategory));
+53: static cl::alias UPA("up", cl::desc("Alias for --unsymbolized-profile"),
+54:                      cl::aliasopt(UnsymbolizedProfFilename));
+56: static cl::opt<std::string> SampleProfFilename(
+57:     "llvm-sample-profile", cl::value_desc("llvm sample profile"),
+58:     cl::desc("Path of the LLVM sample profile"), cl::cat(ProfGenCategory));
+60: static cl::opt<std::string>
+61:     BinaryPath("binary", cl::value_desc("binary"), cl::Required,
+62:                cl::desc("Path of profiled executable binary."),
+63:                cl::cat(ProfGenCategory));
+65: static cl::opt<uint32_t>
+66:     ProcessId("pid", cl::value_desc("process Id"), cl::init(0),
+67:               cl::desc("Process Id for the profiled executable binary."),
+68:               cl::cat(ProfGenCategory));
+70: static cl::opt<std::string> DebugBinPath(
+71:     "debug-binary", cl::value_desc("debug-binary"),
+72:     cl::desc("Path of debug info binary, llvm-profgen will load the DWARF info "
+73:              "from it instead of the executable binary."),
+74:     cl::cat(ProfGenCategory));
+76: static cl::opt<std::string> DataAccessProfileFilename(
+77:     "data-access-perftrace", cl::value_desc("data-access-perftrace"),
+78:     cl::desc("File path of a Linux perf raw trace (generated by `perf report "
+79:              "-D`) consisting of memory access events."),
+80:     cl::cat(ProfGenCategory));
+85:   if (!ShowDisassemblyOnly) {
+87:     bool HasPerfData = PerfDataFilename.getNumOccurrences() > 0;
+88:     bool HasPerfScript = PerfScriptFilename.getNumOccurrences() > 0;
+89:     bool HasUnsymbolizedProfile =
+90:         UnsymbolizedProfFilename.getNumOccurrences() > 0;
+91:     bool HasSampleProfile = SampleProfFilename.getNumOccurrences() > 0;
+92:     uint16_t S =
+93:         HasPerfData + HasPerfScript + HasUnsymbolizedProfile + HasSampleProfile;
+94:     if (S != 1) {
+95:       std::string Msg =
+96:           S > 1
+97:               ? "`--perfscript`, `--perfdata` and `--unsymbolized-profile` "
+98:                 "cannot be used together."
+99:               : "Perf input file is missing, please use one of `--perfscript`, "
+100:                 "`--perfdata` and `--unsymbolized-profile` for the input.";
+101:       exitWithError(Msg);
+102:     }
+104:     auto CheckFileExists = [](bool H, StringRef File) {
+105:       if (H && !llvm::sys::fs::exists(File)) {
+106:         std::string Msg = "Input perf file(" + File.str() + ") doesn't exist.";
+107:         exitWithError(Msg);
+108:       }
+109:     };
+111:     CheckFileExists(HasPerfData, PerfDataFilename);
+112:     CheckFileExists(HasPerfScript, PerfScriptFilename);
+113:     CheckFileExists(HasUnsymbolizedProfile, UnsymbolizedProfFilename);
+114:     CheckFileExists(HasSampleProfile, SampleProfFilename);
+131: static PerfInputFile getPerfInputFile() {
+132:   PerfInputFile File;
+133:   if (PerfDataFilename.getNumOccurrences()) {
+134:     File.InputFile = PerfDataFilename;
+135:     File.Format = PerfFormat::PerfData;
+136:   } else if (PerfScriptFilename.getNumOccurrences()) {
+137:     File.InputFile = PerfScriptFilename;
+138:     File.Format = PerfFormat::PerfScript;
+139:   } else if (UnsymbolizedProfFilename.getNumOccurrences()) {
+140:     File.InputFile = UnsymbolizedProfFilename;
+141:     File.Format = PerfFormat::UnsymbolizedProfile;
+142:   }
+143:   return File;
+144: }
+146: } // end namespace llvm
+148: int main(int argc, const char *argv[]) {
+149:   InitLLVM X(argc, argv);
+152:   InitializeAllTargetInfos();
+153:   InitializeAllTargetMCs();
+154:   InitializeAllDisassemblers();
+156:   cl::HideUnrelatedOptions({&ProfGenCategory, &getColorCategory()});
+157:   cl::ParseCommandLineOptions(argc, argv, "llvm SPGO profile generator\n");
+158:   validateCommandLine();
+161:   std::unique_ptr<ProfiledBinary> Binary =
+162:       std::make_unique<ProfiledBinary>(BinaryPath, DebugBinPath);
+163:   if (ShowDisassemblyOnly)
+164:     return EXIT_SUCCESS;
+178:     Generator->write();
+179:   } else {
+180:     std::optional<uint32_t> PIDFilter;
+181:     if (ProcessId.getNumOccurrences())
+182:       PIDFilter = ProcessId;
+183:     PerfInputFile PerfFile = getPerfInputFile();
+184:     std::unique_ptr<PerfReaderBase> Reader =
+185:         PerfReaderBase::create(Binary.get(), PerfFile, PIDFilter);
+187:     Reader->parsePerfTraces();
+189:     if (!DataAccessProfileFilename.empty()) {
+190:       if (Reader->profileIsCS() || Binary->usePseudoProbes()) {
+191:         exitWithError("Symbolizing vtables from data access profiles is not "
+192:                       "yet supported for context-sensitive perf traces or "
+193:                       "when pseudo-probe based mapping is enabled. ");
+194:       }
+198:       if (Error E = Reader->parseDataAccessPerfTraces(DataAccessProfileFilename,
+199:                                                       PIDFilter)) {
+200:         handleAllErrors(std::move(E), [&](const StringError &SE) {
+201:           exitWithError(SE.getMessage());
+202:         });
+203:       }
+204:     }
+206:     if (SkipSymbolization)
+207:       return EXIT_SUCCESS;
+
+FILE: src/llvm/llvm/tools/llvm-profgen/PerfReader.h
+70: enum PerfContent {
+71:   UnknownContent = 0,
+72:   LBR = 1,      // Only LBR sample.
+73:   LBRStack = 2, // Hybrid sample including call stack and LBR stack.
+74: };
+76: struct PerfInputFile {
+77:   std::string InputFile;
+78:   PerfFormat Format = PerfFormat::UnknownFormat;
+79:   PerfContent Content = PerfContent::UnknownContent;
+
+FILE: src/llvm/llvm/tools/llvm-profgen/PerfReader.cpp
+346: std::unique_ptr<PerfReaderBase>
+347: PerfReaderBase::create(ProfiledBinary *Binary, PerfInputFile &PerfInput,
+348:                        std::optional<int32_t> PIDFilter) {
+349:   std::unique_ptr<PerfReaderBase> PerfReader;
+351:   if (PerfInput.Format == PerfFormat::UnsymbolizedProfile) {
+352:     PerfReader.reset(
+353:         new UnsymbolizedProfileReader(Binary, PerfInput.InputFile));
+354:     return PerfReader;
+355:   }
+359:   if (PerfInput.Format == PerfFormat::PerfData)
+360:     PerfInput = PerfScriptReader::convertPerfDataToTrace(
+361:         Binary, Binary->isKernel(), PerfInput, PIDFilter);
+363:   assert((PerfInput.Format == PerfFormat::PerfScript) &&
+364:          "Should be a perfscript!");
+366:   PerfInput.Content =
+367:       PerfScriptReader::checkPerfScriptType(PerfInput.InputFile);
+368:   if (PerfInput.Content == PerfContent::LBRStack) {
+369:     PerfReader.reset(
+370:         new HybridPerfReader(Binary, PerfInput.InputFile, PIDFilter));
+371:   } else if (PerfInput.Content == PerfContent::LBR) {
+372:     PerfReader.reset(new LBRPerfReader(Binary, PerfInput.InputFile, PIDFilter));
+373:   } else {
+374:     exitWithError("Unsupported perfscript!");
+375:   }
+377:   return PerfReader;
+451: PerfInputFile
+452: PerfScriptReader::convertPerfDataToTrace(ProfiledBinary *Binary, bool SkipPID,
+453:                                          PerfInputFile &File,
+454:                                          std::optional<int32_t> PIDFilter) {
+455:   StringRef PerfData = File.InputFile;
+457:   auto PerfExecutable = sys::Process::FindInEnvPath("PATH", "perf");
+458:   if (!PerfExecutable) {
+459:     exitWithError("Perf not found.");
+460:   }
+461:   std::string PerfPath = *PerfExecutable;
+462:   SmallString<128> PerfTraceFile;
+463:   sys::fs::createUniquePath("perf-script-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.tmp",
+464:                             PerfTraceFile, /*MakeAbsolute=*/true);
+465:   std::string ErrorFile = std::string(PerfTraceFile) + ".err";
+466:   std::optional<StringRef> Redirects[] = {std::nullopt,             // Stdin
+467:                                           StringRef(PerfTraceFile), // Stdout
+468:                                           StringRef(ErrorFile)};    // Stderr
+469:   PerfScriptReader::TempFileCleanups.emplace_back(PerfTraceFile);
+470:   PerfScriptReader::TempFileCleanups.emplace_back(ErrorFile);
+472:   std::string PIDs;
+473:   if (!SkipPID) {
+474:     StringRef ScriptMMapArgs[] = {PerfPath, "script",   "--show-mmap-events",
+475:                                   "-F",     "comm,pid", "-i",
+476:                                   PerfData};
+477:     sys::ExecuteAndWait(PerfPath, ScriptMMapArgs, std::nullopt, Redirects);
+480:     TraceStream TraceIt(PerfTraceFile);
+481:     std::unordered_set<int32_t> PIDSet;
+482:     while (!TraceIt.isAtEoF()) {
+483:       MMapEvent MMap;
+484:       if (isMMapEvent(TraceIt.getCurrentLine()) &&
+485:           extractMMapEventForBinary(Binary, TraceIt.getCurrentLine(), MMap)) {
+486:         auto It = PIDSet.emplace(MMap.PID);
+487:         if (It.second && (!PIDFilter || MMap.PID == *PIDFilter)) {
+488:           if (!PIDs.empty()) {
+489:             PIDs.append(",");
+490:           }
+491:           PIDs.append(utostr(MMap.PID));
+492:         }
+493:       }
+494:       TraceIt.advance();
+495:     }
+497:     if (PIDs.empty()) {
+498:       exitWithError("No relevant mmap event is found in perf data.");
+499:     }
+500:   }
+503:   SmallVector<StringRef, 8> ScriptSampleArgs;
+504:   ScriptSampleArgs.push_back(PerfPath);
+505:   ScriptSampleArgs.push_back("script");
+506:   ScriptSampleArgs.push_back("--show-mmap-events");
+507:   ScriptSampleArgs.push_back("-F");
+508:   ScriptSampleArgs.push_back("ip,brstack");
+509:   ScriptSampleArgs.push_back("-i");
+510:   ScriptSampleArgs.push_back(PerfData);
+511:   if (!PIDs.empty()) {
+512:     ScriptSampleArgs.push_back("--pid");
+513:     ScriptSampleArgs.push_back(PIDs);
+514:   }
+515:   sys::ExecuteAndWait(PerfPath, ScriptSampleArgs, std::nullopt, Redirects);
+517:   return {std::string(PerfTraceFile), PerfFormat::PerfScript,
+518:           PerfContent::UnknownContent};
+534: void PerfScriptReader::updateBinaryAddress(const MMapEvent &Event) {
+536:   StringRef BinaryName = filename(Event.BinaryPath, Binary->isCOFF());
+537:   bool IsKernel = Binary->isKernel();
+538:   if (!IsKernel && Binary->getName() != BinaryName)
+539:     return;
+540:   if (IsKernel && !Binary->isKernelImageName(BinaryName))
+541:     return;
+544:   if (PIDFilter && Event.PID != *PIDFilter)
+545:     return;
+548:   if (Event.Address == Binary->getBaseAddress()) {
+549:     Binary->setIsLoadedByMMap(true);
+550:     return;
+551:   }
+553:   if (IsKernel || Event.Offset == Binary->getTextSegmentOffset()) {
+559:     Binary->setBaseAddress(Event.Address);
+560:     Binary->setIsLoadedByMMap(true);
+561:   } else {
+563:     const auto &Offsets = Binary->getTextSegmentOffsets();
+564:     auto It = llvm::lower_bound(Offsets, Event.Offset);
+565:     if (It != Offsets.end() && *It == Event.Offset) {
+567:       auto I = std::distance(Offsets.begin(), It);
+568:       const auto &PreferredAddrs = Binary->getPreferredTextSegmentAddresses();
+569:       if (PreferredAddrs[I] - Binary->getPreferredBaseAddress() !=
+570:           Event.Address - Binary->getBaseAddress())
+571:         exitWithError("Executable segments not loaded consecutively");
+572:     } else {
+573:       if (It == Offsets.begin())
+574:         exitWithError("File offset not found");
+575:       else {
+578:         --It;
+579:         assert(*It < Event.Offset);
+580:         if (Event.Offset - *It != Event.Address - Binary->getBaseAddress())
+581:           exitWithError("Segment not loaded by consecutive mmaps");
+582:       }
+583:     }
+584:   }
+1124:   StringRef BinaryName = filename(MMap.BinaryPath, Binary->isCOFF());
+1125:   if (Binary->isKernel()) {
+1126:     return Binary->isKernelImageName(BinaryName);
+1127:   }
+1128:   return Binary->getName() == BinaryName;
+1129: }
+1156: bool PerfScriptReader::isLBRSample(StringRef Line) {
+1158:   SmallVector<StringRef, 32> Records;
+1159:   Line.trim().split(Records, " ", 2, false);
+1160:   if (Records.size() < 2)
+1161:     return false;
+1162:   if (Records[1].starts_with("0x") && Records[1].contains('/'))
+1163:     return true;
+1164:   return false;
+1165: }
+1190: PerfContent PerfScriptReader::checkPerfScriptType(StringRef FileName) {
+1191:   TraceStream TraceIt(FileName);
+1192:   uint64_t FrameAddr = 0;
+1193:   while (!TraceIt.isAtEoF()) {
+1195:     if (!TraceIt.getCurrentLine().getAsInteger(10, FrameAddr))
+1196:       TraceIt.advance();
+1199:     int32_t Count = 0;
+1200:     while (!TraceIt.isAtEoF() &&
+1201:            !TraceIt.getCurrentLine().ltrim().getAsInteger(16, FrameAddr)) {
+1202:       Count++;
+1203:       TraceIt.advance();
+1204:     }
+1205:     if (!TraceIt.isAtEoF()) {
+1206:       if (isLBRSample(TraceIt.getCurrentLine())) {
+1207:         if (Count > 0)
+1208:           return PerfContent::LBRStack;
+1209:         else
+1210:           return PerfContent::LBR;
+1211:       }
+1212:       TraceIt.advance();
+1213:     }
+1214:   }
+1216:   exitWithError("Invalid perf script input!");
+1217:   return PerfContent::UnknownContent;
+1218: }
+1261:   if (Ranges.empty()) {
+1262:     WithColor::warning() << "No samples in perf script!\n";
+1263:     return;
+1264:   }
+1266:   auto WarnInvalidRange = [&](uint64_t StartAddress, uint64_t EndAddress,
+1267:                               StringRef Msg) {
+1268:     if (!ShowDetailedWarning)
+1269:       return;
+1270:     WithColor::warning() << "[" << format("%8" PRIx64, StartAddress) << ","
+1271:                          << format("%8" PRIx64, EndAddress) << "]: " << Msg
+1272:                          << "\n";
+1273:   };
+1275:   const char *EndNotBoundaryMsg = "Range is not on instruction boundary, "
+1276:                                   "likely due to profile and binary mismatch.";
+1277:   const char *DanglingRangeMsg = "Range does not belong to any functions, "
+1278:                                  "likely from PLT, .init or .fini section.";
+1279:   const char *RangeCrossFuncMsg =
+1280:       "Fall through range should not cross function boundaries, likely due to "
+1281:       "profile and binary mismatch.";
+1282:   const char *BogusRangeMsg = "Range start is after or too far from range end.";
+1324:       BogusRange += I.second;
+1325:       WarnInvalidRange(StartAddress, EndAddress, BogusRangeMsg);
+1326:     }
+1327:   }
+1329:   emitWarningSummary(
+1330:       InstNotBoundary, TotalRangeNum,
+1331:       "of samples are from ranges that are not on instruction boundary.");
+1332:   emitWarningSummary(
+1333:       UnmatchedRange, TotalRangeNum,
+1334:       "of samples are from ranges that do not belong to any functions.");
+1335:   emitWarningSummary(RecoveredRange, TotalRangeNum,
+1336:                      "of samples are from ranges that belong to functions "
+1337:                      "recovered from symbol table.");
+1338:   emitWarningSummary(
+1339:       RangeCrossFunc, TotalRangeNum,
+1340:       "of samples are from ranges that do cross function boundaries.");
+1341:   emitWarningSummary(
+1342:       BogusRange, TotalRangeNum,
+1343:       "of samples are from ranges that have range start after or too far from "
+1344:       "range end acrossing the unconditinal jmp.");
+1345: }
+1347: void PerfScriptReader::parsePerfTraces() {
+1349:   parseAndAggregateTrace();
+1350:   if (Binary->isKernel() && !Binary->getIsLoadedByMMap()) {
+1351:     exitWithError(
+1352:         "Kernel is requested, but no kernel is found in mmap events.");
+1353:   }
+1355:   emitWarningSummary(NumLeafExternalFrame, NumTotalSample,
+1356:                      "of samples have leaf external frame in call stack.");
+1357:   emitWarningSummary(NumLeadingOutgoingLBR, NumTotalSample,
+
+FILE: src/llvm/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+76: static cl::opt<bool>
+77:     KernelBinary("kernel",
+78:                  cl::desc("Generate the profile for Linux kernel binary."),
+79:                  cl::cat(ProfGenCategory));
+81: namespace sampleprof {
+83: static const Target *getTarget(const ObjectFile *Obj) {
+84:   Triple TheTriple = Obj->makeTriple();
+85:   std::string Error;
+86:   std::string ArchName;
+87:   const Target *TheTarget =
+88:       TargetRegistry::lookupTarget(ArchName, TheTriple, Error);
+89:   if (!TheTarget)
+90:     exitWithError(Error, Obj->getFileName());
+91:   return TheTarget;
+92: }
+230:   OwningBinary<Binary> OBinary = unwrapOrError(createBinary(Path), Path);
+231:   Binary &ExeBinary = *OBinary.getBinary();
+233:   IsCOFF = isa<COFFObjectFile>(&ExeBinary);
+234:   if (!isa<ELFObjectFileBase>(&ExeBinary) && !IsCOFF)
+235:     exitWithError("not a valid ELF/COFF image", Path);
+237:   auto *Obj = cast<ObjectFile>(&ExeBinary);
+238:   TheTriple = Obj->makeTriple();
+240:   LLVM_DEBUG(dbgs() << "Loading " << Path << "\n");
+243:   IsKernel = KernelBinary;
+246:   setPreferredTextSegmentAddresses(Obj);
+251:   if (!DebugBinaryPath.empty()) {
+252:     OwningBinary<Binary> DebugPath =
+336: template <class ELFT>
+337: void ProfiledBinary::setPreferredTextSegmentAddresses(const ELFFile<ELFT> &Obj,
+338:                                                       StringRef FileName) {
+339:   const auto &PhdrRange = unwrapOrError(Obj.program_headers(), FileName);
+344:   uint64_t PageSize = 0x1000;
+345:   for (const typename ELFT::Phdr &Phdr : PhdrRange) {
+346:     if (Phdr.p_type == ELF::PT_LOAD) {
+347:       if (!FirstLoadableAddress)
+348:         FirstLoadableAddress = Phdr.p_vaddr & ~(PageSize - 1U);
+349:       if (Phdr.p_flags & ELF::PF_X) {
+351:         PreferredTextSegmentAddresses.push_back(Phdr.p_vaddr &
+352:                                                 ~(PageSize - 1U));
+353:         TextSegmentOffsets.push_back(Phdr.p_offset & ~(PageSize - 1U));
+354:       } else {
+355:         PhdrInfo Info;
+356:         Info.FileOffset = Phdr.p_offset;
+357:         Info.FileSz = Phdr.p_filesz;
+358:         Info.VirtualAddr = Phdr.p_vaddr;
+359:         NonTextPhdrInfo.push_back(Info);
+360:       }
+361:     }
+362:   }
+364:   if (PreferredTextSegmentAddresses.empty())
+365:     exitWithError("no executable segment found", FileName);
+415:   if (const auto *ELFObj = dyn_cast<ELF32LEObjectFile>(Obj))
+416:     setPreferredTextSegmentAddresses(ELFObj->getELFFile(), Obj->getFileName());
+417:   else if (const auto *ELFObj = dyn_cast<ELF32BEObjectFile>(Obj))
+418:     setPreferredTextSegmentAddresses(ELFObj->getELFFile(), Obj->getFileName());
+419:   else if (const auto *ELFObj = dyn_cast<ELF64LEObjectFile>(Obj))
+420:     setPreferredTextSegmentAddresses(ELFObj->getELFFile(), Obj->getFileName());
+421:   else if (const auto *ELFObj = dyn_cast<ELF64BEObjectFile>(Obj))
+422:     setPreferredTextSegmentAddresses(ELFObj->getELFFile(), Obj->getFileName());
+423:   else if (const auto *COFFObj = dyn_cast<COFFObjectFile>(Obj))
+995: void ProfiledBinary::loadSymbolsFromDWARF(ObjectFile &Obj) {
+996:   auto DebugContext = llvm::DWARFContext::create(
+997:       Obj, DWARFContext::ProcessDebugRelocations::Process, nullptr, DWPPath);
+998:   if (!DebugContext)
+999:     exitWithError("Error creating the debug info context", Path);
+1001:   for (const auto &CompilationUnit : DebugContext->compile_units())
+1002:     loadSymbolsFromDWARFUnit(*CompilationUnit);
+1005:   uint32_t NumOfDWOMissing = 0;
+1006:   for (const auto &CompilationUnit : DebugContext->compile_units()) {
+1007:     DWARFUnit *const DwarfUnit = CompilationUnit.get();
+1008:     if (DwarfUnit->getDWOId()) {
+1009:       DWARFUnit *DWOCU = DwarfUnit->getNonSkeletonUnitDIE(false).getDwarfUnit();
+1010:       if (!DWOCU->isDWOUnit()) {
+1011:         NumOfDWOMissing++;
+1012:         if (ShowDetailedWarning) {
+1013:           std::string DWOName = dwarf::toString(
+1014:               DwarfUnit->getUnitDIE().find(
+1015:                   {dwarf::DW_AT_dwo_name, dwarf::DW_AT_GNU_dwo_name}),
+1016:               "");
+1017:           WithColor::warning() << "DWO debug information for " << DWOName
+1018:                                << " was not loaded.\n";
+1019:         }
+1020:         continue;
+1021:       }
+1022:       loadSymbolsFromDWARFUnit(*DWOCU);
+1023:     }
+1024:   }
+1026:   if (NumOfDWOMissing)
+1027:     WithColor::warning()
+1028:         << " DWO debug information was not loaded for " << NumOfDWOMissing
+1029:         << " modules. Please check the .o, .dwo or .dwp path.\n";
+1030:   if (BinaryFunctions.empty())
+1031:     WithColor::warning() << "Loading of DWARF info completed, but no binary "
+1032:                             "functions have been retrieved.\n";
+
+FILE: src/llvm/llvm/tools/llvm-profgen/ProfiledBinary.h
+581:   getFrameLocationStack(uint64_t Address, bool UseProbeDiscriminator = false) {
+582:     InstructionPointer IP(this, Address);
+583:     return symbolize(IP, SymbolizerOpts.UseSymbolTable, UseProbeDiscriminator);
+584:   }
+586:   const SampleContextFrameVector &
+587:   getCachedFrameLocationStack(uint64_t Address,
+588:                               bool UseProbeDiscriminator = false) {
+589:     auto I = AddressToLocStackMap.emplace(Address, SampleContextFrameVector());
+590:     if (I.second) {
+591:       I.first->second = getFrameLocationStack(Address, UseProbeDiscriminator);
+592:     }
+593:     return I.first->second;
+594:   }
+596:   std::optional<SampleContextFrame> getInlineLeafFrameLoc(uint64_t Address) {
+597:     const auto &Stack = getCachedFrameLocationStack(Address);
+598:     if (Stack.empty())
+599:       return {};
+600:     return Stack.back();
+601:   }
+603:   void flushSymbolizer() { Symbolizer.reset(); }
+605:   MissingFrameInferrer *getMissingContextInferrer() {
+
+FILE: src/llvm/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+30: static cl::opt<SampleProfileFormat> OutputFormat(
+31:     "format", cl::desc("Format of output profile"), cl::init(SPF_Ext_Binary),
+32:     cl::values(clEnumValN(SPF_Binary, "binary", "Binary encoding (default)"),
+33:                clEnumValN(SPF_Ext_Binary, "extbinary",
+34:                           "Extensible binary encoding"),
+35:                clEnumValN(SPF_Text, "text", "Text encoding"),
+36:                clEnumValN(SPF_GCC, "gcc",
+37:                           "GCC encoding (only meaningful for -sample)")),
+38:     cl::cat(ProfGenCategory));
+40: static cl::opt<bool> UseMD5(
+41:     "use-md5", cl::Hidden,
+42:     cl::desc("Use md5 to represent function names in the output profile (only "
+43:              "meaningful for -extbinary)"));
+45: static cl::opt<bool> PopulateProfileSymbolList(
+46:     "populate-profile-symbol-list", cl::init(false), cl::Hidden,
+47:     cl::desc("Populate profile symbol list (only meaningful for -extbinary)"));
+49: static cl::opt<bool> FillZeroForAllFuncs(
+50:     "fill-zero-for-all-funcs", cl::init(false), cl::Hidden,
+51:     cl::desc("Attribute all functions' range with zero count "
+52:              "even it's not hit by any samples."));
+54: static cl::opt<int32_t, true> RecursionCompression(
+55:     "compress-recursion",
+56:     cl::desc("Compressing recursion by deduplicating adjacent frame "
+57:              "sequences up to the specified size. -1 means no size limit."),
+58:     cl::Hidden,
+59:     cl::location(llvm::sampleprof::CSProfileGenerator::MaxCompressionSize));
+61: static cl::opt<bool>
+62:     TrimColdProfile("trim-cold-profile",
+63:                     cl::desc("If the total count of the profile is smaller "
+64:                              "than threshold, it will be trimmed."),
+65:                     cl::cat(ProfGenCategory));
+67: static cl::opt<bool> MarkAllContextPreinlined(
+68:     "mark-all-context-preinlined",
+69:     cl::desc("Mark all function samples as preinlined(set "
+70:              "ContextShouldBeInlined attribute)."),
+71:     cl::init(false));
+73: static cl::opt<bool> CSProfMergeColdContext(
+74:     "csprof-merge-cold-context", cl::init(true),
+75:     cl::desc("If the total count of context profile is smaller than "
+76:              "the threshold, it will be merged into context-less base "
+77:              "profile."),
+78:     cl::cat(ProfGenCategory));
+80: static cl::opt<uint32_t> CSProfMaxColdContextDepth(
+81:     "csprof-max-cold-context-depth", cl::init(1),
+82:     cl::desc("Keep the last K contexts while merging cold profile. 1 means the "
+83:              "context-less base profile"),
+84:     cl::cat(ProfGenCategory));
+86: static cl::opt<int, true> CSProfMaxContextDepth(
+87:     "csprof-max-context-depth",
+88:     cl::desc("Keep the last K contexts while merging profile. -1 means no "
+89:              "depth limit."),
+90:     cl::location(llvm::sampleprof::CSProfileGenerator::MaxContextDepth),
+91:     cl::cat(ProfGenCategory));
+93: static cl::opt<double> ProfileDensityThreshold(
+94:     "profile-density-threshold", cl::init(50),
+95:     cl::desc("If the profile density is below the given threshold, it "
+96:              "will be suggested to increase the sampling rate."),
+97:     cl::Optional, cl::cat(ProfGenCategory));
+98: static cl::opt<bool> ShowDensity("show-density", cl::init(false),
+99:                                  cl::desc("show profile density details"),
+100:                                  cl::Optional, cl::cat(ProfGenCategory));
+101: static cl::opt<int> ProfileDensityCutOffHot(
+102:     "profile-density-cutoff-hot", cl::init(990000),
+103:     cl::desc("Total samples cutoff for functions used to calculate "
+104:              "profile density."),
+105:     cl::cat(ProfGenCategory));
+107: static cl::opt<bool> UpdateTotalSamples(
+108:     "update-total-samples", cl::init(false),
+109:     cl::desc("Update total samples by accumulating all its body samples."),
+110:     cl::Optional, cl::cat(ProfGenCategory));
+112: static cl::opt<bool> GenCSNestedProfile(
+113:     "gen-cs-nested-profile", cl::Hidden, cl::init(true),
+114:     cl::desc("Generate nested function profiles for CSSPGO"));
+116: cl::opt<bool> InferMissingFrames(
+162: void ProfileGeneratorBase::write(std::unique_ptr<SampleProfileWriter> Writer,
+163:                                  SampleProfileMap &ProfileMap) {
+165:   ProfileSymbolList SymbolList;
+167:   if (PopulateProfileSymbolList && OutputFormat == SPF_Ext_Binary) {
+168:     Binary->populateSymbolListFromDWARF(SymbolList);
+169:     Writer->setProfileSymbolList(&SymbolList);
+170:   }
+172:   if (std::error_code EC = Writer->write(ProfileMap))
+173:     exitWithError(std::move(EC));
+174: }
+176: void ProfileGeneratorBase::write() {
+177:   auto WriterOrErr = SampleProfileWriter::create(OutputFilename, OutputFormat);
+178:   if (std::error_code EC = WriterOrErr.getError())
+179:     exitWithError(EC, OutputFilename);
+181:   if (UseMD5) {
+182:     if (OutputFormat != SPF_Ext_Binary)
+183:       WithColor::warning() << "-use-md5 is ignored. Specify "
+184:                               "--format=extbinary to enable it\n";
+185:     else
+186:       WriterOrErr.get()->setUseMD5();
+393: void ProfileGeneratorBase::updateBodySamplesforFunctionProfile(
+394:     FunctionSamples &FunctionProfile, const SampleContextFrame &LeafLoc,
+395:     uint64_t Count) {
+397:   uint32_t Discriminator = getBaseDiscriminator(LeafLoc.Location.Discriminator);
+402:   Count *= getDuplicationFactor(LeafLoc.Location.Discriminator);
+404:   ErrorOr<uint64_t> R =
+405:       FunctionProfile.findSamplesAt(LeafLoc.Location.LineOffset, Discriminator);
+407:   uint64_t PreviousCount = R ? R.get() : 0;
+408:   if (PreviousCount <= Count) {
+409:     FunctionProfile.addBodySamples(LeafLoc.Location.LineOffset, Discriminator,
+410:                                    Count - PreviousCount);
+552:   for (const auto &I : ColdProfileHashes)
+553:     ProfileMap.erase(I);
+554: }
+556: void ProfileGenerator::generateLineNumBasedProfile() {
+557:   assert(SampleCounters->size() == 1 &&
+558:          "Must have one entry for profile generation.");
+559:   const SampleCounter &SC = SampleCounters->begin()->second;
+561:   populateBodySamplesForAllFunctions(SC.RangeCounter);
+563:   populateBoundarySamplesForAllFunctions(SC.BranchCounter);
+564:   populateTypeSamplesForAllFunctions(SC.DataAccessCounter);
+566:   updateFunctionSamples();
+567: }
+569: void ProfileGenerator::generateProbeBasedProfile() {
+570:   assert(SampleCounters->size() == 1 &&
+571:          "Must have one entry for profile generation.");
+573:   FunctionSamples::ProfileIsProbeBased = true;
+574:   const SampleCounter &SC = SampleCounters->begin()->second;
+576:   populateBodySamplesWithProbesForAllFunctions(SC.RangeCounter);
+578:   populateBoundarySamplesWithProbesForAllFunctions(SC.BranchCounter);
+591:   for (const auto &PI : ProbeCounter) {
+592:     const MCDecodedPseudoProbe *Probe = PI.first;
+593:     uint64_t Count = PI.second;
+594:     SampleContextFrameVector FrameVec;
+595:     Binary->getInlineContextForProbe(Probe, FrameVec, true);
+596:     FunctionSamples &FunctionProfile =
+597:         getLeafProfileAndAddTotalSamples(FrameVec, Count);
+598:     FunctionProfile.addBodySamples(Probe->getIndex(), Probe->getDiscriminator(),
+599:                                    Count);
+600:     if (Probe->isEntry())
+601:       FunctionProfile.addHeadSamples(Count);
+602:   }
+751:   for (const auto &Entry : BranchCounters) {
+752:     uint64_t SourceAddress = Entry.first.first;
+753:     uint64_t TargetAddress = Entry.first.second;
+754:     uint64_t Count = Entry.second;
+755:     assert(Count != 0 && "Unexpected zero weight branch");
+757:     StringRef CalleeName = getCalleeNameForAddress(TargetAddress);
+758:     if (CalleeName.size() == 0)
+759:       continue;
+761:     const SampleContextFrameVector &FrameVec =
+762:         Binary->getCachedFrameLocationStack(SourceAddress);
+763:     if (!FrameVec.empty()) {
+764:       FunctionSamples &FunctionProfile =
+765:           getLeafProfileAndAddTotalSamples(FrameVec, 0);
+766:       FunctionProfile.addCalledTargetSamples(
+767:           FrameVec.back().Location.LineOffset,
+768:           getBaseDiscriminator(FrameVec.back().Location.Discriminator),
+769:           FunctionId(CalleeName), Count);
+770:     }
+772:     FunctionSamples &CalleeProfile =
+773:         getTopLevelFunctionProfile(FunctionId(CalleeName));
+774:     CalleeProfile.addHeadSamples(Count);
+775:   }
+840: double
+841: ProfileGeneratorBase::calculateDensity(const SampleProfileMap &Profiles) {
+842:   double ProfileDensity = 0.0;
+844:   uint64_t TotalProfileSamples = 0;
+846:   std::vector<std::pair<double, uint64_t>> FuncDensityList;
+847:   for (const auto &I : Profiles) {
+848:     uint64_t TotalBodySamples = 0;
+849:     uint64_t FuncBodySize = 0;
+850:     calculateBodySamplesAndSize(I.second, TotalBodySamples, FuncBodySize);
+961: void CSProfileGenerator::computeSizeForProfiledFunctions() {
+962:   for (auto *Func : Binary->getProfiledFunctions())
+963:     Binary->computeInlinedContextSizeForFunc(Func);
+966:   Binary->flushSymbolizer();
+967: }
+1150: void CSProfileGenerator::postProcessProfiles() {
+1153:   computeSummaryAndThreshold();
+1157:   if (EnableCSPreInliner) {
+1158:     ContextTracker.populateFuncToCtxtMap();
+1159:     CSPreInliner(ContextTracker, *Binary, Summary.get()).run();
+1161:     if (!CSProfMergeColdContext.getNumOccurrences())
+1162:       CSProfMergeColdContext = false;
+1163:   }
+1165:   convertToProfileMap();
+1168:   if (TrimColdProfile || CSProfMergeColdContext) {
+1169:     SampleContextTrimmer(ProfileMap)
+1170:         .trimAndMergeColdContextProfiles(
+1171:             HotCountThreshold, TrimColdProfile, CSProfMergeColdContext,
+1172:             CSProfMaxColdContextDepth, EnableCSPreInliner);
+1173:   }
+1175:   if (GenCSNestedProfile) {
+
+COMMAND: rg -n -i coresight|cs_etm|itrace|\bETM\b temp/autofdo --glob *.cc --glob *.h --glob !third_party/** --glob !*test*
+EXIT 1
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+COMMAND: rg -n -i coresight|cs_etm|itrace|\bETM\b|perf_spe|ArmSpeDecoder|build.?id src/llvm/llvm/tools/llvm-profgen --glob *.cpp --glob *.h
+EXIT 1
+STDOUT:
+(empty)
+STDERR:
+(empty)

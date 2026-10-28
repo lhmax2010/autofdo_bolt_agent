@@ -23,7 +23,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与完成状态（2026-10-28；RPi5 AutoFDO / 插桩 PGO spike）
+## 当前授权与执行状态（2026-10-28；llvm-profgen 增强准备，已完成）
+
+- 本轮只读分析 GBS/depanneur/Google AutoFDO/llvm-profgen，完成一次未修改 llvm x86_64 全目标基线构建；不修改 LLVM 跟踪源码/spec，不连接开发板，不推 Gerrit。**停在设计确认阶段，不开始增强实现。**
+- src/llvm 开始/结束 status 均为空，HEAD=f999bd406c0a70fe8107aa992164fe6945c5d46a；新分支 afdo/profgen-enhance、worktree=temp/llvm-profgen-enh 跟踪文件无改动，仅保留生成资产/对象/manifest。
+- 增量结论：可以增量，但须固定 worktree/root/参数并保留对象、提前准备被跳过的 %prep 资产。当前 spec 不必改；修改源码后的增量耗时尚未实测。GBS 每次仍执行完整 %build/%install/产包。
+- 构建 20:33:42–21:33:09+08:00，59分27秒，无重跑；GBS_EXIT=0、ALL-END OK。22 二进制 RPM + 1 SRPM 已记录 SHA-256，新编 llvm-profgen 22.1.8 运行退出0；short-circuit RPM 属开发产物，SRPM 不等同完整导出源码。
+- 资源采样最低 available=16663 MiB，未观察到低于2GB；load 1/5/15分钟观测峰值15.11/10.58/9.17。全部临时产物仍在 temp/GBS-ROOT-LLVM-X86、temp/llvm-profgen-enh、temp/profgen-prep。
+- 交付 [增量与基线报告](profgen/00_incremental_build.md)、[23项差异表](profgen/01_gap_analysis.md)、三份 profgen 证据与本状态文件，同一 commit 推送。无新增已知边界例外。
+
+## 前轮授权与完成状态（历史；RPi5 AutoFDO / 插桩 PGO spike）
 
 - 本轮允许 GBS 构建测试包、板上仅写 /opt/afdo_agent；不改 LLVM/BOLT/内核源码，不安装板上 RPM、不 remount/重启。Google AutoFDO 仅克隆只读、不构建。所有测试与清理已完成。
 - llvm-profgen 22.1.8 对 cycles/cpu-clock 两份无分支栈 IP 输入均真实退出 1（Invalid perf script input!），没有生成 profile、没有 AFDO 重编。Google --use_lbr=false 和 BOLT -ba 是源码支持路径，未动态验证。
@@ -80,9 +89,11 @@
 
 # 项目状态
 
-更新：2026-10-28（Asia/Shanghai）。阶段：RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-28（Asia/Shanghai）。阶段：llvm-profgen 增强准备和 x86_64 未修改基线已完成，等待设计确认；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
+
+- 当前准备任务已完成。等待用户确认纯 IP 输入、身份/地址校验和诊断的设计范围；未经新指令不开始 LLVM 增强。保留增量 buildroot/worktree，不重复基线构建。
 
 - 本轮工具 spike 已完成，不重复采集/构建。建议 RPi5 默认插桩 PGO；RPi4 先验证 ARM runtime/全链路。Google 无 LBR 转换和 BOLT -ba 保留为需后续授权验证的候选。
 
@@ -103,7 +114,13 @@
 
 ## 进度
 
-### RPi5 AutoFDO / 插桩 PGO spike（当前，已完成）
+### llvm-profgen 增强准备（当前，已完成）
+
+- GBS/depanneur/build helper 源码核对：bind 源码、跳过 prep、完整执行 build/install 并生成 short-circuit RPM；单包限制和 noinit 条件已记录。[增量源码证据](profgen/evidence/01_incremental_source.txt)
+- 未修改基线完成 7633 个 Ninja 步骤，真实 GBS 退出0、ALL-END OK；平台加载器/工具验收新 profgen 成功，23 个产物逐文件 SHA-256 已保存。[构建证据](profgen/evidence/03_baseline_build.txt)
+- 差异表覆盖输入/匹配/计数/输出/规模/诊断，并区分 Google 独有、双方已有和未实测能力；建议先做纯 IP、身份/地址正确性与有效样本诊断，模块、raw reader、SPE 分期。[差异源码证据](profgen/evidence/02_gap_source.txt)
+
+### RPi5 AutoFDO / 插桩 PGO spike（历史，已完成）
 
 - 源码固定 LLVM f999bd406c0a70fe8107aa992164fe6945c5d46a、Google AutoFDO f95d1a170dfe24ec5ce4117aa4b0f6d836841703；均保持干净。源码结论详见 [报告 §2](spike/01_afdo_pgo_feasibility.md)。
 - 测试包独立本地提交 9925a104708449edabb82afe152d68a0a5b9c908；结果仓库跟踪三个普通文本文件，不跟踪嵌套 Git 元数据。174 行 C、固定 2500000 轮，所有正式运行 checksum=a31c311b953a2ac5。
@@ -210,6 +227,9 @@
 
 ## 已闭合结论（附证据路径）
 
+- 当前 LLVM spec 有条件支持对象复用；空目录完整基线已成功，差量耗时仍是估算。新 llvm-profgen 可运行，原 src/llvm 保持干净。[00](profgen/00_incremental_build.md)、[E3](profgen/evidence/03_baseline_build.txt)
+- Google 的普通 IP、build-id 匹配等可作参考；行/内联计数、discriminator、符号列表和多种输出 LLVM 已有，不能重复列为缺失。[23项差异表](profgen/01_gap_analysis.md)、[E2](profgen/evidence/02_gap_source.txt)
+
 - llvm-profgen 当前纯 IP 输入不可用；Google 无 LBR 和 BOLT -ba 仅源码支持，BOLT 排除 ARM32。[源码证据](spike/evidence/01_source_analysis.txt)、[实测 profile 证据](spike/evidence/04_profiles.txt)。不能据此把所有 AutoFDO 路径判不可用。
 - RPi5 插桩 PGO 已实际构建/采集/合并/重编/正确性验证；未证明稳定性能收益。报告与限制：[01_afdo_pgo_feasibility.md](spike/01_afdo_pgo_feasibility.md)。
 
@@ -254,6 +274,8 @@
 
 ## 待人工裁决
 
+- llvm-profgen 增强设计：先做普通 IP 文本入口、身份与 DSO/PIE 归一化、有效样本统计；是否另立 raw perf.data reader、ET_REL 模块、Chromium 规模和未来 SPE 专项。待用户确认，不开始改代码。
+
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、RPi4 插桩与 RPi5 BOLT -ba。
 
 - 用户合入 Gerrit 并发起 Quickbuild 的时间与新镜像交付；Agent 不向 Gerrit 推送，最新补丁本轮尚未构建/启动。
@@ -265,6 +287,8 @@
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
+
+- 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
 
 - Google create_llvm_prof --use_lbr=false 的端到端运行/行计数质量、ARM/Thumb 正确性和 BOLT -ba 优化仍未实测；RPi4 插桩 PGO 需要 armv7l 构建/训练/匹配/正确性闭环。当前 llvm-profgen 的纯 IP 拒绝已闭合，不待重试。
 - 本轮性能测量次数少且未随机交错，PGO −0.12% 仅为观测差；真实场景收益、跨输入泛化需独立评估。
