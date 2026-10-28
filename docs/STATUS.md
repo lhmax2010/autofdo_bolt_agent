@@ -23,7 +23,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前任务授权：PMUv3 内核构建准备（第一段）
+## 当前授权与停止条件（2026-10-28）
+
+- 用户已允许 Agent 原样启动构建脚本并监测；不修改脚本、配置或 spec，不操作开发板。安装和重启仍由用户执行。
+- 原定以 ALL-END OK 为第二段入口；失败只允许明确的临时网络问题原样重跑一次，其他失败停止；8 小时无标记停止监测而不结束进程。
+- 最新只读例外允许检查 PID 98602/98603、子孙链与 scratch/.build.log。用户明确要求：若进程已退出而没有 ALL-END，记录证据后停止等待，不补写标记。
+- **当前已触发该停止条件。** 常规监测已停止，未开始产物/clang/普通版及 RT 配置核验，没有生成安装步骤；等待下一条指示。
+
+## 历史授权：PMUv3 内核构建准备（第一段）
 
 - 仅准备源码分支/worktree、构建配置和一键脚本，Agent **不连接开发板，不执行任何构建，不运行构建脚本**；只用 bash -n 做语法检查。
 - 不修改 config/ 下两份用户配置，不修改 src/linux-rpi 检出的文件；唯一源码改动放 temp/linux-rpi-pmuv3 的 afdo/pmuv3 分支。开始/结束原工作树状态必须为空。
@@ -38,12 +45,12 @@
 
 # 项目状态
 
-更新：2026-10-27（Asia/Shanghai）。阶段：PMUv3 内核构建准备完成，等待用户执行脚本。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-28（Asia/Shanghai）。阶段：日志报告构建成功，但任务进程已退出且 ALL-END 缺失；按用户指令停止等待。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 当前第一段：已完成精确基线 worktree、单行 PMUv3 配置提交、固定工具链快照/专用 HOME、前台预检及后台结束标记脚本；不启动构建。
-- 用户运行 `/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/build_pmuv3_kernel.sh` 后通知结果。
+- 第一段准备完成；后续授权的原样启动和监测已执行，未修改脚本/配置/spec，未重跑。
+- 当前因进程退出而 ALL-END 缺失停止，等待用户指示；不自动重新启动或补写结束标记。
 - 第二段：先确认 ALL-END OK，再核对 RPM 中配置和基线差异，编写 docs/kernel/02_pmuv3_install.md；此文件尚未生成。
 
 以下为前序探测计划与持续纪律：
@@ -57,12 +64,21 @@
 
 ## 进度
 
-### 内核构建准备（当前；第一段完成）
+### 构建执行与异常停止（当前）
+
+- 2026-10-28 11:56:53+08:00 原样启动脚本，前台退出 0，worker=98602、GBS=98603。
+- 监测看到源码导出、固定快照依赖下载、内核/模块编译及普通/RT 打包推进。没有观察到 sudo 环境限制，无网络重跑。
+- 外层日志记录 spec 于 12:30:30+08:00 完成，并给出 Total succeeded built packages: (1)；但 status 持续 PHASE BUILDING / GBS_EXIT RUNNING，没有 ALL-END。真实 GBS 退出码及包装任务结束时间未知。
+- 13:12:59 / 13:14:08 的授权只读检查：ps -p 两个 PID 无条目（exit=1），递归子孙链无匹配，同一 ps 快照中任务路径匹配也为空。scratch.armv7l.0/.build.log 不存在（非权限拒绝），未提权。
+- 按最新停止规则结束监测；没有结束进程、补写 status、重跑或进入第二段。原始记录 temp/pmuv3-monitor/stop_evidence.txt；报告 [03_pmuv3_build_result.md](kernel/03_pmuv3_build_result.md) 含 status 全文与外层日志最后 50 行。
+- 01 文档已撤回“未直接修改 RT 输入即代表 RT 最终未启用 PMUv3”的推断；普通/RT 实际配置、clang 和 ELF .comment 尚未核验。安装文档未生成。
+
+### 内核构建准备（历史；第一段完成）
 
 - 精确镜像提交 21645b17c0d913e2ba7e10fbc9c993d286b3f57d 在本地存在，未 fetch。原 src/linux-rpi 仍为 42aeefac58edeb081aff440f0b60be71cbe49755，前后 status 为空。
 - temp/linux-rpi-pmuv3 / afdo/pmuv3 的内核本地提交：c27f160de761bb55f64672ceac642698a6e93684。仅 ARM 普通 defconfig 增加 CONFIG_ARM_PMUV3=y，一文件一行；已提交且工作树干净。内核提交未推送。
 - temp/gbs/gbs_rpi4_image.conf 已固定 Unified 20261022.054557 与 Base 20261020.074527；temp/gbs-home/.gbs.conf 最小配置已准备。config/ 原文件哈希不变。
-- spec 无禁用 RT 的宏，脚本将构建普通+RT（只有普通配置加 PMUv3）。当前 nproc=20，运行时计算一半核数，GBS --threads 1。
+- spec 无禁用 RT 的宏，脚本构建普通+RT（只直接修改普通 defconfig；RT 最终是否继承尚待核验）。当前 nproc=20，运行时计算一半核数，GBS --threads 1。
 - 已核查官方同版本 gbs 2.1.0 / depanneur 0.16.30 源码：随包 sudoers 为构建命令授予 NOPASSWD，脚本跳过 sudo -v；受保护的实际策略未读取/提权验证，异常时后台失败退出，不交互等待。
 - 脚本只有 bash -n 静态语法检查（通过），没有执行。尚无本次构建日志、结束状态或 RPM。第二段未开始。
 - 说明与完整内核 diff：[01_pmuv3_build.md](kernel/01_pmuv3_build.md)；脚本：[build_pmuv3_kernel.sh](../scripts/build_pmuv3_kernel.sh)。
@@ -95,8 +111,10 @@
 
 ## 已闭合结论（附证据路径）
 
+- 本次原样启动通过预检，日志报告源码包构建成功；包装状态却未收尾。目标 PID/子孙链及任务路径匹配为空，按用户规则停止。证据及原始状态/末尾日志见 [03_pmuv3_build_result.md](kernel/03_pmuv3_build_result.md)。这不等于已完成 RPM 配置和可安装性验收。
+
 - 镜像精确源码基线可用，afdo/pmuv3 只有一行配置新增；原源码和两份用户 GBS 配置未改。基线/提交/diff/核查命令见 [01_pmuv3_build.md](kernel/01_pmuv3_build.md)。
-- spec 无只构建普通版宏；预期十个显式二进制包，RT 配置不变。GBS/depanneur 随包 sudo 调用与 NOPASSWD 策略源码位置同上；实际构建与实际 sudo 授权尚未运行验证。
+- spec 无只构建普通版宏；预期十个显式二进制包；RT 输入未直接修改，但最终配置是否继承 PMUv3 尚未核验。GBS/depanneur 随包 sudo 调用与 NOPASSWD 策略源码位置同上；实际构建与实际 sudo 授权尚未运行验证。
 
 - 配套 Base 快照已明确；libllvm 22.1.8-1.6 与 perf 实际构建日志一致，ABI/包校验通过；perl 为附带测试脚本解释器依赖。[12_perf_dependencies.txt](probe/evidence/12_perf_dependencies.txt)
 - 临时路径 /tmp 的 noexec 阻止 perf 执行和加载器映射；ldd 无法完成全部 NEEDED 验证。推送文件已删除，RPM 前后同为 1252 且包集不变。[13_perf_deployment.txt](probe/evidence/13_perf_deployment.txt)
@@ -118,7 +136,7 @@
 
 ## 待人工裁决
 
-- 当前等待用户在终端运行第一段脚本并通知 status/log。Agent 不自行启动构建；构建成功也不自动安装或连接板。
+- 当前等待用户对 ALL-END 缺失的后续指示：是否继续诊断包装状态，以及依据何种验收条件进入产物核查。不得把日志成功摘要补写成 GBS_EXIT=0 或 ALL-END OK。
 
 - 用户需要提供符合写入边界且允许执行/映射的测试路径或预置 perf 的镜像。当前 /tmp 为 noexec；不能在“不 remount、不安装、不写其他路径”的范围内继续采样。Base 仓库授权已解决，无需再次确认。
 - 历史直接 make 配置仍受主机 flex/bison 缺失限制；新 GBS 方案由 spec 的 BuildRequires 在隔离构建根解决依赖，尚未启动，未安装主机工具。
@@ -128,8 +146,8 @@
 
 ## 挂账
 
-- 用户执行构建、实际工具链/依赖解析与产物清单、普通版配置差异验证、安装/备份/回退说明；第二段等待用户通知。
-- 脚本中断/退出处理目前只静态审查，未运行验证。SIGKILL/断电/不可写磁盘无法保证 ALL-END；缺标记按未完成处理。
+- 包装状态缺失原因、真实进程退出码、RPM 实物/普通版与 RT 配置、clang 和 .comment 证据、安装/备份/回退步骤均挂账；第二段未开始。
+- 本次执行没有得到 ALL-END，收尾机制未通过运行验收；具体原因未诊断。保持原脚本不变，缺标记按流程未完成处理。
 
 - RPi4 perf 临时运行及完整动态库解析、cpu-clock/cycles 样本、分支负对照、媒体 perf 报告/计时、ETM/SPE trace 内容、BRBE 能力：/tmp noexec 阻塞，采样未执行；不再计划 RPM 安装。
 - 各包最终 CC/CXX、%{optflags}、外部 LTO/链接器参数与已运行镜像对应关系：无 GBS root/构建日志，不能静态补全。
