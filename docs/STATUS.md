@@ -23,7 +23,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与完成状态（2026-10-28；PMUv3 补丁与软件采样）
+## 当前授权与完成状态（2026-10-28；RPi5 环境与采样探测）
+
+- 用户已把同 IP 192.168.108.26 的板换为 RPi5；本轮按 model=Raspberry Pi 5 Model B Rev 1.1、uname -m=aarch64 确认，未依赖 SDB 的旧 rpi4 别名。
+- 本轮按挂载参数验收 /opt/afdo_agent/ 后部署 aarch64 perf/libLLVM；板上仅该目录可写，另有一次用户明确授权的 /tmp true 执行负对照（已删除）。不 remount、不重启、不安装/卸载 RPM、不改 /boot；无构建。
+- **RPi5 真硬件 cycles 与四项硬件计数支持；分支栈不支持；SPE/ETM 当前镜像没有事件源。** 所有 record 后核对 evlist，成功 cycles 为 type 0/config 0，未回退软件。媒体三种采样全部无丢样，按规则不重跑。
+- work 已清空，保留 tools/perf 与 lib/libLLVM.so.22.1；RPM 数开始/结束均 1,249。三个实体库只留本机 temp，现有文件缺完整符号表、代码重定位和调试信息，不具备直接 BOLT/源码行 profile 的前提。
+- 交付 [04_rpi5_probe.md](probe/04_rpi5_probe.md)、新增证据 E15–E18 与本状态文件，同一 commit 推送。新增证据 128,645 B，不改任何历史证据；原手工安装内核方案仍取消。
+
+## 前轮授权与完成状态（历史；PMUv3 补丁与 RPi4 软件采样）
 
 - **已决定：PMUv3 通过补丁合入 Gerrit，由用户起 Quickbuild 出新镜像；原板上手工安装方案取消。** scripts/pmuv3_install/ 保留但不再使用；以下历史安装授权不再有效。不向 Gerrit 推送任何内容。
 - 用户批准最新 tizen 基线只改普通 defconfig 一行；最新分支已删除独立 RT defconfig，RT 由普通配置叠加 rt.config。已检查全部 RT/LSM 片段无 PMU 依赖冲突，补丁提交与独立 git am 验证完成；本轮没有 make/构建。
@@ -63,9 +71,11 @@
 
 # 项目状态
 
-更新：2026-10-28（Asia/Shanghai）。阶段：最新 tizen PMUv3 补丁完成、当前 RPi4 镜像软件采样完成；硬件 PMU 等用户 Quickbuild 新镜像后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-28（Asia/Shanghai）。阶段：RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
+
+- RPi5 本轮探测完成；硬件 cycles/计数已验证，分支栈失败、无 SPE/ETM。无需重复运行已完成场景；下一阶段由用户决定采用哪条 profile 生成路径及匹配的未 strip/debug 二进制。
 
 - 已交付 patches/0001-ARM-configs-tizen_bcm2711-enable-ARM_PMUV3.patch，用户合入 Gerrit 并发起 Quickbuild；Agent 不推 Gerrit。本轮最新补丁未构建/启动，旧镜像基线构建验证仍单独保留。
 - 当前镜像的 perf /opt 部署、软件系统/媒体采样、DSO/符号统计及开销实测已完成；cycles 请求发生软件回退，不能当作硬件采样成功。
@@ -82,7 +92,18 @@
 
 ## 进度
 
-### PMUv3 补丁与当前镜像软件采样（当前，已完成）
+### RPi5 环境与采样（当前，已完成）
+
+- 板型 RPi5 Model B Rev 1.1、aarch64、uid 0；BUILD_ID=tizen-unified-toolchain_20261027.063617_tizen-headed-aarch64；内核 6.12.80-arm64-rpi4-v8。CPU part 0xd0b，armv8_cortex_a76 事件源，arm-pmu 已绑定 armv8-pmu，日志 7 counters。
+- /opt 为 /dev/mmcblk0p3 ext4 rw,relatime，可用 1.3G；true 执行 0。/tmp noexec，true 执行 126；两个拷贝立即删除。/proc/config.gz 不可读，仅核对本地 arm64 defconfig/Kconfig，明确不当作运行配置。
+- Unified 同期 build.xml 指向 Base 20261026.051209；perf 6.12.80-0.aarch64、libllvm 22.1.8-1.5.aarch64 的 repodata/RPM 哈希通过，后者与 aarch64 linux-rpi 构建日志一致。两端部署哈希一致，LD_DEBUG/ldd 全部解析；仅解包，不安装。
+- 软件系统 11,619 样本；硬件 cycles 系统 12,027 样本，evlist type 0/config 0；四项 stat 都有数值。分支栈 record=255，不支持；无 arm_spe/cs_etm，按条件跳过。BRBE 当前不可用，硬件独立能力未知。
+- 720p 基线 real 8.39/8.35/8.52s，均值 8.42s；软件 9.18s、18,940 样本、+9.03%；cycles 9.17s、91,979 样本、+8.91%。1080p 基线 20.09s，软件 21.24s、48,968 样本、+5.72%。所有成功记录 Lost=0，没有触发 -m 1024；全部 EOS/退出 0。
+- 三种采样有完整 DSO/符号计数；libgstlibav 有名称样本全部为 PLT。libavcodec/libgstlibav/libgstreamer 的 .comment、build-id、.symtab、.rela.text 和 DWARF 均缺失；ELF DYN/无 TEXTREL 与 PIC 相符，但原始 -fPIC 开关未知。本机 readelf 只读元数据，库只留 temp。
+- 清空 work 并验证，保留 perf/libLLVM；RPM 前后 1,249。历史 /tmp/sdb.log 跨轮从 400 B 变为首次 connect 后的 495 B、mtime 17:48:51，收尾未变；未在 connect 前 stat，不推断精确写入归因。用户提供的工作区外附件仅作为任务指令读取。
+- 报告与证据：[04](probe/04_rpi5_probe.md)、[E15](probe/evidence/15_rpi5_environment.txt)、[E16](probe/evidence/16_rpi5_perf_deployment.txt)、[E17](probe/evidence/17_rpi5_sampling.txt)、[E18](probe/evidence/18_rpi5_elf_cleanup.txt)。新增证据合计 128,645 B，历史证据未修改。
+
+### PMUv3 补丁与 RPi4 镜像软件采样（历史，已完成）
 
 - fetch origin 后最新 tizen 为 42aeefac58edeb081aff440f0b60be71cbe49755；原 src/linux-rpi 工作树保持干净。相对镜像 21645b17，arch/arm/configs/ 仅删除独立 RT defconfig；普通配置未变。
 - 新 worktree 分支 afdo/pmuv3-gerrit 提交 2834afb2f85a6ef0905de18ed5b4a4ef7059635e；一文件一行新增，Kconfig 菜单顺序放在 GENERIC_PHY 与 ANDROID_BINDER_IPC 之间。rt/selinux/nosmack 片段均未覆盖五项 PMU 依赖；普通与 RT 共用并继承。独立干净 worktree git am 退出 0、结果树一致；无 make。详见 [06](kernel/06_pmuv3_patch.md)。
@@ -168,6 +189,9 @@
 
 ## 已闭合结论（附证据路径）
 
+- RPi5 A76 PMU 已绑定，硬件 cycles 的实际 type/config=0/0，软件/计数支持；分支栈不支持，无 SPE/ETM 事件源；不能由 cycles 推断分支 profile 就绪。[04 报告](probe/04_rpi5_probe.md)、[E15](probe/evidence/15_rpi5_environment.txt)、[E17](probe/evidence/17_rpi5_sampling.txt)。
+- RPi5 同期 aarch64 工具/依赖已校验并可执行，媒体全部无丢样；现有 strip 库不能直接提供完整 BOLT/AutoFDO 前提。work 清空，RPM 数不变；保留文件清单与删除命令见 [04](probe/04_rpi5_probe.md)、[E16](probe/evidence/16_rpi5_perf_deployment.txt)、[E18](probe/evidence/18_rpi5_elf_cleanup.txt)。
+
 - **已决定：PMUv3 通过补丁合入 Gerrit、由用户起 Quickbuild 出新镜像；原手工安装方案取消，scripts/pmuv3_install/ 保留、不再使用。** 最新分支普通/RT 共用配置，片段无冲突；补丁与 git am 已验证：[06](kernel/06_pmuv3_patch.md)。
 - /opt 部署可执行、所有 NEEDED 已解析；软件采样与 DSO 归属支持，硬件 cycles 请求实际回退，符号解析有限；work 已清空，RPM 数不变：[03 软件采样](probe/03_rpi4_sampling.md)、[14](probe/evidence/14_rpi4_sampling.txt)。
 
@@ -206,6 +230,8 @@
 
 ## 待人工裁决
 
+- RPi5 后续选择非分支采样、插桩或其他 profile 路径，以及如何保留完整符号、代码重定位、DWARF/build-id 和匹配二进制；本轮仅探测，没有转换/优化实现。
+
 - 用户合入 Gerrit 并发起 Quickbuild 的时间与新镜像交付；Agent 不向 Gerrit 推送，最新补丁本轮尚未构建/启动。
 
 - **Agent 的板上部署不能依赖 /tmp（noexec），部署目录由能力探测模块按挂载参数自动选定。** 本轮手工授权 /opt/afdo_agent 已明确，后续按挂载参数验收，不再重复索要目录授权；通用自动选择规则仍待设计裁决。
@@ -223,6 +249,6 @@
 
 - 1080p 本次丢样 6.29%，单次开销没有统计稳健性；strip 库内部符号仍缺失。分支栈负对照及 ETM/SPE/BRBE 未在本轮重测，不能由 PMUv3 补丁推断。
 - 各包最终 CC/CXX、%{optflags}、外部 LTO/链接器参数与已运行镜像对应关系：无 GBS root/构建日志，不能静态补全。
-- RPi5 实机：明确下一轮；本轮没有连接或探测。
+- RPi5 实机探测已闭合；运行 .config、BRBE 独立硬件能力、原始编译器/链接器和 -fPIC 开关仍未知。没有生成 BOLT/AutoFDO profile 或验证优化收益。
 - CodingSystem 业务指南、最终契约与实际实现的后续进展。
 - 旧历史写入没有完整 syscall 审计，边界检查无法证明工作区外遗留全集。

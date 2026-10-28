@@ -1,0 +1,642 @@
+RPi5 2026-10-28；真实命令/输出/退出码。CRLF/行尾空白标准化，截断明确标记。
+完整 JSON（含分离 stdout/stderr 和 wrapper）：temp/rpi5-probe/。SDB_EXIT 为传输码，REMOTE_EXIT 才是板上真实码；combined 表示 SDB 合并流。
+板上环境都位于 /opt/afdo_agent/work/；所有 perf 调用均使用专用 --buildid-dir。
+
+=== perf_rpm_query ===
+COMMAND: rpm -qp --qf '%{NAME} %{VERSION}-%{RELEASE}.%{ARCH} %{VCS}
+' /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm
+HOST_EXIT=0
+STDOUT:
+linux-kernel-perf 6.12.80-0.aarch64 platform/kernel/linux-rpi#51a7da74537e1ea4c2eb35865d5d00f170bc57cf
+
+STDERR:
+(empty)
+
+=== perf_requires ===
+COMMAND: rpm -qp --requires /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm
+HOST_EXIT=0
+STDOUT:
+/bin/sh
+/usr/bin/perl
+ld-linux-aarch64.so.1()(64bit)
+ld-linux-aarch64.so.1(GLIBC_2.17)(64bit)
+libLLVM.so.22.1()(64bit)
+libLLVM.so.22.1(LLVM_22.1)(64bit)
+libc.so.6()(64bit)
+libc.so.6(GLIBC_2.17)(64bit)
+libc.so.6(GLIBC_2.22)(64bit)
+libc.so.6(GLIBC_2.26)(64bit)
+libc.so.6(GLIBC_2.28)(64bit)
+libc.so.6(GLIBC_2.30)(64bit)
+libc.so.6(GLIBC_2.32)(64bit)
+libc.so.6(GLIBC_2.33)(64bit)
+libc.so.6(GLIBC_2.34)(64bit)
+libc.so.6(GLIBC_2.38)(64bit)
+libcrypto.so.3()(64bit)
+libcrypto.so.3(OPENSSL_3.0.0)(64bit)
+libdl.so.2()(64bit)
+libdw.so.1()(64bit)
+libdw.so.1(ELFUTILS_0.122)(64bit)
+libdw.so.1(ELFUTILS_0.126)(64bit)
+libdw.so.1(ELFUTILS_0.127)(64bit)
+libdw.so.1(ELFUTILS_0.130)(64bit)
+libdw.so.1(ELFUTILS_0.138)(64bit)
+libdw.so.1(ELFUTILS_0.142)(64bit)
+libdw.so.1(ELFUTILS_0.143)(64bit)
+libdw.so.1(ELFUTILS_0.157)(64bit)
+libdw.so.1(ELFUTILS_0.160)(64bit)
+libdw.so.1(ELFUTILS_0.161)(64bit)
+libelf.so.1()(64bit)
+libelf.so.1(ELFUTILS_1.0)(64bit)
+libelf.so.1(ELFUTILS_1.3)(64bit)
+libelf.so.1(ELFUTILS_1.5)(64bit)
+libelf.so.1(ELFUTILS_1.6)(64bit)
+liblzma.so.5()(64bit)
+liblzma.so.5(XZ_5.0)(64bit)
+libm.so.6()(64bit)
+libm.so.6(GLIBC_2.17)(64bit)
+libm.so.6(GLIBC_2.29)(64bit)
+libpthread.so.0()(64bit)
+librt.so.1()(64bit)
+libstdc++.so.6()(64bit)
+libstdc++.so.6(CXXABI_1.3)(64bit)
+libstdc++.so.6(CXXABI_1.3.9)(64bit)
+libstdc++.so.6(GLIBCXX_3.4)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.21)(64bit)
+libunwind-aarch64.so.8()(64bit)
+libunwind.so.8()(64bit)
+libz.so.1()(64bit)
+libz.so.1(ZLIB_1.2.3.3)(64bit)
+rpmlib(CompressedFileNames) <= 3.0.4-1
+rpmlib(FileDigests) <= 4.6.0-1
+rpmlib(PartialHardlinkSets) <= 4.0.4-1
+rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+rpmlib(PayloadIsXz) <= 5.2-1
+rtld(GNU_HASH)
+
+STDERR:
+(empty)
+
+=== llvm_rpm_query ===
+COMMAND: rpm -qp --qf '%{NAME} %{VERSION}-%{RELEASE}.%{ARCH} %{VCS}
+' /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/libllvm-22.1.8-1.5.aarch64.rpm
+HOST_EXIT=0
+STDOUT:
+libllvm 22.1.8-1.5.aarch64 platform/upstream/llvm#f999bd406c0a70fe8107aa992164fe6945c5d46a
+
+STDERR:
+(empty)
+
+=== llvm_requires ===
+COMMAND: rpm -qp --requires /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/libllvm-22.1.8-1.5.aarch64.rpm
+HOST_EXIT=0
+STDOUT:
+ld-linux-aarch64.so.1()(64bit)
+ld-linux-aarch64.so.1(GLIBC_2.17)(64bit)
+libLLVM.so.22.1()(64bit)
+libc.so.6()(64bit)
+libc.so.6(GLIBC_2.17)(64bit)
+libc.so.6(GLIBC_2.32)(64bit)
+libc.so.6(GLIBC_2.33)(64bit)
+libc.so.6(GLIBC_2.34)(64bit)
+libc.so.6(GLIBC_2.36)(64bit)
+libc.so.6(GLIBC_2.38)(64bit)
+libdl.so.2()(64bit)
+libgcc_s.so.1()(64bit)
+libgcc_s.so.1(GCC_3.0)(64bit)
+libgcc_s.so.1(GCC_3.3)(64bit)
+libgcc_s.so.1(GLIBC_2.0)(64bit)
+libm.so.6()(64bit)
+libm.so.6(GLIBC_2.17)(64bit)
+libm.so.6(GLIBC_2.27)(64bit)
+libm.so.6(GLIBC_2.29)(64bit)
+libm.so.6(GLIBC_2.38)(64bit)
+librt.so.1()(64bit)
+libstdc++.so.6()(64bit)
+libstdc++.so.6(CXXABI_1.3)(64bit)
+libstdc++.so.6(CXXABI_1.3.11)(64bit)
+libstdc++.so.6(CXXABI_1.3.13)(64bit)
+libstdc++.so.6(CXXABI_1.3.3)(64bit)
+libstdc++.so.6(CXXABI_1.3.5)(64bit)
+libstdc++.so.6(CXXABI_1.3.7)(64bit)
+libstdc++.so.6(CXXABI_1.3.9)(64bit)
+libstdc++.so.6(GLIBCXX_3.4)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.11)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.14)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.15)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.17)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.18)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.19)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.20)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.21)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.22)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.26)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.29)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.30)(64bit)
+libstdc++.so.6(GLIBCXX_3.4.9)(64bit)
+libxml2.so.16()(64bit)
+libz.so.1()(64bit)
+libz.so.1(ZLIB_1.2.0)(64bit)
+rpmlib(CompressedFileNames) <= 3.0.4-1
+rpmlib(FileDigests) <= 4.6.0-1
+rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+rpmlib(PayloadIsXz) <= 5.2-1
+rtld(GNU_HASH)
+
+STDERR:
+(empty)
+
+=== perf_extract ===
+COMMAND: nice -n 19 ionice -c3 bash -o pipefail -c 'rpm2cpio /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm | (cd /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract && cpio -idm --no-absolute-filenames)'
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+7259 blocks
+
+=== llvm_extract ===
+COMMAND: nice -n 19 ionice -c3 bash -o pipefail -c 'rpm2cpio /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/libllvm-22.1.8-1.5.aarch64.rpm | (cd /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract && cpio -idm --no-absolute-filenames)'
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+134386 blocks
+
+=== perf_needed ===
+COMMAND: readelf -d /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf
+HOST_EXIT=0
+STDOUT:
+
+Dynamic section at offset 0x30ce20 contains 40 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libunwind-aarch64.so.8]
+ 0x0000000000000001 (NEEDED)             Shared library: [libunwind.so.8]
+ 0x0000000000000001 (NEEDED)             Shared library: [libpthread.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [librt.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so.2]
+ 0x0000000000000001 (NEEDED)             Shared library: [libz.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libelf.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdw.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libcrypto.so.3]
+ 0x0000000000000001 (NEEDED)             Shared library: [libLLVM.so.22.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [liblzma.so.5]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]
+ 0x000000000000000c (INIT)               0x2a140
+ 0x000000000000000d (FINI)               0x232990
+ 0x0000000000000019 (INIT_ARRAY)         0x30e2e0
+ 0x000000000000001b (INIT_ARRAYSZ)       24 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x30e2f8
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x278
+ 0x0000000000000005 (STRTAB)             0x3210
+ 0x0000000000000006 (SYMTAB)             0x2a0
+ 0x000000000000000a (STRSZ)              7240 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000015 (DEBUG)              0x0
+ 0x0000000000000003 (PLTGOT)             0x31d638
+ 0x0000000000000002 (PLTRELSZ)           11832 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x27308
+ 0x0000000000000007 (RELA)               0x5510
+ 0x0000000000000008 (RELASZ)             138744 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffb (FLAGS_1)            Flags: PIE
+ 0x000000006ffffffe (VERNEED)            0x5250
+ 0x000000006fffffff (VERNEEDNUM)         10
+ 0x000000006ffffff0 (VERSYM)             0x4e58
+ 0x000000006ffffff9 (RELACOUNT)          5765
+ 0x0000000000000000 (NULL)               0x0
+
+STDERR:
+(empty)
+
+=== needed_ld-linux-aarch64.so.1 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/ld-linux-aarch64.so.1" ]; then readlink -f "$d/ld-linux-aarch64.so.1"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/ld-linux-aarch64.so.1
+/usr/lib64/ld-linux-aarch64.so.1
+/usr/lib64/ld-linux-aarch64.so.1
+/usr/lib64/ld-linux-aarch64.so.1
+
+STDERR:
+(empty)
+
+=== needed_libLLVM.so.22.1 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libLLVM.so.22.1" ]; then readlink -f "$d/libLLVM.so.22.1"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== needed_libc.so.6 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libc.so.6" ]; then readlink -f "$d/libc.so.6"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libc.so.6
+/usr/lib64/libc.so.6
+
+STDERR:
+(empty)
+
+=== needed_libcrypto.so.3 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libcrypto.so.3" ]; then readlink -f "$d/libcrypto.so.3"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libcrypto.so.3
+/usr/lib64/libcrypto.so.3
+
+STDERR:
+(empty)
+
+=== needed_libdl.so.2 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libdl.so.2" ]; then readlink -f "$d/libdl.so.2"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libdl.so.2
+/usr/lib64/libdl.so.2
+
+STDERR:
+(empty)
+
+=== needed_libdw.so.1 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libdw.so.1" ]; then readlink -f "$d/libdw.so.1"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libdw-0.189.so
+/usr/lib64/libdw-0.189.so
+
+STDERR:
+(empty)
+
+=== needed_libelf.so.1 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libelf.so.1" ]; then readlink -f "$d/libelf.so.1"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libelf-0.189.so
+/usr/lib64/libelf-0.189.so
+
+STDERR:
+(empty)
+
+=== needed_liblzma.so.5 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/liblzma.so.5" ]; then readlink -f "$d/liblzma.so.5"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/liblzma.so.5.8.1
+/usr/lib64/liblzma.so.5.8.1
+
+STDERR:
+(empty)
+
+=== needed_libm.so.6 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libm.so.6" ]; then readlink -f "$d/libm.so.6"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libm.so.6
+/usr/lib64/libm.so.6
+
+STDERR:
+(empty)
+
+=== needed_libpthread.so.0 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libpthread.so.0" ]; then readlink -f "$d/libpthread.so.0"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libpthread.so.0
+/usr/lib64/libpthread.so.0
+
+STDERR:
+(empty)
+
+=== needed_librt.so.1 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/librt.so.1" ]; then readlink -f "$d/librt.so.1"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/librt.so.1
+/usr/lib64/librt.so.1
+
+STDERR:
+(empty)
+
+=== needed_libstdc++.so.6 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libstdc++.so.6" ]; then readlink -f "$d/libstdc++.so.6"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libstdc++.so.6.0.33
+/usr/lib64/libstdc++.so.6.0.33
+
+STDERR:
+(empty)
+
+=== needed_libunwind-aarch64.so.8 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libunwind-aarch64.so.8" ]; then readlink -f "$d/libunwind-aarch64.so.8"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libunwind-aarch64.so.8.0.1
+/usr/lib64/libunwind-aarch64.so.8.0.1
+
+STDERR:
+(empty)
+
+=== needed_libunwind.so.8 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libunwind.so.8" ]; then readlink -f "$d/libunwind.so.8"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libunwind.so.8.0.1
+/usr/lib64/libunwind.so.8.0.1
+
+STDERR:
+(empty)
+
+=== needed_libz.so.1 ===
+COMMAND: for d in /lib64 /usr/lib64 /lib /usr/lib; do if [ -e "$d/libz.so.1" ]; then readlink -f "$d/libz.so.1"; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libz.so.1.3.1
+/usr/lib64/libz.so.1.3.1
+
+STDERR:
+(empty)
+
+=== push_perf ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf /opt/afdo_agent/tools/perf
+HOST_EXIT=0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+
+pushed                           perf	  0%	      0KB	    0KB/s
+pushed                           perf	100%	   3185KB	    0KB/s
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf   6378KB/s (3261448 bytes in 0.499s)
+
+STDERR:
+(empty)
+
+=== sha_perf ===
+COMMAND: nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949  /opt/afdo_agent/tools/perf
+
+STDERR:
+(empty)
+
+=== push_llvm ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract/usr/lib64/libLLVM.so.22.1 /opt/afdo_agent/lib/libLLVM.so.22.1
+HOST_EXIT=0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+
+pushed                libLLVM.so.22.1	  0%	      0MB	    0KB/s
+pushed                libLLVM.so.22.1	 19%	     12MB	11998KB/s
+pushed                libLLVM.so.22.1	 34%	     22MB	11162KB/s
+pushed                libLLVM.so.22.1	 50%	     32MB	 9580KB/s
+pushed                libLLVM.so.22.1	 65%	     42MB	10296KB/s
+pushed                libLLVM.so.22.1	 80%	     52MB	10354KB/s
+pushed                libLLVM.so.22.1	 95%	     62MB	11108KB/s
+pushed                libLLVM.so.22.1	100%	     65MB	11108KB/s
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract/usr/lib64/libLLVM.so.22.1   8778KB/s (68804864 bytes in 7.653s)
+
+STDERR:
+(empty)
+
+=== sha_llvm ===
+COMMAND: nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007  /opt/afdo_agent/lib/libLLVM.so.22.1
+
+STDERR:
+(empty)
+
+=== dependencies ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; LD_DEBUG=libs nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+perf version 6.12.80
+
+STDERR:
+      5223:	find library=libc.so.6 [0]; searching
+      5223:	Found entry: /lib64/libc.so.6 for /usr/bin/nice libc.so.6
+      5223:	calling init: /lib/ld-linux-aarch64.so.1
+      5223:	calling init: /lib64/libc.so.6
+      5223:	transferring control: nice
+      5223:	find library=libc.so.6 [0]; searching
+      5223:	Found entry: /lib64/libc.so.6 for /usr/bin/ionice libc.so.6
+      5223:	calling init: /lib/ld-linux-aarch64.so.1
+      5223:	calling init: /lib64/libc.so.6
+      5223:	transferring control: ionice
+      5223:	find library=libunwind-aarch64.so.8 [0]; searching
+      5223:	Found entry: /lib64/libunwind-aarch64.so.8 for /opt/afdo_agent/tools/perf libunwind-aarch64.so.8
+      5223:	find library=libunwind.so.8 [0]; searching
+      5223:	Found entry: /lib64/libunwind.so.8 for /opt/afdo_agent/tools/perf libunwind.so.8
+      5223:	find library=libpthread.so.0 [0]; searching
+      5223:	Found entry: /lib64/libpthread.so.0 for /opt/afdo_agent/tools/perf libpthread.so.0
+      5223:	find library=librt.so.1 [0]; searching
+      5223:	Found entry: /lib64/librt.so.1 for /opt/afdo_agent/tools/perf librt.so.1
+      5223:	find library=libm.so.6 [0]; searching
+      5223:	Found entry: /lib64/libm.so.6 for /opt/afdo_agent/tools/perf libm.so.6
+      5223:	find library=libdl.so.2 [0]; searching
+      5223:	Found entry: /lib64/libdl.so.2 for /opt/afdo_agent/tools/perf libdl.so.2
+      5223:	find library=libz.so.1 [0]; searching
+      5223:	Found entry: /lib64/libz.so.1 for /opt/afdo_agent/tools/perf libz.so.1
+      5223:	find library=libelf.so.1 [0]; searching
+      5223:	Found entry: /lib64/libelf.so.1 for /opt/afdo_agent/tools/perf libelf.so.1
+      5223:	find library=libdw.so.1 [0]; searching
+      5223:	Found entry: /lib64/libdw.so.1 for /opt/afdo_agent/tools/perf libdw.so.1
+      5223:	find library=libcrypto.so.3 [0]; searching
+      5223:	Found entry: /lib64/libcrypto.so.3 for /opt/afdo_agent/tools/perf libcrypto.so.3
+      5223:	find library=libLLVM.so.22.1 [0]; searching
+      5223:	find library=libstdc++.so.6 [0]; searching
+      5223:	Found entry: /lib64/libstdc++.so.6 for /opt/afdo_agent/tools/perf libstdc++.so.6
+      5223:	find library=liblzma.so.5 [0]; searching
+      5223:	Found entry: /lib64/liblzma.so.5 for /opt/afdo_agent/tools/perf liblzma.so.5
+      5223:	find library=libc.so.6 [0]; searching
+      5223:	Found entry: /lib64/libc.so.6 for /opt/afdo_agent/tools/perf libc.so.6
+      5223:	find library=libbz2.so.1 [0]; searching
+      5223:	Found entry: /lib64/libbz2.so.1 for /lib64/libdw.so.1 libbz2.so.1
+      5223:	find library=libxml2.so.16 [0]; searching
+      5223:	Found entry: /lib64/libxml2.so.16 for /opt/afdo_agent/lib/libLLVM.so.22.1 libxml2.so.16
+      5223:	find library=libgcc_s.so.1 [0]; searching
+      5223:	Found entry: /lib64/libgcc_s.so.1 for /opt/afdo_agent/lib/libLLVM.so.22.1 libgcc_s.so.1
+      5223:	calling init: /lib/ld-linux-aarch64.so.1
+      5223:	calling init: /lib64/libc.so.6
+      5223:	calling init: /lib64/libgcc_s.so.1
+      5223:	calling init: /lib64/libm.so.6
+      5223:	calling init: /lib64/libxml2.so.16
+      5223:	calling init: /lib64/libbz2.so.1
+      5223:	calling init: /lib64/libpthread.so.0
+      5223:	calling init: /lib64/liblzma.so.5
+      5223:	calling init: /lib64/libstdc++.so.6
+      5223:	calling init: /lib64/librt.so.1
+      5223:	calling init: /lib64/libdl.so.2
+      5223:	calling init: /lib64/libz.so.1
+      5223:	calling init: /opt/afdo_agent/lib/libLLVM.so.22.1
+      5223:	calling init: /lib64/libcrypto.so.3
+      5223:	calling init: /lib64/libelf.so.1
+      5223:	calling init: /lib64/libdw.so.1
+      5223:	calling init: /lib64/libunwind.so.8
+      5223:	calling init: /lib64/libunwind-aarch64.so.8
+      5223:	transferring control: /opt/afdo_agent/tools/perf
+[LD_DEBUG 摘录；完整搜索路径见 JSON]
+
+=== ldd ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; ldd /opt/afdo_agent/tools/perf
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+	linux-vdso.so.1 (0x0000ffffb7dd4000)
+	libunwind-aarch64.so.8 => /lib64/libunwind-aarch64.so.8 (0x0000ffffb79f0000)
+	libunwind.so.8 => /lib64/libunwind.so.8 (0x0000ffffb79a0000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x0000ffffb7970000)
+	librt.so.1 => /lib64/librt.so.1 (0x0000ffffb7940000)
+	libm.so.6 => /lib64/libm.so.6 (0x0000ffffb7890000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x0000ffffb7860000)
+	libz.so.1 => /lib64/libz.so.1 (0x0000ffffb7820000)
+	libelf.so.1 => /lib64/libelf.so.1 (0x0000ffffb77e0000)
+	libdw.so.1 => /lib64/libdw.so.1 (0x0000ffffb7740000)
+	libcrypto.so.3 => /lib64/libcrypto.so.3 (0x0000ffffb7280000)
+	libLLVM.so.22.1 => /opt/afdo_agent/lib/libLLVM.so.22.1 (0x0000ffffb3020000)
+	libstdc++.so.6 => /lib64/libstdc++.so.6 (0x0000ffffb2dc0000)
+	liblzma.so.5 => /lib64/liblzma.so.5 (0x0000ffffb2d70000)
+	libc.so.6 => /lib64/libc.so.6 (0x0000ffffb2bd0000)
+	/lib/ld-linux-aarch64.so.1 => /lib64/ld-linux-aarch64.so.1 (0x0000ffffb7d90000)
+	libbz2.so.1 => /lib64/libbz2.so.1 (0x0000ffffb2ba0000)
+	libxml2.so.16 => /lib64/libxml2.so.16 (0x0000ffffb2a30000)
+	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x0000ffffb2a00000)
+
+STDERR:
+(empty)
+
+REPOSITORY DOWNLOAD / CHECKSUM LOG
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/build.xml
+HTTP 200; bytes=635; SHA256=c777e2da351aca49357ef5ca0e418014891fbd5ebff10175782365c727ca6733
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/repodata/repomd.xml
+HTTP 200; bytes=4476; SHA256=9ddc370d88db4a0f63550c6d9af27f71150e592e72630337e546c9baf8329e26
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/repodata/500c4202a750117967d8fe32c1d6d5f8d7b5bc3bfeacb45f163d2c04bb775bdb-primary.xml.gz
+HTTP 200; bytes=1592249; SHA256=500c4202a750117967d8fe32c1d6d5f8d7b5bc3bfeacb45f163d2c04bb775bdb
+unified primary checksum PASS
+unified primary open-checksum PASS
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/repodata/repomd.xml
+HTTP 200; bytes=3558; SHA256=33cc64ace035fc6806514d4dcb20cfb22b25359596bddce7d98067c2fc22c56e
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/repodata/612a7df9a0b56d9eeeb5e3a366a7f3718c8fe66b9ac14b26c3d1360904351731-primary.xml.gz
+HTTP 200; bytes=353896; SHA256=612a7df9a0b56d9eeeb5e3a366a7f3718c8fe66b9ac14b26c3d1360904351731
+base primary checksum PASS
+base primary open-checksum PASS
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/builddata/buildlogs/standard/aarch64/succeeded/linux-rpi.buildlog.txt
+HTTP 200; bytes=974729; SHA256=93f695dee021d0ec249177ec3300b0a8c4c1daa67eef8972aecbb4f9f5d56811
+buildlog:131: [   23s] [94/130] keeping libllvm-22.1.8-1.5
+buildlog:160: [   24s] [123/130] keeping llvm-devel-22.1.8-1.5
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm
+HTTP 200; bytes=1114316; SHA256=84836e8c02f06f7d677ace5c80d5ebed52e750a293640c51e9fdf6ddd4ac8d1b
+linux-kernel-perf-6.12.80-0.aarch64.rpm repodata SHA256 PASS
+GET https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/aarch64/libllvm-22.1.8-1.5.aarch64.rpm
+HTTP 200; bytes=17016101; SHA256=36d45482feef227a78b513dd402f7db4cb7b4139c69db6c1e2bbf2ccfd8b5851
+libllvm-22.1.8-1.5.aarch64.rpm repodata SHA256 PASS
+
+BUILD.XML:
+<?xml version="1.0" ?>
+<build version="1.0">
+  <id>tizen-unified-toolchain_20261027.063617</id>
+  <base_id url="http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/">tizen-base-toolchain_20261026.051209</base_id>
+  <buildtargets>
+    <buildtarget name="standard">
+      <archs>
+        <arch>aarch64</arch>
+        <arch>x86_64</arch>
+        <arch>armv7l</arch>
+        <arch>riscv64</arch>
+      </archs>
+      <repo type="debug">repos/standard/debug</repo>
+      <repo type="binary">repos/standard/packages</repo>
+      <repo type="source">repos/standard/source</repo>
+    </buildtarget>
+  </buildtargets>
+</build>
+
+PACKAGE AND DEPLOYED FILE MANIFEST:
+{
+  "unified": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/",
+  "base": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/",
+  "packages": [
+    {
+      "name": "linux-kernel-perf",
+      "arch": "aarch64",
+      "version": {
+        "epoch": "0",
+        "ver": "6.12.80",
+        "rel": "0",
+        "vcs": "platform/kernel/linux-rpi#51a7da74537e1ea4c2eb35865d5d00f170bc57cf"
+      },
+      "location": "aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm",
+      "checksum": "84836e8c02f06f7d677ace5c80d5ebed52e750a293640c51e9fdf6ddd4ac8d1b",
+      "checksum_type": "sha256",
+      "repo": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/",
+      "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm"
+    },
+    {
+      "name": "libllvm",
+      "arch": "aarch64",
+      "version": {
+        "epoch": "0",
+        "ver": "22.1.8",
+        "rel": "1.5",
+        "vcs": "platform/upstream/llvm#f999bd406c0a70fe8107aa992164fe6945c5d46a"
+      },
+      "location": "aarch64/libllvm-22.1.8-1.5.aarch64.rpm",
+      "checksum": "36d45482feef227a78b513dd402f7db4cb7b4139c69db6c1e2bbf2ccfd8b5851",
+      "checksum_type": "sha256",
+      "repo": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/",
+      "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/libllvm-22.1.8-1.5.aarch64.rpm"
+    }
+  ]
+}
+[
+  {
+    "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf",
+    "path": "/opt/afdo_agent/tools/perf",
+    "sha256": "d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949",
+    "size": 3261448,
+    "package": {
+      "name": "linux-kernel-perf",
+      "arch": "aarch64",
+      "version": {
+        "epoch": "0",
+        "ver": "6.12.80",
+        "rel": "0",
+        "vcs": "platform/kernel/linux-rpi#51a7da74537e1ea4c2eb35865d5d00f170bc57cf"
+      },
+      "location": "aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm",
+      "checksum": "84836e8c02f06f7d677ace5c80d5ebed52e750a293640c51e9fdf6ddd4ac8d1b",
+      "checksum_type": "sha256",
+      "repo": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/",
+      "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/linux-kernel-perf-6.12.80-0.aarch64.rpm"
+    }
+  },
+  {
+    "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract/usr/lib64/libLLVM.so.22.1",
+    "path": "/opt/afdo_agent/lib/libLLVM.so.22.1",
+    "sha256": "06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007",
+    "size": 68804864,
+    "package": {
+      "name": "libllvm",
+      "arch": "aarch64",
+      "version": {
+        "epoch": "0",
+        "ver": "22.1.8",
+        "rel": "1.5",
+        "vcs": "platform/upstream/llvm#f999bd406c0a70fe8107aa992164fe6945c5d46a"
+      },
+      "location": "aarch64/libllvm-22.1.8-1.5.aarch64.rpm",
+      "checksum": "36d45482feef227a78b513dd402f7db4cb7b4139c69db6c1e2bbf2ccfd8b5851",
+      "checksum_type": "sha256",
+      "repo": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/",
+      "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/libllvm-22.1.8-1.5.aarch64.rpm"
+    }
+  }
+]

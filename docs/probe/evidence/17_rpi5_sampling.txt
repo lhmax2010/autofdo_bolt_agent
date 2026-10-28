@@ -1,0 +1,934 @@
+RPi5 2026-10-28；真实命令/输出/退出码。CRLF/行尾空白标准化，截断明确标记。
+完整 JSON（含分离 stdout/stderr 和 wrapper）：temp/rpi5-probe/。SDB_EXIT 为传输码，REMOTE_EXIT 才是板上真实码；combined 表示 SDB 合并流。
+板上环境都位于 /opt/afdo_agent/work/；所有 perf 调用均使用专用 --buildid-dir。
+
+=== perf_version ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+perf version 6.12.80
+
+STDERR:
+(empty)
+
+=== list_sw ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid list sw
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+  alignment-faults                                   [Software event]
+  bpf-output                                         [Software event]
+  cgroup-switches                                    [Software event]
+  context-switches OR cs                             [Software event]
+  cpu-clock                                          [Software event]
+  cpu-migrations OR migrations                       [Software event]
+  dummy                                              [Software event]
+  emulation-faults                                   [Software event]
+  major-faults                                       [Software event]
+  minor-faults                                       [Software event]
+  page-faults OR faults                              [Software event]
+  task-clock                                         [Software event]
+
+tool:
+  duration_time
+  user_time
+  system_time
+
+STDERR:
+(empty)
+
+=== list_hw ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid list hw
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+  branch-instructions OR branches                    [Hardware event]
+  branch-misses                                      [Hardware event]
+  bus-cycles                                         [Hardware event]
+  cache-misses                                       [Hardware event]
+  cache-references                                   [Hardware event]
+  cpu-cycles OR cycles                               [Hardware event]
+  instructions                                       [Hardware event]
+  stalled-cycles-backend OR idle-cycles-backend      [Hardware event]
+  stalled-cycles-frontend OR idle-cycles-frontend    [Hardware event]
+
+STDERR:
+(empty)
+
+=== list_pmu ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid list pmu
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+  br_mis_pred OR armv8_cortex_a76/br_mis_pred/       [Kernel PMU event]
+  br_mis_pred_retired OR armv8_cortex_a76/br_mis_pred_retired/[Kernel PMU event]
+  br_pred OR armv8_cortex_a76/br_pred/               [Kernel PMU event]
+  br_retired OR armv8_cortex_a76/br_retired/         [Kernel PMU event]
+  bus_access OR armv8_cortex_a76/bus_access/         [Kernel PMU event]
+  bus_cycles OR armv8_cortex_a76/bus_cycles/         [Kernel PMU event]
+  cid_write_retired OR armv8_cortex_a76/cid_write_retired/[Kernel PMU event]
+  cpu_cycles OR armv8_cortex_a76/cpu_cycles/         [Kernel PMU event]
+  dtlb_walk OR armv8_cortex_a76/dtlb_walk/           [Kernel PMU event]
+  exc_return OR armv8_cortex_a76/exc_return/         [Kernel PMU event]
+  exc_taken OR armv8_cortex_a76/exc_taken/           [Kernel PMU event]
+  inst_retired OR armv8_cortex_a76/inst_retired/     [Kernel PMU event]
+  inst_spec OR armv8_cortex_a76/inst_spec/           [Kernel PMU event]
+  itlb_walk OR armv8_cortex_a76/itlb_walk/           [Kernel PMU event]
+  l1d_cache OR armv8_cortex_a76/l1d_cache/           [Kernel PMU event]
+  l1d_cache_refill OR armv8_cortex_a76/l1d_cache_refill/[Kernel PMU event]
+  l1d_cache_wb OR armv8_cortex_a76/l1d_cache_wb/     [Kernel PMU event]
+  l1d_tlb OR armv8_cortex_a76/l1d_tlb/               [Kernel PMU event]
+  l1d_tlb_refill OR armv8_cortex_a76/l1d_tlb_refill/ [Kernel PMU event]
+  l1i_cache OR armv8_cortex_a76/l1i_cache/           [Kernel PMU event]
+  l1i_cache_refill OR armv8_cortex_a76/l1i_cache_refill/[Kernel PMU event]
+  l1i_tlb OR armv8_cortex_a76/l1i_tlb/               [Kernel PMU event]
+  l1i_tlb_refill OR armv8_cortex_a76/l1i_tlb_refill/ [Kernel PMU event]
+  l2d_cache OR armv8_cortex_a76/l2d_cache/           [Kernel PMU event]
+  l2d_cache_allocate OR armv8_cortex_a76/l2d_cache_allocate/[Kernel PMU event]
+  l2d_cache_refill OR armv8_cortex_a76/l2d_cache_refill/[Kernel PMU event]
+  l2d_cache_wb OR armv8_cortex_a76/l2d_cache_wb/     [Kernel PMU event]
+  l2d_tlb OR armv8_cortex_a76/l2d_tlb/               [Kernel PMU event]
+  l2d_tlb_refill OR armv8_cortex_a76/l2d_tlb_refill/ [Kernel PMU event]
+  l3d_cache OR armv8_cortex_a76/l3d_cache/           [Kernel PMU event]
+  l3d_cache_allocate OR armv8_cortex_a76/l3d_cache_allocate/[Kernel PMU event]
+  l3d_cache_refill OR armv8_cortex_a76/l3d_cache_refill/[Kernel PMU event]
+  ll_cache_miss_rd OR armv8_cortex_a76/ll_cache_miss_rd/[Kernel PMU event]
+  ll_cache_rd OR armv8_cortex_a76/ll_cache_rd/       [Kernel PMU event]
+  mem_access OR armv8_cortex_a76/mem_access/         [Kernel PMU event]
+  memory_error OR armv8_cortex_a76/memory_error/     [Kernel PMU event]
+  remote_access OR armv8_cortex_a76/remote_access/   [Kernel PMU event]
+  stall_backend OR armv8_cortex_a76/stall_backend/   [Kernel PMU event]
+  stall_frontend OR armv8_cortex_a76/stall_frontend/ [Kernel PMU event]
+  ttbr_write_retired OR armv8_cortex_a76/ttbr_write_retired/[Kernel PMU event]
+
+STDERR:
+(empty)
+
+=== system_sw_record ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cpu-clock -F 999 -a -o /opt/afdo_agent/work/s1.data -- sleep 3
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 1.232 MB /opt/afdo_agent/work/s1.data (11619 samples) ]
+
+
+=== system_sw_evlist ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/s1.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cpu-clock: type: 1 (software), size: 136, config: 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq }: 999, sample_type: IP|TID|TIME|ID|CPU|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, freq: 1, sample_id_all: 1, exclude_guest: 1
+dummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 999, sample_type: IP|TID|TIME|ID|CPU|PERIOD, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, freq: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+(empty)
+
+=== system_sw_report ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso -i /opt/afdo_agent/work/s1.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 11K of event 'cpu-clock'
+# Event count (approx.): 11630630619
+#
+# Overhead  Shared Object
+# ........  ...............................
+#
+    80.82%  [kernel.kallsyms]
+     7.50%  libc.so.6
+     4.67%  enlightenment
+     2.30%  libglib-2.0.so.0.8000.5
+     1.98%  libds.so.0.1.25
+     1.13%  libtbm.so.1.0.0
+     0.42%  libpixman-1.so.0.38.4
+     0.37%  libtizen-core.so.0.4.2
+     0.22%  libwayland-server.so.0.23.1
+     0.10%  libtdm.so.1.0.0
+     0.09%  libhal-backend-tdm-vc4.so
+     0.08%  libhal-backend-tbm-vc4.so.0.0.0
+     0.07%  libttrace.so.1.1.0
+     0.06%  ld-linux-aarch64.so.1
+     0.06%  module.so
+     0.05%  [vdso]
+     0.05%  libhal-api-tdm.so.0.1.0
+     0.02%  libhal-api-tbm.so.1.1
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+STDERR:
+(empty)
+
+=== system_hw_record ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -a -o /opt/afdo_agent/work/h1.data -- sleep 3
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+[ perf record: Woken up 3 times to write data ]
+[ perf record: Captured and wrote 1.254 MB /opt/afdo_agent/work/h1.data (12027 samples) ]
+
+
+=== system_hw_evlist ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/h1.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 4000, sample_type: IP|TID|TIME|CPU|PERIOD|IDENTIFIER, read_format: ID|LOST, disabled: 1, inherit: 1, freq: 1, sample_id_all: 1, exclude_guest: 1
+dummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 1, sample_type: IP|TID|TIME|CPU|IDENTIFIER, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+(empty)
+
+=== system_hw_report ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso -i /opt/afdo_agent/work/h1.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 12K of event 'cycles'
+# Event count (approx.): 6732540342
+#
+# Overhead  Shared Object
+# ........  ...............................
+#
+    29.39%  libc.so.6
+    28.95%  [kernel.kallsyms]
+    15.34%  enlightenment
+     7.78%  libglib-2.0.so.0.8000.5
+     7.67%  libds.so.0.1.25
+     4.23%  libtbm.so.1.0.0
+     1.59%  libpixman-1.so.0.38.4
+     1.35%  libtizen-core.so.0.4.2
+     0.80%  libwayland-server.so.0.23.1
+     0.35%  libhal-backend-tbm-vc4.so.0.0.0
+     0.32%  module.so
+     0.29%  libhal-backend-tdm-vc4.so
+     0.26%  libttrace.so.1.1.0
+     0.25%  libtdm.so.1.0.0
+     0.23%  libhal-api-tbm.so.1.1
+     0.23%  ld-linux-aarch64.so.1
+     0.22%  [vdso]
+     0.20%  libhal-api-tdm.so.0.1.0
+     0.19%  libgallium-24.3.4.so (deleted)
+     0.17%  libflutter_engine.so
+     0.04%  libapp.so
+     0.04%  bash
+     0.03%  libdlog.so.0.0.0
+     0.02%  dlog_logger
+     0.01%  libtpl-egl.so.1.13.2
+     0.01%  libwayland-client.so.0.23.1
+     0.01%  libecore.so.1.25.1
+     0.01%  libEGL.so.1.0.0 (deleted)
+     0.01%  libecore_evas.so.1.25.1
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== branch_record ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -b -o /opt/afdo_agent/work/b1.data -- sleep 1
+REMOTE_EXIT=255 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+Error:
+cycles: PMU Hardware or event type doesn't support branch stack sampling.
+
+
+=== branch_evlist ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/b1.data
+REMOTE_EXIT=255 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+zero-sized data (/opt/afdo_agent/work/b1.data), nothing to do!
+
+
+=== stat ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid stat -e cycles,instructions,branches,branch-misses -- sleep 2
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+
+ Performance counter stats for 'sleep 2':
+
+           1467831      cycles
+           1645084      instructions                     #    1.12  insn per cycle
+            392144      branches
+              7763      branch-misses                    #    1.98% of all branches
+
+       2.001473518 seconds time elapsed
+
+       0.001596000 seconds user
+       0.000000000 seconds sys
+
+
+
+
+=== gst_launch ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; command -v gst-launch-1.0
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/bin/gst-launch-1.0
+
+STDERR:
+(empty)
+
+=== gst_inspect ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 gst-inspect-1.0 avdec_h264
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Factory Details:
+  Rank                     primary (256)
+  Long-name                libav H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 decoder
+  Klass                    Codec/Decoder/Video
+  Description              libav h264 decoder
+  Author                   Wim Taymans <wim.taymans@gmail.com>, Ronald Bultje <rbultje@ronald.bitfreak.net>, Edward Hervey <bilboed@bilboed.com>
+  Documentation            https://gstreamer.freedesktop.org/documentation/libav/avdec_h264.html
+
+Plugin Details:
+  Name                     libav
+  Description              All libav codecs and formats (system install)
+  Filename                 /usr/lib64/gstreamer-1.0/libgstlibav.so
+  Version                  1.24.11
+  License                  LGPL
+  Source module            gst-libav
+  Documentation            https://gstreamer.freedesktop.org/documentation/libav/
+  Source release date      2025-01-06
+  Binary package           GStreamer FFMPEG Plug-ins source release
+  Origin URL               Unknown package origin
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstVideoDecoder
+                         +----GstFFMpegVidDec
+                               +----avdec_h264
+
+Pad Templates:
+  SINK template: 'sink'
+    Availability: Always
+    Capabilities:
+      video/x-h264
+              alignment: au
+          stream-format: { (string)avc, (string)byte-stream }
+      video/x-h264
+              alignment: nal
+          stream-format: byte-stream
+
+  SRC template: 'src'
+    Availability: Always
+    Capabilities:
+      video/x-raw
+                 format: { (string)I420, (string)YUY2, (string)RGB, (string)BGR, (string)Y42B, (string)Y444, (string)YUV9, (string)Y41B, (string)GRAY8, (string)RGB8P, (string)I420, (string)Y42B, (string)Y444, (string)UYVY, (string)NV12, (string)NV21, (string)ARGB, (string)RGBA, (string)ABGR, (string)BGRA, (string)GRAY16_BE, (string)GRAY16_LE, (string)A420, (string)RGB16, (string)RGB15, (string)I420_10BE, (string)I420_10LE, (string)I422_10BE, (string)I422_10LE, (string)Y444_10BE, (string)Y444_10LE, (string)GBR, (string)GBR_10BE, (string)GBR_10LE, (string)A420_10BE, (string)A420_10LE, (string)A422_10BE, (string)A422_10LE, (string)A444_10BE, (string)A444_10LE, (string)GBRA, (string)xRGB, (string)RGBx, (string)xBGR, (string)BGRx, (string)I420_12BE, (string)I420_12LE, (string)I422_12BE, (string)I422_12LE, (string)Y444_12BE, (string)Y444_12LE, (string)GBR_12BE, (string)GBR_12LE, (string)P010_10LE, (string)GBRA_12BE, (string)GBRA_12LE, (string)GBRA_10BE, (string)GBRA_10LE, (string)VUYA, (string)P012_LE, (string)Y212_LE, (string)Y410, (string)Y412_LE }
+      video/x-raw(format:Interlaced)
+                 format: { (string)I420, (string)YUY2, (string)RGB, (string)BGR, (string)Y42B, (string)Y444, (string)YUV9, (string)Y41B, (string)GRAY8, (string)RGB8P, (string)I420, (string)Y42B, (string)Y444, (string)UYVY, (string)NV12, (string)NV21, (string)ARGB, (string)RGBA, (string)ABGR, (string)BGRA, (string)GRAY16_BE, (string)GRAY16_LE, (string)A420, (string)RGB16, (string)RGB15, (string)I420_10BE, (string)I420_10LE, (string)I422_10BE, (string)I422_10LE, (string)Y444_10BE, (string)Y444_10LE, (string)GBR, (string)GBR_10BE, (string)GBR_10LE, (string)A420_10BE, (string)A420_10LE, (string)A422_10BE, (string)A422_10LE, (string)A444_10BE, (string)A444_10LE, (string)GBRA, (string)xRGB, (string)RGBx, (string)xBGR, (string)BGRx, (string)I420_12BE, (string)I420_12LE, (string)I422_12BE, (string)I422_12LE, (string)Y444_12BE, (string)Y444_12LE, (string)GBR_12BE, (string)GBR_12LE, (string)P010_10LE, (string)GBRA_12BE, (string)GBRA_12LE, (string)GBRA_10BE, (string)GBRA_10LE, (string)VUYA, (string)P012_LE, (string)Y212_LE, (string)Y410, (string)Y412_LE }
+         interlace-mode: alternate
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SINK: 'sink'
+    Pad Template: 'sink'
+  SRC: 'src'
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+
+(gst-plugin-scanner:5815): GStreamer-WARNING **: 19:00:08.798: Failed to load plugin '/usr/lib64/gstreamer-1.0/libgstcairo.so': libGLESv2.so.2: cannot open shared object file: No such file or directory
+
+
+=== media_push_720p ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4 /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+HOST_EXIT=0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+
+pushed          bbb_720p_h264_60s.mp4	  0%	      0MB	    0KB/s
+pushed          bbb_720p_h264_60s.mp4	 41%	     11MB	12093KB/s
+pushed          bbb_720p_h264_60s.mp4	 78%	     22MB	10141KB/s
+pushed          bbb_720p_h264_60s.mp4	100%	     28MB	10509KB/s
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4   8553KB/s (30023879 bytes in 3.427s)
+
+STDERR:
+(empty)
+
+=== media_sha_720p ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4  /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+
+STDERR:
+(empty)
+
+=== baseline_720p_1 ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+Redistribute latency...
+New clock: GstSystemClock
+Got EOS from element "pipeline0".
+Execution ended after 0:00:08.311921866
+Setting pipeline to NULL ...
+Freeing pipeline ...
+
+STDERR:
+real 8.39
+user 18.59
+sys 0.38
+
+
+=== baseline_720p_2 ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+Redistribute latency...
+New clock: GstSystemClock
+Got EOS from element "pipeline0".
+Execution ended after 0:00:08.299930513
+Setting pipeline to NULL ...
+Freeing pipeline ...
+
+STDERR:
+real 8.35
+user 18.76
+sys 0.36
+
+
+=== baseline_720p_3 ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+Redistribute latency...
+New clock: GstSystemClock
+Got EOS from element "pipeline0".
+Execution ended after 0:00:08.471919143
+Setting pipeline to NULL ...
+Freeing pipeline ...
+
+STDERR:
+real 8.52
+user 19.15
+sys 0.33
+
+
+=== media_push_1080p ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_1080p_h264_60s.mp4 /opt/afdo_agent/work/bbb_1080p_h264_60s.mp4
+HOST_EXIT=0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+
+pushed         bbb_1080p_h264_60s.mp4	  0%	      0MB	    0KB/s
+pushed         bbb_1080p_h264_60s.mp4	 20%	     11MB	12093KB/s
+pushed         bbb_1080p_h264_60s.mp4	 39%	     22MB	10942KB/s
+pushed         bbb_1080p_h264_60s.mp4	 56%	     32MB	 9623KB/s
+pushed         bbb_1080p_h264_60s.mp4	 72%	     41MB	10130KB/s
+pushed         bbb_1080p_h264_60s.mp4	 89%	     51MB	10238KB/s
+pushed         bbb_1080p_h264_60s.mp4	100%	     57MB	11931KB/s
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_1080p_h264_60s.mp4   8653KB/s (60382636 bytes in 6.814s)
+
+STDERR:
+(empty)
+
+=== media_sha_1080p ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/bbb_1080p_h264_60s.mp4
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+31f72f11eb0566e0265358a14294e5dbddf13fce4ce1507d8872b04c2596a6da  /opt/afdo_agent/work/bbb_1080p_h264_60s.mp4
+
+STDERR:
+(empty)
+
+=== baseline_1080p_1 ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_1080p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+Redistribute latency...
+New clock: GstSystemClock
+Got EOS from element "pipeline0".
+Execution ended after 0:00:20.013065489
+Setting pipeline to NULL ...
+Freeing pipeline ...
+
+STDERR:
+real 20.09
+user 48.70
+sys 0.64
+
+
+=== 720p_sw_record ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cpu-clock -F 999 -o /opt/afdo_agent/work/720p_sw.data -- gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+New clock: GstSystemClock
+Redistribute latency...
+Got EOS from element "pipeline0".
+Execution ended after 0:00:08.273044014
+Setting pipeline to NULL ...
+Freeing pipeline ...
+
+STDERR:
+[ perf record: Woken up 2 times to write data ]
+[ perf record: Captured and wrote 0.730 MB /opt/afdo_agent/work/720p_sw.data (18940 samples) ]
+real 9.18
+user 18.73
+sys 0.44
+
+
+=== 720p_sw_evlist ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/720p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cpu-clock: type: 1 (software), size: 136, config: 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq }: 999, sample_type: IP|TID|TIME|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, freq: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+(empty)
+
+=== 720p_sw_dso ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso -i /opt/afdo_agent/work/720p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 18K of event 'cpu-clock'
+# Event count (approx.): 18958958940
+#
+# Overhead  Shared Object
+# ........  ..................................
+#
+    79.60%  libavcodec.so.62.11.100
+    15.42%  libc.so.6
+     2.18%  [kernel.kallsyms]
+     0.74%  libgstreamer-1.0.so.0.2411.0
+     0.64%  libavutil.so.60.8.100
+     0.25%  libgstbase-1.0.so.0.2411.0
+     0.22%  libgstlibav.so
+     0.18%  libgstvideo-1.0.so.0.2411.0
+     0.16%  libglib-2.0.so.0.8000.5
+     0.15%  libgobject-2.0.so.0.8000.5
+     0.15%  libgstisomp4.so
+     0.13%  libgstvideoparsersbad.so
+     0.09%  libgstcodecparsers-1.0.so.0.2411.0
+     0.06%  libgstcoreelements.so
+     0.02%  ld-linux-aarch64.so.1
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 720p_sw_symbols ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso,sym -i /opt/afdo_agent/work/720p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 18K of event 'cpu-clock'
+# Event count (approx.): 18958958940
+#
+# Overhead  Shared Object                       Symbol
+# ........  ..................................  .......................................................
+#
+    14.51%  libc.so.6                           [.] memcpy
+     1.22%  libavcodec.so.62.11.100             [.] 0x0000000000092cbc
+     1.16%  libavcodec.so.62.11.100             [.] 0x00000000000b8c14
+     0.91%  libavcodec.so.62.11.100             [.] 0x00000000000b8c18
+     0.88%  libavcodec.so.62.11.100             [.] 0x0000000000123ed8
+     0.85%  libavcodec.so.62.11.100             [.] 0x0000000000092cc0
+     0.80%  libavcodec.so.62.11.100             [.] 0x0000000000092e64
+     0.80%  libavcodec.so.62.11.100             [.] 0x00000000000b8ee8
+     0.76%  libavcodec.so.62.11.100             [.] 0x00000000000b8c20
+     0.72%  libavcodec.so.62.11.100             [.] 0x000000000011ed24
+     0.72%  libavcodec.so.62.11.100             [.] 0x000000000014eab0
+     0.70%  libavcodec.so.62.11.100             [.] 0x000000000011ecfc
+     0.68%  libavcodec.so.62.11.100             [.] 0x000000000011f7c8
+     0.61%  libavcodec.so.62.11.100             [.] 0x00000000000972b4
+     0.61%  libavcodec.so.62.11.100             [.] 0x0000000000123d28
+     0.60%  libavcodec.so.62.11.100             [.] 0x00000000000b8c1c
+     0.59%  libavcodec.so.62.11.100             [.] 0x0000000000097144
+     0.58%  libavcodec.so.62.11.100             [.] 0x0000000000139ab8
+     0.54%  libavcodec.so.62.11.100             [.] 0x0000000000118bb0
+     0.52%  libavcodec.so.62.11.100             [.] 0x00000000001442fc
+     0.46%  libavcodec.so.62.11.100             [.] 0x00000000000bd798
+     0.46%  libavcodec.so.62.11.100             [.] 0x0000000000123eb0
+     0.45%  libavcodec.so.62.11.100             [.] 0x00000000001442ac
+     0.44%  libavcodec.so.62.11.100             [.] 0x00000000000b8ef4
+     0.44%  libavcodec.so.62.11.100             [.] 0x000000000012527c
+     0.44%  libavcodec.so.62.11.100             [.] 0x0000000000097148
+     0.41%  libavcodec.so.62.11.100             [.] 0x00000000000b8eec
+     0.40%  libavcodec.so.62.11.100             [.] 0x0000000000123d00
+     0.40%  [kernel.kallsyms]                   [k] finish_task_switch
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 720p_sw_counted ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso,sym --show-nr-samples --percent-limit 0 --field-separator ';' -i /opt/afdo_agent/work/720p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 18K of event 'cpu-clock'
+# Event count (approx.): 18958958940
+#
+# Overhead;     Samples;Shared Object                     ;Symbol
+ 14.51% ; 2749       ;libc.so.6                         ;[.] memcpy
+ 1.22%  ; 231        ;libavcodec.so.62.11.100           ;[.] 0x0000000000092cbc
+ 1.16%  ; 219        ;libavcodec.so.62.11.100           ;[.] 0x00000000000b8c14
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 720p_hw_record ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -c 500009 -o /opt/afdo_agent/work/720p_hw.data -- gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+New clock: GstSystemClock
+Redistribute latency...
+Got EOS from element "pipeline0".
+Execution ended after 0:00:08.298363866
+Setting pipeline to NULL ...
+Freeing pipeline ...
+
+STDERR:
+[ perf record: Woken up 12 times to write data ]
+[ perf record: Captured and wrote 2.814 MB /opt/afdo_agent/work/720p_hw.data (91979 samples) ]
+real 9.17
+user 19.20
+sys 0.45
+
+
+=== 720p_hw_evlist ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/720p_hw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 500009, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+(empty)
+
+=== 720p_hw_dso ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso -i /opt/afdo_agent/work/720p_hw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 91K of event 'cycles'
+# Event count (approx.): 45990327811
+#
+# Overhead  Shared Object
+# ........  ..................................
+#
+    79.93%  libavcodec.so.62.11.100
+    15.52%  libc.so.6
+     1.95%  [kernel.kallsyms]
+     0.65%  libavutil.so.60.8.100
+     0.57%  libgstreamer-1.0.so.0.2411.0
+     0.26%  libgstbase-1.0.so.0.2411.0
+     0.22%  libgstvideo-1.0.so.0.2411.0
+     0.20%  libgstlibav.so
+     0.17%  libgobject-2.0.so.0.8000.5
+     0.14%  libglib-2.0.so.0.8000.5
+     0.14%  libgstisomp4.so
+     0.11%  libgstvideoparsersbad.so
+     0.10%  libgstcodecparsers-1.0.so.0.2411.0
+     0.03%  libgstcoreelements.so
+     0.02%  ld-linux-aarch64.so.1
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 720p_hw_symbols ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso,sym -i /opt/afdo_agent/work/720p_hw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 91K of event 'cycles'
+# Event count (approx.): 45990327811
+#
+# Overhead  Shared Object                       Symbol
+# ........  ..................................  .......................................................
+#
+    14.73%  libc.so.6                           [.] memcpy
+     1.25%  libavcodec.so.62.11.100             [.] 0x00000000000b8c14
+     1.06%  libavcodec.so.62.11.100             [.] 0x0000000000092cbc
+     0.85%  libavcodec.so.62.11.100             [.] 0x0000000000092cc0
+     0.84%  libavcodec.so.62.11.100             [.] 0x0000000000123ed8
+     0.83%  libavcodec.so.62.11.100             [.] 0x00000000000b8c18
+     0.79%  libavcodec.so.62.11.100             [.] 0x00000000000b8c20
+     0.78%  libavcodec.so.62.11.100             [.] 0x0000000000092e64
+     0.76%  libavcodec.so.62.11.100             [.] 0x00000000000b8ee8
+     0.71%  libavcodec.so.62.11.100             [.] 0x000000000011f7c8
+     0.68%  libavcodec.so.62.11.100             [.] 0x000000000011ed24
+     0.66%  libavcodec.so.62.11.100             [.] 0x00000000000b8c1c
+     0.65%  libavcodec.so.62.11.100             [.] 0x000000000011ecfc
+     0.62%  libavcodec.so.62.11.100             [.] 0x0000000000118bb0
+     0.58%  libavcodec.so.62.11.100             [.] 0x0000000000097144
+     0.58%  libavcodec.so.62.11.100             [.] 0x0000000000139ab8
+     0.57%  libavcodec.so.62.11.100             [.] 0x00000000000972b4
+     0.57%  libavcodec.so.62.11.100             [.] 0x0000000000123d28
+     0.56%  libavcodec.so.62.11.100             [.] 0x000000000014eab0
+     0.56%  libavcodec.so.62.11.100             [.] 0x00000000001442fc
+     0.50%  libavcodec.so.62.11.100             [.] 0x000000000012527c
+     0.47%  libavcodec.so.62.11.100             [.] 0x0000000000123eb0
+     0.47%  libavcodec.so.62.11.100             [.] 0x00000000000bd798
+     0.45%  libavcodec.so.62.11.100             [.] 0x000000000011f82c
+     0.45%  libavcodec.so.62.11.100             [.] 0x00000000000b8eec
+     0.43%  libavcodec.so.62.11.100             [.] 0x00000000000b8ef4
+     0.41%  libavcodec.so.62.11.100             [.] 0x00000000000b8ef0
+     0.40%  libavcodec.so.62.11.100             [.] 0x00000000001442ac
+     0.39%  libavcodec.so.62.11.100             [.] 0x0000000000130fb4
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 720p_hw_counted ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso,sym --show-nr-samples --percent-limit 0 --field-separator ';' -i /opt/afdo_agent/work/720p_hw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 91K of event 'cycles'
+# Event count (approx.): 45990327811
+#
+# Overhead;     Samples;Shared Object                     ;Symbol
+ 14.73% ; 13549      ;libc.so.6                         ;[.] memcpy
+ 1.25%  ; 1147       ;libavcodec.so.62.11.100           ;[.] 0x00000000000b8c14
+ 1.06%  ; 976        ;libavcodec.so.62.11.100           ;[.] 0x0000000000092cbc
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 1080p_sw_record ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cpu-clock -F 999 -o /opt/afdo_agent/work/1080p_sw.data -- gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_1080p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Redistribute latency...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+New clock: GstSystemClock
+Redistribute latency...
+Got EOS from element "pipeline0".
+Execution ended after 0:00:19.893684970
+Setting pipeline to NULL ...
+Freeing pipeline ...
+
+STDERR:
+[ perf record: Woken up 8 times to write data ]
+[ perf record: Captured and wrote 1.875 MB /opt/afdo_agent/work/1080p_sw.data (48968 samples) ]
+real 21.24
+user 48.52
+sys 0.71
+
+
+=== 1080p_sw_evlist ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/1080p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cpu-clock: type: 1 (software), size: 136, config: 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq }: 999, sample_type: IP|TID|TIME|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, freq: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+(empty)
+
+=== 1080p_sw_dso ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso -i /opt/afdo_agent/work/1080p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 48K of event 'cpu-clock'
+# Event count (approx.): 49017016968
+#
+# Overhead  Shared Object
+# ........  ..................................
+#
+    82.99%  libavcodec.so.62.11.100
+    13.93%  libc.so.6
+     1.58%  [kernel.kallsyms]
+     0.39%  libavutil.so.60.8.100
+     0.36%  libgstreamer-1.0.so.0.2411.0
+     0.13%  libgstbase-1.0.so.0.2411.0
+     0.11%  libgstvideo-1.0.so.0.2411.0
+     0.10%  libgstlibav.so
+     0.09%  libgobject-2.0.so.0.8000.5
+     0.08%  libgstisomp4.so
+     0.08%  libglib-2.0.so.0.8000.5
+     0.07%  libgstvideoparsersbad.so
+     0.06%  libgstcodecparsers-1.0.so.0.2411.0
+     0.02%  libgstcoreelements.so
+     0.01%  ld-linux-aarch64.so.1
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 1080p_sw_symbols ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso,sym -i /opt/afdo_agent/work/1080p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 48K of event 'cpu-clock'
+# Event count (approx.): 49017016968
+#
+# Overhead  Shared Object                       Symbol
+# ........  ..................................  ...............................................
+#
+    13.43%  libc.so.6                           [.] memcpy
+     1.80%  libavcodec.so.62.11.100             [.] 0x00000000000b8c14
+     1.41%  libavcodec.so.62.11.100             [.] 0x0000000000092cbc
+     1.25%  libavcodec.so.62.11.100             [.] 0x00000000000b8c18
+     1.13%  libavcodec.so.62.11.100             [.] 0x0000000000092cc0
+     1.03%  libavcodec.so.62.11.100             [.] 0x00000000000b8ee8
+     1.01%  libavcodec.so.62.11.100             [.] 0x0000000000092e64
+     0.97%  libavcodec.so.62.11.100             [.] 0x00000000000b8c20
+     0.85%  libavcodec.so.62.11.100             [.] 0x00000000001442fc
+     0.81%  libavcodec.so.62.11.100             [.] 0x00000000000b8c1c
+     0.78%  libavcodec.so.62.11.100             [.] 0x000000000014eab0
+     0.76%  libavcodec.so.62.11.100             [.] 0x00000000001442ac
+     0.75%  libavcodec.so.62.11.100             [.] 0x000000000011f7c8
+     0.72%  libavcodec.so.62.11.100             [.] 0x00000000000972b4
+     0.72%  libavcodec.so.62.11.100             [.] 0x0000000000097144
+     0.68%  libavcodec.so.62.11.100             [.] 0x0000000000118bb0
+     0.64%  libavcodec.so.62.11.100             [.] 0x000000000011ed24
+     0.63%  libavcodec.so.62.11.100             [.] 0x000000000011f82c
+     0.61%  libavcodec.so.62.11.100             [.] 0x0000000000123ed8
+     0.61%  libavcodec.so.62.11.100             [.] 0x0000000000139ab8
+     0.53%  libavcodec.so.62.11.100             [.] 0x000000000011ecfc
+     0.50%  libavcodec.so.62.11.100             [.] 0x0000000000097148
+     0.50%  libavcodec.so.62.11.100             [.] 0x0000000000123d28
+     0.48%  libavcodec.so.62.11.100             [.] 0x00000000000b8eec
+     0.46%  libavcodec.so.62.11.100             [.] 0x0000000000130fb4
+     0.45%  libavcodec.so.62.11.100             [.] 0x00000000000b8ef4
+     0.44%  libavcodec.so.62.11.100             [.] 0x00000000000b8ef0
+     0.42%  libavcodec.so.62.11.100             [.] 0x00000000000972b8
+     0.41%  libavcodec.so.62.11.100             [.] 0x00000000000bd798
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+=== 1080p_sw_counted ===
+COMMAND: export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso,sym --show-nr-samples --percent-limit 0 --field-separator ';' -i /opt/afdo_agent/work/1080p_sw.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 48K of event 'cpu-clock'
+# Event count (approx.): 49017016968
+#
+# Overhead;     Samples;Shared Object                     ;Symbol
+ 13.43% ; 6578       ;libc.so.6                         ;[.] memcpy
+ 1.80%  ; 881        ;libavcodec.so.62.11.100           ;[.] 0x00000000000b8c14
+ 1.41%  ; 689        ;libavcodec.so.62.11.100           ;[.] 0x0000000000092cbc
+[...展示截断：完整输出在同名 temp/rpi5-probe/*.json...]
+STDERR:
+(empty)
+
+SKIPPED: SPE / ETM: no arm_spe / cs_etm event source; no record executed. Media branch-stack skipped because branch capability test failed.
+LOCAL MEDIA SHA256:
+b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4
+
+31f72f11eb0566e0265358a14294e5dbddf13fce4ce1507d8872b04c2596a6da  /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_1080p_h264_60s.mp4
+
+DERIVED STATISTICS: sum complete report sample-count rows, not only displayed heads. Pure hex/unknown unresolved; @plt counted separately.
+[{"key":"720p_sw","resolution":"720p","mode":"sw","retry":false,"samples":18940,"lost":0,"lost_percent":0.0,"times":{"real":9.18,"user":18.73,"sys":0.44},"baseline":[{"real":8.39,"user":18.59,"sys":0.38},{"real":8.35,"user":18.76,"sys":0.36},{"real":8.52,"user":19.15,"sys":0.33}],"baseline_mean":8.42,"baseline_range":0.16999999999999993,"overhead_percent":9.026128266033261,"top_dso":[{"dso":"libavcodec.so.62.11.100","samples":15077,"percent":79.6040126715945},{"dso":"libc.so.6","samples":2920,"percent":15.417106652587117},{"dso":"[kernel.kallsyms]","samples":413,"percent":2.180570221752904},{"dso":"libgstreamer-1.0.so.0.2411.0","samples":140,"percent":0.7391763463569165},{"dso":"libavutil.so.60.8.100","samples":121,"percent":0.6388595564941921},{"dso":"libgstbase-1.0.so.0.2411.0","samples":47,"percent":0.24815205913410768},{"dso":"libgstlibav.so","samples":42,"percent":0.221752903907075},{"dso":"libgstvideo-1.0.so.0.2411.0","samples":34,"percent":0.1795142555438226},{"dso":"libglib-2.0.so.0.8000.5","samples":31,"percent":0.16367476240760295},{"dso":"libgobject-2.0.so.0.8000.5","samples":29,"percent":0.15311510031678985}],"symbols":{"libavcodec.so.62.11.100":{"total":15077,"named":29,"plt":13,"nonplt":16,"unknown":15048,"names":{"memcpy@plt":5,"av_bsf_receive_packet":3,"av_packet_unref":3,"av_frame_ref@plt":2,"av_packet_copy_props":2,"av_packet_free":2,"av_packet_unpack_dictionary":2,"av_bsf_send_packet":1,"av_buffer_replace@plt":1,"av_frame_remove_side_data@plt":1,"av_packet_move_ref":1,"av_refstruct_ref@plt":1,"av_refstruct_unref@plt":1,"avcodec_is_open":1,"avcodec_send_packet":1,"pthread_cond_wait@plt":1,"strlen@plt":1}},"libgstlibav.so":{"total":42,"named":19,"plt":19,"nonplt":0,"unknown":23,"names":{"av_packet_alloc@plt":3,"avcodec_receive_frame@plt":3,"gst_video_frame_map@plt":2,"av_frame_unref@plt":1,"g_malloc0@plt":1,"g_rec_mutex_unlock@plt":1,"gst_buffer_add_video_meta_full@plt":1,"gst_buffer_pool_acquire_buffer@plt":1,"gst_buffer_unmap@plt":1,"gst_video_codec_frame_unref@plt":1,"gst_video_decoder_get_max_decode_time@plt":1,"memcpy@plt":1,"memset@plt":1,"strlen@plt":1}}}},{"key":"720p_hw","resolution":"720p","mode":"hw","retry":false,"samples":91979,"lost":0,"lost_percent":0.0,"times":{"real":9.17,"user":19.2,"sys":0.45},"baseline":[{"real":8.39,"user":18.59,"sys":0.38},{"real":8.35,"user":18.76,"sys":0.36},{"real":8.52,"user":19.15,"sys":0.33}],"baseline_mean":8.42,"baseline_range":0.16999999999999993,"overhead_percent":8.90736342042755,"top_dso":[{"dso":"libavcodec.so.62.11.100","samples":73520,"percent":79.93128866371671},{"dso":"libc.so.6","samples":14277,"percent":15.52202133095598},{"dso":"[kernel.kallsyms]","samples":1795,"percent":1.9515324150077735},{"dso":"libavutil.so.60.8.100","samples":598,"percent":0.6501484034399156},{"dso":"libgstreamer-1.0.so.0.2411.0","samples":522,"percent":0.5675208471498929},{"dso":"libgstbase-1.0.so.0.2411.0","samples":235,"percent":0.25549310168625444},{"dso":"libgstvideo-1.0.so.0.2411.0","samples":201,"percent":0.21852814229334958},{"dso":"libgstlibav.so","samples":185,"percent":0.20113286728492374},{"dso":"libgobject-2.0.so.0.8000.5","samples":160,"percent":0.17395275008425837},{"dso":"libglib-2.0.so.0.8000.5","samples":128,"percent":0.13916220006740668}],"symbols":{"libavcodec.so.62.11.100":{"total":73520,"named":123,"plt":80,"nonplt":43,"unknown":73397,"names":{"memcpy@plt":33,"av_packet_unref":10,"avcodec_send_packet":8,"av_bsf_receive_packet":6,"av_buffer_unref@plt":6,"pthread_mutex_unlock@plt":6,"av_packet_unpack_dictionary":4,"avcodec_is_open":4,"av_buffer_replace@plt":3,"av_frame_replace@plt":3,"av_image_check_sar@plt":3,"av_packet_free":3,"av_packet_ref":3,"pthread_cond_wait@plt":3,"av_bsf_send_packet":2,"av_buffer_get_ref_count@plt":2,"av_frame_ref@plt":2,"av_frame_remove_side_data@plt":2,"av_refstruct_replace@plt":2,"pthread_cond_signal@plt":2,"strlen@plt":2,"av_buffer_realloc@plt":1,"av_frame_unref@plt":1,"av_freep@plt":1,"av_malloc@plt":1,"av_packet_alloc":1,"av_packet_get_side_data":1,"av_packet_move_ref":1,"av_pix_fmt_count_planes@plt":1,"av_refstruct_alloc_ext_c@plt":1,"av_refstruct_pool_get@plt":1,"av_refstruct_ref@plt":1,"memset@plt":1,"pthread_cond_broadcast@plt":1,"pthread_mutex_lock@plt":1}},"libgstlibav.so":{"total":185,"named":74,"plt":74,"nonplt":0,"unknown":111,"names":{"av_packet_alloc@plt":9,"avcodec_receive_frame@plt":5,"g_malloc0@plt":5,"gst_video_frame_map@plt":5,"av_packet_free@plt":4,"g_rec_mutex_unlock@plt":4,"gst_buffer_map@plt":4,"av_buffer_create@plt":3,"av_buffer_get_opaque@plt":3,"gst_buffer_unmap@plt":3,"gst_object_unref@plt":3,"gst_video_decoder_allocate_output_frame@plt":3,"av_frame_copy@plt":2,"av_frame_unref@plt":2,"gst_buffer_pool_acquire_buffer@plt":2,"gst_video_decoder_release_frame@plt":2,"gst_video_frame_unmap@plt":2,"memcpy@plt":2,"av_frame_get_side_data@plt":1,"g_list_free@plt":1,"g_rec_mutex_lock@plt":1,"gst_buffer_get_video_meta@plt":1,"gst_debug_log_valist@plt":1,"gst_mini_object_replace@plt":1,"gst_mini_object_unref@plt":1,"gst_video_codec_frame_ref@plt":1,"gst_video_codec_frame_unref@plt":1,"gst_video_decoder_finish_frame@plt":1,"gst_video_decoder_get_max_decode_time@plt":1}}}},{"key":"1080p_sw","resolution":"1080p","mode":"sw","retry":false,"samples":48968,"lost":0,"lost_percent":0.0,"times":{"real":21.24,"user":48.52,"sys":0.71},"baseline":[{"real":20.09,"user":48.7,"sys":0.64}],"baseline_mean":20.09,"baseline_range":0.0,"overhead_percent":5.724240915878531,"top_dso":[{"dso":"libavcodec.so.62.11.100","samples":40639,"percent":82.9909328541088},{"dso":"libc.so.6","samples":6821,"percent":13.92950498284594},{"dso":"[kernel.kallsyms]","samples":776,"percent":1.5847083809834996},{"dso":"libavutil.so.60.8.100","samples":193,"percent":0.3941349452703807},{"dso":"libgstreamer-1.0.so.0.2411.0","samples":175,"percent":0.3573762457114851},{"dso":"libgstbase-1.0.so.0.2411.0","samples":62,"percent":0.12661329848064043},{"dso":"libgstvideo-1.0.so.0.2411.0","samples":54,"percent":0.11027609867668682},{"dso":"libgstlibav.so","samples":48,"percent":0.09802319882372161},{"dso":"libgobject-2.0.so.0.8000.5","samples":42,"percent":0.08577029897075641},{"dso":"libgstisomp4.so","samples":39,"percent":0.07964384904427381}],"symbols":{"libavcodec.so.62.11.100":{"total":40639,"named":44,"plt":28,"nonplt":16,"unknown":40595,"names":{"memcpy@plt":7,"avcodec_receive_frame":4,"pthread_mutex_lock@plt":3,"av_bsf_receive_packet":2,"av_frame_unref@plt":2,"av_packet_unpack_dictionary":2,"av_packet_unref":2,"av_refstruct_replace@plt":2,"av_buffer_replace@plt":1,"av_frame_remove_side_data@plt":1,"av_image_check_sar@plt":1,"av_image_check_size2@plt":1,"av_malloc@plt":1,"av_packet_copy_props":1,"av_packet_free":1,"av_packet_get_side_data":1,"av_packet_ref":1,"av_pix_fmt_count_planes@plt":1,"av_pix_fmt_desc_get@plt":1,"av_refstruct_alloc_ext_c@plt":1,"av_refstruct_unref@plt":1,"avcodec_is_open":1,"avcodec_send_packet":1,"memset@plt":1,"pthread_cond_signal@plt":1,"pthread_cond_wait@plt":1,"pthread_mutex_unlock@plt":1,"strlen@plt":1}},"libgstlibav.so":{"total":48,"named":17,"plt":17,"nonplt":0,"unknown":31,"names":{"av_packet_alloc@plt":3,"g_malloc0@plt":3,"av_packet_free@plt":2,"gst_video_decoder_allocate_output_frame@plt":2,"gst_video_frame_unmap@plt":2,"g_list_free@plt":1,"gst_buffer_map@plt":1,"gst_buffer_unmap@plt":1,"gst_video_decoder_release_frame@plt":1,"strlen@plt":1}}}}]

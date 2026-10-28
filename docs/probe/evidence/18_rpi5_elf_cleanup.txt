@@ -1,0 +1,616 @@
+RPi5 2026-10-28；真实命令/输出/退出码。CRLF/行尾空白标准化，截断明确标记。
+完整 JSON（含分离 stdout/stderr 和 wrapper）：temp/rpi5-probe/。SDB_EXIT 为传输码，REMOTE_EXIT 才是板上真实码；combined 表示 SDB 合并流。
+板上环境都位于 /opt/afdo_agent/work/；所有 perf 调用均使用专用 --buildid-dir。
+
+=== library_paths ===
+COMMAND: for f in /usr/lib64/libavcodec.so* /usr/lib64/gstreamer-1.0/libgstlibav.so /usr/lib64/libgstreamer-1.0.so* /lib64/libavcodec.so* /lib64/gstreamer-1.0/libgstlibav.so /lib64/libgstreamer-1.0.so*; do if [ -f "$f" ]; then readlink -f "$f" || exit $?; fi; done
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/usr/lib64/libavcodec.so.62.11.100
+/usr/lib64/libavcodec.so.62.11.100
+/usr/lib64/gstreamer-1.0/libgstlibav.so
+/usr/lib64/libgstreamer-1.0.so.0.2411.0
+/usr/lib64/libgstreamer-1.0.so.0.2411.0
+/usr/lib64/libavcodec.so.62.11.100
+/usr/lib64/libavcodec.so.62.11.100
+/usr/lib64/gstreamer-1.0/libgstlibav.so
+/usr/lib64/libgstreamer-1.0.so.0.2411.0
+/usr/lib64/libgstreamer-1.0.so.0.2411.0
+
+STDERR:
+(empty)
+
+=== lib_sha_libgstlibav.so ===
+COMMAND: nice -n 19 ionice -c3 sha256sum /usr/lib64/gstreamer-1.0/libgstlibav.so
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+a3a87fcad461b83f9d75c5556da2caa172626aad17d92ae10406011aedaab671  /usr/lib64/gstreamer-1.0/libgstlibav.so
+
+STDERR:
+(empty)
+
+=== pull_libgstlibav.so ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /usr/lib64/gstreamer-1.0/libgstlibav.so /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstlibav.so
+HOST_EXIT=0
+STDOUT:
+
+pulled                 libgstlibav.so	  0%	      0KB	    0KB/s
+pulled                 libgstlibav.so	100%	    262KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/usr/lib64/gstreamer-1.0/libgstlibav.so   1665KB/s (269008 bytes in 0.157s)
+
+STDERR:
+(empty)
+
+=== elf_libgstlibav.so_header ===
+COMMAND: readelf -h /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstlibav.so
+HOST_EXIT=0
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          267408 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         6
+  Size of section headers:           64 (bytes)
+  Number of section headers:         25
+  Section header string table index: 24
+
+STDERR:
+(empty)
+
+=== elf_libgstlibav.so_sections ===
+COMMAND: readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstlibav.so
+HOST_EXIT=0
+STDOUT:
+There are 25 section headers, starting at offset 0x41490:
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .gnu.hash         GNU_HASH        0000000000000190 000190 000028 00   A  2   0  8
+  [ 2] .dynsym           DYNSYM          00000000000001b8 0001b8 0033c0 18   A  3   3  8
+  [ 3] .dynstr           STRTAB          0000000000003578 003578 0033d3 00   A  0   0  1
+  [ 4] .gnu.version      VERSYM          000000000000694c 00694c 000450 02   A  2   0  2
+  [ 5] .gnu.version_r    VERNEED         0000000000006da0 006da0 0000c0 00   A  3   6  8
+  [ 6] .rela.dyn         RELA            0000000000006e60 006e60 0016b0 18   A  2   0  8
+  [ 7] .rela.plt         RELA            0000000000008510 008510 0031b0 18  AI  2  20  8
+  [ 8] .init             PROGBITS        000000000000b6c0 00b6c0 000018 00  AX  0   0  4
+  [ 9] .plt              PROGBITS        000000000000b6e0 00b6e0 002140 00  AX  0   0 16
+  [10] .text             PROGBITS        000000000000d820 00d820 01e8d0 00  AX  0   0 16
+  [11] .fini             PROGBITS        000000000002c0f0 02c0f0 000014 00  AX  0   0  4
+  [12] .rodata           PROGBITS        000000000002c110 02c110 006fd4 00   A  0   0 16
+  [13] .eh_frame_hdr     PROGBITS        00000000000330e4 0330e4 000624 00   A  0   0  4
+  [14] .eh_frame         PROGBITS        0000000000033708 033708 002ba4 00   A  0   0  8
+  [15] .init_array       INIT_ARRAY      000000000004f118 03f118 000008 08  WA  0   0  8
+  [16] .fini_array       FINI_ARRAY      000000000004f120 03f120 000008 08  WA  0   0  8
+  [17] .data.rel.ro      PROGBITS        000000000004f128 03f128 000b40 00  WA  0   0  8
+  [18] .dynamic          DYNAMIC         000000000004fc68 03fc68 0002c0 10  WA  3   0  8
+  [19] .got              PROGBITS        000000000004ff28 03ff28 0000c0 08  WA  0   0  8
+  [20] .got.plt          PROGBITS        000000000004ffe8 03ffe8 0010a8 08  WA  0   0  8
+  [21] .data             PROGBITS        0000000000051090 041090 000300 00  WA  0   0  8
+  [22] .bss              NOBITS          0000000000051390 041390 0011b8 00  WA  0   0  8
+  [23] .gnu_debuglink    PROGBITS        0000000000000000 041390 00001c 00      0   0  4
+  [24] .shstrtab         STRTAB          0000000000000000 0413ac 0000dd 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), p (processor specific)
+
+STDERR:
+(empty)
+
+=== elf_libgstlibav.so_notes ===
+COMMAND: readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstlibav.so
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== elf_libgstlibav.so_comment ===
+COMMAND: readelf -p .comment /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstlibav.so
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+readelf: Warning: Section '.comment' was not dumped because it does not exist
+
+
+=== elf_libgstlibav.so_dynamic ===
+COMMAND: readelf -d /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstlibav.so
+HOST_EXIT=0
+STDOUT:
+
+Dynamic section at offset 0x3fc68 contains 39 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libgstreamer-1.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgstbase-1.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgstvideo-1.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgstaudio-1.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgstpbutils-1.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libavfilter.so.11]
+ 0x0000000000000001 (NEEDED)             Shared library: [libavformat.so.62]
+ 0x0000000000000001 (NEEDED)             Shared library: [libavcodec.so.62]
+ 0x0000000000000001 (NEEDED)             Shared library: [libavutil.so.60]
+ 0x0000000000000001 (NEEDED)             Shared library: [libglib-2.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgobject-2.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libpthread.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]
+ 0x000000000000000e (SONAME)             Library soname: [libgstlibav.so]
+ 0x000000000000000c (INIT)               0xb6c0
+ 0x000000000000000d (FINI)               0x2c0f0
+ 0x0000000000000019 (INIT_ARRAY)         0x4f118
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x4f120
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x190
+ 0x0000000000000005 (STRTAB)             0x3578
+ 0x0000000000000006 (SYMTAB)             0x1b8
+ 0x000000000000000a (STRSZ)              13267 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x4ffe8
+ 0x0000000000000002 (PLTRELSZ)           12720 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x8510
+ 0x0000000000000007 (RELA)               0x6e60
+ 0x0000000000000008 (RELASZ)             5808 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffb (FLAGS_1)            Flags: NODELETE
+ 0x000000006ffffffe (VERNEED)            0x6da0
+ 0x000000006fffffff (VERNEEDNUM)         6
+ 0x000000006ffffff0 (VERSYM)             0x694c
+ 0x000000006ffffff9 (RELACOUNT)          220
+ 0x0000000000000000 (NULL)               0x0
+
+STDERR:
+(empty)
+
+=== lib_sha_libavcodec.so.62.11.100 ===
+COMMAND: nice -n 19 ionice -c3 sha256sum /usr/lib64/libavcodec.so.62.11.100
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+58bbcd7f1e14fd55590cbee15f58d10ebe02c66139c75c0c9ae8b871b7635455  /usr/lib64/libavcodec.so.62.11.100
+
+STDERR:
+(empty)
+
+=== pull_libavcodec.so.62.11.100 ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /usr/lib64/libavcodec.so.62.11.100 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libavcodec.so.62.11.100
+HOST_EXIT=0
+STDOUT:
+
+pulled        libavcodec.so.62.11.100	  0%	      0KB	    0KB/s
+pulled        libavcodec.so.62.11.100	100%	   4966KB	 9528KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/usr/lib64/libavcodec.so.62.11.100   8132KB/s (5085584 bytes in 0.610s)
+
+STDERR:
+(empty)
+
+=== elf_libavcodec.so.62.11.100_header ===
+COMMAND: readelf -h /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libavcodec.so.62.11.100
+HOST_EXIT=0
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          5083920 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         5
+  Size of section headers:           64 (bytes)
+  Number of section headers:         26
+  Section header string table index: 25
+
+STDERR:
+(empty)
+
+=== elf_libavcodec.so.62.11.100_sections ===
+COMMAND: readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libavcodec.so.62.11.100
+HOST_EXIT=0
+STDOUT:
+There are 26 section headers, starting at offset 0x4d9310:
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .gnu.hash         GNU_HASH        0000000000000158 000158 0004e4 00   A  2   0  8
+  [ 2] .dynsym           DYNSYM          0000000000000640 000640 0027f0 18   A  3   3  8
+  [ 3] .dynstr           STRTAB          0000000000002e30 002e30 002047 00   A  0   0  1
+  [ 4] .gnu.version      VERSYM          0000000000004e78 004e78 000354 02   A  2   0  2
+  [ 5] .gnu.version_d    VERDEF          00000000000051d0 0051d0 000038 00   A  3   2  8
+  [ 6] .gnu.version_r    VERNEED         0000000000005208 005208 0000c0 00   A  3   4  8
+  [ 7] .rela.dyn         RELA            00000000000052c8 0052c8 02d990 18   A  2   0  8
+  [ 8] .rela.plt         RELA            0000000000032c58 032c58 001980 18  AI  2  21  8
+  [ 9] .init             PROGBITS        00000000000345d8 0345d8 000018 00  AX  0   0  4
+  [10] .plt              PROGBITS        00000000000345f0 0345f0 001120 00  AX  0   0 16
+  [11] .text             PROGBITS        0000000000035720 035720 3e48ac 00  AX  0   0 32
+  [12] .fini             PROGBITS        0000000000419fcc 419fcc 000014 00  AX  0   0  4
+  [13] .rodata           PROGBITS        0000000000419fe0 419fe0 06eb78 00   A  0   0 16
+  [14] .eh_frame_hdr     PROGBITS        0000000000488b58 488b58 006e04 00   A  0   0  4
+  [15] .eh_frame         PROGBITS        000000000048f960 48f960 026aec 00   A  0   0  8
+  [16] .init_array       INIT_ARRAY      00000000004c6450 4b6450 000010 08  WA  0   0  8
+  [17] .fini_array       FINI_ARRAY      00000000004c6460 4b6460 000008 08  WA  0   0  8
+  [18] .data.rel.ro      PROGBITS        00000000004c6468 4b6468 01f498 00  WA  0   0  8
+  [19] .dynamic          DYNAMIC         00000000004e5900 4d5900 000250 10  WA  3   0  8
+  [20] .got              PROGBITS        00000000004e5b50 4d5b50 001fa0 08  WA  0   0  8
+  [21] .got.plt          PROGBITS        00000000004e7af0 4d7af0 000898 08  WA  0   0  8
+  [22] .data             PROGBITS        00000000004e8388 4d8388 000e78 00  WA  0   0  8
+  [23] .bss              NOBITS          00000000004e9200 4d9200 272920 00  WA  0   0 16
+  [24] .gnu_debuglink    PROGBITS        0000000000000000 4d9200 000024 00      0   0  4
+  [25] .shstrtab         STRTAB          0000000000000000 4d9224 0000ec 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), p (processor specific)
+
+STDERR:
+(empty)
+
+=== elf_libavcodec.so.62.11.100_notes ===
+COMMAND: readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libavcodec.so.62.11.100
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== elf_libavcodec.so.62.11.100_comment ===
+COMMAND: readelf -p .comment /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libavcodec.so.62.11.100
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+readelf: Warning: Section '.comment' was not dumped because it does not exist
+
+
+=== elf_libavcodec.so.62.11.100_dynamic ===
+COMMAND: readelf -d /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libavcodec.so.62.11.100
+HOST_EXIT=0
+STDOUT:
+
+Dynamic section at offset 0x4d5900 contains 33 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libavutil.so.60]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libpthread.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]
+ 0x000000000000000e (SONAME)             Library soname: [libavcodec.so.62]
+ 0x0000000000000010 (SYMBOLIC)           0x0
+ 0x000000000000000c (INIT)               0x345d8
+ 0x000000000000000d (FINI)               0x419fcc
+ 0x0000000000000019 (INIT_ARRAY)         0x4c6450
+ 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x4c6460
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x158
+ 0x0000000000000005 (STRTAB)             0x2e30
+ 0x0000000000000006 (SYMTAB)             0x640
+ 0x000000000000000a (STRSZ)              8263 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x4e7af0
+ 0x0000000000000002 (PLTRELSZ)           6528 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x32c58
+ 0x0000000000000007 (RELA)               0x52c8
+ 0x0000000000000008 (RELASZ)             186768 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffc (VERDEF)             0x51d0
+ 0x000000006ffffffd (VERDEFNUM)          2
+ 0x000000000000001e (FLAGS)              SYMBOLIC
+ 0x000000006ffffffe (VERNEED)            0x5208
+ 0x000000006fffffff (VERNEEDNUM)         4
+ 0x000000006ffffff0 (VERSYM)             0x4e78
+ 0x000000006ffffff9 (RELACOUNT)          7756
+ 0x0000000000000000 (NULL)               0x0
+
+STDERR:
+(empty)
+
+=== lib_sha_libgstreamer-1.0.so.0.2411.0 ===
+COMMAND: nice -n 19 ionice -c3 sha256sum /usr/lib64/libgstreamer-1.0.so.0.2411.0
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+bee5bb0d6e5cb0bf79d4b2596d7bf896783fe577c795b2f24205ed66124cd273  /usr/lib64/libgstreamer-1.0.so.0.2411.0
+
+STDERR:
+(empty)
+
+=== pull_libgstreamer-1.0.so.0.2411.0 ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /usr/lib64/libgstreamer-1.0.so.0.2411.0 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstreamer-1.0.so.0.2411.0
+HOST_EXIT=0
+STDOUT:
+
+pulled   libgstreamer-1.0.so.0.2411.0	  0%	      0KB	    0KB/s
+pulled   libgstreamer-1.0.so.0.2411.0	100%	   1290KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/usr/lib64/libgstreamer-1.0.so.0.2411.0   5091KB/s (1321664 bytes in 0.253s)
+
+STDERR:
+(empty)
+
+=== elf_libgstreamer-1.0.so.0.2411.0_header ===
+COMMAND: readelf -h /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstreamer-1.0.so.0.2411.0
+HOST_EXIT=0
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          1320064 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         6
+  Size of section headers:           64 (bytes)
+  Number of section headers:         25
+  Section header string table index: 24
+
+STDERR:
+(empty)
+
+=== elf_libgstreamer-1.0.so.0.2411.0_sections ===
+COMMAND: readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstreamer-1.0.so.0.2411.0
+HOST_EXIT=0
+STDOUT:
+There are 25 section headers, starting at offset 0x142480:
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .gnu.hash         GNU_HASH        0000000000000190 000190 003524 00   A  2   0  8
+  [ 2] .dynsym           DYNSYM          00000000000036b8 0036b8 00e550 18   A  3   3  8
+  [ 3] .dynstr           STRTAB          0000000000011c08 011c08 00e15d 00   A  0   0  1
+  [ 4] .gnu.version      VERSYM          000000000001fd66 01fd66 00131c 02   A  2   0  2
+  [ 5] .gnu.version_r    VERNEED         0000000000021088 021088 000090 00   A  3   3  8
+  [ 6] .rela.dyn         RELA            0000000000021118 021118 00a008 18   A  2   0  8
+  [ 7] .rela.plt         RELA            000000000002b120 02b120 0035e8 18  AI  2  20  8
+  [ 8] .init             PROGBITS        000000000002e708 02e708 000018 00  AX  0   0  4
+  [ 9] .plt              PROGBITS        000000000002e720 02e720 002410 00  AX  0   0 16
+  [10] .text             PROGBITS        0000000000030b30 030b30 0b0954 00  AX  0   0 16
+  [11] .fini             PROGBITS        00000000000e1484 0e1484 000014 00  AX  0   0  4
+  [12] .rodata           PROGBITS        00000000000e14a0 0e14a0 02a6e8 00   A  0   0 16
+  [13] .eh_frame_hdr     PROGBITS        000000000010bb88 10bb88 005834 00   A  0   0  4
+  [14] .eh_frame         PROGBITS        00000000001113c0 1113c0 023588 00   A  0   0  8
+  [15] .init_array       INIT_ARRAY      000000000014afe0 13afe0 000010 08  WA  0   0  8
+  [16] .fini_array       FINI_ARRAY      000000000014aff0 13aff0 000008 08  WA  0   0  8
+  [17] .data.rel.ro      PROGBITS        000000000014aff8 13aff8 0048f8 00  WA  0   0  8
+  [18] .dynamic          DYNAMIC         000000000014f8f0 13f8f0 000250 10  WA  3   0  8
+  [19] .got              PROGBITS        000000000014fb40 13fb40 0004a8 08  WA  0   0  8
+  [20] .got.plt          PROGBITS        000000000014ffe8 13ffe8 001210 08  WA  0   0  8
+  [21] .data             PROGBITS        00000000001511f8 1411f8 001180 00  WA  0   0  8
+  [22] .bss              NOBITS          0000000000152378 142378 001ad0 00  WA  0   0  8
+  [23] .gnu_debuglink    PROGBITS        0000000000000000 142378 000028 00      0   0  4
+  [24] .shstrtab         STRTAB          0000000000000000 1423a0 0000dd 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), p (processor specific)
+
+STDERR:
+(empty)
+
+=== elf_libgstreamer-1.0.so.0.2411.0_notes ===
+COMMAND: readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstreamer-1.0.so.0.2411.0
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== elf_libgstreamer-1.0.so.0.2411.0_comment ===
+COMMAND: readelf -p .comment /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstreamer-1.0.so.0.2411.0
+HOST_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+readelf: Warning: Section '.comment' was not dumped because it does not exist
+
+
+=== elf_libgstreamer-1.0.so.0.2411.0_dynamic ===
+COMMAND: readelf -d /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board_libs/rpi5/libgstreamer-1.0.so.0.2411.0
+HOST_EXIT=0
+STDOUT:
+
+Dynamic section at offset 0x13f8f0 contains 33 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libgobject-2.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libglib-2.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgmodule-2.0.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdlog.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libpthread.so.0]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]
+ 0x000000000000000e (SONAME)             Library soname: [libgstreamer-1.0.so.0]
+ 0x000000000000000c (INIT)               0x2e708
+ 0x000000000000000d (FINI)               0xe1484
+ 0x0000000000000019 (INIT_ARRAY)         0x14afe0
+ 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x14aff0
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x190
+ 0x0000000000000005 (STRTAB)             0x11c08
+ 0x0000000000000006 (SYMTAB)             0x36b8
+ 0x000000000000000a (STRSZ)              57693 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x14ffe8
+ 0x0000000000000002 (PLTRELSZ)           13800 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x2b120
+ 0x0000000000000007 (RELA)               0x21118
+ 0x0000000000000008 (RELASZ)             40968 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffb (FLAGS_1)            Flags: NODELETE
+ 0x000000006ffffffe (VERNEED)            0x21088
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x000000006ffffff0 (VERSYM)             0x1fd66
+ 0x000000006ffffff9 (RELACOUNT)          1612
+ 0x0000000000000000 (NULL)               0x0
+
+STDERR:
+(empty)
+
+=== cleanup_work ===
+COMMAND: nice -n 19 ionice -c3 find /opt/afdo_agent/work -mindepth 1 -delete && test -z "$(find /opt/afdo_agent/work -mindepth 1 -print -quit)" && ls -la /opt/afdo_agent/work
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+total 8
+drwxrwxrwx 2 root root 4096 Oct 28 19:02 .
+drwxrwxrwx 5 root root 4096 Oct 28 18:57 ..
+
+STDERR:
+(SDB combined stream)
+
+=== retained ===
+COMMAND: ls -l /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/* && nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/*
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+-rwxr-xrwx 1 root root 68804864 Oct 27 00:56 /opt/afdo_agent/lib/libLLVM.so.22.1
+-rwxr-xrwx 1 root root  3261448 Oct 27 17:32 /opt/afdo_agent/tools/perf
+d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949  /opt/afdo_agent/tools/perf
+06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007  /opt/afdo_agent/lib/libLLVM.so.22.1
+
+STDERR:
+(SDB combined stream)
+
+=== rpm_after ===
+COMMAND: n=$(nice -n 19 ionice -c3 rpm -qa); r=$?; [ "$r" -eq 0 ] || exit "$r"; printf "%s
+" "$n" | wc -l
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+1249
+
+STDERR:
+(SDB combined stream)
+
+=== final_tmp_clean ===
+COMMAND: test ! -e /tmp/afdo_true_noexec_control
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(SDB combined stream)
+
+=== boundary_after ===
+COMMAND: stat -c '%n %s %y' /tmp/sdb.log
+HOST_EXIT=0
+STDOUT:
+/tmp/sdb.log 495 2026-10-28 17:48:51.361776578 +0800
+
+STDERR:
+(empty)
+LOCAL BUILD OPTION REFERENCES:
+FILE src/llvm/bolt/README.md
+9:
+10: ## Input Binary Requirements
+11:
+12: BOLT operates on X86-64 and AArch64 ELF binaries. At the minimum, the binaries
+13: should have an unstripped symbol table, and, to get maximum performance gains,
+14: they should be linked with relocations (`--emit-relocs` or `-q` linker flag).
+15:
+
+FILE src/llvm/bolt/README.md
+119:
+120: In order to allow BOLT to re-arrange functions (in addition to re-arranging
+121: code within functions) in your program, it needs a little help from the linker.
+122: Add `--emit-relocs` to the final link step of your application. You can verify
+123: the presence of relocations by checking for `.rela.text` section in the binary.
+124: BOLT will also report if it detects relocations while processing the binary.
+
+FILE src/llvm/bolt/README.md
+190: For this step, you will need `perf.data` file collected from the previous step and
+191: a copy of the binary that was running. The binary has to be either
+192: unstripped, or should have a symbol table intact (i.e., running `strip -g` is
+193: okay).
+194:
+195: Make sure `perf` is in your `PATH`, and execute `perf2bolt`:
+196: ```
+197: $ perf2bolt -p perf.data -o perf.fdata <executable>
+198: ```
+199:
+200: This command will aggregate branch data from `perf.data` and store it in a
+201: format that is both more compact and more resilient to binary modifications.
+202:
+203: If the profile was collected without brstacks, you will need to add `-ba` flag to
+204: the command line above.
+205:
+
+FILE src/llvm/clang/docs/UsersManual.rst
+2813: the code needs to execute under the profiler. The following is the
+2814: usual build cycle when using sample profilers for optimization:
+2815:
+2816: 1. Build the code with source line table information. You can use all the
+2817:    usual build flags that you always build your application with. The only
+2818:    requirement is that DWARF debug info including source line information is
+2819:    generated. This DWARF information is important for the profiler to be able
+2820:    to map instructions back to source line locations. The usefulness of this
+2821:    DWARF information can be improved with the ``-fdebug-info-for-profiling``
+2822:    and ``-funique-internal-linkage-names`` options.
+2823:
+2824:    On Linux:
+2825:
+2826:    .. code-block:: console
+2827:
+2828:      $ clang++ -O2 -gline-tables-only \
+2829:        -fdebug-info-for-profiling -funique-internal-linkage-names \
+2830:        code.cc -o code
+2831:
+2832:    While MSVC-style targets default to CodeView debug information, DWARF debug
+2833:    information is required to generate source-level LLVM profiles. Use
+2834:    ``-gdwarf`` to include DWARF debug information:
+2835:
+2836:    .. code-block:: winbatch
+2837:
+2838:      > clang-cl /O2 -gdwarf -gline-tables-only ^
+2839:        /clang:-fdebug-info-for-profiling /clang:-funique-internal-linkage-names ^
+2840:        code.cc /Fe:code -fuse-ld=lld /link /debug:dwarf
+2841:
+2842:    [OPTIONAL] Pseudo instrumentation can be used as the anchor for accurate
+2843:    profile mapping with the ``-fpseudo-probe-for-profiling`` option.
+2844:
+2845:    On Linux:
+2846:
+2847:    .. code-block:: console
+2848:
+2849:      $ clang++ -O2 -gline-tables-only \
+2850:        -fpseudo-probe-for-profiling -funique-internal-linkage-names \
+2851:        code.cc -o code
+2852:
+
+rg -n ARM64_BRBE src/linux-rpi/arch/arm64 src/linux-rpi/drivers/perf: exit 1, no matches.

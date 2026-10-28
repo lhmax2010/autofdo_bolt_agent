@@ -1,0 +1,489 @@
+设备树 NUL 字节以 [NUL] 展示；完整原始值见 JSON。
+RPi5 2026-10-28；真实命令/输出/退出码。CRLF/行尾空白标准化，截断明确标记。
+完整 JSON（含分离 stdout/stderr 和 wrapper）：temp/rpi5-probe/。SDB_EXIT 为传输码，REMOTE_EXIT 才是板上真实码；combined 表示 SDB 合并流。
+板上环境都位于 /opt/afdo_agent/work/；所有 perf 调用均使用专用 --buildid-dir。
+工具结果转录：sdb connect 192.168.108.26；exit=0；connecting to 192.168.108.26:26101 ... / connected to 192.168.108.26:26101。
+首次连接后的 stat /tmp/sdb.log：495 B，2026-10-28 17:48:51.361776578 +0800；前轮最后已知值 400 B、12:01:10。未在 connect 前取得新基线。
+
+=== devices ===
+COMMAND: sdb devices
+HOST_EXIT=0
+STDOUT:
+List of devices attached
+192.168.108.26:26101	device    	rpi4
+
+STDERR:
+(empty)
+
+=== model ===
+COMMAND: cat /proc/device-tree/model
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Raspberry Pi 5 Model B Rev 1.1[NUL]
+STDERR:
+(SDB combined stream)
+
+=== arch ===
+COMMAND: uname -m
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+aarch64
+
+STDERR:
+(SDB combined stream)
+
+=== root ===
+COMMAND: sdb -s 192.168.108.26:26101 root on
+HOST_EXIT=0
+STDOUT:
+Switched to 'root' account mode
+
+STDERR:
+(empty)
+
+=== uid ===
+COMMAND: id -u
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+0
+
+STDERR:
+(SDB combined stream)
+
+=== release ===
+COMMAND: uname -r
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+6.12.80-arm64-rpi4-v8
+
+STDERR:
+(SDB combined stream)
+
+=== version ===
+COMMAND: uname -v
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+#1 SMP PREEMPT Tue Oct 27 08:04:21 UTC 2026
+
+STDERR:
+(SDB combined stream)
+
+=== os ===
+COMMAND: cat /etc/os-release
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+NAME=Tizen
+VERSION="11.0.0 (Tizen11.0/Unified)"
+ID=tizen
+VERSION_ID=11.0.0
+PRETTY_NAME="Tizen 11.0.0 (Tizen11.0/Unified)"
+ANSI_COLOR="0;36"
+CPE_NAME="cpe:/o:tizen:tizen:11.0.0"
+BUILD_ID=tizen-unified-toolchain_20261027.063617_tizen-headed-aarch64
+
+STDERR:
+(SDB combined stream)
+
+=== cpu ===
+COMMAND: cat /proc/cpuinfo
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+processor	: 0
+BogoMIPS	: 108.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x4
+CPU part	: 0xd0b
+CPU revision	: 1
+
+processor	: 1
+BogoMIPS	: 108.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x4
+CPU part	: 0xd0b
+CPU revision	: 1
+
+processor	: 2
+BogoMIPS	: 108.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x4
+CPU part	: 0xd0b
+CPU revision	: 1
+
+processor	: 3
+BogoMIPS	: 108.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x4
+CPU part	: 0xd0b
+CPU revision	: 1
+
+Revision	: c04171
+Serial		: 5961bda463a6908b
+Model		: Raspberry Pi 5 Model B Rev 1.1
+
+STDERR:
+(SDB combined stream)
+
+=== memory ===
+COMMAND: free -m
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+               total        used        free      shared  buff/cache   available
+Mem:            3981         683        3052         224         509        3297
+Swap:           1592           1        1591
+
+STDERR:
+(SDB combined stream)
+
+=== mounts ===
+COMMAND: cat /proc/mounts
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+devtmpfs /dev devtmpfs rw,nosuid,size=1993288k,nr_inodes=498322,mode=755 0 0
+sysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
+proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+/dev/mmcblk0p6 /usr/lib/modules ext4 ro,relatime 0 0
+/dev/mmcblk0p2 / ext4 rw,relatime,mb_optimize_scan=0 0 0
+/dev/mmcblk0p3 /opt ext4 rw,relatime 0 0
+/dev/mmcblk0p10 /hal ext4 rw,relatime 0 0
+overlay /apps overlay ro,relatime,lowerdir=/sysroot/product/apps:/sysroot/apps,redirect_dir=on 0 0
+smackfs /sys/fs/smackfs smackfs rw,nosuid,nodev,noexec,relatime 0 0
+tmpfs /dev/shm tmpfs rw,nosuid,nodev,noexec 0 0
+devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000 0 0
+tmpfs /run tmpfs rw,nosuid,nodev,noexec,mode=755 0 0
+tmpfs /sys/fs/cgroup tmpfs ro,nosuid,nodev,noexec,mode=755 0 0
+cgroup /sys/fs/cgroup/systemd cgroup rw,nosuid,nodev,noexec,relatime,xattr,release_agent=/usr/lib/systemd/systemd-cgroups-agent,name=systemd 0 0
+kdbusfs /sys/fs/kdbus kdbusfs rw,nosuid,nodev,noexec,relatime 0 0
+bpf /sys/fs/bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700 0 0
+cgroup /sys/fs/cgroup/blkio cgroup rw,nosuid,nodev,noexec,relatime,blkio 0 0
+cgroup /sys/fs/cgroup/cpu,cpuacct cgroup rw,nosuid,nodev,noexec,relatime,cpu,cpuacct 0 0
+cgroup /sys/fs/cgroup/devices cgroup rw,nosuid,nodev,noexec,relatime,devices 0 0
+cgroup /sys/fs/cgroup/freezer cgroup rw,nosuid,nodev,noexec,relatime,freezer 0 0
+cgroup /sys/fs/cgroup/net_cls cgroup rw,nosuid,nodev,noexec,relatime,net_cls,release_agent=/usr/bin/net-cls-release 0 0
+cgroup /sys/fs/cgroup/cpuset cgroup rw,nosuid,nodev,noexec,relatime,cpuset 0 0
+cgroup /sys/fs/cgroup/memory cgroup rw,nosuid,nodev,noexec,relatime,memory 0 0
+systemd-1 /proc/sys/fs/binfmt_misc autofs rw,relatime,fd=25,pgrp=1,timeout=0,minproto=5,maxproto=5,direct 0 0
+mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+configfs /sys/kernel/config configfs rw,nosuid,nodev,noexec,relatime 0 0
+debugfs /sys/kernel/debug debugfs rw,nosuid,nodev,noexec,relatime 0 0
+tmpfs /tmp tmpfs rw,nosuid,nodev,noexec 0 0
+/dev/mmcblk0p9 /mnt/inform ext4 rw,relatime 0 0
+tracefs /sys/kernel/debug/tracing tracefs rw,nosuid,nodev,noexec,relatime 0 0
+/dev/mmcblk0p5 /opt/usr f2fs rw,lazytime,relatime,background_gc=on,nogc_merge,discard,discard_unit=block,user_xattr,inline_xattr,acl,inline_data,inline_dentry,flush_merge,barrier,extent_cache,mode=adaptive,active_logs=6,alloc_mode=default,checkpoint_merge,fsync_mode=posix,memory=normal,errors=continue 0 0
+fusectl /sys/fs/fuse/connections fusectl rw,nosuid,nodev,noexec,relatime 0 0
+cgroup /sys/fs/cgroup/watchdog cgroup rw,nosuid,nodev,noexec,relatime,release_agent=/usr/bin/resourced-watchdog-handler.sh,name=watchdog 0 0
+tmpfs /opt/media tmpfs rw,relatime 0 0
+tmpfs /run/user/5001 tmpfs rw,nosuid,nodev,noexec,relatime,size=407680k,mode=700,uid=5001,gid=100 0 0
+sdb.default /dev/usb-funcs/sdb/default functionfs rw,relatime 0 0
+mtp.default /dev/usb-funcs/mtp/default functionfs rw,relatime 0 0
+/dev/mmcblk0p5 /opt/usr/home/owner/media f2fs rw,lazytime,relatime,background_gc=on,nogc_merge,discard,discard_unit=block,user_xattr,inline_xattr,acl,inline_data,inline_dentry,flush_merge,barrier,extent_cache,mode=adaptive,active_logs=6,alloc_mode=default,checkpoint_merge,fsync_mode=posix,memory=normal,errors=continue 0 0
+/dev/loop0 /opt/usr/home/owner/subsession/__templ_acct_fix__ ext4 rw,relatime 0 0
+/dev/loop1 /opt/usr/home/owner/subsession/__templ_prof_fix__ ext4 rw,relatime 0 0
+
+STDERR:
+(SDB combined stream)
+
+=== opt_mount ===
+COMMAND: findmnt -T /opt -n -o TARGET,SOURCE,FSTYPE,OPTIONS
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/opt /dev/mmcblk0p3 ext4 rw,relatime
+
+STDERR:
+(SDB combined stream)
+
+=== tmp_mount ===
+COMMAND: findmnt -T /tmp -n -o TARGET,SOURCE,FSTYPE,OPTIONS
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/tmp tmpfs tmpfs rw,nosuid,nodev,noexec
+
+STDERR:
+(SDB combined stream)
+
+=== space ===
+COMMAND: df -h /opt /tmp
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mmcblk0p3        1.3G   23M  1.3G   2% /opt
+tmpfs                 2.0G   24K  2.0G   1% /tmp
+
+STDERR:
+(SDB combined stream)
+
+=== rpm_before ===
+COMMAND: n=$(nice -n 19 ionice -c3 rpm -qa); r=$?; [ "$r" -eq 0 ] || exit "$r"; printf "%s
+" "$n" | wc -l
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+1249
+
+STDERR:
+(SDB combined stream)
+
+=== create_dirs ===
+COMMAND: mkdir -p /opt/afdo_agent/tools /opt/afdo_agent/lib /opt/afdo_agent/work/home /opt/afdo_agent/work/tmp /opt/afdo_agent/work/cache /opt/afdo_agent/work/buildid && : > /opt/afdo_agent/work/perfconfig
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(SDB combined stream)
+
+=== exec_opt ===
+COMMAND: cp /usr/bin/true /opt/afdo_agent/work/true-control || exit $?; /opt/afdo_agent/work/true-control; rc=$?; rm -f /opt/afdo_agent/work/true-control; exit "$rc"
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== exec_tmp ===
+COMMAND: test ! -e /tmp/afdo_true_noexec_control || exit 98; cp /usr/bin/true /tmp/afdo_true_noexec_control || exit $?; /tmp/afdo_true_noexec_control; rc=$?; rm -f /tmp/afdo_true_noexec_control; exit "$rc"
+REMOTE_EXIT=126 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+/bin/sh: /tmp/afdo_true_noexec_control: Permission denied
+
+
+=== true_cleanup ===
+COMMAND: test ! -e /tmp/afdo_true_noexec_control && test ! -e /opt/afdo_agent/work/true-control
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== events ===
+COMMAND: ls /sys/bus/event_source/devices/
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+armv8_cortex_a76
+breakpoint
+kprobe
+software
+tracepoint
+uprobe
+
+STDERR:
+(empty)
+
+=== coresight ===
+COMMAND: ls /sys/bus/coresight/devices/
+REMOTE_EXIT=2 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+ls: cannot access /sys/bus/coresight/devices/: No such file or directory
+
+
+=== dt_nodes ===
+COMMAND: find -H /proc/device-tree -maxdepth 2 -type d \( -iname '*pmu*' -o -iname '*etm*' -o -iname '*coresight*' -o -iname '*spe*' \) -print -exec sh -c 'for n do echo NODE=$n; for p in compatible status; do echo $p:; if [ -f "$n/$p" ]; then tr "\000" "\n" < "$n/$p"; else echo ABSENT; fi; done; done' sh {} +
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/proc/device-tree/arm-pmu
+NODE=/proc/device-tree/arm-pmu
+compatible:
+arm,cortex-a76-pmu
+status:
+ABSENT
+
+STDERR:
+(empty)
+
+=== pmu_driver ===
+COMMAND: ls -l /sys/bus/platform/devices/*pmu*/driver
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+lrwxrwxrwx 1 root root 0 Oct 28 18:57 /sys/bus/platform/devices/arm-pmu/driver -> ../../../bus/platform/drivers/armv8-pmu
+
+STDERR:
+(empty)
+
+=== pmu_drivers ===
+COMMAND: ls /sys/bus/platform/drivers/ | grep -i pmu
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+armv8-pmu
+
+STDERR:
+(empty)
+
+=== dmesg ===
+COMMAND: dmesg | grep -i -E 'pmu|perf|spe|brbe|etm|coresight'
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.002685] CPU features: detected: Speculative Store Bypassing Safe (SSBS)
+[    0.082991] xor: measuring software checksum speed
+[    0.199059] hw perfevents: enabled with armv8_cortex_a76 PMU driver, 7 (0,8000003f) counters available
+[    0.679220] v3d 1002000000.v3d: [drm] Transparent Hugepage support is recommended for optimal performance on this platform!
+[    0.739095] xhci-hcd xhci-hcd.0: Host supports USB 3.0 SuperSpeed
+[    0.740666] xhci-hcd xhci-hcd.1: Host supports USB 3.0 SuperSpeed
+[    0.852000] mmc0: new ultra high speed SDR104 SDXC card at address 59b4
+[    0.941827] mmc1: new ultra high speed DDR50 SDIO card at address 0001
+
+STDERR:
+(empty)
+
+=== config ===
+COMMAND: if [ -r /proc/config.gz ]; then zcat /proc/config.gz | grep -n -E 'CONFIG_(ARM_PMUV3|HW_PERF_EVENTS|ARM_SPE_PMU|CORESIGHT|CORESIGHT_SOURCE_ETM4X|ARM64_BRBE|PID_IN_CONTEXTIDR|KALLSYMS)'; else echo '/proc/config.gz unavailable'; exit 2; fi
+REMOTE_EXIT=2 SDB_EXIT=0
+STDOUT:
+/proc/config.gz unavailable
+
+STDERR:
+(empty)
+
+=== paranoid ===
+COMMAND: cat /proc/sys/kernel/perf_event_paranoid
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+2
+
+STDERR:
+(empty)
+
+STATIC SOURCE CHECK (not runtime configuration)
+Static only: src/linux-rpi HEAD; no running .config, no make.
+FILE src/linux-rpi/arch/arm64/configs/tizen_bcm2711_defconfig
+34: CONFIG_PROFILING=y
+FILE src/linux-rpi/drivers/perf/Kconfig
+146: config ARM_PMUV3
+147: 	depends on HW_PERF_EVENTS && ((ARM && CPU_V7) || ARM64)
+148: 	bool "ARM PMUv3 support" if !ARM64
+149: 	default ARM64
+150: 	  help
+151: 	  Say y if you want to use the ARM performance monitor unit (PMU)
+152: 	  version 3. The PMUv3 is the CPU performance monitors on ARMv8
+153: 	  (aarch32 and aarch64) systems that implement the PMUv3
+154: 	  architecture.
+155:
+156: config ARM_DSU_PMU
+157: 	tristate "ARM DynamIQ Shared Unit (DSU) PMU"
+158: 	depends on ARM64
+159: 	  help
+218: config ARM_SPE_PMU
+219: 	tristate "Enable support for the ARMv8.2 Statistical Profiling Extension"
+220: 	depends on ARM64
+221: 	help
+222: 	  Enable perf support for the ARMv8.2 Statistical Profiling
+223: 	  Extension, which provides periodic sampling of operations in
+224: 	  the CPU pipeline and reports this via the perf AUX interface.
+225:
+226: config ARM_DMC620_PMU
+227: 	tristate "Enable PMU support for the ARM DMC-620 memory controller"
+228: 	depends on (ARM64 && ACPI) || COMPILE_TEST
+229: 	help
+230: 	  Support for PMU events monitoring on the ARM DMC-620 memory
+231: 	  controller.
+FILE src/linux-rpi/arch/arm64/Kconfig
+1545: config HW_PERF_EVENTS
+1546: 	def_bool y
+1547: 	depends on ARM_PMU
+1548:
+1549: # Supported by clang >= 7.0 or GCC >= 12.0.0
+1550: config CC_HAVE_SHADOW_CALL_STACK
+1551: 	def_bool $(cc-option, -fsanitize=shadow-call-stack -ffixed-x18)
+1552:
+1553: config PARAVIRT
+1554: 	bool "Enable paravirtualization code"
+1555: 	help
+1556: 	  This changes the kernel so it can modify itself when it is run
+1557: 	  under a hypervisor, potentially improving performance significantly
+1558: 	  over full virtualization.
+FILE src/linux-rpi/drivers/hwtracing/coresight/Kconfig
+5: menuconfig CORESIGHT
+6: 	tristate "CoreSight Tracing Support"
+7: 	depends on ARM || ARM64
+8: 	depends on OF || ACPI
+9: 	select ARM_AMBA
+10: 	select PERF_EVENTS
+11: 	select CONFIGFS_FS
+12: 	help
+13: 	  This framework provides a kernel interface for the CoreSight debug
+14: 	  and trace drivers to register themselves with. It's intended to build
+15: 	  a topological view of the CoreSight components based on a DT
+16: 	  specification and configure the right series of components when a
+17: 	  trace source gets enabled.
+18:
+100: config CORESIGHT_SOURCE_ETM4X
+101: 	tristate "CoreSight ETMv4.x / ETE driver"
+102: 	depends on ARM64
+103: 	select CORESIGHT_LINKS_AND_SINKS
+104: 	select PID_IN_CONTEXTIDR
+105: 	help
+106: 	  This driver provides support for the CoreSight Embedded Trace Macrocell
+107: 	  version 4.x and the Embedded Trace Extensions (ETE). Both are CPU tracer
+108: 	  modules, tracing the instructions that a processor is executing. This is
+109: 	  primarily useful for instruction level tracing.
+110:
+111: 	  To compile this driver as a module, choose M here: the
+112: 	  module will be called coresight-etm4x.
+113:
+FILE src/linux-rpi/init/Kconfig
+1831: config KALLSYMS
+1832: 	bool "Load all symbols for debugging/ksymoops" if EXPERT
+1833: 	default y
+1834: 	help
+1835: 	  Say Y here to let the kernel print out symbolic crash information and
+1836: 	  symbolic stack backtraces. This increases the size of the kernel
+1837: 	  somewhat, as all symbols have to be loaded into the kernel image.
+1838:
+1839: config KALLSYMS_SELFTEST
+1840: 	bool "Test the basic functions and performance of kallsyms"
+1841: 	depends on KALLSYMS
+1842: 	default n
+1843: 	help
+1844: 	  Test the basic functions and performance of some interfaces, such as
+1899: config PERF_EVENTS
+1900: 	bool "Kernel performance events and counters"
+1901: 	default y if PROFILING
+1902: 	depends on HAVE_PERF_EVENTS
+1903: 	select IRQ_WORK
+1904: 	help
+1905: 	  Enable kernel support for various performance events provided
+1906: 	  by software and hardware.
+1907:
+1908: 	  Software events are supported either built-in or via the
+1909: 	  use of generic tracepoints.
+1910:
+1911: 	  Most modern CPUs support performance events via performance
+1912: 	  counter registers. These registers count the number of certain
+git -C src/linux-rpi rev-parse HEAD; exit=0
+42aeefac58edeb081aff440f0b60be71cbe49755
+git -C src/llvm rev-parse HEAD; exit=0
+f999bd406c0a70fe8107aa992164fe6945c5d46a
+
+FILE src/linux-rpi/arch/arm64/Kconfig.debug
+1: # SPDX-License-Identifier: GPL-2.0-only
+2:
+3: config PID_IN_CONTEXTIDR
+4: 	bool "Write the current PID to the CONTEXTIDR register"
+5: 	help
+6: 	  Enabling this option causes the kernel to write the current PID to
+7: 	  the CONTEXTIDR register, at the expense of some additional
+8: 	  instructions during context switch. Say Y here only if you are
+9: 	  planning to use hardware trace tools with this kernel.
+
+FILE src/linux-rpi/drivers/perf/Kconfig
+58: config ARM_PMU
+59: 	depends on ARM || ARM64
+60: 	bool "ARM PMU framework"
+61: 	default y
+
+FILE src/linux-rpi/arch/arm64/Kconfig
+230: 	select HAVE_MOD_ARCH_SPECIFIC
+231: 	select HAVE_NMI
+232: 	select HAVE_PERF_EVENTS
+233: 	select HAVE_PERF_EVENTS_NMI if ARM64_PSEUDO_NMI
+234: 	select HAVE_PERF_REGS
