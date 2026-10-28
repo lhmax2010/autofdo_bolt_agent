@@ -21,9 +21,19 @@
 2. 环境隔离（例如改 HOME、GIT_CONFIG_NOSYSTEM 等）只用于 gbs 相关命令（export、build 及其派生进程），本轮没有 gbs 命令，因此本轮不需要任何隔离。
 3. 本项目结果仓库（autofdo_bolt_agent）的 git commit 与 git push 一律在正常环境下执行，使用本机已有的 GitHub 认证。提交署名仍用 git config --local 设置的 Hao Lin <hao.lin@samsung.com>，不修改全局 git 配置。
 
+4. 以后用户放在 Downloads 的材料一律移动到工作目录，不在 Downloads 保留副本；只处理用户指定的材料，不遍历或触碰其他文件。
+5. llvm-profgen 增强设计须经多方评审并冻结后才开工；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
+
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-28；llvm-profgen 增强准备，已完成）
+## 当前授权与执行状态（llvm-profgen 增强设计 v0.1，待多方评审）
+
+- [llvm-profgen 增强设计 v0.1](profgen/design/02_llvm_profgen_enhance_design_v0.1.md) 已提交，待多方评审，**冻结前不开工**；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
+- 文档内容未修改。SHA-256=`9a81267b33d1ea59ed84975baabb5802561ca6943219a2070ad2530707231053`；第一行以 `# llvm-profgen 增强设计` 开头；第10行“适用范围”含“不包含任何 Agent 的设计与开发”，三项核验通过。
+- 本次从 `/home/linhao/Downloads/02_llvm_profgen_enhance_design_v0.1.md` 移入这一个文件，属于用户授权的例外；核验后已删除该原文件，并确认其不存在，未触碰 Downloads 下其他文件。以后用户放在 Downloads 的材料一律移动到工作目录，不在 Downloads 保留副本。
+- 本次只提交设计文档和 STATUS.md，不执行评审、源码修改或构建。
+
+## 前轮授权与完成状态（2026-10-28；llvm-profgen 增强准备，已完成）
 
 - 本轮只读分析 GBS/depanneur/Google AutoFDO/llvm-profgen，完成一次未修改 llvm x86_64 全目标基线构建；不修改 LLVM 跟踪源码/spec，不连接开发板，不推 Gerrit。**停在设计确认阶段，不开始增强实现。**
 - src/llvm 开始/结束 status 均为空，HEAD=f999bd406c0a70fe8107aa992164fe6945c5d46a；新分支 afdo/profgen-enhance、worktree=temp/llvm-profgen-enh 跟踪文件无改动，仅保留生成资产/对象/manifest。
@@ -89,9 +99,11 @@
 
 # 项目状态
 
-更新：2026-10-28（Asia/Shanghai）。阶段：llvm-profgen 增强准备和 x86_64 未修改基线已完成，等待设计确认；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-28（Asia/Shanghai）。阶段：llvm-profgen 增强设计 v0.1 已提交，待多方评审，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
+
+- 设计 v0.1 待多方评审，冻结前不开工；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
 
 - 当前准备任务已完成。等待用户确认纯 IP 输入、身份/地址校验和诊断的设计范围；未经新指令不开始 LLVM 增强。保留增量 buildroot/worktree，不重复基线构建。
 
@@ -273,6 +285,8 @@
 - 已确认外部遗留 /tmp/sdb.log，由现存 SDB 服务持有，当前 0 B、前后时间未变；没有删除。首次 shell/Git 隐式初始化读取未追踪，作为历史审计限制保留；用户已澄清正常系统工具初始化及已有 GitHub 认证不属于项目输入边界限制，后续结果仓库 commit/push 不隔离。[07_boundary.txt](probe/evidence/07_boundary.txt)
 
 ## 待人工裁决
+
+- [设计 v0.1](profgen/design/02_llvm_profgen_enhance_design_v0.1.md) 的多方评审与冻结结论；本次归档不代表设计获批或允许开工。
 
 - llvm-profgen 增强设计：先做普通 IP 文本入口、身份与 DSO/PIE 归一化、有效样本统计；是否另立 raw perf.data reader、ET_REL 模块、Chromium 规模和未来 SPE 专项。待用户确认，不开始改代码。
 
