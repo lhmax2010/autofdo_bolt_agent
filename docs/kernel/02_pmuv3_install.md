@@ -1,6 +1,6 @@
 # RPi4 armv7l 普通版 PMUv3：安装、备份与回退
 
-本文件所有板上命令 **由用户执行**。Agent 只离线核验产物并编写步骤，未连接、安装或重启开发板。构建通过用户批准的替代证据验收，GBS 真实退出码未取得，原 status 保持不变，详见 [03_pmuv3_build_result.md](03_pmuv3_build_result.md)。以下命令写入启动分区/模块目录的授权仅用于用户执行安装和回退，不沿用此前“只允许 /tmp”的探测范围。
+用户最新授权：**Agent 执行脚本 01–04，停在重启前；用户手动重启并配置网络后，Agent 执行 05 验收和后续采样。任何失败立即停止，不做修复性操作。**构建通过用户批准的替代证据验收，GBS 真实退出码未取得，原 status 保持不变，详见 [03_pmuv3_build_result.md](03_pmuv3_build_result.md)。安装只允许指定普通内核及模块 RPM；备份写 /tmp/afdo_probe。禁止 remount、Agent 重启、--nodeps/--force 和 RT 安装/卸载。回退脚本仅准备，当前不授权自动执行回退。
 
 ## 1. 安装范围与启动链
 
@@ -31,297 +31,121 @@ devel、headers、perf、bpftool、debug 包均无需安装。新旧普通包 NE
 
 历史实机只确认根是 `/dev/mmcblk0p2`；本轮未读取实时挂载表。以下命令只允许 RPi4 armv7l、rootfs p2、boot p1（vfat）、slot a 的布局；运行时校验镜像/板型/挂载/已安装包以及 **同镜像 U-Boot 三个文件的哈希**。不同就明确失败，不猜分区或改启动链。若 /boot 尚未挂载，命令只将已识别的 p1 挂载到 /boot，不 remount 根分区。启用其他 slot 或自定义 U-Boot 的设备不适用这套自动步骤。
 
-## 2. 本机准备部署目录和板上脚本（整块复制）
+## 脚本使用与结束标记
 
-在本机 Bash 终端按顺序执行各代码块。全部主机产物留在 WORKDIR/temp，所有路径已固定。不要并行执行其他 RPM 更新或 FOTA；备份完成至本次验收期间保留这些文件。任一步失败就停止，不重启。
+不要 source 脚本，也不要把 set -euo pipefail 粘贴到交互终端。下面每一条都启动独立 Bash；脚本内的失败不会退出父终端。每个脚本自带严格错误处理及 EXIT/信号 trap，结束时打印 `END <ISO 时间> OK` 或 `END <ISO 时间> FAILED <脚本/步骤>`，进程退出码保留失败状态。SIGKILL、断电、磁盘不可写不能由 trap 保证记录。
 
-```bash
-set -euo pipefail
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-cd /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
-mkdir -p temp/pmuv3-install/new temp/pmuv3-install/old temp/pmuv3-install/scripts temp/pmuv3-install/backup
-for name in arm-rpi4-linux-kernel arm-rpi4-linux-kernel-modules; do
-    nice -n 19 ionice -c3 cp "temp/GBS-ROOT-RPI4-PMUV3/local/repos/tizen_unified_standard/armv7l/RPMS/$name-6.12.80-0.armv7l.rpm" temp/pmuv3-install/new/
-    nice -n 19 ionice -c3 cp "temp/pmuv3-verify/baseline/$name-6.12.80-0.armv7l.rpm" temp/pmuv3-install/old/
-done
-cat > temp/pmuv3-install/new/SHA256SUMS <<'EOF'
-832a0241990bab9162cfd9455efc687215af4222011eeb8cf64ed8671e3af18c  arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm
-c08a11d4f624097a3619e31d4cb4dc6fa23965441ba66307e440cd01a76057f2  arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm
-EOF
-cat > temp/pmuv3-install/old/SHA256SUMS <<'EOF'
-c0282c7388fcaf020f6ec2bdee78191a22fbb2f4a1903378ca74bf8739f4da98  arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm
-8234b9bea41af489d72777896ec7b6b8e0ec20312b178156242d8cc0fceae560  arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm
-EOF
-(cd temp/pmuv3-install/new && nice -n 19 ionice -c3 sha256sum -c SHA256SUMS)
-(cd temp/pmuv3-install/old && nice -n 19 ionice -c3 sha256sum -c SHA256SUMS)
-# This helper verifies the remote exit marker because SDB transport success alone is insufficient.
-cat > temp/pmuv3-install/run-board.sh <<'EOF'
-#!/bin/bash
-set -euo pipefail
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-[[ $# == 1 && $1 =~ ^(prepare|install|check|rollback)$ ]] || exit 2
-out=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/$1.out
-sdb -s 192.168.108.26:26101 shell "sh /tmp/afdo_probe/$1.sh; rc=\$?; printf '\n__AFDO_RC__%s\n' \"\$rc\"; exit \"\$rc\"" > "$out" 2>&1 || { cat "$out"; exit 1; }
-cat "$out"
-tr -d '\r' < "$out" | grep -qx '__AFDO_RC__0'
-EOF
-cat > temp/pmuv3-install/scripts/prepare.sh <<'EOF'
-#!/bin/sh
-set -eu
-export TMPDIR=/tmp/afdo_probe
-fail() { echo "STOP: $*" >&2; exit 1; }
-[ "$(id -u)" = 0 ] || fail 'root required'
-case "$(tr -d '\000' < /proc/device-tree/model)" in 'Raspberry Pi 4 Model B'*) ;; *) fail 'not RPi4';; esac
-[ "$(uname -m)" = armv7l ] || fail 'not armv7l'
-[ "$(uname -r)" = 6.12.80-arm-rpi4-v7l ] || fail 'unexpected running kernel'
-grep -q 'BUILD_ID=tizen-unified-toolchain_20261022.054557_' /etc/os-release || fail 'different image'
-[ "$(awk '$2=="/" {print $1}' /proc/mounts)" = /dev/mmcblk0p2 ] || fail 'unexpected root partition'
-case " $(cat /proc/cmdline) " in *' partition_ab=b '*) fail 'slot b is active';; esac
-if rpm -qa --qf '%{NAME}\n' | grep -q '^arm-rpi4-rt-linux-kernel'; then fail 'RT packages installed; do not remove them automatically'; fi
-for name in arm-rpi4-linux-kernel arm-rpi4-linux-kernel-modules; do
-    [ "$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}' "$name")" = 6.12.80-0.armv7l ] || fail 'unexpected installed package'
-done
-for tool in tar sha256sum blkid mount umount awk grep tr dd nice ionice rpm; do command -v "$tool" >/dev/null || fail "missing $tool"; done
-tar --help | grep -q -- --xattrs || fail 'tar cannot preserve module security xattrs'
-[ "$(blkid -s TYPE -o value /dev/mmcblk0p1)" = vfat ] || fail 'p1 is not vfat'
-label=$(blkid -s PARTLABEL -o value /dev/mmcblk0p1 || true)
-case "$label" in ''|boot|boot_a) ;; *) fail 'unexpected boot partition label';; esac
-bootdev=$(awk '$2=="/boot" {print $1}' /proc/mounts)
-if [ -z "$bootdev" ]; then
-    if awk '$1=="/dev/mmcblk0p1" {found=1} END {exit !found}' /proc/mounts; then fail 'p1 already mounted elsewhere'; fi
-    mount -t vfat /dev/mmcblk0p1 /boot
-else
-    [ "$bootdev" = /dev/mmcblk0p1 ] || fail '/boot is not p1'
-fi
-awk '$2=="/boot" && $4 ~ /(^|,)rw(,|$)/ {ok=1} END {exit !ok}' /proc/mounts || fail '/boot is not writable'
-# Resolve the GPT inform label like the packaged script, with its legacy p9 fallback.
-inform_device=$(blkid -t PARTLABEL=inform -o device | grep '^/dev/mmcblk0p[0-9]*$' || true)
-[ -n "$inform_device" ] || inform_device=/dev/mmcblk0p9
-if [ -b "$inform_device" ]; then
-    mkdir -p /tmp/afdo_probe/inform
-    mount -o ro "$inform_device" /tmp/afdo_probe/inform
-    trap 'umount /tmp/afdo_probe/inform' EXIT
-    if [ -f /tmp/afdo_probe/inform/partition-ab.info ]; then
-        [ "$(dd if=/tmp/afdo_probe/inform/partition-ab.info bs=1 count=1 2>/dev/null)" != b ] || fail 'next boot slot b'
-    fi
-    umount /tmp/afdo_probe/inform
-    trap - EXIT
-fi
-printf '%s\n' \
- '0813526aeef267c3d92bd4c93605358f4e5424b28161528edd81caaa4de35d85  /boot/u-boot.bin' \
- 'a1fb3849c26f8d0aabe99e60c1bb986c27db3d36f2162e6ad68fe67856eecdc6  /boot/uboot.env' \
- '8ba55683d6f53c04334e2abc8ccc23fd3d7a9eb2d5059c2d80f4b93cbbe985e9  /boot/boot.scr.uimg' | sha256sum -c -
-[ -d /lib/modules/6.12.80-arm-rpi4-v7l ] || fail 'missing old module directory'
-[ ! -e /tmp/afdo_probe/backup/COMPLETE ] || fail 'backup already exists; do not overwrite'
-mkdir -p /tmp/afdo_probe/backup
-cd /tmp/afdo_probe/backup
-df -h /tmp /boot /
-nice -n 19 ionice -c3 tar -C /boot -cpf boot.tar .
-nice -n 19 ionice -c3 tar --xattrs --xattrs-include='*' --acls --numeric-owner -C / -cpf modules.tar lib/modules/6.12.80-arm-rpi4-v7l
-blkid -s UUID -o value /dev/mmcblk0p1 > boot.uuid
-blkid -s UUID -o value /dev/mmcblk0p2 > root.uuid
-[ -s boot.uuid ] && [ -s root.uuid ] || fail 'missing UUID'
-sha256sum /boot/zImage > old-zImage.sha256
-if [ -f /boot/cmdline.txt ]; then sha256sum /boot/cmdline.txt > cmdline.sha256; else : > cmdline.sha256; fi
-rpm -qa --qf '%{NAME} %{VERSION}-%{RELEASE} %{ARCH}\n' > packages.txt
-cat /proc/mounts > mounts.txt
-cat /proc/cmdline > running-cmdline.txt
-uname -a > uname.txt
-nice -n 19 ionice -c3 sha256sum boot.tar modules.tar boot.uuid root.uuid old-zImage.sha256 cmdline.sha256 packages.txt mounts.txt running-cmdline.txt uname.txt > SHA256SUMS
-printf 'backup complete\n' > COMPLETE
-EOF
-cat > temp/pmuv3-install/scripts/check.sh <<'EOF'
-#!/bin/sh
-set -eu
-export TMPDIR=/tmp/afdo_probe
-[ "$(awk '$2=="/boot" {print $1}' /proc/mounts)" = /dev/mmcblk0p1 ]
-[ "$(awk '$2=="/" {print $1}' /proc/mounts)" = /dev/mmcblk0p2 ]
-if rpm -qa --qf '%{NAME}\n' | grep -q '^arm-rpi4-rt-linux-kernel'; then echo 'STOP: RT package detected'; exit 1; fi
-printf '%s\n' \
- 'a1cf2077f2053f2d779b39a0d9d7482bc636ecb38d5c07caf305fc0889207cd6  /boot/zImage' \
- '38a4959985ed44398e9656392c245b554155805808524fc04e556e31cc472925  /boot/config.txt' \
- '0813526aeef267c3d92bd4c93605358f4e5424b28161528edd81caaa4de35d85  /boot/u-boot.bin' \
- 'a1fb3849c26f8d0aabe99e60c1bb986c27db3d36f2162e6ad68fe67856eecdc6  /boot/uboot.env' \
- '8ba55683d6f53c04334e2abc8ccc23fd3d7a9eb2d5059c2d80f4b93cbbe985e9  /boot/boot.scr.uimg' | sha256sum -c -
-grep -qx 'kernel=u-boot.bin' /boot/config.txt
-tr '\000' '\n' < /boot/uboot.env | grep -qx 'kernel=zImage'
-if [ -s /tmp/afdo_probe/backup/cmdline.sha256 ]; then sha256sum -c /tmp/afdo_probe/backup/cmdline.sha256; else [ ! -e /boot/cmdline.txt ]; fi
-[ -d /lib/modules/6.12.80-arm-rpi4-v7l ]
-echo 'NORMAL-KERNEL-BOOT-CHECK OK (config -> U-Boot -> ordinary zImage; known slot-a layout)'
-EOF
-cat > temp/pmuv3-install/scripts/install.sh <<'EOF'
-#!/bin/sh
-set -eu
-export TMPDIR=/tmp/afdo_probe
-[ -f /tmp/afdo_probe/BACKUP_VERIFIED ]
-[ -f /tmp/afdo_probe/backup/COMPLETE ]
-cd /tmp/afdo_probe/new
-sha256sum -c SHA256SUMS
-nice -n 19 ionice -c3 rpm -Uvh --replacepkgs --test ./arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm ./arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm
-nice -n 19 ionice -c3 rpm -Uvh --replacepkgs ./arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm ./arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm
-sync
-sh /tmp/afdo_probe/check.sh
-EOF
-cat > temp/pmuv3-install/scripts/rollback.sh <<'EOF'
-#!/bin/sh
-set -eu
-export TMPDIR=/tmp/afdo_probe
-[ "$(id -u)" = 0 ]
-case "$(tr -d '\000' < /proc/device-tree/model)" in 'Raspberry Pi 4 Model B'*) ;; *) exit 1;; esac
-[ "$(awk '$2=="/" {print $1}' /proc/mounts)" = /dev/mmcblk0p2 ]
-bootdev=$(awk '$2=="/boot" {print $1}' /proc/mounts)
-if [ -z "$bootdev" ]; then mount -t vfat /dev/mmcblk0p1 /boot; else [ "$bootdev" = /dev/mmcblk0p1 ]; fi
-if rpm -qa --qf '%{NAME}\n' | grep -q '^arm-rpi4-rt-linux-kernel'; then echo 'STOP: RT package detected'; exit 1; fi
-cd /tmp/afdo_probe/backup
-nice -n 19 ionice -c3 sha256sum -c SHA256SUMS
-[ "$(blkid -s UUID -o value /dev/mmcblk0p1)" = "$(cat boot.uuid)" ]
-[ "$(blkid -s UUID -o value /dev/mmcblk0p2)" = "$(cat root.uuid)" ]
-cd /tmp/afdo_probe/old
-sha256sum -c SHA256SUMS
-nice -n 19 ionice -c3 rpm -Uvh --oldpackage --replacepkgs --test ./arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm ./arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm
-nice -n 19 ionice -c3 rpm -Uvh --oldpackage --replacepkgs ./arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm ./arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm
-# Restore original custom configuration after restoring original package metadata.
-nice -n 19 ionice -c3 tar --no-same-owner --no-same-permissions -C /boot -xf /tmp/afdo_probe/backup/boot.tar
-nice -n 19 ionice -c3 tar --xattrs --xattrs-include='*' --acls --numeric-owner -C / -xpf /tmp/afdo_probe/backup/modules.tar
-sha256sum -c /tmp/afdo_probe/backup/old-zImage.sha256
-sync
-echo 'ROLLBACK FILES RESTORED; reboot remains a separate user action'
-EOF
-# Syntax checks only; creating these files does not contact the board.
-for script in temp/pmuv3-install/scripts/*.sh; do /bin/sh -n "$script"; done
-/bin/bash -n temp/pmuv3-install/run-board.sh
+日志自动保存在 `/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/logs/`，按脚本名与时间命名；最近的结束标记另存 `<脚本名>.status`。板上真实退出码由 `__AFDO_RC__` 检查，不以 SDB 传输成功替代。每次联系板先按 device-tree model 认板。
+
+原 prepare/install/check/rollback 四个板上脚本及 run-board.sh helper 按原文逐字保留，封装在 01 的 heredoc 中生成；主机路径改为绝对路径。四个板上脚本的适用条件、备份和安装逻辑没有调整。不要并行进行 RPM/FOTA/slot 更新；任一 END FAILED 就停止，不自动修复、重试或回退。
+
+## 2. 本机准备：01_host_prepare.sh
+
+复制新旧普通 kernel/modules 两个 RPM，核对四个 SHA-256，生成原板上脚本/helper 并做 bash -n/sh -n。正常看到四个包校验 OK 和最后 END OK；本步不连接板。
+
+```sh
+/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/pmuv3_install/01_host_prepare.sh
 ```
 
-## 3. 用户连接、预检、备份并拉回主机
+## 3. 连接、预检、备份：02_board_backup.sh
 
-前一块未报错后执行。SDB serial 固定为历史确认的地址，prepare 仍按 model 验板。若连接地址已变，不猜其他设备。本段到备份校验完成为止没有安装 RPM。
+连接固定 SDB serial 192.168.108.26:26101、按 model 确认 RPi4，再推送原 prepare 等脚本。检查镜像、分区、slot、包、U-Boot 哈希和可写性；整个 boot、普通模块及元信息备份到板上 /tmp/afdo_probe/backup，再拉回主机 `temp/pmuv3-install/backup/`，逐项 sha256sum -c 并验证 tar 可读。只有全部成功才写 BACKUP_VERIFIED。**备份校验未全部通过不能执行 03。** 正常看到 __AFDO_RC__0、全部备份校验 OK 和 END OK。
 
-```bash
-set -euo pipefail
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-cd /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
-sdb connect 192.168.108.26
-sdb -s 192.168.108.26:26101 root on
-sdb -s 192.168.108.26:26101 shell 'mkdir -p /tmp/afdo_probe/new /tmp/afdo_probe/old'
-for script in prepare install check rollback; do sdb -s 192.168.108.26:26101 push "temp/pmuv3-install/scripts/$script.sh" "/tmp/afdo_probe/$script.sh"; done
-/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/run-board.sh prepare
-for file in boot.tar modules.tar boot.uuid root.uuid old-zImage.sha256 cmdline.sha256 packages.txt mounts.txt running-cmdline.txt uname.txt SHA256SUMS COMPLETE; do
-    sdb -s 192.168.108.26:26101 pull "/tmp/afdo_probe/backup/$file" "temp/pmuv3-install/backup/$file"
-done
-(cd temp/pmuv3-install/backup && nice -n 19 ionice -c3 sha256sum -c SHA256SUMS)
-nice -n 19 ionice -c3 tar -tf temp/pmuv3-install/backup/boot.tar > temp/pmuv3-install/backup/boot.list
-nice -n 19 ionice -c3 tar -tf temp/pmuv3-install/backup/modules.tar > temp/pmuv3-install/backup/modules.list
-printf 'host backup verified\n' > temp/pmuv3-install/BACKUP_VERIFIED
-sdb -s 192.168.108.26:26101 push temp/pmuv3-install/BACKUP_VERIFIED /tmp/afdo_probe/BACKUP_VERIFIED
+```sh
+/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/pmuv3_install/02_board_backup.sh
 ```
 
-`prepare.out` 保存分区、包状态与备份结果；备份本体和校验和在主机 `temp/pmuv3-install/backup/`，重启后仍在。板上 /tmp 可能 noexec，所有脚本显式用 `sh 文件` 解释执行；不直接执行 /tmp 下的二进制。不要清理主机 temp，直至安装验收/回退完成。
+板上 /tmp 的 noexec 不妨碍显式 `sh 文件`；不在 /tmp 直接执行二进制。备份保留在主机，重启不丢失；在验收/回退完成前不要清理主机 temp。
 
-## 4. 安装普通版，重启前确认
+## 4. 安装与重启前检查：03、04
 
-安装前需要 `/`、`/boot` 可写及足够空间；prepare 已打印空间，RPM 的 test 还会检查事务依赖与冲突。若权限/空间/冲突失败，不加 --nodeps/--force，不 remount 根来绕过，停止并保留输出。
+03 首先重新核对主机备份 SHA-256 和 BACKUP_VERIFIED，再推送两个普通 RPM，依次执行 rpm --test 与 rpm --replacepkgs，最后调用原 check。正常看到包校验成功、RPM 事务成功、NORMAL-KERNEL-BOOT-CHECK OK、__AFDO_RC__0 和 END OK。失败不加 --force/--nodeps，不 remount。
 
-```bash
-set -euo pipefail
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-cd /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
-for file in arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm SHA256SUMS; do
-    sdb -s 192.168.108.26:26101 push "temp/pmuv3-install/new/$file" "/tmp/afdo_probe/new/$file"
-done
-/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/run-board.sh install
+```sh
+/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/pmuv3_install/03_board_install.sh
 ```
 
-**安装后、重启前可单独复制的一条检查命令**（校验实际普通 zImage 哈希、完整新 config.txt、既有 U-Boot/环境/启动脚本哈希及 kernel=zImage；不能仅凭 uname -r，因为此时还运行旧内核）：
+04 是安装后、重启前独立检查：校验普通 zImage、新 config.txt、U-Boot/环境/启动脚本哈希，以及 `kernel=u-boot.bin` → `kernel=zImage` 和 cmdline 未变。此时 uname 仍是旧运行内核，不用它判断磁盘安装是否成功。
 
-```bash
-/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/run-board.sh check
+```sh
+/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/pmuv3_install/04_board_check.sh
 ```
 
-只有输出 `NORMAL-KERNEL-BOOT-CHECK OK` 且 `__AFDO_RC__0` 才继续。prepare 至重启期间不能有人修改 slot/FOTA/U-Boot。本次不改 inform、ramdisk、root 启动参数，也不切换启动槽。
+只有 04 输出 **NORMAL-KERNEL-BOOT-CHECK OK、__AFDO_RC__0、END OK**，才能通知用户“可以重启”。Agent 到此停止，绝不执行 reboot。用户自行重启并手动配置网络，然后通知“已重启并配好网络”。本文件不提供自动重启入口。
 
-用户确认上述检查通过后自行执行重启（连接中断属于预期，重启命令的传输退出码不能作为内核验收）：
+## 5. 用户通知后验收：05_board_verify_after_reboot.sh
 
-```bash
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-sdb -s 192.168.108.26:26101 shell 'sync; rm -rf /tmp/afdo_probe; reboot'
+未收到重启和网络就绪通知前不运行。打印 uname -r/-v、事件源、pmu/driver 链接与 dmesg PMU 摘录及各真实退出码。
+
+```sh
+/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/pmuv3_install/05_board_verify_after_reboot.sh
 ```
 
-## 5. 用户重启后的验收
+- 预期 release：6.12.80-arm-rpi4-v7l；version：**#1 SMP Wed Oct 28 04:12:26 UTC 2026**。不符输出 NEW_KERNEL_NOT_ACTIVE、END FAILED，整个任务停止，不回退、不采样。
+- 身份正确且 driver 指向 armv8-pmu：输出 HARDWARE_PMU_REGISTERED、SAMPLING_SCOPE software+hardware、END OK；事件源通常出现 armv8_cortex_a72，随后执行软件与硬件采样。
+- 身份正确但未绑定：输出 HARDWARE_PMU_NOT_RESTORED、SAMPLING_SCOPE software-only、END OK；此 OK 表示完成验收流程，**不表示硬件恢复**。只继续软件采样，不自动回退。
 
-等板启动后执行。不能仅凭 PMUv3=y 宣称真实硬件采样恢复；先验证新内核身份与 PMU 注册/绑定。
+验收和采样最终分别记录于 docs/kernel/04_pmuv3_boot_verify.md 和 docs/probe/03_rpi4_sampling.md；尚未发生的结果不预填。
 
-```bash
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-sdb connect 192.168.108.26
-sdb -s 192.168.108.26:26101 root on
-sdb -s 192.168.108.26:26101 shell 'uname -r; uname -v; ls /sys/bus/event_source/devices/; ls -l /sys/bus/platform/devices/pmu/driver; dmesg | grep -i -E "pmu|perf.*event"'
+## 6. SDB 可连接时回退：06_rollback_online.sh（当前不执行）
+
+仅在用户决定回退后执行。核对主机备份和旧普通 RPM，推回板；恢复原 RPM 元数据，再从备份恢复 boot 和模块（包含用户原配置）。不复制整套 RPM 数据库，不操作 RT。正常看到旧 zImage 哈希 OK、ROLLBACK FILES RESTORED、__AFDO_RC__0、END OK。旧内核身份对照主机 backup/uname.txt。
+
+```sh
+/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/pmuv3_install/06_rollback_online.sh
 ```
 
-应看到：
+回退后重启也由用户执行，不包含于脚本。
 
-- `uname -r` 为 `6.12.80-arm-rpi4-v7l`，`uname -v` 为 **`#1 SMP Wed Oct 28 04:12:26 UTC 2026`**。
-- 事件源包含 Cortex-A72 PMU（驱动的典型名称 `armv8_cortex_a72`）；sysfs pmu/driver 链接指向 `armv8-pmu`。
-- 若新身份正确却未绑定，记录输出继续诊断 DT/中断/固件，不把这一构建验收当成板上功能已通过。perf 暂时不可用的问题保持独立。
+## 7. SD 卡离线回退：07_rollback_sdcard.sh（当前不执行）
 
-## 6. 能启动且 SDB 可连接时的回退
+仅在用户决定离线回退后：断板电，SD 卡插入本机读卡器。按备份 UUID 确认同一张卡的 p1/p2；分区若已挂载则停止，用户先安全卸载。sudo 由用户在终端输入密码；挂载点仍在 WORKDIR/temp/pmuv3-install/recovery。恢复 boot 与模块，核对旧 zImage 哈希，正常完成后卸载并输出 END OK。失败保留挂载供排查，不能直接拔卡。
 
-同样只操作普通包。原始镜像 RPM 和启动/模块备份在主机，即使 /tmp 被重启清除也能恢复。旧 RPM 恢复包数据库内容，再恢复备份文件（包括用户原 config.txt/cmdline.txt/uboot.env 等定制），所以无须复制或回滚整套 RPM 数据库。
-
-```bash
-set -euo pipefail
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-cd /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
-(cd temp/pmuv3-install/backup && nice -n 19 ionice -c3 sha256sum -c SHA256SUMS)
-(cd temp/pmuv3-install/old && nice -n 19 ionice -c3 sha256sum -c SHA256SUMS)
-sdb connect 192.168.108.26
-sdb -s 192.168.108.26:26101 root on
-sdb -s 192.168.108.26:26101 shell 'mkdir -p /tmp/afdo_probe/backup /tmp/afdo_probe/old'
-sdb -s 192.168.108.26:26101 push temp/pmuv3-install/scripts/rollback.sh /tmp/afdo_probe/rollback.sh
-for file in boot.tar modules.tar boot.uuid root.uuid old-zImage.sha256 cmdline.sha256 packages.txt mounts.txt running-cmdline.txt uname.txt SHA256SUMS COMPLETE; do
-    sdb -s 192.168.108.26:26101 push "temp/pmuv3-install/backup/$file" "/tmp/afdo_probe/backup/$file"
-done
-for file in arm-rpi4-linux-kernel-6.12.80-0.armv7l.rpm arm-rpi4-linux-kernel-modules-6.12.80-0.armv7l.rpm SHA256SUMS; do
-    sdb -s 192.168.108.26:26101 push "temp/pmuv3-install/old/$file" "/tmp/afdo_probe/old/$file"
-done
-/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/run-board.sh rollback
+```sh
+/bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/pmuv3_install/07_rollback_sdcard.sh
 ```
 
-看到 `ROLLBACK FILES RESTORED` 与 `__AFDO_RC__0` 后，用户执行上面的重启命令。旧身份对照主机 `temp/pmuv3-install/backup/uname.txt`，不要期待旧内核也有 PMUv3。
+此步只恢复启动文件和模块，尚未恢复 RPM 文件摘要元数据。SD 卡装回并恢复 SDB 后，继续 06 完成包数据库及备份定制恢复；所有重启均由用户执行。
 
-## 7. 新内核无法启动时：SD 卡离线回退
+## 验证边界与执行记录
 
-关闭板电源，取出该 SD 卡接到本机读卡器。下面代码用备份记录的 UUID 找设备，要求两个分区尚未挂载；若桌面自动挂载导致停止，先在桌面安全卸载该卡的挂载，再重试。不会猜 `/dev/sdX`。此处 sudo 由用户在本机终端执行；挂载点/日志仍全部在 WORKDIR/temp。
+7 个主机脚本通过 bash -n；四个原板上脚本通过 sh -n，helper 通过 bash -n，内容与重构前文档逐字相同。具体执行结果在本节和 STATUS 收尾时记录；安装成功不等于新内核已运行或采样已恢复。
 
-```bash
-set -euo pipefail
-export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
-cd /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
-(cd temp/pmuv3-install/backup && nice -n 19 ionice -c3 sha256sum -c SHA256SUMS)
-boot_uuid=$(cat temp/pmuv3-install/backup/boot.uuid)
-root_uuid=$(cat temp/pmuv3-install/backup/root.uuid)
-boot_device=$(sudo blkid -U "$boot_uuid")
-root_device=$(sudo blkid -U "$root_uuid")
-[[ -b $boot_device && -b $root_device && $boot_device != "$root_device" ]]
-[[ $(lsblk -ndo PKNAME "$boot_device") == "$(lsblk -ndo PKNAME "$root_device")" ]]
-[[ $(cat "/sys/class/block/${boot_device##*/}/partition") == 1 && $(cat "/sys/class/block/${root_device##*/}/partition") == 2 ]]
-if findmnt -rn -S "$boot_device" || findmnt -rn -S "$root_device"; then
-    echo 'STOP: card partition already mounted; unmount it safely first' >&2
-    exit 1
-fi
-mkdir -p temp/pmuv3-install/recovery/boot temp/pmuv3-install/recovery/root
-sudo mount "$root_device" /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/recovery/root
-sudo mount "$boot_device" /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/recovery/boot
-sudo nice -n 19 ionice -c3 tar --no-same-owner --no-same-permissions -C /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/recovery/boot -xf /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/backup/boot.tar
-sudo nice -n 19 ionice -c3 tar --xattrs --xattrs-include='*' --acls --numeric-owner -C /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/recovery/root -xpf /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/backup/modules.tar
-expected_old=$(awk '{print $1}' temp/pmuv3-install/backup/old-zImage.sha256)
-printf '%s  %s\n' "$expected_old" /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/recovery/boot/zImage | sha256sum -c -
-sync
-sudo umount /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/recovery/boot
-sudo umount /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/pmuv3-install/recovery/root
+### 2026-10-28 执行结果：02 预检失败，停止
+
+| 脚本 | 实际结果 |
+|---|---|
+| 01_host_prepare.sh | 主机退出码 0；四个新旧普通 RPM SHA-256 全部 OK；`END 2026-10-28T15:39:52+08:00 OK` |
+| 02_board_backup.sh | 主机退出码 1，远端退出码 1；`END 2026-10-28T15:40:02+08:00 FAILED 02_board_backup:line=57` |
+| 03_board_install.sh | 未运行；没有结束标记 |
+| 04_board_check.sh | 未运行；没有 check 输出或结束标记 |
+| 05/06/07 | 未运行；没有验收、回退或重启 |
+
+02 关键原始输出（仅规范 CRLF）：
+
+```text
+connecting to 192.168.108.26:26101 ...
+connected to 192.168.108.26:26101
+Switched to 'root' account mode
+MODEL Raspberry Pi 4 Model B Rev 1.5
+__AFDO_RC__0
+[已推送原 prepare.sh、install.sh、check.sh、rollback.sh]
+STOP: unexpected installed package
+__AFDO_RC__1
+END 2026-10-28T15:40:02+08:00 FAILED 02_board_backup:line=57
 ```
 
-若中途失败，保留挂载用于排查，不能拔卡。上述正常结束后取回 SD 卡装回板并启动。**离线步骤恢复了旧启动文件与模块，尚未恢复 RPM 的文件摘要元数据**；SDB 恢复后继续执行第 6 节，用原始普通 RPM 恢复数据库，再恢复备份定制。不要把离线启动成功等同于事务回退已全部完成。
+失败位置是原 prepare.sh 的已安装包预检：依次查询普通 kernel/modules 的 `%{VERSION}-%{RELEASE}.%{ARCH}`，要求严格等于 `6.12.80-0.armv7l`。原脚本不打印失败的包名或查询返回值，因此 **当前不能确定是哪个包、实际版本是什么、还是查询本身失败**。没有把这一报错推断为“架构错误”或“包缺失”，没有失败后追加板上查询。
 
-## 验证边界
+失败发生在挂载/备份/安装之前：没有执行 mount、remount、备份 tar、RPM 安装或回退；仅切换 SDB root 模式、确认板型、创建 /tmp/afdo_probe/new 与 old 并推送四个脚本。按“失败立即停止并保留输出”，保留这些临时目录/脚本，未额外清理或重试。主机侧 **没有本轮板上备份，未进行备份 SHA-256 校验，没有 BACKUP_VERIFIED**；01 的 RPM 校验不能替代备份校验。不得运行 03/04，**当前不能通知用户‘可以重启’**。
 
-文档中的 Bash/远端 sh 片段做了静态语法检查；所有安装、挂载、回退、重启和 sysfs 验收均未经本轮实机执行。命令包含不匹配即停止的保护，用户不需要改路径或猜设备。主机没有运行这些片段，板上安装成败和硬件 PMU 能力最终以用户运行结果为准。
+完整主机日志：
+
+- `temp/pmuv3-install/logs/01_host_prepare.20261028T153952+0800.log`
+- `temp/pmuv3-install/logs/02_board_backup.20261028T153958+0800.log`
+- 原远端输出：`temp/pmuv3-install/prepare.out`
+- 结束标记：同日志目录下 `01_host_prepare.status`、`02_board_backup.status`。
+
+语法检查再次通过；实际生成的四个板上脚本与重构前文档逐字相同。没有失败后修改脚本、配置或板上状态来绕过预检。需用户给出下一步指令后才继续。
+
+边界例外：已有 SDB 服务的 `/tmp/sdb.log` 在本轮前后均为 400 bytes、mtime `2026-10-28 12:01:10.724948977 +0800`，没有删除或改动；无新增已知工作区外写入。比对记录在 `temp/pmuv3-install-refactor/boundary_before.txt` 与 `boundary_after.txt`，不是完整系统调用审计。用户显式提供的本轮附件仅用于读取指令，没有改动附件。
