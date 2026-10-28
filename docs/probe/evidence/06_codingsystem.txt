@@ -1,4 +1,7 @@
-本轮重新采集；展示仅去除行尾空白，部分长输出按标记截断。
+证据预算整理（2026-10-28）：保留原报告结论直接引用的源码/契约行与命令退出码；并非本轮重新探测。
+完整旧证据（不可变提交）：https://raw.githubusercontent.com/lhmax2010/autofdo_bolt_agent/5d5b2cdfafc6822400130ec4f8125bfe2f633259/docs/probe/evidence/06_codingsystem.txt
+本轮截断前副本：temp/sampling-current/evidence-original/06_codingsystem.txt
+历史采集；展示仅去除行尾空白，部分长输出按标记截断。
 新克隆：nice -n 19 ionice -c3 git -c credential.helper= -c gc.auto=0 clone https://github.com/lhmax2010/CodingSystem.git temp/CodingSystem；exit 0。旧克隆移动到 temp/CodingSystem_invalidated_run1，未用于本轮证据。
 $ git -C temp/CodingSystem rev-parse HEAD
 exit=0
@@ -29,72 +32,12 @@ agents/compiler/.gitkeep
 agents/skeletons/.gitkeep
 ci/.gitkeep
 conformance/.gitkeep
-docs/00_Framework_HLD_v0.1.md
-docs/00_Framework_HLD_v0.10.md
+[...省略旧草案版本文件名；完整树见文件头固定提交链接...]
 docs/00_Framework_HLD_v0.11.md
-docs/00_Framework_HLD_v0.2.md
-docs/00_Framework_HLD_v0.3.md
-docs/00_Framework_HLD_v0.4.md
-docs/00_Framework_HLD_v0.5.md
-docs/00_Framework_HLD_v0.6.md
-docs/00_Framework_HLD_v0.7.md
-docs/00_Framework_HLD_v0.8.md
-docs/00_Framework_HLD_v0.9.md
 docs/00_Framework_HLD_v1.0_draft_frozen.md
 "docs/00_Framework_HLD_\347\256\200\346\230\216\347\211\210_v1.0.md"
-docs/01_Contract_Spec_v0.1.md
-docs/01_Contract_Spec_v0.10.md
 docs/01_Contract_Spec_v0.11.md
-docs/01_Contract_Spec_v0.2.md
-docs/01_Contract_Spec_v0.3.md
-docs/01_Contract_Spec_v0.4.md
-docs/01_Contract_Spec_v0.5.md
-docs/01_Contract_Spec_v0.6.md
-docs/01_Contract_Spec_v0.7.md
-docs/01_Contract_Spec_v0.8.md
-docs/01_Contract_Spec_v0.9.md
-docs/review/01_v0.10_review_disposition.md
-docs/review/01_v0.10_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.1_review_disposition.md
-docs/review/01_v0.1_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.2_review_disposition.md
-docs/review/01_v0.2_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.3_review_disposition.md
-docs/review/01_v0.3_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.4_review_disposition.md
-docs/review/01_v0.4_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.5_review_disposition.md
-docs/review/01_v0.5_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.6_review_disposition.md
-docs/review/01_v0.6_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.7_review_disposition.md
-docs/review/01_v0.7_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.8_review_disposition.md
-docs/review/01_v0.8_review_{kimi,claudecode,codex}.md
-docs/review/01_v0.9_review_disposition.md
-docs/review/01_v0.9_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.10_review_disposition.md
-docs/review/HLD_v0.10_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.11_review_disposition.md
-docs/review/HLD_v0.11_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.1_review_disposition.md
-docs/review/HLD_v0.1_review_{claudecode,kimi,codex}.md
-docs/review/HLD_v0.2_review_disposition.md
-docs/review/HLD_v0.2_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.3_review_disposition.md
-docs/review/HLD_v0.3_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.4_review_disposition.md
-docs/review/HLD_v0.4_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.5_review_disposition.md
-docs/review/HLD_v0.5_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.6_review_disposition.md
-docs/review/HLD_v0.6_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.7_review_disposition.md
-docs/review/HLD_v0.7_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.8_review_disposition.md
-docs/review/HLD_v0.8_review_{kimi,claudecode,codex}.md
-docs/review/HLD_v0.9_review_disposition.md
-docs/review/HLD_v0.9_review_{kimi,claudecode,codex}.md
+[...省略历次 review 文件名；完整列表见文件头固定提交链接...]
 framework/artifacts/.gitkeep
 framework/context/.gitkeep
 framework/contracts/.gitkeep
@@ -118,13 +61,11 @@ stderr:
 (empty)
 
 
-READ temp/CodingSystem/.dev_memory/current_state.md (Python line-numbered excerpts)
+
+READ temp/CodingSystem/.dev_memory/current_state.md
 1: # Current State
-2:
 3: CodingSystem 的 `main` 已重建为 HLD v0.1 定义的 Multi-Agent 框架开发骨架，尚未包含业务代码。
-4:
 5: ## 目录树摘要
-6:
 7: ```text
 8: .
 9: ├── .dev_memory/
@@ -148,46 +89,17 @@ READ temp/CodingSystem/.dev_memory/current_state.md (Python line-numbered excerp
 27: │   ├── sdk/
 28: │   └── skill/
 29: └── pipelines/
-30: ```
+[...]
 
-READ temp/CodingSystem/docs/00_Framework_HLD_v1.0_draft_frozen.md (Python line-numbered excerpts)
-1: # 00 — Multi-Agent Framework 高层设计（HLD）
-2:
+READ temp/CodingSystem/docs/00_Framework_HLD_v1.0_draft_frozen.md
+[...]
 3: **版本**: v1.0-draft-frozen（= v0.11 + 第十一轮三方 freeze 勘误）
 4: **状态**: **DRAFT FREEZE**（含勘误 E-01，见附录 A15）——第十一轮复审三方一致 GO（Kimi / Claude Code / Codex），十一轮累计 66+ 实质 issue 全部闭环处置。本冻结为 draft freeze：架构与关键路径语义不再变更；contract **v1.0 正式定稿**仍须按 D10/G6 三条件（reference Compiler Agent 真实消费 + 五类 fixture + 兼容矩阵）达成后宣布。冻结后的任何修改须重走三方评审
-5: **读者**: 框架开发（Codex）、cross-reviewer（Kimi / Codex / Claude Code）、后续业务 Agent 开发者
 6: **关联文档**: 01_Contract_Spec、02–06_Agent_Design_Guide、07_Conformance_and_Onboarding、08_Codex_Dev_Guide、09_Phased_Dev_Plan、docs/review/ 下 v0.1–v0.11 全部十一轮处置表（v0.11 处置表为 freeze 勘误依据）
-7:
-8: > **文档定位**：本文档按"Codex 可直接开发"标准编写——关键路径上的技术决策均已定案，不提供备选方案。凡标注 `[待补充]` 的内容为环境类事实材料（由项目负责人核对后填充），不阻塞架构评审；凡标注 `[01]` 的内容为已定案、精确 schema 在 01_Contract_Spec 给出的项。
-16: 本框架服务于 Tizen 平台工程的自动化软件工程流水线（CodingSystem 重启版）。完整目标态为六角色协作：外部 Coding Agent（ClineSR / 过渡期 Codex）产出业务 patch，框架内的 Compiler / UT / Benchmark / Review / CI 五类 Agent 完成编译修复、单测验证、性能基准、AI+人工审查、发布。
-17:
-18: 与旧版 CodingSystem 的关键差异：
-19:
-20: 1. **Coding Agent 移出框架**——仅通过 Skill 协议调用流水线，框架对其零依赖；
-21: 2. **框架平台化**——本团队交付：框架 + 公共模块 + **approval 服务、release broker 及官方发布 adapter（gerrit/github，见 §8.3）** + reference Compiler Agent；业务 Agent（UT / Benchmark / Review / CI）由业务开发者依据 02–06 设计指引二次开发；
-22: 3. **流水线可配置**——支持子集编排（如仅 Compiler + Benchmark），不改代码只改配置。
-23:
-24: ### 1.2 目标（Goals）
-25:
-26: - G1 声明式可配置 pipeline 编排：全量或任意**合法**子集（合法性定义见 §4.2.6），配置驱动；
-27: - G2 Agent SDK：业务开发者面向 SDK 编程，不接触编排引擎内部；
-28: - G3 公共模块：LLM 接入层、知识源接入、Context 管理、EvidencePacket 工具链、Ledger/Artifact store、资源管理接口；
-29: - G4 全流程可追溯、可断点恢复；副作用语义为 **at-least-once + 效应侧幂等**（§5.2），不承诺 exactly-once；
-30: - G5 发布安全物理强制：凭据仅存在于框架 release broker 进程，approval token 原子单次核销（§8）；
-31: - G6 contract v1.0 定稿 gate：reference Compiler Agent 真实消费 + 五类 Agent 的 producer/consumer fixture 全部通过 + 兼容矩阵建立（§13 P5）。基于 FakeLLMProvider 达成；内网真实 LLM 的 provider 一致性验证为独立的上线 gate（§14 R5）。
-81: | D2 | 路由权归属 | Agent 只声明结果（HandoffResult），路由由编排层按 pipeline 配置决定；框架保留系统级 outcome（§4.3.2） | 子集流水线前提；Agent 间互不感知 |
-82: | D3 | 语言/版本 | Python ≥ 3.12 | 实机环境统一 3.12+ |
-83: | D4 | 仓库与分发 | 单 monorepo；框架以 wheel 发布（`codingsystem-framework`），业务 Agent 经 entry-point namespace `codingsystem.agents` 注册；fork 为特殊模式（同步责任在业务侧） | 业务侧可消费而非仅可见 |
-84: | D5 | 基线管理 | Run 启动时 pin **多仓 snapshot manifest**（§7.6.2）；同时 pin **execution manifest**（D12）；Run 全程锁定 | patch 基线一致性 |
-85: | D6 | 权威事实源 | 单一 SQLite **Ledger**（WAL）为 system of record：Run/Task 状态、artifact 索引、幂等记录、循环计数、token 核销同库事务提交；trace 为 Ledger 派生的 JSONL；LangGraph checkpoint 仅作执行恢复机制 | 消除多存储一致性分裂；审计不依赖引擎格式 |
-86: | D7 | 数据边界 | 数据密级**由来源出生即标注**（snapshot 读取器/BuildExecutor/KnowledgeProvider 产出即带密级），聚合取最高、禁止调用方降级；provider 白名单由中心安全配置授权 | 不依赖调用方诚实；残余风险 §14 R8 |
-87: | D8 | 发布安全 | 发布凭据仅存在于框架 **release broker** 独立进程；CI Agent 只产 ReleasePlan；审批授权以 Ledger 授权记录形态存在（无 bearer 流转），broker 经特权 RPC 原子核销；授权绑定 release manifest digest；官方发布 adapter 随框架交付 | 业务 Agent 拿不到凭据，绕过面收敛到 broker 单点 |
-88: | D9 | 循环上限 | 循环为 DSL 显式声明的 `loop` 对象（环级预算），编排层强制；另有 Run 级总预算 | 计数归属清晰、静态可校验 |
-89: | D10 | Contract 冻结 | draft freeze（三方评审）→ v1.0（G6 三条件） | 未被真实消费的 contract 不定稿 |
-90: | D11 | 并发模型 | MVP：**单执行 Run**（执行槽 = 持有 worker/资源执行中；paused 不占执行槽、可多 Run 并存，resume 与新 Run 同入 FIFO 队列）；Run 内节点级并行；task 以子进程 worker 执行；资源经信号量额度管理（§7.6.3）；Ledger 直写者唯一（编排进程，其余经 control-plane RPC） | 单机资源与 SQLite 约束下最小正确模型 |
-91: | D12 | 执行环境固化 | Run 创建时固化 execution manifest：pipeline digest、contract 版本、框架版本、agent 制品 digest、provider 配置 digest、引擎版本；task dispatch / 审批 / 发布前复核相关 digest；恢复时不匹配走 ledger 级 administrative finalize（§4.3.3），不做在途迁移；provider 配置 digest 含策略语义与 **端点身份/信任策略**（仅凭据值除外——密钥轮换不影响恢复，端点改向则触发不匹配） | 官方明示 interrupted thread 不支持拓扑变更（节点改名/删除）、state 不兼容变更有风险；逐类推理迁移安全性的成本与出错面大于一律拒绝 |
+[...]
+[...]
+[...]
 259: #### 5.1.1 AgentBase
-260:
 261: ```python
 262: class AgentBase(ABC):
 263:     agent_type: ClassVar[str]
@@ -200,124 +112,31 @@ READ temp/CodingSystem/docs/00_Framework_HLD_v1.0_draft_frozen.md (Python line-n
 270: ```
 271: - Agent 经 `ctx` 获得框架注入句柄：artifact store、KnowledgeProvider、LLM client、EvidencePacket builder、trace、以及**能力句柄**（BuildExecutor / BoardPool 等，按 agent_type 在配置中授权注入；清单**显式排除发布通道**——发布只存在于 broker（§8.3）；未授权句柄不存在于 ctx，与 D8 联动）。
 272: - 注册：entry-point namespace `codingsystem.agents`；加载时校验 status_set 非空、contract 兼容、conformance attestation（§11.3）。
-273:
 274: #### 5.1.2 Worker 模型（进程边界）
-275: - 每个 task 由编排进程 spawn 独立子进程 worker 执行：注入 ctx → 调 execute → 结果经 IPC 回传。
-276: - worker 以独立进程组（setsid）启动；hard timeout / 取消 = 对**进程组** SIGTERM 宽限后 SIGKILL（killpg，覆盖 gbs 等孙进程），BuildExecutor 额外登记外部长进程供递归清理；进程退出映射 `sys.crash` / `sys.timeout`。
-277: - 编排层持有 worker 租约（heartbeat）；**心跳丢失时 worker（进程组长）先 killpg 终止本组全部进程（含 gbs 孙进程）与 BuildExecutor 登记的外部长进程，再自行退出**——kill 语义不因编排进程失联而缺席；编排进程恢复时先按 Ledger 登记的 pgid 验证归属并 reap 孤儿进程组、再重放。故障注入含"编排进程崩溃且 GBS 子进程仍活跃"用例（§11.3）。
-278: - Agent 实例作用域 = 单 task（无跨 task 内存态，setup/teardown 每 task 执行）。凭据类 secret 不注入业务 worker（D8）。
-279:
-280: ### 5.2 副作用：at-least-once + 效应侧幂等
-281: - **保证等级声明**：框架保证 at-least-once，不承诺 exactly-once。外部效应成功与完成记录落盘之间存在崩溃窗口，关闭窗口的责任在效应侧幂等。
-282: - SDK 入口为 `side_effect(effect_call_id, params, fn, repeat_seq=None)`——**idem_key 只能由框架计算**（worker 不得自供完整键，conformance 强制）；**effect_class 由 fn 所属注册效应类型推导**：side_effect 仅可包装类型化能力句柄上注册的效应（probe/replay_safe 能力声明挂在该类型上），自由函数不可包装，effect_class 参与 conformance 校验（细则 `[01]`）；其为两阶段持久化状态机（Ledger 同库事务）：`claimed(intent) → running → succeeded/failed`；恢复时遇 `running/claimed` 记录 = 状态不确定（待对账），执行 **恢复协议**：按 §5.2 三支对账（probe / replay_safe 重放 / 皆无 → 持久化 unknown 态并转 sys.error）。
-283: - `idem_key = hash(run_id, dispatch_id, effect_class, effect_call_id, effect_params_digest[, repeat_seq])`——**效应身份 = slot + 稳定逻辑调用标识**：slot = (run_id, **dispatch_id**)，dispatch_id 为创建该 task 的边送达/分派事件的 Ledger 标识——跨 attempt 稳定（重试复用同一 task 即同一 dispatch）、跨 task 天然隔离（含 entry 分派与兄弟送达；node/activation/环轮次由 dispatch 记录蕴含，不入键）。**`effect_call_id` 由调用方提供、在 Agent 代码内稳定**（如 "build_main"、"flash_pre"），不依赖调用次序——控制流变化的重试不会把新逻辑调用错配到旧记录；框架强制同 task 内 effect_call_id 唯一在册（conformance 检查项），显式声明的重复执行由调用方给定 `repeat_seq`（迭代序）。`effect_params_digest` = 调用实参规范化摘要（含 series_id/tree_digest、构建目标、板卡标识等，artifact 引用按 content digest 参与）。**不含 attempt**：同 (call_id, params) 的重试/重放命中同一记录；非决定论重执行实参不同 → 新键，且**跨 attempt 遗留**的同 call_id 旧在途异参记录经 attempt 启动对账**定态**——逐支终态：probe 确认成功 → succeeded（复用）、确认未发生或 replay_safe 退役 → abandoned、不可判定 → unknown + sys.error；**succeeded 与 unknown 不得改写为 abandoned**；**异参新键允许集合（枚举定案）**：定态 succeeded 或 abandoned → 异参新 claim 放行、新键独立执行，且旧 succeeded 仅供同参精确键命中复用、**不得跨参数复用**；定态 unknown → task 已随 sys.error 中止，无新键可立。**本枚举仅辖跨 attempt 定态记录**；干净终态 failed（正常执行产物、非定态产物）之上的同 call_id 异参新 claim 依既有效应类别策略放行，不在此列（效应侧"退役"不与 activation 的 supersede 术语混用）。**唯一性约束的两个层面**：conformance 静态检查（每逻辑调用点唯一命名）；运行时拒绝路径——**仅同一 attempt 内**（跨 attempt 遗留已经启动对账定态）同 call_id 存在未决（claimed/running）记录时的异参新 claim 被拒（作者误用形态），task 报 `sys.invalid_result`（细则 `[01]`）。
-284: - **记录状态与查找矩阵**（全集 claimed / running / succeeded / failed / abandoned / unknown，迁移与查找表 `[01]`）：查找只命中非 abandoned 记录——claimed/running → 按效应能力对账（见下）；**succeeded → 直接复用（含上一 attempt 经 probe 确认成功的记录——可 probe 而不可安全重放的效应必须复用，不做保守重做）**；failed → 按效应类别策略重试或上报。对账按效应能力分三支（conformance 分别覆盖）：**可 probe** → probe 确认成功迁 succeeded（复用）、未发生迁 abandoned；**无 probe 但声明 replay_safe** → 旧在途记录退役 abandoned、重放；**两者皆无** → unknown（持久化）并报 sys.error。attempt 启动前，编排层将上一 attempt 遗留的本 task 非终态记录逐条按上述三支对账。abandoned 记录不参与命中；**记录版本化为通则**——凡同键在 abandoned 记录之上的重执行，一律以版本化新记录承载（迁移/查找表 `[01]`）。
-285: - 状态迁移经 control-plane RPC 由编排进程事务写入：worker 收到 claimed ack 后方可启动效应，RPC 失败 = 效应不得启动（fail-closed）；intent/running 即时提交，task 完成事务仅覆盖最终结果 + artifact 索引 + 幂等终态。
-286: - 效应类别要求（contract + conformance 强制）：构建 = 可 probe（worktree/产物存在性）；刷板/板上执行 = 可 probe 或声明可安全重放；**发布 = 仅经 broker，broker 端远端幂等（push 前查远端状态）+ token 单次核销双保险**。
-295: ## 6. Contract 体系概览（精确 schema 见 01_Contract_Spec）
-296:
-297: ### 6.1 消息类型
-298: `TaskInput` / `HandoffResult` / 各 Report（Build/UT/Bench/Review/Feedback，均携带 series_id 与产出 task_id）/ `RunContext` / `ReleasePlan` / `ReleaseManifest` / Approval 决定与授权记录 / Run 终局摘要 / Skill 协议消息。agent_type 注册信息含 status 全集与 hard-required 上游声明。
-299:
-300: ### 6.2 版本规则
-301: Contract 独立版本号；Agent 以 PEP 440 specifier 声明兼容区间（§5.1.1）；框架装配时校验。pipeline `dsl_version` 属 Contract 版本体系。draft 期允许破坏性修改但记 decision_log。
-302:
+[...]
 303: ### 6.3 上游缺失语义
 304: 默认全部 optional + 降级运行 + 报告显式标注"本次 Run 未执行 X"；Agent contract 可声明**少数 hard-required** 上游产物（如 benchmark hard-require 构建产物引用），由 DSL 校验器静态拦截（§4.2.6）。approval_token 属"外部供给依赖"类别，不参与上游产物校验。conformance 含上游缺失用例。
-305:
-306: ### 6.4 Patch 归属与陈旧性
-307: 产物为 patch series（非 squash），逐段标注产出者与动因；series 任何变更 → 新 series_id + 新 tree_digest → 旧 Report 对 gate/join 失效（§4.2.4）、未核销 token 失效（§8.2）。是否 squash 是 broker 发布期可配置行为。
-308:
-309: ### 6.5 Skill 协议（决策定案）
-310: - 传输：**HTTP + JSON 单一协议**（MCP 若需要，未来以 adapter 包装同一操作 contract，MVP 不做）。
-311: - 操作：`create_run(pipeline_id, target_spec)`（target_spec 指定 snapshot 拉取范围：仓/包/manifest，语义 `[01]`）、`submit_patch(run_id, series)`（unified diff series + 逐 patch 的 repo 归属；服务端校验对 pinned snapshot 可应用，不可应用即拒绝；一个 Run 仅接受一次初始 series，重复提交返回明确错误——修订走新 Run）、`get_status`、`get_result`、`cancel_run`。忙时语义：submit_patch 受理后 Run 进入 queued（FIFO，响应返回队列位置），resume 同队列；awaiting_patch 不占队列，TTL 见 §4.3.1。
-312: - 认证与信任边界：静态 bearer token（配置下发调用方）；请求含 request_id 支持幂等重试；patch 大小/路径白名单校验。信任边界声明：Skill 端点仅暴露于内网单机/受控网段（D13），持 token 者视为受信 Coding Agent。
-338: ### 7.6 资源管理
-339: #### 7.6.1 BuildExecutor
+[...]
+[...]
 340: `build(snapshot, series, targets) -> BuildResult`；默认 `GbsLocalExecutor`：per-task git worktree 隔离、`git apply --index` + staged/worktree 一致性校验、构建可 probe（§5.2）；依赖范围默认 reverse-dependency 闭包增量，全量为显式开关。
-341: #### 7.6.2 多仓 snapshot manifest
-342: snapshot = `[ {repo_id, remote, commit, path} ]` 规范化清单；patch 逐条声明 repo_id；跨仓 series 按 manifest 序应用，任一仓失败即整体回滚该 worktree 组；tree_digest = 各仓应用后 tree hash 的规范组合（逻辑定义；计算为纯算法、无需 worktree，见 §4.2.4，算法 `[01]`）。
-343: #### 7.6.3 资源额度（单机自我保护）
-344: BuildExecutor / BoardPool / worker 数各配信号量上限；排队 FIFO；磁盘水位检查（低于阈值拒绝新 Run 并告警）；worktree 于 task 终结时清理，泄漏由定期对账回收。
-414: 分发（D4）：框架构建为 wheel `codingsystem-framework`（含 extras），业务 Agent 依赖该包并经 entry-point 注册；发布 gate 进 ci/。
-415:
-416: ---
-417:
-418: ## 11. 技术栈与质量门禁
-419:
-420: ### 11.1 技术栈
-421: Python ≥ 3.12；LangGraph 依赖闭包 lockfile 锁定（D1）；pydantic v2；SQLite(WAL)；PyYAML。
-422:
-423: ### 11.2 门禁
-424: pytest + coverage 全局 ≥ 80%；**关键模块（orchestration、ledger、approval、release、sdk.side_effect）分支覆盖 ≥ 95%**；mypy --strict；ruff；import-linter（引擎封装）。
-425:
-426: ### 11.3 强制测试类别（P1–P4 gate 组成部分）
-427: DSL property/fuzz（随机图 → 校验器判定性质：可达环必有 budget、release 必经 hitl 等）；状态机 model-based 测试；**逐持久化边界故障注入**（每个 Ledger 提交点前后 kill，验证恢复与对账）；token 并发双消费测试；陈旧 series 进 gate/join 拒绝测试；checkpoint/execution manifest 不匹配拒绝恢复测试；artifact 损坏检测（digest 校验）与 blob 提交顺序逐点崩溃注入（孤儿 GC / dangling 索引对账）；control-plane IPC 权限隔离测试（worker socket 不可达审批/核销命令；跨 task 篡改拒绝；真实 UID/文件权限 E2E）；同 series 多轮循环下 join activation 分组与崩溃重放，含四组 model-based 断言——旧 activation 已首达后推进 series → stale 超时不误杀；同 series 并发多 activation 独立成组；不推进 series 的环（旧源已到达、环边采用、新 activation 成功、旧计时器后到 → 条件③已退役、无误杀）；父退役级联（嵌套子 activation 计时器同事务作废、不误杀，替代 cohort 继承父 scope 后参与外层 join）——及"分支内回环（不重经共同 fan-out）与跨祖先回环（先重经祖先 activation 的 fan-out）均拒绝加载"validator property；跨 attempt 三支定态 × 异参 claim 动作矩阵（succeeded/abandoned 放行新键、succeeded 不跨参复用、unknown 无新键、干净终态 failed 依类别策略放行）测试；publishing 终态映射 pending 组合（含 pending administrative finalize）故障注入与人工裁决 E2E（证据缺失拒绝、broker 未静默拒绝、迟到发布检出）；post-close correction（迟到检出、重复/并发修正、get_result 呈现）；effect_call_id 唯一性 conformance 与"双同参调用首成后崩溃、重试控制流变化"注入；probe-only / replay_safe / 皆无三类效应对账覆盖；join 作用域与共同到达 validator property（嵌套 fan-out、互斥 outcome、嵌套汇合重入外层三类反例）；恢复复用既有 dispatch 记录断言；publishing 期间进程重启/D12 漂移的对账优先注入；blob 上传与 GC 并发注入；编排进程崩溃且 GBS 子进程存活注入；五类 agent_type 的 contract producer/consumer fixture 兼容测试。conformance attestation：结果绑定 agent 制品 digest + contract/套件版本，digest 变更即失效，加载时校验。
-428:
-429: ---
-430:
-431: ## 12. 环境前提与 E0 预检
-432: 同 v0.1 表（gbs 工具链 / image URL / gerrit 探测 / CodeGraph / LLM Wiki / FakeLLM），追加：Approval 服务与 broker 的本机进程部分无外部环境依赖、不进 E0 预检；**官方发布 adapter 的真实端点联调（gerrit/github 端点、凭据、目标仓权限）为独立上线 gate 材料**——开发与 P4 验收基于本地 API 模拟器/fixture，真实端点验证由负责人在受控环境执行（用例 07 提供），未通过前不得对生产目标发布。
-433:
-434: ---
-435:
+[...]
+[...]
 436: ## 13. 分期计划概览（细化见 09）
-437:
 438: | Phase | 交付 | 完成 gate |
-439: |-------|------|----------|
-440: | P0 | 00/01 复审通过 draft freeze；08/09 就绪 | 三方 unanimous GO |
-441: | P1 | EnginePort + engine/ + DSL v1 校验器/编译器 + Run 状态机 + Ledger 核心 + worker 调度 | mock agents：全量/子集配置加载；逐边界故障注入恢复通过 |
-442: | P2 | SDK（worker/side_effect）+ contracts + Skill server + **control-plane RPC + Approval 服务 + Review CLI + Release broker（FakePublisher + 官方 adapter 骨架）** | conformance 骨架 + 授权并发/双消费 + RPC 权限隔离测试通过 |
-443: | P3 | 公共模块（LLM 层+数据边界、Knowledge 双实现联调、context、evidence、GbsLocalExecutor、FakeBoardPool、资源额度）+ **官方 gerrit/github adapter 功能完成与打包（对本地 API 模拟器集成）** | 真实 gbs 最小构建 + 数据边界 fail-closed + adapter 模拟联调用例通过 |
-444: | P4 | 端到端：全量与子集 pipeline（mock 业务 + 真实构建 + CLI 审批 + Fake/模拟器发布）+ deploy/ 资产 | §11.3 全部测试类别 + 真实 UID/权限 E2E 隔离测试通过 = 框架完成；真实发布端点联调为独立上线 gate（§12） |
-445: | P5+ | reference Compiler Agent + 五类 fixture + 兼容矩阵 | contract v1.0（G6） |
+[...]
 
-READ temp/CodingSystem/docs/01_Contract_Spec_v0.11.md (Python line-numbered excerpts)
-1: # 01 — Contract Specification（契约规格）
-2:
+READ temp/CodingSystem/docs/01_Contract_Spec_v0.11.md
+[...]
 3: **版本**: v0.11 Draft（v0.10 三方复审 2 GO / 1 NO-GO 后修订版，待第十一轮复审）
 4: **状态**: 复审中
 5: **上游依据**: docs/00_Framework_HLD_v1.0_draft_frozen.md（下称 HLD）。本文档只精确化 HLD 冻结语义，不引入新架构决策；与 HLD 冲突以 HLD 为准并作为本文档缺陷处理。**例外一处**：V-13b 为 HLD 勘误 HLD-Q1 的形式化（首轮 Claude Code 登记、三方处置表确认走勘误通道），**已于第二轮三方一致批准生效**（规则与程序双表态全 GO），并回写 HLD 附录 A15 勘误注记。
 6: **关联**: docs/review/ 下 01 系十轮处置表（57/47/34/21/18/9/9/12/8/10 条逐条处置）。本版为**自足文本**：不再以"同 v0.1/v0.2"外引承载任何规范性内容。
-35: ulid = 26 字符 Crockford Base32。碰撞策略：ulid 类由生成方保证单调；序号类溢出扩位不回绕。task_prefix：2–4 大写字母、注册期全局唯一（V-02 校验）。
-36:
+[...]
 37: ### 0.3 Contract 版本
 38: `contract_version = "1.0.0.dev1"`（PEP 440 合法；各文档草案展示号与包版映射关系记于 A3 变更表）。draft 期破坏性修改递增 devN；v1.0.0 按 HLD D10/G6 宣布。`contract_requires` 按 PEP 440 specifier 匹配 contracts 包版本；draft 期业务侧锁精确版本（`==1.0.0.devN`，逐版显式升级）。`dsl_version` 当前 1。
-39:
 40: ### 0.4 模型总纲
 41: 全部模型 `ConfigDict(extra="forbid", frozen=True)`；**唯一豁免**：各 Report 类型体允许扩展键，必须置于 `ext: dict[str, JsonValue]` 单一容器内且键带 `<org>__` 前缀——除 ext 外仍 forbid。本文出现的每个类型名在正文或 §7 附录 A0 有完整定义，无匿名 schema。
-107: ### 1.3 静态校验规则（违规 → `PipelineValidationError(rule_id, locus)`）
-108:
-109: | ID | 规则（依据） |
-110: |----|--------------|
-111: | V-00 | **引用有效性**：route.from_ ∈ nodes；route.to 各成员 ∈ nodes ∪ {fail_safe} ∪ {join:<已声明 id>}；join.to ∈ nodes；LoopEdge 两端 ∈ nodes 且该边对应至少一条已声明 route；threshold metric 的 producer_node ∈ nodes；join/loop id 各自唯一；wait_for/edges/to 元素无重复（HLD §4.2.6 首条） |
-112: | V-01 | 节点三型互斥 + **字段适用矩阵**（§1.1 注）；threshold 必填 metric/op/value（§4.2.2） |
-113: | V-02 | **注册与准入**：agent_type 已注册、status_set 非空、task_prefix 格式合法且全局唯一、contract_requires 与 contracts 包版本兼容、conformance attestation 有效且**三重绑定**（制品 digest ∈ execution manifest + contract_version + 套件版本，HLD §11.3——R2-02）——未注册 agent_type 在 V-05 之前即拒（重写恢复项，CF-DSL-02 覆盖） |
-114: | V-03 | 节点名不占保留名/命名空间/`join:`前缀；entry 存在唯一；无不可达节点 |
-115: | V-04 | **路由唯一性**：同 (from_, on) 至多一条 route（fan-out 经单条多元素 to 表达，多条即拒绝） |
-116: | V-05 | route.on ∈（from 节点 status 全集 ∪ 其 gate outcome 集 ∪ sys.*） |
-117: | V-06 | 穷尽性：每节点业务 status 逐条有路由或被 default_route 覆盖 |
-118: | V-07 | 每个可达环至少含一条某 LoopSpec 声明边（等价判定：移除全部声明环边后图无环）；每条声明边隶属唯一 LoopSpec |
-119: | V-08 | join.wait_for ≡ { r.from_ : "join:"+id ∈ r.to }（集合相等，按 to 成员判定） |
-120: | V-09 | **每 activation 单送达（语义性质 + 保守判定）**：性质 = join 来源节点 s 每 activation 最大 dispatch 数 ≤1。判定：s 的多条入边合法当且仅当静态可证两两互斥（源自同一节点不同 outcome 的分支且中途未再汇合，可传递）；互斥性不可静态判定即拒绝。同节点互斥 outcome 多路指向同一 join 合法；互斥入边汇聚于中间节点 s 再入 join 亦合法（CS-05 反例形态） |
-121: | V-10 | join.to 非 join（禁链式）；多源 join 来源由同一显式 fan-out 的分支派生、来源集在分支间构成划分；共同支配不得替代共同 fan-out |
-122: | V-11 | **共同到达性**：对每个 join 来源 s，从其 scope fan-out 到 s 的路径上，每个节点的每个 outcome 分支须满足三者之一——仍在可达 s 的路径上、到达 Run 终局（fail_safe/terminal/release）、或经声明环边回流（受 V-12 双约束）；违者拒绝（HLD §4.2.6） |
-123: | V-12 | **环边双约束**：①回流路径必然重经该 join 的共同 fan-out（重派全部来源分区）；②重经自身 activation 的共同 fan-out 之前不得先重经任何祖先 activation 的共同 fan-out；违任一即拒（HLD §4.2.6 条件(iii)） |
-124: | V-13 | release 路径规则（照 HLD §4.2.5）：必经 hitl；release 可达路径上的 hitl approved 出边直达 release；release 无出边 |
-125: | V-13b | **[HLD 勘误 HLD-Q1]** release-approval 型 hitl 须存在支配它的 **ReleasePlan 生产节点**（按 §2.3 produces 声明判定：produces 含 "release_plan"）；多候选生产者 → 取支配链上最近者，歧义（同深多者）拒绝 |
-126: | V-14 | terminal 节点必有非空 success_on ⊆ status 全集，且**无出边**（非 success outcome 固定映射 fail_safe，编译期落表） |
-127: | V-15 | hard-required（ProducerSelector 解析）与 threshold metric 生产节点：存在、可解析唯一、支配消费节点、消费同 series 结果；metric 的 field 须在该生产节点 produces 全部类型体的 gateable 字段中**唯一匹配**，歧义拒绝 |
-128: | V-16 | retry.on ⊆ **RetryOutcome = {sys.crash, sys.error, sys.timeout}**（封闭枚举；`sys.invalid_result` 不可重试——HLD §4.3.2 字面；CF-DSL-16 反例固定为 invalid_result） |
-129: | V-17 | hitl 分型静态判定：release 可达路径上的 hitl 为 release-approval 型、其余 plain-decision 型；分型进编译产物供运行时选择审批协议（HLD §4.4） |
-130:
-131: ### 1.4 编译产物
-132: `CompiledPipeline`（内部 schema，进 execution manifest 的是其 digest 而非本体）：节点表（分型/hitl 型别/terminal 映射）、路由表、环表、join 表（scope fan-out、来源划分、超时配置）、支配缓存、threshold 解析表。
-133:
-134: ### 1.5 threshold 指标解析（唯一数据源）
-135: `metric = "<producer_node>.<field>"`：field 解析到该生产节点注册 Report 类型体的**顶层定点字符串字段**（§2.4 各 Report 的可门禁字段以 `# gateable` 注明）；比较按 Decimal。缺失字段 / 非法值 / 生产节点本轮无产出 → outcome=fail（fail-closed）。旗舰示例 `benchmark.regression_pct` 解析到 BenchReport.regression_pct（顶层聚合字段，§2.4）。
-173: ### 2.3 Agent 注册与任务消息
-174:
-175: ```python
+[...]
 176: class ProducerSelector(BaseModel): report_type: str; producer_node: str | None = None  # None=按支配链最近唯一者
 177: class AgentRegistration(BaseModel):
 178:     agent_type: str; task_prefix: str
@@ -325,7 +144,7 @@ READ temp/CodingSystem/docs/01_Contract_Spec_v0.11.md (Python line-numbered exce
 180:     produces: frozenset[str]                       # 产出 report_type 集（V-13b/V-15 判定依据）
 181:     hard_required_inputs: tuple[ProducerSelector, ...] = ()
 182:     capabilities_required: frozenset[str] = frozenset()
-183:
+[...]
 184: class UpstreamItem(BaseModel): producer_node: str; report_type: str; task_id: str | None; ref: ArtifactRef | None  # ref=None 即缺失
 185: class TaskInput(BaseModel):
 186:     run_id: str; task_id: str; dispatch_id: str; attempt: int
@@ -334,80 +153,23 @@ READ temp/CodingSystem/docs/01_Contract_Spec_v0.11.md (Python line-numbered exce
 189:     upstream: tuple[UpstreamItem, ...]              # 按 (producer_node, report_type) 唯一；同类型多生产者各占一项
 190:     join_inputs: tuple[JoinInputItem, ...] | None
 191: class JoinInputItem(BaseModel): source_node: str; handoff_ref: ArtifactRef; series_id: str; task_id: str
-192:
 193: class HandoffResult(BaseModel):
 194:     task_id: str; status: str; series_id: str
 195:     series_candidate_id: str | None = None      # 引用本 task 预登记的 candidate；无 patch 任务为 None（R4-01）
 196:     artifact_refs: dict[str, ArtifactRef]; reason: str = ""
 197:     metrics: dict[str, float] = {}                  # 运行时观测，不参与 digest（§0.1）
-198:
 199: class ArtifactRef(BaseModel): digest: str; kind: str; media_type: str = "application/json"; data_class: DataClass
 200: class RunContext(BaseModel):                        # setup(ctx) 注入面（HLD §5.1.1/§6.1）
 201:     run_id: str; snapshot_id: str; snapshot_manifest_ref: ArtifactRef
 202:     pipeline_id: str; pipeline_digest: str; contract_version: str
 203:     capabilities: frozenset[str]                    # 实际注入的能力句柄名集（发布通道永不出现）
-204: ```
-205:
-206: ### 2.4 Report schema
-207: ```python
-208: class ReportBase(BaseModel):
-209:     report_type: str; task_id: str; run_id: str; series_id: str
-210:     created_at: datetime; data_class: DataClass
-211:     inputs: tuple[UpstreamItem, ...]        # 消费与缺失显式记录（HLD §6.3）
-212: ```
-213: 每个具名 Report = ReportBase 子类 + 类型体；**ReleasePlan 亦然**（§2.5 类型体中与头重复的 run_id/series_id 移除，由头承载）。`HandoffResult.artifact_refs` 键约定：所产各 Report 以其 report_type 为键（框架据此 + produces 声明构造 UpstreamItem 并校验齐全），其余产物键自由但不得与任何 report_type 冲突。类型体（`# gateable` = 可作 threshold 指标的顶层定点字符串字段）：
+[...]
 214: - **BuildReport**：`succeeded: bool; targets_built: list[str]; revdep_scope: list[str]; failed_target: str|None; error_excerpt_ref: ArtifactRef|None; fix_patches: list[PatchAttribution]; rounds_used: int; output_refs: dict[str, ArtifactRef]`（RPM 等构建产物，供 hard-require）
-215: - **UTReport**：`passed: bool; boards: list[str]; suites: list[SuiteResult]; failure_analysis_ref: ArtifactRef|None; fix_patches: list[PatchAttribution]`
-216: ```python
-217: class SuiteResult(BaseModel): name: str; board_id: str; passed: int = Field(ge=0); failed: int = Field(ge=0); skipped: int = Field(ge=0)
+[...]
 218: class MetricEntry(BaseModel): value: str; baseline: str; regression_pct: str   # 定点字符串（§0.1 pattern）
-219: class RoundDigest(BaseModel): round: int = Field(ge=1); node: str; task_id: str; status: str; summary: str
-220: class ReportEntry(BaseModel): producer_node: str; report_type: str; task_id: str; ref: ArtifactRef
-221: ```
-222: - **BenchReport**：`regression_pct: str  # gateable（定点，全指标最大回归）; metrics: dict[str, MetricEntry]; baseline_ref: ArtifactRef; patch_relatedness_ref: ArtifactRef`；`MetricEntry = {value: str, baseline: str, regression_pct: str}`（定点字符串）
-395: ### 4.1 键与调用面
-396: ```python
-397: class EffectResult(BaseModel): return_value: JsonValue; artifact_refs: dict[str, ArtifactRef] = {}
-398: def side_effect(effect_call_id: str, params: BaseModel, fn: EffectType, repeat_seq: int | None = None) -> EffectResult
-399: # idem_key = digest({run_id, dispatch_id, effect_class, effect_call_id, effect_params_digest, repeat_seq})
-400: ```
-401: succeeded 复用即返回存储的 EffectResult。**同键与调用约束（自足文本）**：
-402: - `effect_call_id` 调用方提供、代码内稳定命名（`[a-z0-9_]+`），conformance 静态检查每逻辑调用点唯一命名，同 task 内唯一在册；显式重复执行由调用方给定 `repeat_seq` 迭代序。
-403: - `effect_class` 由 fn 所属注册效应类型推导，自由函数不可包装（SDK 拒绝）；服务端交叉校验见 §5.1。
-404: - `effect_params_digest = digest(params)`，params 内 ArtifactRef 以 digest 参与；canonical 全文存 params_ref。
-405: - **不含 attempt**：同 (call_id, params) 重试/重放命中同一记录；非决定论重执行实参不同 → 新键；跨 attempt 遗留的同 call_id 旧在途异参记录经 attempt 启动对账定态（§4.3 三支），succeeded/unknown 不得改写为 abandoned。
-440: class EffectType(Protocol):
-441:     effect_class: ClassVar[str]; replay_safe: ClassVar[bool]
-442:     supports_probe: ClassVar[bool]                # 静态能力位（对账路径选择依据）
-443:     probe_retry_max: ClassVar[int]; probe_retry_interval_sec: ClassVar[int]   # indeterminate 有限重试参数（P-04）
-444:     failed_disposition: ClassVar[Literal["raise","retry_new_version"]]; failed_max_retries: ClassVar[int]
-445:     def probe(self, params, record) -> ProbeResult: ...
-446: ```
-447: 对账映射（**probe 优先**）：supports_probe → 先 probe：confirmed_happened → succeeded（复用）；confirmed_not_happened → abandoned；indeterminate → 有限重试（§4.2 进度字段）耗尽后——**若 replay_safe → 退役 abandoned 版本化重放（fallback）**，否则 unknown + sys.error（不得当作 not_happened）。not_supported ∧ replay_safe → 退役重放；两能力皆无 → unknown + sys.error。四组合（supports_probe × replay_safe）全覆盖 = CF-EF-02 轴定案。failed 同键再调用：按 failed_disposition——raise（返回存储 error）或 retry_new_version（版本化重试至 failed_max_retries，超限 raise）。
-448: 注册面：entry-point namespace `codingsystem.effects`；装配时校验 effect_class 唯一、能力声明齐备、类别硬性要求（build.* 可 probe；board.* 可 probe 或 replay_safe；publish.* 仅 broker，业务注册即拒绝）。
-754: | CF-UP-01 | optional 上游缺失 | dispatch | UpstreamItem.ref=None 显式呈现；hard-required 缺失按 V-15 静态不可达（运行时防御拒绝） |
+[...]
 755: | CF-FIX-00 | fixture 注册集定案（CF-DSL-FLAG 依赖，**逐名对齐两份规范 YAML 原文**）：compiler{build_passed, **build_failed_exhausted**} / ut{ut_passed, ut_fix_patch_ready} / benchmark{bench_done, bench_failed} / review{**review_report_ready**, pass, concerns, block}（pass 供 A4 terminal success_on）/ ci{**release_plan_ready**}；task_prefix CMP/UT/BEN/REV/CI | 注册 | harness 从两份原文**字节**抽取 **agent 型来源节点的 route.on 与 agent terminal 的 success_on** 逐项断言 ∈ 对应注册集；gate 型来源的 on 另对照 §1.2 固定 outcome 集（approved/rejected/pass/fail 不属任何 agent 集——R7-05 量词修正）；注册集与旗舰不符即红灯自证 |
 756: | CF-FIX-01 | compiler fixture：consume 无 / produce BuildReport(含 output_refs、fix_patches 各 1) | 装配+往返 | 注册过、schema 往返过、attestation 三重绑定过 |
 757: | CF-FIX-02 | ut fixture：consume BuildReport / produce UTReport(双 board、fix_patch 1) | 同上 | 同上 + candidate 引用分支 B 走通 |
 758: | CF-FIX-03 | benchmark fixture：consume BuildReport / produce BenchReport(regression_pct 定点) | 同上 | 同上 + gateable 字段解析 |
-759: | CF-FIX-04 | review fixture：consume 三 Report(一缺失) / produce ReviewReport | 同上 | 同上 + inputs 缺失显式化（CF-UP 交叉） |
-760: | CF-FIX-05 | ci fixture：consume ReviewReport / produce ReleasePlan(ReportBase 头) | 同上 | 同上 + V-13b produces 判定 + ci_plan_task_id 绑定 |
-768: ## 8. 附录 A4：compiler_bench_only.yaml（规范原文——CF-DSL-FLAG 断言以此字节加载）
-769:
-770: ```yaml
-771: pipeline: compiler_bench_only
-772: dsl_version: 1
-773: nodes:
-774:   compiler: {agent_type: compiler}
-775:   benchmark: {agent_type: benchmark}
-776:   bench_gate: {gate: threshold, metric: benchmark.regression_pct, op: "<=", value: 5.0}
-777:   summary: {agent_type: review, mode: bench_summary, terminal: true, success_on: [pass]}
-778: entry: compiler
-779: routes:
-780:   - {from: compiler, on: build_passed, to: benchmark}
-781:   - {from: benchmark, on: bench_done, to: bench_gate}
-782:   - {from: bench_gate, on: pass, to: summary}
-783: default_route: fail_safe
-784: run_budget: {max_wall_clock_min: 240}
-785: ```
-786: （status 名依 CF-FIX fixture 注册集；`value: 5.0` 词素路径与 `on:` 字符串键在本文件上同时得证；无环故无 loops 节，V-07 空覆盖合法。）
+[...]

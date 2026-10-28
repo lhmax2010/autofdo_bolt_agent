@@ -1,17 +1,20 @@
+证据预算整理（2026-10-28）：保留原报告结论直接引用的源码/契约行与命令退出码；并非本轮重新探测。
+完整旧证据（不可变提交）：https://raw.githubusercontent.com/lhmax2010/autofdo_bolt_agent/5d5b2cdfafc6822400130ec4f8125bfe2f633259/docs/probe/evidence/08_pmu_config.txt
+本轮截断前副本：temp/sampling-current/evidence-original/08_pmu_config.txt
 展示保留命令、真实退出码与 stderr；行尾空白已清理。
 $ nice -n 19 ionice -c3 make -C src/linux-rpi O=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kcfg-arm ARCH=arm tizen_bcm2711_defconfig
 exit=2
 STDOUT:
-make: Entering directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi'
-make[1]: Entering directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kcfg-arm'
+[目录进出提示省略]
+[目录进出提示省略]
   GEN     Makefile
   HOSTCC  scripts/basic/fixdep
   HOSTCC  scripts/kconfig/conf.o
   HOSTCC  scripts/kconfig/confdata.o
   HOSTCC  scripts/kconfig/expr.o
   LEX     scripts/kconfig/lexer.lex.c
-make[1]: Leaving directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kcfg-arm'
-make: Leaving directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi'
+[目录进出提示省略]
+[目录进出提示省略]
 
 STDERR:
 /bin/sh: 1: flex: not found
@@ -23,16 +26,16 @@ make: *** [Makefile:224: __sub-make] Error 2
 $ nice -n 19 ionice -c3 make -C src/linux-rpi O=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kcfg-arm64 ARCH=arm64 tizen_bcm2711_defconfig
 exit=2
 STDOUT:
-make: Entering directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi'
-make[1]: Entering directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kcfg-arm64'
+[目录进出提示省略]
+[目录进出提示省略]
   GEN     Makefile
   HOSTCC  scripts/basic/fixdep
   HOSTCC  scripts/kconfig/conf.o
   HOSTCC  scripts/kconfig/confdata.o
   HOSTCC  scripts/kconfig/expr.o
   LEX     scripts/kconfig/lexer.lex.c
-make[1]: Leaving directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kcfg-arm64'
-make: Leaving directory '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi'
+[目录进出提示省略]
+[目录进出提示省略]
 
 STDERR:
 /bin/sh: 1: flex: not found
@@ -66,13 +69,8 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 STDERR:
 
 CONFIG EXISTS temp/kcfg-arm/.config: False
-READ temp/kcfg-arm/scripts/kconfig/.conf.o.cmd
-savedcmd_scripts/kconfig/conf.o := gcc -Wp,-MMD,scripts/kconfig/.conf.o.d -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu11   -I /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi/scripts/include   -I ./scripts/kconfig -c -o scripts/kconfig/conf.o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi/scripts/kconfig/conf.c
-CONFIG EXISTS temp/kcfg-arm64/.config: False
-READ temp/kcfg-arm64/scripts/kconfig/.conf.o.cmd
-savedcmd_scripts/kconfig/conf.o := gcc -Wp,-MMD,scripts/kconfig/.conf.o.d -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu11   -I /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi/scripts/include   -I ./scripts/kconfig -c -o scripts/kconfig/conf.o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/linux-rpi/scripts/kconfig/conf.c
 
-READ src/linux-rpi/arch/arm/configs/tizen_bcm2711_defconfig (Python line-numbered excerpts)
+READ src/linux-rpi/arch/arm/configs/tizen_bcm2711_defconfig
 29: CONFIG_USER_NS=y
 30: CONFIG_SCHED_AUTOGROUP=y
 31: CONFIG_BLK_DEV_INITRD=y
@@ -81,79 +79,31 @@ READ src/linux-rpi/arch/arm/configs/tizen_bcm2711_defconfig (Python line-numbere
 34: CONFIG_ARCH_BCM=y
 35: CONFIG_ARCH_BCM2835=y
 36: CONFIG_ARM_LPAE=y
-527: CONFIG_PRINTK_TIME=y
-528: CONFIG_CONSOLE_LOGLEVEL_QUIET=3
-529: CONFIG_BOOT_PRINTK_DELAY=y
-530: CONFIG_DEBUG_INFO_DWARF4=y
-531: CONFIG_DEBUG_INFO_BTF=y
-532: CONFIG_KGDB=y
-533: CONFIG_KGDB_KDB=y
-534: CONFIG_KDB_KEYBOARD=y
+[...]
 
-READ src/linux-rpi/arch/arm64/configs/tizen_bcm2711_defconfig (Python line-numbered excerpts)
+READ src/linux-rpi/arch/arm64/configs/tizen_bcm2711_defconfig
 30: CONFIG_USER_NS=y
 31: CONFIG_SCHED_AUTOGROUP=y
 32: CONFIG_BLK_DEV_INITRD=y
 33: CONFIG_EXPERT=y
-34: CONFIG_PROFILING=y
-35: CONFIG_ARCH_BCM=y
-36: CONFIG_ARCH_BCM2835=y
-37: CONFIG_ARCH_BRCMSTB=y
-38: # CONFIG_CAVIUM_ERRATUM_22375 is not set
-537: CONFIG_PRINTK_TIME=y
-538: CONFIG_CONSOLE_LOGLEVEL_QUIET=3
-539: CONFIG_BOOT_PRINTK_DELAY=y
-540: CONFIG_DEBUG_INFO_DWARF4=y
-541: CONFIG_DEBUG_INFO_BTF=y
-542: CONFIG_KGDB=y
-543: CONFIG_KGDB_KDB=y
-544: CONFIG_KDB_KEYBOARD=y
+[...]
 
-READ src/linux-rpi/arch/arm/Kconfig (Python line-numbered excerpts)
-1137: config THUMB2_KERNEL
-1138: 	bool "Compile the kernel in Thumb-2 mode" if !CPU_THUMBONLY
-1139: 	depends on (CPU_V7 || CPU_V7M) && !CPU_V6 && !CPU_V6K
-1140: 	default y if CPU_THUMBONLY
-1141: 	select ARM_UNWIND
-1142: 	help
-1143: 	  By enabling this option, the kernel will be compiled in
-1144: 	  Thumb-2 mode.
-1145:
-1146: 	  If unsure, say N.
+READ src/linux-rpi/arch/arm/Kconfig
+[...]
 1275: config HW_PERF_EVENTS
 1276: 	def_bool y
 1277: 	depends on ARM_PMU
 
-READ src/linux-rpi/arch/arm64/Kconfig (Python line-numbered excerpts)
-1545: config HW_PERF_EVENTS
-1546: 	def_bool y
-1547: 	depends on ARM_PMU
-
-READ src/linux-rpi/init/Kconfig (Python line-numbered excerpts)
-1831: config KALLSYMS
-1832: 	bool "Load all symbols for debugging/ksymoops" if EXPERT
-1833: 	default y
-1834: 	help
-1835: 	  Say Y here to let the kernel print out symbolic crash information and
-1836: 	  symbolic stack backtraces. This increases the size of the kernel
-1837: 	  somewhat, as all symbols have to be loaded into the kernel image.
-1852: config KALLSYMS_ALL
-1853: 	bool "Include all symbols in kallsyms"
-1854: 	depends on DEBUG_KERNEL && KALLSYMS
-1855: 	help
-1856: 	  Normally kallsyms only contains the symbols of functions for nicer
-1857: 	  OOPS messages and backtraces (i.e., symbols from the text and inittext
-1858: 	  sections). This is sufficient for most cases. And only if you want to
-1859: 	  enable kernel live patching, or other less common use cases (e.g.,
+READ src/linux-rpi/init/Kconfig
+[...]
 1897: menu "Kernel Performance Events And Counters"
-1898:
 1899: config PERF_EVENTS
 1900: 	bool "Kernel performance events and counters"
 1901: 	default y if PROFILING
 1902: 	depends on HAVE_PERF_EVENTS
 1903: 	select IRQ_WORK
 
-READ src/linux-rpi/drivers/perf/Kconfig (Python line-numbered excerpts)
+READ src/linux-rpi/drivers/perf/Kconfig
 6: menu "Performance monitor support"
 7: 	depends on PERF_EVENTS
 58: config ARM_PMU
@@ -163,11 +113,9 @@ READ src/linux-rpi/drivers/perf/Kconfig (Python line-numbered excerpts)
 62: 	help
 63: 	  Say y if you want to use CPU performance monitors on ARM-based
 64: 	  systems.
-65:
 66: config ARM_V6_PMU
 67: 	depends on ARM_PMU && (CPU_V6 || CPU_V6K)
 68: 	def_bool y
-69:
 70: config ARM_V7_PMU
 71: 	depends on ARM_PMU && CPU_V7
 72: 	def_bool y
@@ -179,15 +127,9 @@ READ src/linux-rpi/drivers/perf/Kconfig (Python line-numbered excerpts)
 151: 	  Say y if you want to use the ARM performance monitor unit (PMU)
 152: 	  version 3. The PMUv3 is the CPU performance monitors on ARMv8
 153: 	  (aarch32 and aarch64) systems that implement the PMUv3
-218: config ARM_SPE_PMU
-219: 	tristate "Enable support for the ARMv8.2 Statistical Profiling Extension"
-220: 	depends on ARM64
-221: 	help
-222: 	  Enable perf support for the ARMv8.2 Statistical Profiling
-223: 	  Extension, which provides periodic sampling of operations in
-224: 	  the CPU pipeline and reports this via the perf AUX interface.
+[...]
 
-READ src/linux-rpi/drivers/hwtracing/coresight/Kconfig (Python line-numbered excerpts)
+READ src/linux-rpi/drivers/hwtracing/coresight/Kconfig
 5: menuconfig CORESIGHT
 6: 	tristate "CoreSight Tracing Support"
 7: 	depends on ARM || ARM64
@@ -196,78 +138,9 @@ READ src/linux-rpi/drivers/hwtracing/coresight/Kconfig (Python line-numbered exc
 10: 	select PERF_EVENTS
 11: 	select CONFIGFS_FS
 12: 	help
-22: if CORESIGHT
-23: config CORESIGHT_LINKS_AND_SINKS
-24: 	tristate "CoreSight Link and Sink drivers"
-87: config CORESIGHT_SOURCE_ETM3X
-88: 	tristate "CoreSight Embedded Trace Macrocell 3.x driver"
-89: 	depends on !ARM64
-90: 	select CORESIGHT_LINKS_AND_SINKS
-91: 	help
-92: 	  This driver provides support for processor ETM3.x and PTM1.x modules,
-93: 	  which allows tracing the instructions that a processor is executing
-94: 	  This is primarily useful for instruction level tracing.  Depending
-95: 	  the ETM version data tracing may also be available.
-96:
-97: 	  To compile this driver as a module, choose M here: the
-98: 	  module will be called coresight-etm3x.
-99:
-100: config CORESIGHT_SOURCE_ETM4X
-101: 	tristate "CoreSight ETMv4.x / ETE driver"
-102: 	depends on ARM64
-103: 	select CORESIGHT_LINKS_AND_SINKS
-104: 	select PID_IN_CONTEXTIDR
+[...]
 
-READ src/linux-rpi/arch/arm/Kconfig.debug (Python line-numbered excerpts)
-1831: config PID_IN_CONTEXTIDR
-1832: 	bool "Write the current PID to the CONTEXTIDR register"
-1833: 	depends on CPU_COPY_V6
-1834: 	help
-1835: 	  Enabling this option causes the kernel to write the current PID to
-1836: 	  the PROCID field of the CONTEXTIDR register, at the expense of some
-1837: 	  additional instructions during context switch. Say Y here only if you
-1838: 	  are planning to use hardware trace tools with this kernel.
-
-READ src/linux-rpi/arch/arm64/Kconfig.debug (Python line-numbered excerpts)
-1: # SPDX-License-Identifier: GPL-2.0-only
-2:
-3: config PID_IN_CONTEXTIDR
-4: 	bool "Write the current PID to the CONTEXTIDR register"
-5: 	help
-6: 	  Enabling this option causes the kernel to write the current PID to
-7: 	  the CONTEXTIDR register, at the expense of some additional
-8: 	  instructions during context switch. Say Y here only if you are
-9: 	  planning to use hardware trace tools with this kernel.
-
-READ src/linux-rpi/lib/Kconfig.debug (Python line-numbered excerpts)
-227: config DEBUG_INFO
-228: 	bool
-229: 	help
-230: 	  A kernel debug info option other than "None" has been selected
-231: 	  in the "Debug information" choice below, indicating that debug
-232: 	  information will be generated for build targets.
-245: 	  that will include debugging info resulting in a larger kernel image.
-246: 	  This adds debug symbols to the kernel and modules (gcc -g), and
-247: 	  is needed if you intend to use kernel crashdump or binary object
-248: 	  tools like crash, kgdb, LKCD, gdb, etc on the kernel.
-249:
-250: 	  Choose which version of DWARF debug info to emit. If unsure,
-251: 	  select "Toolchain default".
-270:
-271: config DEBUG_INFO_DWARF4
-272: 	bool "Generate DWARF Version 4 debuginfo"
-273: 	select DEBUG_INFO
-274: 	depends on !CC_IS_CLANG || AS_IS_LLVM || (AS_IS_GNU && AS_VERSION >= 23502)
-275: 	help
-276: 	  Generate DWARF v4 debug info. This requires gcc 4.5+, binutils 2.35.2
-277: 	  if using clang without clang's integrated assembler, and gdb 7.0+.
-278:
-279: 	  If you have consumers of DWARF debug info that are not ready for
-280: 	  newer revisions of DWARF, you may wish to choose this or have your
-281: 	  config select this.
-282:
-
-READ src/linux-rpi/arch/arm/boot/dts/broadcom/bcm2711.dtsi (Python line-numbered excerpts)
+READ src/linux-rpi/arch/arm/boot/dts/broadcom/bcm2711.dtsi
 435: 	pmu {
 436: 		compatible = "arm,cortex-a72-pmu";
 437: 		interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>,
@@ -277,7 +150,7 @@ READ src/linux-rpi/arch/arm/boot/dts/broadcom/bcm2711.dtsi (Python line-numbered
 441: 		interrupt-affinity = <&cpu0>, <&cpu1>, <&cpu2>, <&cpu3>;
 442: 	};
 
-READ src/linux-rpi/arch/arm/boot/dts/broadcom/bcm2711-rpi-4-b.dts (Python line-numbered excerpts)
+READ src/linux-rpi/arch/arm/boot/dts/broadcom/bcm2711-rpi-4-b.dts
 1: // SPDX-License-Identifier: GPL-2.0
 2: /dts-v1/;
 3: #define BCM2711
@@ -291,29 +164,11 @@ READ src/linux-rpi/arch/arm/boot/dts/broadcom/bcm2711-rpi-4-b.dts (Python line-n
 11: #undef i2c0
 12: #include "bcm270x.dtsi"
 
-READ src/linux-rpi/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts (Python line-numbered excerpts)
+READ src/linux-rpi/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts
 1: // SPDX-License-Identifier: GPL-2.0
 2: #include "arm/broadcom/bcm2711-rpi-4-b.dts"
 
-READ src/linux-rpi/drivers/of/base.c (Python line-numbered excerpts)
-452:  *  __of_device_is_available - check if a device is available for use
-453:  *
-454:  *  @device: Node to check for availability, with locks already held
-455:  *
-456:  *  Return: True if the status property is absent or set to "okay" or "ok",
-457:  *  false otherwise
-458:  */
-459: static bool __of_device_is_available(const struct device_node *device)
-460: {
-461: 	static const char * const ok[] = {"okay", "ok", NULL};
-462:
-463: 	if (!device)
-464: 		return false;
-465:
-466: 	return !__of_get_property(device, "status", NULL) ||
-467: 		__of_device_is_status(device, ok);
-
-READ src/linux-rpi/drivers/perf/Makefile (Python line-numbered excerpts)
+READ src/linux-rpi/drivers/perf/Makefile
 1: # SPDX-License-Identifier: GPL-2.0
 2: obj-$(CONFIG_ARM_CCI_PMU) += arm-cci.o
 3: obj-$(CONFIG_ARM_CCN) += arm-ccn.o
@@ -325,8 +180,8 @@ READ src/linux-rpi/drivers/perf/Makefile (Python line-numbered excerpts)
 9: obj-$(CONFIG_ARM_PMUV3) += arm_pmuv3.o
 10: obj-$(CONFIG_ARM_V6_PMU) += arm_v6_pmu.o
 
-READ src/linux-rpi/drivers/perf/arm_pmuv3.c (Python line-numbered excerpts)
-1375: static const struct of_device_id armv8_pmu_of_device_ids[] = {
+READ src/linux-rpi/drivers/perf/arm_pmuv3.c
+[...]
 1376: 	{.compatible = "arm,armv8-pmuv3",	.data = armv8_pmuv3_pmu_init},
 1377: 	{.compatible = "arm,cortex-a34-pmu",	.data = armv8_cortex_a34_pmu_init},
 1378: 	{.compatible = "arm,cortex-a35-pmu",	.data = armv8_cortex_a35_pmu_init},
@@ -336,34 +191,9 @@ READ src/linux-rpi/drivers/perf/arm_pmuv3.c (Python line-numbered excerpts)
 1382: 	{.compatible = "arm,cortex-a65-pmu",	.data = armv8_cortex_a65_pmu_init},
 1383: 	{.compatible = "arm,cortex-a72-pmu",	.data = armv8_cortex_a72_pmu_init},
 1384: 	{.compatible = "arm,cortex-a73-pmu",	.data = armv8_cortex_a73_pmu_init},
-1418: }
-1419:
-1420: static struct platform_driver armv8_pmu_driver = {
-1421: 	.driver		= {
-1422: 		.name	= ARMV8_PMU_PDEV_NAME,
-1423: 		.of_match_table = armv8_pmu_of_device_ids,
-1424: 		.suppress_bind_attrs = true,
-1425: 	},
-1426: 	.probe		= armv8_pmu_device_probe,
-1427: };
-1428:
-1429: static int __init armv8_pmu_driver_init(void)
-1430: {
-1431: 	int ret;
-1432:
-1433: 	if (acpi_disabled)
-1434: 		ret = platform_driver_register(&armv8_pmu_driver);
-1435: 	else
-1436: 		ret = arm_pmu_acpi_probe(armv8_pmuv3_pmu_init);
-1437:
-1438: 	if (!ret)
-1439: 		lockup_detector_retry_init();
-1440:
-1441: 	return ret;
-1442: }
-1443: device_initcall(armv8_pmu_driver_init)
+[...]
 
-READ src/linux-rpi/drivers/perf/arm_v7_pmu.c (Python line-numbered excerpts)
+READ src/linux-rpi/drivers/perf/arm_v7_pmu.c
 1947: static const struct of_device_id armv7_pmu_of_device_ids[] = {
 1948: 	{.compatible = "arm,cortex-a17-pmu",	.data = armv7_a17_pmu_init},
 1949: 	{.compatible = "arm,cortex-a15-pmu",	.data = armv7_a15_pmu_init},
@@ -377,28 +207,11 @@ READ src/linux-rpi/drivers/perf/arm_v7_pmu.c (Python line-numbered excerpts)
 1957: 	{.compatible = "qcom,scorpion-mp-pmu",	.data = scorpion_mp_pmu_init},
 1958: 	{},
 1959: };
-1960:
-1961: static int armv7_pmu_device_probe(struct platform_device *pdev)
-1962: {
-1963: 	return arm_pmu_device_probe(pdev, armv7_pmu_of_device_ids, NULL);
-1964: }
-1965:
-1966: static struct platform_driver armv7_pmu_driver = {
-1967: 	.driver		= {
-1968: 		.name	= "armv7-pmu",
-1969: 		.of_match_table = armv7_pmu_of_device_ids,
-1970: 		.suppress_bind_attrs = true,
-1971: 	},
-1972: 	.probe		= armv7_pmu_device_probe,
-1973: };
-1974:
-1975: builtin_platform_driver(armv7_pmu_driver);
+[...]
 
-READ src/linux-rpi/include/linux/perf/arm_pmu.h (Python line-numbered excerpts)
+READ src/linux-rpi/include/linux/perf/arm_pmu.h
 181: void armpmu_free_irq(int irq, int cpu);
-182:
 183: #define ARMV8_PMU_PDEV_NAME "armv8-pmu"
-184:
 $ rg -n 'ARM_PMUV3|CORESIGHT|ARM_SPE_PMU|ARM64_BRBE' src/linux-rpi/arch/arm/configs/tizen_bcm2711_defconfig src/linux-rpi/arch/arm64/configs/tizen_bcm2711_defconfig
 EXIT=1
 STDOUT:

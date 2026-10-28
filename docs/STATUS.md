@@ -23,14 +23,18 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与停止条件（2026-10-28；只读诊断完成）
+## 当前授权与完成状态（2026-10-28；PMUv3 补丁与软件采样）
 
-- 用户本轮仅授权板上 root 只读查询 RPM 安装状态/归属、/boot 挂载、运行内核和模块目录，以及本机旧 RPM 元数据比对。明确不改板上脚本、不重跑 02、不安装、不挂载、不重启。
-- **诊断完成，判定 A**：两个普通 kernel/modules 包的 rpm -q 与 --qf 都返回 is not installed、真实退出码 1；模块目录/modules.dep 无 RPM 归属。当前内核/模块未由 RPM 数据库管理，符合镜像直接写入形态；具体镜像制作工序未追溯。
-- /boot 未挂载（awk 退出 0、输出为空），未查启动文件归属/哈希、未提取旧 zImage。两个本机旧 RPM BUILDTIME 均为 0，不能用于确认 uname -v 的 2026-10-22 06:42:32 UTC 编译时间。
-- 只新增 docs/kernel/05_preflight_diag.md 并更新本 STATUS，同一 commit 推送。板上查询结束后已停止；**不提出或实施任何安装方案修改，等待指示，不自动恢复安装或采样。**
+- **已决定：PMUv3 通过补丁合入 Gerrit，由用户起 Quickbuild 出新镜像；原板上手工安装方案取消。** scripts/pmuv3_install/ 保留但不再使用；以下历史安装授权不再有效。不向 Gerrit 推送任何内容。
+- 用户批准最新 tizen 基线只改普通 defconfig 一行；最新分支已删除独立 RT defconfig，RT 由普通配置叠加 rt.config。已检查全部 RT/LSM 片段无 PMU 依赖冲突，补丁提交与独立 git am 验证完成；本轮没有 make/构建。
+- 本轮板上写入仅 /opt/afdo_agent/，另明确授权清理旧 /tmp/afdo_probe 和短暂 /tmp true noexec 负对照。工具/媒体校验、依赖解析、软件采样/硬件负对照已完成，work 清空，保留 tools/perf 与 lib/libLLVM.so.22.1。禁止 remount、重启、RPM 安装/卸载、/boot 改动；本轮均未执行。
+- 提交补丁、06 补丁报告、03 软件采样报告、证据与本状态文件至本项目 main；不推内核分支。后续新镜像构建/刷写由用户推进；不自动恢复手工安装。
 
-## 前轮安装授权与停止条件（历史；本轮不恢复）
+## 前轮只读诊断（历史，已完成）
+
+- 判定 A：普通 kernel/modules 两包均不在 RPM 数据库，模块目录无 RPM 归属。/boot 未挂载；未获取 zImage 哈希；旧 RPM BUILDTIME=0，无法与运行内核编译日期直接对应。证据见 [05](kernel/05_preflight_diag.md)。
+
+## 前轮安装授权与停止条件（历史；方案已取消，以下不得再执行）
 
 - 用户已审核 02 安装方案，授权 Agent 将主机命令封装为 7 个独立脚本，执行 01–04 到重启前；四个原板上脚本内容必须保持不变。任一步 END FAILED 就立即停止，保留输出，不修复、不重试、不回退。
 - **当前已触发停止：02_board_backup.sh 在已安装包预检返回远端 1，报 STOP: unexpected installed package。** 01 成功；02 尚未备份；03、04 未运行。不能通知用户“可以重启”，先等后续指示。
@@ -59,14 +63,13 @@
 
 # 项目状态
 
-更新：2026-10-28（Asia/Shanghai）。阶段：只读诊断完成，判定 A（普通内核与模块包均未注册于 RPM）；/boot 未挂载，未做镜像哈希比对，停止等待指示。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-28（Asia/Shanghai）。阶段：最新 tizen PMUv3 补丁完成、当前 RPi4 镜像软件采样完成；硬件 PMU 等用户 Quickbuild 新镜像后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 主机命令已封装为 01–07 独立脚本，带 END 标记和持久日志，原板上脚本逐字保持，静态语法检查全部通过。
-- 01 已执行成功；02 在包预检失败后停止。最新授权的只读诊断已完成，确认两个包均未安装于 RPM 数据库；03/04 仍未运行，不通知重启、不修改安装方案，等待指示。
-- 原安装、用户手动重启与联网、新内核验收、软件/硬件采样计划保留，但本轮只读诊断结束后停止；只有用户后续指令才能继续。
-- 当前不运行 05–07，不新增采样结果；最终 docs/kernel/04_pmuv3_boot_verify.md 与 docs/probe/03_rpi4_sampling.md 随实测交付，新的采样证据按用户 150KB 限额整理。
+- 已交付 patches/0001-ARM-configs-tizen_bcm2711-enable-ARM_PMUV3.patch，用户合入 Gerrit 并发起 Quickbuild；Agent 不推 Gerrit。本轮最新补丁未构建/启动，旧镜像基线构建验证仍单独保留。
+- 当前镜像的 perf /opt 部署、软件系统/媒体采样、DSO/符号统计及开销实测已完成；cycles 请求发生软件回退，不能当作硬件采样成功。
+- 后续等用户的新镜像与授权，再验收 PMU 绑定及真正硬件事件。原手工安装方案取消，不执行 scripts/pmuv3_install/，不通知用户按旧方案重启。
 
 以下为前序探测计划与持续纪律：
 
@@ -79,7 +82,20 @@
 
 ## 进度
 
-### 预检只读诊断（当前；已完成并停止）
+### PMUv3 补丁与当前镜像软件采样（当前，已完成）
+
+- fetch origin 后最新 tizen 为 42aeefac58edeb081aff440f0b60be71cbe49755；原 src/linux-rpi 工作树保持干净。相对镜像 21645b17，arch/arm/configs/ 仅删除独立 RT defconfig；普通配置未变。
+- 新 worktree 分支 afdo/pmuv3-gerrit 提交 2834afb2f85a6ef0905de18ed5b4a4ef7059635e；一文件一行新增，Kconfig 菜单顺序放在 GENERIC_PHY 与 ANDROID_BINDER_IPC 之间。rt/selinux/nosmack 片段均未覆盖五项 PMU 依赖；普通与 RT 共用并继承。独立干净 worktree git am 退出 0、结果树一致；无 make。详见 [06](kernel/06_pmuv3_patch.md)。
+- RPi4 Model B Rev 1.5、uid=0；/opt 实为 /dev/mmcblk0p3 的 rw ext4 独立挂载，可执行；/tmp true 负对照返回 126，已立即删除。旧 /tmp/afdo_probe 清理通过。
+- 已校验 perf 6.12.80/libLLVM 22.1.8 两端 SHA-256；LD_DEBUG/ldd 完全解析，perf 实际运行成功。全部数据、registry/cache 位于 work，结束已清空，只保留工具与库。RPM 数前后同为 1,252。
+- 软件系统采样 12,012 样本。cycles record 返回 0 但 evlist/report 确认是 type=1 的 cpu-clock 回退；当前镜像硬件 cycles 不支持，不能只看退出码。
+- 720p 三次基线 real 均值 12.3133s、差 2.04s；带采样 12.35s，观测开销 +0.30%，26,158 样本、无丢失。1080p 一次基线 23.29s，带采样 24.43s，+4.89%，保存 15,416、丢失 1,034（6.29%）。低次数/冷 registry/丢样限制详见 [03 软件采样](probe/03_rpi4_sampling.md)。
+- libavcodec 样本占比 87.4035%/87.7465%；有名称比例仅 0.5467%/0.8575%，且绝大多数为 PLT。libgstlibav 有名称样本全部 PLT，内部函数仍不能解析。[14 原始证据](probe/evidence/14_rpi4_sampling.txt)。
+- 全部 evidence/*.txt 合计 149,956 B，满足本轮 150KB；04/05/06/08 历史冗余输出已截断，文件头保留原不可变提交链接及 temp 完整副本路径，历史结论未变。
+- 历史 /tmp/sdb.log 本轮末尾仍为 400 B、mtime 2026-10-28 12:01:10.724948977 +0800；没有新增已知未授权边界例外。
+
+
+### 预检只读诊断（历史；已完成）
 
 - 板型 Raspberry Pi 4 Model B Rev 1.5，id -u=0；本轮未再次切换 root 模式。
 - 普通 kernel/modules 两包不带 --qf 和带指定 --qf 各查一次，均明确 is not installed，真实远端退出 1；不是已经发现版本/架构不一致或仅缺其中一个。
@@ -152,9 +168,15 @@
 
 ## 已闭合结论（附证据路径）
 
+- **已决定：PMUv3 通过补丁合入 Gerrit、由用户起 Quickbuild 出新镜像；原手工安装方案取消，scripts/pmuv3_install/ 保留、不再使用。** 最新分支普通/RT 共用配置，片段无冲突；补丁与 git am 已验证：[06](kernel/06_pmuv3_patch.md)。
+- /opt 部署可执行、所有 NEEDED 已解析；软件采样与 DSO 归属支持，硬件 cycles 请求实际回退，符号解析有限；work 已清空，RPM 数不变：[03 软件采样](probe/03_rpi4_sampling.md)、[14](probe/evidence/14_rpi4_sampling.txt)。
+
+以下历史结论按当时镜像/基线阅读；当前授权和实测以上文为准。
+
+
 - 预检诊断归类 A：两个普通内核/模块包都不在 RPM 数据库中，模块目录无 RPM 归属；/boot 未挂载。旧 RPM 的 BUILDTIME=0，无法验证 2026 年编译日期。证据：[05_preflight_diag.md](kernel/05_preflight_diag.md)。
 
-- 已决定：**32 位内核加 CONFIG_ARM_PMUV3=y，由本项目构建。** 构建/完整配置对比已通过替代证据验收（[03](kernel/03_pmuv3_build_result.md)）；当前安装预检失败，新运行内核/PMU 验收尚未执行。
+- 历史普通版内核构建/完整配置对比已通过替代证据验收（[03](kernel/03_pmuv3_build_result.md)）；该旧产物手工安装方案已取消，后续使用用户 Quickbuild 的新镜像。
 - 主机脚本封装完成；01 的 RPM 校验通过，02 在真实远端退出 1 后停止，未安装。证据与原输出路径：[02](kernel/02_pmuv3_install.md)。
 
 - 构建经三组替代证据验收通过；真实 GBS 退出码未知且 ALL-END 缺失，不能补写。普通配置与精确镜像基线仅 ARM_PMUV3 从 n→y；RT 未启用。clang/LLD 22.1.8 已由配置、保存命令与 ELF 核对。证据：[03](kernel/03_pmuv3_build_result.md)。
@@ -184,11 +206,11 @@
 
 ## 待人工裁决
 
-- 两个普通包均未注册于 RPM（A 类）已查清；本轮只读诊断结束后停止等待指示。不提出或实施安装方案修改，不运行 02/03，不通知重启。
+- 用户合入 Gerrit 并发起 Quickbuild 的时间与新镜像交付；Agent 不向 Gerrit 推送，最新补丁本轮尚未构建/启动。
 
 - **Agent 的板上部署不能依赖 /tmp（noexec），部署目录由能力探测模块按挂载参数自动选定。** 本轮手工授权 /opt/afdo_agent 已明确，后续按挂载参数验收，不再重复索要目录授权；通用自动选择规则仍待设计裁决。
 - 历史直接 make 配置仍受主机 flex/bison 缺失限制；GBS 构建已完成并在构建根解决依赖，没有安装主机工具。
-- 原运行镜像仓库 devel 配置已核验；新普通内核已构建，未部署或重启，运行板实测仍待用户完成。
+- 新镜像出来后的 PMU 驱动绑定及真实硬件 cycles 采样验收；不能以本轮 perf 软件回退或旧基线构建成功代替。
 - 是否提供保留 .comment/build-id 的原始构建库及明确 debug 仓库配置。
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
@@ -197,9 +219,9 @@
 - 原 GBS 真实退出码无法追溯；会话/进程组被执行器回收属于推断，没有死亡信号或生命周期审计证据。原 status 永久保留原貌。
 - 包装脚本修复未经运行验证，下次构建验证；setsid 不能抵抗 cgroup 清理、SIGKILL、断电、磁盘不可写。
 - quiet 原构建日志没有完整 clang 命令行，已用本次 `.cmd` 命令和 ELF 代证；不伪造日志行号。
-- 02 失败原因已查清：两个包均不在 RPM 数据库。/boot 未挂载导致板上 zImage 哈希未知，旧 RPM BUILDTIME=0 无法比对实际编译日期。备份、安装、重启、PMU 注册/绑定和软件/cycles 采样仍未执行，本轮不继续。
+- 旧手工安装预检失败原因已查清且方案取消；/boot 未挂载时的 zImage 哈希仍未知，BUILDTIME=0 不用于匹配日期。新镜像 PMU 绑定/硬件采样仍待验收；软件采样已闭合。
 
-- RPi4 perf 动态库解析、cpu-clock/cycles、分支负对照、媒体 DSO/符号统计与开销：待安装和用户重启后的验收；本轮已授权 /opt/afdo_agent 解决工具部署路径，尚未执行。ETM/SPE/BRBE 的历史未知结论保持，不能由 PMUv3 构建推断。
+- 1080p 本次丢样 6.29%，单次开销没有统计稳健性；strip 库内部符号仍缺失。分支栈负对照及 ETM/SPE/BRBE 未在本轮重测，不能由 PMUv3 补丁推断。
 - 各包最终 CC/CXX、%{optflags}、外部 LTO/链接器参数与已运行镜像对应关系：无 GBS root/构建日志，不能静态补全。
 - RPi5 实机：明确下一轮；本轮没有连接或探测。
 - CodingSystem 业务指南、最终契约与实际实现的后续进展。

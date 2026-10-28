@@ -1,0 +1,753 @@
+RPi4 当前镜像软件采样，2026-10-28。本轮真实输出；CRLF 统一，去掉行尾空白。
+完整命令、wrapper、原始 stdout/stderr/远端退出码：temp/sampling-current/*.json。
+展示头部截断在每项中标明；没有拉回 perf.data。采样统计来自完整 perf report --show-nr-samples --percent-limit 0 的全部行。
+ENV = export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache;
+P = nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid
+下列 COMMAND 中 $P 表示上述完整前缀；有 ENV 的项目在括号 shell 内先应用 ENV。STDERR 是独立捕获的板上 stderr；初始/清理命令则由 SDB 合并输出，标注 combined。退出码从紧接命令的 $? 取得，SDB 返回码单列。
+
+=== connect ===
+COMMAND: sdb connect 192.168.108.26
+HOST_EXIT=0
+STDOUT:
+192.168.108.26:26101 is already connected
+STDERR:
+(empty)
+
+=== model ===
+COMMAND: cat /proc/device-tree/model
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Raspberry Pi 4 Model B Rev 1.5[NUL]
+STDERR:
+(SDB combined stream)
+
+=== id ===
+COMMAND: id -u
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+0
+STDERR:
+(SDB combined stream)
+
+=== rpm_before ===
+COMMAND: n=$(nice -n 19 ionice -c3 rpm -qa); r=$?; [ "$r" -eq 0 ] || exit "$r"; printf "%s\n" "$n" | wc -l
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+1252
+STDERR:
+(SDB combined stream)
+
+=== cleanup_install ===
+COMMAND: rm -rf /tmp/afdo_probe && test ! -e /tmp/afdo_probe
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(SDB combined stream)
+
+=== opt_mount ===
+COMMAND: if command -v findmnt >/dev/null 2>&1; then findmnt -T /opt -n -o TARGET,SOURCE,FSTYPE,OPTIONS; else df /opt; cat /proc/mounts; fi
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+/opt /dev/mmcblk0p3 ext4 rw,relatime
+STDERR:
+(SDB combined stream)
+
+=== space ===
+COMMAND: df -h /opt /tmp
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mmcblk0p3        1.3G   47M  1.2G   4% /opt
+tmpfs                 1.9G  8.0K  1.9G   1% /tmp
+STDERR:
+(SDB combined stream)
+
+=== opt_existing ===
+COMMAND: ls -ld /opt/afdo_agent /opt/afdo_agent/tools /opt/afdo_agent/lib /opt/afdo_agent/work
+REMOTE_EXIT=2 SDB_EXIT=0
+STDOUT:
+ls: cannot access /opt/afdo_agent: No such file or directory
+ls: cannot access /opt/afdo_agent/tools: No such file or directory
+ls: cannot access /opt/afdo_agent/lib: No such file or directory
+ls: cannot access /opt/afdo_agent/work: No such file or directory
+STDERR:
+(SDB combined stream)
+
+=== create_dirs ===
+COMMAND: mkdir -p /opt/afdo_agent/tools /opt/afdo_agent/lib /opt/afdo_agent/work/home /opt/afdo_agent/work/tmp /opt/afdo_agent/work/cache /opt/afdo_agent/work/buildid && : > /opt/afdo_agent/work/perfconfig
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(SDB combined stream)
+
+=== exec_opt ===
+COMMAND: cp /usr/bin/true /opt/afdo_agent/work/true-control || exit $?; /opt/afdo_agent/work/true-control; rc=$?; rm -f /opt/afdo_agent/work/true-control; exit "$rc"
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== exec_tmp ===
+COMMAND: test ! -e /tmp/afdo_true_noexec_control || exit 98; cp /usr/bin/true /tmp/afdo_true_noexec_control || exit $?; /tmp/afdo_true_noexec_control; rc=$?; rm -f /tmp/afdo_true_noexec_control; exit "$rc"
+REMOTE_EXIT=126 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+/bin/sh: /tmp/afdo_true_noexec_control: Permission denied
+
+=== true_cleanup ===
+COMMAND: test ! -e /tmp/afdo_true_noexec_control && test ! -e /opt/afdo_agent/work/true-control
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== push_0 ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms/perf-extract/usr/bin/perf /opt/afdo_agent/tools/perf
+HOST_EXIT=0
+EXCERPT: 传输输出仅保留最后两行
+STDOUT:
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms/perf-extract/usr/bin/perf   4664KB/s (2992296 bytes in 0.626s)
+STDERR:
+(empty)
+
+=== remote_sha_0 ===
+COMMAND: nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf
+STDERR:
+(empty)
+
+=== push_1 ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1 /opt/afdo_agent/lib/libLLVM.so.22.1
+HOST_EXIT=0
+EXCERPT: 传输输出仅保留最后两行
+STDOUT:
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1   6675KB/s (33641876 bytes in 4.921s)
+STDERR:
+(empty)
+
+=== remote_sha_1 ===
+COMMAND: nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1
+STDERR:
+(empty)
+
+=== dependencies ===
+COMMAND: ENV; LD_DEBUG=libs $P --version
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: LD_DEBUG stderr 只保留 find-library/init/control/error 行；完整 11098 bytes 在 dependencies.json
+STDOUT:
+perf version 6.12.80
+STDERR:
+     28568:	find library=libgcc_s.so.1 [0]; searching
+     28568:	find library=libc.so.6 [0]; searching
+     28568:	calling init: /lib/ld-linux.so.3
+     28568:	calling init: /lib/libc.so.6
+     28568:	calling init: /lib/libgcc_s.so.1
+     28568:	initialize program: nice
+     28568:	transferring control: nice
+     28568:	find library=libc.so.6 [0]; searching
+     28568:	find library=libgcc_s.so.1 [0]; searching
+     28568:	calling init: /lib/ld-linux.so.3
+     28568:	calling init: /lib/libc.so.6
+     28568:	calling init: /lib/libgcc_s.so.1
+     28568:	initialize program: ionice
+     28568:	transferring control: ionice
+     28568:	find library=libunwind.so.8 [0]; searching
+     28568:	find library=libunwind-arm.so.8 [0]; searching
+     28568:	find library=libpthread.so.0 [0]; searching
+     28568:	find library=librt.so.1 [0]; searching
+     28568:	find library=libm.so.6 [0]; searching
+     28568:	find library=libdl.so.2 [0]; searching
+     28568:	find library=libz.so.1 [0]; searching
+     28568:	find library=libelf.so.1 [0]; searching
+     28568:	find library=libdw.so.1 [0]; searching
+     28568:	find library=libcrypto.so.3 [0]; searching
+     28568:	find library=libLLVM.so.22.1 [0]; searching
+     28568:	find library=libstdc++.so.6 [0]; searching
+     28568:	find library=liblzma.so.5 [0]; searching
+     28568:	find library=libgcc_s.so.1 [0]; searching
+     28568:	find library=libc.so.6 [0]; searching
+     28568:	find library=libbz2.so.1 [0]; searching
+     28568:	find library=libxml2.so.16 [0]; searching
+     28568:	calling init: /lib/ld-linux.so.3
+     28568:	calling init: /lib/libc.so.6
+     28568:	calling init: /lib/libm.so.6
+     28568:	calling init: /lib/libgcc_s.so.1
+     28568:	calling init: /lib/libxml2.so.16
+     28568:	calling init: /lib/libbz2.so.1
+     28568:	calling init: /lib/libpthread.so.0
+     28568:	calling init: /lib/liblzma.so.5
+     28568:	calling init: /lib/libstdc++.so.6
+     28568:	calling init: /lib/librt.so.1
+     28568:	calling init: /lib/libdl.so.2
+     28568:	calling init: /lib/libz.so.1
+     28568:	calling init: /opt/afdo_agent/lib/libLLVM.so.22.1
+     28568:	calling init: /lib/libcrypto.so.3
+     28568:	calling init: /lib/libelf.so.1
+     28568:	calling init: /lib/libdw.so.1
+     28568:	calling init: /lib/libunwind-arm.so.8
+     28568:	calling init: /lib/libunwind.so.8
+     28568:	initialize program: /opt/afdo_agent/tools/perf
+     28568:	transferring control: /opt/afdo_agent/tools/perf
+
+=== ldd ===
+COMMAND: ENV; ldd /opt/afdo_agent/tools/perf
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+	linux-vdso.so.1 (0xbefec000)
+	libunwind.so.8 => /lib/libunwind.so.8 (0xb6b80000)
+	libunwind-arm.so.8 => /lib/libunwind-arm.so.8 (0xb6b20000)
+	libpthread.so.0 => /lib/libpthread.so.0 (0xb6efe000)
+	librt.so.1 => /lib/librt.so.1 (0xb6bdc000)
+	libm.so.6 => /lib/libm.so.6 (0xb6ad2000)
+	libdl.so.2 => /lib/libdl.so.2 (0xb6bd8000)
+	libz.so.1 => /lib/libz.so.1 (0xb6a90000)
+	libelf.so.1 => /lib/libelf.so.1 (0xb6a50000)
+	libdw.so.1 => /lib/libdw.so.1 (0xb69b0000)
+	libcrypto.so.3 => /lib/libcrypto.so.3 (0xb66f0000)
+	libLLVM.so.22.1 => /opt/afdo_agent/lib/libLLVM.so.22.1 (0xb4650000)
+	libstdc++.so.6 => /lib/libstdc++.so.6 (0xb44b2000)
+	liblzma.so.5 => /lib/liblzma.so.5 (0xb4494000)
+	libgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb4479000)
+	libc.so.6 => /lib/libc.so.6 (0xb4318000)
+	/lib/ld-linux.so.3 (0xb6f05000)
+	libbz2.so.1 => /lib/libbz2.so.1 (0xb42d0000)
+	libxml2.so.16 => /lib/libxml2.so.16 (0xb41c0000)
+STDERR:
+(empty)
+
+=== version ===
+COMMAND: ENV; $P --version
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+perf version 6.12.80
+STDERR:
+(empty)
+
+=== list_sw ===
+COMMAND: ENV; $P list sw
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+  alignment-faults                                   [Software event]
+  bpf-output                                         [Software event]
+  cgroup-switches                                    [Software event]
+  context-switches OR cs                             [Software event]
+  cpu-clock                                          [Software event]
+  cpu-migrations OR migrations                       [Software event]
+  dummy                                              [Software event]
+  emulation-faults                                   [Software event]
+  major-faults                                       [Software event]
+  minor-faults                                       [Software event]
+  page-faults OR faults                              [Software event]
+  task-clock                                         [Software event]
+
+tool:
+  duration_time
+  user_time
+  system_time
+STDERR:
+(empty)
+
+=== list_hw ===
+COMMAND: ENV; $P list hw
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+=== current_kernel ===
+COMMAND: ENV; uname -r; uname -v; ls /sys/bus/event_source/devices/
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+6.12.80-arm-rpi4-v7l
+#1 SMP Thu Oct 22 06:42:32 UTC 2026
+breakpoint
+kprobe
+software
+tracepoint
+uprobe
+STDERR:
+(empty)
+
+=== time_tool ===
+COMMAND: ENV; command -v time; command -v gst-launch-1.0; command -v gst-inspect-1.0
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+time
+/usr/bin/gst-launch-1.0
+/usr/bin/gst-inspect-1.0
+STDERR:
+(empty)
+
+=== software_system ===
+COMMAND: ENV; $P record -e cpu-clock -F 999 -a -o /opt/afdo_agent/work/s1.data -- sleep 3
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 1.081 MB /opt/afdo_agent/work/s1.data (12012 samples) ]
+
+=== software_system_report ===
+COMMAND: ENV; $P report -i /opt/afdo_agent/work/s1.data --stdio --sort dso
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: stdout 取前 40 行；未对 perf 进程使用 head/SIGPIPE
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 12K of event 'cpu-clock'
+# Event count (approx.): 12024024012
+#
+# Overhead  Shared Object
+# ........  ........................
+#
+    99.58%  [kernel.kallsyms]
+     0.15%  ld-linux.so.3
+     0.14%  libc.so.6
+     0.06%  bash
+     0.04%  libsystemd-shared-244.so
+     0.02%  libglib-2.0.so.0.8000.5
+     0.01%  [kdbus]
+     0.01%  systemd
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+STDERR:
+(empty)
+
+=== cycles_negative ===
+COMMAND: ENV; $P record -e cycles -a -o /opt/afdo_agent/work/h1.data -- sleep 2
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+[ perf record: Woken up 5 times to write data ]
+[ perf record: Captured and wrote 2.134 MB /opt/afdo_agent/work/h1.data (32106 samples) ]
+
+=== cycles_evlist ===
+COMMAND: ENV; $P evlist -v -i /opt/afdo_agent/work/h1.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cpu-clock: type: 1 (software), size: 136, config: 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq }: 4000, sample_type: IP|TID|TIME|CPU|PERIOD|IDENTIFIER, read_format: ID|LOST, disabled: 1, inherit: 1, freq: 1, sample_id_all: 1, exclude_guest: 1
+dummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 1, sample_type: IP|TID|TIME|CPU|IDENTIFIER, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+STDERR:
+(empty)
+
+=== cycles_header ===
+COMMAND: ENV; $P report -i /opt/afdo_agent/work/h1.data --stdio --header-only
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+# ========
+# captured on    : Wed Oct 28 17:11:55 2026
+# header version : 1
+# data offset    : 472
+# data size      : 2237656
+# feat offset    : 2238128
+# hostname : localhost
+# os release : 6.12.80-arm-rpi4-v7l
+# perf version : 6.12.80
+# arch : armv7l
+# nrcpus online : 4
+# nrcpus avail : 4
+# cpudesc : ARMv7 Processor rev 3 (v7l)
+# total memory : 3976476 kB
+# cmdline : /opt/afdo_agent/tools/perf record -e cycles -a -o /opt/afdo_agent/work/h1.data -- sleep 2
+# event : name = cpu-clock, , id = { 70, 71, 72, 73 }, type = 1 (software), size = 136, config = 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq } = 4000, sample_type = IP|TID|TIME|CPU|PERIOD|IDENTIFIER, read_format = ID|LOST, disabled = 1, inherit = 1, freq = 1, sample_id_all = 1, exclude_guest = 1
+# event : name = dummy:u, , id = { 74, 75, 76, 77 }, type = 1 (software), size = 136, config = 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq } = 1, sample_type = IP|TID|TIME|CPU|IDENTIFIER, read_format = ID|LOST, inherit = 1, exclude_kernel = 1, exclude_hv = 1, mmap = 1, comm = 1, task = 1, sample_id_all = 1, exclude_guest = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1
+# CPU_TOPOLOGY info available, use -I to display
+# pmu mappings: cpu = 4, breakpoint = 5, kprobe = 8, software = 1, tracepoint = 2, uprobe = 9
+# CACHE info available, use -I to display
+# time of first sample : 2427.848212
+# time of last sample : 2429.854876
+# sample duration :   2006.664 ms
+# cpu pmu capabilities: not available
+# missing features: (null) CPUID NUMA_TOPOLOGY BRANCH_STACK GROUP_DESC AUXTRACE STAT MEM_TOPOLOGY CLOCKID DIR_FORMAT COMPRESSED CLOCK_DATA HYBRID_TOPOLOGY
+# ========
+#
+STDERR:
+(empty)
+
+=== media_push_720p ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4 /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+HOST_EXIT=0
+EXCERPT: 传输输出仅保留最后两行
+STDOUT:
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4   6547KB/s (30023879 bytes in 4.477s)
+STDERR:
+(empty)
+
+=== media_sha_720p ===
+COMMAND: ENV; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4  /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+STDERR:
+(empty)
+
+=== baseline_720p_1 ===
+COMMAND: ENV; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: GStreamer stdout 只保留 EOS/结束/释放行；stderr 全文
+STDOUT:
+Got EOS from element "pipeline0".
+Execution ended after 0:00:11.701435160
+Setting pipeline to NULL ...
+Freeing pipeline ...
+STDERR:
+(gst-plugin-scanner:32339): GStreamer-WARNING **: 17:15:57.502: Failed to load plugin '/usr/lib/gstreamer-1.0/libgstcairo.so': libGLESv2.so.2: cannot open shared object file: No such file or directory
+real 13.47
+user 29.81
+sys 1.24
+
+=== baseline_720p_2 ===
+COMMAND: ENV; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: GStreamer stdout 只保留 EOS/结束/释放行；stderr 全文
+STDOUT:
+Got EOS from element "pipeline0".
+Execution ended after 0:00:11.271061141
+Setting pipeline to NULL ...
+Freeing pipeline ...
+STDERR:
+real 11.43
+user 29.36
+sys 0.65
+
+=== baseline_720p_3 ===
+COMMAND: ENV; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: GStreamer stdout 只保留 EOS/结束/释放行；stderr 全文
+STDOUT:
+Got EOS from element "pipeline0".
+Execution ended after 0:00:11.889255660
+Setting pipeline to NULL ...
+Freeing pipeline ...
+STDERR:
+real 12.04
+user 29.57
+sys 0.65
+
+=== sample_720p ===
+COMMAND: ENV; time -p $P record -e cpu-clock -F 999 -o /opt/afdo_agent/work/s2.data -- gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: GStreamer stdout 只保留 EOS/结束/释放行；stderr 全文
+STDOUT:
+Got EOS from element "pipeline0".
+Execution ended after 0:00:11.222496141
+Setting pipeline to NULL ...
+Freeing pipeline ...
+STDERR:
+[ perf record: Woken up 4 times to write data ]
+[ perf record: Captured and wrote 1.004 MB /opt/afdo_agent/work/s2.data (26158 samples) ]
+real 12.35
+user 30.01
+sys 0.96
+
+=== 720p_dso ===
+COMMAND: ENV; $P report --stdio --sort dso -i /opt/afdo_agent/work/s2.data
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: stdout 取前 30 行；未对 perf 进程使用 head/SIGPIPE
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 26K of event 'cpu-clock'
+# Event count (approx.): 26184184158
+#
+# Overhead  Shared Object
+# ........  ..................................
+#
+    87.40%  libavcodec.so.62.11.100
+     7.63%  libc.so.6
+     3.42%  [kernel.kallsyms]
+     0.32%  libavutil.so.60.8.100
+     0.32%  libgstreamer-1.0.so.0.2411.0
+     0.18%  libglib-2.0.so.0.8000.5
+     0.15%  libgstlibav.so
+     0.14%  libgstvideo-1.0.so.0.2411.0
+     0.11%  libgstbase-1.0.so.0.2411.0
+     0.07%  libgobject-2.0.so.0.8000.5
+     0.07%  libgstvideoparsersbad.so
+     0.06%  libgstcodecparsers-1.0.so.0.2411.0
+     0.06%  libgstisomp4.so
+     0.04%  ld-linux.so.3
+     0.03%  libgstcoreelements.so
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+STDERR:
+(empty)
+
+=== 720p_symbols ===
+COMMAND: ENV; $P report --stdio --sort dso,sym -i /opt/afdo_agent/work/s2.data
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: stdout 取前 40 行；未对 perf 进程使用 head/SIGPIPE
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 26K of event 'cpu-clock'
+# Event count (approx.): 26184184158
+#
+# Overhead  Shared Object                       Symbol
+# ........  ..................................  .................................................
+#
+     6.39%  libc.so.6                           [.] memcpy
+     3.85%  libavcodec.so.62.11.100             [.] 0x000de2b6
+     1.09%  libavcodec.so.62.11.100             [.] 0x00270596
+     0.82%  libavcodec.so.62.11.100             [.] 0x00101464
+     0.69%  [kernel.kallsyms]                   [k] _raw_spin_unlock_irqrestore
+     0.67%  libavcodec.so.62.11.100             [.] 0x000c06fe
+     0.64%  libavcodec.so.62.11.100             [.] 0x000c0702
+     0.64%  libavcodec.so.62.11.100             [.] 0x001049f2
+     0.64%  libavcodec.so.62.11.100             [.] 0x00101486
+     0.52%  libc.so.6                           [.] memset
+     0.50%  libavcodec.so.62.11.100             [.] 0x000d4d48
+     0.48%  libavcodec.so.62.11.100             [.] 0x00101bea
+     0.41%  libavcodec.so.62.11.100             [.] 0x00104886
+     0.40%  libavcodec.so.62.11.100             [.] 0x000c086c
+     0.39%  libavcodec.so.62.11.100             [.] 0x000c3b30
+     0.39%  libavcodec.so.62.11.100             [.] 0x0010552a
+     0.39%  libavcodec.so.62.11.100             [.] 0x000c3c74
+     0.36%  libavcodec.so.62.11.100             [.] 0x000d4d4c
+     0.36%  libavcodec.so.62.11.100             [.] 0x001049d2
+     0.36%  libavcodec.so.62.11.100             [.] avpriv_request_sample@plt
+     0.35%  libavcodec.so.62.11.100             [.] 0x000d4d50
+     0.33%  libavcodec.so.62.11.100             [.] 0x00132228
+     0.33%  libavcodec.so.62.11.100             [.] 0x00270590
+     0.32%  libavcodec.so.62.11.100             [.] 0x00101e80
+     0.32%  libavcodec.so.62.11.100             [.] 0x001049ba
+     0.29%  libavcodec.so.62.11.100             [.] 0x00104a40
+     0.29%  [kernel.kallsyms]                   [k] finish_task_switch
+     0.29%  libavcodec.so.62.11.100             [.] 0x000c1dee
+     0.29%  libavcodec.so.62.11.100             [.] 0x001049c4
+STDERR:
+(empty)
+
+=== 720p_evlist ===
+COMMAND: ENV; $P evlist -v -i /opt/afdo_agent/work/s2.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cpu-clock: type: 1 (software), size: 136, config: 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq }: 999, sample_type: IP|TID|TIME|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, freq: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+STDERR:
+(empty)
+
+=== media_push_1080p ===
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_1080p_h264_60s.mp4 /opt/afdo_agent/work/bbb_1080p_h264_60s.mp4
+HOST_EXIT=0
+EXCERPT: 传输输出仅保留最后两行
+STDOUT:
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_1080p_h264_60s.mp4   6816KB/s (60382636 bytes in 8.650s)
+STDERR:
+(empty)
+
+=== media_sha_1080p ===
+COMMAND: ENV; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/bbb_1080p_h264_60s.mp4
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+31f72f11eb0566e0265358a14294e5dbddf13fce4ce1507d8872b04c2596a6da  /opt/afdo_agent/work/bbb_1080p_h264_60s.mp4
+STDERR:
+(empty)
+
+=== baseline_1080p_1 ===
+COMMAND: ENV; time -p nice -n 19 ionice -c3 gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_1080p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: GStreamer stdout 只保留 EOS/结束/释放行；stderr 全文
+STDOUT:
+Got EOS from element "pipeline0".
+Execution ended after 0:00:23.055129079
+Setting pipeline to NULL ...
+Freeing pipeline ...
+STDERR:
+real 23.29
+user 64.60
+sys 1.23
+
+=== sample_1080p ===
+COMMAND: ENV; time -p $P record -e cpu-clock -F 999 -o /opt/afdo_agent/work/s3.data -- gst-launch-1.0 filesrc location=/opt/afdo_agent/work/bbb_1080p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: GStreamer stdout 只保留 EOS/结束/释放行；stderr 全文
+STDOUT:
+Got EOS from element "pipeline0".
+Execution ended after 0:00:23.567775634
+Setting pipeline to NULL ...
+Freeing pipeline ...
+STDERR:
+[ perf record: Woken up 1 times to write data ]
+Warning:
+Processed 16450 samples and lost 6.29%!
+
+[ perf record: Captured and wrote 0.595 MB /opt/afdo_agent/work/s3.data (15416 samples) ]
+real 24.43
+user 66.92
+sys 1.47
+
+=== 1080p_dso ===
+COMMAND: ENV; $P report --stdio --sort dso -i /opt/afdo_agent/work/s3.data
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: stdout 取前 30 行；未对 perf 进程使用 head/SIGPIPE
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 1034
+#
+# Samples: 15K of event 'cpu-clock'
+# Event count (approx.): 15431431416
+#
+# Overhead  Shared Object
+# ........  ..................................
+#
+    87.75%  libavcodec.so.62.11.100
+     7.65%  libc.so.6
+     3.59%  [kernel.kallsyms]
+     0.19%  libgstreamer-1.0.so.0.2411.0
+     0.18%  libavutil.so.60.8.100
+     0.14%  libglib-2.0.so.0.8000.5
+     0.13%  libgstbase-1.0.so.0.2411.0
+     0.10%  libgstvideo-1.0.so.0.2411.0
+     0.09%  libgstlibav.so
+     0.05%  ld-linux.so.3
+     0.05%  libgobject-2.0.so.0.8000.5
+     0.05%  libgstisomp4.so
+     0.03%  libgstcodecparsers-1.0.so.0.2411.0
+     0.01%  libgstvideoparsersbad.so
+     0.01%  libgstcoreelements.so
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+STDERR:
+Warning:
+Processed 16450 samples and lost 6.29%!
+
+=== 1080p_symbols ===
+COMMAND: ENV; $P report --stdio --sort dso,sym -i /opt/afdo_agent/work/s3.data
+REMOTE_EXIT=0 SDB_EXIT=0
+EXCERPT: stdout 取前 40 行；未对 perf 进程使用 head/SIGPIPE
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 1034
+#
+# Samples: 15K of event 'cpu-clock'
+# Event count (approx.): 15431431416
+#
+# Overhead  Shared Object                       Symbol
+# ........  ..................................  ............................................
+#
+     6.48%  libc.so.6                           [.] memcpy
+     5.55%  libavcodec.so.62.11.100             [.] 0x000de2b6
+     1.37%  libavcodec.so.62.11.100             [.] 0x00270596
+     0.82%  libavcodec.so.62.11.100             [.] 0x000c0702
+     0.78%  libavcodec.so.62.11.100             [.] 0x00101464
+     0.77%  libavcodec.so.62.11.100             [.] 0x00101486
+     0.73%  libavcodec.so.62.11.100             [.] 0x001049f2
+     0.67%  [kernel.kallsyms]                   [k] _raw_spin_unlock_irqrestore
+     0.67%  libavcodec.so.62.11.100             [.] avpriv_request_sample@plt
+     0.65%  libc.so.6                           [.] memset
+     0.64%  libavcodec.so.62.11.100             [.] 0x000c06fe
+     0.59%  libavcodec.so.62.11.100             [.] 0x00101bea
+     0.58%  libavcodec.so.62.11.100             [.] 0x00104886
+     0.54%  libavcodec.so.62.11.100             [.] 0x000d4d48
+     0.44%  libavcodec.so.62.11.100             [.] 0x0010552a
+     0.43%  libavcodec.so.62.11.100             [.] 0x000c086c
+     0.42%  libavcodec.so.62.11.100             [.] 0x00270590
+     0.41%  libavcodec.so.62.11.100             [.] 0x000d4d4c
+     0.40%  libavcodec.so.62.11.100             [.] 0x001049d2
+     0.39%  libavcodec.so.62.11.100             [.] 0x00101e80
+     0.38%  libavcodec.so.62.11.100             [.] 0x0011c78e
+     0.36%  libavcodec.so.62.11.100             [.] 0x00101090
+     0.36%  libavcodec.so.62.11.100             [.] 0x00101da2
+     0.36%  libavcodec.so.62.11.100             [.] 0x00132228
+     0.36%  libavcodec.so.62.11.100             [.] 0x000c0870
+     0.36%  libavcodec.so.62.11.100             [.] 0x00104a40
+     0.36%  libavcodec.so.62.11.100             [.] 0x0010550a
+     0.36%  libavcodec.so.62.11.100             [.] 0x0011e41c
+     0.35%  libavcodec.so.62.11.100             [.] 0x00101cc6
+STDERR:
+Warning:
+Processed 16450 samples and lost 6.29%!
+
+=== 1080p_evlist ===
+COMMAND: ENV; $P evlist -v -i /opt/afdo_agent/work/s3.data
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+cpu-clock: type: 1 (software), size: 136, config: 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq }: 999, sample_type: IP|TID|TIME|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, freq: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+STDERR:
+(empty)
+
+=== cleanup_work ===
+COMMAND: nice -n 19 ionice -c3 find /opt/afdo_agent/work -mindepth 1 -delete && test -z "$(find /opt/afdo_agent/work -mindepth 1 -print)" && ls -la /opt/afdo_agent/work
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+total 8
+drwxrwxrwx 2 root root 4096 Oct 28 17:21 .
+drwxrwxrwx 5 root root 4096 Oct 28 17:10 ..
+STDERR:
+(SDB combined stream)
+
+=== retained ===
+COMMAND: ls -l /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1 && nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+-rwxr-xrwx 1 root root 33641876 Oct 21 05:11 /opt/afdo_agent/lib/libLLVM.so.22.1
+-rwxr-xrwx 1 root root  2992296 Oct 22 16:03 /opt/afdo_agent/tools/perf
+41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf
+49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1
+STDERR:
+(SDB combined stream)
+
+=== rpm_after ===
+COMMAND: n=$(nice -n 19 ionice -c3 rpm -qa); r=$?; [ "$r" -eq 0 ] || exit "$r"; printf "%s\n" "$n" | wc -l
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+1252
+STDERR:
+(SDB combined stream)
+
+=== final_tmp_clean ===
+COMMAND: test ! -e /tmp/afdo_probe && test ! -e /tmp/afdo_true_noexec_control
+REMOTE_EXIT=0 SDB_EXIT=0
+STDOUT:
+(empty)
+STDERR:
+(SDB combined stream)
+
+=== symbol-count methodology ===
+For each recording, the first diagnostic `perf script -F dso,sym` returned 0 but only emitted blank lines (26158 / 15416); it was not used to infer symbol resolution.
+Instead ran ENV; $P report --stdio --sort dso,sym --show-nr-samples --percent-limit 0 --field-separator ';' -i /opt/afdo_agent/work/s2.data (and s3.data).
+Both REMOTE_EXIT=0. Sum of all Samples columns exactly equals recorded retained samples (26158 / 15416).
+Each row is split at ';'. Pure hex / [unknown] symbols are unresolved. Other names count as named, and @plt is separated from non-PLT names.
+Full raw tables: temp/sampling-current/{720p,1080p}_counted_symbols.json. Derived counts below; not presented as raw perf output.
+
+720p
+{"total":26158,"baseline":[{"real":13.47,"user":29.81,"sys":1.24},{"real":11.43,"user":29.36,"sys":0.65},{"real":12.04,"user":29.57,"sys":0.65}],"mean_real":12.313333333333333,"range_real":2.040000000000001,"sampling":{"real":12.35,"user":30.01,"sys":0.96},"overhead_percent":0.297780184082308,"top_dso":[{"dso":"libavcodec.so.62.11.100","samples":22863,"share_percent":87.40347121339552},{"dso":"libc.so.6","samples":1996,"share_percent":7.630552794556158},{"dso":"[kernel.kallsyms]","samples":894,"share_percent":3.4176924841348724},{"dso":"libavutil.so.60.8.100","samples":85,"share_percent":0.32494839054973623},{"dso":"libgstreamer-1.0.so.0.2411.0","samples":83,"share_percent":0.31730254606621305},{"dso":"libglib-2.0.so.0.8000.5","samples":47,"share_percent":0.1796773453627953},{"dso":"libgstlibav.so","samples":38,"share_percent":0.1452710451869409},{"dso":"libgstvideo-1.0.so.0.2411.0","samples":36,"share_percent":0.1376252007034177},{"dso":"libgstbase-1.0.so.0.2411.0","samples":28,"share_percent":0.10704182276932486},{"dso":"libgobject-2.0.so.0.8000.5","samples":19,"share_percent":0.07263552259347045}],"symbols":{"libavcodec.so.62.11.100":{"samples":22863,"resolved":125,"unknown":22738,"resolved_percent":0.5467348991820846,"plt_samples":117,"named_nonplt_samples":8,"named_symbols":{"avpriv_request_sample@plt":93,"memcpy@plt":12,"av_channel_layout_uninit@plt":8,"av_packet_free":3,"av_bsf_receive_packet":2,"av_packet_unref":2,"av_buffer_pool_get@plt":1,"av_codec_is_decoder":1,"av_memdup@plt":1,"av_opt_free@plt":1,"av_sample_fmt_is_planar@plt":1}},"libgstlibav.so":{"samples":38,"resolved":11,"unknown":27,"resolved_percent":28.947368421052634,"plt_samples":11,"named_nonplt_samples":0,"named_symbols":{"gst_buffer_pool_get_config@plt":3,"gst_pad_push_event@plt":2,"av_opt_set_int@plt":1,"av_packet_new_side_data@plt":1,"g_mutex_clear@plt":1,"gst_buffer_get_size@plt":1,"gst_caps_get_features@plt":1,"gst_video_decoder_set_needs_format@plt":1}}},"lost":0}
+
+1080p
+{"total":15416,"baseline":[{"real":23.29,"user":64.6,"sys":1.23}],"mean_real":23.29,"range_real":0.0,"sampling":{"real":24.43,"user":66.92,"sys":1.47},"overhead_percent":4.894804637183348,"top_dso":[{"dso":"libavcodec.so.62.11.100","samples":13527,"share_percent":87.74649714582252},{"dso":"libc.so.6","samples":1179,"share_percent":7.647898287493514},{"dso":"[kernel.kallsyms]","samples":553,"share_percent":3.587182148417229},{"dso":"libgstreamer-1.0.so.0.2411.0","samples":29,"share_percent":0.1881162428645563},{"dso":"libavutil.so.60.8.100","samples":27,"share_percent":0.17514270887389724},{"dso":"libglib-2.0.so.0.8000.5","samples":22,"share_percent":0.1427088738972496},{"dso":"libgstbase-1.0.so.0.2411.0","samples":20,"share_percent":0.12973533990659056},{"dso":"libgstvideo-1.0.so.0.2411.0","samples":15,"share_percent":0.09730150492994291},{"dso":"libgstlibav.so","samples":14,"share_percent":0.0908147379346134},{"dso":"ld-linux.so.3","samples":8,"share_percent":0.05189413596263622}],"symbols":{"libavcodec.so.62.11.100":{"samples":13527,"resolved":116,"unknown":13411,"resolved_percent":0.8575441709174243,"plt_samples":115,"named_nonplt_samples":1,"named_symbols":{"avpriv_request_sample@plt":103,"memcpy@plt":5,"av_channel_layout_uninit@plt":2,"av_channel_layout_describe@plt":1,"av_memdup@plt":1,"av_packet_unref":1,"av_refstruct_unref@plt":1,"av_stereo3d_alloc@plt":1,"frexp@plt":1}},"libgstlibav.so":{"samples":14,"resolved":5,"unknown":9,"resolved_percent":35.714285714285715,"plt_samples":5,"named_nonplt_samples":0,"named_symbols":{"g_string_free_and_steal@plt":1,"gst_buffer_pool_get_config@plt":1,"gst_event_new_eos@plt":1,"gst_event_parse_seek@plt":1,"gst_query_set_nth_allocation_pool@plt":1}}},"lost":1034}
