@@ -23,12 +23,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与停止条件（2026-10-28）
+## 当前授权与交付（2026-10-28；最新指令优先）
 
-- 用户已允许 Agent 原样启动构建脚本并监测；不修改脚本、配置或 spec，不操作开发板。安装和重启仍由用户执行。
-- 原定以 ALL-END OK 为第二段入口；失败只允许明确的临时网络问题原样重跑一次，其他失败停止；8 小时无标记停止监测而不结束进程。
-- 最新只读例外允许检查 PID 98602/98603、子孙链与 scratch/.build.log。用户明确要求：若进程已退出而没有 ALL-END，记录证据后停止等待，不补写标记。
-- **当前已触发该停止条件。** 常规监测已停止，未开始产物/clang/普通版及 RT 配置核验，没有生成安装步骤；等待下一条指示。
+- 用户已允许用三组替代证据验收缺少 ALL-END 的构建：depanneur success/无 fail、HTML 成功行、15 个二进制 RPM + 1 个 SRPM 与日志/指定时间窗口/哈希逐项核对。三项全部满足，构建验收通过；GBS 真实退出码仍未知，原 status 没有改写。
+- 用户指定将异常按包装收尾进程提前回收处理。根因机制只能推断；本轮仅静态修改构建脚本，完整 worker setsid 脱离会话、继承锁，GBS setsid --wait；不运行、不重新构建、不改 GBS 配置/spec。
+- 第二段离线产物核验与安装/回退文档已完成；**安装、重启与板上验收由用户执行，Agent 不连接开发板。** 下一步等待用户执行结果，不能自动运行安装命令。
+- 本次提交包含 scripts/build_pmuv3_kernel.sh、docs/kernel/01、02、03 与本 STATUS；temp/、src/ 不提交。修复未经运行验证，下次获准构建时验证。
 
 ## 历史授权：PMUv3 内核构建准备（第一段）
 
@@ -45,13 +45,13 @@
 
 # 项目状态
 
-更新：2026-10-28（Asia/Shanghai）。阶段：日志报告构建成功，但任务进程已退出且 ALL-END 缺失；按用户指令停止等待。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-28（Asia/Shanghai）。阶段：替代证据构建验收通过；普通版配置/clang 已核验，安装/回退说明已交付；等待用户执行板上操作。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，补充轮在其上增加独立证据。** 本轮只探测 RPi4，RPi5 下一轮处理。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
 - 第一段准备完成；后续授权的原样启动和监测已执行，未修改脚本/配置/spec，未重跑。
-- 当前因进程退出而 ALL-END 缺失停止，等待用户指示；不自动重新启动或补写结束标记。
-- 第二段：先确认 ALL-END OK，再核对 RPM 中配置和基线差异，编写 docs/kernel/02_pmuv3_install.md；此文件尚未生成。
+- 本轮三组替代证据验收完成，收尾脚本只静态修复，不自动重新启动或补写结束标记。
+- 第二段已完成普通/RT RPM 配置、基线差异、clang/ELF 和安装/回退文档；后续只等用户板上验收反馈。
 
 以下为前序探测计划与持续纪律：
 
@@ -64,23 +64,25 @@
 
 ## 进度
 
-### 构建执行与异常停止（当前）
+### 构建验收、静态修复与第二段（当前）
 
-- 2026-10-28 11:56:53+08:00 原样启动脚本，前台退出 0，worker=98602、GBS=98603。
-- 监测看到源码导出、固定快照依赖下载、内核/模块编译及普通/RT 打包推进。没有观察到 sudo 环境限制，无网络重跑。
-- 外层日志记录 spec 于 12:30:30+08:00 完成，并给出 Total succeeded built packages: (1)；但 status 持续 PHASE BUILDING / GBS_EXIT RUNNING，没有 ALL-END。真实 GBS 退出码及包装任务结束时间未知。
-- 13:12:59 / 13:14:08 的授权只读检查：ps -p 两个 PID 无条目（exit=1），递归子孙链无匹配，同一 ps 快照中任务路径匹配也为空。scratch.armv7l.0/.build.log 不存在（非权限拒绝），未提权。
-- 按最新停止规则结束监测；没有结束进程、补写 status、重跑或进入第二段。原始记录 temp/pmuv3-monitor/stop_evidence.txt；报告 [03_pmuv3_build_result.md](kernel/03_pmuv3_build_result.md) 含 status 全文与外层日志最后 50 行。
-- 01 文档已撤回“未直接修改 RT 输入即代表 RT 最终未启用 PMUv3”的推断；普通/RT 实际配置、clang 和 ELF .comment 尚未核验。安装文档未生成。
+- 构建 2026-10-28 11:56:53+08:00 启动，日志完成于 12:30:30+08:00；无重跑。worker=98602/GBS=98603 已退出，status 留在 BUILDING，真实退出码没有取得。
+- 本轮按最新授权验收：success/rpi4-linux-kernel-6.12.80-0/log.txt 存在、fail 空；index.html 为 Succeeded；15 个二进制 RPM + 1 个 SRPM 全部实存、SHA-256 已记录、与 Wrote 行一一匹配，mtime 均在 11:56:53–12:31 内。完整 status、外层末尾 50 行、success 末尾 30 行及所有产物表见 [03](kernel/03_pmuv3_build_result.md)。
+- 普通 devel `.config:5957` ARM_PMUV3=y，`:500` HW_PERF_EVENTS=y。从同镜像快照原 devel 提取基线配置，两边 5,649 项只有 ARM_PMUV3 从 n→y；没有其他依赖变化。配置核验不等于运行板上 PMU 已绑定。
+- RT devel `.config:5996` ARM_PMUV3 未启用，`:505` HW_PERF_EVENTS=y。spec/实际日志使用独立 tizen_bcm2711_rt_defconfig；01 文档已更正为基于 RPM 的实际结论。
+- 日志 LLVM=1、Kbuild `.main.o.cmd` 实际 clang 编译命令、GBS root 平台 readelf 读取 vmlinux .comment（通过 qemu-arm-static，无 sudo）一致确认 clang/LLD 22.1.8。quiet 构建日志没有完整 clang 命令，不能提供其日志行号；替代命令证据及限制已写 03。
+- 构建脚本现将整个 worker 脱离调用会话，传递 fd 9 锁，setsid --wait 保留真实退出码；RPM 元数据扫描实读 16 个输出，无权限错误。仅 bash -n，通过；未实际运行修复。具体回收机制仍为推断。
+- [02 安装/回退文档](kernel/02_pmuv3_install.md) 只安装普通 kernel+modules，备份整 boot 和模块并拉回主机验哈希；核对普通包无脚本、config.txt 直接覆盖、RT 脚本会切镜像；包含普通启动链哈希检查、在线与 SD 卡离线回退、重启后的身份与 PMU 绑定验收。文档 Shell 片段仅静态检查，不执行。
+- 原源码/worktree 干净，未改 config/、固定 GBS 配置/spec，未运行构建、未连接板、未安装包/重启。主机临时 RPM、配置与证据在 temp/pmuv3-verify/；原日志/status 保留。
 
 ### 内核构建准备（历史；第一段完成）
 
 - 精确镜像提交 21645b17c0d913e2ba7e10fbc9c993d286b3f57d 在本地存在，未 fetch。原 src/linux-rpi 仍为 42aeefac58edeb081aff440f0b60be71cbe49755，前后 status 为空。
 - temp/linux-rpi-pmuv3 / afdo/pmuv3 的内核本地提交：c27f160de761bb55f64672ceac642698a6e93684。仅 ARM 普通 defconfig 增加 CONFIG_ARM_PMUV3=y，一文件一行；已提交且工作树干净。内核提交未推送。
 - temp/gbs/gbs_rpi4_image.conf 已固定 Unified 20261022.054557 与 Base 20261020.074527；temp/gbs-home/.gbs.conf 最小配置已准备。config/ 原文件哈希不变。
-- spec 无禁用 RT 的宏，脚本构建普通+RT（只直接修改普通 defconfig；RT 最终是否继承尚待核验）。当前 nproc=20，运行时计算一半核数，GBS --threads 1。
+- spec 无禁用 RT 的宏，脚本构建普通+RT（当前核验普通 PMUv3=y、RT 未启用，见上文）。准备时 nproc=20，运行时计算一半核数，GBS --threads 1。
 - 已核查官方同版本 gbs 2.1.0 / depanneur 0.16.30 源码：随包 sudoers 为构建命令授予 NOPASSWD，脚本跳过 sudo -v；受保护的实际策略未读取/提权验证，异常时后台失败退出，不交互等待。
-- 脚本只有 bash -n 静态语法检查（通过），没有执行。尚无本次构建日志、结束状态或 RPM。第二段未开始。
+- 第一段当时仅完成 bash -n；后续已实际构建、核验产物并完成第二段文档，见当前进度。
 - 说明与完整内核 diff：[01_pmuv3_build.md](kernel/01_pmuv3_build.md)；脚本：[build_pmuv3_kernel.sh](../scripts/build_pmuv3_kernel.sh)。
 
 ### 补充轮（历史）
@@ -111,10 +113,12 @@
 
 ## 已闭合结论（附证据路径）
 
-- 本次原样启动通过预检，日志报告源码包构建成功；包装状态却未收尾。目标 PID/子孙链及任务路径匹配为空，按用户规则停止。证据及原始状态/末尾日志见 [03_pmuv3_build_result.md](kernel/03_pmuv3_build_result.md)。这不等于已完成 RPM 配置和可安装性验收。
+- 构建经三组替代证据验收通过；真实 GBS 退出码未知且 ALL-END 缺失，不能补写。普通配置与精确镜像基线仅 ARM_PMUV3 从 n→y；RT 未启用。clang/LLD 22.1.8 已由配置、保存命令与 ELF 核对。证据：[03](kernel/03_pmuv3_build_result.md)。
+- 普通 kernel/modules 无自己的 %post/%preun；config.txt 作为 payload 覆盖；RT %post/%preun 会移动 zImage。普通版安装、boot/模块备份、回退与启动检查：[02](kernel/02_pmuv3_install.md)。
+
 
 - 镜像精确源码基线可用，afdo/pmuv3 只有一行配置新增；原源码和两份用户 GBS 配置未改。基线/提交/diff/核查命令见 [01_pmuv3_build.md](kernel/01_pmuv3_build.md)。
-- spec 无只构建普通版宏；预期十个显式二进制包；RT 输入未直接修改，但最终配置是否继承 PMUv3 尚未核验。GBS/depanneur 随包 sudo 调用与 NOPASSWD 策略源码位置同上；实际构建与实际 sudo 授权尚未运行验证。
+- spec 无只构建普通版宏；预期十个显式二进制包；RT 实际未启用 PMUv3，见 03 的 devel 配置。GBS/depanneur 随包 sudo 调用与 NOPASSWD 策略源码位置同上；实际构建已完成且未见 sudo 限制；当前脚本脱离会话修复仍未运行验证。
 
 - 配套 Base 快照已明确；libllvm 22.1.8-1.6 与 perf 实际构建日志一致，ABI/包校验通过；perl 为附带测试脚本解释器依赖。[12_perf_dependencies.txt](probe/evidence/12_perf_dependencies.txt)
 - 临时路径 /tmp 的 noexec 阻止 perf 执行和加载器映射；ldd 无法完成全部 NEEDED 验证。推送文件已删除，RPM 前后同为 1252 且包集不变。[13_perf_deployment.txt](probe/evidence/13_perf_deployment.txt)
@@ -136,18 +140,20 @@
 
 ## 待人工裁决
 
-- 当前等待用户对 ALL-END 缺失的后续指示：是否继续诊断包装状态，以及依据何种验收条件进入产物核查。不得把日志成功摘要补写成 GBS_EXIT=0 或 ALL-END OK。
+- 用户自行执行 02 文档的普通版安装/回退与重启验收；若预检板型、分区/slot 或 U-Boot 哈希不匹配，停止并提供输出。Agent 没有板上操作授权。ALL-END 缺失的替代验收授权已闭合，不再重复询问。
 
 - 用户需要提供符合写入边界且允许执行/映射的测试路径或预置 perf 的镜像。当前 /tmp 为 noexec；不能在“不 remount、不安装、不写其他路径”的范围内继续采样。Base 仓库授权已解决，无需再次确认。
-- 历史直接 make 配置仍受主机 flex/bison 缺失限制；新 GBS 方案由 spec 的 BuildRequires 在隔离构建根解决依赖，尚未启动，未安装主机工具。
-- 原运行镜像完整配置仍待核验；第一段已在独立 worktree 准备 ARM_PMUV3=y 改动，但没有构建、部署或重启。
+- 历史直接 make 配置仍受主机 flex/bison 缺失限制；GBS 构建已完成并在构建根解决依赖，没有安装主机工具。
+- 原运行镜像仓库 devel 配置已核验；新普通内核已构建，未部署或重启，运行板实测仍待用户完成。
 - 是否提供保留 .comment/build-id 的原始构建库及明确 debug 仓库配置。
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
 
-- 包装状态缺失原因、真实进程退出码、RPM 实物/普通版与 RT 配置、clang 和 .comment 证据、安装/备份/回退步骤均挂账；第二段未开始。
-- 本次执行没有得到 ALL-END，收尾机制未通过运行验收；具体原因未诊断。保持原脚本不变，缺标记按流程未完成处理。
+- 原 GBS 真实退出码无法追溯；会话/进程组被执行器回收属于推断，没有死亡信号或生命周期审计证据。原 status 永久保留原貌。
+- 包装脚本修复未经运行验证，下次构建验证；setsid 不能抵抗 cgroup 清理、SIGKILL、断电、磁盘不可写。
+- quiet 原构建日志没有完整 clang 命令行，已用本次 `.cmd` 命令和 ELF 代证；不伪造日志行号。
+- 板上安装、重启、PMU 注册/驱动绑定及实际 cycles 采样仍未执行；安装文档的实际挂载/事务/回退行为待用户验证。
 
 - RPi4 perf 临时运行及完整动态库解析、cpu-clock/cycles 样本、分支负对照、媒体 perf 报告/计时、ETM/SPE trace 内容、BRBE 能力：/tmp noexec 阻塞，采样未执行；不再计划 RPM 安装。
 - 各包最终 CC/CXX、%{optflags}、外部 LTO/链接器参数与已运行镜像对应关系：无 GBS root/构建日志，不能静态补全。

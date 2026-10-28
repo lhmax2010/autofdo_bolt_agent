@@ -4,7 +4,9 @@
 
 ## 2026-10-28 执行状态
 
-Agent 已按后续授权原样启动脚本。外层日志报告构建成功，但状态缺少 ALL-END；用户批准的只读例外检查确认目标 PID/子孙链和任务路径进程匹配均为空，现已停止等待指示。**不要自动重跑；未开始第二段产物核验。** 详见 [03_pmuv3_build_result.md](03_pmuv3_build_result.md)。下文的“未执行”描述是第一段历史状态。
+构建于 2026-10-28 11:56:53 启动，日志于 12:30:30 报告成功（33 分 37 秒），无重跑。ALL-END 缺失、真实 GBS 退出码未取得。用户随后明确批准以 depanneur success、HTML Succeeded、15 个二进制 RPM + 1 个 SRPM 的实存/时间/哈希一致性代替退出码验收，**三项全部通过**。普通版与镜像基线完整配置相比，仅 ARM_PMUV3 从 n 变 y；RT 实际仍为 n。见 [03_pmuv3_build_result.md](03_pmuv3_build_result.md) 与 [安装/回退步骤](02_pmuv3_install.md)。下文第一段的“未执行”为历史状态。
+
+本轮另对包装脚本做了会话脱离修复：整个 worker 用 setsid --fork 启动，继承 fd 9 锁；GBS 用 setsid --wait 保留真实退出码。只通过 bash -n，**修复未经运行验证，下次构建时验证**；本轮没有执行修复后的脚本，也没有连接开发板。具体回收机制未确认，只能推断；不能保证抵抗 cgroup 清理/SIGKILL/断电。
 
 ## 用户执行入口
 
@@ -14,7 +16,7 @@ Agent 已按后续授权原样启动脚本。外层日志报告构建成功，�
 /bin/bash /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/scripts/build_pmuv3_kernel.sh
 ```
 
-首次构建估算 **2–6 小时**，受下载、模拟/交叉构建、低优先级和共享主机负载影响，可能更久；不是实测承诺。当前 `nproc=20`，脚本运行时重新计算，make 使用 `max(1, floor(nproc/2))`，当前为 `-j10`；`--threads 1` 限制 GBS 同时只构建一个源包。普通内核和 RT 内核按 spec 顺序都编译。
+第一段首次构建估算 **2–6 小时**（本次实际至成功日志为 **33 分 37 秒**；未来仍取决于负载），受下载、模拟/交叉构建、低优先级和共享主机负载影响，可能更久；不是实测承诺。当前 `nproc=20`，脚本运行时重新计算，make 使用 `max(1, floor(nproc/2))`，当前为 `-j10`；`--threads 1` 限制 GBS 同时只构建一个源包。普通内核和 RT 内核按 spec 顺序都编译。
 
 按 depanneur 0.16.30 随包的 NOPASSWD 规则，**预计不会要求 sudo 密码，脚本跳过 sudo -v**。本轮未调用任何 sudo 命令，没有读取受保护的本机 sudoers 内容；若机器策略另有覆盖，后台构建将失败并记录，不能保证实际免密。详见 sudo 源码核查一节。
 
@@ -25,7 +27,7 @@ tail -f /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/logs/bui
 cat /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/logs/build_pmuv3.status
 ```
 
-用户看到最终 `ALL-END <时间> OK` 后通知 Agent。`FAILED`、缺少 ALL-END、或状态仍为 BUILDING 均不能进入安装阶段。
+后续正常流程仍以 `ALL-END <时间> OK` 为入口；缺标记不得补写成功。本次例外按用户后续明确授权的替代证据验收通过，不更改原 status。
 
 ## 1. 精确基线与唯一改动
 
@@ -167,7 +169,7 @@ GBS 2.1.0 源码 `temp/pmuv3-prep/gbs-source/BUILD/gitbuildsys/conf.py:287`–30
 
 另可能产生 SRPM 或构建系统自动 debug 子包，以真实产物为准。`Name: rpi4-linux-kernel` 没有对应主包 `%files`，不能凭 Name 行再假设多一个同名二进制包。
 
-`:178` 与 `:252` 都是无条件 `for target in %{variant} %{variant}-rt`；没有只编普通版的宏开关，所以脚本没有虚构 --define 来禁用 RT，也没有改 spec。`:172` 的 dev_wos 只改变安全配置，不是禁用 RT 的开关，未设置它。仅能确认没有直接修改 RT 配置输入；不能据此断言 RT 最终未启用 PMUv3。用户指出 RT 目标会在普通 defconfig 上叠加 rt.config，实际继承结果须从 RT devel RPM 核对，当前尚未验证。`:327`–339 的 RT %post/%preun 会切换启动镜像，第二段必须单独审查，当前不提供安装命令。
+`:178` 与 `:252` 都是无条件 `for target in %{variant} %{variant}-rt`；没有只编普通版的宏开关，所以脚本没有虚构 --define 来禁用 RT，也没有改 spec。`:172` 的 dev_wos 只改变安全配置，不是禁用 RT 的开关，未设置它。RT 实际结果现已核对：devel 包 `.config:5996` 为 `# CONFIG_ARM_PMUV3 is not set`，`:505` 为 `CONFIG_HW_PERF_EVENTS=y`。本次 spec `:5` / `:198` 使用独立 tizen_bcm2711_rt_defconfig，成功日志 `:9376` 同样如此，并非本次从已改普通 defconfig 叠加 rt.config。此结论来自实际产物，撤回此前“未直接修改即可推断 RT”及“本次 RT 必定继承”的表述。`:327`–339 的 RT %post/%preun 会切换启动镜像，安装文档明确不安装或自动卸载任何 RT 包。
 
 ## 5. 脚本预检、后台状态与限制
 
@@ -181,10 +183,10 @@ HOME=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs-home GI
 
 - 在固定 worktree 中执行；所有项目输出、日志、专用 HOME、下载/临时目录均指向 WORKDIR/temp。
 - `flock` 防止此脚本重复启动覆盖正在运行的日志；只拒绝同一脚本的重复运行，不阻止用户的其他 GBS 会话。拒绝重复启动时保留当前任务的状态，不能为第二个进程改写其 ALL-END。
-- Worker PID 存入 `temp/logs/build_pmuv3.pid`，前台同时打印 `kill -TERM <PID>`。worker 忽略终端关闭的 HUP；TERM/INT 处理及 EXIT trap 会写出 FAILED/真实 wait 退出码，给本任务进程组发送终止请求，不触碰其他构建。权限隔离下的 root 子进程可能无法由普通用户直接终止；中断后如仍有后台进程，应据日志处理，不据 ALL-END 宣称所有特权进程都已消失。
+- 整个收尾 worker 现在由 `setsid --fork /bin/bash ... --worker` 脱离调用会话，继承 fd 9 锁并确认启动；其内部用 `setsid --wait` 等待 GBS。Worker PID 存入 `temp/logs/build_pmuv3.pid`，前台同时打印 `kill -TERM <PID>`。worker 忽略终端关闭的 HUP；TERM/INT 处理及 EXIT trap 会写出 FAILED/真实 wait 退出码，给本任务进程组发送终止请求，不触碰其他构建。权限隔离下的 root 子进程可能无法由普通用户直接终止；中断后如仍有后台进程，应据日志处理，不据 ALL-END 宣称所有特权进程都已消失。
 - 状态文件原子替换，含 START/END、HEAD、GBS_EXIT、WRAPPER_EXIT、RPM 列表，最后一行是 `ALL-END <时间> OK|FAILED`。预检失败为 GBS_EXIT NOT_STARTED；信号终止保留中断原因。GBS 正常退出且码为 0、RPM 列表读取成功时才写 OK。
 - RPM 列表扫描专用 `BUILDROOT/local/repos`，不把下载依赖缓存作为产物；重复运行时这是专用输出仓库的现有清单，不等于证明每个文件本次重新编译。真实产物归属、配置、build-id 等留待第二段核验。
-- trap 覆盖可捕获的终止和普通错误；**SIGKILL、断电、磁盘不可写时无法保证写出 ALL-END**。出现缺标记必须按未完成处理，不能补写 OK。脚本没有运行，因此信号处理目前只有静态检查，尚无运行验收。
+- trap 覆盖可捕获的终止和普通错误；**SIGKILL、断电、磁盘不可写时无法保证写出 ALL-END**。出现缺标记必须按未完成处理，不能补写 OK。旧脚本已运行且发生缺标记；本次修复仅静态检查，修复未经运行验证，下次构建时验证。
 
 ## 6. 第一段检查与交接
 

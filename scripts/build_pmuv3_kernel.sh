@@ -1,5 +1,5 @@
 #!/bin/bash
-# Prepared only; invoke manually after reviewing docs/kernel/01_pmuv3_build.md.
+# Detachment repair is syntax-checked only; validate on the next authorized build.
 set -Eeuo pipefail
 
 readonly WORKDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
@@ -21,11 +21,20 @@ readonly CONFIG_SHA256=c4dfc2d24398e7f8afb1d6d10dc9161a2a9e40c88d59a9b21ccda2ad8
 export TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp
 mkdir -p "$TMPDIR" "$LOGDIR"
 
-# A concurrent launch must not overwrite the active run's log or ALL-END marker.
-exec 9>"$LOCK"
-if ! flock -n 9; then
-    printf 'ERROR: another PMUv3 build wrapper owns %s; left its log/status intact.\n' "$LOCK" >&2
-    exit 1
+# Only an internal worker with the inherited lock may bypass foreground checks.
+worker_mode=0
+if [[ ${1:-} == --worker ]]; then
+    [[ $# == 3 && $3 =~ ^[1-9][0-9]*$ ]] || exit 2
+    [[ /proc/$$/fd/9 -ef "$LOCK" ]] || exit 2
+    flock -n 9 || exit 2
+    worker_mode=1
+else
+    # A concurrent launch must not overwrite the active run's log/status.
+    exec 9>"$LOCK"
+    if ! flock -n 9; then
+        printf 'ERROR: another PMUv3 build wrapper owns %s; left its log/status intact.\n' "$LOCK" >&2
+        exit 1
+    fi
 fi
 
 start_time=$(date --iso-8601=seconds)
@@ -50,7 +59,9 @@ finish() {
         printf 'START %s\nEND %s\nHEAD %s\nPHASE %s\nGBS_EXIT %s\nWRAPPER_EXIT %s\n' \
             "$start_time" "$end_time" "$EXPECTED_HEAD" "$phase" "$gbs_exit" "$wrapper_exit"
         printf 'REASON %s\nRPM-LIST-BEGIN\n' "${failure_reason:-none}"
-        # Only the dedicated output repository; exclude downloaded dependency RPMs.
+        # Metadata-only scan: root ownership is harmless if directories are searchable.
+        # Permission errors propagate through pipefail to RPM_LIST_EXIT/FAILED.
+        # Only the dedicated output repository; exclude dependency RPMs.
         if [[ -d $BUILDROOT/local/repos ]]; then
             nice -n 19 ionice -c3 find "$BUILDROOT/local/repos" -type f -name '*.rpm' -print | LC_ALL=C sort
             inventory_exit=$?
@@ -88,8 +99,36 @@ fail() {
     exit 1
 }
 
+if (( worker_mode )); then
+    start_time=$2
+    jobs=$3
+    phase=BUILDING
+    # The complete worker owns a new session, all stdio, and the inherited fd 9.
+    trap '' HUP
+    printf '%s\n' "$BASHPID" > "$PIDFILE.tmp"
+    mv -f -- "$PIDFILE.tmp" "$PIDFILE"
+    printf 'START %s\nHEAD %s\nWORKER_PID %s\n' "$start_time" "$EXPECTED_HEAD" "$BASHPID"
+    cd "$WORKTREE"
+    # --wait propagates the program exit status even if setsid has to fork.
+    setsid --wait /usr/bin/env -u VIRTUAL_ENV -u GIT_CONFIG_GLOBAL -u GIT_CONFIG_SYSTEM \
+        -u GIT_CONFIG -u GIT_CONFIG_COUNT \
+        HOME="$GBS_HOME" GIT_CONFIG_NOSYSTEM=1 TMPDIR="$GBS_TMP" \
+        XDG_CONFIG_HOME="$GBS_HOME/.config" XDG_CACHE_HOME="$GBS_HOME/.cache" \
+        nice -n 19 ionice -c3 /usr/bin/gbs -c "$GBS_CONFIG" build -A armv7l \
+        --threads 1 --define "_smp_mflags -j$jobs" </dev/null &
+    gbs_pid=$!
+    printf 'START %s\nHEAD %s\nPHASE BUILDING\nWORKER_PID %s\nGBS_PID %s\nGBS_EXIT RUNNING\n' \
+        "$start_time" "$EXPECTED_HEAD" "$BASHPID" "$gbs_pid" > "$STATUS"
+    printf 'GBS_PID %s\nCOMMAND: HOME=%s GIT_CONFIG_NOSYSTEM=1 nice -n 19 ionice -c3 /usr/bin/gbs -c %s build -A armv7l --threads 1 --define "_smp_mflags -j%s"\n' \
+        "$gbs_pid" "$GBS_HOME" "$GBS_CONFIG" "$jobs"
+    if wait "$gbs_pid"; then gbs_exit=0; else gbs_exit=$?; fi
+    phase=COMPLETED
+    if (( gbs_exit != 0 )); then failure_reason='GBS returned a nonzero exit code'; fi
+    exit "$gbs_exit"
+fi
+
 [[ $# == 0 ]] || fail 'This script accepts no arguments.'
-for tool in git nice ionice gbs depanneur dpkg-query nproc df ps awk sha256sum cmp setsid find sort date; do
+for tool in git nice ionice gbs depanneur dpkg-query nproc df ps awk sha256sum cmp setsid find sort date flock sleep; do
     command -v "$tool" >/dev/null || fail "Required system command missing: $tool"
 done
 [[ -d $WORKTREE ]] || fail "Missing worktree: $WORKTREE"
@@ -133,39 +172,25 @@ printf 'If local sudo policy differs, the detached build cannot prompt and will 
 mkdir -p "$GBS_TMP" "$GBS_HOME/.config" "$GBS_HOME/.cache"
 printf 'START %s\nHEAD %s\nPHASE STARTING\nGBS_EXIT NOT_STARTED\n' "$start_time" "$EXPECTED_HEAD" > "$STATUS"
 
-# No build occurs until the user executes this script. The worker owns fd 9.
-(
-    handoff=0
-    gbs_pid=
-    phase=BUILDING
-    trap finish EXIT
-    trap 'on_signal INT 130' INT
-    trap 'on_signal TERM 143' TERM
-    # Survive terminal closure. TERM/INT to the PID in PIDFILE interrupt the worker.
-    trap '' HUP
-    printf 'START %s\nHEAD %s\n' "$start_time" "$EXPECTED_HEAD"
-    cd "$WORKTREE"
-    # HOME and Git isolation apply only to GBS and its descendants.
-    # setsid prevents a changed sudo policy from prompting on the caller's terminal.
-    setsid /usr/bin/env -u VIRTUAL_ENV -u GIT_CONFIG_GLOBAL -u GIT_CONFIG_SYSTEM \
-        -u GIT_CONFIG -u GIT_CONFIG_COUNT \
-        HOME="$GBS_HOME" GIT_CONFIG_NOSYSTEM=1 TMPDIR="$GBS_TMP" \
-        XDG_CONFIG_HOME="$GBS_HOME/.config" XDG_CACHE_HOME="$GBS_HOME/.cache" \
-        nice -n 19 ionice -c3 /usr/bin/gbs -c "$GBS_CONFIG" build -A armv7l \
-        --threads 1 --define "_smp_mflags -j$jobs" </dev/null &
-    gbs_pid=$!
-    printf 'START %s\nHEAD %s\nPHASE BUILDING\nGBS_PID %s\nGBS_EXIT RUNNING\n' \
-        "$start_time" "$EXPECTED_HEAD" "$gbs_pid" > "$STATUS"
-    printf 'GBS_PID %s\nCOMMAND: HOME=%s GIT_CONFIG_NOSYSTEM=1 nice -n 19 ionice -c3 /usr/bin/gbs -c %s build -A armv7l --threads 1 --define "_smp_mflags -j%s"\n' \
-        "$gbs_pid" "$GBS_HOME" "$GBS_CONFIG" "$jobs"
-    if wait "$gbs_pid"; then gbs_exit=0; else gbs_exit=$?; fi
-    phase=COMPLETED
-    if (( gbs_exit != 0 )); then failure_reason='GBS returned a nonzero exit code'; fi
-    exit "$gbs_exit"
-) > "$LOG" 2>&1 </dev/null &
-worker_pid=$!
+# Detach the entire status-owning worker, not just GBS. fd 9 stays open across exec.
+# No shell job-control is enabled; the GBS setsid child can be waited for directly.
+rm -f -- "$PIDFILE"
 handoff=1
-printf '%s\n' "$worker_pid" > "$PIDFILE"
+if ! setsid --fork /bin/bash "$WORKDIR/scripts/build_pmuv3_kernel.sh" \
+    --worker "$start_time" "$jobs" 9>&9 > "$LOG" 2>&1 </dev/null; then
+    handoff=0
+    fail 'Could not start the detached worker.'
+fi
+# Wait only for the worker acknowledgement, never for the build in the foreground.
+for ((attempt=0; attempt<100; attempt++)); do
+    [[ -s $PIDFILE ]] && break
+    sleep 0.1
+done
+if [[ ! -s $PIDFILE ]]; then
+    printf 'ERROR: worker acknowledgement missing; inspect %s and %s; do not relaunch blindly.\n' "$LOG" "$STATUS" >&2
+    exit 1
+fi
+read -r worker_pid < "$PIDFILE"
 printf 'Background worker PID=%s; kernel HEAD=%s\n' "$worker_pid" "$EXPECTED_HEAD"
 printf 'To request interruption: kill -TERM %s\n' "$worker_pid"
 printf '\n'
