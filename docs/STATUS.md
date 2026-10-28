@@ -23,7 +23,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与完成状态（2026-10-28；RPi5 环境与采样探测）
+## 当前授权与完成状态（2026-10-28；RPi5 AutoFDO / 插桩 PGO spike）
+
+- 本轮允许 GBS 构建测试包、板上仅写 /opt/afdo_agent；不改 LLVM/BOLT/内核源码，不安装板上 RPM、不 remount/重启。Google AutoFDO 仅克隆只读、不构建。所有测试与清理已完成。
+- llvm-profgen 22.1.8 对 cycles/cpu-clock 两份无分支栈 IP 输入均真实退出 1（Invalid perf script input!），没有生成 profile、没有 AFDO 重编。Google --use_lbr=false 和 BOLT -ba 是源码支持路径，未动态验证。
+- 插桩 PGO 在 RPi5 已闭环：7 函数/31 计数块、profile 匹配写入 IR、pgo 三次 checksum 与 base 一致；base 均值 14.2733s、pgo 14.2567s，约 −0.12%，不认定稳定性能收益。RPi4 插桩仍需 armv7l 验证。
+- 固定 Unified 20261027.063617 / Base 20261026.051209；首次因平台 debug 拆分导致未打包文件失败，只修正测试 spec 后重试成功，再 profile 重编成功；三次均取得真实 GBS 退出码与带时间 ALL-END。
+- work 已清空，RPM 数前后 1249，保留原 perf/libLLVM；无新增边界例外，历史外部 /tmp/sdb.log 元数据未变。
+- 交付 [spike 报告](spike/01_afdo_pgo_feasibility.md)、[源码/spec/profile](../spike/afdo-spike/)、四个 [spike 证据](spike/evidence/01_source_analysis.txt)（共 90,836 B）与本状态文件，同一 commit 推送。未编写 Agent 实现。
+
+## 前轮授权与完成状态（历史；RPi5 环境与采样探测）
 
 - 用户已把同 IP 192.168.108.26 的板换为 RPi5；本轮按 model=Raspberry Pi 5 Model B Rev 1.1、uname -m=aarch64 确认，未依赖 SDB 的旧 rpi4 别名。
 - 本轮按挂载参数验收 /opt/afdo_agent/ 后部署 aarch64 perf/libLLVM；板上仅该目录可写，另有一次用户明确授权的 /tmp true 执行负对照（已删除）。不 remount、不重启、不安装/卸载 RPM、不改 /boot；无构建。
@@ -71,11 +80,13 @@
 
 # 项目状态
 
-更新：2026-10-28（Asia/Shanghai）。阶段：RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-28（Asia/Shanghai）。阶段：RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- RPi5 本轮探测完成；硬件 cycles/计数已验证，分支栈失败、无 SPE/ETM。无需重复运行已完成场景；下一阶段由用户决定采用哪条 profile 生成路径及匹配的未 strip/debug 二进制。
+- 本轮工具 spike 已完成，不重复采集/构建。建议 RPi5 默认插桩 PGO；RPi4 先验证 ARM runtime/全链路。Google 无 LBR 转换和 BOLT -ba 保留为需后续授权验证的候选。
+
+- RPi5 环境探测完成；硬件 cycles/计数已验证，分支栈失败、无 SPE/ETM。后续 spike 已验证插桩 PGO，普通 IP 的 llvm-profgen 路径不可用；真实包仍须匹配未 strip/debug 二进制。
 
 - 已交付 patches/0001-ARM-configs-tizen_bcm2711-enable-ARM_PMUV3.patch，用户合入 Gerrit 并发起 Quickbuild；Agent 不推 Gerrit。本轮最新补丁未构建/启动，旧镜像基线构建验证仍单独保留。
 - 当前镜像的 perf /opt 部署、软件系统/媒体采样、DSO/符号统计及开销实测已完成；cycles 请求发生软件回退，不能当作硬件采样成功。
@@ -92,7 +103,17 @@
 
 ## 进度
 
-### RPi5 环境与采样（当前，已完成）
+### RPi5 AutoFDO / 插桩 PGO spike（当前，已完成）
+
+- 源码固定 LLVM f999bd406c0a70fe8107aa992164fe6945c5d46a、Google AutoFDO f95d1a170dfe24ec5ce4117aa4b0f6d836841703；均保持干净。源码结论详见 [报告 §2](spike/01_afdo_pgo_feasibility.md)。
+- 测试包独立本地提交 9925a104708449edabb82afe152d68a0a5b9c908；结果仓库跟踪三个普通文本文件，不跟踪嵌套 Git 元数据。174 行 C、固定 2500000 轮，所有正式运行 checksum=a31c311b953a2ac5。
+- GBS 19:15:24–19:19:29 失败退出 1；修正测试 spec 后 19:20:58–19:21:12 成功；profile 重编 19:27:19–19:27:36 成功。整个 worker setsid、GBS setsid --wait，三次 ALL-END 完整；该 spike 临时 wrapper 的验证不等于重新运行了历史内核脚本。[构建证据](spike/evidence/02_build.txt)
+- clang/profgen/profdata 22.1.8、readelf 2.43 均来自 GBS root；最终 RPM 三个 ELF 保留 symtab/build-id/debug_line/rela.text。cycles 真硬件 68745 样本，cpu-clock 14268 样本，均无丢样且无 BRANCH_STACK；数据/文本/profile 均核对传输哈希。[运行证据](spike/evidence/03_runtime.txt)
+- 两份 llvm-profgen 均退出 1、输出文件不存在；没有 AFDO 优化变体。插桩 merge/show 成功，profile 文本 819 B 入库，spec 内重新 merge 后重编；IR 热点入口/冷热权重匹配。[profile 证据](spike/evidence/04_profiles.txt)
+- base real=14.27/14.27/14.28；instr=15.02（+5.23%）；pgo=14.25/14.26/14.26（−0.12%，小差异不认定收益）；所有校验一致。采集器两种 real 均15.20（+6.49%）。
+- 板上 work 空、RPM 前后1249，工具/库哈希不变；/tmp/sdb.log 前后495 B、mtime未变。新增四份证据90,836 B，无修改历史证据，无新增已知边界例外。
+
+### RPi5 环境与采样（历史，已完成）
 
 - 板型 RPi5 Model B Rev 1.1、aarch64、uid 0；BUILD_ID=tizen-unified-toolchain_20261027.063617_tizen-headed-aarch64；内核 6.12.80-arm64-rpi4-v8。CPU part 0xd0b，armv8_cortex_a76 事件源，arm-pmu 已绑定 armv8-pmu，日志 7 counters。
 - /opt 为 /dev/mmcblk0p3 ext4 rw,relatime，可用 1.3G；true 执行 0。/tmp noexec，true 执行 126；两个拷贝立即删除。/proc/config.gz 不可读，仅核对本地 arm64 defconfig/Kconfig，明确不当作运行配置。
@@ -189,6 +210,9 @@
 
 ## 已闭合结论（附证据路径）
 
+- llvm-profgen 当前纯 IP 输入不可用；Google 无 LBR 和 BOLT -ba 仅源码支持，BOLT 排除 ARM32。[源码证据](spike/evidence/01_source_analysis.txt)、[实测 profile 证据](spike/evidence/04_profiles.txt)。不能据此把所有 AutoFDO 路径判不可用。
+- RPi5 插桩 PGO 已实际构建/采集/合并/重编/正确性验证；未证明稳定性能收益。报告与限制：[01_afdo_pgo_feasibility.md](spike/01_afdo_pgo_feasibility.md)。
+
 - RPi5 A76 PMU 已绑定，硬件 cycles 的实际 type/config=0/0，软件/计数支持；分支栈不支持，无 SPE/ETM 事件源；不能由 cycles 推断分支 profile 就绪。[04 报告](probe/04_rpi5_probe.md)、[E15](probe/evidence/15_rpi5_environment.txt)、[E17](probe/evidence/17_rpi5_sampling.txt)。
 - RPi5 同期 aarch64 工具/依赖已校验并可执行，媒体全部无丢样；现有 strip 库不能直接提供完整 BOLT/AutoFDO 前提。work 清空，RPM 数不变；保留文件清单与删除命令见 [04](probe/04_rpi5_probe.md)、[E16](probe/evidence/16_rpi5_perf_deployment.txt)、[E18](probe/evidence/18_rpi5_elf_cleanup.txt)。
 
@@ -230,7 +254,7 @@
 
 ## 待人工裁决
 
-- RPi5 后续选择非分支采样、插桩或其他 profile 路径，以及如何保留完整符号、代码重定位、DWARF/build-id 和匹配二进制；本轮仅探测，没有转换/优化实现。
+- 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、RPi4 插桩与 RPi5 BOLT -ba。
 
 - 用户合入 Gerrit 并发起 Quickbuild 的时间与新镜像交付；Agent 不向 Gerrit 推送，最新补丁本轮尚未构建/启动。
 
@@ -241,6 +265,9 @@
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
+
+- Google create_llvm_prof --use_lbr=false 的端到端运行/行计数质量、ARM/Thumb 正确性和 BOLT -ba 优化仍未实测；RPi4 插桩 PGO 需要 armv7l 构建/训练/匹配/正确性闭环。当前 llvm-profgen 的纯 IP 拒绝已闭合，不待重试。
+- 本轮性能测量次数少且未随机交错，PGO −0.12% 仅为观测差；真实场景收益、跨输入泛化需独立评估。
 
 - 原 GBS 真实退出码无法追溯；会话/进程组被执行器回收属于推断，没有死亡信号或生命周期审计证据。原 status 永久保留原貌。
 - 包装脚本修复未经运行验证，下次构建验证；setsid 不能抵抗 cgroup 清理、SIGKILL、断电、磁盘不可写。

@@ -1,0 +1,392 @@
+Captured 2026-10-28 Asia/Shanghai. Paths abbreviated literally below:
+WORKDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+ROOT=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0
+REMOTE_EXIT is the captured board command status before any cat/printing; TRANSPORT_EXIT is separate SDB status. Empty STDERR means the command emitted none. No pipeline head exit used to judge record/profile generation.
+
+FILE: temp/gbs/gbs_rpi5_image.conf
+[general]
+# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs-tmp-spike
+profile = profile.tizen_unified_standard
+buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE
+
+[profile.tizen_unified_standard]
+repos = repo.base-standard, repo.unified-standard
+
+[repo.base-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/
+
+[repo.unified-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/
+
+Build worker: temp/spike/build.sh (setsid --fork whole worker, fd 9 lock; setsid --wait GBS; HOME/GIT_CONFIG_NOSYSTEM only GBS).
+#!/bin/bash
+set -Eeuo pipefail
+W=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+export TMPDIR="$W/temp/tmp"
+run=${1:?run label required}
+[[ $run =~ ^[a-z0-9_-]+$ ]] || exit 2
+shift
+if [[ ${1:-} != --worker ]]; then
+    test ! -e /etc/gbs.conf
+    test -f "$W/temp/gbs-home/.gbs.conf"
+    test -z "$(git -C "$W/spike/afdo-spike" status --porcelain)"
+    exec 9>"$W/temp/spike/build.lock"
+    flock -n 9 || { echo 'Another spike build is running'; exit 1; }
+    setsid --fork /bin/bash "$W/temp/spike/build.sh" "$run" --worker "$@" 9>&9 >"$W/temp/spike/logs/$run.log" 2>&1 </dev/null
+    echo "Worker launched: $W/temp/spike/logs/$run.status"
+    exit 0
+fi
+shift
+status="$W/temp/spike/logs/$run.status"
+start=$(date --iso-8601=seconds)
+rc=NOT_STARTED
+finish() {
+    code=$?
+    trap - EXIT
+    set +e
+    end=$(date --iso-8601=seconds)
+    verdict=FAILED
+    [[ $rc == 0 && $code == 0 ]] && verdict=OK
+    {
+        printf 'START %s\nEND %s\nGBS_EXIT %s\nWRAPPER_EXIT %s\n' "$start" "$end" "$rc" "$code"
+        find "$W/temp/GBS-ROOT-RPI5-SPIKE/local/repos" -type f -name '*.rpm' -print
+        printf 'ALL-END %s %s\n' "$end" "$verdict"
+    } >"$status.tmp"
+    mv "$status.tmp" "$status"
+}
+trap finish EXIT
+trap '' HUP
+trap 'exit 143' TERM
+trap 'exit 130' INT
+printf 'START %s\nPHASE BUILDING\nWORKER_PID %s\n' "$start" "$$" >"$status"
+cd "$W/spike/afdo-spike"
+set +e
+setsid --wait env HOME="$W/temp/gbs-home" GIT_CONFIG_NOSYSTEM=1 TMPDIR="$W/temp/gbs-tmp-spike" nice -n 19 ionice -c3 gbs -c "$W/temp/gbs/gbs_rpi5_image.conf" build -A aarch64 --threads 1 --define '_smp_mflags -j2' "$@"
+rc=$?
+exit "$rc"
+
+FILE: temp/spike/logs/build1.status (complete)
+START 2026-10-28T19:15:24+08:00
+END 2026-10-28T19:19:29+08:00
+GBS_EXIT 1
+WRAPPER_EXIT 1
+ALL-END 2026-10-28T19:19:29+08:00 FAILED
+
+FILE: temp/spike/logs/build1.log (numbered selected lines)
+2: warning: No local package repository for arch aarch64
+491: [  231s] clang version 22.1.8
+492: [  231s] Target: aarch64-tizen-linux-gnu
+494: [  231s] InstalledDir: /usr/bin
+495: [  231s] Configuration file: /usr/bin/clang.cfg
+717: [  231s] + /usr/lib/rpm/find-debuginfo.sh -j2 --build-id-seed 1.0-1 --unique-debug-src-base afdo-spike-1.0-1.aarch64 -S debugsourcefiles.list /home/abuild/rpmbuild/BUILD/afdo-spike-1.0
+760: [  232s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/afdo-spike-1.0-1.aarch64
+761: [  232s] error: Installed (but unpackaged) file(s) found:
+767: [  232s]     Installed (but unpackaged) file(s) found:
+773: warning: build failed, Leaving the logs in $WORKDIR/temp/GBS-ROOT-RPI5-SPIKE/local/repos/tizen_unified_standard/aarch64/logs/fail/afdo-spike-1.0-1/log.txt
+788: error: <gbs>some packages failed to be built
+
+FILE: temp/spike/logs/build1_retry.status (complete)
+START 2026-10-28T19:20:58+08:00
+END 2026-10-28T19:21:12+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/repos/tizen_unified_standard/aarch64/RPMS/afdo-spike-1.0-1.aarch64.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/repos/tizen_unified_standard/aarch64/SRPMS/afdo-spike-1.0-1.src.rpm
+ALL-END 2026-10-28T19:21:12+08:00 OK
+
+FILE: temp/spike/logs/build1_retry.log (numbered selected lines)
+2: warning: No local package repository for arch aarch64
+205: [    4s] clang version 22.1.8
+206: [    4s] Target: aarch64-tizen-linux-gnu
+208: [    4s] InstalledDir: /usr/bin
+209: [    4s] Configuration file: /usr/bin/clang.cfg
+451: [    5s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/afdo-spike-1.0-1.aarch64
+452: [    5s] Wrote: /home/abuild/rpmbuild/SRPMS/afdo-spike-1.0-1.src.rpm
+453: [    5s] Wrote: /home/abuild/rpmbuild/RPMS/aarch64/afdo-spike-1.0-1.aarch64.rpm
+
+FILE: temp/spike/logs/build2.status (complete)
+START 2026-10-28T19:27:19+08:00
+END 2026-10-28T19:27:36+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/repos/tizen_unified_standard/aarch64/RPMS/afdo-spike-1.0-1.aarch64.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/repos/tizen_unified_standard/aarch64/SRPMS/afdo-spike-1.0-1.src.rpm
+ALL-END 2026-10-28T19:27:36+08:00 OK
+
+FILE: temp/spike/logs/build2.log (numbered selected lines)
+2: warning: No local package repository for arch aarch64
+209: [    6s] clang version 22.1.8
+210: [    6s] Target: aarch64-tizen-linux-gnu
+212: [    6s] InstalledDir: /usr/bin
+213: [    6s] Configuration file: /usr/bin/clang.cfg
+555: [    7s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/afdo-spike-1.0-1.aarch64
+556: [    7s] Wrote: /home/abuild/rpmbuild/SRPMS/afdo-spike-1.0-1.src.rpm
+557: [    7s] Wrote: /home/abuild/rpmbuild/RPMS/aarch64/afdo-spike-1.0-1.aarch64.rpm
+
+RECORD: temp/spike/platform_clang_version.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/clang --version
+EXIT:
+0
+STDOUT:
+clang version 22.1.8
+Target: x86_64-tizen-linux-gnu
+Thread model: posix
+InstalledDir: $ROOT/emul/usr/lib64
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/platform_llvm-profgen_version.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/llvm-profgen --version
+EXIT:
+0
+STDOUT:
+LLVM (http://llvm.org/):
+  LLVM version 22.1.8
+  Optimized build.
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/platform_llvm-profdata_version.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/llvm-profdata --version
+EXIT:
+0
+STDOUT:
+LLVM (http://llvm.org/):
+  LLVM version 22.1.8
+  Optimized build.
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/platform_readelf_version.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf --version
+EXIT:
+0
+STDOUT:
+GNU readelf (GNU Binutils) 2.43
+Copyright (C) 2024 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) any later version.
+This program has absolutely no warranty.
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_base_sections.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -SW $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-base
+EXIT:
+0
+STDOUT:
+[selected output lines]
+  [ 2] .note.gnu.build-id NOTE            000000000000021c 00021c 000024 00   A  0   0  4
+  [15] .rela.text        RELA            0000000000000000 003830 000570 18   I 50  14  8
+  [39] .debug_line       PROGBITS        0000000000000000 001c59 000587 00      0   0  1
+  [40] .rela.debug_line  RELA            0000000000000000 004670 000138 18   I 50  39  8
+  [46] .debug_line_str   PROGBITS        0000000000000000 002878 000059 01  MS  0   0  1
+  [50] .symtab           SYMTAB          0000000000000000 002958 000bd0 18     51  93  8
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_base_notes.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -n $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-base
+EXIT:
+0
+STDOUT:
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 10cf3fa4b2a24395310f402e23cbbc7703a831bc
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.7.0
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_base_comment.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -p .comment $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-base
+EXIT:
+0
+STDOUT:
+
+String dump of section '.comment':
+  [     0]  GCC: (Tizen GCC 14.2.0 20240801 1.1) 14.2.0
+  [    2c]  clang version 22.1.8
+
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_instr_sections.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -SW $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-instr
+EXIT:
+0
+STDOUT:
+[selected output lines]
+  [ 2] .note.gnu.build-id NOTE            000000000000021c 00021c 000024 00   A  0   0  4
+  [15] .rela.text        RELA            0000000000000000 01ee98 008448 18   I 57  14  8
+  [46] .debug_line       PROGBITS        0000000000000000 018f31 000668 00      0   0  1
+  [47] .rela.debug_line  RELA            0000000000000000 028b40 000138 18   I 57  46  8
+  [53] .debug_line_str   PROGBITS        0000000000000000 019c28 000059 01  MS  0   0  1
+  [57] .symtab           SYMTAB          0000000000000000 019d18 003810 18     58 458  8
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_instr_notes.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -n $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-instr
+EXIT:
+0
+STDOUT:
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 6e001e0362ee072afd58e7334714dd632b564d83
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.7.0
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_instr_comment.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -p .comment $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-instr
+EXIT:
+0
+STDOUT:
+
+String dump of section '.comment':
+  [     0]  GCC: (Tizen GCC 14.2.0 20240801 1.1) 14.2.0
+  [    2c]  clang version 22.1.8
+
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_pgo_sections.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -SW $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-pgo
+EXIT:
+0
+STDOUT:
+[selected output lines]
+  [ 2] .note.gnu.build-id NOTE            000000000000021c 00021c 000024 00   A  0   0  4
+  [15] .rela.text        RELA            0000000000000000 0038f8 000558 18   I 50  14  8
+  [39] .debug_line       PROGBITS        0000000000000000 001c4c 0005ba 00      0   0  1
+  [40] .rela.debug_line  RELA            0000000000000000 004738 000180 18   I 50  39  8
+  [46] .debug_line_str   PROGBITS        0000000000000000 002898 000059 01  MS  0   0  1
+  [50] .symtab           SYMTAB          0000000000000000 002990 000c18 18     51  96  8
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_pgo_notes.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -n $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-pgo
+EXIT:
+0
+STDOUT:
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: b279c893b9786f05a45ad81ea08af983893ae1e5
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.7.0
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/build2_pgo_comment.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/readelf -p .comment $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-pgo
+EXIT:
+0
+STDOUT:
+
+String dump of section '.comment':
+  [     0]  GCC: (Tizen GCC 14.2.0 20240801 1.1) 14.2.0
+  [    2c]  clang version 22.1.8
+
+
+STDERR:
+(empty)
+
+Final payload hashes and sizes (temp/spike/build2_files.json):
+[
+  {
+    "variant": "base",
+    "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/spike/build2-extract/usr/bin/afdo-spike-base",
+    "sha256": "28c1ac135271ec050588691bc654ca59e486a4258ed0e4027c9e156dd14675df",
+    "size": 23600
+  },
+  {
+    "variant": "instr",
+    "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/spike/build2-extract/usr/bin/afdo-spike-instr",
+    "sha256": "b09905ebe115c1c6b81b2cb813a086cb31905b43fb88f28c6944af4012f5f682",
+    "size": 172824
+  },
+  {
+    "variant": "pgo",
+    "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/spike/build2-extract/usr/bin/afdo-spike-pgo",
+    "sha256": "9ecb901764f4ccca9c3538d7bd2cdd7103c01f797f9a0752cf7f309f4e5ec029",
+    "size": 23872
+  }
+]
+FILE: temp/spike/logs/build1_retry.log (compiler/merge commands, original line numbers)
+203: [    4s] + set -eux
+204: [    4s] + clang --version
+205: [    4s] clang version 22.1.8
+206: [    4s] Target: aarch64-tizen-linux-gnu
+207: [    4s] Thread model: posix
+208: [    4s] InstalledDir: /usr/bin
+209: [    4s] Configuration file: /usr/bin/clang.cfg
+210: [    4s] + llvm-profdata --version
+211: [    4s] LLVM (http://llvm.org/):
+212: [    4s]   LLVM version 22.1.8
+213: [    4s]   Optimized build.
+214: [    4s] + common='-O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs'
+215: [    4s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs spike.c -o afdo-spike-base
+216: [    4s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-generate spike.c -o afdo-spike-instr
+
+FILE: temp/spike/logs/build2.log (compiler/merge commands, original line numbers)
+207: [    6s] + set -eux
+208: [    6s] + clang --version
+209: [    6s] clang version 22.1.8
+210: [    6s] Target: aarch64-tizen-linux-gnu
+211: [    6s] Thread model: posix
+212: [    6s] InstalledDir: /usr/bin
+213: [    6s] Configuration file: /usr/bin/clang.cfg
+214: [    6s] + llvm-profdata --version
+215: [    6s] LLVM (http://llvm.org/):
+216: [    6s]   LLVM version 22.1.8
+217: [    6s]   Optimized build.
+218: [    6s] + common='-O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs'
+219: [    6s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs spike.c -o afdo-spike-base
+220: [    6s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-generate spike.c -o afdo-spike-instr
+221: [    6s] + llvm-profdata merge instr.proftext -o instr.profdata
+222: [    6s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-use=instr.profdata -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -Rpass=pgo-instrumentation -Rpass-missed=pgo -fsave-optimization-record -fdiagnostics-show-hotness spike.c -o afdo-spike-pgo
+223: [    7s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -fprofile-use=instr.profdata -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -S -emit-llvm spike.c -o afdo-spike-pgo.ll

@@ -1,0 +1,851 @@
+Source analysis only. No LLVM/Google AutoFDO/BOLT source modifications or builds.
+COMMAND: git -C src/llvm rev-parse HEAD
+EXIT=0
+f999bd406c0a70fe8107aa992164fe6945c5d46a
+
+(empty)
+COMMAND: git -C src/llvm status --porcelain
+EXIT=0
+(empty)
+(empty)
+COMMAND: git -C temp/autofdo rev-parse HEAD
+EXIT=0
+f95d1a170dfe24ec5ce4117aa4b0f6d836841703
+
+(empty)
+COMMAND: git -C temp/autofdo status --porcelain
+EXIT=0
+(empty)
+(empty)
+
+FILE: src/llvm/llvm/tools/llvm-profgen/PerfReader.h
+66:
+67: };
+68:
+69: // The type of perfscript content.
+70: enum PerfContent {
+71:   UnknownContent = 0,
+72:   LBR = 1,      // Only LBR sample.
+73:   LBRStack = 2, // Hybrid sample including call stack and LBR stack.
+74: };
+75:
+76: struct PerfInputFile {
+77:   std::string InputFile;
+78:   PerfFormat Format = PerfFormat::UnknownFormat;
+79:   PerfContent Content = PerfContent::UnknownContent;
+
+FILE: src/llvm/llvm/tools/llvm-profgen/PerfReader.cpp
+346: std::unique_ptr<PerfReaderBase>
+347: PerfReaderBase::create(ProfiledBinary *Binary, PerfInputFile &PerfInput,
+348:                        std::optional<int32_t> PIDFilter) {
+349:   std::unique_ptr<PerfReaderBase> PerfReader;
+350:
+351:   if (PerfInput.Format == PerfFormat::UnsymbolizedProfile) {
+352:     PerfReader.reset(
+353:         new UnsymbolizedProfileReader(Binary, PerfInput.InputFile));
+354:     return PerfReader;
+355:   }
+356:
+357:   // For perf data input, we need to convert them into perf script first.
+358:   // If this is a kernel perf file, there is no need for retrieving PIDs.
+359:   if (PerfInput.Format == PerfFormat::PerfData)
+360:     PerfInput = PerfScriptReader::convertPerfDataToTrace(
+361:         Binary, Binary->isKernel(), PerfInput, PIDFilter);
+362:
+363:   assert((PerfInput.Format == PerfFormat::PerfScript) &&
+364:          "Should be a perfscript!");
+365:
+366:   PerfInput.Content =
+367:       PerfScriptReader::checkPerfScriptType(PerfInput.InputFile);
+368:   if (PerfInput.Content == PerfContent::LBRStack) {
+369:     PerfReader.reset(
+370:         new HybridPerfReader(Binary, PerfInput.InputFile, PIDFilter));
+371:   } else if (PerfInput.Content == PerfContent::LBR) {
+372:     PerfReader.reset(new LBRPerfReader(Binary, PerfInput.InputFile, PIDFilter));
+373:   } else {
+374:     exitWithError("Unsupported perfscript!");
+375:   }
+376:
+377:   return PerfReader;
+453:                                          PerfInputFile &File,
+454:                                          std::optional<int32_t> PIDFilter) {
+455:   StringRef PerfData = File.InputFile;
+456:   // Run perf script to retrieve PIDs matching binary we're interested in.
+457:   auto PerfExecutable = sys::Process::FindInEnvPath("PATH", "perf");
+458:   if (!PerfExecutable) {
+459:     exitWithError("Perf not found.");
+460:   }
+461:   std::string PerfPath = *PerfExecutable;
+462:   SmallString<128> PerfTraceFile;
+463:   sys::fs::createUniquePath("perf-script-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.tmp",
+464:                             PerfTraceFile, /*MakeAbsolute=*/true);
+465:   std::string ErrorFile = std::string(PerfTraceFile) + ".err";
+466:   std::optional<StringRef> Redirects[] = {std::nullopt,             // Stdin
+467:                                           StringRef(PerfTraceFile), // Stdout
+468:                                           StringRef(ErrorFile)};    // Stderr
+469:   PerfScriptReader::TempFileCleanups.emplace_back(PerfTraceFile);
+470:   PerfScriptReader::TempFileCleanups.emplace_back(ErrorFile);
+471:
+472:   std::string PIDs;
+473:   if (!SkipPID) {
+474:     StringRef ScriptMMapArgs[] = {PerfPath, "script",   "--show-mmap-events",
+475:                                   "-F",     "comm,pid", "-i",
+476:                                   PerfData};
+477:     sys::ExecuteAndWait(PerfPath, ScriptMMapArgs, std::nullopt, Redirects);
+478:
+479:     // Collect the PIDs
+480:     TraceStream TraceIt(PerfTraceFile);
+481:     std::unordered_set<int32_t> PIDSet;
+482:     while (!TraceIt.isAtEoF()) {
+483:       MMapEvent MMap;
+484:       if (isMMapEvent(TraceIt.getCurrentLine()) &&
+485:           extractMMapEventForBinary(Binary, TraceIt.getCurrentLine(), MMap)) {
+486:         auto It = PIDSet.emplace(MMap.PID);
+487:         if (It.second && (!PIDFilter || MMap.PID == *PIDFilter)) {
+488:           if (!PIDs.empty()) {
+489:             PIDs.append(",");
+490:           }
+491:           PIDs.append(utostr(MMap.PID));
+492:         }
+493:       }
+494:       TraceIt.advance();
+495:     }
+496:
+497:     if (PIDs.empty()) {
+498:       exitWithError("No relevant mmap event is found in perf data.");
+499:     }
+500:   }
+501:
+502:   // Run perf script again to retrieve events for PIDs collected above
+503:   SmallVector<StringRef, 8> ScriptSampleArgs;
+504:   ScriptSampleArgs.push_back(PerfPath);
+505:   ScriptSampleArgs.push_back("script");
+506:   ScriptSampleArgs.push_back("--show-mmap-events");
+507:   ScriptSampleArgs.push_back("-F");
+508:   ScriptSampleArgs.push_back("ip,brstack");
+509:   ScriptSampleArgs.push_back("-i");
+510:   ScriptSampleArgs.push_back(PerfData);
+511:   if (!PIDs.empty()) {
+512:     ScriptSampleArgs.push_back("--pid");
+513:     ScriptSampleArgs.push_back(PIDs);
+514:   }
+515:   sys::ExecuteAndWait(PerfPath, ScriptSampleArgs, std::nullopt, Redirects);
+516:
+517:   return {std::string(PerfTraceFile), PerfFormat::PerfScript,
+518:           PerfContent::UnknownContent};
+1152: // A LBR sample is like:
+1153: // 40062f 0x5c6313f/0x5c63170/P/-/-/0  0x5c630e7/0x5c63130/P/-/-/0 ...
+1154: // A heuristic for fast detection by checking whether a
+1155: // leading "  0x" and the '/' exist.
+1156: bool PerfScriptReader::isLBRSample(StringRef Line) {
+1157:   // Skip the leading instruction pointer
+1158:   SmallVector<StringRef, 32> Records;
+1159:   Line.trim().split(Records, " ", 2, false);
+1160:   if (Records.size() < 2)
+1161:     return false;
+1162:   if (Records[1].starts_with("0x") && Records[1].contains('/'))
+1163:     return true;
+1164:   return false;
+1165: }
+1186: //          ... 0x4005c8/0x4005dc/P/-/-/0    # LBR Entries
+1187: // Determine the perfscript contains hybrid samples(call stack + LBRs) by
+1188: // checking whether there is a non-empty call stack immediately followed by
+1189: // a LBR sample
+1190: PerfContent PerfScriptReader::checkPerfScriptType(StringRef FileName) {
+1191:   TraceStream TraceIt(FileName);
+1192:   uint64_t FrameAddr = 0;
+1193:   while (!TraceIt.isAtEoF()) {
+1194:     // Skip the aggregated count
+1195:     if (!TraceIt.getCurrentLine().getAsInteger(10, FrameAddr))
+1196:       TraceIt.advance();
+1197:
+1198:     // Detect sample with call stack
+1199:     int32_t Count = 0;
+1200:     while (!TraceIt.isAtEoF() &&
+1201:            !TraceIt.getCurrentLine().ltrim().getAsInteger(16, FrameAddr)) {
+1202:       Count++;
+1203:       TraceIt.advance();
+1204:     }
+1205:     if (!TraceIt.isAtEoF()) {
+1206:       if (isLBRSample(TraceIt.getCurrentLine())) {
+1207:         if (Count > 0)
+1208:           return PerfContent::LBRStack;
+1209:         else
+1210:           return PerfContent::LBR;
+1211:       }
+1212:       TraceIt.advance();
+1213:     }
+1214:   }
+1215:
+1216:   exitWithError("Invalid perf script input!");
+1217:   return PerfContent::UnknownContent;
+1218: }
+
+FILE: src/llvm/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+82:
+83: static const Target *getTarget(const ObjectFile *Obj) {
+84:   Triple TheTriple = Obj->makeTriple();
+85:   std::string Error;
+86:   std::string ArchName;
+87:   const Target *TheTarget =
+88:       TargetRegistry::lookupTarget(ArchName, TheTriple, Error);
+89:   if (!TheTarget)
+90:     exitWithError(Error, Obj->getFileName());
+91:   return TheTarget;
+92: }
+93:
+230:   OwningBinary<Binary> OBinary = unwrapOrError(createBinary(Path), Path);
+231:   Binary &ExeBinary = *OBinary.getBinary();
+232:
+233:   IsCOFF = isa<COFFObjectFile>(&ExeBinary);
+234:   if (!isa<ELFObjectFileBase>(&ExeBinary) && !IsCOFF)
+235:     exitWithError("not a valid ELF/COFF image", Path);
+236:
+237:   auto *Obj = cast<ObjectFile>(&ExeBinary);
+238:   TheTriple = Obj->makeTriple();
+239:
+240:   LLVM_DEBUG(dbgs() << "Loading " << Path << "\n");
+241:
+684: void ProfiledBinary::setUpDisassembler(const ObjectFile *Obj) {
+685:   const Target *TheTarget = getTarget(Obj);
+686:   StringRef FileName = Obj->getFileName();
+687:
+688:   MRI.reset(TheTarget->createMCRegInfo(TheTriple));
+689:   if (!MRI)
+690:     exitWithError("no register info for target " + TheTriple.str(), FileName);
+691:
+692:   MCTargetOptions MCOptions;
+693:   AsmInfo.reset(TheTarget->createMCAsmInfo(*MRI, TheTriple, MCOptions));
+694:   if (!AsmInfo)
+695:     exitWithError("no assembly info for target " + TheTriple.str(), FileName);
+696:
+697:   Expected<SubtargetFeatures> Features = Obj->getFeatures();
+698:   if (!Features)
+699:     exitWithError(Features.takeError(), FileName);
+700:   STI.reset(
+701:       TheTarget->createMCSubtargetInfo(TheTriple, "", Features->getString()));
+702:   if (!STI)
+703:     exitWithError("no subtarget info for target " + TheTriple.str(), FileName);
+704:
+705:   MII.reset(TheTarget->createMCInstrInfo());
+706:   if (!MII)
+707:     exitWithError("no instruction info for target " + TheTriple.str(),
+708:                   FileName);
+709:
+710:   MCContext Ctx(TheTriple, AsmInfo.get(), MRI.get(), STI.get());
+711:   std::unique_ptr<MCObjectFileInfo> MOFI(
+712:       TheTarget->createMCObjectFileInfo(Ctx, /*PIC=*/false));
+713:   Ctx.setObjectFileInfo(MOFI.get());
+714:   DisAsm.reset(TheTarget->createMCDisassembler(*STI, Ctx));
+715:   if (!DisAsm)
+716:     exitWithError("no disassembler for target " + TheTriple.str(), FileName);
+717:
+855:   // Only apply this to ELF binary. e.g. COFF file format doesn't have `size`
+856:   // field in the symbol table.
+857:   bool IsELFObject = isa<ELFObjectFileBase>(Obj);
+858:   if (!IsELFObject)
+859:     return;
+860:   for (const SymbolRef &Symbol : Obj->symbols()) {
+861:     const SymbolRef::Type Type = unwrapOrError(Symbol.getType(), FileName);
+862:     const uint64_t StartAddr = unwrapOrError(Symbol.getAddress(), FileName);
+863:     const StringRef Name = unwrapOrError(Symbol.getName(), FileName);
+864:     uint64_t Size = 0;
+865:     if (LLVM_LIKELY(IsELFObject)) {
+866:       ELFSymbolRef ElfSymbol(Symbol);
+867:       Size = ElfSymbol.getSize();
+868:     }
+869:
+870:     if (Size == 0 || Type != SymbolRef::ST_Function)
+871:       continue;
+872:
+873:     const uint64_t EndAddr = StartAddr + Size;
+874:     const StringRef SymName =
+
+FILE: src/llvm/llvm/tools/llvm-profgen/llvm-profgen.cpp
+147:
+148: int main(int argc, const char *argv[]) {
+149:   InitLLVM X(argc, argv);
+150:
+151:   // Initialize targets and assembly printers/parsers.
+152:   InitializeAllTargetInfos();
+153:   InitializeAllTargetMCs();
+154:   InitializeAllDisassemblers();
+155:
+156:   cl::HideUnrelatedOptions({&ProfGenCategory, &getColorCategory()});
+157:   cl::ParseCommandLineOptions(argc, argv, "llvm SPGO profile generator\n");
+158:   validateCommandLine();
+159:
+160:   // Load symbols and disassemble the code of a given binary.
+161:   std::unique_ptr<ProfiledBinary> Binary =
+162:       std::make_unique<ProfiledBinary>(BinaryPath, DebugBinPath);
+163:   if (ShowDisassemblyOnly)
+164:     return EXIT_SUCCESS;
+165:
+
+FILE: src/llvm/llvm/tools/llvm-profgen/CMakeLists.txt
+1:
+2: set(LLVM_LINK_COMPONENTS
+3:   AllTargetsDescs
+4:   AllTargetsDisassemblers
+5:   AllTargetsInfos
+6:   DebugInfoDWARF
+7:   Core
+8:   MC
+9:   IPO
+10:   MCDisassembler
+11:   Object
+12:   ProfileData
+13:   Support
+14:   Symbolize
+15:   TargetParser
+16:   )
+
+FILE: src/llvm/packaging/llvm.spec
+215:     -DLLVM_ENABLE_RTTI=ON \
+216: %ifarch x86_64 i686
+217:     -DCMAKE_BUILD_TYPE=Release \
+218:     -DLLVM_TARGETS_TO_BUILD='X86;ARM;AArch64;BPF' \
+219: %endif
+220: %ifarch armv7l
+221:     -DCMAKE_BUILD_TYPE=MinSizeRel \
+222:     -DLLVM_TARGETS_TO_BUILD='ARM;BPF' \
+223:     -DLLVM_TARGET_ARCH="ARM" \
+224: %endif
+225: %ifarch aarch64
+226:     -DCMAKE_BUILD_TYPE=Release \
+227:     -DLLVM_TARGETS_TO_BUILD='AArch64;BPF' \
+228:     -DLLVM_TARGET_ARCH="AArch64" \
+229: %endif
+230: %ifarch riscv64
+231:     -DCMAKE_BUILD_TYPE=Release \
+232:     -DLLVM_TARGETS_TO_BUILD='RISCV;BPF' \
+233: %endif
+
+FILE: temp/autofdo/profile.cc
+30:
+31: ABSL_FLAG(bool, use_lbr, true,
+32:             "Whether to use lbr profile.");
+33: ABSL_FLAG(bool, llc_misses, false, "The profile represents llc misses.");
+34:
+53: void Profile::AggregatePerFunctionProfile(bool check_lbr_entry) {
+54:   const AddressCountMap *count_map = &sample_reader_->address_count_map();
+55:   for (const auto &[addr, count] : *count_map) {
+56:     uint64_t vaddr = symbol_map_->get_static_vaddr(addr);
+57:     ProfileMaps *maps = GetProfileMaps(vaddr);
+58:     if (maps != nullptr) {
+59:       maps->address_count_map[vaddr] += count;
+60:     }
+61:   }
+62:
+63:   const AddressTimestampMap *address_timestamp_map = &sample_reader_->address_timestamp_map ();
+64:   for (const auto &[addr, timestamp] : *address_timestamp_map) {
+65:     uint64_t vaddr = symbol_map_->get_static_vaddr(addr);
+66:     ProfileMaps *maps = GetProfileMaps(vaddr);
+67:     if (maps != nullptr && maps->timestamp == 0) {
+68:       maps->timestamp = timestamp;
+69:     }
+70:   }
+71:
+72:   #if defined(HAVE_LLVM)
+73:   std::unique_ptr<MiniDisassembler> Disassembler;
+74:   if (check_lbr_entry) {
+75:     const llvm::object::ObjectFile *Obj = addr2line_->getObject();
+76:     if (Obj) {
+77:       auto DisassemblerHandler = MiniDisassembler::Create(Obj);
+78:       if (DisassemblerHandler.ok()) {
+79:         Disassembler = std::move(DisassemblerHandler.value());
+80:       }
+81:     }
+82:     if (!Disassembler) {
+83:       LOG(WARNING) << "Cannot create MiniDisassembler and check lbr entry "
+84:                    << " will be disabled.";
+85:     }
+155:   InstructionMap inst_map(addr2line_, symbol_map_);
+156:   // LOG(INFO) << "ProcessPerFunctionProfile: " << func_name;
+157:   inst_map.BuildPerFunctionInstructionMap(func_name, maps.start_addr,
+158:                                           maps.end_addr);
+159:   // LOG(INFO) << "Built instruction map for func: " << func_name;
+160:
+161:   symbol_map_->AddSymbolTimestamp (func_name, maps.timestamp);
+162:
+163:   AddressCountMap map;
+164:   const AddressCountMap *map_ptr;
+165:   if (absl::GetFlag(FLAGS_use_lbr)) {
+166:     if (maps.range_count_map.empty()) {
+167:       LOG(WARNING) << "use_lbr was enabled but range_count_map was empty!";
+168:       return;
+169:     }
+170:     for (const auto &[range, count] : maps.range_count_map) {
+171:       for (uint64_t addr = range.first;
+172:            inst_map.lookup(addr) && addr <= range.second; ++addr) {
+173:         map[addr] += count;
+174:       }
+175:     }
+176:     map_ptr = &map;
+177:   } else {
+178:     map_ptr = &maps.address_count_map;
+179:   }
+180:
+181:   for (const auto &[address, count] : *map_ptr) {
+182:     const InstructionMap::InstInfo *info = inst_map.lookup(address);
+183:     if (info == nullptr) {
+184:       continue;
+185:     }
+186:     if (!info->source_stack.empty()) {
+187:       // LOG(INFO) << "adding source count for func: " << func_name
+188:       //           << " address: " << address;
+189:       symbol_map_->AddSourceCount(func_name, info->source_stack, count, 0,
+190:                                   info->source_stack[0].DuplicationFactor(),
+191:                                   SymbolMap::PERFDATA);
+192:     }
+
+FILE: temp/autofdo/sample_reader.cc
+270:   quipper::PerfReader reader;
+271:   quipper::PerfParser parser(&reader);
+272:   if (!reader.ReadFile(profile_file) || !parser.ParseRawEvents()) {
+273:     return false;
+274:   }
+275:
+276:   // If we can find build_id from binary, and the exact build_id was found
+277:   // in the profile, then we use focus_bins to match samples. Otherwise,
+278:   // focus_binary_re_ is used to match the binary name with the samples.
+279:   if (!build_id_.empty()) {
+280:     GetFileNameFromBuildID(&reader);
+281:     if (focus_bins_.empty()) {
+282:       // The binary with build_id_ was not found in perf.data.
+283:       // That could happen when e.g. perf.data is a system-wide profile,
+284:       // and the binary of interest was not running when the profile
+285:       // was collected.
+286:       return true;
+287:     }
+288:   } else {
+289:     LOG(INFO) << "No buildid found in binary";
+290:   }
+291:
+292:   for (const auto &event : parser.parsed_events()) {
+293:     if (!event.event_ptr ||
+294:         event.event_ptr->header().type() != quipper::PERF_RECORD_SAMPLE) {
+295:       continue;
+296:     }
+297:     if (MatchBinary(event.dso_and_offset)) {
+298:       address_count_map_[event.dso_and_offset.offset()]++;
+299:       uint64_t address = event.dso_and_offset.offset();
+300:       uint64_t timestamp = event.event_ptr->timestamp();
+301:       address_timestamp_map_.insert({address, timestamp});
+302:     }
+303:     int start_index = 0;
+304:     while (start_index < event.branch_stack.size() &&
+305:            event.branch_stack[start_index].spec ==
+306:                quipper::PERF_BR_SPEC_WRONG_PATH) {
+307:       start_index++;
+308:     }
+309:     if (event.branch_stack.size() > start_index &&
+310:         MatchBinary(event.branch_stack[start_index].to) &&
+
+FILE: temp/autofdo/profile_creator.h
+32:   static uint64_t GetTotalCountFromTextProfile(
+33:       absl::string_view input_profile_name);
+34:
+35:   // Creates AutoFDO profile, returns true if success, false otherwise.
+36:   bool CreateProfile(const std::string &input_profile_name,
+37:                      const std::string &profiler,
+38:                      devtools_crosstool_autofdo::ProfileWriter *writer,
+39:                      const std::string &output_profile_name,
+40:                      bool store_sym_list_in_profile = false,
+41:                      bool check_lbr_entry = false);
+42:
+43:   // Reads samples from the input profile.
+
+FILE: temp/autofdo/profile_creator.cc
+163:
+164:   return writer->WriteToFile(output_profile_name);
+165: }
+166:
+167: bool ProfileCreator::ReadSample(absl::string_view input_profile_name,
+168:                                 const std::string &profiler) {
+169:   if (profiler == "perf" || profiler == "perf_spe") {
+170:     std::string focus_binary_re;
+171:     std::string build_id;
+172:     // Sets the regular expression to filter samples for a given binary.
+173:     if (!absl::GetFlag(FLAGS_focus_binary_re).empty()) {
+174:       focus_binary_re = absl::GetFlag(FLAGS_focus_binary_re);
+175:     } else {
+176:       char *dup_name = strdup(binary_.c_str());
+177:       char *strip_ptr = strstr(dup_name, ".unstripped");
+178:       if (strip_ptr) {
+179:         *strip_ptr = 0;
+180:       }
+181:       const char *file_base_name = basename(dup_name);
+182:       CHECK(file_base_name) << "Cannot find basename for: " << binary_;
+183:       focus_binary_re = std::string(".*/") + file_base_name + "$";
+184:       free(dup_name);
+185:
+186:       ElfReader reader(binary_);
+187:       // Quipper (and other parts of google3's perf infrastructure) pads build
+188:       // ids--if present--to 40 characters hex. Match that behavior here. See
+189:       // quipper/perf_data_utils.h and b/21597512 for more info.
+190:       const size_t kMinPerfBuildIDStringLength = 40;
+191:       build_id = reader.GetBuildId();
+192:       if (!build_id.empty() && build_id.length() < kMinPerfBuildIDStringLength)
+193:         build_id.resize(kMinPerfBuildIDStringLength, '0');
+194:     }
+195:
+196:     if (profiler == "perf_spe") {
+197: #if defined(HAVE_LLVM)
+198:       sample_reader_ = new PerfSpeDataSampleReader(
+199:           absl::GetFlag(FLAGS_disassemble_arm_branches)
+200:               ? PerfSpeDataSampleReader::BranchIdStrategy::kDisassembly
+201:               : PerfSpeDataSampleReader::BranchIdStrategy::kSampling,
+202:           input_profile_name, focus_binary_re, binary_);
+203: #else
+204:       sample_reader_ = new SimpleSpeDataSampleReader(input_profile_name, binary_);
+205: #endif
+206:     } else {
+207:       sample_reader_ = new PerfDataSampleReader(input_profile_name,
+208:                                                 focus_binary_re, build_id);
+209:     }
+210:   } else if (profiler == "text") {
+211:     sample_reader_ = new TextSampleReaderWriter(input_profile_name);
+212:   } else {
+213:     LOG(ERROR) << "Unsupported profiler type: " << profiler;
+214:     return false;
+215:   }
+216:   if (!sample_reader_->ReadAndSetTotalCount()) {
+
+FILE: temp/autofdo/create_llvm_prof.cc
+31:           "Input profile file name. When --format=propeller, this accepts "
+32:           "multiple profile file names concatnated by ';' and if the file name "
+33:           "has prefix \"@\", then the profile is treated as a list file whose "
+34:           "lines are interpreted as input profile paths.");
+35: ABSL_FLAG(std::string, profiler, "perf",
+36:           "Input profile type. Possible values: perf (LBR), text, prefetch, or "
+37:           "perf_spe.");
+38: ABSL_FLAG(std::string, prefetch_hints, "", "Input cache prefetch hints");
+260:       nullptr);
+261:   if (absl::GetFlag(FLAGS_format) == "text") {
+262:     writer = std::make_unique<devtools_crosstool_autofdo::LLVMProfileWriter>(
+263:         llvm::sampleprof::SPF_Text);
+264:   } else if (absl::GetFlag(FLAGS_format) == "binary") {
+265:     writer = std::make_unique<devtools_crosstool_autofdo::LLVMProfileWriter>(
+266:         llvm::sampleprof::SPF_Binary);
+267:   } else if (absl::GetFlag(FLAGS_format) == "extbinary") {
+268:     writer = std::make_unique<devtools_crosstool_autofdo::LLVMProfileWriter>(
+269:         llvm::sampleprof::SPF_Ext_Binary);
+270:   } else {
+271:     LOG(ERROR)
+272:         << "--format=" << absl::GetFlag(FLAGS_format) << " is not supported. "
+273:         << "Use one of 'text', 'binary', 'propeller' or 'extbinary' format";
+274:     return 1;
+275:   }
+276:
+277:   if (absl::GetFlag(FLAGS_prof_sym_list) &&
+278:       absl::GetFlag(FLAGS_format) != "extbinary") {
+279:     LOG(ERROR) << "--prof_sym_list is enabled, --format must be extbinary";
+280:     return 1;
+281:   }
+282:
+283:   devtools_crosstool_autofdo::ProfileCreator creator(
+284:       absl::GetFlag(FLAGS_binary));
+285:   absl::SetFlag(&FLAGS_use_discriminator_encoding, true);
+286:   if (creator.CreateProfile(absl::GetFlag(FLAGS_profile),
+287:                             absl::GetFlag(FLAGS_profiler), writer.get(),
+288:                             absl::GetFlag(FLAGS_out),
+289:                             absl::GetFlag(FLAGS_prof_sym_list))) {
+290:     return 0;
+
+FILE: temp/autofdo/instruction_map.cc
+18: void InstructionMap::BuildPerFunctionInstructionMap(absl::string_view name,
+19:                                                     uint64_t start_addr,
+20:                                                     uint64_t end_addr) {
+21:   if (start_addr >= end_addr) {
+22:     return;
+23:   }
+24:
+25:   // Make sure nobody has set up inst_map_ yet.
+26:   CHECK(inst_map_.empty());
+27:
+28:   start_addr_ = start_addr;
+29:   // LOG(INFO) << "Building per function instruction map: " << start_addr << " to "
+30:   //           << end_addr << " (size: " << end_addr - start_addr << ")";
+31:   inst_map_.resize(end_addr - start_addr);
+32:   for (uint64_t addr = start_addr; addr < end_addr; addr++) {
+33:     InstInfo *info = &inst_map_[addr - start_addr];
+34:     addr2line_->GetInlineStack(addr, &info->source_stack);
+35:     if (!info->source_stack.empty()) {
+36:       symbol_map_->AddSourceCount(name, info->source_stack, 0, 1, 1,
+37:                                   SymbolMap::PERFDATA);
+38:     }
+39:   }
+
+FILE: temp/autofdo/util/symbolize/elf_reader.cc
+60:
+61: // The lowest bit of an ARM symbol value is used to indicate a Thumb address.
+62: const int kARMThumbBitOffset = 0;
+63:
+64: // Converts an ARM Thumb symbol value to a true aligned address value.
+65: template <typename T>
+66: T AdjustARMThumbSymbolValue(const T& symbol_table_value) {
+67:   return symbol_table_value & ~(1 << kARMThumbBitOffset);
+68: }
+288:     unsigned char header[EI_NIDENT];
+289:     if (pread(fd, header, sizeof(header), 0) != sizeof(header)) {
+290:       if (error != NULL) *error = "Could not read header";
+291:       return false;
+292:     }
+293:
+294:     if (memcmp(header, ELFMAG, SELFMAG) != 0) {
+295:       if (error != NULL) *error = "Missing ELF magic";
+296:       return false;
+297:     }
+298:
+299:     if (header[EI_CLASS] != ElfArch::kElfClass) {
+300:       if (error != NULL) *error = "Different word size";
+301:       return false;
+302:     }
+303:
+304:     int endian = 0;
+305:     if (header[EI_DATA] == ELFDATA2LSB)
+306:       endian = __LITTLE_ENDIAN;
+307:     else if (header[EI_DATA] == ELFDATA2MSB)
+308:       endian = __BIG_ENDIAN;
+309:     if (endian != __BYTE_ORDER) {
+310:       if (error != NULL) *error = "Different byte order";
+311:       return false;
+312:     }
+313:
+314:     return true;
+315:   }
+316:
+317:   void VisitSymbols(typename ElfArch::Word section_type,
+318:                     ElfReader::SymbolSink *sink) {
+632:     sections_.resize(GetNumSections(), NULL);
+633:     return true;
+634:   }
+635:
+636:   void AdjustSymbolValue(typename ElfArch::Sym* sym) {
+637:     switch (header_.e_machine) {
+638:     case EM_ARM:
+639:       // For ARM architecture, if the LSB of the function symbol offset is set,
+640:       // it indicates a Thumb function.  This bit should not be taken literally.
+641:       // Clear it.
+642:       if (ElfArch::Type(sym) == STT_FUNC)
+643:         sym->st_value = AdjustARMThumbSymbolValue(sym->st_value);
+644:       break;
+645:     case EM_386:
+646:       // No adjustment needed for Intel x86 architecture.  However, explicitly
+647:       // define this case as we use it quite often.
+648:       break;
+649:     case EM_PPC:
+650:       // PowerPC architecture may need adjustment in the future.
+651:       break;
+652:     default:
+943: ElfReaderImpl<Elf32> *ElfReader::GetImpl32() {
+944:   if (impl32_ == NULL) {
+945:     impl32_ = new ElfReaderImpl<Elf32>(path_, fd_);
+946:   }
+947:   return impl32_;
+948: }
+949:
+950: ElfReaderImpl<Elf64> *ElfReader::GetImpl64() {
+951:   if (impl64_ == NULL) {
+952:     impl64_ = new ElfReaderImpl<Elf64>(path_, fd_);
+953:   }
+954:   return impl64_;
+955: }
+
+FILE: temp/autofdo/CMakeLists.txt
+261:   set (LLVM_INCLUDE_TOOLS OFF)
+262:   set (LLVM_INCLUDE_DOCS OFF)
+263:
+264:   set (LLVM_ENABLE_RTTI ON)
+265:   set (LLVM_ENABLE_PROJECTS clang CACHE STRING
+266:     "Semicolon-separated list of projects to build (${LLVM_KNOWN_PROJECTS}), or \"all\".")
+267:   set (LLVM_TARGETS_TO_BUILD X86 AArch64 CACHE STRING
+268:     "Semicolon-separated list of LLVM targets to build, or \"all\".")
+269:   set (LLVM_ENABLE_ZSTD FORCE_ON)
+270:   if (NOT ${BUILD_SHARED})
+
+FILE: src/llvm/bolt/lib/Profile/DataAggregator.cpp
+46:
+47: static cl::opt<bool>
+48:     BasicAggregation("basic-events",
+49:                      cl::desc("aggregate basic events (without brstack info)"),
+50:                      cl::cat(AggregatorCategory));
+51:
+52: static cl::alias BasicAggregationAlias("ba",
+53:                                        cl::desc("Alias for --basic-events"),
+54:                                        cl::aliasopt(BasicAggregation));
+55:
+56: static cl::opt<bool> DeprecatedBasicAggregationNl(
+57:     "nl", cl::desc("Alias for --basic-events (deprecated. Use --ba)"),
+58:     cl::cat(AggregatorCategory), cl::ReallyHidden,
+59:     cl::callback([](const bool &Enabled) {
+60:       errs()
+61:           << "BOLT-WARNING: '-nl' is deprecated, please use '--ba' instead.\n";
+62:       BasicAggregation = Enabled;
+63:     }));
+64:
+213:   if (opts::BasicAggregation) {
+214:     launchPerfProcess("events without brstack", MainEventsPPI,
+215:                       "script -F pid,event,ip");
+216:   } else if (!opts::ITraceAggregation.empty()) {
+217:     // Disable parsing memory profile from trace data, unless requested by user.
+218:     if (!opts::ParseMemProfile.getNumOccurrences())
+219:       opts::ParseMemProfile = false;
+220:     launchPerfProcess("branch events with itrace", MainEventsPPI,
+221:                       "script -F pid,brstack --itrace=" +
+222:                           opts::ITraceAggregation);
+223:   } else {
+224:     launchPerfProcess("branch events", MainEventsPPI, "script -F pid,brstack");
+225:   }
+722:
+723: bool DataAggregator::doBasicSample(BinaryFunction &OrigFunc, uint64_t Address,
+724:                                    uint64_t Count) {
+725:   // To record executed bytes, use basic block size as is regardless of BAT.
+726:   uint64_t BlockSize = 0;
+727:   if (BinaryBasicBlock *BB = OrigFunc.getBasicBlockContainingOffset(
+728:           Address - OrigFunc.getAddress()))
+729:     BlockSize = BB->getOriginalSize();
+730:
+731:   BinaryFunction *ParentFunc = getBATParentFunction(OrigFunc);
+732:   BinaryFunction &Func = ParentFunc ? *ParentFunc : OrigFunc;
+733:   // Attach executed bytes to parent function in case of cold fragment.
+734:   Func.SampleCountInBytes += Count * BlockSize;
+735:
+736:   auto I = NamesToBasicSamples.find(Func.getOneName());
+737:   if (I == NamesToBasicSamples.end()) {
+738:     bool Success;
+739:     StringRef LocName = getLocationName(Func, BAT);
+740:     std::tie(I, Success) = NamesToBasicSamples.insert(std::make_pair(
+741:         Func.getOneName(),
+742:         FuncBasicSampleData(LocName, FuncBasicSampleData::ContainerTy())));
+743:   }
+744:
+745:   Address -= Func.getAddress();
+746:   if (BAT)
+747:     Address = BAT->translate(Func.getAddress(), Address, /*IsBranchSrc=*/false);
+748:
+749:   I->second.bumpCount(Address, Count);
+750:   return true;
+751: }
+752:
+1634:          << " brstack entries\n";
+1635:   if (NumTotalSamples) {
+1636:     if (NumSamples && NumSamplesNoLBR == NumSamples) {
+1637:       // Note: we don't know if perf2bolt is being used to parse memory samples
+1638:       // at this point. In this case, it is OK to parse zero LBRs.
+1639:       if (!opts::ArmSPE)
+1640:         errs()
+1641:             << "PERF2BOLT-WARNING: all recorded samples for this binary lack "
+1642:                "brstack. Record profile with perf record -j any or run "
+1643:                "perf2bolt "
+1644:                "in non-brstack mode with -ba (the performance improvement in "
+1645:                "-ba "
+1646:                "mode may be limited)\n";
+1647:       else
+1648:         errs()
+1649:             << "PERF2BOLT-WARNING: All recorded samples for this binary lack "
+1678:
+1679: std::error_code DataAggregator::parseBasicEvents() {
+1680:   outs() << "PERF2BOLT: parsing basic events (without brstack)...\n";
+1681:   NamedRegionTimer T("parseBasic", "Parsing basic events", TimerGroupName,
+1682:                      TimerGroupDesc, opts::TimeAggregator);
+1683:   while (hasData()) {
+1684:     ErrorOr<PerfBasicSample> Sample = parseBasicSample();
+1685:     if (std::error_code EC = Sample.getError())
+1686:       return EC;
+1687:
+1688:     if (!Sample->PC)
+1689:       continue;
+1690:     ++NumTotalSamples;
+1691:
+1692:     if (BinaryFunction *BF = getBinaryFunctionContainingAddress(Sample->PC))
+1693:       BF->setHasProfileAvailable();
+1694:
+1695:     ++BasicSamples[Sample->PC];
+1696:     EventNames.insert(Sample->EventName);
+1697:   }
+1698:   outs() << "PERF2BOLT: read " << NumTotalSamples << " basic samples\n";
+1699:
+1700:   return std::error_code();
+1701: }
+1702:
+1703: void DataAggregator::processBasicEvents() {
+1704:   outs() << "PERF2BOLT: processing basic events (without brstack)...\n";
+1705:   NamedRegionTimer T("processBasic", "Processing basic events", TimerGroupName,
+1706:                      TimerGroupDesc, opts::TimeAggregator);
+1707:   uint64_t OutOfRangeSamples = 0;
+1708:   for (auto &Sample : BasicSamples) {
+1709:     const uint64_t PC = Sample.first;
+1710:     const uint64_t HitCount = Sample.second;
+1711:     BinaryFunction *Func = getBinaryFunctionContainingAddress(PC);
+1712:     if (!Func) {
+1713:       OutOfRangeSamples += HitCount;
+1714:       continue;
+1715:     }
+1716:
+1717:     doBasicSample(*Func, PC, HitCount);
+1718:   }
+1719:
+1720:   printBasicSamplesDiagnostics(OutOfRangeSamples);
+2215:   if (opts::BasicAggregation) {
+2216:     OutFile << "no_lbr";
+2217:     for (const StringMapEntry<EmptyStringSetTag> &Entry : EventNames)
+2218:       OutFile << " " << Entry.getKey();
+2219:     OutFile << "\n";
+2220:
+2221:     for (const auto &KV : NamesToBasicSamples) {
+2222:       const FuncBasicSampleData &FSD = KV.second;
+2223:       for (const BasicSampleInfo &SI : FSD.Data) {
+2224:         writeLocation(SI.Loc);
+2225:         OutFile << SI.Hits << "\n";
+2226:         ++BranchValues;
+2227:       }
+2228:     }
+2229:   } else {
+2230:     for (const auto &KV : NamesToBranches) {
+
+FILE: src/llvm/bolt/lib/Rewrite/RewriteInstance.cpp
+348:     return createX86MCPlusBuilder(Analysis, Info, RegInfo, STI);
+349: #endif
+350:
+351: #ifdef AARCH64_AVAILABLE
+352:   if (Arch == Triple::aarch64)
+353:     return createAArch64MCPlusBuilder(Analysis, Info, RegInfo, STI);
+354: #endif
+355:
+356: #ifdef RISCV_AVAILABLE
+357:   if (Arch == Triple::riscv64)
+358:     return createRISCVMCPlusBuilder(Analysis, Info, RegInfo, STI);
+359: #endif
+360:
+398:   auto ELF64LEFile = dyn_cast<ELF64LEObjectFile>(InputFile);
+399:   if (!ELF64LEFile) {
+400:     Err = createStringError(errc::not_supported,
+401:                             "Only 64-bit LE ELF binaries are supported");
+402:     return;
+403:   }
+404:
+2251:
+2252:   if (BC->IsStripped && !opts::AllowStripped) {
+2253:     BC->errs()
+2254:         << "BOLT-ERROR: stripped binaries are not supported. If you know "
+2255:            "what you're doing, use --allow-stripped to proceed\n";
+2256:     exit(1);
+2257:   }
+2258:
+2259:   // Force non-relocation mode for heatmap generation
+2260:   if (opts::HeatmapMode == opts::HeatmapModeKind::HM_Exclusive)
+2261:     BC->HasRelocations = false;
+2262:
+2279: void RewriteInstance::adjustCommandLineOptions() {
+2280:   if (BC->isAArch64() && !BC->HasRelocations)
+2281:     BC->errs() << "BOLT-WARNING: non-relocation mode for AArch64 is not fully "
+2282:                   "supported\n";
+2283:
+2304:   if (BC->isAArch64() && !opts::CompactCodeModel &&
+2305:       opts::SplitStrategy == opts::SplitFunctionsStrategy::CDSplit) {
+2306:     BC->errs() << "BOLT-ERROR: CDSplit is not supported with LongJmp. Try with "
+2307:                   "'--compact-code-model'\n";
+2308:     exit(1);
+2309:   }

@@ -1,0 +1,1020 @@
+Captured 2026-10-28 Asia/Shanghai. Paths abbreviated literally below:
+WORKDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+ROOT=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0
+REMOTE_EXIT is the captured board command status before any cat/printing; TRANSPORT_EXIT is separate SDB status. Empty STDERR means the command emitted none. No pipeline head exit used to judge record/profile generation.
+
+RECORD: temp/spike/connect.json
+COMMAND:
+sdb connect 192.168.108.26
+EXIT:
+0
+STDOUT:
+192.168.108.26:26101 is already connected
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/devices.json
+COMMAND:
+sdb devices
+EXIT:
+0
+STDOUT:
+List of devices attached
+192.168.108.26:26101	device    	rpi4
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/model.json
+TIME:
+2026-10-28T19:16:14.471512+08:00
+COMMAND:
+cat /proc/device-tree/model
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+Raspberry Pi 5 Model B Rev 1.1[NUL]
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/arch.json
+TIME:
+2026-10-28T19:16:14.574822+08:00
+COMMAND:
+uname -m
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+aarch64
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/root.json
+COMMAND:
+sdb -s 192.168.108.26:26101 root on
+EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+RECORD: temp/spike/uid.json
+TIME:
+2026-10-28T19:16:14.724690+08:00
+COMMAND:
+id -u
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+0
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/rpm_before.json
+TIME:
+2026-10-28T19:16:14.924619+08:00
+COMMAND:
+n=$(nice -n 19 ionice -c3 rpm -qa); r=$?; [ "$r" -eq 0 ] || exit "$r"; printf "%s
+" "$n" | wc -l
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+1249
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/mount.json
+TIME:
+2026-10-28T19:16:15.026327+08:00
+COMMAND:
+findmnt -T /opt -n -o TARGET,SOURCE,FSTYPE,OPTIONS
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+/opt /dev/mmcblk0p3 ext4 rw,relatime
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/space.json
+TIME:
+2026-10-28T19:16:15.129724+08:00
+COMMAND:
+df -h /opt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mmcblk0p3        1.3G   97M  1.2G   8% /opt
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/prepare_work.json
+TIME:
+2026-10-28T19:16:15.233082+08:00
+COMMAND:
+test -d /opt/afdo_agent/work && test -z "$(find /opt/afdo_agent/work -mindepth 1 -print -quit)" && mkdir -p /opt/afdo_agent/work/home /opt/afdo_agent/work/tmp /opt/afdo_agent/work/buildid && : > /opt/afdo_agent/work/perfconfig
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/perf_sha.json
+TIME:
+2026-10-28T19:16:15.694608+08:00
+COMMAND:
+nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949  /opt/afdo_agent/tools/perf
+06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007  /opt/afdo_agent/lib/libLLVM.so.22.1
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/perf_version.json
+TIME:
+2026-10-28T19:16:15.812683+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+perf version 6.12.80
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/push_base.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push $WORKDIR/temp/spike/build1-extract/usr/bin/afdo-spike-base /opt/afdo_agent/work/afdo-spike-base
+EXIT:
+0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+
+pushed                afdo-spike-base	  0%	      0KB	    0KB/s
+pushed                afdo-spike-base	100%	     23KB	    0KB/s
+1 file(s) pushed. 0 file(s) skipped.
+$WORKDIR/temp/spike/build1-extract/usr/bin/afdo-spike-base   141KB/s (23600 bytes in 0.162s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_base.json
+TIME:
+2026-10-28T19:22:29.234816+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo-spike-base
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+28c1ac135271ec050588691bc654ca59e486a4258ed0e4027c9e156dd14675df  /opt/afdo_agent/work/afdo-spike-base
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/push_instr.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push $WORKDIR/temp/spike/build1-extract/usr/bin/afdo-spike-instr /opt/afdo_agent/work/afdo-spike-instr
+EXIT:
+0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+
+pushed               afdo-spike-instr	  0%	      0KB	    0KB/s
+pushed               afdo-spike-instr	100%	    168KB	    0KB/s
+1 file(s) pushed. 0 file(s) skipped.
+$WORKDIR/temp/spike/build1-extract/usr/bin/afdo-spike-instr   1315KB/s (172824 bytes in 0.128s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_instr.json
+TIME:
+2026-10-28T19:22:29.495020+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo-spike-instr
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+b09905ebe115c1c6b81b2cb813a086cb31905b43fb88f28c6944af4012f5f682  /opt/afdo_agent/work/afdo-spike-instr
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pilot.json
+TIME:
+2026-10-28T19:22:30.169830+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-base 100000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=100000 seed=0123456789abcdef checksum=e86377386234dafc
+
+STDERR:
+real 0.57
+user 0.57
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/base_run_1.json
+TIME:
+2026-10-28T19:23:53.481310+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-base 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+real 14.27
+user 14.27
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/base_run_2.json
+TIME:
+2026-10-28T19:24:07.865536+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-base 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+real 14.27
+user 14.25
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/base_run_3.json
+TIME:
+2026-10-28T19:24:22.257170+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-base 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+real 14.28
+user 14.25
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/cycles_record.json
+TIME:
+2026-10-28T19:24:37.568626+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -c 500009 -o /opt/afdo_agent/work/afdo_cycles.data -- /opt/afdo_agent/work/afdo-spike-base 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+[ perf record: Woken up 9 times to write data ]
+[ perf record: Captured and wrote 2.101 MB /opt/afdo_agent/work/afdo_cycles.data (68745 samples) ]
+real 15.20
+user 14.50
+sys 0.08
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/cycles_evlist.json
+TIME:
+2026-10-28T19:24:37.694300+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/afdo_cycles.data
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 500009, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/cycles_export_symbols.json
+TIME:
+2026-10-28T19:24:38.353928+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -F ip,sym,dso -i /opt/afdo_agent/work/afdo_cycles.data > /opt/afdo_agent/work/afdo_cycles_symbols.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/cycles_export_ip.json
+TIME:
+2026-10-28T19:24:38.695310+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script --show-mmap-events -F ip -i /opt/afdo_agent/work/afdo_cycles.data > /opt/afdo_agent/work/afdo_cycles_ip.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/cycles_report.json
+TIME:
+2026-10-28T19:24:38.004264+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso -i /opt/afdo_agent/work/afdo_cycles.data
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 68K of event 'cycles'
+# Event count (approx.): 34373118705
+#
+# Overhead  Shared Object
+# ........  .................
+#
+    99.98%  afdo-spike-base
+     0.02%  [kernel.kallsyms]
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/clk_record.json
+TIME:
+2026-10-28T19:24:55.603022+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cpu-clock -F 999 -o /opt/afdo_agent/work/afdo_clk.data -- /opt/afdo_agent/work/afdo-spike-base 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+[ perf record: Woken up 3 times to write data ]
+[ perf record: Captured and wrote 0.547 MB /opt/afdo_agent/work/afdo_clk.data (14268 samples) ]
+real 15.20
+user 14.37
+sys 0.12
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/clk_evlist.json
+TIME:
+2026-10-28T19:24:55.726745+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/afdo_clk.data
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+cpu-clock: type: 1 (software), size: 136, config: 0 (PERF_COUNT_SW_CPU_CLOCK), { sample_period, sample_freq }: 999, sample_type: IP|TID|TIME|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, freq: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/clk_export_symbols.json
+TIME:
+2026-10-28T19:24:56.296462+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -F ip,sym,dso -i /opt/afdo_agent/work/afdo_clk.data > /opt/afdo_agent/work/afdo_clk_symbols.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/clk_export_ip.json
+TIME:
+2026-10-28T19:24:56.578212+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script --show-mmap-events -F ip -i /opt/afdo_agent/work/afdo_clk.data > /opt/afdo_agent/work/afdo_clk_ip.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/clk_report.json
+TIME:
+2026-10-28T19:24:56.003072+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso -i /opt/afdo_agent/work/afdo_clk.data
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 14K of event 'cpu-clock'
+# Event count (approx.): 14282282268
+#
+# Overhead  Shared Object
+# ........  .................
+#
+    99.99%  afdo-spike-base
+     0.01%  [kernel.kallsyms]
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/instr_run.json
+TIME:
+2026-10-28T19:25:12.615685+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; export LLVM_PROFILE_FILE=/opt/afdo_agent/work/instr-%p.profraw; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-instr 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+real 15.02
+user 15.01
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/profraw_list.json
+TIME:
+2026-10-28T19:25:12.720157+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; ls -l /opt/afdo_agent/work/instr-*.profraw; printf "PATHS\n"; printf "%s\n" /opt/afdo_agent/work/instr-*.profraw
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+-rw-rw-rw- 1 root root 984 Oct 28 20:25 /opt/afdo_agent/work/instr-36489.profraw
+PATHS
+/opt/afdo_agent/work/instr-36489.profraw
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/profraw_sha.json
+TIME:
+2026-10-28T19:25:12.823157+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/instr-36489.profraw
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+150f63f6d7a37e119a56289acabbbf234a80c7d8cfb5be4bad3224b9eef45d2d  /opt/afdo_agent/work/instr-36489.profraw
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/push_pgo.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push $WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-pgo /opt/afdo_agent/work/afdo-spike-pgo
+EXIT:
+0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+
+pushed                 afdo-spike-pgo	  0%	      0KB	    0KB/s
+pushed                 afdo-spike-pgo	100%	     23KB	    0KB/s
+1 file(s) pushed. 0 file(s) skipped.
+$WORKDIR/temp/spike/build2-extract/usr/bin/afdo-spike-pgo   152KB/s (23872 bytes in 0.153s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_pgo.json
+TIME:
+2026-10-28T19:28:40.489879+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo-spike-pgo
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+9ecb901764f4ccca9c3538d7bd2cdd7103c01f797f9a0752cf7f309f4e5ec029  /opt/afdo_agent/work/afdo-spike-pgo
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pgo_run_1.json
+TIME:
+2026-10-28T19:28:54.847196+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-pgo 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+real 14.25
+user 14.24
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pgo_run_2.json
+TIME:
+2026-10-28T19:29:09.213909+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-pgo 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+real 14.26
+user 14.24
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pgo_run_3.json
+TIME:
+2026-10-28T19:29:23.576806+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/work/afdo-spike-pgo 2500000
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+rounds=2500000 seed=0123456789abcdef checksum=a31c311b953a2ac5
+
+STDERR:
+real 14.26
+user 14.25
+sys 0.00
+
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/cleanup.json
+TIME:
+2026-10-28T19:29:43.643652+08:00
+COMMAND:
+nice -n 19 ionice -c3 find /opt/afdo_agent/work -mindepth 1 -delete && test -z "$(find /opt/afdo_agent/work -mindepth 1 -print -quit)" && ls -la /opt/afdo_agent/work
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+total 8
+drwxrwxrwx 2 root root 4096 Oct 28 20:29 .
+drwxrwxrwx 5 root root 4096 Oct 28 18:57 ..
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/rpm_after.json
+TIME:
+2026-10-28T19:29:43.843946+08:00
+COMMAND:
+n=$(nice -n 19 ionice -c3 rpm -qa); r=$?; [ "$r" -eq 0 ] || exit "$r"; printf "%s
+" "$n" | wc -l
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+1249
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/retained.json
+TIME:
+2026-10-28T19:29:44.302386+08:00
+COMMAND:
+nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949  /opt/afdo_agent/tools/perf
+06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007  /opt/afdo_agent/lib/libLLVM.so.22.1
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/boundary_before.json
+COMMAND:
+stat -c '%n %s %y' /tmp/sdb.log
+EXIT:
+0
+STDOUT:
+/tmp/sdb.log 495 2026-10-28 17:48:51.361776578 +0800
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/boundary_after.json
+COMMAND:
+stat -c '%n %s %y' /tmp/sdb.log
+EXIT:
+0
+STDOUT:
+/tmp/sdb.log 495 2026-10-28 17:48:51.361776578 +0800
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_afdo_cycles.data.json
+TIME:
+2026-10-28T19:24:38.809959+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo_cycles.data
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+1e12fab527b63fbad188453d67a16919574f7e77d0e1a87ea475cbb644eb9197  /opt/afdo_agent/work/afdo_cycles.data
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pull_afdo_cycles.data.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/afdo_cycles.data $WORKDIR/temp/spike/afdo_cycles.data
+EXIT:
+0
+STDOUT:
+
+pulled               afdo_cycles.data	  0%	      0KB	    0KB/s
+pulled               afdo_cycles.data	100%	   2157KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/afdo_cycles.data   6136KB/s (2209000 bytes in 0.351s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_afdo_cycles_ip.txt.json
+TIME:
+2026-10-28T19:24:40.038432+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo_cycles_ip.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+36b3842fb34a9333bf99b324438f1579805f95a1533801332462f138ae1904cc  /opt/afdo_agent/work/afdo_cycles_ip.txt
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pull_afdo_cycles_ip.txt.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/afdo_cycles_ip.txt $WORKDIR/temp/spike/afdo_cycles_ip.txt
+EXIT:
+0
+STDOUT:
+
+pulled             afdo_cycles_ip.txt	  0%	      0KB	    0KB/s
+pulled             afdo_cycles_ip.txt	100%	   1210KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/afdo_cycles_ip.txt   4900KB/s (1239508 bytes in 0.247s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_afdo_cycles_symbols.txt.json
+TIME:
+2026-10-28T19:24:39.305697+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo_cycles_symbols.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+75c9a2bdb26f9e472cfd77d2d5b1509ba11022b4cb61ef44b08b72c1f2156a42  /opt/afdo_agent/work/afdo_cycles_symbols.txt
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pull_afdo_cycles_symbols.txt.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/afdo_cycles_symbols.txt $WORKDIR/temp/spike/afdo_cycles_symbols.txt
+EXIT:
+0
+STDOUT:
+
+pulled        afdo_cycles_symbols.txt	  0%	      0KB	    0KB/s
+pulled        afdo_cycles_symbols.txt	100%	   4579KB	 8709KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/afdo_cycles_symbols.txt   7487KB/s (4689077 bytes in 0.611s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_afdo_clk.data.json
+TIME:
+2026-10-28T19:24:56.685267+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo_clk.data
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+cc1d8a496605545afdc568811e7cfe7edc5b7bb298215219d9b0f4517ceff42d  /opt/afdo_agent/work/afdo_clk.data
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pull_afdo_clk.data.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/afdo_clk.data $WORKDIR/temp/spike/afdo_clk.data
+EXIT:
+0
+STDOUT:
+
+pulled                  afdo_clk.data	  0%	      0KB	    0KB/s
+pulled                  afdo_clk.data	100%	    566KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/afdo_clk.data   3076KB/s (579864 bytes in 0.184s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_afdo_clk_ip.txt.json
+TIME:
+2026-10-28T19:24:57.323176+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo_clk_ip.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+df01e145cb11f09acef099f96bf4669b4bb65c9ad70e1c2f2fd7058ea76089e7  /opt/afdo_agent/work/afdo_clk_ip.txt
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pull_afdo_clk_ip.txt.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/afdo_clk_ip.txt $WORKDIR/temp/spike/afdo_clk_ip.txt
+EXIT:
+0
+STDOUT:
+
+pulled                afdo_clk_ip.txt	  0%	      0KB	    0KB/s
+pulled                afdo_clk_ip.txt	100%	    252KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/afdo_clk_ip.txt   1662KB/s (258922 bytes in 0.152s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/sha_afdo_clk_symbols.txt.json
+TIME:
+2026-10-28T19:24:56.987673+08:00
+COMMAND:
+export HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/afdo_clk_symbols.txt
+REMOTE_EXIT:
+0
+TRANSPORT_EXIT:
+0
+STDOUT:
+bf5dba5dbd1948fb481be7386d29c41efc2d3bf6549a0b2a21e2ec9e113ff7d9  /opt/afdo_agent/work/afdo_clk_symbols.txt
+
+STDERR:
+(empty)
+SDB_STDERR:
+(empty)
+
+RECORD: temp/spike/pull_afdo_clk_symbols.txt.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/afdo_clk_symbols.txt $WORKDIR/temp/spike/afdo_clk_symbols.txt
+EXIT:
+0
+STDOUT:
+
+pulled           afdo_clk_symbols.txt	  0%	      0KB	    0KB/s
+pulled           afdo_clk_symbols.txt	100%	    950KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/afdo_clk_symbols.txt   4290KB/s (973280 bytes in 0.221s)
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/pull_profraw.json
+COMMAND:
+nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/instr-36489.profraw $WORKDIR/temp/spike/instr-36489.profraw
+EXIT:
+0
+STDOUT:
+
+pulled            instr-36489.profraw	  0%	      0 B	    0KB/s
+pulled            instr-36489.profraw	100%	    984 B	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/instr-36489.profraw   5KB/s (984 bytes in 0.168s)
+
+STDERR:
+(empty)
+
+FILE: temp/spike/afdo_cycles_ip.txt (first 8 lines)
+PERF_RECORD_MMAP -1/0: [0xffff800080000000(0x1fd8a00) @ 0xffff800080000000]: x [kernel.kallsyms]_text
+PERF_RECORD_MMAP -1/0: [0xffff80007a0b0000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/extcon-usb-fixed.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0b6000(0x6000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-core.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0ba000(0x6000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/dm-bow.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0c8000(0x4000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/logger.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0cf000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/proc-tsm.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0d1000(0x5000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/net/wireless/broadcom/brcm80211/brcmutil/brcmutil.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0d4000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/inform-reboot.ko
+
+FILE: temp/spike/afdo_clk_ip.txt (first 8 lines)
+PERF_RECORD_MMAP -1/0: [0xffff800080000000(0x1fd8a00) @ 0xffff800080000000]: x [kernel.kallsyms]_text
+PERF_RECORD_MMAP -1/0: [0xffff80007a0b0000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/extcon-usb-fixed.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0b6000(0x6000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-core.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0ba000(0x6000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/dm-bow.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0c8000(0x4000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/logger.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0cf000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/proc-tsm.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0d1000(0x5000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/net/wireless/broadcom/brcm80211/brcmutil/brcmutil.ko
+PERF_RECORD_MMAP -1/0: [0xffff80007a0d4000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/inform-reboot.ko
+
+FILE: temp/spike/afdo_cycles_symbols.txt (first 8 lines)
+ ffff8000800ad714 up_read ([kernel.kallsyms])
+ ffff8000805b32b8 cap_mmap_file ([kernel.kallsyms])
+     aaaac3b60abc run_workload (/opt/afdo_agent/work/afdo-spike-base)
+     aaaac3b6090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaac3b608ec sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaac3b608f8 sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaac3b6090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaac3b6090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+
+FILE: temp/spike/afdo_clk_symbols.txt (first 8 lines)
+     aaaacd9c090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaacd9c090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaacd9c08f4 sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaacd9c0904 sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaacd9c090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaacd9c090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaacd9c090c sort_block (/opt/afdo_agent/work/afdo-spike-base)
+     aaaacd9c090c sort_block (/opt/afdo_agent/work/afdo-spike-base)

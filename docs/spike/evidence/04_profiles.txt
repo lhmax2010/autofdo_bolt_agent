@@ -1,0 +1,157 @@
+Captured 2026-10-28 Asia/Shanghai. Paths abbreviated literally below:
+WORKDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+ROOT=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0
+REMOTE_EXIT is the captured board command status before any cat/printing; TRANSPORT_EXIT is separate SDB status. Empty STDERR means the command emitted none. No pipeline head exit used to judge record/profile generation.
+
+RECORD: temp/spike/profgen_cycles.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/llvm-profgen --binary=$WORKDIR/temp/spike/build1-extract/usr/bin/afdo-spike-base --perfscript=$WORKDIR/temp/spike/afdo_cycles_ip.txt --format=extbinary --output=$WORKDIR/temp/spike/afdo_cycles.extbinary
+EXIT:
+1
+STDOUT:
+(empty)
+STDERR:
+llvm-profgen: error: Invalid perf script input!
+
+
+RECORD: temp/spike/profgen_clk.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/llvm-profgen --binary=$WORKDIR/temp/spike/build1-extract/usr/bin/afdo-spike-base --perfscript=$WORKDIR/temp/spike/afdo_clk_ip.txt --format=extbinary --output=$WORKDIR/temp/spike/afdo_clk.extbinary
+EXIT:
+1
+STDOUT:
+(empty)
+STDERR:
+llvm-profgen: error: Invalid perf script input!
+
+
+RECORD: temp/spike/profdata_merge.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/llvm-profdata merge $WORKDIR/temp/spike/instr-36489.profraw -o $WORKDIR/temp/spike/instr.profdata
+EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+RECORD: temp/spike/profdata_show.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/llvm-profdata show --all-functions --counts $WORKDIR/temp/spike/instr.profdata
+EXIT:
+0
+STDOUT:
+Counters:
+  run_workload:
+    Hash: 0x056e49bf1c3aaeee
+    Counters: 5
+    Block counts: [320000000, 320000000, 2497558, 2442, 1]
+  sort_block:
+    Hash: 0x0b15abf27e5d80bf
+    Counters: 4
+    Block counts: [10465782328, 10159363842, 317500000, 2500000]
+  lookup_work:
+    Hash: 0x07735b69b9a7afd9
+    Counters: 3
+    Block counts: [299991523, 20008477, 2500000]
+  main:
+    Hash: 0x0d2ae952a998a00a
+    Counters: 8
+    Block counts: [0, 4096, 1, 1, 1, 0, 0, 0]
+  rare_path:
+    Hash: 0x07735b69b9a7afd9
+    Counters: 3
+    Block counts: [8005, 67697, 2442]
+  hash_mix:
+    Hash: 0x0a4d0ad3efffffff
+    Counters: 1
+    Block counts: [300003624]
+  spike.c;_ZL12parse_numberPKcPm.__uniq.15873189423843482198216846878061840358:
+    Hash: 0x04080bab86692ad9
+    Counters: 7
+    Block counts: [0, 1, 1, 1, 1, 1, 0]
+Instrumentation level: IR  entry_first = 0  instrument_loop_entries = 0
+Functions shown: 7
+Total functions: 7
+Maximum function count: 10465782328
+Maximum internal block count: 10159363842
+Total number of blocks: 31
+Total count: 22210232043
+
+STDERR:
+(empty)
+
+RECORD: temp/spike/profdata_text.json
+COMMAND:
+nice -n 19 ionice -c3 $ROOT/emul/lib64/ld-linux-x86-64.so.2 --library-path $ROOT/emul/lib64:$ROOT/emul/usr/lib64 $ROOT/emul/usr/bin/llvm-profdata merge --text $WORKDIR/temp/spike/instr.profdata -o $WORKDIR/spike/afdo-spike/instr.proftext
+EXIT:
+0
+STDOUT:
+(empty)
+STDERR:
+(empty)
+
+FILE: temp/spike/profile_results.json
+{
+  "cycles": {
+    "exit": 1,
+    "profile_exists": false,
+    "size": 0
+  },
+  "clk": {
+    "exit": 1,
+    "profile_exists": false,
+    "size": 0
+  }
+}
+FILE: temp/spike/afdo-spike-pgo.ll (original line numbers, selected lines)
+16: define dso_local i64 @hash_mix(i64 noundef %0) local_unnamed_addr #0 !dbg !56 !prof !59 {
+29: define dso_local void @sort_block(ptr noundef captures(none) %0, i32 noundef %1) local_unnamed_addr #1 !dbg !69 !prof !70 {
+31:   br i1 %3, label %4, label %6, !dbg !73, !prof !74
+53:   br i1 %17, label %18, label %22, !dbg !85, !prof !87
+60:   br i1 %21, label %22, label %11, !dbg !91, !prof !92, !llvm.loop !93
+69:   br i1 %27, label %6, label %7, !dbg !99, !prof !100, !llvm.loop !101
+79: define dso_local i64 @lookup_work(ptr noundef readonly captures(none) %0, i64 noundef %1) local_unnamed_addr #3 !dbg !103 !prof !70 {
+107:   br i1 %24, label %31, label %26, !dbg !127, !prof !128
+129:   br i1 %41, label %3, label %5, !dbg !145, !prof !146, !llvm.loop !147
+133: define dso_local i64 @rare_path(i64 noundef %0) local_unnamed_addr #4 !dbg !150 !prof !151 {
+144:   br i1 %7, label %8, label %11, !dbg !157, !prof !158
+160:   br i1 %17, label %2, label %3, !dbg !169, !prof !170, !llvm.loop !171
+164: define dso_local i64 @run_workload(i64 noundef %0) local_unnamed_addr #3 !dbg !174 !prof !175 {
+168:   br i1 %3, label %10, label %4, !dbg !179, !prof !180
+208:   br i1 %31, label %32, label %13, !dbg !200, !prof !202, !llvm.loop !203
+217:   br i1 %38, label %53, label %56, !dbg !212, !prof !213
+234:   br i1 %52, label %12, label %39, !dbg !228, !prof !146, !llvm.loop !229
+250:   br i1 %62, label %10, label %6, !dbg !240, !prof !241, !llvm.loop !242
+254: define dso_local range(i32 0, 3) i32 @main(i32 noundef %0, ptr noundef readonly captures(none) %1) local_unnamed_addr #5 !dbg !244 !prof !175 {
+262:   br i1 %5, label %20, label %6, !dbg !250, !prof !251
+266:   br i1 %7, label %8, label %24, !dbg !254, !prof !255
+273:   br i1 %12, label %20, label %13, !dbg !263, !prof !251
+277:   br i1 %14, label %15, label %24, !dbg !265, !prof !266
+295:   br i1 %26, label %27, label %30, !dbg !280, !prof !251
+327:   br i1 %49, label %50, label %32, !dbg !309, !prof !310, !llvm.loop !311
+342: define internal fastcc range(i32 0, 2) i32 @_ZL12parse_numberPKcPm.__uniq.15873189423843482198216846878061840358(ptr noundef %0, ptr noundef nonnull writeonly captures(none) %1) unnamed_addr #6 !dbg !320 !prof !175 !PGOFuncName !321 {
+358:   br i1 %9, label %10, label %19, !dbg !333, !prof !255
+363:   br i1 %12, label %19, label %13, !dbg !337, !prof !251
+370:   br i1 %17, label %19, label %18, !dbg !341, !prof !251
+482: !59 = !{!"function_entry_count", i64 300003624}
+493: !70 = !{!"function_entry_count", i64 2500000}
+497: !74 = !{!"branch_weights", i32 2499999, i32 1}
+510: !87 = !{!"branch_weights", i32 -908512682, i32 102139495}
+515: !92 = !{!"branch_weights", i32 3693837, i32 -810067024}
+523: !100 = !{!"branch_weights", i32 2499999, i32 315000001}
+551: !128 = !{!"branch_weights", i32 20008477, i32 299991523}
+569: !146 = !{!"branch_weights", i32 2500000, i32 317500000}
+574: !151 = !{!"function_entry_count", i64 2442}
+581: !158 = !{!"branch_weights", i32 8005, i32 67697}
+593: !170 = !{!"branch_weights", i32 2442, i32 73260}
+598: !175 = !{!"function_entry_count", i64 1}
+603: !180 = !{!"branch_weights", i32 1, i32 127}
+625: !202 = !{!"branch_weights", i32 2500000, i32 157500000}
+636: !213 = !{!"branch_weights", i32 2442, i32 2497558}
+664: !241 = !{!"branch_weights", i32 127, i32 319999873}
+674: !251 = !{!"branch_weights", i32 0, i32 1}
+678: !255 = !{!"branch_weights", i32 1, i32 0}
+689: !266 = !{!"branch_weights", i32 0, i32 -2147483648}
+733: !310 = !{!"branch_weights", i32 1, i32 4095}
+750: !327 = !{!"branch_weights", i32 1, i32 0, i32 0}
