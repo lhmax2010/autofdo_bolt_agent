@@ -9,7 +9,7 @@
 | C 主机原型 | 两架构默认 profi/显式关闭符合预期；IR 带权分支匹配 PGO 侧88.24%、sample侧65.22%，并非全量对齐 | [E3](evidence/05/03_clang_ir.txt) |
 | D 可选 armv7l | 约7分30秒内完成：GBS两轮成功，MMAP2 build-id匹配，插桩PGO闭环且校验一致 | [E4](evidence/05/04_arm_spike.txt) |
 
-证据中的每项以 `=== 名称 ===` 标识，包含完整命令、真实远端或主机退出码、stdout/stderr；SDB transport 不代替远端退出码。首次建立工作目录前的输出为 SDB 合并流，已标记。大文件/完整 JSON/日志全部保留在 `WORKDIR/temp/rpi4-prefreeze/`，下文简称 T；WORKDIR 为 `/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent`。新增证据四文件共 **146,789 B**，旧证据未改。
+证据中的每项以 `=== 名称 ===` 标识，包含完整命令、真实远端或主机退出码、stdout/stderr；SDB transport 不代替远端退出码。首次建立工作目录前的输出为 SDB 合并流，已标记。大文件/完整 JSON/日志全部保留在 `WORKDIR/temp/rpi4-prefreeze/`，下文简称 T；WORKDIR 为 `/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent`。新增证据四文件共 **146,877 B**，旧证据未改。
 
 本轮板上环境：`LC_ALL=C`、`LD_LIBRARY_PATH=/opt/afdo_agent/lib`；HOME/TMPDIR/PERF_CONFIG/GST_REGISTRY/XDG_CACHE_HOME 均在 `/opt/afdo_agent/work/` 下。下文 P 是 `nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid`；F 是 `/opt/afdo_agent/work/`。所有数据命令都显式指定 `-i/-o`，不使用默认当前目录写入。
 

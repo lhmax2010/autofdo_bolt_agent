@@ -34,7 +34,7 @@
 - 设计差异/未闭合项：buildid-mmap的buildid-list实际非空；vdso带偏移；Thumb符号区间需清除状态位；IR带权分支匹配15/17与15/23。没有产生LOST、无主机x86_64 perf、RPi5页大小本轮未测，不能宣称整个冻结门槛已闭合。
 - armv7l插桩PGO在约7分30秒内闭环：两轮GBS退出0/ALL-END OK，base/instr/pgo校验同为ff818b861cb93a67；不推断性能收益。只在temp测试包中改架构宏与训练profile，原spike和LLVM源码不改。
 - 板上work已清空，保留perf/libLLVM；/opt最终已用70628KiB、可用1234960KiB，RPM前后1252，pswpin/pswpout前后26/613。未remount、重启或装卸RPM。
-- [05报告](probe/05_rpi4_pmu_image_and_prefreeze.md)、[本轮四份证据](probe/evidence/05/01_environment_hardware.txt)（146,789B）、[IR匹配原型](../tools/match_ir_branches_prototype.py)与本状态文件同一commit提交；旧证据、设计不动。执行偏差与历史SDB边界限制在报告末尾如实保留。
+- [05报告](probe/05_rpi4_pmu_image_and_prefreeze.md)、[本轮四份证据](probe/evidence/05/01_environment_hardware.txt)（146,877B）、[IR匹配原型](../tools/match_ir_branches_prototype.py)与本状态文件同一commit提交；旧证据、设计不动。执行偏差与历史SDB边界限制在报告末尾如实保留。
 
 ## 前轮授权与完成状态（历史；llvm-profgen 增强设计 v0.2 归档）
 
