@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（llvm-profgen 增强设计 v0.1，待多方评审）
+## 当前授权与执行状态（2026-10-29；llvm-profgen 增强设计 v0.2，第二轮评审前）
+
+- 设计文档当前版本为 [v0.2](profgen/design/02_llvm_profgen_enhance_design_v0.2.md)（第二轮评审前）；v0.1 三方评审已处理完毕，处理表见 v0.2 附录 A。v0.1 文件保留不动。
+- 待决事项：是否进行第二轮评审、是否先做第 10 节步骤 1 的冻结前板上核实，均由用户决定。本轮只移动归档和提交，不执行评审、板上核实、构建或代码修改；冻结前不开工，Agent 的设计与开发仍在 llvm-profgen 增强完成后才开始。
+- 按用户授权的一次性例外，仅读取并用 `mv` 移入 `/home/linhao/Downloads/02_llvm_profgen_enhance_design_v0.2.md`；移动前 SHA-256 和标题校验通过，移动后哈希不变，已确认 Downloads 原文件不存在，未触碰其他 Downloads 文件。
+- 仓库内文档 SHA-256：`b4b03533513b23aa06b26def0faa342445dca128f0602c013cd8545cc26f99cf`；内容未修改，仅与 STATUS.md 同一 commit 提交推送。
+
+## 前轮授权与完成状态（历史；llvm-profgen 增强设计 v0.1 归档）
 
 - [llvm-profgen 增强设计 v0.1](profgen/design/02_llvm_profgen_enhance_design_v0.1.md) 已提交，待多方评审，**冻结前不开工**；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
 - 文档内容未修改。SHA-256=`9a81267b33d1ea59ed84975baabb5802561ca6943219a2070ad2530707231053`；第一行以 `# llvm-profgen 增强设计` 开头；第10行“适用范围”含“不包含任何 Agent 的设计与开发”，三项核验通过。
@@ -99,11 +106,11 @@
 
 # 项目状态
 
-更新：2026-10-28（Asia/Shanghai）。阶段：llvm-profgen 增强设计 v0.1 已提交，待多方评审，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-29（Asia/Shanghai）。阶段：llvm-profgen 增强设计当前版本 v0.2（第二轮评审前），v0.1 三方评审已处理完毕；第二轮评审与冻结前板上核实待用户决定，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 设计 v0.1 待多方评审，冻结前不开工；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
+- 当前设计 v0.2（第二轮评审前）；v0.1 三方评审已处理完毕，见 v0.2 附录 A。第二轮评审及第 10 节步骤 1 的冻结前板上核实由用户决定；冻结前不开工，Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
 
 - 当前准备任务已完成。等待用户确认纯 IP 输入、身份/地址校验和诊断的设计范围；未经新指令不开始 LLVM 增强。保留增量 buildroot/worktree，不重复基线构建。
 
@@ -286,7 +293,7 @@
 
 ## 待人工裁决
 
-- [设计 v0.1](profgen/design/02_llvm_profgen_enhance_design_v0.1.md) 的多方评审与冻结结论；本次归档不代表设计获批或允许开工。
+- [设计 v0.2](profgen/design/02_llvm_profgen_enhance_design_v0.2.md)：是否进行第二轮评审、是否先做第 10 节步骤 1 的冻结前板上核实，由用户决定；本次归档不代表设计冻结或允许开工。
 
 - llvm-profgen 增强设计：先做普通 IP 文本入口、身份与 DSO/PIE 归一化、有效样本统计；是否另立 raw perf.data reader、ET_REL 模块、Chromium 规模和未来 SPE 专项。待用户确认，不开始改代码。
 
