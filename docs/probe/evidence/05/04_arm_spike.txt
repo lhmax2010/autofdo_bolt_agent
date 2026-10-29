@@ -1,0 +1,409 @@
+D: optional armv7l spike, all temporary source/spec/profile changes under temp/rpi4-prefreeze/spike-arm. No LLVM changes.
+D_START 2026-10-29T23:40:01.231563+08:00
+D_END 2026-10-29T23:47:31.073957+08:00
+
+arm_base STATUS
+START 2026-10-29T23:40:01+08:00
+END 2026-10-29T23:43:48+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/RPMS/afdo-spike-1.0-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/SRPMS/afdo-spike-1.0-1.src.rpm
+ALL-END 2026-10-29T23:43:48+08:00 OK
+BUILD COMMAND/COMPILER EXCERPTS
+484: [  213s] + clang --version
+485: [  213s] clang version 22.1.8
+490: [  213s] + llvm-profdata --version
+495: [  213s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs spike.c -o afdo-spike-base
+496: [  214s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-generate spike.c -o afdo-spike-instr
+BUILD FINAL 12 LINES
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.*
+
+arm_pgo STATUS
+START 2026-10-29T23:46:21+08:00
+END 2026-10-29T23:46:38+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/RPMS/afdo-spike-1.0-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/SRPMS/afdo-spike-1.0-1.src.rpm
+ALL-END 2026-10-29T23:46:38+08:00 OK
+BUILD COMMAND/COMPILER EXCERPTS
+206: [    7s] + clang --version
+207: [    7s] clang version 22.1.8
+212: [    7s] + llvm-profdata --version
+217: [    7s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs spike.c -o afdo-spike-base
+218: [    7s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-generate spike.c -o afdo-spike-instr
+219: [    7s] + llvm-profdata merge instr.proftext -o instr.profdata
+220: [    7s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-use=instr.profdata -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -Rpass=pgo-instrumentation -Rpass-missed=pgo -fsave-optimization-record -fdiagnostics-show-hotness spike.c -o afdo-spike-pgo
+221: [    7s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -fprofile-use=instr.profdata -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -S -emit-llvm spike.c -o afdo-spike-pgo.ll
+BUILD FINAL 12 LINES
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.*
+
+=== arm_base_notes ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-base
+EXIT 0; TRANSPORT host
+STDOUT:
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.2.0
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: c0b79348eade7bedbe988a295bd7d8a765128b10
+
+STDERR:
+
+
+=== arm_base_sections ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-base
+EXIT 0; TRANSPORT host
+STDOUT:
+There are 58 section headers, starting at offset 0x3a68:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 2] .note.ABI-tag     NOTE            000001c8 0001c8 000020 00   A  0   0  4
+  [ 3] .note.gnu.build-id NOTE            000001e8 0001e8 000024 00   A  0   0  4
+  [ 9] .rel.dyn          REL             00000404 000404 000048 08   A  4   0  4
+  [11] .rel.plt          REL             0000045c 00045c 000048 08  AI  4  27  4
+  [29] .rel.text         REL             00000000 000e48 000160 08   I 55  16  4
+  [33] .debug_aranges    PROGBITS        00000000 001390 0000a8 00      0   0  8
+  [34] .rel.debug_aranges REL             00000000 001438 000058 08   I 55  33  4
+  [35] .debug_info       PROGBITS        00000000 001490 000351 00      0   0  1
+  [36] .rel.debug_info   REL             00000000 0017e4 0001e8 08   I 55  35  4
+  [37] .debug_abbrev     PROGBITS        00000000 0019cc 0001ec 00      0   0  1
+  [38] .debug_line       PROGBITS        00000000 001bb8 000646 00      0   0  1
+  [39] .rel.debug_line   REL             00000000 002200 000068 08   I 55  38  4
+  [40] .debug_str        PROGBITS        00000000 002268 00055d 01  MS  0   0  1
+  [41] .rel.init         REL             00000000 0027c8 000008 08   I 55  17  4
+  [42] .debug_ranges     PROGBITS        00000000 0027d0 000048 00      0   0  8
+  [43] .rel.debug_ranges REL             00000000 002818 000050 08   I 55  42  4
+  [44] .rel.data         REL             00000000 002868 000008 08   I 55  25  4
+  [45] .rel.fini_array   REL             00000000 002870 000008 08   I 55  20  4
+  [46] .rel.init_array   REL             00000000 002878 000008 08   I 55  21  4
+  [47] .debug_rnglists   PROGBITS        00000000 002880 000043 00      0   0  1
+  [48] .debug_str_offsets PROGBITS        00000000 0028c3 000064 00      0   0  1
+  [49] .rel.debug_str_offsets REL             00000000 002928 0000b8 08   I 55  48  4
+  [50] .debug_addr       PROGBITS        00000000 0029e0 00006c 00      0   0  1
+  [51] .rel.debug_addr   REL             00000000 002a4c 0000c8 08   I 55  50  4
+  [52] .debug_frame      PROGBITS        00000000 002b14 0000ec 00      0   0  4
+  [53] .rel.debug_frame  REL             00000000 002c00 000060 08   I 55  52  4
+  [54] .debug_line_str   PROGBITS        00000000 002c60 000059 01  MS  0   0  1
+  [55] .symtab           SYMTAB          00000000 002cbc 0007e0 10     57 104  4
+[section excerpt; full JSON in temp]
+
+STDERR:
+
+
+=== arm_base_header ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -h /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-base
+EXIT 0; TRANSPORT host
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x10530
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          14952 (bytes into file)
+  Flags:                             0x5000200, Version5 EABI, soft-float ABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         12
+  Size of section headers:           40 (bytes)
+  Number of section headers:         58
+  Section header string table index: 56
+
+STDERR:
+
+
+=== arm_instr_notes ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-instr
+EXIT 0; TRANSPORT host
+STDOUT:
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.2.0
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 0e098b6df41734fa09470d60ce215ea223954709
+
+STDERR:
+
+
+=== arm_instr_sections ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-instr
+EXIT 0; TRANSPORT host
+STDOUT:
+There are 65 section headers, starting at offset 0x1b828:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 2] .note.ABI-tag     NOTE            000001c8 0001c8 000020 00   A  0   0  4
+  [ 3] .note.gnu.build-id NOTE            000001e8 0001e8 000024 00   A  0   0  4
+  [ 9] .rel.dyn          REL             00000904 000904 000178 08   A  4   0  4
+  [11] .rel.plt          REL             00000d0c 000d0c 000188 08  AI  4  32  4
+  [23] .data.rel.ro      PROGBITS        0002656c 00656c 000010 00  WA  0   0  4
+  [34] .rel.text         REL             00000000 00ca40 001878 08   I 62  17  4
+  [38] .debug_aranges    PROGBITS        00000000 014770 0000a8 00      0   0  8
+  [39] .rel.debug_aranges REL             00000000 014818 000058 08   I 62  38  4
+  [40] .debug_info       PROGBITS        00000000 014870 00033d 00      0   0  1
+  [41] .rel.debug_info   REL             00000000 014bb0 0001e8 08   I 62  40  4
+  [42] .debug_abbrev     PROGBITS        00000000 014d98 0001d9 00      0   0  1
+  [43] .debug_line       PROGBITS        00000000 014f71 000745 00      0   0  1
+  [44] .rel.debug_line   REL             00000000 0156b8 000068 08   I 62  43  4
+  [45] .debug_str        PROGBITS        00000000 015720 00055d 01  MS  0   0  1
+  [46] .rel.init         REL             00000000 015c80 000008 08   I 62  18  4
+  [47] .debug_ranges     PROGBITS        00000000 015c88 000048 00      0   0  8
+  [48] .rel.debug_ranges REL             00000000 015cd0 000050 08   I 62  47  4
+  [49] .rel.data         REL             00000000 015d20 000068 08   I 62  27  4
+  [50] .rel.fini_array   REL             00000000 015d88 000008 08   I 62  21  4
+  [51] .rel.init_array   REL             00000000 015d90 000010 08   I 62  22  4
+  [53] .debug_rnglists   PROGBITS        00000000 015e08 000057 00      0   0  1
+  [54] .debug_str_offsets PROGBITS        00000000 015e5f 000064 00      0   0  1
+  [55] .rel.debug_str_offsets REL             00000000 015ec4 0000b8 08   I 62  54  4
+  [56] .debug_addr       PROGBITS        00000000 015f7c 000068 00      0   0  1
+  [57] .rel.debug_addr   REL             00000000 015fe4 0000c0 08   I 62  56  4
+  [58] .debug_frame      PROGBITS        00000000 0160a4 000120 00      0   0  4
+  [59] .rel.debug_frame  REL             00000000 0161c4 000070 08   I 62  58  4
+  [60] .debug_line_str   PROGBITS        00000000 016234 000059 01  MS  0   0  1
+  [61] .rel.data.rel.ro  REL             00000000 016290 000020 08   I 62  23  4
+  [62] .symtab           SYMTAB          00000000 0162b0 003180 10     64 726  4
+[section excerpt; full JSON in temp]
+
+STDERR:
+
+
+=== arm_sha_base ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; chmod 755 /opt/afdo_agent/work/spike-base; sha256sum /opt/afdo_agent/work/spike-base
+EXIT 0; TRANSPORT 0
+STDOUT:
+4b9b4121b36f6c034410e8ff3d9aa46498d605bdd2d20f1401a280bf324fa26f  /opt/afdo_agent/work/spike-base
+
+STDERR:
+
+
+=== arm_sha_instr ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; chmod 755 /opt/afdo_agent/work/spike-instr; sha256sum /opt/afdo_agent/work/spike-instr
+EXIT 0; TRANSPORT 0
+STDOUT:
+7910d84b7ddfdfc3f63adfa6ee72645ca2011f0086e3f99e2cbda526734e5d47  /opt/afdo_agent/work/spike-instr
+
+STDERR:
+
+
+=== arm_base_run ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p /opt/afdo_agent/work/spike-base 200000
+EXIT 0; TRANSPORT 0
+STDOUT:
+rounds=200000 seed=0123456789abcdef checksum=ff818b861cb93a67
+
+STDERR:
+real 3.25
+user 3.24
+sys 0.00
+
+
+=== arm_buildid_record ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record --buildid-mmap -e cycles -c 1000003 -o /opt/afdo_agent/work/arm_spike.data -- /opt/afdo_agent/work/spike-base 200000
+EXIT 0; TRANSPORT 0
+STDOUT:
+rounds=200000 seed=0123456789abcdef checksum=ff818b861cb93a67
+
+STDERR:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.152 MB /opt/afdo_agent/work/arm_spike.data ]
+
+
+=== arm_buildid_script ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/arm_spike.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/arm_spike_dsoff.txt
+EXIT 0; TRANSPORT 0
+STDOUT:
+
+STDERR:
+
+
+=== arm_buildid_list ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid buildid-list -i /opt/afdo_agent/work/arm_spike.data
+EXIT 0; TRANSPORT 0
+STDOUT:
+c0b79348eade7bedbe988a295bd7d8a765128b10 /opt/afdo_agent/work/spike-base
+eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c /usr/lib/libc.so.6
+d9c293aaae06e2f3b9a2136fed98e6f1677d5312 [kernel.kallsyms]
+
+STDERR:
+
+
+=== arm_instr_run ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; LLVM_PROFILE_FILE=/opt/afdo_agent/work/arm-instr-%p.profraw /opt/afdo_agent/work/spike-instr 200000
+EXIT 0; TRANSPORT 0
+STDOUT:
+rounds=200000 seed=0123456789abcdef checksum=ff818b861cb93a67
+
+STDERR:
+
+
+=== arm_merge ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-profdata merge /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-instr-15397.profraw -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm.profdata
+EXIT 0; TRANSPORT host
+STDOUT:
+
+STDERR:
+
+
+=== arm_profdata_show ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-profdata show --all-functions --counts /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm.profdata
+EXIT 0; TRANSPORT host
+STDOUT:
+Counters:
+  spike.c;_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358:
+    Hash: 0x04080bab86692ad9
+    Counters: 7
+    Block counts: [0, 1, 1, 1, 1, 1, 0]
+  run_workload:
+    Hash: 0x056e49bf1c3aaeee
+    Counters: 5
+    Block counts: [25600000, 25600000, 199804, 196, 1]
+  sort_block:
+    Hash: 0x0b15abf27e5d80bf
+    Counters: 4
+    Block counts: [837311741, 812796211, 25400000, 200000]
+  lookup_work:
+    Hash: 0x07735b69b9a7afd9
+    Counters: 3
+    Block counts: [23999000, 1601000, 200000]
+  main:
+    Hash: 0x0d2ae952a998a00a
+    Counters: 8
+    Block counts: [0, 4096, 1, 1, 1, 0, 0, 0]
+  rare_path:
+    Hash: 0x07735b69b9a7afd9
+    Counters: 3
+    Block counts: [621, 5455, 196]
+  hash_mix:
+    Hash: 0x0a4d0ad3efffffff
+    Counters: 1
+    Block counts: [24003717]
+Instrumentation level: IR  entry_first = 0  instrument_loop_entries = 0
+Functions shown: 7
+Total functions: 7
+Maximum function count: 837311741
+Maximum internal block count: 812796211
+Total number of blocks: 31
+Total count: 1776922046
+
+STDERR:
+
+
+=== arm_pgo_notes ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-pgo-extract/usr/bin/afdo-spike-pgo
+EXIT 0; TRANSPORT host
+STDOUT:
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.2.0
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 39492c5f3f64fc465993a34be1910d91197f0851
+
+STDERR:
+
+
+=== arm_pgo_sections ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-pgo-extract/usr/bin/afdo-spike-pgo
+EXIT 0; TRANSPORT host
+STDOUT:
+There are 58 section headers, starting at offset 0x3b10:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 2] .note.ABI-tag     NOTE            000001c8 0001c8 000020 00   A  0   0  4
+  [ 3] .note.gnu.build-id NOTE            000001e8 0001e8 000024 00   A  0   0  4
+  [ 9] .rel.dyn          REL             00000404 000404 000048 08   A  4   0  4
+  [11] .rel.plt          REL             00000464 000464 000048 08  AI  4  27  4
+  [29] .rel.text         REL             00000000 000e28 000168 08   I 55  16  4
+  [33] .debug_aranges    PROGBITS        00000000 001378 0000a8 00      0   0  8
+  [34] .rel.debug_aranges REL             00000000 001420 000058 08   I 55  33  4
+  [35] .debug_info       PROGBITS        00000000 001478 000345 00      0   0  1
+  [36] .rel.debug_info   REL             00000000 0017c0 0001e8 08   I 55  35  4
+  [37] .debug_abbrev     PROGBITS        00000000 0019a8 0001d9 00      0   0  1
+  [38] .debug_line       PROGBITS        00000000 001b81 000643 00      0   0  1
+  [39] .rel.debug_line   REL             00000000 0021c4 000080 08   I 55  38  4
+  [40] .debug_str        PROGBITS        00000000 002244 00055d 01  MS  0   0  1
+  [41] .rel.init         REL             00000000 0027a4 000008 08   I 55  17  4
+  [42] .debug_ranges     PROGBITS        00000000 0027b0 000048 00      0   0  8
+  [43] .rel.debug_ranges REL             00000000 0027f8 000050 08   I 55  42  4
+  [44] .rel.data         REL             00000000 002848 000008 08   I 55  25  4
+  [45] .rel.fini_array   REL             00000000 002850 000008 08   I 55  20  4
+  [46] .rel.init_array   REL             00000000 002858 000008 08   I 55  21  4
+  [47] .debug_rnglists   PROGBITS        00000000 002860 00004f 00      0   0  1
+  [48] .debug_str_offsets PROGBITS        00000000 0028af 000064 00      0   0  1
+  [49] .rel.debug_str_offsets REL             00000000 002914 0000b8 08   I 55  48  4
+  [50] .debug_addr       PROGBITS        00000000 0029cc 000070 00      0   0  1
+  [51] .rel.debug_addr   REL             00000000 002a3c 0000d0 08   I 55  50  4
+  [52] .debug_frame      PROGBITS        00000000 002b0c 000110 00      0   0  4
+  [53] .rel.debug_frame  REL             00000000 002c1c 000070 08   I 55  52  4
+  [54] .debug_line_str   PROGBITS        00000000 002c8c 000059 01  MS  0   0  1
+  [55] .symtab           SYMTAB          00000000 002ce8 000810 10     57 107  4
+[section excerpt; full JSON in temp]
+
+STDERR:
+
+
+=== arm_sha_pgo ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; chmod 755 /opt/afdo_agent/work/spike-pgo; sha256sum /opt/afdo_agent/work/spike-pgo
+EXIT 0; TRANSPORT 0
+STDOUT:
+5c8e6617016631ae2e998c23131f16b5114a7534ccf468c315e029861a1c15b0  /opt/afdo_agent/work/spike-pgo
+
+STDERR:
+
+
+=== arm_pgo_run ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p /opt/afdo_agent/work/spike-pgo 200000
+EXIT 0; TRANSPORT 0
+STDOUT:
+rounds=200000 seed=0123456789abcdef checksum=ff818b861cb93a67
+
+STDERR:
+real 3.21
+user 3.21
+sys 0.00
+
+
+ELF build-id c0b79348eade7bedbe988a295bd7d8a765128b10
+  15336/15336   PERF_RECORD_MMAP2 15336/15336: [0x4d0000(0x1000) @ 0 <c0b79348eade7bedbe988a295bd7d8a765128b10>]: r-xp /opt/afdo_agent/work/spike-base
+MATCHED

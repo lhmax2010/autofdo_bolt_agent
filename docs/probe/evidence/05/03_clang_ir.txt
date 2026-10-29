@@ -1,0 +1,316 @@
+C: GBS platform compiler only. Full IR: temp/rpi4-prefreeze/{pgo,sample}_pass.txt; synthetic sample profile is NOT measured profile and proves no statistical quality.
+
+=== profi_armv7l-tizen-linux-gnueabi_default ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=armv7l-tizen-linux-gnueabi -fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile '-###' -c /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c
+EXIT 0; TRANSPORT host
+STDOUT:
+
+STDERR:
+clang version 22.1.8
+Target: armv7l-tizen-linux-gnueabi
+Thread model: posix
+InstalledDir: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64
+ (in-process)
+ "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/ld-linux-x86-64.so.2" "-cc1" "-triple" "armv7-tizen-linux-gnueabi" "-emit-obj" "-disable-free" "-clear-ast-before-backend" "-disable-llvm-verifier" "-discard-value-names" "-main-file-name" "x.c" "-mrelocation-model" "pic" "-pic-level" "2" "-pic-is-pie" "-mframe-pointer=all" "-fmath-errno" "-ffp-contract=on" "-fno-rounding-math" "-mconstructor-aliases" "-target-cpu" "generic" "-target-feature" "+soft-float-abi" "-target-feature" "+read-tp-tpidruro" "-target-feature" "+vfp2" "-target-feature" "+vfp2sp" "-target-feature" "+vfp3" "-target-feature" "+vfp3d16" "-target-feature" "+vfp3d16sp" "-target-feature" "+vfp3sp" "-target-feature" "-fp16" "-target-feature" "-vfp4" "-target-feature" "-vfp4d16" "-target-feature" "-vfp4d16sp" "-target-feature" "-vfp4sp" "-target-feature" "-fp-armv8" "-target-feature" "-fp-armv8d16" "-target-feature" "-fp-armv8d16sp" "-target-feature" "-fp-armv8sp" "-target-feature" "-fullfp16" "-target-feature" "+fp64" "-target-feature" "+d32" "-target-feature" "+neon" "-target-feature" "-sha2" "-target-feature" "-aes" "-target-feature" "-fp16fml" "-target-abi" "aapcs-linux" "-mfloat-abi" "soft" "-debugger-tuning=gdb" "-fdebug-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-fcoverage-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-mllvm" "-sample-profile-use-profi" "-resource-dir" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22" "-internal-isystem" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22/include" "-internal-isystem" "/usr/local/include" "-internal-externc-isystem" "/include" "-internal-externc-isystem" "/usr/include" "-ferror-limit" "19" "-fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile" "-fno-signed-char" "-fgnuc-version=4.2.1" "-fskip-odr-check-in-gmf" "-faddrsig" "-o" "x.o" "-x" "c" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c"
+
+
+=== profi_armv7l-tizen-linux-gnueabi_off ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=armv7l-tizen-linux-gnueabi -fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile -fno-sample-profile-use-profi '-###' -c /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c
+EXIT 0; TRANSPORT host
+STDOUT:
+
+STDERR:
+clang version 22.1.8
+Target: armv7l-tizen-linux-gnueabi
+Thread model: posix
+InstalledDir: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64
+ (in-process)
+ "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/ld-linux-x86-64.so.2" "-cc1" "-triple" "armv7-tizen-linux-gnueabi" "-emit-obj" "-disable-free" "-clear-ast-before-backend" "-disable-llvm-verifier" "-discard-value-names" "-main-file-name" "x.c" "-mrelocation-model" "pic" "-pic-level" "2" "-pic-is-pie" "-mframe-pointer=all" "-fmath-errno" "-ffp-contract=on" "-fno-rounding-math" "-mconstructor-aliases" "-target-cpu" "generic" "-target-feature" "+soft-float-abi" "-target-feature" "+read-tp-tpidruro" "-target-feature" "+vfp2" "-target-feature" "+vfp2sp" "-target-feature" "+vfp3" "-target-feature" "+vfp3d16" "-target-feature" "+vfp3d16sp" "-target-feature" "+vfp3sp" "-target-feature" "-fp16" "-target-feature" "-vfp4" "-target-feature" "-vfp4d16" "-target-feature" "-vfp4d16sp" "-target-feature" "-vfp4sp" "-target-feature" "-fp-armv8" "-target-feature" "-fp-armv8d16" "-target-feature" "-fp-armv8d16sp" "-target-feature" "-fp-armv8sp" "-target-feature" "-fullfp16" "-target-feature" "+fp64" "-target-feature" "+d32" "-target-feature" "+neon" "-target-feature" "-sha2" "-target-feature" "-aes" "-target-feature" "-fp16fml" "-target-abi" "aapcs-linux" "-mfloat-abi" "soft" "-debugger-tuning=gdb" "-fdebug-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-fcoverage-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-resource-dir" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22" "-internal-isystem" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22/include" "-internal-isystem" "/usr/local/include" "-internal-externc-isystem" "/include" "-internal-externc-isystem" "/usr/include" "-ferror-limit" "19" "-fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile" "-fno-signed-char" "-fgnuc-version=4.2.1" "-fskip-odr-check-in-gmf" "-faddrsig" "-o" "x.o" "-x" "c" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c"
+
+
+=== profi_aarch64-tizen-linux-gnu_default ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=aarch64-tizen-linux-gnu -fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile '-###' -c /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c
+EXIT 0; TRANSPORT host
+STDOUT:
+
+STDERR:
+clang version 22.1.8
+Target: aarch64-tizen-linux-gnu
+Thread model: posix
+InstalledDir: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64
+ (in-process)
+ "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/ld-linux-x86-64.so.2" "-cc1" "-triple" "aarch64-tizen-linux-gnu" "-emit-obj" "-disable-free" "-clear-ast-before-backend" "-disable-llvm-verifier" "-discard-value-names" "-main-file-name" "x.c" "-mrelocation-model" "pic" "-pic-level" "2" "-pic-is-pie" "-mframe-pointer=non-leaf-no-reserve" "-fmath-errno" "-ffp-contract=on" "-fno-rounding-math" "-mconstructor-aliases" "-funwind-tables=2" "-enable-tlsdesc" "-target-cpu" "generic" "-target-feature" "+v8a" "-target-feature" "+fp-armv8" "-target-feature" "+neon" "-target-abi" "aapcs" "-debugger-tuning=gdb" "-fdebug-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-fcoverage-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-mllvm" "-sample-profile-use-profi" "-resource-dir" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22" "-internal-isystem" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22/include" "-internal-isystem" "/usr/local/include" "-internal-externc-isystem" "/include" "-internal-externc-isystem" "/usr/include" "-ferror-limit" "19" "-fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile" "-fno-signed-char" "-fgnuc-version=4.2.1" "-fskip-odr-check-in-gmf" "-target-feature" "-fmv" "-faddrsig" "-fdwarf2-cfi-asm" "-o" "x.o" "-x" "c" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c"
+
+
+=== profi_aarch64-tizen-linux-gnu_off ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=aarch64-tizen-linux-gnu -fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile -fno-sample-profile-use-profi '-###' -c /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c
+EXIT 0; TRANSPORT host
+STDOUT:
+
+STDERR:
+clang version 22.1.8
+Target: aarch64-tizen-linux-gnu
+Thread model: posix
+InstalledDir: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64
+ (in-process)
+ "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/ld-linux-x86-64.so.2" "-cc1" "-triple" "aarch64-tizen-linux-gnu" "-emit-obj" "-disable-free" "-clear-ast-before-backend" "-disable-llvm-verifier" "-discard-value-names" "-main-file-name" "x.c" "-mrelocation-model" "pic" "-pic-level" "2" "-pic-is-pie" "-mframe-pointer=non-leaf-no-reserve" "-fmath-errno" "-ffp-contract=on" "-fno-rounding-math" "-mconstructor-aliases" "-funwind-tables=2" "-enable-tlsdesc" "-target-cpu" "generic" "-target-feature" "+v8a" "-target-feature" "+fp-armv8" "-target-feature" "+neon" "-target-abi" "aapcs" "-debugger-tuning=gdb" "-fdebug-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-fcoverage-compilation-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent" "-resource-dir" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22" "-internal-isystem" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64/../lib64/clang/22/include" "-internal-isystem" "/usr/local/include" "-internal-externc-isystem" "/include" "-internal-externc-isystem" "/usr/include" "-ferror-limit" "19" "-fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/empty.profile" "-fno-signed-char" "-fgnuc-version=4.2.1" "-fskip-odr-check-in-gmf" "-target-feature" "-fmv" "-faddrsig" "-fdwarf2-cfi-asm" "-o" "x.o" "-x" "c" "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/x.c"
+
+
+=== ir_pgo_attempt1 ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=aarch64-tizen-linux-gnu --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0 -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -S -emit-llvm -fprofile-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/spike/instr.profdata -mllvm -print-after=pgo-instr-use /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/spike.c -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/pgo.ll
+EXIT 1; TRANSPORT host
+STDOUT:
+
+STDERR:
+In file included from /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/spike.c:9:
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/usr/include/stdio.h:34:10: fatal error: 'stddef.h' file not found
+   34 | #include <stddef.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang -resource-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/usr/lib64/clang/22 --target=aarch64-tizen-linux-gnu --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0 -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -S -emit-llvm -fprofile-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/spike/instr.profdata -mllvm -print-after=pgo-instr-use /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/spike.c -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/pgo.ll
+EXIT 0
+Full stderr/dump stored in /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/ir_pgo.json
+
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang -resource-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/usr/lib64/clang/22 --target=aarch64-tizen-linux-gnu --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0 -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -S -emit-llvm -fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/synthetic.sample -mllvm -print-after=sample-profile -mllvm -disable-sample-loader-inlining /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/spike.c -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/sample.ll
+EXIT 0
+Full stderr/dump stored in /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/ir_sample.json
+
+Synthetic function names/start lines:
+[
+  [
+    "hash_mix",
+    43
+  ],
+  [
+    "sort_block",
+    62
+  ],
+  [
+    "lookup_work",
+    76
+  ],
+  [
+    "_ZL11rotate_leftmj.__uniq.171455684725107265042141504779546797095",
+    37
+  ],
+  [
+    "rare_path",
+    95
+  ],
+  [
+    "run_workload",
+    116
+  ],
+  [
+    "_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095",
+    107
+  ],
+  [
+    "_ZL11next_randomPm.__uniq.171455684725107265042141504779546797095",
+    27
+  ],
+  [
+    "main",
+    153
+  ],
+  [
+    "_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095",
+    52
+  ],
+  [
+    "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+    137
+  ]
+]
+
+Synthetic profile excerpts (all function headers; offsets 0..39 each use count=1000+7*offset; full file in temp/rpi4-prefreeze/synthetic.sample):
+hash_mix:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+sort_block:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+lookup_work:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+_ZL11rotate_leftmj.__uniq.171455684725107265042141504779546797095:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+rare_path:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+run_workload:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+_ZL11next_randomPm.__uniq.171455684725107265042141504779546797095:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+main:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095:50000:1000
+ 0: 1000
+ 1: 1007
+ 2: 1014
+
+$ python3 tools/match_ir_branches_prototype.py temp/rpi4-prefreeze/pgo_pass.txt temp/rpi4-prefreeze/sample_pass.txt
+EXIT 0
+
+pgo {'conditional_terminators': 22, 'weighted_terminators': 17, 'fully_matched_terminators': 15, 'weighted_successors': 34, 'matched_successors': 30, 'matched_ratio': 0.8823529411764706}
+Unmatched successors, all:
+run_workload dump-line=206 loc=['110', '5', None] successor=0 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %18, label %19, label %28, !dbg !199, !prof !101
+run_workload dump-line=206 loc=['110', '5', None] successor=1 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %18, label %19, label %28, !dbg !199, !prof !101
+main dump-line=319 loc=['55', '5', None] successor=0 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %36, label %37, label %53, !dbg !294, !prof !295
+main dump-line=319 loc=['55', '5', None] successor=1 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %36, label %37, label %53, !dbg !294, !prof !295
+
+sample {'conditional_terminators': 23, 'weighted_terminators': 23, 'fully_matched_terminators': 15, 'weighted_successors': 46, 'matched_successors': 30, 'matched_ratio': 0.6521739130434783}
+Unmatched successors, all:
+_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095 dump-line=273 loc=['110', '5', None] successor=0 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %5, label %7, label %6, !dbg !257, !prof !167
+_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095 dump-line=273 loc=['110', '5', None] successor=1 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %5, label %7, label %6, !dbg !257, !prof !167
+main dump-line=321 loc=['158', '67', None] successor=0 reason=same key exists but opposite branch has no branch_weights
+  br i1 %19, label %24, label %20, !dbg !300, !prof !302
+main dump-line=321 loc=['158', '67', None] successor=1 reason=same key exists but opposite branch has no branch_weights
+  br i1 %19, label %24, label %20, !dbg !300, !prof !302
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=365 loc=['141', '24', None] successor=0 reason=same key exists but opposite branch has no branch_weights
+  br i1 %6, label %9, label %7, !dbg !337, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=365 loc=['141', '24', None] successor=1 reason=same key exists but opposite branch has no branch_weights
+  br i1 %6, label %9, label %7, !dbg !337, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=369 loc=['141', '24', None] successor=0 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %8, label %9, label %10, !dbg !341, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=369 loc=['141', '24', None] successor=1 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %8, label %9, label %10, !dbg !341, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=380 loc=['146', '20', None] successor=0 reason=same key exists but opposite branch has no branch_weights
+  br i1 %14, label %24, label %15, !dbg !349, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=380 loc=['146', '20', None] successor=1 reason=same key exists but opposite branch has no branch_weights
+  br i1 %14, label %24, label %15, !dbg !349, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=385 loc=['146', '35', None] successor=0 reason=same key exists but opposite branch has no branch_weights
+  br i1 %17, label %24, label %18, !dbg !352, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=385 loc=['146', '35', None] successor=1 reason=same key exists but opposite branch has no branch_weights
+  br i1 %17, label %24, label %18, !dbg !352, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=393 loc=['146', '51', None] successor=0 reason=same key exists but opposite branch has no branch_weights
+  br i1 %23, label %24, label %25, !dbg !356, !prof !338
+_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095 dump-line=393 loc=['146', '51', None] successor=1 reason=same key exists but opposite branch has no branch_weights
+  br i1 %23, label %24, label %25, !dbg !356, !prof !338
+_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095 dump-line=422 loc=['55', '5', None] successor=0 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %5, label %7, label %6, !dbg !373, !prof !374
+_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095 dump-line=422 loc=['55', '5', None] successor=1 reason=no same function/location/successor key at opposite pass boundary
+  br i1 %5, label %7, label %6, !dbg !373, !prof !374
+
+Prototype sanity checks:
+pgo: self-match=100%; weighted terminators=17
+sample: self-match=100%; weighted terminators=23
+Duplicate matching keys rejected; signed i32 weight literals accepted (uint32 bit patterns). EXIT 0
+
+pgo raw branch/weight metadata excerpts (original lines):
+36:   br i1 %5, label %7, label %6, !dbg !63, !prof !64
+50:   br i1 %13, label %23, label %14, !dbg !71, !prof !72
+58:   br i1 %19, label %20, label %23, !dbg !77, !prof !79
+89:   br i1 %7, label %10, label %8, !dbg !100, !prof !101
+113:   br i1 %27, label %34, label %28, !dbg !122, !prof !123
+147:   br i1 %5, label %7, label %6, !dbg !151, !prof !152
+155:   br i1 %9, label %10, label %14, !dbg !156, !prof !157
+186:   br i1 %8, label %10, label %9, !dbg !184, !prof !185
+196:   br i1 %13, label %34, label %14, !dbg !190, !prof !101
+206:   br i1 %18, label %19, label %28, !dbg !199, !prof !101
+225:   br i1 %33, label %46, label %49, !dbg !216, !prof !217
+267:   br i1 %5, label %21, label %6, !dbg !252, !prof !253
+271:   br i1 %7, label %8, label %13, !dbg !256, !prof !257
+278:   br i1 %12, label %21, label %13, !dbg !265, !prof !253
+282:   br i1 %14, label %15, label %25, !dbg !267, !prof !253
+303:   br i1 %27, label %28, label %31, !dbg !281, !prof !253
+319:   br i1 %36, label %37, label %53, !dbg !294, !prof !295
+500: !64 = !{!"branch_weights", i32 317500000, i32 2500000}
+508: !72 = !{!"branch_weights", i32 3693838, i32 -806373187}
+515: !79 = !{!"branch_weights", i32 -908512682, i32 102139495}
+537: !101 = !{!"branch_weights", i32 320000000, i32 2500000}
+559: !123 = !{!"branch_weights", i32 20008477, i32 299991523}
+588: !152 = !{!"branch_weights", i32 75702, i32 2442}
+593: !157 = !{!"branch_weights", i32 8005, i32 67697}
+621: !185 = !{!"branch_weights", i32 2500000, i32 1}
+653: !217 = !{!"branch_weights", i32 2442, i32 2497558}
+689: !253 = !{!"branch_weights", i32 0, i32 1}
+693: !257 = !{!"branch_weights", i32 1, i32 0}
+731: !295 = !{!"branch_weights", i32 4096, i32 1}
+
+sample raw branch/weight metadata excerpts (original lines):
+36:   br i1 %5, label %7, label %6, !dbg !63, !prof !64
+50:   br i1 %13, label %14, label %24, !dbg !71, !prof !72
+58:   br i1 %19, label %20, label %24, !dbg !77, !prof !79
+90:   br i1 %7, label %10, label %8, !dbg !102, !prof !103
+114:   br i1 %27, label %28, label %34, !dbg !124, !prof !125
+159:   br i1 %5, label %7, label %6, !dbg !161, !prof !162
+167:   br i1 %9, label %10, label %14, !dbg !166, !prof !167
+200:   br i1 %8, label %10, label %9, !dbg !196, !prof !197
+213:   br i1 %13, label %22, label %14, !dbg !203, !prof !204
+224:   br i1 %21, label %28, label %31, !dbg !214, !prof !215
+273:   br i1 %5, label %7, label %6, !dbg !257, !prof !167
+299:   br i1 %5, label %20, label %6, !dbg !277, !prof !278
+303:   br i1 %7, label %8, label %13, !dbg !281, !prof !282
+310:   br i1 %12, label %13, label %20, !dbg !291, !prof !292
+314:   br i1 %14, label %15, label %24, !dbg !294, !prof !295
+321:   br i1 %19, label %24, label %20, !dbg !300, !prof !302
+332:   br i1 %26, label %27, label %30, !dbg !312, !prof !313
+365:   br i1 %6, label %9, label %7, !dbg !337, !prof !338
+369:   br i1 %8, label %9, label %10, !dbg !341, !prof !338
+380:   br i1 %14, label %24, label %15, !dbg !349, !prof !338
+385:   br i1 %17, label %24, label %18, !dbg !352, !prof !338
+393:   br i1 %23, label %24, label %25, !dbg !356, !prof !338
+422:   br i1 %5, label %7, label %6, !dbg !373, !prof !374
+532: !64 = !{!"branch_weights", i32 1063, i32 1077}
+540: !72 = !{!"branch_weights", i32 1057, i32 1055}
+547: !79 = !{!"branch_weights", i32 1049, i32 8}
+571: !103 = !{!"branch_weights", i32 1217, i32 1105}
+593: !125 = !{!"branch_weights", i32 794, i32 423}
+598: !130 = !{!"branch_weights", i32 794}
+604: !136 = !{!"branch_weights", i32 423}
+609: !141 = !{!"branch_weights", i32 1217}
+630: !162 = !{!"branch_weights", i32 2070, i32 1063}
+635: !167 = !{!"branch_weights", i32 1028, i32 1042}
+639: !171 = !{!"branch_weights", i32 1028}
+642: !174 = !{!"branch_weights", i32 1042}
+665: !197 = !{!"branch_weights", i32 2196, i32 1021}
+672: !204 = !{!"branch_weights", i32 1049, i32 2196}
+674: !206 = !{!"branch_weights", i32 2196}
+683: !215 = !{!"branch_weights", i32 1091, i32 1105}
+685: !217 = !{!"branch_weights", i32 1049}
+696: !228 = !{!"branch_weights", i32 1091}
+700: !232 = !{!"branch_weights", i32 1105}
+746: !278 = !{!"branch_weights", i32 15, i32 1077}
+750: !282 = !{!"branch_weights", i32 542, i32 535}
+757: !289 = !{!"branch_weights", i32 542}
+760: !292 = !{!"branch_weights", i32 542, i32 0}
+763: !295 = !{!"branch_weights", i32 409, i32 668}
+766: !298 = !{!"branch_weights", i32 409}
+770: !302 = !{!"branch_weights", i32 409, i32 0}
+776: !308 = !{!"branch_weights", i32 15}
+781: !313 = !{!"branch_weights", i32 415, i32 662}
+784: !316 = !{!"branch_weights", i32 415}
+789: !321 = !{!"branch_weights", i32 662}
+806: !338 = !{!"branch_weights", i32 0, i32 1063}
+812: !344 = !{!"branch_weights", i32 1063}
+842: !374 = !{!"branch_weights", i32 1035, i32 1014}
+846: !378 = !{!"branch_weights", i32 1035}

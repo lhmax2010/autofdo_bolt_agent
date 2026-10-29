@@ -1,0 +1,838 @@
+B: format/mapping/period/build-id evidence. Full raw streams: temp/rpi4-prefreeze/{fixed,multi,freq,buildid,lost}_dsoff.txt and *_symbols.txt.
+
+=== fixed_dsoff ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/fixed.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/fixed_dsoff.txt
+EXIT 0; TRANSPORT 0
+STDOUT:
+
+STDERR:
+
+
+=== fixed_symbols ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/fixed.data -F pid,tid,event,period,ip,sym,symoff,dsoff > /opt/afdo_agent/work/fixed_symbols.txt
+EXIT 0; TRANSPORT 0
+STDOUT:
+
+STDERR:
+
+
+=== fixed_evlist ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/fixed.data
+EXIT 0; TRANSPORT 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+
+
+=== multi_record ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -a -e cycles -c 1000003 -o /opt/afdo_agent/work/multi.data -- sh -c 'gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false & p1=$!; gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false & p2=$!; echo DECODER_PIDS=$p1,$p2; wait "$p1"; r1=$?; wait "$p2"; r2=$?; echo DECODER_EXIT=$r1,$r2; test "$r1" = 0 && test "$r2" = 0'
+EXIT 0; TRANSPORT 0
+STDOUT:
+DECODER_PIDS=12121,12122
+DECODER_EXIT=0,0
+
+STDERR:
+[ perf record: Woken up 4 times to write data ]
+[ perf record: Captured and wrote 1.691 MB /opt/afdo_agent/work/multi.data (22662 samples) ]
+real 5.28
+user 10.47
+sys 1.04
+
+
+=== multi_evlist ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/multi.data
+EXIT 0; TRANSPORT 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, disabled: 1, inherit: 1, sample_id_all: 1, exclude_guest: 1
+dummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+
+
+=== freq_record ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -F 1000 -o /opt/afdo_agent/work/freq.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false
+EXIT 0; TRANSPORT 0
+STDOUT:
+
+STDERR:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.193 MB /opt/afdo_agent/work/freq.data (4886 samples) ]
+real 3.29
+user 4.99
+sys 0.49
+
+
+=== freq_evlist ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/freq.data
+EXIT 0; TRANSPORT 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000, sample_type: IP|TID|TIME|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, freq: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+
+
+=== buildid_record ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record --buildid-mmap -e cycles -c 1000003 -o /opt/afdo_agent/work/buildid.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false
+EXIT 0; TRANSPORT 0
+STDOUT:
+
+STDERR:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.235 MB /opt/afdo_agent/work/buildid.data ]
+real 3.29
+user 5.04
+sys 0.46
+
+
+=== buildid_evlist ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/buildid.data
+EXIT 0; TRANSPORT 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1
+
+STDERR:
+
+
+=== buildid_buildids ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid buildid-list -i /opt/afdo_agent/work/buildid.data
+EXIT 0; TRANSPORT 0
+STDOUT:
+                                         /usr/lib/gstreamer-1.0/libgstcoreelements.so
+                                         /usr/lib/gstreamer-1.0/libgstisomp4.so
+                                         /usr/lib/gstreamer-1.0/libgstlibav.so
+                                         /usr/lib/gstreamer-1.0/libgstvideoparsersbad.so
+7d50a721f278fb1c861daa91e8a17d6ca7df7c8c /usr/lib/ld-linux.so.3
+                                         /usr/lib/libavcodec.so.62.11.100
+                                         /usr/lib/libavutil.so.60.8.100
+eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c /usr/lib/libc.so.6
+                                         /usr/lib/libglib-2.0.so.0.8000.5
+                                         /usr/lib/libgobject-2.0.so.0.8000.5
+                                         /usr/lib/libgstbase-1.0.so.0.2411.0
+                                         /usr/lib/libgstcodecparsers-1.0.so.0.2411.0
+                                         /usr/lib/libgstreamer-1.0.so.0.2411.0
+                                         /usr/lib/libgstvideo-1.0.so.0.2411.0
+d9c293aaae06e2f3b9a2136fed98e6f1677d5312 [kernel.kallsyms]
+
+STDERR:
+
+
+=== fixed_buildids ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid buildid-list -i /opt/afdo_agent/work/fixed.data
+EXIT 0; TRANSPORT 0
+STDOUT:
+7d50a721f278fb1c861daa91e8a17d6ca7df7c8c /usr/lib/ld-linux.so.3
+eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c /usr/lib/libc.so.6
+d9c293aaae06e2f3b9a2136fed98e6f1677d5312 [kernel.kallsyms]
+b28d4cd3ec398b3cdfe34f88c907eafdfa27e3b2 [vdso]
+
+STDERR:
+
+
+=== lost_record ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -c 100003 -m 8 -o /opt/afdo_agent/work/lost.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_1080p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+EXIT 0; TRANSPORT 0
+STDOUT:
+
+STDERR:
+[ perf record: Woken up 1950 times to write data ]
+[ perf record: Captured and wrote 31.915 MB /opt/afdo_agent/work/lost.data (1044541 samples) ]
+real 32.48
+user 71.91
+sys 1.99
+
+
+=== lost_export_recheck ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/lost.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/lost_dsoff_recheck.txt
+EXIT 0; TRANSPORT 0
+STDOUT:
+
+STDERR:
+
+
+=== lost_export_hash ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /opt/afdo_agent/work/lost_dsoff.txt /opt/afdo_agent/work/lost_dsoff_recheck.txt
+EXIT 0; TRANSPORT 0
+STDOUT:
+52128c99b268ff8d23137e92184d399dcb585d0344f49ce7c0588e1950b47de5  /opt/afdo_agent/work/lost_dsoff.txt
+52128c99b268ff8d23137e92184d399dcb585d0344f49ce7c0588e1950b47de5  /opt/afdo_agent/work/lost_dsoff_recheck.txt
+
+STDERR:
+
+
+=== lost_report ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report -i /opt/afdo_agent/work/lost.data --stdio --sort dso --header
+EXIT 0; TRANSPORT 0
+STDOUT:
+# ========
+# captured on    : Fri Oct 30 00:38:43 2026
+# header version : 1
+# data offset    : 288
+# data size      : 33465224
+# feat offset    : 33465512
+# hostname : localhost
+# os release : 6.12.80-arm-rpi4-v7l
+# perf version : 6.12.80
+# arch : armv7l
+# nrcpus online : 4
+# nrcpus avail : 4
+# cpudesc : ARMv7 Processor rev 3 (v7l)
+# total memory : 3976476 kB
+# cmdline : /opt/afdo_agent/tools/perf record -e cycles -c 100003 -m 8 -o /opt/afdo_agent/work/lost.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_1080p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! fakesink sync=false
+# event : name = cycles, , id = { 172, 173, 174, 175 }, type = 0 (PERF_TYPE_HARDWARE), size = 136, config = 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq } = 100003, sample_type = IP|TID|TIME, read_format = ID|LOST, disabled = 1, inherit = 1, mmap = 1, comm = 1, enable_on_exec = 1, task = 1, sample_id_all = 1, exclude_guest = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1
+# CPU_TOPOLOGY info available, use -I to display
+# pmu mappings: armv8_cortex_a72 = 10, breakpoint = 5, kprobe = 8, software = 1, tracepoint = 2, uprobe = 9
+# CACHE info available, use -I to display
+# time of first sample : 11788.514012
+# time of last sample : 11818.801671
+# sample duration :  30287.660 ms
+# armv8_cortex_a72 pmu capabilities: slots=0x00000000, threshold_max=0x00000000, bus_slots=0x00000000, bus_width=0x00000000
+# missing features: (null) CPUID NUMA_TOPOLOGY BRANCH_STACK GROUP_DESC AUXTRACE STAT MEM_TOPOLOGY CLOCKID DIR_FORMAT COMPRESSED CPU_PMU_CAPS CLOCK_DATA HYBRID_TOPOLOGY
+# ========
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 1M of event 'cycles'
+# Event count (approx.): 104457233623
+#
+# Overhead  Shared Object
+# ........  ..................................
+#
+    90.36%  libavcodec.so.62.11.100
+     6.92%  libc.so.6
+     1.86%  [kernel.kallsyms]
+     0.20%  libavutil.so.60.8.100
+     0.20%  libgstreamer-1.0.so.0.2411.0
+     0.08%  libgstvideo-1.0.so.0.2411.0
+     0.08%  libgstbase-1.0.so.0.2411.0
+     0.06%  libglib-2.0.so.0.8000.5
+     0.06%  libgstlibav.so
+     0.05%  libgobject-2.0.so.0.8000.5
+     0.04%  libgstisomp4.so
+     0.03%  libgstvideoparsersbad.so
+     0.03%  libgstcodecparsers-1.0.so.0.2411.0
+     0.01%  ld-linux.so.3
+     0.01%  libgstcoreelements.so
+     0.00%  gst-launch-1.0
+     0.00%  libpcre2-8.so.0.15.0
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+STDERR:
+
+
+=== libavcodec_sha ===
+$ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libavcodec.so.62.11.100
+EXIT 0; TRANSPORT 0
+STDOUT:
+9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56  /usr/lib/libavcodec.so.62.11.100
+
+STDERR:
+
+
+=== libavcodec_segments ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -lW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100
+EXIT 0; TRANSPORT host
+STDOUT:
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 5 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  ARM_EXIDX      0x2d3410 0x002d3410 0x002d3410 0x027f0 0x027f0 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0x2d5c04 0x2d5c04 R E 0x1000
+  LOAD           0x2d6000 0x002d6000 0x002d6000 0x156d0 0x287550 RW  0x1000
+  DYNAMIC        0x2e9e0c 0x002e9e0c 0x002e9e0c 0x00130 0x00130 RW  0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0x10
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .ARM.exidx
+   01     .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_d .gnu.version_r .rel.dyn .rel.plt .init .plt .text .fini .rodata .ARM.extab .ARM.exidx .eh_frame
+   02     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss
+   03     .dynamic
+   04
+
+STDERR:
+
+
+=== libavcodec_notes ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100
+EXIT 0; TRANSPORT host
+STDOUT:
+
+STDERR:
+
+
+Export harness note: first lost_dsoff.json stdout was contaminated by concurrently reused query.stdout (99 bytes from libavcodec sha query). Command/data output file was separate. Re-export with per-command capture paths succeeded, stdout/stderr empty, output SHA identical. Only rechecked export is authoritative.
+
+$ perf script fixed.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff
+FIRST 200 LINES (original stream):
+      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf00c000(0x5000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/kernel/drivers/bluetooth/btbcm.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf014000(0x4000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/kernel/drivers/net/wireless/broadcom/brcm80211/brcmutil/brcmutil.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf016000(0x4000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/logger.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf024000(0x5000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/dm-bow.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf02c000(0x8000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/kernel/drivers/bluetooth/hci_uart.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf031000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/proc-tsm.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf033000(0x18000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xbf05e000(0x56000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/kernel/drivers/net/wireless/broadcom/brcm80211/brcmfmac/brcmfmac.ko
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0x47c000(0x8000) @ 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6f0a000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xbefda000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xbefdc000(0x1000) @ 0 00:00 0 0]: r-xp [vdso]
+  11948/11948      1000003 cycles:          c0518110 ([kernel.kallsyms])
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6e18000(0xde000) @ 0 b3:02 4716 4247150011]: r-xp /usr/lib/libgstreamer-1.0.so.0.2411.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6d34000(0xe4000) @ 0 b3:02 5224 1909556278]: r-xp /usr/lib/libglib-2.0.so.0.8000.5
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6cf8000(0x3c000) @ 0 b3:02 2338 3765789547]: r-xp /usr/lib/libgobject-2.0.so.0.8000.5
+  11948/11948      1000003 cycles:          b6f0fb00 (/usr/lib/ld-linux.so.3+0x5b00)
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6cdd000(0x1b000) @ 0 b3:02 1131 4118491913]: r-xp /usr/lib/libgcc_s.so.1
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6cd9000(0x4000) @ 0 b3:02 1084 1484850435]: r-xp /usr/lib/libpthread.so.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6b77000(0x162000) @ 0 b3:02 1073 583608144]: r-xp /usr/lib/libc.so.6
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6b73000(0x4000) @ 0 b3:02 2342 2454772076]: r-xp /usr/lib/libgmodule-2.0.so.0.8000.5
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6b25000(0x4e000) @ 0 b3:02 1076 1946423866]: r-xp /usr/lib/libm.so.6
+  11948/11948      1000003 cycles:          c050e9b0 ([kernel.kallsyms])
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6b0b000(0x18000) @ 0 b3:02 4683 3905514236]: r-xp /usr/lib/libdlog.so.0.0.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6aa2000(0x69000) @ 0 b3:02 2329 256189314]: r-xp /usr/lib/libpcre2-8.so.0.15.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6a97000(0xb000) @ 0 b3:02 1944 831127150]: r-xp /usr/lib/libffi.so.8.1.4
+  11948/11948      1000003 cycles:          c050e9b0 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          c04735f8 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          c0516160 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6d671fc (/usr/lib/libglib-2.0.so.0.8000.5+0x331fc)
+  11948/11948      1000003 cycles:          b6ca594c (/usr/lib/libc.so.6+0x12e94c)
+  11948/11948      1000003 cycles:          b6d66ab6 (/usr/lib/libglib-2.0.so.0.8000.5+0x32ab6)
+  11948/11948      1000003 cycles:          b6c01c08 (/usr/lib/libc.so.6+0x8ac08)
+  11948/11948      1000003 cycles:          b6d082f4 (/usr/lib/libgobject-2.0.so.0.8000.5+0x102f4)
+  11948/11948      1000003 cycles:          b6bfff08 (/usr/lib/libc.so.6+0x88f08)
+  11948/11948      1000003 cycles:          c0514f40 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6d519ce (/usr/lib/libglib-2.0.so.0.8000.5+0x1d9ce)
+  11948/11948      1000003 cycles:          b6e89a80 (/usr/lib/libgstreamer-1.0.so.0.2411.0+0x71a80)
+  11948/11948      1000003 cycles:          b6daa1f4 (/usr/lib/libglib-2.0.so.0.8000.5+0x761f4)
+  11948/11948      1000003 cycles:          b6d1d60a (/usr/lib/libgobject-2.0.so.0.8000.5+0x2560a)
+  11948/11948      1000003 cycles:          b6c069d2 (/usr/lib/libc.so.6+0x8f9d2)
+  11948/11948      1000003 cycles:          b6d0a7dc (/usr/lib/libgobject-2.0.so.0.8000.5+0x127dc)
+  11948/11948      1000003 cycles:          b6c01dbc (/usr/lib/libc.so.6+0x8adbc)
+  11948/11948      1000003 cycles:          b6d67858 (/usr/lib/libglib-2.0.so.0.8000.5+0x33858)
+  11948/11948      1000003 cycles:          b6d0a7dc (/usr/lib/libgobject-2.0.so.0.8000.5+0x127dc)
+  11948/11948      1000003 cycles:          b6c04c80 (/usr/lib/libc.so.6+0x8dc80)
+  11948/11948      1000003 cycles:          b6eb313e (/usr/lib/libgstreamer-1.0.so.0.2411.0+0x9b13e)
+  11948/11948      1000003 cycles:          b6c011fc (/usr/lib/libc.so.6+0x8a1fc)
+  11948/11948      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6c069d0 (/usr/lib/libc.so.6+0x8f9d0)
+  11948/11948      1000003 cycles:          b6c00190 (/usr/lib/libc.so.6+0x89190)
+  11948/11948      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6eb356e (/usr/lib/libgstreamer-1.0.so.0.2411.0+0x9b56e)
+  11948/11948      1000003 cycles:          b6d02778 (/usr/lib/libgobject-2.0.so.0.8000.5+0xa778)
+  11948/11948      1000003 cycles:          b6d51baa (/usr/lib/libglib-2.0.so.0.8000.5+0x1dbaa)
+  11948/11948      1000003 cycles:          b6e9c6b6 (/usr/lib/libgstreamer-1.0.so.0.2411.0+0x846b6)
+  11948/11948      1000003 cycles:          b6d67858 (/usr/lib/libglib-2.0.so.0.8000.5+0x33858)
+  11948/11948      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          c149ecc8 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6d0ce98 (/usr/lib/libgobject-2.0.so.0.8000.5+0x14e98)
+  11948/11948      1000003 cycles:          b6d772ba (/usr/lib/libglib-2.0.so.0.8000.5+0x432ba)
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6a4b000(0x4c000) @ 0 b3:02 4705 874426730]: r-xp /usr/lib/gstreamer-1.0/libgstcoreelements.so
+  11948/11948      1000003 cycles:          c14ba110 ([kernel.kallsyms])
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb69dd000(0x5d000) @ 0 b3:02 4708 2731229827]: r-xp /usr/lib/libgstbase-1.0.so.0.2411.0
+  11948/11948      1000003 cycles:          b6f12328 (/usr/lib/ld-linux.so.3+0x8328)
+  11948/11948      1000003 cycles:          b6e6f954 (/usr/lib/libgstreamer-1.0.so.0.2411.0+0x57954)
+  11948/11948      1000003 cycles:          b6e61198 (/usr/lib/libgstreamer-1.0.so.0.2411.0+0x49198)
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6973000(0x6a000) @ 0 b3:02 15245 921114024]: r-xp /usr/lib/gstreamer-1.0/libgstisomp4.so
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6966000(0xd000) @ 0 b3:02 9998 4173467187]: r-xp /usr/lib/libgstriff-1.0.so.0.2411.0
+  11948/11948      1000003 cycles:          b6f10214 (/usr/lib/ld-linux.so.3+0x6214)
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6913000(0x53000) @ 0 b3:02 9992 2175405879]: r-xp /usr/lib/libgstaudio-1.0.so.0.2411.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb68e8000(0x2b000) @ 0 b3:02 10006 3082409932]: r-xp /usr/lib/libgsttag-1.0.so.0.2411.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6866000(0x82000) @ 0 b3:02 10008 2283991393]: r-xp /usr/lib/libgstvideo-1.0.so.0.2411.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb683a000(0x2c000) @ 0 b3:02 9996 2008022549]: r-xp /usr/lib/libgstpbutils-1.0.so.0.2411.0
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb682a000(0x10000) @ 0 b3:02 1166 1833775904]: r-xp /usr/lib/libz.so.1.3.1
+  11948/11948      1000003 cycles:          b6f2cfd8 (/usr/lib/ld-linux.so.3+0x22fd8)
+  11948/11948      1000003 cycles:          b6f2e1ce (/usr/lib/ld-linux.so.3+0x241ce)
+  11948/11948      1000003 cycles:          c0a7a1b4 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6f16a58 (/usr/lib/ld-linux.so.3+0xca58)
+  11948/11948      1000003 cycles:          b6f2d3ca (/usr/lib/ld-linux.so.3+0x233ca)
+  11948/11948      1000003 cycles:          b6d7e226 (/usr/lib/libglib-2.0.so.0.8000.5+0x4a226)
+  11948/11948      1000003 cycles:          b697bac0 (/usr/lib/gstreamer-1.0/libgstisomp4.so+0x8ac0)
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb67fa000(0x30000) @ 0 b3:02 15326 1846163854]: r-xp /usr/lib/gstreamer-1.0/libgstvideoparsersbad.so
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6796000(0x64000) @ 0 b3:02 15336 3996802786]: r-xp /usr/lib/libgstcodecparsers-1.0.so.0.2411.0
+  11948/11948      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          c04c9304 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          c149ed2c ([kernel.kallsyms])
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6769000(0x2d000) @ 0 b3:02 10022 2296769471]: r-xp /usr/lib/gstreamer-1.0/libgstlibav.so
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6734000(0x35000) @ 0 b3:02 5566 2524341440]: r-xp /usr/lib/libavfilter.so.11.4.100
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6688000(0xac000) @ 0 b3:02 2267 3812231496]: r-xp /usr/lib/libavformat.so.62.3.100
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb612a000(0x55e000) @ 0 b3:02 1702 4080200201]: r-xp /usr/lib/libavcodec.so.62.11.100
+  11948/11948      1000003 cycles:          c14adf88 ([kernel.kallsyms])
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb509a000(0x1090000) @ 0 b3:02 1529 4221694576]: r-xp /usr/lib/libavutil.so.60.8.100
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb4fe5000(0xb5000) @ 0 b3:02 1853 3697428418]: r-xp /usr/lib/libswscale.so.9.1.100
+  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb4fd2000(0x13000) @ 0 b3:02 5562 3350719210]: r-xp /usr/lib/libswresample.so.6.1.100
+  11948/11948      1000003 cycles:          b6f0c778 (/usr/lib/ld-linux.so.3+0x2778)
+  11948/11948      1000003 cycles:          b6f122ac (/usr/lib/ld-linux.so.3+0x82ac)
+  11948/11948      1000003 cycles:          b6f2e0e8 (/usr/lib/ld-linux.so.3+0x240e8)
+  11948/11948      1000003 cycles:          b6f12070 (/usr/lib/ld-linux.so.3+0x8070)
+  11948/11948      1000003 cycles:          b6f124c4 (/usr/lib/ld-linux.so.3+0x84c4)
+  11948/11948      1000003 cycles:          b6f12304 (/usr/lib/ld-linux.so.3+0x8304)
+  11948/11948      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6bf667c (/usr/lib/libc.so.6+0x7f67c)
+  11948/11948      1000003 cycles:          b6c0040c (/usr/lib/libc.so.6+0x8940c)
+  11948/11948      1000003 cycles:          b6c0239c (/usr/lib/libc.so.6+0x8b39c)
+  11948/11948      1000003 cycles:          b6a129de (/usr/lib/libgstbase-1.0.so.0.2411.0+0x359de)
+  11948/11948      1000003 cycles:          c0b71e60 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c04c9304 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c04c929c ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c04c04dc ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c149f3a0 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c14f19c8 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          b50fd11c (/usr/lib/libavutil.so.60.8.100+0x6311c)
+  11948/11951      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c0518000 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c04c04dc ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          b638637c (/usr/lib/libavcodec.so.62.11.100+0x25c37c)
+  11948/11951      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c04c9304 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c0518024 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c04f6318 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c04c0610 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c0a7a0d0 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          b6c05de8 (/usr/lib/libc.so.6+0x8ede8)
+  11948/11951      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c0513318 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c149ed2c ([kernel.kallsyms])
+  11948/11948      1000003 cycles:          b6daa1c0 (/usr/lib/libglib-2.0.so.0.8000.5+0x761c0)
+  11948/11948      1000003 cycles:          b6d0d514 (/usr/lib/libgobject-2.0.so.0.8000.5+0x15514)
+  11948/11951      1000003 cycles:          b6e4593c (/usr/lib/libgstreamer-1.0.so.0.2411.0+0x2d93c)
+  11948/11951      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b6c05de8 (/usr/lib/libc.so.6+0x8ede8)
+  11948/11953      1000003 cycles:          c04eb958 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          c0a7a0d0 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          c0518110 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          c04d2dc0 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c14f0fec ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b6189d90 (/usr/lib/libavcodec.so.62.11.100+0x5fd90)
+  11948/11951      1000003 cycles:          c04c8dc8 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          c14f0fec ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b61ca27a (/usr/lib/libavcodec.so.62.11.100+0xa027a)
+  11948/11953      1000003 cycles:          b61c213a (/usr/lib/libavcodec.so.62.11.100+0x9813a)
+  11948/11953      1000003 cycles:          b6204c9a (/usr/lib/libavcodec.so.62.11.100+0xdac9a)
+  11948/11953      1000003 cycles:          b61c9742 (/usr/lib/libavcodec.so.62.11.100+0x9f742)
+  11948/11953      1000003 cycles:          b6189d28 (/usr/lib/libavcodec.so.62.11.100+0x5fd28)
+  11948/11953      1000003 cycles:          b618a4ec (/usr/lib/libavcodec.so.62.11.100+0x604ec)
+  11948/11953      1000003 cycles:          b6205a1e (/usr/lib/libavcodec.so.62.11.100+0xdba1e)
+  11948/11953      1000003 cycles:          b61c250a (/usr/lib/libavcodec.so.62.11.100+0x9850a)
+  11948/11953      1000003 cycles:          b61c9742 (/usr/lib/libavcodec.so.62.11.100+0x9f742)
+  11948/11953      1000003 cycles:          b6189d46 (/usr/lib/libavcodec.so.62.11.100+0x5fd46)
+  11948/11953      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b6189be8 (/usr/lib/libavcodec.so.62.11.100+0x5fbe8)
+  11948/11953      1000003 cycles:          b61ca1f2 (/usr/lib/libavcodec.so.62.11.100+0xa01f2)
+  11948/11954      1000003 cycles:          c04c8bcc ([kernel.kallsyms])
+  11948/11954      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11954      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11954      1000003 cycles:          c149f394 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11954      1000003 cycles:          b61e9c02 (/usr/lib/libavcodec.so.62.11.100+0xbfc02)
+  11948/11951      1000003 cycles:          b638fd68 (/usr/lib/libavcodec.so.62.11.100+0x265d68)
+  11948/11954      1000003 cycles:          b61e2e6a (/usr/lib/libavcodec.so.62.11.100+0xb8e6a)
+  11948/11951      1000003 cycles:          b6d0d4a6 (/usr/lib/libgobject-2.0.so.0.8000.5+0x154a6)
+  11948/11954      1000003 cycles:          b61c37e0 (/usr/lib/libavcodec.so.62.11.100+0x997e0)
+  11948/11955      1000003 cycles:          c0514f40 ([kernel.kallsyms])
+  11948/11954      1000003 cycles:          b61e11de (/usr/lib/libavcodec.so.62.11.100+0xb71de)
+  11948/11955      1000003 cycles:          c0514ed0 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b620582a (/usr/lib/libavcodec.so.62.11.100+0xdb82a)
+  11948/11955      1000003 cycles:          c04c0728 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b61e16a8 (/usr/lib/libavcodec.so.62.11.100+0xb76a8)
+  11948/11955      1000003 cycles:          b6c05df8 (/usr/lib/libc.so.6+0x8edf8)
+  11948/11954      1000003 cycles:          c04eb958 ([kernel.kallsyms])
+  11948/11951      1000003 cycles:          c14f1178 ([kernel.kallsyms])
+  11948/11955      1000003 cycles:          b61c2622 (/usr/lib/libavcodec.so.62.11.100+0x98622)
+  11948/11953      1000003 cycles:          b61c97b8 (/usr/lib/libavcodec.so.62.11.100+0x9f7b8)
+  11948/11951      1000003 cycles:          c050e9b0 ([kernel.kallsyms])
+  11948/11955      1000003 cycles:          b61c61da (/usr/lib/libavcodec.so.62.11.100+0x9c1da)
+  11948/11954      1000003 cycles:          b6189ec0 (/usr/lib/libavcodec.so.62.11.100+0x5fec0)
+  11948/11956      1000003 cycles:          c04c070c ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b618a4ec (/usr/lib/libavcodec.so.62.11.100+0x604ec)
+  11948/11956      1000003 cycles:          c04c04dc ([kernel.kallsyms])
+  11948/11954      1000003 cycles:          c02001cc ([kernel.kallsyms])
+  11948/11956      1000003 cycles:          c050e9b0 ([kernel.kallsyms])
+  11948/11953      1000003 cycles:          b61ca2e4 (/usr/lib/libavcodec.so.62.11.100+0xa02e4)
+  11948/11956      1000003 cycles:          b6bff280 (/usr/lib/libc.so.6+0x88280)
+  11948/11953      1000003 cycles:          b62286c2 (/usr/lib/libavcodec.so.62.11.100+0xfe6c2)
+  11948/11953      1000003 cycles:          b62075c0 (/usr/lib/libavcodec.so.62.11.100+0xdd5c0)
+  11948/11955      1000003 cycles:          b619b070 (/usr/lib/libavcodec.so.62.11.100+0x71070)
+  11948/11953      1000003 cycles:          b61c979a (/usr/lib/libavcodec.so.62.11.100+0x9f79a)
+  11948/11955      1000003 cycles:          b61e9ffe (/usr/lib/libavcodec.so.62.11.100+0xbfffe)
+  11948/11954      1000003 cycles:          c04c04dc ([kernel.kallsyms])
+
+FIRST 20 LIBAVCODEC SAMPLES (original line numbers):
+122:   11948/11951      1000003 cycles:          b638637c (/usr/lib/libavcodec.so.62.11.100+0x25c37c)
+148:   11948/11953      1000003 cycles:          b6189d90 (/usr/lib/libavcodec.so.62.11.100+0x5fd90)
+151:   11948/11953      1000003 cycles:          b61ca27a (/usr/lib/libavcodec.so.62.11.100+0xa027a)
+152:   11948/11953      1000003 cycles:          b61c213a (/usr/lib/libavcodec.so.62.11.100+0x9813a)
+153:   11948/11953      1000003 cycles:          b6204c9a (/usr/lib/libavcodec.so.62.11.100+0xdac9a)
+154:   11948/11953      1000003 cycles:          b61c9742 (/usr/lib/libavcodec.so.62.11.100+0x9f742)
+155:   11948/11953      1000003 cycles:          b6189d28 (/usr/lib/libavcodec.so.62.11.100+0x5fd28)
+156:   11948/11953      1000003 cycles:          b618a4ec (/usr/lib/libavcodec.so.62.11.100+0x604ec)
+157:   11948/11953      1000003 cycles:          b6205a1e (/usr/lib/libavcodec.so.62.11.100+0xdba1e)
+158:   11948/11953      1000003 cycles:          b61c250a (/usr/lib/libavcodec.so.62.11.100+0x9850a)
+159:   11948/11953      1000003 cycles:          b61c9742 (/usr/lib/libavcodec.so.62.11.100+0x9f742)
+160:   11948/11953      1000003 cycles:          b6189d46 (/usr/lib/libavcodec.so.62.11.100+0x5fd46)
+162:   11948/11953      1000003 cycles:          b6189be8 (/usr/lib/libavcodec.so.62.11.100+0x5fbe8)
+163:   11948/11953      1000003 cycles:          b61ca1f2 (/usr/lib/libavcodec.so.62.11.100+0xa01f2)
+169:   11948/11954      1000003 cycles:          b61e9c02 (/usr/lib/libavcodec.so.62.11.100+0xbfc02)
+170:   11948/11951      1000003 cycles:          b638fd68 (/usr/lib/libavcodec.so.62.11.100+0x265d68)
+171:   11948/11954      1000003 cycles:          b61e2e6a (/usr/lib/libavcodec.so.62.11.100+0xb8e6a)
+173:   11948/11954      1000003 cycles:          b61c37e0 (/usr/lib/libavcodec.so.62.11.100+0x997e0)
+175:   11948/11954      1000003 cycles:          b61e11de (/usr/lib/libavcodec.so.62.11.100+0xb71de)
+177:   11948/11953      1000003 cycles:          b620582a (/usr/lib/libavcodec.so.62.11.100+0xdb82a)
+
+ANALYSIS fixed
+samples: 7659
+lib_samples: 6496
+formula_matches: 6496
+exec_load_matches: 6496
+lib_mappings: {"11948": ["0xb612a000"]}
+lib_samples_per_pid: {"11948": 6496}
+examples: [{"line": 122, "pid": "11948", "tid": "11951", "ip": "0xb638637c", "mmap": [3054673920, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x25c37c", "calculated": "0x25c37c"}, {"line": 148, "pid": "11948", "tid": "11953", "ip": "0xb6189d90", "mmap": [3054673920, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x5fd90", "calculated": "0x5fd90"}, {"line": 151, "pid": "11948", "tid": "11953", "ip": "0xb61ca27a", "mmap": [3054673920, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xa027a", "calculated": "0xa027a"}, {"line": 152, "pid": "11948", "tid": "11953", "ip": "0xb61c213a", "mmap": [3054673920, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x9813a", "calculated": "0x9813a"}, {"line": 153, "pid": "11948", "tid": "11953", "ip": "0xb6204c9a", "mmap": [3054673920, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xdac9a", "calculated": "0xdac9a"}]
+special_dsos: {"[kernel.kallsyms]": 393}
+dynsym_checked: 1
+dynsym_raw_hits: 0
+dynsym_thumb_normalized_hits: 1
+dynsym_excluded: {"unknown": 6472, "plt_not_defined_dynsym": 23}
+dynsym_examples: [{"line": 1429, "name": "av_packet_alloc", "ip": "b6329000", "dsoff": "0x1ff000", "vaddr": "0x1ff000", "symbol_value": "0x1ff001", "symbol_size": 112}]
+formula_mismatches: []
+lost_records: []
+RAW DYNSYM INTERVAL MISMATCHES (all; normalized Thumb interval has zero mismatches):
+line=1429 av_packet_alloc ip=b6329000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+period distribution: {1000003: 7659}
+
+ANALYSIS freq
+samples: 4886
+lib_samples: 4096
+formula_matches: 4096
+exec_load_matches: 4096
+lib_mappings: {"12277": ["0xb61ec000"]}
+lib_samples_per_pid: {"12277": 4096}
+examples: [{"line": 114, "pid": "12277", "tid": "12300", "ip": "0xb628cbbe", "mmap": [3055468544, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xa0bbe", "calculated": "0xa0bbe"}, {"line": 119, "pid": "12277", "tid": "12300", "ip": "0xb628c246", "mmap": [3055468544, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xa0246", "calculated": "0xa0246"}, {"line": 122, "pid": "12277", "tid": "12300", "ip": "0xb628b876", "mmap": [3055468544, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x9f876", "calculated": "0x9f876"}, {"line": 123, "pid": "12277", "tid": "12303", "ip": "0xb62b8a0e", "mmap": [3055468544, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xcca0e", "calculated": "0xcca0e"}, {"line": 124, "pid": "12277", "tid": "12300", "ip": "0xb62858ae", "mmap": [3055468544, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x998ae", "calculated": "0x998ae"}]
+special_dsos: {"[kernel.kallsyms]": 305}
+dynsym_checked: 0
+dynsym_raw_hits: 0
+dynsym_thumb_normalized_hits: 0
+dynsym_excluded: {"unknown": 4079, "plt_not_defined_dynsym": 17}
+dynsym_examples: []
+formula_mismatches: []
+lost_records: []
+RAW DYNSYM INTERVAL MISMATCHES (all; normalized Thumb interval has zero mismatches):
+period unique/min/max: (4638, 1, 20001473)
+period decade bins [10^k,10^(k+1)): {0: 52, 1: 16, 2: 4, 3: 14, 4: 9, 5: 368, 6: 4404, 7: 19}
+top20 period frequencies: [(1, 51), (2163140, 4), (1925694, 4), (1799528, 4), (1719077, 4), (1687006, 4), (1474660, 3), (1626648, 3), (1283656, 3), (1452415, 3), (1488926, 3), (17, 2), (29, 2), (36, 2), (8912015, 2), (21, 2), (2427572, 2), (12893841, 2), (1588220, 2), (2472152, 2)]
+
+ANALYSIS multi
+samples: 22662
+lib_samples: 13289
+formula_matches: 13289
+exec_load_matches: 13289
+lib_mappings: {"1977": ["0xb59d1000"], "12122": ["0xb6109000"], "12121": ["0xb61d5000"]}
+lib_samples_per_pid: {"12121": 6662, "12122": 6627}
+examples: [{"line": 4564, "pid": "12121", "tid": "12126", "ip": "0xb64305a2", "mmap": [3055374336, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x25b5a2", "calculated": "0x25b5a2"}, {"line": 4634, "pid": "12122", "tid": "12129", "ip": "0xb61a1558", "mmap": [3054538752, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x98558", "calculated": "0x98558"}, {"line": 4639, "pid": "12121", "tid": "12131", "ip": "0xb6268ea8", "mmap": [3055374336, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x93ea8", "calculated": "0x93ea8"}, {"line": 4659, "pid": "12122", "tid": "12129", "ip": "0xb6206ed8", "mmap": [3054538752, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xfded8", "calculated": "0xfded8"}, {"line": 4661, "pid": "12122", "tid": "12129", "ip": "0xb61a8790", "mmap": [3054538752, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x9f790", "calculated": "0x9f790"}]
+special_dsos: {"[kernel.kallsyms]": 2572, "[vdso]+0x4ec": 1, "[vdso]+0x548": 1, "[vdso]+0x630": 1, "[vdso]+0x63c": 1, "[vdso]+0x640": 3, "[vdso]+0x500": 1, "[vdso]+0x918": 2, "[vdso]+0x56c": 2, "[vdso]+0x4d4": 2, "[vdso]+0x914": 2, "[vdso]+0x534": 1, "[vdso]+0x528": 1}
+dynsym_checked: 7
+dynsym_raw_hits: 3
+dynsym_thumb_normalized_hits: 7
+dynsym_excluded: {"unknown": 13226, "plt_not_defined_dynsym": 56}
+dynsym_examples: [{"line": 1470, "name": "avcodec_send_packet", "ip": "b6189f00", "dsoff": "0x80f00", "vaddr": "0x80f00", "symbol_value": "0x80e91", "symbol_size": 166}, {"line": 1765, "name": "av_codec_is_decoder", "ip": "b6402090", "dsoff": "0x22d090", "vaddr": "0x22d090", "symbol_value": "0x22d091", "symbol_size": 14}, {"line": 1883, "name": "av_bsf_receive_packet", "ip": "b61858b6", "dsoff": "0x7c8b6", "vaddr": "0x7c8b6", "symbol_value": "0x7c8b5", "symbol_size": 6}, {"line": 8456, "name": "avcodec_send_packet", "ip": "b6189f0a", "dsoff": "0x80f0a", "vaddr": "0x80f0a", "symbol_value": "0x80e91", "symbol_size": 166}, {"line": 14508, "name": "av_packet_free", "ip": "b63d4070", "dsoff": "0x1ff070", "vaddr": "0x1ff070", "symbol_value": "0x1ff071", "symbol_size": 176}, {"line": 20797, "name": "av_packet_alloc", "ip": "b63d4000", "dsoff": "0x1ff000", "vaddr": "0x1ff000", "symbol_value": "0x1ff001", "symbol_size": 112}, {"line": 21981, "name": "av_packet_unref", "ip": "b6308120", "dsoff": "0x1ff120", "vaddr": "0x1ff120", "symbol_value": "0x1ff121", "symbol_size": 144}]
+formula_mismatches: []
+lost_records: []
+RAW DYNSYM INTERVAL MISMATCHES (all; normalized Thumb interval has zero mismatches):
+line=1765 av_codec_is_decoder ip=b6402090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=14508 av_packet_free ip=b63d4070 off=0x1ff070 va=0x1ff070 st_value=0x1ff071 size=176
+line=20797 av_packet_alloc ip=b63d4000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=21981 av_packet_unref ip=b6308120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+period distribution: {1000003: 22662}
+
+ANALYSIS buildid
+samples: 7466
+lib_samples: 6322
+formula_matches: 6322
+exec_load_matches: 6322
+lib_mappings: {"12425": ["0xb616e000"]}
+lib_samples_per_pid: {"12425": 6322}
+examples: [{"line": 124, "pid": "12425", "tid": "12428", "ip": "0xb6231634", "mmap": [3054952448, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xc3634", "calculated": "0xc3634"}, {"line": 142, "pid": "12425", "tid": "12430", "ip": "0xb6201eb2", "mmap": [3054952448, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x93eb2", "calculated": "0x93eb2"}, {"line": 149, "pid": "12425", "tid": "12430", "ip": "0xb62076d8", "mmap": [3054952448, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x996d8", "calculated": "0x996d8"}, {"line": 151, "pid": "12425", "tid": "12430", "ip": "0xb6249894", "mmap": [3054952448, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0xdb894", "calculated": "0xdb894"}, {"line": 153, "pid": "12425", "tid": "12430", "ip": "0xb620d722", "mmap": [3054952448, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x9f722", "calculated": "0x9f722"}]
+special_dsos: {"[kernel.kallsyms]": 395}
+dynsym_checked: 0
+dynsym_raw_hits: 0
+dynsym_thumb_normalized_hits: 0
+dynsym_excluded: {"unknown": 6298, "plt_not_defined_dynsym": 24}
+dynsym_examples: []
+formula_mismatches: []
+lost_records: []
+RAW DYNSYM INTERVAL MISMATCHES (all; normalized Thumb interval has zero mismatches):
+period distribution: {1000003: 7466}
+
+ANALYSIS lost
+samples: 1044541
+lib_samples: 943893
+formula_matches: 943893
+exec_load_matches: 943893
+lib_mappings: {"12555": ["0xb6155000"]}
+lib_samples_per_pid: {"12555": 943893}
+examples: [{"line": 683, "pid": "12555", "tid": "12555", "ip": "0xb61a5eb4", "mmap": [3054850048, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x50eb4", "calculated": "0x50eb4"}, {"line": 860, "pid": "12555", "tid": "12558", "ip": "0xb63b137c", "mmap": [3054850048, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x25c37c", "calculated": "0x25c37c"}, {"line": 862, "pid": "12555", "tid": "12558", "ip": "0xb63b137c", "mmap": [3054850048, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x25c37c", "calculated": "0x25c37c"}, {"line": 863, "pid": "12555", "tid": "12558", "ip": "0xb63b137c", "mmap": [3054850048, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x25c37c", "calculated": "0x25c37c"}, {"line": 864, "pid": "12555", "tid": "12558", "ip": "0xb616f096", "mmap": [3054850048, 5627904, 0, "/usr/lib/libavcodec.so.62.11.100"], "dsoff": "0x1a096", "calculated": "0x1a096"}]
+special_dsos: {"[kernel.kallsyms]": 19464}
+dynsym_checked: 219
+dynsym_raw_hits: 103
+dynsym_thumb_normalized_hits: 219
+dynsym_excluded: {"unknown": 940743, "plt_not_defined_dynsym": 2931}
+dynsym_examples: [{"line": 4148, "name": "avcodec_is_open", "ip": "b61cfcac", "dsoff": "0x7acac", "vaddr": "0x7acac", "symbol_value": "0x7acad", "symbol_size": 10}, {"line": 12937, "name": "av_packet_move_ref", "ip": "b63549b0", "dsoff": "0x1ff9b0", "vaddr": "0x1ff9b0", "symbol_value": "0x1ff9b1", "symbol_size": 96}, {"line": 13158, "name": "av_bsf_send_packet", "ip": "b61d184c", "dsoff": "0x7c84c", "vaddr": "0x7c84c", "symbol_value": "0x7c84d", "symbol_size": 104}, {"line": 17455, "name": "av_packet_unref", "ip": "b6354124", "dsoff": "0x1ff124", "vaddr": "0x1ff124", "symbol_value": "0x1ff121", "symbol_size": 144}, {"line": 19479, "name": "av_bsf_receive_packet", "ip": "b61d18b6", "dsoff": "0x7c8b6", "vaddr": "0x7c8b6", "symbol_value": "0x7c8b5", "symbol_size": 6}, {"line": 19713, "name": "av_packet_copy_props", "ip": "b6354744", "dsoff": "0x1ff744", "vaddr": "0x1ff744", "symbol_value": "0x1ff6a9", "symbol_size": 226}, {"line": 28800, "name": "av_bsf_receive_packet", "ip": "b61d18b6", "dsoff": "0x7c8b6", "vaddr": "0x7c8b6", "symbol_value": "0x7c8b5", "symbol_size": 6}, {"line": 30464, "name": "av_packet_alloc", "ip": "b6354000", "dsoff": "0x1ff000", "vaddr": "0x1ff000", "symbol_value": "0x1ff001", "symbol_size": 112}]
+formula_mismatches: []
+lost_records: []
+RAW DYNSYM INTERVAL MISMATCHES (all; normalized Thumb interval has zero mismatches):
+line=4148 avcodec_is_open ip=b61cfcac off=0x7acac va=0x7acac st_value=0x7acad size=10
+line=12937 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=13158 av_bsf_send_packet ip=b61d184c off=0x7c84c va=0x7c84c st_value=0x7c84d size=104
+line=30464 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=32512 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=40411 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=47359 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=56569 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=56995 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=57926 av_packet_get_side_data ip=b6354504 off=0x1ff504 va=0x1ff504 st_value=0x1ff505 size=52
+line=63600 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=89619 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=109327 av_packet_free ip=b6354070 off=0x1ff070 va=0x1ff070 st_value=0x1ff071 size=176
+line=140449 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=157210 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=176448 av_packet_free ip=b6354070 off=0x1ff070 va=0x1ff070 st_value=0x1ff071 size=176
+line=177833 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=183382 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=214405 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=229612 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=230645 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=249315 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=259930 av_packet_copy_props ip=b63546a8 off=0x1ff6a8 va=0x1ff6a8 st_value=0x1ff6a9 size=226
+line=270336 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=292059 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=302343 av_packet_free ip=b6354070 off=0x1ff070 va=0x1ff070 st_value=0x1ff071 size=176
+line=302892 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=307429 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=324219 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=327820 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=343133 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=346801 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=357694 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=364694 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=366867 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=368583 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=373144 av_packet_copy_props ip=b63546a8 off=0x1ff6a8 va=0x1ff6a8 st_value=0x1ff6a9 size=226
+line=375251 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=386690 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=388811 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=389246 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=391028 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=402251 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=415759 av_bsf_send_packet ip=b61d184c off=0x7c84c va=0x7c84c st_value=0x7c84d size=104
+line=417131 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=441380 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=450934 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=462155 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=474461 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=477584 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=481300 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=487649 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=500796 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=503277 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=523139 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=541825 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=544687 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=548794 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=568786 av_packet_ref ip=b6354790 off=0x1ff790 va=0x1ff790 st_value=0x1ff791 size=288
+line=587317 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=591391 av_packet_ref ip=b6354790 off=0x1ff790 va=0x1ff790 st_value=0x1ff791 size=288
+line=597680 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=597947 av_bsf_send_packet ip=b61d184c off=0x7c84c va=0x7c84c st_value=0x7c84d size=104
+line=605355 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=609698 av_packet_make_refcounted ip=b6354a10 off=0x1ffa10 va=0x1ffa10 st_value=0x1ffa11 size=100
+line=613083 av_packet_get_side_data ip=b6354504 off=0x1ff504 va=0x1ff504 st_value=0x1ff505 size=52
+line=639305 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=655151 av_packet_make_refcounted ip=b6354a10 off=0x1ffa10 va=0x1ffa10 st_value=0x1ffa11 size=100
+line=674763 av_packet_make_refcounted ip=b6354a10 off=0x1ffa10 va=0x1ffa10 st_value=0x1ffa11 size=100
+line=702835 av_packet_get_side_data ip=b6354504 off=0x1ff504 va=0x1ff504 st_value=0x1ff505 size=52
+line=710620 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=720295 av_packet_copy_props ip=b63546a8 off=0x1ff6a8 va=0x1ff6a8 st_value=0x1ff6a9 size=226
+line=732099 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=735439 avcodec_is_open ip=b61cfcac off=0x7acac va=0x7acac st_value=0x7acad size=10
+line=738510 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=738647 av_bsf_send_packet ip=b61d184c off=0x7c84c va=0x7c84c st_value=0x7c84d size=104
+line=738779 av_packet_make_refcounted ip=b6354a10 off=0x1ffa10 va=0x1ffa10 st_value=0x1ffa11 size=100
+line=740237 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=741053 av_packet_copy_props ip=b63546a8 off=0x1ff6a8 va=0x1ff6a8 st_value=0x1ff6a9 size=226
+line=759891 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=760583 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=779669 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=783002 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=785616 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=792005 av_packet_copy_props ip=b63546a8 off=0x1ff6a8 va=0x1ff6a8 st_value=0x1ff6a9 size=226
+line=793496 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=805572 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=806898 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=817039 av_packet_copy_props ip=b63546a8 off=0x1ff6a8 va=0x1ff6a8 st_value=0x1ff6a9 size=226
+line=824323 av_packet_unpack_dictionary ip=b635460e off=0x1ff60e va=0x1ff60e st_value=0x1ff60f size=104
+line=836336 av_packet_move_ref ip=b63549b0 off=0x1ff9b0 va=0x1ff9b0 st_value=0x1ff9b1 size=96
+line=849942 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=853283 avcodec_is_open ip=b61cfcac off=0x7acac va=0x7acac st_value=0x7acad size=10
+line=873189 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=878641 av_codec_is_decoder ip=b6382090 off=0x22d090 va=0x22d090 st_value=0x22d091 size=14
+line=895844 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=897966 avcodec_send_packet ip=b61d5e90 off=0x80e90 va=0x80e90 st_value=0x80e91 size=166
+line=899523 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=907472 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=919892 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=920201 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=938007 av_packet_alloc ip=b6354000 off=0x1ff000 va=0x1ff000 st_value=0x1ff001 size=112
+line=940422 av_packet_free ip=b6354070 off=0x1ff070 va=0x1ff070 st_value=0x1ff071 size=176
+line=956886 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=978980 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+line=983056 avcodec_is_open ip=b61cfcac off=0x7acac va=0x7acac st_value=0x7acad size=10
+line=985497 avcodec_is_open ip=b61cfcac off=0x7acac va=0x7acac st_value=0x7acad size=10
+line=995993 av_packet_get_side_data ip=b6354504 off=0x1ff504 va=0x1ff504 st_value=0x1ff505 size=52
+line=997393 avcodec_is_open ip=b61cfcac off=0x7acac va=0x7acac st_value=0x7acad size=10
+line=1000001 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=1009242 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=1023737 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=1025497 av_bsf_receive_packet ip=b61d18b4 off=0x7c8b4 va=0x7c8b4 st_value=0x7c8b5 size=6
+line=1027922 av_bsf_send_packet ip=b61d184c off=0x7c84c va=0x7c84c st_value=0x7c84d size=104
+line=1031240 av_packet_unref ip=b6354120 off=0x1ff120 va=0x1ff120 st_value=0x1ff121 size=144
+line=1031357 avcodec_receive_frame ip=b61d0458 off=0x7b458 va=0x7b458 st_value=0x7b459 size=60
+period distribution: {100003: 1044541}
+
+BUILDID MMAP2 EXAMPLES
+  12425/12425   PERF_RECORD_MMAP2 12425/12425: [0xb6bbb000(0x162000) @ 0 <eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c>]: r-xp /usr/lib/libc.so.6
+  12425/12425   PERF_RECORD_MMAP2 12425/12425: [0xb616e000(0x55e000) @ 0 b3:02 1702 4080200201]: r-xp /usr/lib/libavcodec.so.62.11.100
+
+SPECIAL DSO EXAMPLES: unknown symbol is not an unknown DSO. No [unknown] DSO observed.
+  11948/11948      1000003 cycles:          c0518110 ([kernel.kallsyms])
+   1612/1612       1000003  cycles:          befdf4ec ([vdso]+0x4ec)
+
+HOST PERF CANDIDATES: recursive name search found only ARM/AArch64 candidates; permission-denied metadata in protected buildroot/virtual proc dirs, no escalation.
+temp/GBS-ROOT-RPI4-PMUV3/local/BUILD-ROOTS/scratch.armv7l.0/home/abuild/rpmbuild/BUILD/rpi4-linux-kernel-6.12.80/build/arm-rpi4/perf
+temp/rpms-aarch64/perf-extract/usr/bin/perf
+temp/rpms/perf-extract/usr/bin/perf
+
+=== host_perf_candidate_0 ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -h temp/GBS-ROOT-RPI4-PMUV3/local/BUILD-ROOTS/scratch.armv7l.0/home/abuild/rpmbuild/BUILD/rpi4-linux-kernel-6.12.80/build/arm-rpi4/perf
+EXIT 0; TRANSPORT host
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x97a50
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          3740324 (bytes into file)
+  Flags:                             0x5000200, Version5 EABI, soft-float ABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         13
+  Size of section headers:           40 (bytes)
+  Number of section headers:         48
+  Section header string table index: 46
+
+STDERR:
+
+
+=== host_perf_candidate_1 ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -h temp/rpms-aarch64/perf-extract/usr/bin/perf
+EXIT 0; TRANSPORT host
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0x2c780
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          3259656 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         9
+  Size of section headers:           64 (bytes)
+  Number of section headers:         28
+  Section header string table index: 27
+
+STDERR:
+
+
+=== host_perf_candidate_2 ===
+$ nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -h temp/rpms/perf-extract/usr/bin/perf
+EXIT 0; TRANSPORT host
+STDOUT:
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x97a50
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          2990976 (bytes into file)
+  Flags:                             0x5000200, Version5 EABI, soft-float ABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         13
+  Size of section headers:           40 (bytes)
+  Number of section headers:         33
+  Section header string table index: 32
+
+STDERR:
+
+
+SOURCE EXPLAINS NONEMPTY buildid-list WITH --buildid-mmap:
+src/linux-rpi/tools/perf/builtin-buildid-list.c:101: 	perf_tool__init(&build_id__mark_dso_hit_ops, /*ordered_events=*/true);
+src/linux-rpi/tools/perf/builtin-buildid-list.c:102: 	build_id__mark_dso_hit_ops.sample	= build_id__mark_dso_hit;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:103: 	build_id__mark_dso_hit_ops.mmap		= perf_event__process_mmap;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:104: 	build_id__mark_dso_hit_ops.mmap2	= perf_event__process_mmap2;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:105: 	build_id__mark_dso_hit_ops.fork		= perf_event__process_fork;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:106: 	build_id__mark_dso_hit_ops.exit		= perf_event__exit_del_thread;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:107: 	build_id__mark_dso_hit_ops.attr		= perf_event__process_attr;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:108: 	build_id__mark_dso_hit_ops.build_id	= perf_event__process_build_id;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:121:
+src/linux-rpi/tools/perf/builtin-buildid-list.c:122: 	if (!perf_header__has_feat(&session->header, HEADER_BUILD_ID))
+src/linux-rpi/tools/perf/builtin-buildid-list.c:123: 		with_hits = true;
+src/linux-rpi/tools/perf/builtin-buildid-list.c:124:
+src/linux-rpi/tools/perf/builtin-buildid-list.c:125: 	if (zstd_init(&(session->zstd_data), 0) < 0)
+src/linux-rpi/tools/perf/builtin-buildid-list.c:126: 		pr_warning("Decompression initialization failed. Reported data may be incomplete.\n");
+src/linux-rpi/tools/perf/builtin-buildid-list.c:127:
+src/linux-rpi/tools/perf/builtin-buildid-list.c:128: 	/*
+src/linux-rpi/tools/perf/builtin-buildid-list.c:129: 	 * in pipe-mode, the only way to get the buildids is to parse
+src/linux-rpi/tools/perf/builtin-buildid-list.c:130: 	 * the record stream. Buildids are stored as RECORD_HEADER_BUILD_ID
+src/linux-rpi/tools/perf/builtin-buildid-list.c:131: 	 */
+src/linux-rpi/tools/perf/builtin-buildid-list.c:132: 	if (with_hits || perf_data__is_pipe(&data))
+src/linux-rpi/tools/perf/builtin-buildid-list.c:133: 		perf_session__process_events(session);
+src/linux-rpi/tools/perf/builtin-buildid-list.c:134:
+src/linux-rpi/tools/perf/builtin-buildid-list.c:135: 	perf_session__fprintf_dsos_buildid(session, stdout, dso__skip_buildid, with_hits);

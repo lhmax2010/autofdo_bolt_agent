@@ -26,7 +26,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-29；llvm-profgen 增强设计 v0.2，第二轮评审前）
+## 当前授权与执行状态（2026-10-29；RPi4 PMUv3 新镜像与 v0.2 冻结前核实，已完成）
+
+- 用户已授权并完成第 10 节步骤 1 的本轮板上/主机核实及可选 armv7l spike；不修改 LLVM 代码或设计文档，不开始增强实现。设计当前版本仍为 v0.2（未冻结、第二轮评审前），是否进行第二轮评审与冻结由用户决定。
+- RPi4 身份断言通过；镜像 Unified 20261028.105834，armv8-pmu 已绑定 A72，cycles type=0/config=0，7,659样本；硬件PMU已在新镜像实测通过，页大小4096。
+- dsoff 固定数据6,496条、双进程13,289条 libavcodec 样本公式/PT_LOAD均100%一致。固定period=1000003，频率模式逐样本变化；buildid-mmap与ELF非空ID实测匹配。
+- 设计差异/未闭合项：buildid-mmap的buildid-list实际非空；vdso带偏移；Thumb符号区间需清除状态位；IR带权分支匹配15/17与15/23。没有产生LOST、无主机x86_64 perf、RPi5页大小本轮未测，不能宣称整个冻结门槛已闭合。
+- armv7l插桩PGO在约7分30秒内闭环：两轮GBS退出0/ALL-END OK，base/instr/pgo校验同为ff818b861cb93a67；不推断性能收益。只在temp测试包中改架构宏与训练profile，原spike和LLVM源码不改。
+- 板上work已清空，保留perf/libLLVM；/opt最终已用70628KiB、可用1234960KiB，RPM前后1252，pswpin/pswpout前后26/613。未remount、重启或装卸RPM。
+- [05报告](probe/05_rpi4_pmu_image_and_prefreeze.md)、[本轮四份证据](probe/evidence/05/01_environment_hardware.txt)（146,789B）、[IR匹配原型](../tools/match_ir_branches_prototype.py)与本状态文件同一commit提交；旧证据、设计不动。执行偏差与历史SDB边界限制在报告末尾如实保留。
+
+## 前轮授权与完成状态（历史；llvm-profgen 增强设计 v0.2 归档）
 
 - 设计文档当前版本为 [v0.2](profgen/design/02_llvm_profgen_enhance_design_v0.2.md)（第二轮评审前）；v0.1 三方评审已处理完毕，处理表见 v0.2 附录 A。v0.1 文件保留不动。
 - 待决事项：是否进行第二轮评审、是否先做第 10 节步骤 1 的冻结前板上核实，均由用户决定。本轮只移动归档和提交，不执行评审、板上核实、构建或代码修改；冻结前不开工，Agent 的设计与开发仍在 llvm-profgen 增强完成后才开始。
@@ -106,13 +116,13 @@
 
 # 项目状态
 
-更新：2026-10-29（Asia/Shanghai）。阶段：llvm-profgen 增强设计当前版本 v0.2（第二轮评审前），v0.1 三方评审已处理完毕；第二轮评审与冻结前板上核实待用户决定，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 等用户 Quickbuild 后验证。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-29（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像及本轮冻结前核实已完成；llvm-profgen 设计当前版本 v0.2（第二轮评审前），v0.1 三方评审已处理完毕；第二轮评审与冻结待用户决定，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 当前设计 v0.2（第二轮评审前）；v0.1 三方评审已处理完毕，见 v0.2 附录 A。第二轮评审及第 10 节步骤 1 的冻结前板上核实由用户决定；冻结前不开工，Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
+- 当前设计 v0.2（第二轮评审前）；v0.1 三方评审已处理完毕，见附录 A。本轮第 10 节步骤 1 核实已出报告；后续第二轮评审、未闭合证据和冻结由用户决定。冻结前不开工，Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
 
-- 当前准备任务已完成。等待用户确认纯 IP 输入、身份/地址校验和诊断的设计范围；未经新指令不开始 LLVM 增强。保留增量 buildroot/worktree，不重复基线构建。
+- v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree，未经冻结与新授权不开始 LLVM 增强。
 
 - 本轮工具 spike 已完成，不重复采集/构建。建议 RPi5 默认插桩 PGO；RPi4 先验证 ARM runtime/全链路。Google 无 LBR 转换和 BOLT -ba 保留为需后续授权验证的候选。
 
@@ -120,7 +130,7 @@
 
 - 已交付 patches/0001-ARM-configs-tizen_bcm2711-enable-ARM_PMUV3.patch，用户合入 Gerrit 并发起 Quickbuild；Agent 不推 Gerrit。本轮最新补丁未构建/启动，旧镜像基线构建验证仍单独保留。
 - 当前镜像的 perf /opt 部署、软件系统/媒体采样、DSO/符号统计及开销实测已完成；cycles 请求发生软件回退，不能当作硬件采样成功。
-- 后续等用户的新镜像与授权，再验收 PMU 绑定及真正硬件事件。原手工安装方案取消，不执行 scripts/pmuv3_install/，不通知用户按旧方案重启。
+- RPi4 新镜像 PMU 绑定及真正硬件cycles已验收。原手工安装方案仍取消，不执行 scripts/pmuv3_install/；后续真实包训练与优化另行授权。
 
 以下为前序探测计划与持续纪律：
 
@@ -133,7 +143,12 @@
 
 ## 进度
 
-### llvm-profgen 增强准备（当前，已完成）
+### RPi4 PMUv3 新镜像与冻结前核实（当前，已完成）
+
+- A/B/C/D 实测、未匹配IR分支、设计差异、板上清理与原始文件位置详见 [05](probe/05_rpi4_pmu_image_and_prefreeze.md)。只写一次性匹配原型，不修改设计或开始实现。
+- 采样与部署证据：[E1](probe/evidence/05/01_environment_hardware.txt)、[E2](probe/evidence/05/02_perf_formats_mapping.txt)；编译器/IR与armv7l闭环：[E3](probe/evidence/05/03_clang_ir.txt)、[E4](probe/evidence/05/04_arm_spike.txt)。
+
+### llvm-profgen 增强准备（历史，已完成）
 
 - GBS/depanneur/build helper 源码核对：bind 源码、跳过 prep、完整执行 build/install 并生成 short-circuit RPM；单包限制和 noinit 条件已记录。[增量源码证据](profgen/evidence/01_incremental_source.txt)
 - 未修改基线完成 7633 个 Ninja 步骤，真实 GBS 退出0、ALL-END OK；平台加载器/工具验收新 profgen 成功，23 个产物逐文件 SHA-256 已保存。[构建证据](profgen/evidence/03_baseline_build.txt)
@@ -246,6 +261,9 @@
 
 ## 已闭合结论（附证据路径）
 
+- RPi4 新镜像A72 PMU已绑定，cycles没有软件回退；armv7l插桩PGO小程序闭环通过。旧镜像软件回退结论仅适用于历史镜像。[E1](probe/evidence/05/01_environment_hardware.txt)、[E4](probe/evidence/05/04_arm_spike.txt)
+- v0.2部分输入预期需评审：模式A buildid-list非空、vdso有偏移；当前IR匹配键只部分覆盖。period/页大小/地址换算/profi事实已取得。[E2](probe/evidence/05/02_perf_formats_mapping.txt)、[E3](probe/evidence/05/03_clang_ir.txt)
+
 - 当前 LLVM spec 有条件支持对象复用；空目录完整基线已成功，差量耗时仍是估算。新 llvm-profgen 可运行，原 src/llvm 保持干净。[00](profgen/00_incremental_build.md)、[E3](profgen/evidence/03_baseline_build.txt)
 - Google 的普通 IP、build-id 匹配等可作参考；行/内联计数、discriminator、符号列表和多种输出 LLVM 已有，不能重复列为缺失。[23项差异表](profgen/01_gap_analysis.md)、[E2](profgen/evidence/02_gap_source.txt)
 
@@ -293,9 +311,8 @@
 
 ## 待人工裁决
 
-- [设计 v0.2](profgen/design/02_llvm_profgen_enhance_design_v0.2.md)：是否进行第二轮评审、是否先做第 10 节步骤 1 的冻结前板上核实，由用户决定；本次归档不代表设计冻结或允许开工。
+- [设计 v0.2](profgen/design/02_llvm_profgen_enhance_design_v0.2.md)：本轮冻结前事实已核实并列出设计差异；是否进行第二轮评审、补哪些未闭合证据及是否冻结，由用户决定，不据验证完成自动开工。
 
-- llvm-profgen 增强设计：先做普通 IP 文本入口、身份与 DSO/PIE 归一化、有效样本统计；是否另立 raw perf.data reader、ET_REL 模块、Chromium 规模和未来 SPE 专项。待用户确认，不开始改代码。
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、RPi4 插桩与 RPi5 BOLT -ba。
 
@@ -303,15 +320,18 @@
 
 - **Agent 的板上部署不能依赖 /tmp（noexec），部署目录由能力探测模块按挂载参数自动选定。** 本轮手工授权 /opt/afdo_agent 已明确，后续按挂载参数验收，不再重复索要目录授权；通用自动选择规则仍待设计裁决。
 - 历史直接 make 配置仍受主机 flex/bison 缺失限制；GBS 构建已完成并在构建根解决依赖，没有安装主机工具。
-- 新镜像出来后的 PMU 驱动绑定及真实硬件 cycles 采样验收；不能以本轮 perf 软件回退或旧基线构建成功代替。
+- 新镜像PMU绑定及硬件cycles验收已完成；真实包优化效果与统计质量仍待后续授权评估。
 - 是否提供保留 .comment/build-id 的原始构建库及明确 debug 仓库配置。
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
 
+- 冻结前未闭合：本轮高采样率未产生LOST，实际丢样语法fixture未取得；无主机x86_64 perf，因此跨主机文本比对跳过；RPi5板上页大小未在本轮核实。IR匹配率接受阈值及未匹配处理需评审，合成profile不证明统计质量。
+- armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
+
 - 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
 
-- Google create_llvm_prof --use_lbr=false 的端到端运行/行计数质量、ARM/Thumb 正确性和 BOLT -ba 优化仍未实测；RPi4 插桩 PGO 需要 armv7l 构建/训练/匹配/正确性闭环。当前 llvm-profgen 的纯 IP 拒绝已闭合，不待重试。
+- Google create_llvm_prof --use_lbr=false 的端到端运行/行计数质量、ARM/Thumb 正确性和 BOLT -ba 优化仍未实测；RPi4 插桩 PGO 的 armv7l 小程序闭环已于本轮完成。当前 llvm-profgen 的纯 IP 拒绝已闭合，不待重试。
 - 本轮性能测量次数少且未随机交错，PGO −0.12% 仅为观测差；真实场景收益、跨输入泛化需独立评估。
 
 - 原 GBS 真实退出码无法追溯；会话/进程组被执行器回收属于推断，没有死亡信号或生命周期审计证据。原 status 永久保留原貌。
