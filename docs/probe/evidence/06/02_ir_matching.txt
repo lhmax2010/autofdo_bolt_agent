@@ -1,0 +1,1491 @@
+IR generation, profile ingestion, matcher results (prototype).
+
+GBS worker command/config:
+#!/bin/bash
+set -Eeuo pipefail
+W=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+export TMPDIR="$W/temp/tmp"
+run=${1:?run label required}
+[[ $run =~ ^[a-z0-9_-]+$ ]] || exit 2
+shift
+if [[ ${1:-} != --worker ]]; then
+    test ! -e /etc/gbs.conf
+    test -f "$W/temp/gbs-home/.gbs.conf"
+    test -z "$(git -C "$W/temp/rpi4-followup/spike-arm" status --porcelain)"
+    exec 9>"$W/temp/rpi4-followup/build.lock"
+    flock -n 9 || { echo 'Another spike build is running'; exit 1; }
+    setsid --fork /bin/bash "$W/temp/rpi4-followup/build.sh" "$run" --worker "$@" 9>&9 >"$W/temp/rpi4-followup/logs/$run.log" 2>&1 </dev/null
+    echo "Worker launched: $W/temp/rpi4-followup/logs/$run.status"
+    exit 0
+fi
+shift
+status="$W/temp/rpi4-followup/logs/$run.status"
+start=$(date --iso-8601=seconds)
+rc=NOT_STARTED
+finish() {
+    code=$?
+    trap - EXIT
+    set +e
+    end=$(date --iso-8601=seconds)
+    verdict=FAILED
+    [[ $rc == 0 && $code == 0 ]] && verdict=OK
+    {
+        printf 'START %s\nEND %s\nGBS_EXIT %s\nWRAPPER_EXIT %s\n' "$start" "$end" "$rc" "$code"
+        find "$W/temp/GBS-ROOT-RPI4-SPIKE/local/repos" -type f -name '*.rpm' -print
+        printf 'ALL-END %s %s\n' "$end" "$verdict"
+    } >"$status.tmp"
+    mv "$status.tmp" "$status"
+    cat "$status"
+}
+trap finish EXIT
+trap '' HUP
+trap 'exit 143' TERM
+trap 'exit 130' INT
+printf 'START %s\nPHASE BUILDING\nWORKER_PID %s\n' "$start" "$$" >"$status"
+cd "$W/temp/rpi4-followup/spike-arm"
+set +e
+setsid --wait env HOME="$W/temp/gbs-home" GIT_CONFIG_NOSYSTEM=1 TMPDIR="$W/temp/gbs-tmp-rpi4-spike" nice -n 19 ionice -c3 gbs -c "$W/temp/gbs/gbs_rpi4_spike.conf" build -A armv7l --threads 1 --define '_smp_mflags -j2' "$@"
+rc=$?
+exit "$rc"
+
+[general]
+# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs-tmp-rpi4-spike
+profile = profile.tizen_unified_standard
+buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE
+
+[profile.tizen_unified_standard]
+repos = repo.base-standard, repo.unified-standard
+
+[repo.base-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261020.074527/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260722.045200/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260804.124315/repos/standard/packages/
+
+[repo.unified-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261022.054557/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260725.003315/repos/standard/packages/
+#url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260804.223836/repos/standard/packages/
+
+STATUS
+START 2026-10-30T00:21:54+08:00
+END 2026-10-30T00:22:11+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/RPMS/afdo-spike-1.0-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/SRPMS/afdo-spike-1.0-1.src.rpm
+ALL-END 2026-10-30T00:22:11+08:00 OK
+temp/rpi4-followup/logs/no_preinline.log:212-220
+212: [    6s] + llvm-profdata --version
+213: [    6s] LLVM (http://llvm.org/):
+214: [    6s]   LLVM version 22.1.8
+215: [    6s]   Optimized build.
+216: [    6s] + common='-O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs'
+217: [    6s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs spike.c -o afdo-spike-base
+218: [    6s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-generate -mllvm -disable-preinline spike.c -o afdo-spike-instr
+219: [    6s] + for exe in afdo-spike-base afdo-spike-instr
+220: [    6s] + readelf -h afdo-spike-base
+
+[instr_sha]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; chmod 755 /opt/afdo_agent/work/no-preinline-instr; sha256sum /opt/afdo_agent/work/no-preinline-instr
+time: 2026-10-30T00:24:16.005188+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+e63d8c18374a725024f69a58b3b08a7f087b90c0aec2df868931f4aa9e34ba57  /opt/afdo_agent/work/no-preinline-instr
+
+stderr:
+
+
+[instr_run]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; LLVM_PROFILE_FILE=/opt/afdo_agent/work/nopre-%p.profraw /opt/afdo_agent/work/no-preinline-instr 200000
+time: 2026-10-30T00:24:19.315171+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+rounds=200000 seed=0123456789abcdef checksum=ff818b861cb93a67
+
+stderr:
+
+
+[profraw_sha]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /opt/afdo_agent/work/nopre-29568.profraw
+time: 2026-10-30T00:24:19.572390+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+e7d93ee6240537222bfeafe5c88460d93a75875e945bbac2a4931b9be883078a  /opt/afdo_agent/work/nopre-29568.profraw
+
+stderr:
+
+
+[merge]
+COMMAND: nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-profdata merge /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/nopre-29568.profraw -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/nopre.profdata
+exit: 0
+stdout:
+
+stderr:
+
+
+[profile_show]
+COMMAND: nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-profdata show --all-functions --counts /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/nopre.profdata
+exit: 0
+stdout:
+Counters:
+  spike.c;_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358:
+    Hash: 0x04080bab86692ad9
+    Counters: 7
+    Block counts: [0, 1, 1, 1, 1, 1, 0]
+  run_workload:
+    Hash: 0x07df0bf8426facf0
+    Counters: 4
+    Block counts: [25600000, 199804, 196, 1]
+  sort_block:
+    Hash: 0x0b15abf27e5d80bf
+    Counters: 4
+    Block counts: [837311741, 812796211, 25400000, 200000]
+  spike.c;_ZL16initialize_tablev.__uniq.15873189423843482198216846878061840358:
+    Hash: 0x0209aa3e1d398548
+    Counters: 2
+    Block counts: [4096, 1]
+  spike.c;_ZL11next_randomPy.__uniq.15873189423843482198216846878061840358:
+    Hash: 0x0a4d0ad3efffffff
+    Counters: 1
+    Block counts: [25604096]
+  lookup_work:
+    Hash: 0x07735b69b9a7afd9
+    Counters: 3
+    Block counts: [23999000, 1601000, 200000]
+  main:
+    Hash: 0x056e49bf60c57a27
+    Counters: 7
+    Block counts: [0, 1, 1, 1, 0, 0, 0]
+  rare_path:
+    Hash: 0x07735b69b9a7afd9
+    Counters: 3
+    Block counts: [621, 5455, 196]
+  hash_mix:
+    Hash: 0x0a4d0ad3efffffff
+    Counters: 1
+    Block counts: [24003717]
+  spike.c;_ZL11rotate_leftyj.__uniq.15873189423843482198216846878061840358:
+    Hash: 0x0a4d0ad3efffffff
+    Counters: 1
+    Block counts: [27406259]
+  spike.c;_ZL14checksum_blockPKj.__uniq.15873189423843482198216846878061840358:
+    Hash: 0x0209aa3e1d398548
+    Counters: 2
+    Block counts: [25600000, 200000]
+Instrumentation level: IR  entry_first = 0  instrument_loop_entries = 0
+Functions shown: 11
+Total functions: 11
+Maximum function count: 837311741
+Maximum internal block count: 812796211
+Total number of blocks: 35
+Total count: 1830132402
+
+stderr:
+
+
+ir_pgo_attempt1
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=armv7l-tizen-linux-gnueabi --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0 -resource-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/usr/lib64/clang/22 -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -S -emit-llvm -fprofile-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/nopre.profdata -mllvm -disable-preinline -mllvm -print-after=pgo-instr-use spike.c -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/pgo.ll
+exit 1
+stdout 
+stderr (initial lines only):
+In file included from spike.c:9:
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/usr/include/stdio.h:34:10: fatal error: 'stddef.h' file not found
+   34 | #include <stddef.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+ir_pgo
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=armv7l-tizen-linux-gnueabi --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0 -resource-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/usr/lib/clang/22 -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -S -emit-llvm -fprofile-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/nopre.profdata -mllvm -disable-preinline -mllvm -print-after=pgo-instr-use spike.c -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/pgo.ll
+exit 0
+stdout 
+stderr (initial lines only):
+; *** IR Dump After PGOInstrumentationUse on [module] ***
+; ModuleID = 'spike.c'
+source_filename = "spike.c"
+target datalayout = "e-m:e-p:32:32-Fi8-i64:64-v128:64:128-a:0:32-n32-S64"
+target triple = "armv7-tizen-linux-gnueabi"
+
+%struct.entry = type { i32, i32 }
+
+
+ir_sample
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=armv7l-tizen-linux-gnueabi --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0 -resource-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/usr/lib/clang/22 -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -S -emit-llvm -fprofile-sample-use=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/synthetic_arm.sample -mllvm -print-after=sample-profile -mllvm -disable-sample-loader-inlining spike.c -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/sample.ll
+exit 0
+stdout 
+stderr (initial lines only):
+; *** IR Dump After SampleProfileLoaderPass on [module] ***
+; ModuleID = 'spike.c'
+source_filename = "spike.c"
+target datalayout = "e-m:e-p:32:32-Fi8-i64:64-v128:64:128-a:0:32-n32-S64"
+target triple = "armv7-tizen-linux-gnueabi"
+
+%struct.entry = type { i32, i32 }
+
+src/llvm/clang/lib/CodeGen/CodeGenModule.cpp:509-519
+509:   if (CodeGenOpts.UniqueInternalLinkageNames &&
+510:       !getModule().getSourceFileName().empty()) {
+511:     std::string Path = getModule().getSourceFileName();
+512:     // Check if a path substitution is needed from the MacroPrefixMap.
+513:     for (const auto &Entry : LangOpts.MacroPrefixMap)
+514:       if (Path.rfind(Entry.first, 0) != std::string::npos) {
+515:         Path = Entry.second + Path.substr(Entry.first.size());
+516:         break;
+517:       }
+518:     ModuleNameHash = llvm::getUniqueInternalLinkagePostfix(Path);
+519:   }
+
+MATCHER CHECKS
+PASS self-match temp/rpi4-prefreeze/pgo zero=False
+PASS self-match temp/rpi4-prefreeze/pgo zero=True
+PASS self-match temp/rpi4-prefreeze/sample zero=False
+PASS self-match temp/rpi4-prefreeze/sample zero=True
+PASS self-match temp/rpi4-followup/pgo zero=False
+PASS self-match temp/rpi4-followup/pgo zero=True
+PASS self-match temp/rpi4-followup/sample zero=False
+PASS self-match temp/rpi4-followup/sample zero=True
+PASS duplicate keys rejected
+PASS zero inference and no input mutation
+PASS unprofiled unweighted branch excluded
+PASS negative printed i32 interpreted unsigned
+PASS zero policy changes edge counts, preserves PGO weight denominator
+PASS switch/br shape mismatch surfaced for two matched successor keys
+
+MATCH GROUP 05
+{
+  "matched_successors": 30,
+  "matched_shape_mismatches": [],
+  "sides": {
+    "pgo": {
+      "conditional_terminators": 22,
+      "explicit_weighted_terminators": 17,
+      "zero_inferred_terminators": 0,
+      "zero_inferred_successors": 0,
+      "total_ir_weight": 8593540005,
+      "matched_ir_weight": 8271035908,
+      "weight_matched_ratio": 0.9624713334886023,
+      "weighted_terminators": 17,
+      "fully_matched_terminators": 15,
+      "weighted_successors": 34,
+      "matched_successors": 30,
+      "matched_ratio": 0.8823529411764706,
+      "unmatched": [
+        {
+          "function": "run_workload",
+          "block": "15",
+          "line": 206,
+          "location": [
+            "110",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095",
+                "107",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            [
+              "126",
+              "21",
+              null,
+              [
+                "function",
+                "run_workload",
+                "116",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ],
+              null
+            ]
+          ],
+          "successor_index": 0,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %18, label %19, label %28, !dbg !199, !prof !101",
+          "weight": 320000000,
+          "zero_inferred": false
+        },
+        {
+          "function": "run_workload",
+          "block": "15",
+          "line": 206,
+          "location": [
+            "110",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095",
+                "107",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            [
+              "126",
+              "21",
+              null,
+              [
+                "function",
+                "run_workload",
+                "116",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ],
+              null
+            ]
+          ],
+          "successor_index": 1,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %18, label %19, label %28, !dbg !199, !prof !101",
+          "weight": 2500000,
+          "zero_inferred": false
+        },
+        {
+          "function": "main",
+          "block": "33",
+          "line": 319,
+          "location": [
+            "55",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095",
+                "52",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            [
+              "169",
+              "5",
+              null,
+              [
+                "function",
+                "main",
+                "153",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ],
+              null
+            ]
+          ],
+          "successor_index": 0,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %36, label %37, label %53, !dbg !294, !prof !295",
+          "weight": 4096,
+          "zero_inferred": false
+        },
+        {
+          "function": "main",
+          "block": "33",
+          "line": 319,
+          "location": [
+            "55",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095",
+                "52",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            [
+              "169",
+              "5",
+              null,
+              [
+                "function",
+                "main",
+                "153",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ],
+              null
+            ]
+          ],
+          "successor_index": 1,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %36, label %37, label %53, !dbg !294, !prof !295",
+          "weight": 1,
+          "zero_inferred": false
+        }
+      ]
+    },
+    "sample": {
+      "conditional_terminators": 23,
+      "explicit_weighted_terminators": 23,
+      "zero_inferred_terminators": 0,
+      "zero_inferred_successors": 0,
+      "total_ir_weight": 37417,
+      "matched_ir_weight": 27574,
+      "weight_matched_ratio": 0.736937755565652,
+      "weighted_terminators": 23,
+      "fully_matched_terminators": 15,
+      "weighted_successors": 46,
+      "matched_successors": 30,
+      "matched_ratio": 0.6521739130434783,
+      "unmatched": [
+        {
+          "function": "_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095",
+          "block": "2",
+          "line": 273,
+          "location": [
+            "110",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095",
+                "107",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %5, label %7, label %6, !dbg !257, !prof !167",
+          "weight": 1028,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095",
+          "block": "2",
+          "line": 273,
+          "location": [
+            "110",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL14checksum_blockPKj.__uniq.171455684725107265042141504779546797095",
+                "107",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %5, label %7, label %6, !dbg !257, !prof !167",
+          "weight": 1042,
+          "zero_inferred": false
+        },
+        {
+          "function": "main",
+          "block": "15",
+          "line": 321,
+          "location": [
+            "158",
+            "67",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "6",
+              [
+                "function",
+                "main",
+                "153",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %19, label %24, label %20, !dbg !300, !prof !302",
+          "weight": 409,
+          "zero_inferred": false
+        },
+        {
+          "function": "main",
+          "block": "15",
+          "line": 321,
+          "location": [
+            "158",
+            "67",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "6",
+              [
+                "function",
+                "main",
+                "153",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %19, label %24, label %20, !dbg !300, !prof !302",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "entry",
+          "line": 365,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "function",
+              "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+              "137",
+              [
+                "file",
+                "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                "temp/rpi4-prefreeze/spike.c"
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %6, label %9, label %7, !dbg !337, !prof !338",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "entry",
+          "line": 365,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "function",
+              "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+              "137",
+              [
+                "file",
+                "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                "temp/rpi4-prefreeze/spike.c"
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %6, label %9, label %7, !dbg !337, !prof !338",
+          "weight": 1063,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "7",
+          "line": 369,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %8, label %9, label %10, !dbg !341, !prof !338",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "7",
+          "line": 369,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %8, label %9, label %10, !dbg !341, !prof !338",
+          "weight": 1063,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "10",
+          "line": 380,
+          "location": [
+            "146",
+            "20",
+            null,
+            [
+              "function",
+              "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+              "137",
+              [
+                "file",
+                "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                "temp/rpi4-prefreeze/spike.c"
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %14, label %24, label %15, !dbg !349, !prof !338",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "10",
+          "line": 380,
+          "location": [
+            "146",
+            "20",
+            null,
+            [
+              "function",
+              "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+              "137",
+              [
+                "file",
+                "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                "temp/rpi4-prefreeze/spike.c"
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %14, label %24, label %15, !dbg !349, !prof !338",
+          "weight": 1063,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "15",
+          "line": 385,
+          "location": [
+            "146",
+            "35",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %17, label %24, label %18, !dbg !352, !prof !338",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "15",
+          "line": 385,
+          "location": [
+            "146",
+            "35",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %17, label %24, label %18, !dbg !352, !prof !338",
+          "weight": 1063,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "18",
+          "line": 393,
+          "location": [
+            "146",
+            "51",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "4",
+              [
+                "function",
+                "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %23, label %24, label %25, !dbg !356, !prof !338",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+          "block": "18",
+          "line": 393,
+          "location": [
+            "146",
+            "51",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "4",
+              [
+                "function",
+                "_ZL12parse_numberPKcPm.__uniq.171455684725107265042141504779546797095",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %23, label %24, label %25, !dbg !356, !prof !338",
+          "weight": 1063,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095",
+          "block": "3",
+          "line": 422,
+          "location": [
+            "55",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095",
+                "52",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %5, label %7, label %6, !dbg !373, !prof !374",
+          "weight": 1035,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095",
+          "block": "3",
+          "line": 422,
+          "location": [
+            "55",
+            "5",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL16initialize_tablev.__uniq.171455684725107265042141504779546797095",
+                "52",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+                  "temp/rpi4-prefreeze/spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %5, label %7, label %6, !dbg !373, !prof !374",
+          "weight": 1014,
+          "zero_inferred": false
+        }
+      ]
+    }
+  }
+}
+
+MATCH GROUP preinline
+{
+  "matched_successors": 42,
+  "matched_shape_mismatches": [
+    {
+      "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+      "location": [
+        "141",
+        "24",
+        null,
+        [
+          "function",
+          "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "137",
+          [
+            "file",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+            "spike.c"
+          ]
+        ],
+        null
+      ],
+      "successor_index": 0,
+      "pgo_line": 356,
+      "sample_line": 358,
+      "pgo_shape": [
+        "switch",
+        3
+      ],
+      "sample_shape": [
+        "br",
+        2
+      ]
+    },
+    {
+      "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+      "location": [
+        "141",
+        "24",
+        null,
+        [
+          "function",
+          "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "137",
+          [
+            "file",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+            "spike.c"
+          ]
+        ],
+        null
+      ],
+      "successor_index": 1,
+      "pgo_line": 356,
+      "sample_line": 358,
+      "pgo_shape": [
+        "switch",
+        3
+      ],
+      "sample_shape": [
+        "br",
+        2
+      ]
+    }
+  ],
+  "sides": {
+    "pgo": {
+      "conditional_terminators": 22,
+      "explicit_weighted_terminators": 21,
+      "zero_inferred_terminators": 0,
+      "zero_inferred_successors": 0,
+      "total_ir_weight": 1804524407,
+      "matched_ir_weight": 1804524407,
+      "weight_matched_ratio": 1.0,
+      "weighted_terminators": 21,
+      "fully_matched_terminators": 20,
+      "weighted_successors": 43,
+      "matched_successors": 42,
+      "matched_ratio": 0.9767441860465116,
+      "unmatched": [
+        {
+          "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "block": "entry",
+          "line": 356,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "function",
+              "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+              "137",
+              [
+                "file",
+                "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                "spike.c"
+              ]
+            ],
+            null
+          ],
+          "successor_index": 2,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "switch i8 %4, label %6 [\n    i8 45, label %5\n    i8 0, label %20\n  ], !dbg !314, !prof !315",
+          "weight": 0,
+          "zero_inferred": false
+        }
+      ]
+    },
+    "sample": {
+      "conditional_terminators": 23,
+      "explicit_weighted_terminators": 23,
+      "zero_inferred_terminators": 0,
+      "zero_inferred_successors": 0,
+      "total_ir_weight": 37417,
+      "matched_ir_weight": 35945,
+      "weight_matched_ratio": 0.9606595932330224,
+      "weighted_terminators": 23,
+      "fully_matched_terminators": 21,
+      "weighted_successors": 46,
+      "matched_successors": 42,
+      "matched_ratio": 0.9130434782608695,
+      "unmatched": [
+        {
+          "function": "main",
+          "block": "15",
+          "line": 314,
+          "location": [
+            "158",
+            "67",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "6",
+              [
+                "function",
+                "main",
+                "153",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                  "spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %19, label %24, label %20, !dbg !298, !prof !300",
+          "weight": 409,
+          "zero_inferred": false
+        },
+        {
+          "function": "main",
+          "block": "15",
+          "line": 314,
+          "location": [
+            "158",
+            "67",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "6",
+              [
+                "function",
+                "main",
+                "153",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                  "spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "same key exists but opposite branch has no branch_weights",
+          "instruction": "br i1 %19, label %24, label %20, !dbg !298, !prof !300",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "block": "7",
+          "line": 362,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                  "spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %8, label %9, label %10, !dbg !339, !prof !336",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "block": "7",
+          "line": 362,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                  "spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %8, label %9, label %10, !dbg !339, !prof !336",
+          "weight": 1063,
+          "zero_inferred": false
+        }
+      ]
+    }
+  }
+}
+
+MATCH GROUP zero
+{
+  "matched_successors": 44,
+  "matched_shape_mismatches": [
+    {
+      "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+      "location": [
+        "141",
+        "24",
+        null,
+        [
+          "function",
+          "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "137",
+          [
+            "file",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+            "spike.c"
+          ]
+        ],
+        null
+      ],
+      "successor_index": 0,
+      "pgo_line": 356,
+      "sample_line": 358,
+      "pgo_shape": [
+        "switch",
+        3
+      ],
+      "sample_shape": [
+        "br",
+        2
+      ]
+    },
+    {
+      "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+      "location": [
+        "141",
+        "24",
+        null,
+        [
+          "function",
+          "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "137",
+          [
+            "file",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+            "spike.c"
+          ]
+        ],
+        null
+      ],
+      "successor_index": 1,
+      "pgo_line": 356,
+      "sample_line": 358,
+      "pgo_shape": [
+        "switch",
+        3
+      ],
+      "sample_shape": [
+        "br",
+        2
+      ]
+    }
+  ],
+  "sides": {
+    "pgo": {
+      "conditional_terminators": 22,
+      "explicit_weighted_terminators": 21,
+      "zero_inferred_terminators": 1,
+      "zero_inferred_successors": 2,
+      "total_ir_weight": 1804524407,
+      "matched_ir_weight": 1804524407,
+      "weight_matched_ratio": 1.0,
+      "weighted_terminators": 22,
+      "fully_matched_terminators": 21,
+      "weighted_successors": 45,
+      "matched_successors": 44,
+      "matched_ratio": 0.9777777777777777,
+      "unmatched": [
+        {
+          "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "block": "entry",
+          "line": 356,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "function",
+              "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+              "137",
+              [
+                "file",
+                "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                "spike.c"
+              ]
+            ],
+            null
+          ],
+          "successor_index": 2,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "switch i8 %4, label %6 [\n    i8 45, label %5\n    i8 0, label %20\n  ], !dbg !314, !prof !315",
+          "weight": 0,
+          "zero_inferred": false
+        }
+      ]
+    },
+    "sample": {
+      "conditional_terminators": 23,
+      "explicit_weighted_terminators": 23,
+      "zero_inferred_terminators": 0,
+      "zero_inferred_successors": 0,
+      "total_ir_weight": 37417,
+      "matched_ir_weight": 36354,
+      "weight_matched_ratio": 0.9715904535371622,
+      "weighted_terminators": 23,
+      "fully_matched_terminators": 22,
+      "weighted_successors": 46,
+      "matched_successors": 44,
+      "matched_ratio": 0.9565217391304348,
+      "unmatched": [
+        {
+          "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "block": "7",
+          "line": 362,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                  "spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 0,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %8, label %9, label %10, !dbg !339, !prof !336",
+          "weight": 0,
+          "zero_inferred": false
+        },
+        {
+          "function": "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+          "block": "7",
+          "line": 362,
+          "location": [
+            "141",
+            "24",
+            null,
+            [
+              "scope",
+              null,
+              null,
+              "2",
+              [
+                "function",
+                "_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358",
+                "137",
+                [
+                  "file",
+                  "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/spike-arm",
+                  "spike.c"
+                ]
+              ]
+            ],
+            null
+          ],
+          "successor_index": 1,
+          "reason": "no same function/location/successor key at opposite pass boundary",
+          "instruction": "br i1 %8, label %9, label %10, !dbg !339, !prof !336",
+          "weight": 1063,
+          "zero_inferred": false
+        }
+      ]
+    }
+  }
+}
+temp/rpi4-followup/pgo_pass.txt:350-380
+350: ; Function Attrs: cold nounwind
+351: define internal fastcc range(i32 0, 2) i32 @_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358(ptr noundef %0, ptr noundef nonnull %1) unnamed_addr #6 !dbg !308 !prof !175 !PGOFuncName !309 {
+352:   %3 = alloca ptr, align 4
+353:   call void @llvm.lifetime.start.p0(ptr nonnull %3) #12, !dbg !310
+354:   store ptr null, ptr %3, align 4, !dbg !311, !tbaa !271
+355:   %4 = load i8, ptr %0, align 1, !dbg !312, !tbaa !313
+356:   switch i8 %4, label %6 [
+357:     i8 45, label %5
+358:     i8 0, label %20
+359:   ], !dbg !314, !prof !315
+360: 
+361: 5:                                                ; preds = %2
+362:   br label %20, !dbg !314
+363: 
+364: 6:                                                ; preds = %2
+365:   %7 = call ptr @__errno_location() #15, !dbg !316
+366:   store i32 0, ptr %7, align 4, !dbg !317, !tbaa !38
+367:   %8 = call i64 @strtoull(ptr noundef nonnull %0, ptr noundef nonnull %3, i32 noundef 0) #12, !dbg !318
+368:   %9 = load i32, ptr %7, align 4, !dbg !319, !tbaa !38
+369:   %10 = icmp eq i32 %9, 0, !dbg !320
+370:   br i1 %10, label %11, label %20, !dbg !321, !prof !268
+371: 
+372: 11:                                               ; preds = %6
+373:   %12 = load ptr, ptr %3, align 4, !dbg !322, !tbaa !271
+374:   %13 = icmp eq ptr %12, %0, !dbg !324
+375:   br i1 %13, label %20, label %14, !dbg !325, !prof !264
+376: 
+377: 14:                                               ; preds = %11
+378:   %15 = load i8, ptr %12, align 1, !dbg !326, !tbaa !313
+379:   %16 = icmp ne i8 %15, 0, !dbg !328
+380:   %17 = icmp eq i64 %8, 0
+temp/rpi4-followup/sample_pass.txt:350-382
+350: ; Function Attrs: nounwind
+351: define internal i32 @_ZL12parse_numberPKcPy.__uniq.15873189423843482198216846878061840358(ptr noundef %0, ptr noundef %1) #2 !dbg !329 !prof !154 {
+352:   %3 = alloca ptr, align 4
+353:   call void @llvm.lifetime.start.p0(ptr %3) #8, !dbg !330
+354:   store ptr null, ptr %3, align 4, !dbg !331, !tbaa !283
+355:   %4 = load i8, ptr %0, align 1, !dbg !332, !tbaa !333
+356:   %5 = zext i8 %4 to i32, !dbg !332
+357:   %6 = icmp eq i32 %5, 45, !dbg !334
+358:   br i1 %6, label %9, label %7, !dbg !335, !prof !336
+359: 
+360: 7:                                                ; preds = %2
+361:   %8 = icmp eq i32 %5, 0, !dbg !337
+362:   br i1 %8, label %9, label %10, !dbg !339, !prof !336
+363: 
+364: 9:                                                ; preds = %7, %2
+365:   br label %26, !dbg !340
+366: 
+367: 10:                                               ; preds = %7
+368:   %11 = call ptr @__errno_location() #9, !dbg !341, !prof !342
+369:   store i32 0, ptr %11, align 4, !dbg !343, !tbaa !38
+370:   %12 = call i64 @strtoull(ptr noundef %0, ptr noundef %3, i32 noundef 0) #8, !dbg !344, !prof !342
+371:   %13 = load i32, ptr %11, align 4, !dbg !345, !tbaa !38
+372:   %14 = icmp ne i32 %13, 0, !dbg !346
+373:   br i1 %14, label %24, label %15, !dbg !347, !prof !336
+374: 
+375: 15:                                               ; preds = %10
+376:   %16 = load ptr, ptr %3, align 4, !dbg !348, !tbaa !283
+377:   %17 = icmp eq ptr %16, %0, !dbg !349
+378:   br i1 %17, label %24, label %18, !dbg !350, !prof !336
+379: 
+380: 18:                                               ; preds = %15
+381:   %19 = load i8, ptr %16, align 1, !dbg !351, !tbaa !333
+382:   %20 = zext i8 %19 to i32, !dbg !351
+
+Final prototype after shape diagnostic: 8 self-matches still 100%; duplicates rejected; 2 matched shape-mismatch edges reported; exit 0.
+
+Compiler version from temp/rpi4-followup/logs/no_preinline.log:207
+[    6s] clang version 22.1.8

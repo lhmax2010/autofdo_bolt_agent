@@ -1,0 +1,757 @@
+Command abbreviation READ_ELF below expands exactly to:
+nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf
+Only the repeated command prefix is abbreviated; output is unchanged except NUL rendered as \0.
+
+Thumb survey: original platform readelf outputs and source excerpts. Full dumps under temp/rpi4-followup.
+[identity]
+COMMAND: uname -m; uname -r; cat /proc/device-tree/model; id -u
+time: 2026-10-30T00:20:56.265941+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+armv7l
+6.12.80-arm-rpi4-v7l
+Raspberry Pi 4 Model B Rev 1.5\00
+
+stderr:
+(SDB combined stream)
+[mount]
+COMMAND: findmnt -T /opt -n -o TARGET,SOURCE,FSTYPE,OPTIONS
+time: 2026-10-30T00:20:56.981461+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+/opt /dev/mmcblk0p3 ext4 rw,relatime
+
+stderr:
+(SDB combined stream)
+
+FILE 0: /usr/lib/libavcodec.so.62.11.100
+SHA256 9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56
+COUNTS {".dynsym": {"total": 144, "thumb": 144}, ".symtab": {}}
+[file_sha_0]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libavcodec.so.62.11.100
+time: 2026-10-30T00:20:59.937402+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56  /usr/lib/libavcodec.so.62.11.100
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavcodec.so.62.11.100
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavcodec.so.62.11.100
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   291: 00050e25    52 FUNC    GLOBAL DEFAULT   11 av_codec_iterate@@LIBAVCODEC_62
+   292: 001ff677    50 FUNC    GLOBAL DEFAULT   11 av_packet_shrink_side_data@@LIBAVCODEC_62
+[elf_0_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavcodec.so.62.11.100
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 1: /usr/lib/libavutil.so.60.8.100
+SHA256 d9bbdf5e131799b082bed7845d2afa06780f2f9e1f7b8441a6756b83b53243af
+COUNTS {".dynsym": {"total": 608, "thumb": 608}, ".symtab": {}}
+[file_sha_1]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libavutil.so.60.8.100
+time: 2026-10-30T00:21:00.529208+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+d9bbdf5e131799b082bed7845d2afa06780f2f9e1f7b8441a6756b83b53243af  /usr/lib/libavutil.so.60.8.100
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavutil.so.60.8.100
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavutil.so.60.8.100
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   110: 00017465    48 FUNC    GLOBAL DEFAULT   11 av_strstart@@LIBAVUTIL_60
+   111: 0002de8d    96 FUNC    GLOBAL DEFAULT   11 av_log@@LIBAVUTIL_60
+[elf_1_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavutil.so.60.8.100
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 2: /usr/lib/libavformat.so.62.3.100
+SHA256 299b0d3485daa30c800fbf909642bf876cf85e34d4e7397285b3cc2ba328ed88
+COUNTS {".dynsym": {"total": 152, "thumb": 152}, ".symtab": {}}
+[file_sha_2]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libavformat.so.62.3.100
+time: 2026-10-30T00:21:00.860411+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+299b0d3485daa30c800fbf909642bf876cf85e34d4e7397285b3cc2ba328ed88  /usr/lib/libavformat.so.62.3.100
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavformat.so.62.3.100
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavformat.so.62.3.100
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   339: 00033439    22 FUNC    GLOBAL DEFAULT   11 av_probe_input_format@@LIBAVFORMAT_62
+   340: 0007ecf1     4 FUNC    GLOBAL DEFAULT   11 avformat_network_init@@LIBAVFORMAT_62
+[elf_2_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libavformat.so.62.3.100
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 3: /usr/lib/libswscale.so.9.1.100
+SHA256 8b2efc46173b01ce41afb5e013520fd49fa36adaa6f54f88bfbc8ceb2eb03eb9
+COUNTS {".dynsym": {"total": 39, "thumb": 39}, ".symtab": {}}
+[file_sha_3]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libswscale.so.9.1.100
+time: 2026-10-30T00:21:01.202649+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+8b2efc46173b01ce41afb5e013520fd49fa36adaa6f54f88bfbc8ceb2eb03eb9  /usr/lib/libswscale.so.9.1.100
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libswscale.so.9.1.100
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libswscale.so.9.1.100
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+    74: 000460a5   296 FUNC    GLOBAL DEFAULT   11 sws_receive_slice@@LIBSWSCALE_9
+    75: 0005b1f9   324 FUNC    GLOBAL DEFAULT   11 sws_freeContext@@LIBSWSCALE_9
+[elf_3_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libswscale.so.9.1.100
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 4: /usr/lib/libc.so.6
+SHA256 5265d103c649dee96819be42f444c31fe1045d49c0abf7c095459e13366a0d82
+COUNTS {".dynsym": {"total": 3003, "arm": 3000, "thumb": 3}, ".symtab": {}}
+[file_sha_4]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libc.so.6
+time: 2026-10-30T00:21:01.533695+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+5265d103c649dee96819be42f444c31fe1045d49c0abf7c095459e13366a0d82  /usr/lib/libc.so.6
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libc.so.6
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libc.so.6
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+    25: 0006c694   512 FUNC    WEAK   DEFAULT   12 fgetc@@GLIBC_2.4
+    26: 00076648   156 FUNC    GLOBAL DEFAULT   12 pthread_attr_getstacksize@GLIBC_2.4
+[elf_4_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libc.so.6
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 5: /usr/lib/ld-linux.so.3
+SHA256 d5498e47b0a67a510cb1897aa885e3ccd4b4c3aa2bb0356edc51f8d5f1a11f42
+COUNTS {".dynsym": {"total": 22, "arm": 22}, ".symtab": {}}
+[file_sha_5]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/ld-linux.so.3
+time: 2026-10-30T00:21:01.948075+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+d5498e47b0a67a510cb1897aa885e3ccd4b4c3aa2bb0356edc51f8d5f1a11f42  /usr/lib/ld-linux.so.3
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_ld-linux.so.3
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_ld-linux.so.3
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+     4: 00010a74   240 FUNC    GLOBAL DEFAULT    8 __tunable_get_val@@GLIBC_PRIVATE
+     5: 0000c0a4    44 FUNC    GLOBAL DEFAULT    8 _dl_fatal_printf@@GLIBC_PRIVATE
+[elf_5_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_ld-linux.so.3
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 6: /usr/lib/libglib-2.0.so.0.8000.5
+SHA256 d4cc71caf0e97d91fe26ff6c2b1c0166d6f42df84585bdebc22c56e0f1faa4f2
+COUNTS {".dynsym": {"total": 1857, "thumb": 1857}, ".symtab": {}}
+[file_sha_6]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libglib-2.0.so.0.8000.5
+time: 2026-10-30T00:21:02.252669+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+d4cc71caf0e97d91fe26ff6c2b1c0166d6f42df84585bdebc22c56e0f1faa4f2  /usr/lib/libglib-2.0.so.0.8000.5
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libglib-2.0.so.0.8000.5
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libglib-2.0.so.0.8000.5
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   261: 00076463   106 FUNC    GLOBAL DEFAULT   10 g_cond_broadcast
+   262: 00066d41   188 FUNC    GLOBAL DEFAULT   10 g_uuid_string_random
+[elf_6_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libglib-2.0.so.0.8000.5
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 7: /usr/lib/libgobject-2.0.so.0.8000.5
+SHA256 659019d55cfc65f6239f13487426f3e582e8815895b24dd4befe90b548889636
+COUNTS {".dynsym": {"total": 477, "thumb": 477}, ".symtab": {}}
+[file_sha_7]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libgobject-2.0.so.0.8000.5
+time: 2026-10-30T00:21:02.614367+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+659019d55cfc65f6239f13487426f3e582e8815895b24dd4befe90b548889636  /usr/lib/libgobject-2.0.so.0.8000.5
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgobject-2.0.so.0.8000.5
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgobject-2.0.so.0.8000.5
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   231: 00010bd1    50 FUNC    GLOBAL DEFAULT   10 g_cclosure_marshal_VOID__BOOLEANv
+   232: 0000d2e1    56 FUNC    GLOBAL DEFAULT   10 g_value_get_type
+[elf_7_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgobject-2.0.so.0.8000.5
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 8: /usr/lib/libgstreamer-1.0.so.0.2411.0
+SHA256 03943dea8a6d019a599255f2c0a81fba9c34b26ad5147d5285bf11dc67f11819
+COUNTS {".dynsym": {"total": 1785, "thumb": 1785}, ".symtab": {}}
+[file_sha_8]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libgstreamer-1.0.so.0.2411.0
+time: 2026-10-30T00:21:02.917942+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+03943dea8a6d019a599255f2c0a81fba9c34b26ad5147d5285bf11dc67f11819  /usr/lib/libgstreamer-1.0.so.0.2411.0
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstreamer-1.0.so.0.2411.0
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstreamer-1.0.so.0.2411.0
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   596: 00037aed    62 FUNC    GLOBAL DEFAULT   10 gst_buffer_extract_dup
+   597: 00059b31   160 FUNC    GLOBAL DEFAULT   10 gst_iterator_fold
+[elf_8_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstreamer-1.0.so.0.2411.0
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 9: /usr/lib/libgstbase-1.0.so.0.2411.0
+SHA256 8075a31773ab0104fae4572f1bd185ccd00732e209492698fdddbc85ecba482f
+COUNTS {".dynsym": {"total": 389, "thumb": 389}, ".symtab": {}}
+[file_sha_9]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libgstbase-1.0.so.0.2411.0
+time: 2026-10-30T00:21:03.278756+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+8075a31773ab0104fae4572f1bd185ccd00732e209492698fdddbc85ecba482f  /usr/lib/libgstbase-1.0.so.0.2411.0
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstbase-1.0.so.0.2411.0
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstbase-1.0.so.0.2411.0
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   436: 0000ff99    92 FUNC    GLOBAL DEFAULT   10 gst_aggregator_set_ignore_inactive_pads
+   437: 0001e6ad   576 FUNC    GLOBAL DEFAULT   10 gst_base_parse_set_latency
+[elf_9_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstbase-1.0.so.0.2411.0
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 10: /usr/lib/libgstvideo-1.0.so.0.2411.0
+SHA256 d93eea57fbee808ac968d729008a1ff3d77df975f12aeca4c9aba05ed9a96301
+COUNTS {".dynsym": {"total": 533, "thumb": 533}, ".symtab": {}}
+[file_sha_10]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libgstvideo-1.0.so.0.2411.0
+time: 2026-10-30T00:21:03.597431+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+d93eea57fbee808ac968d729008a1ff3d77df975f12aeca4c9aba05ed9a96301  /usr/lib/libgstvideo-1.0.so.0.2411.0
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstvideo-1.0.so.0.2411.0
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstvideo-1.0.so.0.2411.0
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   508: 0002307d     8 FUNC    GLOBAL DEFAULT   10 gst_video_decoder_set_subframe_mode
+   509: 00030e9d    72 FUNC    GLOBAL DEFAULT   10 gst_video_region_of_interest_meta_get_param
+[elf_10_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libgstvideo-1.0.so.0.2411.0
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 11: /usr/lib/gstreamer-1.0/libgstlibav.so
+SHA256 123f426bd65f5d39ca14eefba28d17afca582272d2e54286e0d29138dfff89da
+COUNTS {".dynsym": {"total": 2, "thumb": 2}, ".symtab": {}}
+[file_sha_11]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/gstreamer-1.0/libgstlibav.so
+time: 2026-10-30T00:21:03.934591+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+123f426bd65f5d39ca14eefba28d17afca582272d2e54286e0d29138dfff89da  /usr/lib/gstreamer-1.0/libgstlibav.so
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_gstreamer-1.0_libgstlibav.so
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_gstreamer-1.0_libgstlibav.so
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   557: 00009099    92 FUNC    GLOBAL DEFAULT   10 gst_plugin_libav_register
+   558: 0000908d    12 FUNC    GLOBAL DEFAULT   10 gst_plugin_libav_get_desc
+[elf_11_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_gstreamer-1.0_libgstlibav.so
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 12: /usr/lib/libstdc++.so.6.0.33
+SHA256 0c467b0a84f464363696e6ab20b7dffa5c12c9c3f56a34060242e35f1d5328cc
+COUNTS {".dynsym": {"total": 4610, "thumb": 4610}, ".symtab": {}}
+[file_sha_12]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/lib/libstdc++.so.6.0.33
+time: 2026-10-30T00:21:04.278327+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+0c467b0a84f464363696e6ab20b7dffa5c12c9c3f56a34060242e35f1d5328cc  /usr/lib/libstdc++.so.6.0.33
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libstdc++.so.6.0.33
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libstdc++.so.6.0.33
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   212: 000bfb61     8 FUNC    WEAK   DEFAULT   13 _ZNKSbIwSt11char_traitsIwESaIwEE8capacityEv@@GLIBCXX_3.4
+   214: 000c7739   160 FUNC    WEAK   DEFAULT   13 _ZNSt7__cxx1115messages_bynameIcEC2EPKcj@@GLIBCXX_3.4.21
+[elf_12_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libstdc++.so.6.0.33
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 13: /usr/bin/gst-launch-1.0
+SHA256 fbf80df4e729b12df8f1b4ccbf78d5f2c88b38cf8c5061e2994831c776ef7ab6
+COUNTS {".dynsym": {}, ".symtab": {}}
+[file_sha_13]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/bin/gst-launch-1.0
+time: 2026-10-30T00:21:04.720800+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+fbf80df4e729b12df8f1b4ccbf78d5f2c88b38cf8c5061e2994831c776ef7ab6  /usr/bin/gst-launch-1.0
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_gst-launch-1.0
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_gst-launch-1.0
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+
+[elf_13_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_gst-launch-1.0
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 14: /usr/bin/gst-inspect-1.0
+SHA256 7b7e1ad2d298d168ffc5eb4e19876b5bc55cf0f0a18051b9abbd61a72bdd7741
+COUNTS {".dynsym": {}, ".symtab": {}}
+[file_sha_14]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/bin/gst-inspect-1.0
+time: 2026-10-30T00:21:04.989877+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+7b7e1ad2d298d168ffc5eb4e19876b5bc55cf0f0a18051b9abbd61a72bdd7741  /usr/bin/gst-inspect-1.0
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_gst-inspect-1.0
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_gst-inspect-1.0
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+
+[elf_14_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_gst-inspect-1.0
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 15: /usr/bin/dbus-daemon
+SHA256 1e410afe9a347987d93283ad380a60c3ea900f2884117b91c8310133818776a9
+COUNTS {".dynsym": {}, ".symtab": {}}
+[file_sha_15]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/bin/dbus-daemon
+time: 2026-10-30T00:21:05.262822+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+1e410afe9a347987d93283ad380a60c3ea900f2884117b91c8310133818776a9  /usr/bin/dbus-daemon
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_dbus-daemon
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_dbus-daemon
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+
+[elf_15_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_dbus-daemon
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 16: /usr/bin/bash
+SHA256 9d96ca4bee770b739e0a104d083f57690fd5c1842c35bf92e58a374028752c4d
+COUNTS {".dynsym": {"total": 1, "arm": 1}, ".symtab": {}}
+[file_sha_16]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/bin/bash
+time: 2026-10-30T00:21:05.551585+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+9d96ca4bee770b739e0a104d083f57690fd5c1842c35bf92e58a374028752c4d  /usr/bin/bash
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_bash
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_bash
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+   203: 00006b20     0 FUNC    GLOBAL DEFAULT   12 _start
+[elf_16_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_bash
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 17: /usr/bin/ls
+SHA256 b70f94a25f82cf89a2bb6c12eff543935e7266daea9190e8be3d3034d741d7fa
+COUNTS {".dynsym": {}, ".symtab": {}}
+[file_sha_17]
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; sha256sum /usr/bin/ls
+time: 2026-10-30T00:21:05.860902+08:00
+remote_exit: 0
+transport_exit: 0
+sdb_stderr: 
+stdout:
+b70f94a25f82cf89a2bb6c12eff543935e7266daea9190e8be3d3034d741d7fa  /usr/bin/ls
+
+stderr:
+
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_ls
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_ls
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+
+[elf_17_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_bin_ls
+exit: 0
+stdout:
+
+stderr:
+
+
+FILE 18: 05 spike-base (local)
+SHA256 4b9b4121b36f6c034410e8ff3d9aa46498d605bdd2d20f1401a280bf324fa26f
+COUNTS {".dynsym": {}, ".symtab": {"$d": 26, "$a": 19, "total": 14, "arm": 10, "thumb": 4, "$t": 4}}
+COMMAND READ_ELF -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-base
+exit 0; stderr 
+COMMAND READ_ELF -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-base
+exit 0; stderr 
+Symbol examples (first two only, full table in temp):
+    21: 00010574     0 FUNC    LOCAL  DEFAULT   16 call_weak_fn
+    28: 00010c50     0 FUNC    LOCAL  HIDDEN    17 _init
+[elf_18_attributes]
+COMMAND: READ_ELF -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/arm-base-extract/usr/bin/afdo-spike-base
+exit: 0
+stdout:
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "7-A"
+  Tag_CPU_arch: v7
+  Tag_CPU_arch_profile: Application
+  Tag_ARM_ISA_use: Yes
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_FP_arch: VFPv3
+  Tag_Advanced_SIMD_arch: NEONv1
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_rounding: Needed
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_align_preserved: 8-byte, except leaf SP
+  Tag_ABI_enum_size: int
+  Tag_CPU_unaligned_access: v6
+
+stderr:
+
+
+05 spike complete defined FUNC and mapping totals:
+    21: 00010574     0 FUNC    LOCAL  DEFAULT   16 call_weak_fn
+    28: 00010c50     0 FUNC    LOCAL  HIDDEN    17 _init
+    29: 00010c5c     0 FUNC    LOCAL  HIDDEN    18 _fini
+    32: 00010599     0 FUNC    LOCAL  DEFAULT   16 deregister_tm_clones
+    36: 000105c5     0 FUNC    LOCAL  DEFAULT   16 register_tm_clones
+    40: 000105f9     0 FUNC    LOCAL  DEFAULT   16 __do_global_dtors_aux
+    46: 00010639     0 FUNC    LOCAL  DEFAULT   16 frame_dummy
+   105: 00010530     0 FUNC    GLOBAL DEFAULT   16 _start
+   106: 000109e0   624 FUNC    GLOBAL DEFAULT   16 main
+   115: 00010640   112 FUNC    GLOBAL DEFAULT   16 hash_mix
+   116: 000106b0   104 FUNC    GLOBAL DEFAULT   16 sort_block
+   117: 00010718   192 FUNC    GLOBAL DEFAULT   16 lookup_work
+   118: 000107d8   100 FUNC    GLOBAL DEFAULT   16 rare_path
+   119: 00010840   416 FUNC    GLOBAL DEFAULT   16 run_workload
+
+libc odd defined FUNC entries:
+  1174: 00091b01   220 FUNC    GLOBAL DEFAULT   12 strlen@@GLIBC_2.4
+  2042: 0008dc31   156 FUNC    GLOBAL DEFAULT   12 memchr@@GLIBC_2.4
+  2930: 0008f9d1   740 FUNC    GLOBAL DEFAULT   12 strcmp@@GLIBC_2.4
+
+config/gbs_llvm.conf:1-18
+1: [general]
+2: # GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+3: tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp
+4: profile = profile.tizen_unified_standard
+5: buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-TIZEN-LLVM-CODES
+6: 
+7: [profile.tizen_unified_standard]
+8: repos = repo.base-standard, repo.unified-standard
+9: 
+10: [repo.base-standard]
+11: url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/reference/repos/standard/packages/
+12: #url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260722.045200/repos/standard/packages/
+13: #url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260804.124315/repos/standard/packages/
+14: 
+15: [repo.unified-standard]
+16: url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/reference/repos/standard/packages/
+17: #url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260725.003315/repos/standard/packages/
+18: #url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260804.223836/repos/standard/packages/
+
+temp/rpi4-followup/reference_build.conf:148-176
+148: # clang utils
+149: %__ar_clang llvm-ar
+150: %__ranlib_clang llvm-ranlib
+151: %__cc_clang %{_host}-clang
+152: %__cxx_clang %{_host}-clang++
+153: %__optflags_toolchain_clang -Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument %{?___optflags_toolchain_clang:%{___optflags_toolchain_clang}}
+154: 
+155: # gcc utils
+156: %__ar_gcc gcc-ar
+157: %__ranlib_gcc gcc-ranlib
+158: %__cc_gcc %{_host}-gcc
+159: %__cxx_gcc %{_host}-g++
+160: %__optflags_toolchain_gcc -O2 -fno-inline-functions -fstack-protector-strong %{?___optflags_toolchain_gcc:%{___optflags_toolchain_gcc}}
+161: 
+162: %_toolchain %{?_toolchain_override}%{!?_toolchain_override:clang}
+163: %toolchain_is() %((echo "%_toolchain" | %{__grep} -qE "%{1}") && echo 1 || echo 0)
+164: 
+165: %__ar %{expand:%%{__ar_%{_toolchain}}}
+166: %__ranlib %{expand:%%{__ranlib_%{_toolchain}}}
+167: %__cc %{expand:%%{__cc_%{_toolchain}}}
+168: %__cxx %{expand:%%{__cxx_%{_toolchain}}}
+169: %__optflags_toolchain %{expand:%%{__optflags_toolchain_%{_toolchain}}}
+170: 
+171: %prep %%prep\
+172: export AR=%{__ar} RANLIB=%{__ranlib};\
+173: %{nil}
+174: 
+175: %build %%build\
+176: export AR=%{__ar} RANLIB=%{__ranlib};\
+
+temp/rpi4-followup/reference_build.conf:359-365
+359: 
+360: ########## compilation flags ##########
+361: %define __optflags %{__optflags_toolchain} -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches
+362: 
+363: Optflags: armv7l %{__optflags} -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64
+364: Optflags: armv7hl %{__optflags} -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=hard -mthumb -D_FILE_OFFSET_BITS=64
+365: Optflags: aarch64 %{__optflags} -march=armv8-a+fp+simd+crc+crypto -mtune=cortex-a53
+
+src/ffmpeg/packaging/ffmpeg.spec:225-249
+225: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 "
+226: 
+227: %ifarch %{arm} aarch64
+228: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--disable-mmx "
+229: %else
+230: %endif
+231: 
+232: CFLAGS="%{optflags} -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "; export CFLAGS
+233: export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV"
+234: 
+235: %ifarch %{arm}
+236: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--extra-cflags=-mfpu=neon"
+237: %endif
+238: 
+239: export AR=%{__ar} RANLIB=%{__ranlib}
+240: export CC=%{__cc} CXX=%{__cxx}
+241: 
+242: ./configure \
+243:     --prefix=%{_prefix} \
+244:     --libdir=%{_libdir} \
+245:     --shlibdir=%{_libdir} \
+246:     --datadir=%{_datadir}/%{name} \
+247:     $CONFIGURE_OPTIONS
+248: 
+249: %build
+
+src/ffmpeg/configure:427-431
+427:   --build-suffix=SUFFIX    library name suffix []
+428:   --enable-pic             build position-independent code
+429:   --enable-thumb           compile for Thumb instruction set
+430:   --enable-lto[=arg]       use link-time optimization
+431:   --env="ENV=override"     override the environment variables
+
+src/ffmpeg/configure:6380-6388
+6380: elif enabled arm; then
+6381: 
+6382:     enabled msvc && check_cpp_condition thumb stddef.h "defined _M_ARMT"
+6383:     test_cpp_condition stddef.h "defined __thumb__" && test_cc <<EOF && enable_weak thumb
+6384: float func(float a, float b){ return a+b; }
+6385: EOF
+6386:     enabled thumb && check_cflags -mthumb || check_cflags -marm
+6387: 
+6388:     if check_cpp_condition vfp_args stddef.h "defined __ARM_PCS_VFP"; then
+
+temp/rpi4-prefreeze/logs/arm_base.log:492-499
+492: [  213s]   LLVM version 22.1.8
+493: [  213s]   Optimized build.
+494: [  213s] + common='-O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs'
+495: [  213s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs spike.c -o afdo-spike-base
+496: [  214s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs -fprofile-generate spike.c -o afdo-spike-instr
+497: [  214s] + for exe in afdo-spike-base afdo-spike-instr
+498: [  214s] + readelf -h afdo-spike-base
+499: [  214s] ELF Header:
+
+temp/rpi4-followup/spike-arm/packaging/afdo-spike.spec:24-42
+24: %setup -q
+25: 
+26: %build
+27: set -eux
+28: clang --version
+29: llvm-profdata --version
+30: common='-O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -Wl,--emit-relocs'
+31: clang $common spike.c -o afdo-spike-base
+32: clang $common -fprofile-generate -mllvm -disable-preinline spike.c -o afdo-spike-instr
+33: %if 0%{?with_pgo}
+34: # The committed profile is portable text; binary profile remains in the buildroot.
+35: llvm-profdata merge instr.proftext -o instr.profdata
+36: clang $common -fprofile-use=instr.profdata -mllvm -disable-preinline -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -Rpass=pgo-instrumentation -Rpass-missed=pgo -fsave-optimization-record -fdiagnostics-show-hotness spike.c -o afdo-spike-pgo
+37: # Persist IR evidence that the matched profile set entry counts and branch weights.
+38: clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -fprofile-use=instr.profdata -mllvm -disable-preinline -Werror=profile-instr-out-of-date -Werror=profile-instr-unprofiled -S -emit-llvm spike.c -o afdo-spike-pgo.ll
+39: %endif
+40: %if 0%{?with_afdo}
+41: clang $common -fprofile-sample-use=afdo.extbinary -Rpass=sample-profile -Rpass-missed=sample-profile spike.c -o afdo-spike-afdo
+42: %endif
+
+reference build.conf download/checksum:
+{
+  "url": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/reference/repos/standard/packages/repodata/b93e08750f78b418a02f9c352e01d2fa9d619e2c723760ad9741ac915cd8a63b-build.conf.gz",
+  "resolved": "https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/reference/repos/standard/packages/repodata/b93e08750f78b418a02f9c352e01d2fa9d619e2c723760ad9741ac915cd8a63b-build.conf.gz",
+  "bytes": 4651,
+  "sha256": "b93e08750f78b418a02f9c352e01d2fa9d619e2c723760ad9741ac915cd8a63b",
+  "status": 200
+}
+open_sha256 9cb6888b85ffcc02980d79a13338893a1201e77ad971c3809c86c4eb06b8be59
+
+Final independent local SHA256 recheck: all 18 pulled ELF files match saved board sha256sum output; exit 0.
+
+libc++ search (only /usr/lib and /lib candidates):
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; for p in /usr/lib/libc++.so* /lib/libc++.so*; do if [ -f "$p" ]; then readlink -f "$p"; fi; done | sort -u
+remote_exit 0
+stdout 
+stderr 

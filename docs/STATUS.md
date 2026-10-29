@@ -26,7 +26,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-29；RPi4 PMUv3 新镜像与 v0.2 冻结前核实，已完成）
+## 当前授权与执行状态（2026-10-30；v0.2 冻结前补充核实，已完成）
+
+- 本轮完成 RPi4 与主机补证；只改获授权的 IR 匹配原型、报告与状态，不改 LLVM 或设计。v0.2 仍未冻结，待用户评审决定；Agent 开发仍在 llvm-profgen 增强完成后开始。
+- Thumb：拉取13库＋5程序并核对SHA；GBS项目armv7l optflags含 `-mthumb`，FFmpeg/GLib/GStreamer/libstdc++已定义动态FUNC均为Thumb；libc/加载器偏ARM，裸clang spike自有C函数为ARM。这与v0.2“默认A32”前提不符。[证据](probe/evidence/06/01_thumb.txt)
+- IR：生成/使用均禁用preinline，GBS真实退出0、带时间ALL-END OK，RPi4训练checksum与05相同；加入零权边后PGO/sample边数覆盖44/45与44/46，IR权重覆盖100%与97.16%。仍有switch/br相同键但后继语义不同，不能以100%覆盖宣称质量比较成立；原型保留重复键拒绝及自匹配，并报告形态差异。[证据](probe/evidence/06/02_ir_matching.txt)
+- 主机perf：查同源20261022、相近20261027、reference、配套Base均无x86_64 linux-kernel-perf；新镜像20261028仓库404。无主机工具，05同数据跨主机逐行比对仍未完成，不安装或编译替代工具。[证据](probe/evidence/06/03_host_perf.txt)
+- LOST已补实测：cycles -c10007 -m1、1080p约20秒媒体，942条LOST/61667丢失样本、8.06%；pswpin/pswpout保持26/613。LOST_SAMPLES未实测。[证据](probe/evidence/06/04_lost_cleanup.txt)
+- 板上work为空，仅保留原perf/libLLVM；RPM前后1252；/opt清理后已用73412KiB、可用1232176KiB、6%，专用目录前后35796KiB。分区增加928KiB而专用目录大小不变，不删除其他目录追平占用。
+- [06报告](probe/06_rpi4_prefreeze_followup.md)、四份证据、匹配原型和本状态同一commit提交。新证据总量低于150KB，旧证据保持不动；无新增已知边界例外，历史SDB服务内部写入审计限制继续保留。
+
+## 前轮授权与执行状态（2026-10-29；RPi4 PMUv3 新镜像与 v0.2 冻结前核实，历史）
 
 - 用户已授权并完成第 10 节步骤 1 的本轮板上/主机核实及可选 armv7l spike；不修改 LLVM 代码或设计文档，不开始增强实现。设计当前版本仍为 v0.2（未冻结、第二轮评审前），是否进行第二轮评审与冻结由用户决定。
 - RPi4 身份断言通过；镜像 Unified 20261028.105834，armv8-pmu 已绑定 A72，cycles type=0/config=0，7,659样本；硬件PMU已在新镜像实测通过，页大小4096。
@@ -116,7 +126,7 @@
 
 # 项目状态
 
-更新：2026-10-29（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像及本轮冻结前核实已完成；llvm-profgen 设计当前版本 v0.2（第二轮评审前），v0.1 三方评审已处理完毕；第二轮评审与冻结待用户决定，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen 设计当前版本 v0.2（第二轮评审前），v0.1 三方评审已处理完毕；第二轮评审与冻结待用户决定，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
@@ -314,9 +324,9 @@
 - [设计 v0.2](profgen/design/02_llvm_profgen_enhance_design_v0.2.md)：本轮冻结前事实已核实并列出设计差异；是否进行第二轮评审、补哪些未闭合证据及是否冻结，由用户决定，不据验证完成自动开工。
 
 
-- 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、RPi4 插桩与 RPi5 BOLT -ba。
+- 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
 
-- 用户合入 Gerrit 并发起 Quickbuild 的时间与新镜像交付；Agent 不向 Gerrit 推送，最新补丁本轮尚未构建/启动。
+- 新镜像已由用户交付并通过05的PMUv3验收；Agent不向Gerrit推送，不恢复已取消的手工安装方案。后续镜像交付由用户决定。
 
 - **Agent 的板上部署不能依赖 /tmp（noexec），部署目录由能力探测模块按挂载参数自动选定。** 本轮手工授权 /opt/afdo_agent 已明确，后续按挂载参数验收，不再重复索要目录授权；通用自动选择规则仍待设计裁决。
 - 历史直接 make 配置仍受主机 flex/bison 缺失限制；GBS 构建已完成并在构建根解决依赖，没有安装主机工具。
@@ -326,7 +336,7 @@
 
 ## 挂账
 
-- 冻结前未闭合：本轮高采样率未产生LOST，实际丢样语法fixture未取得；无主机x86_64 perf，因此跨主机文本比对跳过；RPi5板上页大小未在本轮核实。IR匹配率接受阈值及未匹配处理需评审，合成profile不证明统计质量。
+- 冻结前未闭合：06已取得实际LOST语法与计数，LOST_SAMPLES仍未实测；所查仓库无主机x86_64 perf，跨主机文本比对仍跳过；RPi5页大小本轮未核实。IR匹配接受阈值、switch/br及后继语义差异需评审；合成profile与100%键权重覆盖不证明统计质量。Thumb在主要目标库中普遍存在，与v0.2默认A32前提不符。证据见[06](probe/06_rpi4_prefreeze_followup.md)。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
@@ -337,7 +347,7 @@
 - 原 GBS 真实退出码无法追溯；会话/进程组被执行器回收属于推断，没有死亡信号或生命周期审计证据。原 status 永久保留原貌。
 - 包装脚本修复未经运行验证，下次构建验证；setsid 不能抵抗 cgroup 清理、SIGKILL、断电、磁盘不可写。
 - quiet 原构建日志没有完整 clang 命令行，已用本次 `.cmd` 命令和 ELF 代证；不伪造日志行号。
-- 旧手工安装预检失败原因已查清且方案取消；/boot 未挂载时的 zImage 哈希仍未知，BUILDTIME=0 不用于匹配日期。新镜像 PMU 绑定/硬件采样仍待验收；软件采样已闭合。
+- 旧手工安装预检失败原因已查清且方案取消；/boot 未挂载时的 zImage 哈希仍未知，BUILDTIME=0 不用于匹配日期。新镜像 PMU 绑定/硬件采样已于05验收；软件采样已闭合。
 
 - 1080p 本次丢样 6.29%，单次开销没有统计稳健性；strip 库内部符号仍缺失。分支栈负对照及 ETM/SPE/BRBE 未在本轮重测，不能由 PMUv3 补丁推断。
 - 各包最终 CC/CXX、%{optflags}、外部 LTO/链接器参数与已运行镜像对应关系：无 GBS root/构建日志，不能静态补全。
