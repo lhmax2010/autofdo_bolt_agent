@@ -26,7 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-30；v0.2 冻结前补充核实，已完成）
+## 当前授权与执行状态（2026-10-30；llvm-profgen 增强设计 v0.3 归档）
+
+- 设计当前版本为 [v0.3](profgen/design/02_llvm_profgen_enhance_design_v0.3.md)，依据 [05](probe/05_rpi4_pmu_image_and_prefreeze.md)、[06](probe/06_rpi4_prefreeze_followup.md) 冻结前核实修订，修订表见附录 B；进入第二轮三方评审。冻结前不开工，Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
+- 冻结前核实剩余项：RPi5 的 dsoff、`--buildid-mmap`、页大小；aarch64 IR 匹配按 v0.3 的 5.8 第 2 条重跑；Tizen debuginfo 是否保留 `$a/$t/$d` 映射符号。
+- 待用户决定：是否在工作目录内为 x86_64 构建主机 perf，决定 `--perfdata` 能否进入第一批。本次仅归档，不执行评审、板上核实、构建或实现。
+- 按用户授权的一次性例外，只处理 `/home/linhao/Downloads/02_llvm_profgen_enhance_design_v0.3.md`：SHA-256及标题前缀校验通过后，用 `mv` 移入仓库，移动后哈希一致、Downloads 原文件已不存在；未触碰该目录其他文件，v0.1、v0.2 保留不动。
+- v0.3 文档内容未修改，SHA-256=`fd093bb7b0c5a19599b21b480ccc9bb06a542e9b3ea144628c54e659e74b50f3`；仅与本 STATUS 同一 commit 提交推送。
+
+## 前轮授权与执行状态（2026-10-30；v0.2 冻结前补充核实，历史）
 
 - 本轮完成 RPi4 与主机补证；只改获授权的 IR 匹配原型、报告与状态，不改 LLVM 或设计。v0.2 仍未冻结，待用户评审决定；Agent 开发仍在 llvm-profgen 增强完成后开始。
 - Thumb：拉取13库＋5程序并核对SHA；GBS项目armv7l optflags含 `-mthumb`，FFmpeg/GLib/GStreamer/libstdc++已定义动态FUNC均为Thumb；libc/加载器偏ARM，裸clang spike自有C函数为ARM。这与v0.2“默认A32”前提不符。[证据](probe/evidence/06/01_thumb.txt)
@@ -126,11 +134,11 @@
 
 # 项目状态
 
-更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen 设计当前版本 v0.2（第二轮评审前），v0.1 三方评审已处理完毕；第二轮评审与冻结待用户决定，冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen 设计当前版本 v0.3（依据05、06核实修订，见附录B），进入第二轮三方评审；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 当前设计 v0.2（第二轮评审前）；v0.1 三方评审已处理完毕，见附录 A。本轮第 10 节步骤 1 核实已出报告；后续第二轮评审、未闭合证据和冻结由用户决定。冻结前不开工，Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
+- 当前设计 v0.3，依据05、06冻结前核实修订（修订表见附录B），进入第二轮三方评审。剩余核实为RPi5的dsoff、`--buildid-mmap`、页大小，按v0.3第5.8节第2条重跑aarch64 IR匹配，以及Tizen debuginfo的`$a/$t/$d`映射符号保留情况。冻结前不开工，Agent的设计与开发在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree，未经冻结与新授权不开始 LLVM 增强。
 
@@ -321,7 +329,7 @@
 
 ## 待人工裁决
 
-- [设计 v0.2](profgen/design/02_llvm_profgen_enhance_design_v0.2.md)：本轮冻结前事实已核实并列出设计差异；是否进行第二轮评审、补哪些未闭合证据及是否冻结，由用户决定，不据验证完成自动开工。
+- [设计 v0.3](profgen/design/02_llvm_profgen_enhance_design_v0.3.md)进入第二轮三方评审，冻结仍待确认。是否在工作目录内为x86_64构建主机perf由用户决定，决定`--perfdata`能否进入第一批；本次归档不授权启动构建。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -336,7 +344,7 @@
 
 ## 挂账
 
-- 冻结前未闭合：06已取得实际LOST语法与计数，LOST_SAMPLES仍未实测；所查仓库无主机x86_64 perf，跨主机文本比对仍跳过；RPi5页大小本轮未核实。IR匹配接受阈值、switch/br及后继语义差异需评审；合成profile与100%键权重覆盖不证明统计质量。Thumb在主要目标库中普遍存在，与v0.2默认A32前提不符。证据见[06](probe/06_rpi4_prefreeze_followup.md)。
+- 冻结前剩余核实（按v0.3）：RPi5的dsoff、`--buildid-mmap`、页大小；aarch64 IR匹配按5.8第2条重跑；Tizen debuginfo是否保留`$a/$t/$d`映射符号。主机perf构建待用户决定，跨主机文本对照尚未完成。05、06的Thumb及IR匹配事实已纳入v0.3修订（附录B）；历史证据保留，不以合成profile或100%键权重覆盖证明统计质量。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
