@@ -26,7 +26,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-30；设计v0.6归档，已完成）
+## 当前授权与执行状态（2026-10-30；设计v0.7归档与第一阶段冻结，已完成）
+
+- 当前设计版本为 [v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)。第一阶段（正确性规则与契约，第10节步骤2的范围）已冻结；v0.6限定范围复核（Codex、Claude Code）已处理，记录见附录F。
+- 冻结后对冻结范围内规则的修改，需单独提出并在设计文档中记录。
+- 交付前的非★项：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`；probe构建拆分后`.pseudo_probe/.pseudo_probe_desc`的位置；补存DWARF5拆分核对与BUILD目录产物build-id的证据；`[unknown]`素材。
+- 第二阶段待定事项见设计文档第12节。挂账不再包含LOST_SAMPLES实测：v0.6起已不支持从文本读取这类记录，不再是待办。
+- 下一步：等待实现授权；本轮只移动文件与记录状态，不修改设计文档内容，不开始任何实现。Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 按用户授权，仅用mv移入Downloads中指定的v0.7文件；移动前后SHA-256均为`eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be`，行数均为1015，源文件已不存在。v0.5、v0.6原位保留且内容不变，未触碰Downloads其他文件；本次指定文件移动属于用户授权的边界例外。
+
+## 前轮授权与执行状态（2026-10-30；设计v0.6归档，历史）
 
 - 当前设计版本为 [v0.6](profgen/design/02_llvm_profgen_enhance_design_v0.6.md)。本轮仅移动文档与记录状态，不修改文档内容，不开始任何实现。
 - v0.5第三轮评审已处理（Codex、Claude Code；Kimi Code未参加），处理记录见v0.6附录E。
@@ -175,11 +184,11 @@
 
 # 项目状态
 
-更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.6，v0.5第三轮评审处理见附录E，第一阶段★前置项全部闭合；显式SHA-1构建与调试拆分验证通过（08），RPi5 dsoff/buildid-mmap/页大小验证通过（09），第一阶段评审/冻结待确认；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.7，v0.6限定范围复核处理见附录F，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；显式SHA-1构建与调试拆分验证通过（08），RPi5 dsoff/buildid-mmap/页大小验证通过（09），下一步等待实现授权，本轮不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 当前设计v0.6；v0.5第三轮评审已处理（Codex、Claude Code；Kimi Code未参加，见附录E）。08/09已闭合第一阶段全部★前置项；交付前非★项见“挂账”。下一步等待限定范围复核或第一阶段冻结的决定；本轮不开始实现，Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；下一步等待实现授权，Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree，未经冻结与新授权不开始 LLVM 增强。
 
@@ -372,7 +381,7 @@
 
 ## 待人工裁决
 
-- [设计v0.6](profgen/design/02_llvm_profgen_enhance_design_v0.6.md)：等待限定范围复核或第一阶段冻结的决定。是否在工作目录内为x86_64构建主机perf仍由用户决定，决定`--perfdata`能否进入第一批；本轮未构建主机perf。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，等待实现授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，本轮未执行构建或实现。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -387,7 +396,7 @@
 
 ## 挂账
 
-- 交付前非★项（v0.6）：新LLVM发布后复核默认build-id；确认aarch64 Tizen debuginfo的`$x/$d`；补存DWARF5拆分核对与BUILD目录产物build-id的证据；`[unknown]`素材。第一阶段★前置项已由08/09全部闭合。主机perf构建待用户决定；IR匹配/BFI为第二阶段前实验，不沿用旧百分比；LOST_SAMPLES仍无实测。
+- 交付前非★项（v0.7）：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`；probe构建拆分后`.pseudo_probe/.pseudo_probe_desc`的位置；补存DWARF5拆分核对与BUILD目录产物build-id的证据；`[unknown]`素材。第一阶段已冻结；第二阶段待定事项见设计第12节，IR匹配/BFI不沿用旧百分比。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
