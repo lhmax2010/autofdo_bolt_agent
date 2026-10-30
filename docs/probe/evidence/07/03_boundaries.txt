@@ -1,0 +1,764 @@
+Independent length-rule enumeration vs platform llvm-objdump.
+Prototype temp/v04/elf_boundary.py SHA256 a6091e26e5ba6bd7527c7e421c46f23425cfdff78f38a66ad651c3d402178355
+Command: nice -n 19 ionice -c3 python3 -B temp/v04/elf_boundary.py temp/v04/runtime-extract/usr/lib/libavcodec.so.62.11.100 temp/v04/debug-extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug temp/v04/libavcodec.merged.so
+exit 0
+Known bytes: 00bf (NOP16), 40f20100 (MOVW32), 00f000f8 (BL32). Expected starts [0,2,6], length rule PASS.
+23 selected ranges: no mismatches, no overruns, no unknown objdump instructions.
+
+{
+  "selection_counts": {
+    "largest_thumb": 20,
+    "contains_data": 20,
+    "contains_arm": 3
+  },
+  "eligible_counts": {
+    "thumb": 5584,
+    "data": 4873,
+    "arm": 3
+  },
+  "functions": [
+    {
+      "value": 3268837,
+      "size": 36236,
+      "type": "FUNC",
+      "section": 11,
+      "name": "inter_pred_scaled_8bpp",
+      "start": 3268836,
+      "end": 3305072,
+      "thumb": true,
+      "original_size": 36236,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 0,
+      "prototype_count": 13190,
+      "objdump_count": 13190,
+      "same": 13190,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 3305073,
+      "size": 36224,
+      "type": "FUNC",
+      "section": 11,
+      "name": "inter_pred_scaled_16bpp",
+      "start": 3305072,
+      "end": 3341296,
+      "thumb": true,
+      "original_size": 36224,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 1,
+      "prototype_count": 13091,
+      "objdump_count": 13091,
+      "same": 13091,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 3341297,
+      "size": 27104,
+      "type": "FUNC",
+      "section": 11,
+      "name": "inter_pred_8bpp",
+      "start": 3341296,
+      "end": 3368400,
+      "thumb": true,
+      "original_size": 27104,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 2,
+      "prototype_count": 10025,
+      "objdump_count": 10025,
+      "same": 10025,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 3368401,
+      "size": 26964,
+      "type": "FUNC",
+      "section": 11,
+      "name": "inter_pred_16bpp",
+      "start": 3368400,
+      "end": 3395364,
+      "thumb": true,
+      "original_size": 26964,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 3,
+      "prototype_count": 9873,
+      "objdump_count": 9873,
+      "same": 9873,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 802925,
+      "size": 24156,
+      "type": "FUNC",
+      "section": 11,
+      "name": "ff_h264_decode_mb_cabac",
+      "start": 802924,
+      "end": 827080,
+      "thumb": true,
+      "original_size": 24156,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 4,
+      "prototype_count": 8190,
+      "objdump_count": 8190,
+      "same": 8190,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2781961,
+      "size": 21256,
+      "type": "FUNC",
+      "section": 11,
+      "name": "vp8_decode_mb_row_no_filter",
+      "start": 2781960,
+      "end": 2803216,
+      "thumb": true,
+      "original_size": 21256,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 5,
+      "prototype_count": 7797,
+      "objdump_count": 7797,
+      "same": 7797,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2881805,
+      "size": 19752,
+      "type": "FUNC",
+      "section": 11,
+      "name": "ff_vp9_decode_block",
+      "start": 2881804,
+      "end": 2901556,
+      "thumb": true,
+      "original_size": 19752,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 6,
+      "prototype_count": 7123,
+      "objdump_count": 7123,
+      "same": 7123,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2602689,
+      "size": 19080,
+      "type": "FUNC",
+      "section": 11,
+      "name": "vc1_decode_b_blocks",
+      "start": 2602688,
+      "end": 2621768,
+      "thumb": true,
+      "original_size": 19080,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 7,
+      "prototype_count": 6431,
+      "objdump_count": 6431,
+      "same": 6431,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2855825,
+      "size": 18656,
+      "type": "FUNC",
+      "section": 11,
+      "name": "decode_frame_header",
+      "start": 2855824,
+      "end": 2874480,
+      "thumb": true,
+      "original_size": 18656,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 8,
+      "prototype_count": 6126,
+      "objdump_count": 6126,
+      "same": 6126,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2516913,
+      "size": 17568,
+      "type": "FUNC",
+      "section": 11,
+      "name": "decode_frame",
+      "start": 2516912,
+      "end": 2534480,
+      "thumb": true,
+      "original_size": 17568,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 9,
+      "prototype_count": 5694,
+      "objdump_count": 5694,
+      "same": 5694,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 852081,
+      "size": 16936,
+      "type": "FUNC",
+      "section": 11,
+      "name": "ff_h264_decode_mb_cavlc",
+      "start": 852080,
+      "end": 869016,
+      "thumb": true,
+      "original_size": 16936,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 10,
+      "prototype_count": 5921,
+      "objdump_count": 5921,
+      "same": 5921,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2586481,
+      "size": 16208,
+      "type": "FUNC",
+      "section": 11,
+      "name": "vc1_decode_p_blocks",
+      "start": 2586480,
+      "end": 2602688,
+      "thumb": true,
+      "original_size": 16208,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 11,
+      "prototype_count": 5415,
+      "objdump_count": 5415,
+      "same": 5415,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2231593,
+      "size": 16056,
+      "type": "FUNC",
+      "section": 11,
+      "name": "mp_decode_frame",
+      "start": 2231592,
+      "end": 2247648,
+      "thumb": true,
+      "original_size": 16056,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 12,
+      "prototype_count": 5375,
+      "objdump_count": 5375,
+      "same": 5375,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2300621,
+      "size": 13988,
+      "type": "FUNC",
+      "section": 11,
+      "name": "encode_mb",
+      "start": 2300620,
+      "end": 2314608,
+      "thumb": true,
+      "original_size": 13988,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 13,
+      "prototype_count": 5120,
+      "objdump_count": 5120,
+      "same": 5120,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 883529,
+      "size": 13680,
+      "type": "FUNC",
+      "section": 11,
+      "name": "ff_h264_filter_mb_fast",
+      "start": 883528,
+      "end": 897208,
+      "thumb": true,
+      "original_size": 13680,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 14,
+      "prototype_count": 4786,
+      "objdump_count": 4786,
+      "same": 4786,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 343537,
+      "size": 12164,
+      "type": "FUNC",
+      "section": 11,
+      "name": "ac3_decode_frame",
+      "start": 343536,
+      "end": 355700,
+      "thumb": true,
+      "original_size": 12164,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 15,
+      "prototype_count": 4277,
+      "objdump_count": 4277,
+      "same": 4277,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 2212737,
+      "size": 11284,
+      "type": "FUNC",
+      "section": 11,
+      "name": "mpeg4_encode_mb",
+      "start": 2212736,
+      "end": 2224020,
+      "thumb": true,
+      "original_size": 11284,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 16,
+      "prototype_count": 3806,
+      "objdump_count": 3806,
+      "same": 3806,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 906849,
+      "size": 10972,
+      "type": "FUNC",
+      "section": 11,
+      "name": "hl_decode_mb_444_complex",
+      "start": 906848,
+      "end": 917820,
+      "thumb": true,
+      "original_size": 10972,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 17,
+      "prototype_count": 3898,
+      "objdump_count": 3898,
+      "same": 3898,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 922193,
+      "size": 10880,
+      "type": "FUNC",
+      "section": 11,
+      "name": "hl_decode_mb_complex",
+      "start": 922192,
+      "end": 933072,
+      "thumb": true,
+      "original_size": 10880,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 18,
+      "prototype_count": 3762,
+      "objdump_count": 3762,
+      "same": 3762,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 3021105,
+      "size": 10780,
+      "type": "FUNC",
+      "section": 11,
+      "name": "iadst_iadst_16x16_add_c",
+      "start": 3021104,
+      "end": 3031884,
+      "thumb": true,
+      "original_size": 10780,
+      "extent_source": "STT_FUNC st_size",
+      "states": [
+        "d",
+        "t"
+      ],
+      "categories": [
+        "largest_thumb",
+        "contains_data"
+      ],
+      "index": 19,
+      "prototype_count": 2959,
+      "objdump_count": 2959,
+      "same": 2959,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 195880,
+      "size": 36,
+      "type": "FUNC",
+      "section": 11,
+      "name": "call_weak_fn",
+      "start": 195880,
+      "end": 195916,
+      "thumb": false,
+      "original_size": 0,
+      "extent_source": "supplement only: next FUNC or section end; original st_size=0",
+      "states": [
+        "a",
+        "d"
+      ],
+      "categories": [
+        "contains_arm"
+      ],
+      "index": 20,
+      "prototype_count": 7,
+      "objdump_count": 7,
+      "same": 7,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 85840,
+      "size": 12,
+      "type": "FUNC",
+      "section": 9,
+      "name": "_init",
+      "start": 85840,
+      "end": 85852,
+      "thumb": false,
+      "original_size": 0,
+      "extent_source": "supplement only: next FUNC or section end; original st_size=0",
+      "states": [
+        "a"
+      ],
+      "categories": [
+        "contains_arm"
+      ],
+      "index": 21,
+      "prototype_count": 3,
+      "objdump_count": 3,
+      "same": 3,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    },
+    {
+      "value": 3412064,
+      "size": 8,
+      "type": "FUNC",
+      "section": 12,
+      "name": "_fini",
+      "start": 3412064,
+      "end": 3412072,
+      "thumb": false,
+      "original_size": 0,
+      "extent_source": "supplement only: next FUNC or section end; original st_size=0",
+      "states": [
+        "a"
+      ],
+      "categories": [
+        "contains_arm"
+      ],
+      "index": 22,
+      "prototype_count": 2,
+      "objdump_count": 2,
+      "same": 2,
+      "mismatches": [],
+      "errors": [],
+      "unknown": []
+    }
+  ],
+  "reference": "temp/v04/libavcodec.merged.so"
+}
+[disasm_0]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-objdump --triple=thumbv7a -d --start-address=0x31e0e4 --stop-address=0x326e70 temp/v04/libavcodec.merged.so
+exit: 0
+stdout:
+
+temp/v04/libavcodec.merged.so:	file format elf32-littlearm
+
+Disassembly of section .text:
+
+0031e0e4 <inter_pred_scaled_8bpp>:
+  31e0e4: e92d 4ff0    	push.w	{r4, r5, r6, r7, r8, r9, r10, r11, lr}
+  31e0e8: b0b1         	sub	sp, #0xc4
+  31e0ea: f8df 1fb8    	ldr.w	r1, [pc, #0xfb8]        @ 0x31f0a4 <inter_pred_scaled_8bpp+0xfc0>
+  31e0ee: 4479         	add	r1, pc
+  31e0f0: 6809         	ldr	r1, [r1]
+  31e0f2: 6809         	ldr	r1, [r1]
+  31e0f4: 9130         	str	r1, [sp, #0xc0]
+  31e0f6: 6b45         	ldr	r5, [r0, #0x34]
+  31e0f8: 6804         	ldr	r4, [r0]
+  31e0fa: f895 c003    	ldrb.w	r12, [r5, #0x3]
+  31e0fe: f104 0215    	add.w	r2, r4, #0x15
+  31e102: f504 7196    	add.w	r1, r4, #0x12c
+  31e106: 78ab         	ldrb	r3, [r5, #0x2]
+  31e108: f812 700c    	ldrb.w	r7, [r2, r12]
+  31e10c: eb01 06c7    	add.w	r6, r1, r7, lsl #3
+  31e110: 962e         	str	r6, [sp, #0xb8]
+  31e112: f851 6037    	ldr.w	r6, [r1, r7, lsl #3]
+  31e116: b163         	cbz	r3, 0x31e132 <inter_pred_scaled_8bpp+0x4e> @ imm = #0x18
+  31e118: 792b         	ldrb	r3, [r5, #0x4]
+  31e11a: 5cd2         	ldrb	r2, [r2, r3]
+  31e11c: f851 3032    	ldr.w	r3, [r1, r2, lsl #3]
+  31e120: eb01 01c2    	add.w	r1, r1, r2, lsl #3
+  31e124: 9128         	str	r1, [sp, #0xa0]
+  31e126: 931f         	str	r3, [sp, #0x7c]
+  31e128: e9d3 3711    	ldrd	r3, r7, [r3, #68]
+  31e12c: 9325         	str	r3, [sp, #0x94]
+  31e12e: 9721         	str	r7, [sp, #0x84]
+  31e130: e7ff         	b	0x31e132 <inter_pred_scaled_8bpp+0x4e> @ imm = #-0x2
+  31e132: e9d0 210a    	ldrd	r2, r1, [r0, #40]
+  31e136: f8d0 800c    	ldr.w	r8, [r0, #0xc]
+ 
+[excerpt]
+
+stderr:
+
+[disasm_20]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-objdump --triple=thumbv7a -d --start-address=0x2fd28 --stop-address=0x2fd4c temp/v04/libavcodec.merged.so
+exit: 0
+stdout:
+
+temp/v04/libavcodec.merged.so:	file format elf32-littlearm
+
+Disassembly of section .text:
+
+0002fd28 <call_weak_fn>:
+   2fd28: e59f3014     	ldr	r3, [pc, #0x14]         @ 0x2fd44 <call_weak_fn+0x1c>
+   2fd2c: e59f2014     	ldr	r2, [pc, #0x14]         @ 0x2fd48 <call_weak_fn+0x20>
+   2fd30: e08f3003     	add	r3, pc, r3
+   2fd34: e7932002     	ldr	r2, [r3, r2]
+   2fd38: e3520000     	cmp	r2, #0
+   2fd3c: 012fff1e     	bxeq	lr
+   2fd40: eaff9506     	b	0x15160 <__gmon_start__@plt> @ imm = #-0x1abe8
+   2fd44: 54 d4 39 00  	.word	0x0039d454
+   2fd48: b0 06 00 00  	.word	0x000006b0
+
+stderr:
+
+[disasm_21]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-objdump --triple=thumbv7a -d --start-address=0x14f50 --stop-address=0x14f5c temp/v04/libavcodec.merged.so
+exit: 0
+stdout:
+
+temp/v04/libavcodec.merged.so:	file format elf32-littlearm
+
+Disassembly of section .init:
+
+00014f50 <_init>:
+   14f50: e92d4008     	push	{r3, lr}
+   14f54: eb006b73     	bl	0x2fd28 <call_weak_fn>  @ imm = #0x1adcc
+   14f58: e8bd8008     	pop	{r3, pc}
+
+stderr:
+
+[disasm_22]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-objdump --triple=thumbv7a -d --start-address=0x341060 --stop-address=0x341068 temp/v04/libavcodec.merged.so
+exit: 0
+stdout:
+
+temp/v04/libavcodec.merged.so:	file format elf32-littlearm
+
+Disassembly of section .fini:
+
+00341060 <_fini>:
+  341060: e92d4008     	push	{r3, lr}
+  341064: e8bd8008     	pop	{r3, pc}
+
+stderr:
+
+Input bytes for llvm-mc:
+0x40 0xf2 0x01 0x00
+0x00 0xf0 0x00 0xf8
+[mc_thumb]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-mc --disassemble --triple=thumb < /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/thumb2.txt
+exit: 0
+stdout:
+	lsls	r2, r6, #7
+	movs	r0, r0
+	lsls	r0, r6, #3
+
+stderr:
+<stdin>:1:1: warning: invalid instruction encoding
+0x40 0xf2 0x01 0x00
+^
+<stdin>:2:16: warning: invalid instruction encoding
+0x00 0xf0 0x00 0xf8
+               ^
+
+[mc_thumbv7a]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/llvm-mc --disassemble --triple=thumbv7a < /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/thumb2.txt
+exit: 0
+stdout:
+	movw	r0, #1
+	bl	#0
+
+stderr:
+

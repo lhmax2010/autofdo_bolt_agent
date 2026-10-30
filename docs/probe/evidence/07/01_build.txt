@@ -1,0 +1,255 @@
+v0.4 archive, unchanged FFmpeg build, actual link process observation.
+Design SHA256 abceb98ae958e20c4436e88c45da88c154ec4d29e0bc56939f0828530ddef4cf
+Source title validation passed; mv to docs/profgen/design; exact Downloads source absent.
+src/ffmpeg HEAD 5fe76358596f66e955f005094e6f34ca525ab23d
+src/ffmpeg and temp/v04/ffmpeg packaging/ffmpeg.spec SHA256 both 3bcacdb46864239418d177173bc629bc250f247e31de4e53bc8dfd247c307a49
+[general]
+# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs-tmp-v04-ffmpeg
+profile = profile.tizen_unified_standard
+buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG
+
+[profile.tizen_unified_standard]
+repos = repo.base-standard, repo.unified-standard
+
+[repo.base-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/reference/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260722.045200/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260804.124315/repos/standard/packages/
+
+[repo.unified-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/reference/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260725.003315/repos/standard/packages/
+#url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260804.223836/repos/standard/packages/
+
+START 2026-10-30T20:35:55+08:00
+END 2026-10-30T20:42:49+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/doc-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-tool-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-debugsource-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-tool-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/SRPMS/ffmpeg-8.0.1-1.src.rpm
+ALL-END 2026-10-30T20:42:49+08:00 OK
+temp/v04/logs/ffmpeg.log
+1488: [  384s] LD	libavcodec/libavcodec.so.62
+1756: [  386s] + /usr/lib/rpm/find-debuginfo.sh -j10 --build-id-seed 8.0.1-1 --unique-debug-src-base ffmpeg-8.0.1-1.arm -S debugsourcefiles.list /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1
+1784: [  387s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: Unknown debugging section .debug_line_str
+1789: [  387s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: DWARF version 5 unhandled
+1791: [  387s] *** WARNING: No build ID note found in /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100
+1851: [  390s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100
+2018: [  391s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
+2072: [  393s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/ffmpeg-debugsource-8.0.1-1.armv7l.rpm
+2073: [  394s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavcodec-8.0.1-1.armv7l.rpm
+2074: [  394s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavcodec-devel-8.0.1-1.armv7l.rpm
+2087: [  397s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavcodec-debuginfo-8.0.1-1.armv7l.rpm
+
+Actual link process argv captured read-only by ps -ww -eo pid,args at 0.2s intervals; this is NOT a verbose build-log line or a make -n reconstruction:
+2026-10-30T20:42:33.695013+08:00 1935636 /bin/sh -c printf "LD\t%s\n" libavcodec/libavcodec.so.62; armv7l-tizen-linux-gnueabi-clang -shared -Wl,-soname,libavcodec.so.62 -Wl,-Bsymbolic -Wl,--version-script,libavcodec/libavcodec.ver -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavutil -Llibswscale -Llibswresample -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments  -o libavcodec/libavcodec.so.62 @libavcodec/libavcodec.so.62.objs -lavutil -pthread -lm -latomic -lm -latomic -pthread 
+2026-10-30T20:42:33.695163+08:00 1935637 armv7l-tizen-linux-gnueabi-clang -shared -Wl,-soname,libavcodec.so.62 -Wl,-Bsymbolic -Wl,--version-script,libavcodec/libavcodec.ver -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavutil -Llibswscale -Llibswresample -Wl,-z,relro -Wl,-z,now -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments -o libavcodec/libavcodec.so.62 @libavcodec/libavcodec.so.62.objs -lavutil -pthread -lm -latomic -lm -latomic -pthread
+temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/ffbuild/config.mak
+24: CC=armv7l-tizen-linux-gnueabi-clang
+28: LD=armv7l-tizen-linux-gnueabi-clang
+51: CFLAGS=-Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fno-strict-overflow -fstack-protector-all -fPIE  -mfpu=neon -std=c17 -fomit-frame-pointer -fPIC -mthumb -pthread -g -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -Wno-implicit-const-int-float-conversion -Wno-microsoft-enum-forward-reference -O3 -fno-math-errno -fno-signed-zeros -mstack-alignment=16 -Qunused-arguments -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type
+75: LDFLAGS= -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments
+temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/tizen_unified_standard.conf:148-180
+148: # clang utils
+149: %__ar_clang llvm-ar
+150: %__ranlib_clang llvm-ranlib
+151: %__cc_clang %{_host}-clang
+152: %__cxx_clang %{_host}-clang++
+153: %__optflags_toolchain_clang -Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument %{?___optflags_toolchain_clang:%{___optflags_toolchain_clang}}
+154: 
+155: # gcc utils
+156: %__ar_gcc gcc-ar
+157: %__ranlib_gcc gcc-ranlib
+158: %__cc_gcc %{_host}-gcc
+159: %__cxx_gcc %{_host}-g++
+160: %__optflags_toolchain_gcc -O2 -fno-inline-functions -fstack-protector-strong %{?___optflags_toolchain_gcc:%{___optflags_toolchain_gcc}}
+161: 
+162: %_toolchain %{?_toolchain_override}%{!?_toolchain_override:clang}
+163: %toolchain_is() %((echo "%_toolchain" | %{__grep} -qE "%{1}") && echo 1 || echo 0)
+164: 
+165: %__ar %{expand:%%{__ar_%{_toolchain}}}
+166: %__ranlib %{expand:%%{__ranlib_%{_toolchain}}}
+167: %__cc %{expand:%%{__cc_%{_toolchain}}}
+168: %__cxx %{expand:%%{__cxx_%{_toolchain}}}
+169: %__optflags_toolchain %{expand:%%{__optflags_toolchain_%{_toolchain}}}
+170: 
+171: %prep %%prep\
+172: export AR=%{__ar} RANLIB=%{__ranlib};\
+173: %{nil}
+174: 
+175: %build %%build\
+176: export AR=%{__ar} RANLIB=%{__ranlib};\
+177: export CC=%{__cc} CXX=%{__cxx};\
+178: %{nil}
+179: 
+180: %install %{?_enable_debug_packages:%{?buildsubdir:%{debug_package}}}\
+temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/tizen_unified_standard.conf:357-365
+357: Substitute: glibc-devel-32bit
+358: %endif
+359: 
+360: ########## compilation flags ##########
+361: %define __optflags %{__optflags_toolchain} -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches
+362: 
+363: Optflags: armv7l %{__optflags} -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64
+364: Optflags: armv7hl %{__optflags} -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=hard -mthumb -D_FILE_OFFSET_BITS=64
+365: Optflags: aarch64 %{__optflags} -march=armv8-a+fp+simd+crc+crypto -mtune=cortex-a53
+
+Full build.conf range: temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/tizen_unified_standard.conf:1-559
+Search /build-id|build_id/i: 0 lines; rg exit 1.
+[
+  {
+    "command": "set -o pipefail; rpm2cpio /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-8.0.1-1.armv7l.rpm | cpio -idm --quiet",
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/runtime-extract",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "rpm_sha256": "152d0691e983a45c343804153f78825a2ff3b7c252323e4ef4e9b2c3a4acf07e"
+  },
+  {
+    "command": "set -o pipefail; rpm2cpio /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-debuginfo-8.0.1-1.armv7l.rpm | cpio -idm --quiet",
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/debug-extract",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "rpm_sha256": "1881e4e098497b1315e4f2efe6832233c3f4d6aedca016dfe6872f0900761a00"
+  }
+]
+[
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/doc-8.0.1-1.armv7l.rpm",
+    "bytes": 47036,
+    "sha256": "ab773efcf29e49c1f2972bade75a0ec6b08148359323c305cbc019c120c9e1da"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-debugsource-8.0.1-1.armv7l.rpm",
+    "bytes": 1306240,
+    "sha256": "c64330608736163f1689d7779a53f372034b09f8a1c326471d678ccf13fbcd37"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-tool-8.0.1-1.armv7l.rpm",
+    "bytes": 157968,
+    "sha256": "c29b2c21d1711420ead97508a86f39d71b2b5bb51ed7de69247966db0aacaae2"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-tool-debuginfo-8.0.1-1.armv7l.rpm",
+    "bytes": 298792,
+    "sha256": "0f81bc7496c44ad4854236c106db64e88fb3370f2b9ad3b040bb442457879c5d"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-8.0.1-1.armv7l.rpm",
+    "bytes": 1586468,
+    "sha256": "152d0691e983a45c343804153f78825a2ff3b7c252323e4ef4e9b2c3a4acf07e"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-debuginfo-8.0.1-1.armv7l.rpm",
+    "bytes": 3331528,
+    "sha256": "1881e4e098497b1315e4f2efe6832233c3f4d6aedca016dfe6872f0900761a00"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-devel-8.0.1-1.armv7l.rpm",
+    "bytes": 69072,
+    "sha256": "dc98e794cc94b001d763aa23bbb8932f6a4b3924a6f3a95984e39dbe2cd0d099"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-8.0.1-1.armv7l.rpm",
+    "bytes": 117968,
+    "sha256": "500be8d09bfbb3b6ab3fe755e147fc03226a52a5332958d9e0ab55fcaa62223a"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-debuginfo-8.0.1-1.armv7l.rpm",
+    "bytes": 235220,
+    "sha256": "e6507a8eab894e57360c2a15d346fc6ebaed1f4540557915ef865aa18eb99e09"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-devel-8.0.1-1.armv7l.rpm",
+    "bytes": 22332,
+    "sha256": "d5a59cba17c3b3c4b801f3ed44287de62f555f215263d7dc2b9f9dd0d7c5feef"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-8.0.1-1.armv7l.rpm",
+    "bytes": 398056,
+    "sha256": "4a2c414182c8158bbbfd120401c6552d23ffb8cdaa1ed32662ef894de1b0aada"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-debuginfo-8.0.1-1.armv7l.rpm",
+    "bytes": 859840,
+    "sha256": "5ec7e31279b89dded7dabc289579ae3a993adde63afd8c825cd7bdc797058584"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-devel-8.0.1-1.armv7l.rpm",
+    "bytes": 52516,
+    "sha256": "fa846613a409ce2964f22c8284daef1c57fb4a39a9af7b0cdf221051b9c1947b"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-8.0.1-1.armv7l.rpm",
+    "bytes": 282132,
+    "sha256": "b27bda070e897fe662a84a239dc28d14b16fd3badadfc96bba7932d88fe0ec82"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-debuginfo-8.0.1-1.armv7l.rpm",
+    "bytes": 486004,
+    "sha256": "0df42516ac0cc4c04bc06e6b3f9b3d5dd6e250912b60037385b839fe58fd253a"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-devel-8.0.1-1.armv7l.rpm",
+    "bytes": 154380,
+    "sha256": "c7cab46f03ad63c0ee8d5d7ffce6f95e0bdae5c4df40f9b9645d452d9cb51bd8"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-8.0.1-1.armv7l.rpm",
+    "bytes": 55552,
+    "sha256": "704ec021a12938aaaf1a9cab2e7171b17b0f6b245705ce3da35bce541ef4102f"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-debuginfo-8.0.1-1.armv7l.rpm",
+    "bytes": 68988,
+    "sha256": "7a467ddccaf017a43df8f6fa552ce49c7675cb5a710205f7f04243f93cb23e3e"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-devel-8.0.1-1.armv7l.rpm",
+    "bytes": 14568,
+    "sha256": "3c0a2156ec4da6c1b8003c424c7aff4d60052381e575f50ca30c14c738461759"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-8.0.1-1.armv7l.rpm",
+    "bytes": 229812,
+    "sha256": "9f382f7a428754d35d751c3da93fd5f992487c7981be7a72ce1715247e046f24"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-debuginfo-8.0.1-1.armv7l.rpm",
+    "bytes": 445344,
+    "sha256": "7fdc84a0d859097c0388290b00d1cb7d7a364a9f5c647a8b427fccfca2b9c101"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-devel-8.0.1-1.armv7l.rpm",
+    "bytes": 15316,
+    "sha256": "0f3f68ce842da3730532aaddfd6ea415013eedaefa265a3f5cd4d4f83d2852a5"
+  },
+  {
+    "path": "temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/SRPMS/ffmpeg-8.0.1-1.src.rpm",
+    "bytes": 16312455,
+    "sha256": "0b7d3c16793472736ac868f992285a22cf96ae8f33a947592a9be3a6f34da806"
+  }
+]

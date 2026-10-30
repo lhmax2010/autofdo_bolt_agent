@@ -1,0 +1,850 @@
+Board identity, actual commands, RC and samples for lit provenance.
+[connect]
+COMMAND sdb connect 192.168.108.26
+exit: 0
+stdout:
+192.168.108.26:26101 is already connected
+
+stderr:
+
+[identity_assert]
+COMMAND a=$(uname -m); r=$?; echo "ARCH=$a RC=$r"; [ "$r" = 0 ] && [ "$a" = armv7l ] || exit 20; k=$(uname -r); r=$?; echo "KERNEL=$k RC=$r"; [ "$r" = 0 ] || exit 21; case "$k" in *rpi4*|*v7l*) ;; *) exit 22;; esac; echo IDENTITY_OK
+time: 2026-10-30T20:36:04.008789+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+ARCH=armv7l RC=0
+KERNEL=6.12.80-arm-rpi4-v7l RC=0
+IDENTITY_OK
+
+stderr:
+(SDB combined stream)
+sdb_stderr:
+
+[board_before]
+COMMAND cat /proc/device-tree/model; id; df -k /opt; du -sk /opt/afdo_agent; rpm -qa | wc -l; lsmod; findmnt -T /opt -n -o TARGET,SOURCE,FSTYPE,OPTIONS; sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1
+time: 2026-10-30T20:36:05.039500+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+Raspberry Pi 4 Model B Rev 1.5\0uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context="User::Shell"
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mmcblk0p3         1335696     81880   1223708   7% /opt
+35796	/opt/afdo_agent
+1252
+Module                  Size  Used by
+proc_tsm               12288  0
+brcmfmac              352256  0
+brcmutil               16384  1 brcmfmac
+hci_uart               32768  0
+btbcm                  20480  1 hci_uart
+kdbus                  98304  103
+dm_bow                 20480  0
+logger                 16384  244
+inform_reboot          12288  0
+extcon_usb_fixed       12288  0
+/opt /dev/mmcblk0p3 ext4 rw,relatime
+41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf
+49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1
+
+stderr:
+(SDB combined stream)
+sdb_stderr:
+
+
+Temporary sample build status
+START 2026-10-30T20:43:08+08:00
+END 2026-10-30T20:43:32+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/RPMS/afdo-spike-1.0-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/repos/tizen_unified_standard/armv7l/SRPMS/afdo-spike-1.0-1.src.rpm
+ALL-END 2026-10-30T20:43:32+08:00 OK
+temp/v04/logs/samples.log
+206: [   11s] + clang --version
+207: [   12s] clang version 22.1.8
+213: [   12s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 cases.c -o cases
+214: [   13s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 after.c -o after
+215: [   13s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 -shared -fPIC deletedlib.c -o libdeleted_probe.so
+216: [   13s] + clang -O2 -gline-tables-only -fdebug-info-for-profiling -funique-internal-linkage-names -Wl,--build-id=sha1 deleted.c -L. -ldeleted_probe -o deleted
+[fork_record]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -c 1000003 -o /opt/afdo_agent/work/fork.data -- /opt/afdo_agent/work/cases fork
+time: 2026-10-30T20:44:08.272062+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+ROLE=parent PID=6736 PARENT=6736 CHILD=6738
+ROLE=child PID=6738 PARENT=6736 CHILD=0
+DONE PID=6738 CHECKSUM=ff818b861cb93a67
+DONE PID=6736 CHECKSUM=ff818b861cb93a67
+
+stderr:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.303 MB /opt/afdo_agent/work/fork.data (9845 samples) ]
+
+sdb_stderr:
+
+[fork_evlist]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/fork.data
+time: 2026-10-30T20:44:08.450557+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+stderr:
+
+sdb_stderr:
+
+[fork_export]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/fork.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/fork.txt
+time: 2026-10-30T20:44:09.042351+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+
+stderr:
+
+sdb_stderr:
+
+[exec_record]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -c 1000003 -o /opt/afdo_agent/work/exec.data -- /opt/afdo_agent/work/cases exec
+time: 2026-10-30T20:44:15.283128+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+BEFORE PID=6835
+EXEC PID=6835 CHECKSUM=ff818b861cb93a67
+AFTER PID=6835
+AFTER_DONE 583b2e51
+
+stderr:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.184 MB /opt/afdo_agent/work/exec.data (5925 samples) ]
+
+sdb_stderr:
+
+[exec_evlist]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/exec.data
+time: 2026-10-30T20:44:15.463675+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+stderr:
+
+sdb_stderr:
+
+[exec_export]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/exec.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/exec.txt
+time: 2026-10-30T20:44:16.031975+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+
+stderr:
+
+sdb_stderr:
+
+[deleted_record]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; rm -f /opt/afdo_agent/work/deleted.ready /opt/afdo_agent/work/deleted.go
+LD_LIBRARY_PATH=/opt/afdo_agent/work:/opt/afdo_agent/lib nice -n 19 ionice -c3 /opt/afdo_agent/work/deleted > /opt/afdo_agent/work/deleted.run.log 2>&1 & p=$!
+i=0; while [ ! -f /opt/afdo_agent/work/deleted.ready ] && [ "$i" -lt 100 ]; do sleep 0.1; i=$((i+1)); done
+if [ ! -f /opt/afdo_agent/work/deleted.ready ]; then wait "$p"; exit 90; fi
+nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record --buildid-mmap -e cycles -c 1000003 -p "$p" -o /opt/afdo_agent/work/deleted.data -- sh -c 'touch /opt/afdo_agent/work/deleted.go; sleep 5'
+r=$?
+wait "$p"; child=$?
+cat /opt/afdo_agent/work/deleted.run.log
+printf 'PERF_EXIT=%s CHILD_EXIT=%s\n' "$r" "$child"
+[ "$r" -eq 0 ] && [ "$child" -eq 0 ]
+time: 2026-10-30T20:44:18.318754+08:00
+remote_exit: 1
+transport_exit: 0
+stdout:
+DELETED PID=6929 CHECKSUM=20dfff6f
+PERF_EXIT=143 CHILD_EXIT=0
+
+stderr:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.040 MB /opt/afdo_agent/work/deleted.data ]
+/bin/sh: line 10:  6931 Terminated              nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record --buildid-mmap -e cycles -c 1000003 -p "$p" -o /opt/afdo_agent/work/deleted.data -- sh -c 'touch /opt/afdo_agent/work/deleted.go; sleep 5'
+
+sdb_stderr:
+
+[deleted_retry_record]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; rm -f /opt/afdo_agent/work/deleted.ready /opt/afdo_agent/work/deleted.go
+LD_LIBRARY_PATH=/opt/afdo_agent/work:/opt/afdo_agent/lib nice -n 19 ionice -c3 /opt/afdo_agent/work/deleted > /opt/afdo_agent/work/deleted.run.log 2>&1 & p=$!
+i=0; while [ ! -f /opt/afdo_agent/work/deleted.ready ] && [ "$i" -lt 100 ]; do sleep 0.1; i=$((i+1)); done
+if [ ! -f /opt/afdo_agent/work/deleted.ready ]; then wait "$p"; exit 90; fi
+nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record --buildid-mmap -e cycles -c 1000003 -p "$p" -o /opt/afdo_agent/work/deleted.data > /opt/afdo_agent/work/deleted.perf.stdout 2> /opt/afdo_agent/work/deleted.perf.stderr & rec=$!
+sleep 0.5
+touch /opt/afdo_agent/work/deleted.go
+wait "$p"; child=$?
+kill -INT "$rec" 2>/dev/null || true
+wait "$rec"; r=$?
+cat /opt/afdo_agent/work/deleted.run.log /opt/afdo_agent/work/deleted.perf.stdout
+cat /opt/afdo_agent/work/deleted.perf.stderr >&2
+printf 'PERF_EXIT=%s CHILD_EXIT=%s\n' "$r" "$child"
+[ "$r" -eq 0 ] && [ "$child" -eq 0 ]
+time: 2026-10-30T20:45:46.974507+08:00
+remote_exit: 1
+transport_exit: 0
+stdout:
+DELETED PID=7486 CHECKSUM=20dfff6f
+PERF_EXIT=130 CHILD_EXIT=0
+
+stderr:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.040 MB /opt/afdo_agent/work/deleted.data ]
+
+sdb_stderr:
+
+[deleted_bounded_record]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; rm -f /opt/afdo_agent/work/deleted.ready /opt/afdo_agent/work/deleted.go
+LD_LIBRARY_PATH=/opt/afdo_agent/work:/opt/afdo_agent/lib nice -n 19 ionice -c3 /opt/afdo_agent/work/deleted > /opt/afdo_agent/work/deleted.run.log 2>&1 & p=$!
+i=0; while [ ! -f /opt/afdo_agent/work/deleted.ready ] && [ "$i" -lt 100 ]; do sleep 0.1; i=$((i+1)); done
+if [ ! -f /opt/afdo_agent/work/deleted.ready ]; then wait "$p"; exit 90; fi
+nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record --buildid-mmap -e cycles -c 1000003 -p "$p" -o /opt/afdo_agent/work/deleted.data -- sh -c 'touch /opt/afdo_agent/work/deleted.go; sleep 0.1'
+r=$?
+wait "$p"; child=$?
+cat /opt/afdo_agent/work/deleted.run.log
+printf 'PERF_EXIT=%s CHILD_EXIT=%s\n' "$r" "$child"
+[ "$r" -eq 0 ] && [ "$child" -eq 0 ]
+time: 2026-10-30T20:46:57.499479+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+DELETED PID=7933 CHECKSUM=20dfff6f
+PERF_EXIT=0 CHILD_EXIT=0
+
+stderr:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.008 MB /opt/afdo_agent/work/deleted.data ]
+
+sdb_stderr:
+
+[deleted_evlist]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/deleted.data
+time: 2026-10-30T20:46:57.678217+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1
+
+stderr:
+
+sdb_stderr:
+
+[deleted_export]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/deleted.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/deleted.txt
+time: 2026-10-30T20:46:57.864902+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+
+stderr:
+
+sdb_stderr:
+
+[module_record]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -a -e cycles -c 100003 -o /opt/afdo_agent/work/module.data -- sh -c 'i=0; while [ "$i" -lt 500 ]; do dbus-send --system --print-reply --dest=org.freedesktop.DBus / org.freedesktop.DBus.ListNames >/dev/null || exit $?; i=$((i+1)); done' 
+time: 2026-10-30T20:47:10.969009+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+
+stderr:
+[ perf record: Woken up 62 times to write data ]
+[ perf record: Captured and wrote 16.810 MB /opt/afdo_agent/work/module.data (318382 samples) ]
+
+sdb_stderr:
+
+[module_evlist]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/module.data
+time: 2026-10-30T20:47:11.323253+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 100003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, disabled: 1, inherit: 1, sample_id_all: 1, exclude_guest: 1
+dummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 100003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+stderr:
+
+sdb_stderr:
+
+[module_export]
+COMMAND export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/module.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/module.txt
+time: 2026-10-30T20:47:14.638193+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+
+stderr:
+
+sdb_stderr:
+
+[cases_notes]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases
+exit: 0
+stdout:
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.2.0
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5
+
+stderr:
+
+[after_notes]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/after
+exit: 0
+stdout:
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.2.0
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 40e5ef329b035f1c91eb80be2aa521a91f3e178a
+
+stderr:
+
+[libdeleted_probe_so_notes]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so
+exit: 0
+stdout:
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 390adaa690f0167d6f59403cc8d7deb4a04a7d86
+
+stderr:
+
+
+Independent map/formula result:
+{
+  "fork": {
+    "total_samples": 9845,
+    "samples_by_pid": {
+      "6736": 4927,
+      "6738": 4918
+    },
+    "target_samples_by_pid": {
+      "6736": 4923,
+      "6738": 4917
+    },
+    "consistent_by_pid": {
+      "6736": 4923,
+      "6738": 4917
+    },
+    "mismatches": [],
+    "own_mmap2_by_pid": {
+      "6736": 5
+    },
+    "exec_phase_counts": {},
+    "exec_wrong_image": [],
+    "module_dso_counts": {},
+    "deleted_sample_count": 0,
+    "unknown_sample_count": 0,
+    "parent_pid": 6736,
+    "child_pid": 6738
+  },
+  "exec": {
+    "total_samples": 5925,
+    "samples_by_pid": {
+      "6835": 5925
+    },
+    "target_samples_by_pid": {
+      "6835": 5914
+    },
+    "consistent_by_pid": {
+      "6835": 5914
+    },
+    "mismatches": [],
+    "own_mmap2_by_pid": {
+      "6835": 10
+    },
+    "exec_phase_counts": {
+      "before:cases": 4833,
+      "after:after": 1081
+    },
+    "exec_wrong_image": [],
+    "module_dso_counts": {},
+    "deleted_sample_count": 0,
+    "unknown_sample_count": 0
+  },
+  "deleted": {
+    "total_samples": 151,
+    "samples_by_pid": {
+      "7933": 151
+    },
+    "target_samples_by_pid": {
+      "7933": 151
+    },
+    "consistent_by_pid": {
+      "7933": 151
+    },
+    "mismatches": [],
+    "own_mmap2_by_pid": {
+      "-1": 11,
+      "7933": 7
+    },
+    "exec_phase_counts": {},
+    "exec_wrong_image": [],
+    "module_dso_counts": {},
+    "deleted_sample_count": 151,
+    "unknown_sample_count": 0
+  },
+  "module": {
+    "total_samples": 318382,
+    "samples_by_pid": {
+      "pid_count": 596
+    },
+    "target_samples_by_pid": {},
+    "consistent_by_pid": {},
+    "mismatches": [],
+    "own_mmap2_by_pid": {},
+    "exec_phase_counts": {},
+    "exec_wrong_image": [],
+    "module_dso_counts": {
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko": 1663,
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/logger.ko": 56,
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/proc-tsm.ko": 10
+    },
+    "deleted_sample_count": 274,
+    "unknown_sample_count": 0
+  }
+}
+
+Raw lines (exact excerpts from full primary exports; JSON below only for formula arithmetic):
+
+EXPORT fork.txt
+target_mmaps:
+   6736/6736    PERF_RECORD_MMAP2 6736/6736: [0x420000(0x2000) @ 0 b3:03 893 2005307221]: r-xp /opt/afdo_agent/work/cases
+deleted:
+
+modules:
+
+unknown:
+
+formula_examples:
+[
+  {
+    "raw": "   6736/6736       1000003 cycles:            4208a0 (/opt/afdo_agent/work/cases+0x8a0)",
+    "line": 20,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8a0",
+    "dsoff": "0x8a0"
+  },
+  {
+    "raw": "   6738/6738       1000003 cycles:            420958 (/opt/afdo_agent/work/cases+0x958)",
+    "line": 21,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x958",
+    "dsoff": "0x958"
+  },
+  {
+    "raw": "   6736/6736       1000003 cycles:            420854 (/opt/afdo_agent/work/cases+0x854)",
+    "line": 22,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x854",
+    "dsoff": "0x854"
+  },
+  {
+    "raw": "   6738/6738       1000003 cycles:            4208a0 (/opt/afdo_agent/work/cases+0x8a0)",
+    "line": 23,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8a0",
+    "dsoff": "0x8a0"
+  },
+  {
+    "raw": "   6736/6736       1000003 cycles:            4208b0 (/opt/afdo_agent/work/cases+0x8b0)",
+    "line": 24,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8b0",
+    "dsoff": "0x8b0"
+  },
+  {
+    "raw": "   6738/6738       1000003 cycles:            420880 (/opt/afdo_agent/work/cases+0x880)",
+    "line": 25,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x880",
+    "dsoff": "0x880"
+  },
+  {
+    "raw": "   6736/6736       1000003 cycles:            4208b0 (/opt/afdo_agent/work/cases+0x8b0)",
+    "line": 26,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8b0",
+    "dsoff": "0x8b0"
+  },
+  {
+    "raw": "   6738/6738       1000003 cycles:            4208b0 (/opt/afdo_agent/work/cases+0x8b0)",
+    "line": 27,
+    "map_pid": 6736,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8b0",
+    "dsoff": "0x8b0"
+  }
+]
+
+EXPORT exec.txt
+target_mmaps:
+   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0x420000(0x2000) @ 0 b3:03 893 2005307221]: r-xp /opt/afdo_agent/work/cases
+   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0x480000(0x1000) @ 0 b3:03 896 149884850]: r-xp /opt/afdo_agent/work/after
+deleted:
+
+modules:
+
+unknown:
+
+formula_examples:
+[
+  {
+    "raw": "   6835/6835       1000003 cycles:            4208a4 (/opt/afdo_agent/work/cases+0x8a4)",
+    "line": 19,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8a4",
+    "dsoff": "0x8a4"
+  },
+  {
+    "raw": "   6835/6835       1000003 cycles:            420944 (/opt/afdo_agent/work/cases+0x944)",
+    "line": 20,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x944",
+    "dsoff": "0x944"
+  },
+  {
+    "raw": "   6835/6835       1000003 cycles:            4208b0 (/opt/afdo_agent/work/cases+0x8b0)",
+    "line": 21,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8b0",
+    "dsoff": "0x8b0"
+  },
+  {
+    "raw": "   6835/6835       1000003 cycles:            420b08 (/opt/afdo_agent/work/cases+0xb08)",
+    "line": 22,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0xb08",
+    "dsoff": "0xb08"
+  },
+  {
+    "raw": "   6835/6835       1000003 cycles:            4208b0 (/opt/afdo_agent/work/cases+0x8b0)",
+    "line": 23,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8b0",
+    "dsoff": "0x8b0"
+  },
+  {
+    "raw": "   6835/6835       1000003 cycles:            4208b0 (/opt/afdo_agent/work/cases+0x8b0)",
+    "line": 24,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8b0",
+    "dsoff": "0x8b0"
+  },
+  {
+    "raw": "   6835/6835       1000003 cycles:            420854 (/opt/afdo_agent/work/cases+0x854)",
+    "line": 25,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x854",
+    "dsoff": "0x854"
+  },
+  {
+    "raw": "   6835/6835       1000003 cycles:            4208b0 (/opt/afdo_agent/work/cases+0x8b0)",
+    "line": 26,
+    "map_pid": 6835,
+    "map_line": 12,
+    "start": "0x420000",
+    "pgoff": "0x0",
+    "calculated": "0x8b0",
+    "dsoff": "0x8b0"
+  }
+]
+
+EXPORT deleted.txt
+target_mmaps:
+      0/0       PERF_RECORD_MMAP2 7933/7933: [0x4e0000(0x1000) @ 0 <652e2db19cef7a9f7a8b3787723eba441b15cb42>]: r-xp /opt/afdo_agent/work/deleted
+      0/0       PERF_RECORD_MMAP2 7933/7933: [0xb6f50000(0x1000) @ 0 b3:03 966 0]: r-xp /opt/afdo_agent/work/libdeleted_probe.so (deleted)
+deleted:
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)
+modules:
+
+unknown:
+
+formula_examples:
+[
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 19,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  },
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 20,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  },
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 21,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  },
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 22,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  },
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 23,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  },
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 24,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  },
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 25,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  },
+  {
+    "raw": "   7933/7933       1000003 cycles:          b6f50410 (/opt/afdo_agent/work/libdeleted_probe.so (deleted)+0x410)",
+    "line": 26,
+    "map_pid": 7933,
+    "map_line": 14,
+    "start": "0xb6f50000",
+    "pgoff": "0x0",
+    "calculated": "0x410",
+    "dsoff": "0x410"
+  }
+]
+
+EXPORT module.txt
+target_mmaps:
+
+deleted:
+   2075/2119        100003  cycles:          aac3f290 (/hal/lib/libgallium-24.3.4.so (deleted)+0x53290)
+   2075/2119        100003  cycles:          ae469510 (/hal/lib/libglapi.so.0.0.0 (deleted)+0xb510)
+   2075/2119        100003  cycles:          aad684c4 (/hal/lib/libgallium-24.3.4.so (deleted)+0x17c4c4)
+   2075/2119        100003  cycles:          aac300ca (/hal/lib/libgallium-24.3.4.so (deleted)+0x440ca)
+   2075/2119        100003  cycles:          aaecfa30 (/hal/lib/libgallium-24.3.4.so (deleted)+0x2e3a30)
+   2075/2119        100003  cycles:          aaddb608 (/hal/lib/libgallium-24.3.4.so (deleted)+0x1ef608)
+   2075/2119        100003  cycles:          ab002668 (/hal/lib/libgallium-24.3.4.so (deleted)+0x416668)
+   2075/2119        100003  cycles:          aaed1714 (/hal/lib/libgallium-24.3.4.so (deleted)+0x2e5714)
+   2075/2119        100003  cycles:          aadf5ae4 (/hal/lib/libgallium-24.3.4.so (deleted)+0x209ae4)
+   2075/2119        100003  cycles:          aad20130 (/hal/lib/libgallium-24.3.4.so (deleted)+0x134130)
+   2075/2119        100003  cycles:          aac3f94a (/hal/lib/libgallium-24.3.4.so (deleted)+0x5394a)
+   2075/2119        100003  cycles:          aac536f8 (/hal/lib/libgallium-24.3.4.so (deleted)+0x676f8)
+   2075/2119        100003  cycles:          aac69c7e (/hal/lib/libgallium-24.3.4.so (deleted)+0x7dc7e)
+   2075/2119        100003  cycles:          aac4e654 (/hal/lib/libgallium-24.3.4.so (deleted)+0x62654)
+   2075/2119        100003  cycles:          ab0650c4 (/hal/lib/libgallium-24.3.4.so (deleted)+0x4790c4)
+   2075/2119        100003  cycles:          aaecf81c (/hal/lib/libgallium-24.3.4.so (deleted)+0x2e381c)
+   2075/2119        100003  cycles:          aac13062 (/hal/lib/libgallium-24.3.4.so (deleted)+0x27062)
+   2075/2119        100003  cycles:          b18ffff8 (/usr/lib/libCOREGL.so.4.0 (deleted)+0x27ff8)
+   1612/1612        100003  cycles:          b51dac78 (/hal/lib/driver/libEGL.so.1.0.0 (deleted)+0x7c78)
+   1612/1612        100003  cycles:          b48a4080 (/hal/lib/libgallium-24.3.4.so (deleted)+0x1e2080)
+modules:
+   8017/8017        100003  cycles:          bf03c3c8 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x945c)
+   8017/8017        100003  cycles:          bf033684 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x718)
+   8017/8017        100003  cycles:          bf03f78c (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0xc820)
+   8017/8017        100003  cycles:          bf039d5c (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x6df0)
+   8017/8017        100003  cycles:          bf039d5c (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x6df0)
+   8018/8018        100003  cycles:          bf039e84 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x6f18)
+   8018/8018        100003  cycles:          bf039e84 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x6f18)
+   8018/8018        100003  cycles:          bf03f730 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0xc7c4)
+   8018/8018        100003  cycles:          bf03f72c (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0xc7c0)
+   8018/8018        100003  cycles:          bf03f750 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0xc7e4)
+   8018/8018        100003  cycles:          bf034798 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x182c)
+    848/1676        100003  cycles:          bf043a58 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x10aec)
+   8019/8019        100003  cycles:          bf0347a8 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x183c)
+   8020/8020        100003  cycles:          bf033684 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x718)
+    848/1676        100003  cycles:          bf038888 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x591c)
+   8020/8020        100003  cycles:          bf03f730 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0xc7c4)
+   8021/8021        100003  cycles:          bf039da4 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x6e38)
+   8021/8021        100003  cycles:          bf033684 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0x718)
+   8021/8021        100003  cycles:          bf03f750 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0xc7e4)
+   8022/8022        100003  cycles:          bf03dda0 (/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko+0xae34)
+unknown:
+
+formula_examples:
+[]
+[cleanup]
+COMMAND find /opt/afdo_agent/work -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + && test -z "$(find /opt/afdo_agent/work -mindepth 1 -print -quit)" && echo WORK_EMPTY
+time: 2026-10-30T20:48:46.308963+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+WORK_EMPTY
+
+stderr:
+(SDB combined stream)
+sdb_stderr:
+
+[board_after]
+COMMAND df -k /opt; du -sk /opt/afdo_agent; rpm -qa | wc -l; find /opt/afdo_agent -type f -exec sha256sum {} \;
+time: 2026-10-30T20:48:47.305044+08:00
+remote_exit: 0
+transport_exit: 0
+stdout:
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mmcblk0p3         1335696     82788   1222800   7% /opt
+35796	/opt/afdo_agent
+1252
+49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1
+41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf
+
+stderr:
+(SDB combined stream)
+sdb_stderr:
+
+
+Temporary test source excerpts (not Agent implementation); NUL in board model output is rendered as \0 above.
+temp/v04/spike-samples/cases.c SHA256 b4edc8efb141890faf14a9fa6b295f5aec7083e317c7696a9be938d857c84ee4
+1: #define main original_spike_main
+2: #include "spike.c"
+3: #undef main
+4: #include <unistd.h>
+5: #include <sys/wait.h>
+6: #include <string.h>
+7: int main(int argc, char **argv) {
+8:     setbuf(stdout, NULL);
+9:     initial_seed = DEFAULT_SEED; initialize_table();
+10:     if (argc == 2 && strcmp(argv[1], "fork") == 0) {
+11:         pid_t parent = getpid(), child = fork();
+12:         if (child < 0) { perror("fork"); return 1; }
+13:         printf("ROLE=%s PID=%ld PARENT=%ld CHILD=%ld\n", child ? "parent" : "child", (long)getpid(), (long)parent, (long)child);
+14:         uint64_t result = run_workload(200000);
+15:         printf("DONE PID=%ld CHECKSUM=%016" PRIx64 "\n", (long)getpid(), result);
+16:         if (child) { int status; if (waitpid(child,&status,0)<0 || !WIFEXITED(status)) return 2; return WEXITSTATUS(status); }
+17:         return 0;
+18:     }
+19:     if (argc == 2 && strcmp(argv[1], "exec") == 0) {
+20:         printf("BEFORE PID=%ld\n", (long)getpid());
+21:         uint64_t result=run_workload(200000);
+22:         printf("EXEC PID=%ld CHECKSUM=%016" PRIx64 "\n", (long)getpid(),result);
+23:         execl("/opt/afdo_agent/work/after", "after", (char *)0);
+24:         perror("execl"); return 3;
+25:     }
+26:     return 4;
+27: }
+temp/v04/spike-samples/deleted.c SHA256 5dea66d0c6f27f0ec7089cba2320e3300ee87491a4d7d32e95bec0259876ddb5
+1: #include <stdio.h>
+2: #include <stdint.h>
+3: #include <unistd.h>
+4: extern uint32_t deleted_work(uint32_t);
+5: int main(void) {
+6:  setbuf(stdout,0);
+7:  if(unlink("/opt/afdo_agent/work/libdeleted_probe.so")) {perror("unlink");return 1;}
+8:  FILE *f=fopen("/opt/afdo_agent/work/deleted.ready","w"); if(!f)return 2; fprintf(f,"%ld\n",(long)getpid()); fclose(f);
+9:  for(int i=0;i<300;i++) { if(access("/opt/afdo_agent/work/deleted.go",F_OK)==0) { printf("DELETED PID=%ld CHECKSUM=%08x\n",(long)getpid(),deleted_work(123));return 0; } usleep(100000); }
+10:  return 3;
+11: }

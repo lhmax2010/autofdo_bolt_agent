@@ -26,7 +26,18 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-30；llvm-profgen 增强设计 v0.3 归档）
+## 当前授权与执行状态（2026-10-30；v0.4归档与主机/RPi4冻结前核实，已完成）
+
+- 设计当前版本为 [v0.4](profgen/design/02_llvm_profgen_enhance_design_v0.4.md)，正文未改；SHA-256=`abceb98ae958e20c4436e88c45da88c154ec4d29e0bc56939f0828530ddef4cf`。按用户授权校验后用mv从指定Downloads路径移入，源文件已不存在，其他Downloads文件及v0.1–v0.3不动。
+- 本轮只做验证与记录，未改LLVM/原FFmpeg源码或spec；一次性边界脚本与测试包留在temp，不开始增强或Agent实现。v0.4第一阶段评审/冻结仍待确认，不以本轮验证结束自动开工。
+- 原样FFmpeg在独立GBS root构建成功（GBS_EXIT=0、带时间ALL-END OK），产出运行与debuginfo RPM。调试文件保留.symtab、$a/$t/$d=27/5882/6489和.ARM.attributes，代码节NOBITS；运行文件无这些符号/属性。两份均没有build-id note，不能称已验证build-id身份一致性；默认链接无build-id，与06镜像现象一致。[构建/ELF证据](probe/evidence/07/01_build.txt)
+- 20个最大Thumb函数（也覆盖所取含$d前20）指令边界全部一致；另对3个st_size=0的CRT A32符号作有界范围补充，总132871个起点无差异。零大小符号的推导上界不等同DWARF函数范围验收。thumb与thumbv7a差异已复现，前者警告但仍exit0。[证据](probe/evidence/07/03_boundaries.txt)
+- RPi4 fork父/子目标样本4923/4917，偏移100%一致，子无自有MMAP2；exec后旧映像样本0；deleted最终正常录制151条，模块1729条，未出现([unknown])。deleted前两次返回143/130，保留失败证据，不当成功；最终record和子进程均0。[证据](probe/evidence/07/04_board.txt)
+- 板上work已清空；只保留原perf/libLLVM；RPM前后1252；/opt清理后已用82788KiB、可用1222800KiB、7%，专用目录du前后35796KiB。未remount、重启或装卸RPM。
+- 剩余RPi5项：dsoff及公式核对、`--buildid-mmap`、页大小。第二阶段前按v0.4新规则重跑IR/BFI核实；主机x86_64 perf构建仍待用户决定。当前FFmpeg没有有ID的note保留正例，debugedit的DWARF5警告与完整行表/源码路径质量未在本轮核验。
+- [07报告](probe/07_v04_prefreeze_checks.md)、v0.4、四份新增证据（99680字节）及STATUS同一commit交付。只有本次指定Downloads移动这一授权例外，无新增已知其他边界例外；历史SDB服务内部写入审计限制保留。
+
+## 前轮授权与执行状态（2026-10-30；llvm-profgen增强设计v0.3归档，历史）
 
 - 设计当前版本为 [v0.3](profgen/design/02_llvm_profgen_enhance_design_v0.3.md)，依据 [05](probe/05_rpi4_pmu_image_and_prefreeze.md)、[06](probe/06_rpi4_prefreeze_followup.md) 冻结前核实修订，修订表见附录 B；进入第二轮三方评审。冻结前不开工，Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
 - 冻结前核实剩余项：RPi5 的 dsoff、`--buildid-mmap`、页大小；aarch64 IR 匹配按 v0.3 的 5.8 第 2 条重跑；Tizen debuginfo 是否保留 `$a/$t/$d` 映射符号。
@@ -134,11 +145,11 @@
 
 # 项目状态
 
-更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen 设计当前版本 v0.3（依据05、06核实修订，见附录B），进入第二轮三方评审；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.4，主机与RPi4本轮冻结前核实已完成（07），第一阶段评审/冻结待确认；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 当前设计 v0.3，依据05、06冻结前核实修订（修订表见附录B），进入第二轮三方评审。剩余核实为RPi5的dsoff、`--buildid-mmap`、页大小，按v0.3第5.8节第2条重跑aarch64 IR匹配，以及Tizen debuginfo的`$a/$t/$d`映射符号保留情况。冻结前不开工，Agent的设计与开发在llvm-profgen增强完成后才开始。
+- 当前设计v0.4；本轮07完成默认FFmpeg调试文件/运行文件、Thumb边界及RPi4真实样例核实。剩余RPi5的dsoff、`--buildid-mmap`、页大小待后续；IR/BFI核实按v0.4第10节安排在第二阶段前完成。冻结前不开工，Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree，未经冻结与新授权不开始 LLVM 增强。
 
@@ -329,7 +340,7 @@
 
 ## 待人工裁决
 
-- [设计 v0.3](profgen/design/02_llvm_profgen_enhance_design_v0.3.md)进入第二轮三方评审，冻结仍待确认。是否在工作目录内为x86_64构建主机perf由用户决定，决定`--perfdata`能否进入第一批；本次归档不授权启动构建。
+- [设计v0.4](profgen/design/02_llvm_profgen_enhance_design_v0.4.md)第一阶段冻结待评审确认。是否在工作目录内为x86_64构建主机perf仍由用户决定，决定`--perfdata`能否进入第一批；本轮未构建主机perf。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -344,7 +355,7 @@
 
 ## 挂账
 
-- 冻结前剩余核实（按v0.3）：RPi5的dsoff、`--buildid-mmap`、页大小；aarch64 IR匹配按5.8第2条重跑；Tizen debuginfo是否保留`$a/$t/$d`映射符号。主机perf构建待用户决定，跨主机文本对照尚未完成。05、06的Thumb及IR匹配事实已纳入v0.3修订（附录B）；历史证据保留，不以合成profile或100%键权重覆盖证明统计质量。
+- 冻结前剩余RPi5项（v0.4）：dsoff与公式核对、`--buildid-mmap`、页大小。Tizen调试文件映射符号/属性/代码NOBITS及Thumb长度规则已由07补证；默认FFmpeg无build-id，仍缺有ID时调试note保留正例。debugedit DWARF5警告、完整DWARF质量未核验。主机perf构建待用户决定；IR匹配/BFI按v0.4列为第二阶段前实验，不沿用旧百分比。([unknown])和LOST_SAMPLES仍无本轮实测。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
