@@ -1,0 +1,886 @@
+Acquisition, exact dsoff projection, event metadata and report. Full data/text remain in temp/rpi5-prefreeze.
+
+=== fixed_record ===
+TIME: 2026-10-30T21:44:42.335300+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -c 1000003 -o /opt/afdo_agent/work/fixed.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+[ perf record: Woken up 2 times to write data ]
+[ perf record: Captured and wrote 0.239 MB /opt/afdo_agent/work/fixed.data (7617 samples) ]
+real 2.15
+user 3.19
+sys 0.24
+
+SDB_STDERR: 
+
+=== fixed_dsoff ===
+TIME: 2026-10-30T21:44:42.627322+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/fixed.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/fixed_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: 
+
+=== fixed_evlist ===
+TIME: 2026-10-30T21:44:43.058279+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/fixed.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+
+SDB_STDERR: 
+
+=== fixed_report ===
+TIME: 2026-10-30T21:44:43.342180+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso --header -i /opt/afdo_agent/work/fixed.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+# ========
+# captured on    : Fri Oct 30 22:45:00 2026
+# header version : 1
+# data offset    : 288
+# data size      : 250736
+# feat offset    : 251024
+# hostname : localhost
+# os release : 6.12.80-arm64-rpi4-v8
+# perf version : 6.12.80
+# arch : aarch64
+# nrcpus online : 4
+# nrcpus avail : 4
+# cpuid : 0x00000000414fd0b1
+# total memory : 4074912 kB
+# cmdline : /opt/afdo_agent/tools/perf record -e cycles -c 1000003 -o /opt/afdo_agent/work/fixed.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false 
+# event : name = cycles, , id = { 4, 5, 6, 7 }, type = 0 (PERF_TYPE_HARDWARE), size = 136, config = 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq } = 1000003, sample_type = IP|TID|TIME, read_format = ID|LOST, disabled = 1, inherit = 1, mmap = 1, comm = 1, enable_on_exec = 1, task = 1, sample_id_all = 1, exclude_guest = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1
+# CPU_TOPOLOGY info available, use -I to display
+# pmu mappings: armv8_cortex_a76 = 10, breakpoint = 5, kprobe = 8, software = 1, tracepoint = 2, uprobe = 9
+# CACHE info available, use -I to display
+# time of first sample : 156.086103
+# time of last sample : 157.664428
+# sample duration :   1578.325 ms
+# armv8_cortex_a76 pmu capabilities: slots=0x00000000, threshold_max=0x00000000, bus_slots=0x00000000, bus_width=0x00000000
+# missing features: (null) CPUDESC NUMA_TOPOLOGY BRANCH_STACK GROUP_DESC AUXTRACE STAT MEM_TOPOLOGY CLOCKID DIR_FORMAT COMPRESSED CPU_PMU_CAPS CLOCK_DATA HYBRID_TOPOLOGY 
+# ========
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 7K of event 'cycles'
+# Event count (approx.): 7617022851
+#
+# Overhead  Shared Object                     
+# ........  ..................................
+#
+    77.00%  libavcodec.so.62.11.100           
+    16.44%  libc.so.6                         
+     3.12%  [kernel.kallsyms]                 
+     0.93%  libgstreamer-1.0.so.0.2411.0      
+     0.72%  libavutil.so.60.8.100             
+     0.37%  libgstvideo-1.0.so.0.2411.0       
+     0.26%  libgstbase-1.0.so.0.2411.0        
+     0.22%  libgobject-2.0.so.0.8000.5        
+     0.21%  libglib-2.0.so.0.8000.5           
+     0.20%  libgstisomp4.so                   
+     0.20%  libgstvideoparsersbad.so          
+     0.12%  libgstcoreelements.so             
+     0.08%  ld-linux-aarch64.so.1             
+     0.08%  libgstlibav.so                    
+     0.05%  libgstcodecparsers-1.0.so.0.2411.0
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_fixed.data ===
+TIME: 2026-10-30T21:44:43.565695+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/fixed.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+4398490b583cd82478aa03f1b44db8fb2f18a07856674a7bcc00b12b72026db2  /opt/afdo_agent/work/fixed.data
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_fixed.data ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/fixed.data /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed.data
+HOST_EXIT: 0
+STDOUT:
+pulled                     fixed.data	  0%	      0KB	    0KB/spulled                     fixed.data	100%	    252KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/fixed.data   1652KB/s (258268 bytes in 0.152s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_fixed_dsoff.txt ===
+TIME: 2026-10-30T21:44:42.734111+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/fixed_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+721ee62217d6b904642ef977b14b6e4113dcdeb48946d7aa4738250dbcd5f864  /opt/afdo_agent/work/fixed_dsoff.txt
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_fixed_dsoff.txt ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/fixed_dsoff.txt /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed_dsoff.txt
+HOST_EXIT: 0
+STDOUT:
+pulled                fixed_dsoff.txt	  0%	      0KB	    0KB/spulled                fixed_dsoff.txt	100%	    716KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/fixed_dsoff.txt   3636KB/s (733772 bytes in 0.197s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== multi_record ===
+TIME: 2026-10-30T21:44:47.962321+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -a -e cycles -c 1000003 -o /opt/afdo_agent/work/multi.data -- sh -c 'gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false & p1=$!; gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false & p2=$!; echo DECODER_PIDS=$p1,$p2; wait "$p1"; r1=$?; wait "$p2"; r2=$?; echo DECODER_EXIT=$r1,$r2; test "$r1" = 0 && test "$r2" = 0'
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+DECODER_PIDS=2178,2179
+DECODER_EXIT=0,0
+
+STDERR:
+[ perf record: Woken up 5 times to write data ]
+[ perf record: Captured and wrote 1.868 MB /opt/afdo_agent/work/multi.data (26778 samples) ]
+real 4.13
+user 7.87
+sys 0.42
+
+SDB_STDERR: 
+
+=== multi_dsoff ===
+TIME: 2026-10-30T21:44:48.368128+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/multi.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/multi_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: 
+
+=== multi_evlist ===
+TIME: 2026-10-30T21:44:49.076989+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/multi.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, disabled: 1, inherit: 1, sample_id_all: 1, exclude_guest: 1
+dummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+
+SDB_STDERR: 
+
+=== multi_report ===
+TIME: 2026-10-30T21:44:49.441764+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso --header -i /opt/afdo_agent/work/multi.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+# ========
+# captured on    : Fri Oct 30 22:45:05 2026
+# header version : 1
+# data offset    : 472
+# data size      : 1958408
+# feat offset    : 1958880
+# hostname : localhost
+# os release : 6.12.80-arm64-rpi4-v8
+# perf version : 6.12.80
+# arch : aarch64
+# nrcpus online : 4
+# nrcpus avail : 4
+# cpuid : 0x00000000414fd0b1
+# total memory : 4074912 kB
+# cmdline : /opt/afdo_agent/tools/perf record -a -e cycles -c 1000003 -o /opt/afdo_agent/work/multi.data -- sh -c gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false & p1=$!; gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false & p2=$!; echo DECODER_PIDS=$p1,$p2; wait "$p1"; r1=$?; wait "$p2"; r2=$?; echo DECODER_EXIT=$r1,$r2; test "$r1" = 0 && test "$r2" = 0 
+# event : name = cycles, , id = { 43, 44, 45, 46 }, type = 0 (PERF_TYPE_HARDWARE), size = 136, config = 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq } = 1000003, sample_type = IP|TID|TIME|ID|CPU, read_format = ID|LOST, disabled = 1, inherit = 1, sample_id_all = 1, exclude_guest = 1
+# event : name = dummy:u, , id = { 47, 48, 49, 50 }, type = 1 (software), size = 136, config = 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq } = 1000003, sample_type = IP|TID|TIME|ID|CPU, read_format = ID|LOST, inherit = 1, exclude_kernel = 1, exclude_hv = 1, mmap = 1, comm = 1, task = 1, sample_id_all = 1, exclude_guest = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1
+# CPU_TOPOLOGY info available, use -I to display
+# pmu mappings: armv8_cortex_a76 = 10, breakpoint = 5, kprobe = 8, software = 1, tracepoint = 2, uprobe = 9
+# CACHE info available, use -I to display
+# time of first sample : 159.748881
+# time of last sample : 162.805285
+# sample duration :   3056.405 ms
+# armv8_cortex_a76 pmu capabilities: slots=0x00000000, threshold_max=0x00000000, bus_slots=0x00000000, bus_width=0x00000000
+# missing features: (null) CPUDESC NUMA_TOPOLOGY BRANCH_STACK GROUP_DESC AUXTRACE STAT MEM_TOPOLOGY CLOCKID DIR_FORMAT COMPRESSED CPU_PMU_CAPS CLOCK_DATA HYBRID_TOPOLOGY 
+# ========
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 26K of event 'cycles'
+# Event count (approx.): 26778080334
+#
+# Overhead  Shared Object                     
+# ........  ..................................
+#
+    53.52%  libavcodec.so.62.11.100           
+    17.83%  libc.so.6                         
+     9.71%  [kernel.kallsyms]                 
+     6.73%  enlightenment                     
+     2.86%  libglib-2.0.so.0.8000.5           
+     2.75%  libds.so.0.1.25                   
+     1.28%  libtbm.so.1.0.0                   
+     0.70%  libgstreamer-1.0.so.0.2411.0      
+     0.55%  libtizen-core.so.0.4.2            
+     0.49%  libpixman-1.so.0.38.4             
+     0.48%  libavutil.so.60.8.100             
+     0.32%  libgstbase-1.0.so.0.2411.0        
+     0.30%  libwayland-server.so.0.23.1       
+     0.26%  libgstvideo-1.0.so.0.2411.0       
+     0.24%  libgobject-2.0.so.0.8000.5        
+     0.21%  libgstlibav.so                    
+     0.19%  libtdm.so.1.0.0                   
+     0.19%  libhal-backend-tbm-vc4.so.0.0.0   
+     0.16%  libhal-backend-tdm-vc4.so         
+     0.15%  libgstisomp4.so                   
+     0.15%  libgstvideoparsersbad.so          
+     0.14%  libttrace.so.1.1.0                
+     0.13%  module.so                         
+     0.12%  libhal-api-tdm.so.0.1.0           
+     0.11%  ld-linux-aarch64.so.1             
+     0.11%  libgstcoreelements.so             
+     0.09%  [vdso]                            
+     0.08%  libgstcodecparsers-1.0.so.0.2411.0
+     0.07%  libhal-api-tbm.so.1.1             
+     0.03%  bash                              
+     0.01%  libsqlite3.so.3.51.0              
+     0.01%  dlog_logger                       
+     0.00%  dlogsend                          
+     0.00%  libcynara-client-async.so.0.27.0  
+     0.00%  libdlog.so.0.0.0                  
+     0.00%  libecore_wl2.so.1.25.1            
+     0.00%  libstdc++.so.6.0.33               
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_multi.data ===
+TIME: 2026-10-30T21:44:49.693756+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/multi.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+f0a0d8c052a3d342126b1525ba1d7d28b7b6bee8a9d21b414053c56e2dff884d  /opt/afdo_agent/work/multi.data
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_multi.data ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/multi.data /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/multi.data
+HOST_EXIT: 0
+STDOUT:
+pulled                     multi.data	  0%	      0KB	    0KB/spulled                     multi.data	100%	   1920KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/multi.data   6004KB/s (1966216 bytes in 0.319s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_multi_dsoff.txt ===
+TIME: 2026-10-30T21:44:48.488917+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/multi_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+0974d7dc13cfb23a16b6832eb425e97c369b540930d2f4ebf4e74fb75fff3c93  /opt/afdo_agent/work/multi_dsoff.txt
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_multi_dsoff.txt ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/multi_dsoff.txt /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/multi_dsoff.txt
+HOST_EXIT: 0
+STDOUT:
+pulled                multi_dsoff.txt	  0%	      0KB	    0KB/spulled                multi_dsoff.txt	100%	   2975KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/multi_dsoff.txt   6478KB/s (3046551 bytes in 0.459s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== freq_record ===
+TIME: 2026-10-30T21:44:52.266925+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record -e cycles -F 1000 -o /opt/afdo_agent/work/freq.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+[ perf record: Woken up 2 times to write data ]
+[ perf record: Captured and wrote 0.105 MB /opt/afdo_agent/work/freq.data (2581 samples) ]
+real 2.14
+user 3.23
+sys 0.16
+
+SDB_STDERR: 
+
+=== freq_dsoff ===
+TIME: 2026-10-30T21:44:52.551182+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/freq.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/freq_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: 
+
+=== freq_evlist ===
+TIME: 2026-10-30T21:44:52.939255+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/freq.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000, sample_type: IP|TID|TIME|PERIOD, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, freq: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1
+
+STDERR:
+
+SDB_STDERR: 
+
+=== freq_report ===
+TIME: 2026-10-30T21:44:53.216404+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso --header -i /opt/afdo_agent/work/freq.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+# ========
+# captured on    : Fri Oct 30 22:45:10 2026
+# header version : 1
+# data offset    : 288
+# data size      : 110232
+# feat offset    : 110520
+# hostname : localhost
+# os release : 6.12.80-arm64-rpi4-v8
+# perf version : 6.12.80
+# arch : aarch64
+# nrcpus online : 4
+# nrcpus avail : 4
+# cpuid : 0x00000000414fd0b1
+# total memory : 4074912 kB
+# cmdline : /opt/afdo_agent/tools/perf record -e cycles -F 1000 -o /opt/afdo_agent/work/freq.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false 
+# event : name = cycles, , id = { 58, 59, 60, 61 }, type = 0 (PERF_TYPE_HARDWARE), size = 136, config = 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq } = 1000, sample_type = IP|TID|TIME|PERIOD, read_format = ID|LOST, disabled = 1, inherit = 1, mmap = 1, comm = 1, freq = 1, enable_on_exec = 1, task = 1, sample_id_all = 1, exclude_guest = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1
+# CPU_TOPOLOGY info available, use -I to display
+# pmu mappings: armv8_cortex_a76 = 10, breakpoint = 5, kprobe = 8, software = 1, tracepoint = 2, uprobe = 9
+# CACHE info available, use -I to display
+# time of first sample : 166.012822
+# time of last sample : 167.451274
+# sample duration :   1438.452 ms
+# armv8_cortex_a76 pmu capabilities: slots=0x00000000, threshold_max=0x00000000, bus_slots=0x00000000, bus_width=0x00000000
+# missing features: (null) CPUDESC NUMA_TOPOLOGY BRANCH_STACK GROUP_DESC AUXTRACE STAT MEM_TOPOLOGY CLOCKID DIR_FORMAT COMPRESSED CPU_PMU_CAPS CLOCK_DATA HYBRID_TOPOLOGY 
+# ========
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 2K of event 'cycles'
+# Event count (approx.): 7521560710
+#
+# Overhead  Shared Object                     
+# ........  ..................................
+#
+    78.26%  libavcodec.so.62.11.100           
+    16.63%  libc.so.6                         
+     2.32%  [kernel.kallsyms]                 
+     0.60%  libavutil.so.60.8.100             
+     0.50%  libgstreamer-1.0.so.0.2411.0      
+     0.37%  libgobject-2.0.so.0.8000.5        
+     0.28%  libgstisomp4.so                   
+     0.27%  libgstvideo-1.0.so.0.2411.0       
+     0.22%  libgstcodecparsers-1.0.so.0.2411.0
+     0.19%  libgstlibav.so                    
+     0.16%  libgstbase-1.0.so.0.2411.0        
+     0.09%  libglib-2.0.so.0.8000.5           
+     0.06%  libgstcoreelements.so             
+     0.03%  libgstvideoparsersbad.so          
+     0.01%  ld-linux-aarch64.so.1             
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_freq.data ===
+TIME: 2026-10-30T21:44:53.438483+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/freq.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+1d799795e0a804d2e72d6edd26b84c7667ffbcb6d12e7b2229763a489fe6bbc2  /opt/afdo_agent/work/freq.data
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_freq.data ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/freq.data /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/freq.data
+HOST_EXIT: 0
+STDOUT:
+pulled                      freq.data	  0%	      0KB	    0KB/spulled                      freq.data	100%	    115KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/freq.data   821KB/s (117764 bytes in 0.139s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_freq_dsoff.txt ===
+TIME: 2026-10-30T21:44:52.657802+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/freq_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+b74da23fc9da2a7722fa27432ac738b29ec0578a41e95854ccc3104112369a15  /opt/afdo_agent/work/freq_dsoff.txt
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_freq_dsoff.txt ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/freq_dsoff.txt /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/freq_dsoff.txt
+HOST_EXIT: 0
+STDOUT:
+pulled                 freq_dsoff.txt	  0%	      0KB	    0KB/spulled                 freq_dsoff.txt	100%	    246KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/freq_dsoff.txt   1608KB/s (252242 bytes in 0.153s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== buildid_record ===
+TIME: 2026-10-30T21:44:55.829201+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; time -p nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid record --buildid-mmap -e cycles -c 1000003 -o /opt/afdo_agent/work/buildid.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.228 MB /opt/afdo_agent/work/buildid.data ]
+real 2.14
+user 3.03
+sys 0.21
+
+SDB_STDERR: 
+
+=== buildid_dsoff ===
+TIME: 2026-10-30T21:44:56.124009+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/buildid.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > /opt/afdo_agent/work/buildid_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: 
+
+=== buildid_evlist ===
+TIME: 2026-10-30T21:44:56.553665+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid evlist -v -i /opt/afdo_agent/work/buildid.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1
+
+STDERR:
+
+SDB_STDERR: 
+
+=== buildid_report ===
+TIME: 2026-10-30T21:44:56.839701+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid report --stdio --sort dso --header -i /opt/afdo_agent/work/buildid.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+# ========
+# captured on    : Fri Oct 30 22:45:13 2026
+# header version : 1
+# data offset    : 288
+# data size      : 238640
+# feat offset    : 238928
+# hostname : localhost
+# os release : 6.12.80-arm64-rpi4-v8
+# perf version : 6.12.80
+# arch : aarch64
+# nrcpus online : 4
+# nrcpus avail : 4
+# cpuid : 0x00000000414fd0b1
+# total memory : 4074912 kB
+# cmdline : /opt/afdo_agent/tools/perf record --buildid-mmap -e cycles -c 1000003 -o /opt/afdo_agent/work/buildid.data -- gst-launch-1.0 -q filesrc location=/opt/afdo_agent/work/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false 
+# event : name = cycles, , id = { 99, 100, 101, 102 }, type = 0 (PERF_TYPE_HARDWARE), size = 136, config = 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq } = 1000003, sample_type = IP|TID|TIME, read_format = ID|LOST, disabled = 1, inherit = 1, mmap = 1, comm = 1, enable_on_exec = 1, task = 1, sample_id_all = 1, exclude_guest = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1, build_id = 1
+# CPU_TOPOLOGY info available, use -I to display
+# pmu mappings: armv8_cortex_a76 = 10, breakpoint = 5, kprobe = 8, software = 1, tracepoint = 2, uprobe = 9
+# CACHE info available, use -I to display
+# time of first sample : 0.000000
+# time of last sample : 0.000000
+# sample duration :      0.000 ms
+# armv8_cortex_a76 pmu capabilities: slots=0x00000000, threshold_max=0x00000000, bus_slots=0x00000000, bus_width=0x00000000
+# missing features: (null) BUILD_ID CPUDESC NUMA_TOPOLOGY BRANCH_STACK GROUP_DESC AUXTRACE STAT MEM_TOPOLOGY CLOCKID DIR_FORMAT COMPRESSED CPU_PMU_CAPS CLOCK_DATA HYBRID_TOPOLOGY 
+# ========
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 7K of event 'cycles'
+# Event count (approx.): 7226021678
+#
+# Overhead  Shared Object                     
+# ........  ..................................
+#
+    77.65%  libavcodec.so.62.11.100           
+    15.33%  libc.so.6                         
+     3.20%  [kernel.kallsyms]                 
+     0.77%  libgstreamer-1.0.so.0.2411.0      
+     0.75%  libavutil.so.60.8.100             
+     0.50%  libgstbase-1.0.so.0.2411.0        
+     0.32%  libglib-2.0.so.0.8000.5           
+     0.26%  libgstlibav.so                    
+     0.26%  libgstvideo-1.0.so.0.2411.0       
+     0.22%  libgstvideoparsersbad.so          
+     0.21%  libgobject-2.0.so.0.8000.5        
+     0.18%  libgstisomp4.so                   
+     0.15%  libgstcoreelements.so             
+     0.11%  libgstcodecparsers-1.0.so.0.2411.0
+     0.08%  ld-linux-aarch64.so.1             
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_buildid.data ===
+TIME: 2026-10-30T21:44:57.221863+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/buildid.data
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+9d931fad7c18160329efa076857667477f1fdfc9b903fec82970045267867d9d  /opt/afdo_agent/work/buildid.data
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_buildid.data ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/buildid.data /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/buildid.data
+HOST_EXIT: 0
+STDOUT:
+pulled                   buildid.data	  0%	      0KB	    0KB/spulled                   buildid.data	100%	    240KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/buildid.data   1579KB/s (245984 bytes in 0.152s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== file_sha_buildid_dsoff.txt ===
+TIME: 2026-10-30T21:44:56.230631+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/buildid_dsoff.txt
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+380202c9985f193c3663e3f8f9c36c0556ff6a57aef143abb7a357caf75f45ad  /opt/afdo_agent/work/buildid_dsoff.txt
+
+STDERR:
+
+SDB_STDERR: 
+
+=== pull_buildid_dsoff.txt ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 pull /opt/afdo_agent/work/buildid_dsoff.txt /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/buildid_dsoff.txt
+HOST_EXIT: 0
+STDOUT:
+pulled              buildid_dsoff.txt	  0%	      0KB	    0KB/spulled              buildid_dsoff.txt	100%	    681KB	    0KB/s
+1 file(s) pulled. 0 file(s) skipped.
+/opt/afdo_agent/work/buildid_dsoff.txt   3491KB/s (698240 bytes in 0.195s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== fixed_dsoff.txt first 200 lines (verbatim) ===
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff800080000000(0x21d3200) @ 0xffff800080000000]: x [kernel.kallsyms]_text
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b0000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/inform-reboot.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b6000(0x7000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-core.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2ba000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/extcon-usb-fixed.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2c4000(0x6000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/dm-bow.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2cf000(0x6000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/net/wireless/broadcom/brcm80211/brcmutil/brcmutil.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2d2000(0x4000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/logger.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2de000(0x1a000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/kdbus/kdbus.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2fb000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-platform.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a303000(0x6000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/bluetooth/btbcm.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a309000(0x51000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/net/wireless/broadcom/brcm80211/brcmfmac/brcmfmac.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a35d000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/proc-tsm.ko
+      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a379000(0xb000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/bluetooth/hci_uart.ko
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xaaaaab3d0000(0x21000) @ 0 b3:02 8898 1572954365]: r-xp /usr/bin/gst-launch-1.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3b8b000(0x42000) @ 0 b3:02 656 3540038822]: r-xp /usr/lib64/ld-linux-aarch64.so.1
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3bc7000(0x2000) @ 0 00:00 0 0]: r-xp [vdso]
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3a20000(0x154000) @ 0 b3:02 8828 1896025618]: r-xp /usr/lib64/libgstreamer-1.0.so.0.2411.0
+   2085/2085       1000003 cycles:  ffff800080372fcc ([kernel.kallsyms])
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb38d0000(0x142000) @ 0 b3:02 8869 3922790644]: r-xp /usr/lib64/libglib-2.0.so.0.8000.5
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3850000(0x72000) @ 0 b3:02 7476 454142625]: r-xp /usr/lib64/libgobject-2.0.so.0.8000.5
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3820000(0x21000) @ 0 b3:02 671 8789592]: r-xp /usr/lib64/libpthread.so.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3680000(0x199000) @ 0 b3:02 659 2904585266]: r-xp /usr/lib64/libc.so.6
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3650000(0x21000) @ 0 b3:02 7910 2562237263]: r-xp /usr/lib64/libgmodule-2.0.so.0.8000.5
+   2085/2085       1000003 cycles:      ffffb3ba9cbc (/usr/lib64/ld-linux-aarch64.so.1+0x1ecbc)
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb35a0000(0xa1000) @ 0 b3:02 662 879467224]: r-xp /usr/lib64/libm.so.6
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3560000(0x37000) @ 0 b3:02 6737 1156523963]: r-xp /usr/lib64/libdlog.so.0.0.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb34b0000(0xa1000) @ 0 b3:02 7467 2430215651]: r-xp /usr/lib64/libpcre2-8.so.0.15.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3470000(0x31000) @ 0 b3:02 1500 113481858]: r-xp /usr/lib64/libffi.so.8.1.4
+   2085/2085       1000003 cycles:  ffff8000800c0ed4 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:      ffffb37a4c40 (/usr/lib64/libc.so.6+0x124c40)
+   2085/2085       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:      ffffb370d974 (/usr/lib64/libc.so.6+0x8d974)
+   2085/2085       1000003 cycles:      ffffb3913eb4 (/usr/lib64/libglib-2.0.so.0.8000.5+0x43eb4)
+   2085/2085       1000003 cycles:      ffffb3913ea8 (/usr/lib64/libglib-2.0.so.0.8000.5+0x43ea8)
+   2085/2085       1000003 cycles:      ffffb3ad09d8 (/usr/lib64/libgstreamer-1.0.so.0.2411.0+0xb09d8)
+   2085/2085       1000003 cycles:      ffffb38ee2c8 (/usr/lib64/libglib-2.0.so.0.8000.5+0x1e2c8)
+   2085/2085       1000003 cycles:      ffffb3ad0260 (/usr/lib64/libgstreamer-1.0.so.0.2411.0+0xb0260)
+   2085/2085       1000003 cycles:  ffff80008121d504 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:      ffffb39560a8 (/usr/lib64/libglib-2.0.so.0.8000.5+0x860a8)
+   2085/2085       1000003 cycles:      ffffb3ac6cb8 (/usr/lib64/libgstreamer-1.0.so.0.2411.0+0xa6cb8)
+   2085/2085       1000003 cycles:      ffffb3974f60 (/usr/lib64/libglib-2.0.so.0.8000.5+0xa4f60)
+   2085/2085       1000003 cycles:      ffffb39127c8 (/usr/lib64/libglib-2.0.so.0.8000.5+0x427c8)
+   2085/2085       1000003 cycles:  ffff8000811c569c ([kernel.kallsyms])
+   2085/2085       1000003 cycles:  ffff80008041e7d4 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:      ffffb3ac3c24 (/usr/lib64/libgstreamer-1.0.so.0.2411.0+0xa3c24)
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb33f0000(0x72000) @ 0 b3:02 8817 3611987328]: r-xp /usr/lib64/gstreamer-1.0/libgstcoreelements.so
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3340000(0x91000) @ 0 b3:02 8820 3638261585]: r-xp /usr/lib64/libgstbase-1.0.so.0.2411.0
+   2085/2085       1000003 cycles:      ffffb3b92540 (/usr/lib64/ld-linux-aarch64.so.1+0x7540)
+   2085/2085       1000003 cycles:      ffffb370d974 (/usr/lib64/libc.so.6+0x8d974)
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb32a0000(0x92000) @ 0 b3:02 13162 1816046092]: r-xp /usr/lib64/gstreamer-1.0/libgstisomp4.so
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3270000(0x21000) @ 0 b3:02 10300 1924292264]: r-xp /usr/lib64/libgstriff-1.0.so.0.2411.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb31e0000(0x82000) @ 0 b3:02 10294 2957849724]: r-xp /usr/lib64/libgstaudio-1.0.so.0.2411.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3180000(0x51000) @ 0 b3:02 10308 2570639064]: r-xp /usr/lib64/libgsttag-1.0.so.0.2411.0
+   2085/2085       1000003 cycles:      ffffb3ba96ec (/usr/lib64/ld-linux-aarch64.so.1+0x1e6ec)
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb30b0000(0xc2000) @ 0 b3:02 10310 3966303576]: r-xp /usr/lib64/libgstvideo-1.0.so.0.2411.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3050000(0x52000) @ 0 b3:02 10298 1361329291]: r-xp /usr/lib64/libgstpbutils-1.0.so.0.2411.0
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3010000(0x31000) @ 0 b3:02 753 1091585431]: r-xp /usr/lib64/libz.so.1.3.1
+   2085/2085       1000003 cycles:      ffffb3b925c4 (/usr/lib64/ld-linux-aarch64.so.1+0x75c4)
+   2085/2085       1000003 cycles:      ffffb3b93070 (/usr/lib64/ld-linux-aarch64.so.1+0x8070)
+   2085/2085       1000003 cycles:      ffffb3acc298 (/usr/lib64/libgstreamer-1.0.so.0.2411.0+0xac298)
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb2fb0000(0x51000) @ 0 b3:02 10356 2261733744]: r-xp /usr/lib64/gstreamer-1.0/libgstvideoparsersbad.so
+   2085/2085       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb2f10000(0x91000) @ 0 b3:02 10366 3198926376]: r-xp /usr/lib64/libgstcodecparsers-1.0.so.0.2411.0
+   2085/2085       1000003 cycles:  ffff8000806d4950 ([kernel.kallsyms])
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb2eb0000(0x53000) @ 0 b3:02 10400 2483999955]: r-xp /usr/lib64/gstreamer-1.0/libgstlibav.so
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb2e30000(0x77000) @ 0 b3:02 2920 1133705693]: r-xp /usr/lib64/libavfilter.so.11.4.100
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb2d20000(0x10a000) @ 0 b3:02 1651 1914319939]: r-xp /usr/lib64/libavformat.so.62.3.100
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb25c0000(0x75c000) @ 0 b3:02 1290 3403977211]: r-xp /usr/lib64/libavcodec.so.62.11.100
+   2085/2085       1000003 cycles:  ffff80008121d504 ([kernel.kallsyms])
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb14d0000(0x10ed000) @ 0 b3:02 1116 2715517625]: r-xp /usr/lib64/libavutil.so.60.8.100
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb1340000(0x188000) @ 0 b3:02 1441 1544433109]: r-xp /usr/lib64/libswscale.so.9.1.100
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb1300000(0x31000) @ 0 b3:02 2916 756356845]: r-xp /usr/lib64/libswresample.so.6.1.100
+   2085/2085       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:      ffffb3bab59c (/usr/lib64/ld-linux-aarch64.so.1+0x2059c)
+   2085/2085       1000003 cycles:      ffffb37138bc (/usr/lib64/libc.so.6+0x938bc)
+   2085/2085       1000003 cycles:  ffff8000803719f8 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:      ffffb3866e24 (/usr/lib64/libgobject-2.0.so.0.8000.5+0x16e24)
+   2085/2088       1000003 cycles:      ffffb32c9860 (/usr/lib64/gstreamer-1.0/libgstisomp4.so+0x29860)
+   2085/2088       1000003 cycles:      ffffb3885600 (/usr/lib64/libgobject-2.0.so.0.8000.5+0x35600)
+   2085/2088       1000003 cycles:  ffff800080333320 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff80008121d568 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff80008121d568 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff80008029394c ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000803378f8 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff80008008e884 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000811c5bf0 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:      ffffb3af9860 (/usr/lib64/libgstreamer-1.0.so.0.2411.0+0xd9860)
+   2085/2088       1000003 cycles:  ffff80008121d504 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:      ffffb37120c4 (/usr/lib64/libc.so.6+0x920c4)
+   2085/2090       1000003 cycles:      ffffb14ee360 (/usr/lib64/libavutil.so.60.8.100+0x1e360)
+   2085/2090       1000003 cycles:  ffff8000802e7348 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:  ffff800080035404 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff80008033a0cc ([kernel.kallsyms])
+   2085/2091       1000003 cycles:  ffff800080333320 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2092       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2092       1000003 cycles:  ffff80008121d504 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff80008033a0cc ([kernel.kallsyms])
+   2085/2093       1000003 cycles:  ffff8000811c569c ([kernel.kallsyms])
+   2085/2091       1000003 cycles:      ffffb2939c10 (/usr/lib64/libavcodec.so.62.11.100+0x379c10)
+   2085/2090       1000003 cycles:      ffffb26e0238 (/usr/lib64/libavcodec.so.62.11.100+0x120238)
+   2085/2090       1000003 cycles:      ffffb26e5324 (/usr/lib64/libavcodec.so.62.11.100+0x125324)
+   2085/2090       1000003 cycles:      ffffb26da9f8 (/usr/lib64/libavcodec.so.62.11.100+0x11a9f8)
+   2085/2090       1000003 cycles:  ffff8000802e7950 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:      ffffb26e5254 (/usr/lib64/libavcodec.so.62.11.100+0x125254)
+   2085/2092       1000003 cycles:      ffffb26e0418 (/usr/lib64/libavcodec.so.62.11.100+0x120418)
+   2085/2090       1000003 cycles:      ffffb26e4050 (/usr/lib64/libavcodec.so.62.11.100+0x124050)
+   2085/2090       1000003 cycles:      ffffb26e3fac (/usr/lib64/libavcodec.so.62.11.100+0x123fac)
+   2085/2093       1000003 cycles:  ffff800080333320 ([kernel.kallsyms])
+   2085/2091       1000003 cycles:      ffffb26578ac (/usr/lib64/libavcodec.so.62.11.100+0x978ac)
+   2085/2092       1000003 cycles:      ffffb26d8940 (/usr/lib64/libavcodec.so.62.11.100+0x118940)
+   2085/2090       1000003 cycles:      ffffb26e6474 (/usr/lib64/libavcodec.so.62.11.100+0x126474)
+   2085/2091       1000003 cycles:      ffffb267d798 (/usr/lib64/libavcodec.so.62.11.100+0xbd798)
+   2085/2092       1000003 cycles:      ffffb270f664 (/usr/lib64/libavcodec.so.62.11.100+0x14f664)
+   2085/2090       1000003 cycles:      ffffb26e51d8 (/usr/lib64/libavcodec.so.62.11.100+0x1251d8)
+   2085/2090       1000003 cycles:      ffffb26e00f8 (/usr/lib64/libavcodec.so.62.11.100+0x1200f8)
+   2085/2090       1000003 cycles:      ffffb26e3ed8 (/usr/lib64/libavcodec.so.62.11.100+0x123ed8)
+   2085/2090       1000003 cycles:      ffffb26e3e98 (/usr/lib64/libavcodec.so.62.11.100+0x123e98)
+   2085/2090       1000003 cycles:      ffffb26e00cc (/usr/lib64/libavcodec.so.62.11.100+0x1200cc)
+   2085/2090       1000003 cycles:      ffffb26e544c (/usr/lib64/libavcodec.so.62.11.100+0x12544c)
+   2085/2090       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2091       1000003 cycles:      ffffb26e3dc4 (/usr/lib64/libavcodec.so.62.11.100+0x123dc4)
+   2085/2093       1000003 cycles:      ffffb26df7c8 (/usr/lib64/libavcodec.so.62.11.100+0x11f7c8)
+   2085/2090       1000003 cycles:      ffffb272c9ec (/usr/lib64/libavcodec.so.62.11.100+0x16c9ec)
+   2085/2091       1000003 cycles:  ffff80008033a0cc ([kernel.kallsyms])
+   2085/2092       1000003 cycles:      ffffb2652cdc (/usr/lib64/libavcodec.so.62.11.100+0x92cdc)
+   2085/2092       1000003 cycles:      ffffb26f8c1c (/usr/lib64/libavcodec.so.62.11.100+0x138c1c)
+   2085/2093       1000003 cycles:      ffffb26df67c (/usr/lib64/libavcodec.so.62.11.100+0x11f67c)
+   2085/2093       1000003 cycles:  ffff80008121d4a4 ([kernel.kallsyms])
+   2085/2091       1000003 cycles:  ffff8000802e7d98 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:      ffffb26ded24 (/usr/lib64/libavcodec.so.62.11.100+0x11ed24)
+   2085/2092       1000003 cycles:      ffffb2704c0c (/usr/lib64/libavcodec.so.62.11.100+0x144c0c)
+   2085/2090       1000003 cycles:      ffffb26d809c (/usr/lib64/libavcodec.so.62.11.100+0x11809c)
+   2085/2090       1000003 cycles:      ffffb26541f0 (/usr/lib64/libavcodec.so.62.11.100+0x941f0)
+   2085/2090       1000003 cycles:      ffffb2656000 (/usr/lib64/libavcodec.so.62.11.100+0x96000)
+   2085/2090       1000003 cycles:      ffffb26dc638 (/usr/lib64/libavcodec.so.62.11.100+0x11c638)
+   2085/2090       1000003 cycles:      ffffb26e7864 (/usr/lib64/libavcodec.so.62.11.100+0x127864)
+   2085/2090       1000003 cycles:      ffffb26e0260 (/usr/lib64/libavcodec.so.62.11.100+0x120260)
+   2085/2090       1000003 cycles:      ffffb26daeac (/usr/lib64/libavcodec.so.62.11.100+0x11aeac)
+   2085/2090       1000003 cycles:      ffffb26f84a8 (/usr/lib64/libavcodec.so.62.11.100+0x1384a8)
+   2085/2091       1000003 cycles:  ffff80008033a0cc ([kernel.kallsyms])
+   2085/2091       1000003 cycles:      ffffb2721cb0 (/usr/lib64/libavcodec.so.62.11.100+0x161cb0)
+   2085/2092       1000003 cycles:      ffffb26d8bac (/usr/lib64/libavcodec.so.62.11.100+0x118bac)
+   2085/2092       1000003 cycles:      ffffb26d7844 (/usr/lib64/libavcodec.so.62.11.100+0x117844)
+   2085/2092       1000003 cycles:      ffffb26e53b4 (/usr/lib64/libavcodec.so.62.11.100+0x1253b4)
+   2085/2093       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2093       1000003 cycles:      ffffb2678c24 (/usr/lib64/libavcodec.so.62.11.100+0xb8c24)
+   2085/2090       1000003 cycles:      ffffb26541fc (/usr/lib64/libavcodec.so.62.11.100+0x941fc)
+   2085/2090       1000003 cycles:      ffffb27059f8 (/usr/lib64/libavcodec.so.62.11.100+0x1459f8)
+   2085/2090       1000003 cycles:      ffffb26e3eb0 (/usr/lib64/libavcodec.so.62.11.100+0x123eb0)
+   2085/2091       1000003 cycles:      ffffb26e3ce0 (/usr/lib64/libavcodec.so.62.11.100+0x123ce0)
+   2085/2091       1000003 cycles:      ffffb37a4eb0 (/usr/lib64/libc.so.6+0x124eb0)
+   2085/2090       1000003 cycles:  ffff80008008ed38 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:      ffffb26e3ed8 (/usr/lib64/libavcodec.so.62.11.100+0x123ed8)
+   2085/2090       1000003 cycles:      ffffb26561d0 (/usr/lib64/libavcodec.so.62.11.100+0x961d0)
+   2085/2090       1000003 cycles:      ffffb26561f8 (/usr/lib64/libavcodec.so.62.11.100+0x961f8)
+   2085/2090       1000003 cycles:      ffffb26decdc (/usr/lib64/libavcodec.so.62.11.100+0x11ecdc)
+   2085/2090       1000003 cycles:      ffffb26e5238 (/usr/lib64/libavcodec.so.62.11.100+0x125238)
+   2085/2091       1000003 cycles:      ffffb26d8cec (/usr/lib64/libavcodec.so.62.11.100+0x118cec)
+   2085/2088       1000003 cycles:      ffffb271abc8 (/usr/lib64/libavcodec.so.62.11.100+0x15abc8)
+   2085/2091       1000003 cycles:      ffffb26d863c (/usr/lib64/libavcodec.so.62.11.100+0x11863c)
+   2085/2092       1000003 cycles:      ffffb26543e0 (/usr/lib64/libavcodec.so.62.11.100+0x943e0)
+   2085/2092       1000003 cycles:      ffffb2678c30 (/usr/lib64/libavcodec.so.62.11.100+0xb8c30)
+   2085/2092       1000003 cycles:      ffffb270430c (/usr/lib64/libavcodec.so.62.11.100+0x14430c)
+   2085/2093       1000003 cycles:      ffffb265749c (/usr/lib64/libavcodec.so.62.11.100+0x9749c)
+   2085/2093       1000003 cycles:      ffffb26dbb40 (/usr/lib64/libavcodec.so.62.11.100+0x11bb40)
+   2085/2093       1000003 cycles:      ffffb26dfb44 (/usr/lib64/libavcodec.so.62.11.100+0x11fb44)
+   2085/2093       1000003 cycles:  ffff80008033a0cc ([kernel.kallsyms])
+   2085/2090       1000003 cycles:  ffff800080033fdc ([kernel.kallsyms])
+   2085/2091       1000003 cycles:  ffff80008033a0cc ([kernel.kallsyms])
+   2085/2091       1000003 cycles:      ffffb2678c1c (/usr/lib64/libavcodec.so.62.11.100+0xb8c1c)
+   2085/2091       1000003 cycles:      ffffb2939bf4 (/usr/lib64/libavcodec.so.62.11.100+0x379bf4)
+   2085/2091       1000003 cycles:      ffffb2678eec (/usr/lib64/libavcodec.so.62.11.100+0xb8eec)
+   2085/2091       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2091       1000003 cycles:      ffffb2656374 (/usr/lib64/libavcodec.so.62.11.100+0x96374)
+   2085/2091       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2091       1000003 cycles:      ffffb270ea88 (/usr/lib64/libavcodec.so.62.11.100+0x14ea88)
+   2085/2091       1000003 cycles:      ffffb2939bf4 (/usr/lib64/libavcodec.so.62.11.100+0x379bf4)
+   2085/2091       1000003 cycles:      ffffb2678ee8 (/usr/lib64/libavcodec.so.62.11.100+0xb8ee8)
+   2085/2088       1000003 cycles:      ffffb33faa18 (/usr/lib64/gstreamer-1.0/libgstcoreelements.so+0xaa18)
+   2085/2090       1000003 cycles:      ffffb26df55c (/usr/lib64/libavcodec.so.62.11.100+0x11f55c)
+   2085/2088       1000003 cycles:  ffff8000802ee358 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:  ffff80008030df54 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:      ffffb37120c4 (/usr/lib64/libc.so.6+0x920c4)
+   2085/2090       1000003 cycles:      ffffb2721fc8 (/usr/lib64/libavcodec.so.62.11.100+0x161fc8)
+   2085/2088       1000003 cycles:  ffff80008121d504 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:      ffffb26d8b90 (/usr/lib64/libavcodec.so.62.11.100+0x118b90)
+   2085/2088       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:  ffff8000800186e8 ([kernel.kallsyms])
+   2085/2088       1000003 cycles:  ffff8000802e7938 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:      ffffb2678ee8 (/usr/lib64/libavcodec.so.62.11.100+0xb8ee8)
+   2085/2085       1000003 cycles:  ffff80008008ed38 ([kernel.kallsyms])
+   2085/2090       1000003 cycles:  ffff80008121d504 ([kernel.kallsyms])
+   2085/2085       1000003 cycles:  ffff800080f7d67c ([kernel.kallsyms])
+
+=== fixed target first 20 sample lines (verbatim) ===
+   2085/2091       1000003 cycles:      ffffb2939c10 (/usr/lib64/libavcodec.so.62.11.100+0x379c10)
+   2085/2090       1000003 cycles:      ffffb26e0238 (/usr/lib64/libavcodec.so.62.11.100+0x120238)
+   2085/2090       1000003 cycles:      ffffb26e5324 (/usr/lib64/libavcodec.so.62.11.100+0x125324)
+   2085/2090       1000003 cycles:      ffffb26da9f8 (/usr/lib64/libavcodec.so.62.11.100+0x11a9f8)
+   2085/2090       1000003 cycles:      ffffb26e5254 (/usr/lib64/libavcodec.so.62.11.100+0x125254)
+   2085/2092       1000003 cycles:      ffffb26e0418 (/usr/lib64/libavcodec.so.62.11.100+0x120418)
+   2085/2090       1000003 cycles:      ffffb26e4050 (/usr/lib64/libavcodec.so.62.11.100+0x124050)
+   2085/2090       1000003 cycles:      ffffb26e3fac (/usr/lib64/libavcodec.so.62.11.100+0x123fac)
+   2085/2091       1000003 cycles:      ffffb26578ac (/usr/lib64/libavcodec.so.62.11.100+0x978ac)
+   2085/2092       1000003 cycles:      ffffb26d8940 (/usr/lib64/libavcodec.so.62.11.100+0x118940)
+   2085/2090       1000003 cycles:      ffffb26e6474 (/usr/lib64/libavcodec.so.62.11.100+0x126474)
+   2085/2091       1000003 cycles:      ffffb267d798 (/usr/lib64/libavcodec.so.62.11.100+0xbd798)
+   2085/2092       1000003 cycles:      ffffb270f664 (/usr/lib64/libavcodec.so.62.11.100+0x14f664)
+   2085/2090       1000003 cycles:      ffffb26e51d8 (/usr/lib64/libavcodec.so.62.11.100+0x1251d8)
+   2085/2090       1000003 cycles:      ffffb26e00f8 (/usr/lib64/libavcodec.so.62.11.100+0x1200f8)
+   2085/2090       1000003 cycles:      ffffb26e3ed8 (/usr/lib64/libavcodec.so.62.11.100+0x123ed8)
+   2085/2090       1000003 cycles:      ffffb26e3e98 (/usr/lib64/libavcodec.so.62.11.100+0x123e98)
+   2085/2090       1000003 cycles:      ffffb26e00cc (/usr/lib64/libavcodec.so.62.11.100+0x1200cc)
+   2085/2090       1000003 cycles:      ffffb26e544c (/usr/lib64/libavcodec.so.62.11.100+0x12544c)
+   2085/2091       1000003 cycles:      ffffb26e3dc4 (/usr/lib64/libavcodec.so.62.11.100+0x123dc4)
+
+=== fixed target mappings ===
+   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb25c0000(0x75c000) @ 0 b3:02 1290 3403977211]: r-xp /usr/lib64/libavcodec.so.62.11.100
+
+=== multi target first 20 sample lines (verbatim) ===
+   2178/2184       1000003  cycles:      ffff82033244 (/usr/lib64/libavcodec.so.62.11.100+0x153244)
+   2179/2186       1000003  cycles:      ffff8ec076a8 (/usr/lib64/libavcodec.so.62.11.100+0x1176a8)
+   2179/2186       1000003  cycles:      ffff8eb86048 (/usr/lib64/libavcodec.so.62.11.100+0x96048)
+   2179/2187       1000003  cycles:      ffff8ec5d740 (/usr/lib64/libavcodec.so.62.11.100+0x16d740)
+   2179/2186       1000003  cycles:      ffff8eb86a44 (/usr/lib64/libavcodec.so.62.11.100+0x96a44)
+   2178/2188       1000003  cycles:      ffff82090b40 (/usr/lib64/libavcodec.so.62.11.100+0x1b0b40)
+   2179/2186       1000003  cycles:      ffff8ec13e98 (/usr/lib64/libavcodec.so.62.11.100+0x123e98)
+   2179/2186       1000003  cycles:      ffff8ec153b4 (/usr/lib64/libavcodec.so.62.11.100+0x1253b4)
+   2178/2188       1000003  cycles:      ffff82003ed8 (/usr/lib64/libavcodec.so.62.11.100+0x123ed8)
+   2179/2186       1000003  cycles:      ffff8ec13f68 (/usr/lib64/libavcodec.so.62.11.100+0x123f68)
+   2178/2188       1000003  cycles:      ffff81f76214 (/usr/lib64/libavcodec.so.62.11.100+0x96214)
+   2179/2186       1000003  cycles:      ffff8ec13e98 (/usr/lib64/libavcodec.so.62.11.100+0x123e98)
+   2178/2188       1000003  cycles:      ffff8208e680 (/usr/lib64/libavcodec.so.62.11.100+0x1ae680)
+   2179/2186       1000003  cycles:      ffff8ec152a0 (/usr/lib64/libavcodec.so.62.11.100+0x1252a0)
+   2178/2188       1000003  cycles:      ffff81ffaf04 (/usr/lib64/libavcodec.so.62.11.100+0x11af04)
+   2179/2189       1000003  cycles:      ffff8ec4ed48 (/usr/lib64/libavcodec.so.62.11.100+0x15ed48)
+   2179/2186       1000003  cycles:      ffff8ec13ed8 (/usr/lib64/libavcodec.so.62.11.100+0x123ed8)
+   2178/2188       1000003  cycles:      ffff820052f4 (/usr/lib64/libavcodec.so.62.11.100+0x1252f4)
+   2179/2187       1000003  cycles:      ffff8ec51e74 (/usr/lib64/libavcodec.so.62.11.100+0x161e74)
+   2179/2186       1000003  cycles:      ffff8ec13eb0 (/usr/lib64/libavcodec.so.62.11.100+0x123eb0)
+
+=== multi target mappings ===
+      0/0       PERF_RECORD_MMAP2 911/911: [0xffff93c60000(0x4b7000) @ 0 b3:02 1290 0]: r-xp /usr/lib64/libavcodec.so.62.11.100
+      0/0       PERF_RECORD_MMAP2 916/916: [0xffff90240000(0x4b7000) @ 0 b3:02 1290 0]: r-xp /usr/lib64/libavcodec.so.62.11.100
+   2179/2179    PERF_RECORD_MMAP2 2179/2179: [0xffff8eaf0000(0x75c000) @ 0 b3:02 1290 3403977211]: r-xp /usr/lib64/libavcodec.so.62.11.100
+   2178/2178    PERF_RECORD_MMAP2 2178/2178: [0xffff81ee0000(0x75c000) @ 0 b3:02 1290 3403977211]: r-xp /usr/lib64/libavcodec.so.62.11.100
+
+=== special sample records (verbatim) ===
+   2085/2085       1000003 cycles:  ffff800080372fcc ([kernel.kallsyms])
+   2176/2176       1000003  cycles:  ffff8000811da3cc ([kernel.kallsyms])
+    458/458        1000003  cycles:      ffff994cd360 ([vdso]+0x360)
+
+=== negative pid/tid (verbatim, multi_dsoff.txt:11718) ===
+     -1/-1         1000003  cycles:  ffff80008008ed38 ([kernel.kallsyms])

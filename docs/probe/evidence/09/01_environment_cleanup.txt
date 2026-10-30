@@ -1,0 +1,889 @@
+Raw commands and outputs; before work exists / after cleanup SDB combined stream explicitly marked.
+
+=== connect ===
+TIME: not recorded
+COMMAND: sdb connect 192.168.108.26
+HOST_EXIT: 0
+STDOUT:
+error: failed to connect to remote target '192.168.108.26'
+
+STDERR:
+
+SDB_STDERR: 
+
+=== devices ===
+TIME: not recorded
+COMMAND: sdb devices
+HOST_EXIT: 0
+STDOUT:
+List of devices attached 
+
+STDERR:
+
+SDB_STDERR: 
+
+=== reachability ===
+TIME: not recorded
+COMMAND: ping -c 2 -W 2 192.168.108.26
+HOST_EXIT: 1
+STDOUT:
+PING 192.168.108.26 (192.168.108.26) 56(84) bytes of data.
+
+--- 192.168.108.26 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1035ms
+
+
+STDERR:
+
+SDB_STDERR: 
+
+=== identity_transport ===
+TIME: not recorded
+COMMAND: sdb -s 192.168.108.26:26101 shell 'uname -m; uname -r'
+HOST_EXIT: 1
+STDOUT:
+
+STDERR:
+error: target not found
+error: serial number '192.168.108.26:26101' wrong
+
+SDB_STDERR: 
+
+=== connect_retry ===
+TIME: not recorded
+COMMAND: sdb connect 192.168.108.26
+HOST_EXIT: 0
+STDOUT:
+connecting to 192.168.108.26:26101 ...
+connected to 192.168.108.26:26101
+
+STDERR:
+
+SDB_STDERR: 
+
+=== identity ===
+TIME: 2026-10-30T21:43:58.107062+08:00
+COMMAND: uname -m; uname -r; cat /proc/device-tree/model; printf "\n"; test "$(uname -m)" = aarch64 && case "$(uname -r)" in 6.12.*-arm64-rpi4-v8) exit 0;; *) exit 1;; esac
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+aarch64
+6.12.80-arm64-rpi4-v8
+Raspberry Pi 5 Model B Rev 1.1\0
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== root_on ===
+TIME: not recorded
+COMMAND: sdb -s 192.168.108.26:26101 root on
+HOST_EXIT: 0
+STDOUT:
+Switched to 'root' account mode
+
+STDERR:
+
+SDB_STDERR: 
+
+=== root_uid ===
+TIME: 2026-10-30T21:44:07.172734+08:00
+COMMAND: id -u
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+0
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== fingerprint ===
+TIME: 2026-10-30T21:44:07.274080+08:00
+COMMAND: uname -a; cat /etc/os-release; if test -f /etc/tizen-build.conf; then cat /etc/tizen-build.conf; fi
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+Linux localhost 6.12.80-arm64-rpi4-v8 #1 SMP PREEMPT Wed Oct 28 12:37:44 UTC 2026 aarch64 GNU/Linux
+NAME=Tizen
+VERSION="11.0.0 (Tizen11.0/Unified)"
+ID=tizen
+VERSION_ID=11.0.0
+PRETTY_NAME="Tizen 11.0.0 (Tizen11.0/Unified)"
+ANSI_COLOR="0;36"
+CPE_NAME="cpe:/o:tizen:tizen:11.0.0"
+BUILD_ID=tizen-unified-toolchain_20261028.105834_tizen-headed-aarch64
+TZ_BUILD_RELEASE_NAME="Tizen11.0/Unified"
+TZ_BUILD_VERSION=11.0
+TZ_BUILD_FULLVER=11.0.0
+TZ_BUILD_RELEASE_TYPE=eng
+TZ_BUILD_VARIANT=NONE
+
+TZ_BUILD_PROFILE=common
+TZ_BUILD_PROJECT=Tizen-Unified-Toolchain
+
+TZ_BUILD_VENDOR=tizen
+TZ_BUILD_REPO=standard
+TZ_BUILD_ARCH=aarch64
+
+TZ_BUILD_ID=tizen-unified-toolchain_20261028.105834
+TZ_BUILD_DATE=20261028.105834
+TZ_BUILD_TIME=17:01:08
+TZ_BUILD_TS=1793206868
+
+TZ_BUILD_URL=http://download.tizen.org
+TZ_BUILD_SNAPSHOT_URL=${TZ_BUILD_URL}/snapshots/TIZEN/Tizen/Tizen-Unified/
+TZ_BUILD_DAILY_URL=${TZ_BUILD_URL}/releases/daily/TIZEN/Tizen/Tizen-Unified/
+TZ_BUILD_WEEKLY_URL=${TZ_BUILD_URL}/releases/weekly/TIZEN/Tizen/Tizen-Unified/
+TZ_BUILD_MILESTONE_URL=${TZ_BUILD_URL}/releases/milestone/TIZEN/Tizen/Tizen-Unified/
+
+TZ_BUILD_WITH_MESA=1
+TZ_BUILD_WITH_WAYLAND=1
+TZ_BUILD_WITH_RDP=1
+TZ_BUILD_WITH_X=
+
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== pagesize ===
+TIME: 2026-10-30T21:44:07.377505+08:00
+COMMAND: getconf PAGESIZE
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+4096
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== mount ===
+TIME: 2026-10-30T21:44:07.479681+08:00
+COMMAND: findmnt -T /opt -n -o TARGET,SOURCE,FSTYPE,OPTIONS
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+/opt /dev/mmcblk0p3 ext4 rw,relatime
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== disk_before ===
+TIME: 2026-10-30T21:44:07.582944+08:00
+COMMAND: df -k /opt; du -sk /opt/afdo_agent
+REMOTE_EXIT: 1; TRANSPORT_EXIT: 0
+STDOUT:
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mmcblk0p3         1335696     26064   1279552   2% /opt
+du: cannot access `/opt/afdo_agent': No such file or directory
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== rpm_before ===
+TIME: 2026-10-30T21:44:07.906153+08:00
+COMMAND: rpm -qa | wc -l
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+1249
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== existing ===
+TIME: 2026-10-30T21:44:08.012065+08:00
+COMMAND: find /opt/afdo_agent -maxdepth 2 -type f; sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT: 1; TRANSPORT_EXIT: 0
+STDOUT:
+find: `/opt/afdo_agent': No such file or directory
+sha256sum: /opt/afdo_agent/tools/perf: No such file or directory
+sha256sum: /opt/afdo_agent/lib/libLLVM.so.22.1: No such file or directory
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== prepare ===
+TIME: 2026-10-30T21:44:17.827773+08:00
+COMMAND: mkdir -p /opt/afdo_agent/tools /opt/afdo_agent/lib /opt/afdo_agent/work/home /opt/afdo_agent/work/tmp /opt/afdo_agent/work/cache /opt/afdo_agent/work/buildid && touch /opt/afdo_agent/work/perfconfig
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== push_perf ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf /opt/afdo_agent/tools/perf
+HOST_EXIT: 0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+pushed                           perf	  0%	      0KB	    0KB/spushed                           perf	100%	   3185KB	    0KB/s
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf   7006KB/s (3261448 bytes in 0.454s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== sha_perf ===
+TIME: 2026-10-30T21:44:18.437764+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949  /opt/afdo_agent/tools/perf
+
+STDERR:
+
+SDB_STDERR: 
+
+=== push_libLLVM ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract/usr/lib64/libLLVM.so.22.1 /opt/afdo_agent/lib/libLLVM.so.22.1
+HOST_EXIT: 0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+pushed                libLLVM.so.22.1	  0%	      0MB	    0KB/spushed                libLLVM.so.22.1	 19%	     12MB	12002KB/spushed                libLLVM.so.22.1	 34%	     22MB	10232KB/spushed                libLLVM.so.22.1	 49%	     32MB	10321KB/spushed                libLLVM.so.22.1	 65%	     42MB	11069KB/spushed                libLLVM.so.22.1	 80%	     52MB	 9705KB/spushed                libLLVM.so.22.1	 95%	     62MB	11144KB/spushed                libLLVM.so.22.1	100%	     65MB	11144KB/s
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract/usr/lib64/libLLVM.so.22.1   8764KB/s (68804864 bytes in 7.666s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== sha_libLLVM ===
+TIME: 2026-10-30T21:44:27.073184+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007  /opt/afdo_agent/lib/libLLVM.so.22.1
+
+STDERR:
+
+SDB_STDERR: 
+
+=== push_media ===
+TIME: not recorded
+COMMAND: nice -n 19 ionice -c3 sdb -s 192.168.108.26:26101 push /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4 /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+HOST_EXIT: 0
+STDOUT:
+WARNING: Your data are to be sent over an unencrypted connection and could be read by others.
+pushed          bbb_720p_h264_60s.mp4	  0%	      0MB	    0KB/spushed          bbb_720p_h264_60s.mp4	 44%	     12MB	11999KB/spushed          bbb_720p_h264_60s.mp4	 79%	     22MB	10317KB/spushed          bbb_720p_h264_60s.mp4	100%	     28MB	11803KB/s
+1 file(s) pushed. 0 file(s) skipped.
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4   8564KB/s (30023879 bytes in 3.423s)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== sha_media ===
+TIME: 2026-10-30T21:44:30.976589+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4  /opt/afdo_agent/work/bbb_720p_h264_60s.mp4
+
+STDERR:
+
+SDB_STDERR: 
+
+=== chmod ===
+TIME: 2026-10-30T21:44:31.080141+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; chmod 755 /opt/afdo_agent/tools/perf
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+
+STDERR:
+
+SDB_STDERR: 
+
+=== version ===
+TIME: 2026-10-30T21:44:31.204345+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+perf version 6.12.80
+
+STDERR:
+
+SDB_STDERR: 
+
+=== dependencies ===
+TIME: 2026-10-30T21:44:31.325133+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; LD_DEBUG=libs nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+perf version 6.12.80
+
+STDERR:
+      2002:	find library=libc.so.6 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libc.so.6
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libc.so.6
+      2002:	Found entry: /lib64/libc.so.6 for /usr/bin/nice libc.so.6
+      2002:	
+      2002:	
+      2002:	calling init: /lib/ld-linux-aarch64.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libc.so.6
+      2002:	
+      2002:	
+      2002:	initialize program: nice
+      2002:	
+      2002:	
+      2002:	transferring control: nice
+      2002:	
+      2002:	find library=libc.so.6 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libc.so.6
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libc.so.6
+      2002:	Found entry: /lib64/libc.so.6 for /usr/bin/ionice libc.so.6
+      2002:	
+      2002:	
+      2002:	calling init: /lib/ld-linux-aarch64.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libc.so.6
+      2002:	
+      2002:	
+      2002:	initialize program: ionice
+      2002:	
+      2002:	
+      2002:	transferring control: ionice
+      2002:	
+      2002:	find library=libunwind-aarch64.so.8 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libunwind-aarch64.so.8
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libunwind-aarch64.so.8
+      2002:	Found entry: /lib64/libunwind-aarch64.so.8 for /opt/afdo_agent/tools/perf libunwind-aarch64.so.8
+      2002:	
+      2002:	find library=libunwind.so.8 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libunwind.so.8
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libunwind.so.8
+      2002:	Found entry: /lib64/libunwind.so.8 for /opt/afdo_agent/tools/perf libunwind.so.8
+      2002:	
+      2002:	find library=libpthread.so.0 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libpthread.so.0
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libpthread.so.0
+      2002:	Found entry: /lib64/libpthread.so.0 for /opt/afdo_agent/tools/perf libpthread.so.0
+      2002:	
+      2002:	find library=librt.so.1 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/librt.so.1
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/librt.so.1
+      2002:	Found entry: /lib64/librt.so.1 for /opt/afdo_agent/tools/perf librt.so.1
+      2002:	
+      2002:	find library=libm.so.6 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libm.so.6
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libm.so.6
+      2002:	Found entry: /lib64/libm.so.6 for /opt/afdo_agent/tools/perf libm.so.6
+      2002:	
+      2002:	find library=libdl.so.2 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libdl.so.2
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libdl.so.2
+      2002:	Found entry: /lib64/libdl.so.2 for /opt/afdo_agent/tools/perf libdl.so.2
+      2002:	
+      2002:	find library=libz.so.1 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libz.so.1
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libz.so.1
+      2002:	Found entry: /lib64/libz.so.1 for /opt/afdo_agent/tools/perf libz.so.1
+      2002:	
+      2002:	find library=libelf.so.1 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libelf.so.1
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libelf.so.1
+      2002:	Found entry: /lib64/libelf.so.1 for /opt/afdo_agent/tools/perf libelf.so.1
+      2002:	
+      2002:	find library=libdw.so.1 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libdw.so.1
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libdw.so.1
+      2002:	Found entry: /lib64/libdw.so.1 for /opt/afdo_agent/tools/perf libdw.so.1
+      2002:	
+      2002:	find library=libcrypto.so.3 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libcrypto.so.3
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libcrypto.so.3
+      2002:	Found entry: /lib64/libcrypto.so.3 for /opt/afdo_agent/tools/perf libcrypto.so.3
+      2002:	
+      2002:	find library=libLLVM.so.22.1 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libLLVM.so.22.1
+      2002:	
+      2002:	find library=libstdc++.so.6 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libstdc++.so.6
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libstdc++.so.6
+      2002:	Found entry: /lib64/libstdc++.so.6 for /opt/afdo_agent/tools/perf libstdc++.so.6
+      2002:	
+      2002:	find library=liblzma.so.5 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/liblzma.so.5
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/liblzma.so.5
+      2002:	Found entry: /lib64/liblzma.so.5 for /opt/afdo_agent/tools/perf liblzma.so.5
+      2002:	
+      2002:	find library=libc.so.6 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libc.so.6
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libc.so.6
+      2002:	Found entry: /lib64/libc.so.6 for /opt/afdo_agent/tools/perf libc.so.6
+      2002:	
+      2002:	find library=libbz2.so.1 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libbz2.so.1
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libbz2.so.1
+      2002:	Found entry: /lib64/libbz2.so.1 for /lib64/libdw.so.1 libbz2.so.1
+      2002:	
+      2002:	find library=libxml2.so.16 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libxml2.so.16
+      2002:	 search path=/opt/afdo_agent/lib/../lib64		(RUNPATH from file /opt/afdo_agent/lib/libLLVM.so.22.1)
+      2002:	  trying file=/opt/afdo_agent/lib/../lib64/libxml2.so.16
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libxml2.so.16
+      2002:	Found entry: /lib64/libxml2.so.16 for /opt/afdo_agent/lib/libLLVM.so.22.1 libxml2.so.16
+      2002:	
+      2002:	find library=libgcc_s.so.1 [0]; searching
+      2002:	 search path=/opt/afdo_agent/lib		(LD_LIBRARY_PATH)
+      2002:	  trying file=/opt/afdo_agent/lib/libgcc_s.so.1
+      2002:	 search cache=/etc/ld.so.cache
+      2002:	  trying file=/lib64/libgcc_s.so.1
+      2002:	Found entry: /lib64/libgcc_s.so.1 for /opt/afdo_agent/lib/libLLVM.so.22.1 libgcc_s.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib/ld-linux-aarch64.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libc.so.6
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libgcc_s.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libm.so.6
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libxml2.so.16
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libbz2.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libpthread.so.0
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/liblzma.so.5
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libstdc++.so.6
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/librt.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libdl.so.2
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libz.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /opt/afdo_agent/lib/libLLVM.so.22.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libcrypto.so.3
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libelf.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libdw.so.1
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libunwind.so.8
+      2002:	
+      2002:	
+      2002:	calling init: /lib64/libunwind-aarch64.so.8
+      2002:	
+      2002:	
+      2002:	initialize program: /opt/afdo_agent/tools/perf
+      2002:	
+      2002:	
+      2002:	transferring control: /opt/afdo_agent/tools/perf
+      2002:	
+      2002:	
+      2002:	calling fini:  [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libunwind-aarch64.so.8 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libunwind.so.8 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libdw.so.1 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libelf.so.1 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libcrypto.so.3 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /opt/afdo_agent/lib/libLLVM.so.22.1 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libz.so.1 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libdl.so.2 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/librt.so.1 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libstdc++.so.6 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/liblzma.so.5 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libpthread.so.0 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libbz2.so.1 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libxml2.so.16 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libm.so.6 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libgcc_s.so.1 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib64/libc.so.6 [0]
+      2002:	
+      2002:	
+      2002:	calling fini: /lib/ld-linux-aarch64.so.1 [0]
+      2002:	
+
+SDB_STDERR: 
+
+=== dependencies_ldd ===
+TIME: 2026-10-30T21:45:57.572219+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; ldd /opt/afdo_agent/tools/perf
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+	linux-vdso.so.1 (0x0000ffff8ff68000)
+	libunwind-aarch64.so.8 => /lib64/libunwind-aarch64.so.8 (0x0000ffff8fb90000)
+	libunwind.so.8 => /lib64/libunwind.so.8 (0x0000ffff8fb40000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x0000ffff8fb10000)
+	librt.so.1 => /lib64/librt.so.1 (0x0000ffff8fae0000)
+	libm.so.6 => /lib64/libm.so.6 (0x0000ffff8fa30000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x0000ffff8fa00000)
+	libz.so.1 => /lib64/libz.so.1 (0x0000ffff8f9c0000)
+	libelf.so.1 => /lib64/libelf.so.1 (0x0000ffff8f980000)
+	libdw.so.1 => /lib64/libdw.so.1 (0x0000ffff8f8d0000)
+	libcrypto.so.3 => /lib64/libcrypto.so.3 (0x0000ffff8f400000)
+	libLLVM.so.22.1 => /opt/afdo_agent/lib/libLLVM.so.22.1 (0x0000ffff8b1a0000)
+	libstdc++.so.6 => /lib64/libstdc++.so.6 (0x0000ffff8af40000)
+	liblzma.so.5 => /lib64/liblzma.so.5 (0x0000ffff8aef0000)
+	libc.so.6 => /lib64/libc.so.6 (0x0000ffff8ad50000)
+	/lib/ld-linux-aarch64.so.1 => /lib64/ld-linux-aarch64.so.1 (0x0000ffff8ff20000)
+	libbz2.so.1 => /lib64/libbz2.so.1 (0x0000ffff8ad20000)
+	libxml2.so.16 => /lib64/libxml2.so.16 (0x0000ffff8abb0000)
+	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x0000ffff8ab80000)
+
+STDERR:
+
+SDB_STDERR: 
+
+=== gst ===
+TIME: 2026-10-30T21:44:32.001878+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; command -v gst-launch-1.0 && gst-inspect-1.0 avdec_h264
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+/usr/bin/gst-launch-1.0
+Factory Details:
+  Rank                     primary (256)
+  Long-name                libav H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 decoder
+  Klass                    Codec/Decoder/Video
+  Description              libav h264 decoder
+  Author                   Wim Taymans <wim.taymans@gmail.com>, Ronald Bultje <rbultje@ronald.bitfreak.net>, Edward Hervey <bilboed@bilboed.com>
+  Documentation            https://gstreamer.freedesktop.org/documentation/libav/avdec_h264.html
+
+Plugin Details:
+  Name                     libav
+  Description              All libav codecs and formats (system install)
+  Filename                 /usr/lib64/gstreamer-1.0/libgstlibav.so
+  Version                  1.24.11
+  License                  LGPL
+  Source module            gst-libav
+  Documentation            https://gstreamer.freedesktop.org/documentation/libav/
+  Source release date      2025-01-06
+  Binary package           GStreamer FFMPEG Plug-ins source release
+  Origin URL               Unknown package origin
+
+GObject
+ +----GInitiallyUnowned
+       +----GstObject
+             +----GstElement
+                   +----GstVideoDecoder
+                         +----GstFFMpegVidDec
+                               +----avdec_h264
+
+Pad Templates:
+  SINK template: 'sink'
+    Availability: Always
+    Capabilities:
+      video/x-h264
+              alignment: au
+          stream-format: { (string)avc, (string)byte-stream }
+      video/x-h264
+              alignment: nal
+          stream-format: byte-stream
+  
+  SRC template: 'src'
+    Availability: Always
+    Capabilities:
+      video/x-raw
+                 format: { (string)I420, (string)YUY2, (string)RGB, (string)BGR, (string)Y42B, (string)Y444, (string)YUV9, (string)Y41B, (string)GRAY8, (string)RGB8P, (string)I420, (string)Y42B, (string)Y444, (string)UYVY, (string)NV12, (string)NV21, (string)ARGB, (string)RGBA, (string)ABGR, (string)BGRA, (string)GRAY16_BE, (string)GRAY16_LE, (string)A420, (string)RGB16, (string)RGB15, (string)I420_10BE, (string)I420_10LE, (string)I422_10BE, (string)I422_10LE, (string)Y444_10BE, (string)Y444_10LE, (string)GBR, (string)GBR_10BE, (string)GBR_10LE, (string)A420_10BE, (string)A420_10LE, (string)A422_10BE, (string)A422_10LE, (string)A444_10BE, (string)A444_10LE, (string)GBRA, (string)xRGB, (string)RGBx, (string)xBGR, (string)BGRx, (string)I420_12BE, (string)I420_12LE, (string)I422_12BE, (string)I422_12LE, (string)Y444_12BE, (string)Y444_12LE, (string)GBR_12BE, (string)GBR_12LE, (string)P010_10LE, (string)GBRA_12BE, (string)GBRA_12LE, (string)GBRA_10BE, (string)GBRA_10LE, (string)VUYA, (string)P012_LE, (string)Y212_LE, (string)Y410, (string)Y412_LE }
+      video/x-raw(format:Interlaced)
+                 format: { (string)I420, (string)YUY2, (string)RGB, (string)BGR, (string)Y42B, (string)Y444, (string)YUV9, (string)Y41B, (string)GRAY8, (string)RGB8P, (string)I420, (string)Y42B, (string)Y444, (string)UYVY, (string)NV12, (string)NV21, (string)ARGB, (string)RGBA, (string)ABGR, (string)BGRA, (string)GRAY16_BE, (string)GRAY16_LE, (string)A420, (string)RGB16, (string)RGB15, (string)I420_10BE, (string)I420_10LE, (string)I422_10BE, (string)I422_10LE, (string)Y444_10BE, (string)Y444_10LE, (string)GBR, (string)GBR_10BE, (string)GBR_10LE, (string)A420_10BE, (string)A420_10LE, (string)A422_10BE, (string)A422_10LE, (string)A444_10BE, (string)A444_10LE, (string)GBRA, (string)xRGB, (string)RGBx, (string)xBGR, (string)BGRx, (string)I420_12BE, (string)I420_12LE, (string)I422_12BE, (string)I422_12LE, (string)Y444_12BE, (string)Y444_12LE, (string)GBR_12BE, (string)GBR_12LE, (string)P010_10LE, (string)GBRA_12BE, (string)GBRA_12LE, (string)GBRA_10BE, (string)GBRA_10LE, (string)VUYA, (string)P012_LE, (string)Y212_LE, (string)Y410, (string)Y412_LE }
+         interlace-mode: alternate
+
+Element has no clocking capabilities.
+Element has no URI handling capabilities.
+
+Pads:
+  SINK: 'sink'
+    Pad Template: 'sink'
+  SRC: 'src'
+    Pad Template: 'src'
+
+Element Properties:
+
+  automatic-request-sync-point-flags: Flags to use when automatically requesting sync points
+                        flags: readable, writable
+                        Flags "GstVideoDecoderRequestSyncPointFlags" Default: 0x00000003, "corrupt-output+discard-input"
+                           (0x00000001): discard-input    - GST_VIDEO_DECODER_REQUEST_SYNC_POINT_DISCARD_INPUT
+                           (0x00000002): corrupt-output   - GST_VIDEO_DECODER_REQUEST_SYNC_POINT_CORRUPT_OUTPUT
+  
+  automatic-request-sync-points: Automatically request sync points when it would be useful
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  debug-mv            : Whether to print motion vectors on top of the image (deprecated, non-functional)
+                        flags: readable, writable, deprecated
+                        Boolean. Default: false
+  
+  direct-rendering    : Enable direct rendering
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  discard-corrupted-frames: Discard frames marked as corrupted instead of outputting them
+                        flags: readable, writable
+                        Boolean. Default: false
+  
+  lowres              : At which resolution to decode images
+                        flags: readable, writable
+                        Enum "GstLibAVVidDecLowres" Default: 0, "full"
+                           (0): full             - 0
+                           (1): 1/2-size         - 1
+                           (2): 1/4-size         - 2
+  
+  max-errors          : Max consecutive decoder errors before returning flow error
+                        flags: readable, writable
+                        Integer. Range: -1 - 2147483647 Default: -1 
+  
+  max-threads         : Maximum number of worker threads to spawn. (0 = auto)
+                        flags: readable, writable
+                        Integer. Range: 0 - 2147483647 Default: 0 
+  
+  min-force-key-unit-interval: Minimum interval between force-keyunit requests in nanoseconds
+                        flags: readable, writable
+                        Unsigned Integer64. Range: 0 - 18446744073709551615 Default: 0 
+  
+  name                : The name of the object
+                        flags: readable, writable
+                        String. Default: "avdec_h264-0"
+  
+  output-corrupt      : Whether libav should output frames even if corrupted
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  parent              : The parent of the object
+                        flags: readable, writable
+                        Object of type "GstObject"
+  
+  qos                 : Handle Quality-of-Service events from downstream
+                        flags: readable, writable
+                        Boolean. Default: true
+  
+  skip-frame          : Which types of frames to skip during decoding
+                        flags: readable, writable
+                        Enum "GstLibAVVidDecSkipFrame" Default: 0, "Skip nothing"
+                           (0): Skip nothing     - 0
+                           (1): Skip B-frames    - 1
+                           (2): Skip IDCT/Dequantization - 2
+                           (5): Skip everything  - 5
+  
+  std-compliance      : Standard compliance mode to use
+                        flags: readable, writable
+                        Enum "GstAvCodecCompliance" Default: 2147483647, "auto"
+                           (2147483647): auto             - The decoder automatically decides. If the pipeline is live, it will use `normal` mode, and `strict` otherwise.
+                           (2): very-strict      - VeryStrict: Strictly conform to an older more strict version of the spec or reference software
+                           (1): strict           - Strict: Strictly conform to all the things in the spec no matter what consequences
+                           (0): normal           - Normal
+                           (-1): unofficial       - Unofficial: Allow unofficial extensions (decoder will not differentiate this with "normal")
+                           (-2): experimental     - Experimental: Allow nonstandardized experimental things (decoder will not differentiate this with "normal")
+  
+  thread-type         : Multithreading methods to use
+                        flags: readable, writable
+                        Flags "GstLibAVVidDecThreadType" Default: 0x00000000, "auto"
+                           (0x00000000): auto             - Auto
+                           (0x00000001): frame            - Frame
+                           (0x00000002): slice            - Slice
+  
+
+STDERR:
+
+(gst-plugin-scanner:2012): GStreamer-WARNING **: 22:44:50.316: Failed to load plugin '/usr/lib64/gstreamer-1.0/libgstcairo.so': libGLESv2.so.2: cannot open shared object file: No such file or directory
+
+SDB_STDERR: 
+
+=== events ===
+TIME: 2026-10-30T21:44:32.110571+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; ls /sys/bus/event_source/devices/
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+armv8_cortex_a76
+breakpoint
+kprobe
+software
+tracepoint
+uprobe
+
+STDERR:
+
+SDB_STDERR: 
+
+LOCAL INPUTS
+{
+  "perf": {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf",
+    "exists": true,
+    "sha256": "d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949"
+  },
+  "libLLVM": {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract/usr/lib64/libLLVM.so.22.1",
+    "exists": true,
+    "sha256": "06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007"
+  },
+  "media": {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4",
+    "exists": true,
+    "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4"
+  }
+}
+
+=== disk_peak ===
+TIME: 2026-10-30T21:44:57.485266+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; df -k /opt; du -sk /opt/afdo_agent/work
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mmcblk0p3         1335696    142160   1163456  11% /opt
+45528	/opt/afdo_agent/work
+
+STDERR:
+
+SDB_STDERR: 
+
+=== disk_before_cleanup ===
+TIME: 2026-10-30T21:45:57.678656+08:00
+COMMAND: export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; df -k /opt; du -sk /opt/afdo_agent /opt/afdo_agent/work
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mmcblk0p3         1335696    142328   1163288  11% /opt
+115940	/opt/afdo_agent
+45544	/opt/afdo_agent/work
+
+STDERR:
+
+SDB_STDERR: 
+
+=== cleanup ===
+TIME: 2026-10-30T21:46:12.305368+08:00
+COMMAND: find /opt/afdo_agent/work -mindepth 1 -delete && test -z "$(find /opt/afdo_agent/work -mindepth 1 -print -quit)" && echo WORK_EMPTY
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+WORK_EMPTY
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== disk_after ===
+TIME: 2026-10-30T21:46:12.407513+08:00
+COMMAND: df -k /opt; du -sk /opt/afdo_agent /opt/afdo_agent/work
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mmcblk0p3         1335696     96816   1208800   8% /opt
+70400	/opt/afdo_agent
+4	/opt/afdo_agent/work
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== rpm_after ===
+TIME: 2026-10-30T21:46:12.602966+08:00
+COMMAND: rpm -qa | wc -l
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+1249
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 
+
+=== retained ===
+TIME: 2026-10-30T21:46:13.061827+08:00
+COMMAND: find /opt/afdo_agent -type f -print; nice -n 19 ionice -c3 sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1
+REMOTE_EXIT: 0; TRANSPORT_EXIT: 0
+STDOUT:
+/opt/afdo_agent/lib/libLLVM.so.22.1
+/opt/afdo_agent/tools/perf
+d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949  /opt/afdo_agent/tools/perf
+06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007  /opt/afdo_agent/lib/libLLVM.so.22.1
+
+STDERR:
+(SDB combined stream)
+SDB_STDERR: 

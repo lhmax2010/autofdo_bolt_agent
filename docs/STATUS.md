@@ -26,7 +26,18 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-30；v0.5归档与build-id调试拆分核实，已完成）
+## 当前授权与执行状态（2026-10-30；RPi5 v0.5冻结前板上核实，已完成）
+
+- 设计当前版本仍为v0.5，内容未修改；只验证与记录，不改LLVM、不开始增强或Agent实现。没有GBS构建，没有板上装卸RPM、remount、重启或/tmp执行。
+- 初次连接失败，用户确认开机后重连；身份断言aarch64、6.12.80-arm64-rpi4-v8通过，model为RPi5。当前镜像20261028.105834，比04更新；页大小4096。原工具不存在，按04哈希恢复aarch64 perf/libLLVM、依赖解析通过。[E1](probe/evidence/09/01_environment_cleanup.txt)
+- 真硬件cycles type=0/config=0；固定周期7,617样本。libavcodec单进程5,865条及双进程14,331条dsoff公式/唯一可执行PT_LOAD均100%通过；两个解码pid基址不同。可执行段仍offset=vaddr=0，未覆盖不等布局。[E2](probe/evidence/09/02_sampling_formats.txt)、[E3](probe/evidence/09/03_mapping_buildid_period.txt)
+- --buildid-mmap exit0；libc的MMAP2与GBS readelf ID均为8b45bf5b6a314fc498c8c73f164d6259c895405b（20字节），1/1匹配。libavcodec仍无ID；buildid-list两种录制均非空。固定period均1000003；频率模式2,431种取值，行为与05/v0.5一致。
+- 新观察：multi系统级内核样本有一条pid/tid=-1/-1；v0.5未明确此负值例子的语义，报告保留原文，不修改设计。未出现([unknown])；按源码格式编写素材仍挂账。
+- work已删除全部内容并验空；仅保留perf/libLLVM，哈希不变，RPM前后1249。/opt清理后已用96,816KiB、可用1,208,800KiB、8%，专用目录70,400KiB。[E1](probe/evidence/09/01_environment_cleanup.txt)
+- 冻结前剩余项：新LLVM发布后的原样构建复核；[unknown]样例按源码格式编写素材。RPi5的dsoff、--buildid-mmap、页大小本轮闭合；设计冻结仍待评审决定，主机perf准入和第二阶段IR/BFI实验保留。
+- [09报告](probe/09_rpi5_prefreeze_checks.md)、三份证据（122,412字节）及本状态同一commit提交。无新增已知边界例外；历史SDB共享服务外部日志的隐式写入未审计。
+
+## 前轮授权与执行状态（2026-10-30；v0.5归档与build-id调试拆分核实，历史）
 
 - 设计当前版本为 [v0.5](profgen/design/02_llvm_profgen_enhance_design_v0.5.md)，正文未修改；SHA-256=`1e70bac98024bfa45dc5505bb315565fd7a1591c9cfcf5ba0e24747b3d45a8cf`。校验后用mv移入指定Downloads文件，源路径已不存在，其他Downloads文件及v0.1–v0.4不动。
 - 本轮不连接开发板、不改LLVM、不开始实现。07的临时FFmpeg worktree分支afdo/v05-buildid仅在spec configure调用新增一行`--extra-ldflags="-Wl,--build-id=sha1"`；原src/ffmpeg干净。临时提交8a50cbfdc1383a34b781756c73c6252d86e6e1ad只本地保留；不推FFmpeg/Gerrit。
@@ -155,11 +166,11 @@
 
 # 项目状态
 
-更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.5，显式SHA-1构建与调试拆分验证通过（08），第一阶段评审/冻结待确认；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.5，显式SHA-1构建与调试拆分验证通过（08），RPi5 dsoff/buildid-mmap/页大小验证通过（09），第一阶段评审/冻结待确认；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 当前设计v0.5；08已验证显式SHA-1构建拆分后两份SHT_NOTE可读且ID一致。剩余冻结前项为RPi5的dsoff、`--buildid-mmap`、页大小，以及新LLVM发布后的原样构建复核。IR/BFI核实仍在第二阶段前完成；冻结前不开工，Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.5；08已验证显式SHA-1构建拆分后两份SHT_NOTE可读且ID一致。09已闭合RPi5的dsoff、`--buildid-mmap`、页大小；剩余冻结前项为新LLVM发布后的原样构建复核，以及[unknown]样例按源码格式编写素材。IR/BFI核实仍在第二阶段前完成；冻结前不开工，Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree，未经冻结与新授权不开始 LLVM 增强。
 
@@ -300,6 +311,8 @@
 
 ## 已闭合结论（附证据路径）
 
+- RPi5页大小4096；libavcodec单进程5,865/双进程14,331条dsoff公式与唯一落段100%通过；libc MMAP2/ELF build-id一致，period行为符合v0.5；负pid/tid样例为新事实，不自动认定设计冻结。[09](probe/09_rpi5_prefreeze_checks.md)、[E3](probe/evidence/09/03_mapping_buildid_period.txt)
+
 - RPi4 新镜像A72 PMU已绑定，cycles没有软件回退；armv7l插桩PGO小程序闭环通过。旧镜像软件回退结论仅适用于历史镜像。[E1](probe/evidence/05/01_environment_hardware.txt)、[E4](probe/evidence/05/04_arm_spike.txt)
 - v0.2部分输入预期需评审：模式A buildid-list非空、vdso有偏移；当前IR匹配键只部分覆盖。period/页大小/地址换算/profi事实已取得。[E2](probe/evidence/05/02_perf_formats_mapping.txt)、[E3](probe/evidence/05/03_clang_ir.txt)
 
@@ -365,7 +378,7 @@
 
 ## 挂账
 
-- 冻结前剩余项（v0.5）：RPi5的dsoff与公式核对、`--buildid-mmap`、页大小；新LLVM发布后的原样构建复核。07的映射符号/属性/Thumb长度规则和08的有ID调试note正例已完成；新默认工具链不能直接沿用显式SHA-1的长度/取值结论。debugedit DWARF5警告和完整DWARF质量仍未核验。主机perf构建待用户决定；IR匹配/BFI为第二阶段前实验，不沿用旧百分比。([unknown])和LOST_SAMPLES仍无本轮实测。
+- 冻结前剩余项（v0.5）：新LLVM发布后的原样构建复核；[unknown]样例按源码格式编写素材。RPi5的dsoff与公式核对、`--buildid-mmap`、页大小已由09完成。07的映射符号/属性/Thumb长度规则和08的有ID调试note正例已完成；新默认工具链不能直接沿用显式SHA-1的长度/取值结论。debugedit DWARF5警告和完整DWARF质量仍未核验。主机perf构建待用户决定；IR匹配/BFI为第二阶段前实验，不沿用旧百分比。([unknown])和LOST_SAMPLES仍无本轮实测。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
