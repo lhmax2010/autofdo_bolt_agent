@@ -1,0 +1,388 @@
+RPM extraction, platform ELF tools, note and symlink validation
+[
+  {
+    "command": "set -o pipefail; rpm2cpio /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/rpms/libavcodec-8.0.1-1.armv7l.rpm | cpio -idm --quiet",
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "rpm_sha256": "379def3fdbe7b2bb825d0b8fa6cda4f0f1dab6b737a8a86434bdf74fcdac9c6e",
+    "bytes": 1586804
+  },
+  {
+    "command": "set -o pipefail; rpm2cpio /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/rpms/libavcodec-debuginfo-8.0.1-1.armv7l.rpm | cpio -idm --quiet",
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "rpm_sha256": "b260d7391ddb0bafac3e2ec4871a05abb55c45a1f7d01abc533d47d4dfaaab74",
+    "bytes": 3331256
+  }
+]
+[libavcodec-8.0.1-1.armv7l.rpm_listing]
+COMMAND rpm -qplv /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/rpms/libavcodec-8.0.1-1.armv7l.rpm
+exit 0
+stdout:
+lrwxrwxrwx    1 root     root                       23 Oct 30 21:20 /usr/lib/libavcodec.so.62 -> libavcodec.so.62.11.100
+-rwxr-xr-x    1 root     root                  3996872 Oct 30 21:20 /usr/lib/libavcodec.so.62.11.100
+drwxr-xr-x    2 root     root                        0 Oct 30 21:20 /usr/share/licenses/libavcodec
+-rw-r--r--    1 root     root                    26517 Dec  3  2025 /usr/share/licenses/libavcodec/COPYING.LGPLv2.1
+
+stderr:
+
+[libavcodec-debuginfo-8.0.1-1.armv7l.rpm_listing]
+COMMAND rpm -qplv /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/rpms/libavcodec-debuginfo-8.0.1-1.armv7l.rpm
+exit 0
+stdout:
+drwxr-xr-x    2 root     root                        0 Oct 30 21:20 /usr/lib/debug
+drwxr-xr-x    2 root     root                        0 Oct 30 21:20 /usr/lib/debug/.build-id
+drwxr-xr-x    2 root     root                        0 Oct 30 21:20 /usr/lib/debug/.build-id/f9
+lrwxrwxrwx    1 root     root                       46 Oct 30 21:20 /usr/lib/debug/.build-id/f9/60461f63c852474257f51267b7b543afffdc9c -> ../../../../../usr/lib/libavcodec.so.62.11.100
+lrwxrwxrwx    1 root     root                       66 Oct 30 21:20 /usr/lib/debug/.build-id/f9/60461f63c852474257f51267b7b543afffdc9c.debug -> ../../../../../usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
+drwxr-xr-x    2 root     root                        0 Oct 30 21:20 /usr/lib/debug/usr
+drwxr-xr-x    2 root     root                        0 Oct 30 21:20 /usr/lib/debug/usr/lib
+-rw-r--r--    1 root     root                 15975228 Oct 30 21:20 /usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
+
+stderr:
+
+[runtime_notes]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100
+exit 0
+stdout:
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: f960461f63c852474257f51267b7b543afffdc9c
+
+stderr:
+
+[runtime_sections]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100
+exit 0
+stdout:
+There are 27 section headers, starting at offset 0x3cf890:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .note.gnu.build-id NOTE            00000114 000114 000024 00   A  0   0  4
+  [ 2] .gnu.hash         GNU_HASH        00000138 000138 0004e4 04   A  3   0  4
+  [ 3] .dynsym           DYNSYM          0000061c 00061c 001b50 10   A  4   3  4
+  [ 4] .dynstr           STRTAB          0000216c 00216c 0020d5 00   A  0   0  1
+  [ 5] .gnu.version      VERSYM          00004242 004242 00036a 02   A  3   0  2
+  [ 6] .gnu.version_d    VERDEF          000045ac 0045ac 000038 00   A  4   2  4
+  [ 7] .gnu.version_r    VERNEED         000045e4 0045e4 000100 00   A  4   5  4
+  [ 8] .rel.dyn          REL             000046e4 0046e4 00fff0 08   A  3   0  4
+  [ 9] .rel.plt          REL             000146d4 0146d4 0008c0 08  AI  3  22  4
+  [10] .init             PROGBITS        00014f94 014f94 00000c 00  AX  0   0  4
+  [11] .plt              PROGBITS        00014fa0 014fa0 000d88 04  AX  0   0  4
+  [12] .text             PROGBITS        00015d40 015d40 32b364 00  AX  0   0 64
+  [13] .fini             PROGBITS        003410a4 3410a4 000008 00  AX  0   0  4
+  [14] .rodata           PROGBITS        003410b0 3410b0 07462c 00   A  0   0 16
+  [15] .ARM.extab        PROGBITS        003b56dc 3b56dc 0005fc 00   A  0   0  4
+  [16] .ARM.exidx        ARM_EXIDX       003b5cd8 3b5cd8 002c30 00  AL 12   0  4
+  [17] .eh_frame         PROGBITS        003b8908 3b8908 000004 00   A  0   0  4
+  [18] .init_array       INIT_ARRAY      003b9000 3b9000 000004 04  WA  0   0  4
+  [19] .fini_array       FINI_ARRAY      003b9004 3b9004 000004 04  WA  0   0  4
+  [20] .data.rel.ro      PROGBITS        003b9008 3b9008 01404c 00  WA  0   0  8
+  [21] .dynamic          DYNAMIC         003cd054 3cd054 000138 08  WA  4   0  4
+  [22] .got              PROGBITS        003cd18c 3cd18c 001668 04  WA  0   0  4
+  [23] .data             PROGBITS        003cf000 3cf000 000770 00  WA  0   0  4
+  [24] .bss              NOBITS          003cf770 3cf770 271e80 00  WA  0   0 16
+  [25] .gnu_debuglink    PROGBITS        00000000 3cf770 000024 00      0   0  4
+  [26] .shstrtab         STRTAB          00000000 3cf794 0000fc 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), y (purecode), p (processor specific)
+
+stderr:
+
+[runtime_attributes]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100
+exit 0
+stdout:
+
+stderr:
+
+[debug_notes]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
+exit 0
+stdout:
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: f960461f63c852474257f51267b7b543afffdc9c
+
+stderr:
+
+[debug_sections]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -SW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
+exit 0
+stdout:
+There are 40 section headers, starting at offset 0xf3bcfc:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .note.gnu.build-id NOTE            00000114 000114 000024 00   A  0   0  4
+  [ 2] .gnu.hash         NOBITS          00000138 000138 0004e4 04   A  3   0  4
+  [ 3] .dynsym           NOBITS          0000061c 000138 001b50 10   A  4   3  4
+  [ 4] .dynstr           NOBITS          0000216c 000138 0020d5 00   A  0   0  1
+  [ 5] .gnu.version      NOBITS          00004242 000138 00036a 02   A  3   0  2
+  [ 6] .gnu.version_d    NOBITS          000045ac 000138 000038 00   A  4   2  4
+  [ 7] .gnu.version_r    NOBITS          000045e4 000138 000100 00   A  4   5  4
+  [ 8] .rel.dyn          NOBITS          000046e4 000138 00fff0 08   A  3   0  4
+  [ 9] .rel.plt          NOBITS          000146d4 000138 0008c0 08  AI  3  22  4
+  [10] .init             NOBITS          00014f94 000138 00000c 00  AX  0   0  4
+  [11] .plt              NOBITS          00014fa0 000138 000d88 04  AX  0   0  4
+  [12] .text             NOBITS          00015d40 000140 32b364 00  AX  0   0 64
+  [13] .fini             NOBITS          003410a4 000140 000008 00  AX  0   0  4
+  [14] .rodata           NOBITS          003410b0 000140 07462c 00   A  0   0 16
+  [15] .ARM.extab        NOBITS          003b56dc 000140 0005fc 00   A  0   0  4
+  [16] .ARM.exidx        NOBITS          003b5cd8 000140 002c30 00  AL 12   0  4
+  [17] .eh_frame         NOBITS          003b8908 000140 000004 00   A  0   0  4
+  [18] .init_array       NOBITS          003b9000 000140 000004 04  WA  0   0  4
+  [19] .fini_array       NOBITS          003b9004 000140 000004 04  WA  0   0  4
+  [20] .data.rel.ro      NOBITS          003b9008 000140 01404c 00  WA  0   0  8
+  [21] .dynamic          NOBITS          003cd054 000140 000138 08  WA  4   0  4
+  [22] .got              NOBITS          003cd18c 000140 001668 04  WA  0   0  4
+  [23] .data             NOBITS          003cf000 000140 000770 00  WA  0   0  4
+  [24] .bss              NOBITS          003cf770 000140 271e80 00  WA  0   0 16
+  [25] .comment          PROGBITS        00000000 000140 000041 01  MS  0   0  1
+  [26] .ARM.attributes   ARM_ATTRIBUTES  00000000 000181 000035 00      0   0  1
+  [27] .GCC.command.line PROGBITS        00000000 0001b6 079774 01  MS  0   0  1
+  [28] .debug_aranges    PROGBITS        00000000 079930 0006d8 00      0   0  8
+  [29] .debug_info       PROGBITS        00000000 07a008 4bae13 00      0   0  1
+  [30] .debug_abbrev     PROGBITS        00000000 534e1b 02bd97 00      0   0  1
+  [31] .debug_line       PROGBITS        00000000 560bb2 28f745 00      0   0  1
+  [32] .debug_frame      PROGBITS        00000000 7f02f8 02bfbc 00      0   0  4
+  [33] .debug_str        PROGBITS        00000000 81c2b4 04783d 01  MS  0   0  1
+  [34] .debug_loc        PROGBITS        00000000 863af1 5c4a57 00      0   0  1
+  [35] .debug_ranges     PROGBITS        00000000 e28548 09d8c8 00      0   0  8
+  [36] .debug_line_str   PROGBITS        00000000 ec5e10 0006ae 01  MS  0   0  1
+  [37] .symtab           SYMTAB          00000000 ec64c0 04ecf0 10     38 19741  4
+  [38] .strtab           STRTAB          00000000 f151b0 0269ae 00      0   0  1
+  [39] .shstrtab         STRTAB          00000000 f3bb5e 00019e 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), y (purecode), p (processor specific)
+
+stderr:
+
+[debug_attributes]
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -A /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
+exit 0
+stdout:
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "7-A"
+  Tag_CPU_arch: v7
+  Tag_CPU_arch_profile: Application
+  Tag_ARM_ISA_use: Yes
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_FP_arch: VFPv3
+  Tag_Advanced_SIMD_arch: NEONv1
+  Tag_ABI_PCS_GOT_use: GOT-indirect
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_align_preserved: 8-byte, except leaf SP
+  Tag_ABI_enum_size: int
+  Tag_CPU_unaligned_access: v6
+  Tag_ABI_FP_16bit_format: IEEE 754
+
+stderr:
+
+
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100
+exit 0
+stderr 
+Symbol/mapping output excerpt (full table in temp):
+Symbol table '.dynsym' contains 437 entries:
+
+
+COMMAND nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -sW /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
+exit 0
+stderr 
+Symbol/mapping output excerpt (full table in temp):
+Symbol table '.symtab' contains 20175 entries:
+    38: 0002fd68     0 NOTYPE  LOCAL  DEFAULT   12 $a
+    40: 0002fd84     0 NOTYPE  LOCAL  DEFAULT   12 $d
+    41: 00014f94     0 NOTYPE  LOCAL  DEFAULT   10 $a
+    42: 003410a4     0 NOTYPE  LOCAL  DEFAULT   13 $a
+    44: 00014f9c     0 NOTYPE  LOCAL  DEFAULT   10 $a
+    45: 003410a8     0 NOTYPE  LOCAL  DEFAULT   13 $a
+    47: 0002fe30     0 NOTYPE  LOCAL  DEFAULT   12 $t
+    50: 00030274     0 NOTYPE  LOCAL  DEFAULT   12 $d
+    51: 0003027c     0 NOTYPE  LOCAL  DEFAULT   12 $t
+    53: 000304b4     0 NOTYPE  LOCAL  DEFAULT   12 $d
+    54: 00015d40     0 NOTYPE  LOCAL  DEFAULT   12 $t
+    55: 00015e50     0 NOTYPE  LOCAL  DEFAULT   12 $d
+
+RESULTS
+{
+  "runtime": {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100",
+    "sha256": "ba6f821afc9d7d96630aedb8fc00914d71dcfb9e8973a396edf4eb6e7f5f80de",
+    "symtab": false,
+    "mapping": {
+      "a": 0,
+      "t": 0,
+      "d": 0,
+      "x": 0
+    },
+    "attributes": "",
+    "build_id": [
+      "f960461f63c852474257f51267b7b543afffdc9c"
+    ],
+    "notes_sections": [
+      {
+        "name": ".note.gnu.build-id",
+        "type": "NOTE",
+        "addr": 276,
+        "off": 276,
+        "size": 36,
+        "flags": "A"
+      }
+    ],
+    "code_sections": [
+      {
+        "name": ".init",
+        "type": "PROGBITS",
+        "addr": 85908,
+        "off": 85908,
+        "size": 12,
+        "flags": "AX"
+      },
+      {
+        "name": ".plt",
+        "type": "PROGBITS",
+        "addr": 85920,
+        "off": 85920,
+        "size": 3464,
+        "flags": "AX"
+      },
+      {
+        "name": ".text",
+        "type": "PROGBITS",
+        "addr": 89408,
+        "off": 89408,
+        "size": 3322724,
+        "flags": "AX"
+      },
+      {
+        "name": ".fini",
+        "type": "PROGBITS",
+        "addr": 3412132,
+        "off": 3412132,
+        "size": 8,
+        "flags": "AX"
+      }
+    ],
+    "build_id_bytes": [
+      20
+    ],
+    "has_arm_attributes": false,
+    "note_is_SHT_NOTE": true
+  },
+  "debug": {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+    "sha256": "747916edc1bccd8a8a9ffddcec0d4d8fcbb0d255166396f57968dfd9c35a2afd",
+    "symtab": true,
+    "mapping": {
+      "a": 27,
+      "t": 5883,
+      "d": 6489,
+      "x": 0
+    },
+    "attributes": "Attribute Section: aeabi\nFile Attributes\n  Tag_CPU_name: \"7-A\"\n  Tag_CPU_arch: v7\n  Tag_CPU_arch_profile: Application\n  Tag_ARM_ISA_use: Yes\n  Tag_THUMB_ISA_use: Thumb-2\n  Tag_FP_arch: VFPv3\n  Tag_Advanced_SIMD_arch: NEONv1\n  Tag_ABI_PCS_GOT_use: GOT-indirect\n  Tag_ABI_PCS_wchar_t: 4\n  Tag_ABI_FP_denormal: Needed\n  Tag_ABI_FP_exceptions: Needed\n  Tag_ABI_FP_number_model: IEEE 754\n  Tag_ABI_align_needed: 8-byte\n  Tag_ABI_align_preserved: 8-byte, except leaf SP\n  Tag_ABI_enum_size: int\n  Tag_CPU_unaligned_access: v6\n  Tag_ABI_FP_16bit_format: IEEE 754\n",
+    "build_id": [
+      "f960461f63c852474257f51267b7b543afffdc9c"
+    ],
+    "notes_sections": [
+      {
+        "name": ".note.gnu.build-id",
+        "type": "NOTE",
+        "addr": 276,
+        "off": 276,
+        "size": 36,
+        "flags": "A"
+      }
+    ],
+    "code_sections": [
+      {
+        "name": ".init",
+        "type": "NOBITS",
+        "addr": 85908,
+        "off": 312,
+        "size": 12,
+        "flags": "AX"
+      },
+      {
+        "name": ".plt",
+        "type": "NOBITS",
+        "addr": 85920,
+        "off": 312,
+        "size": 3464,
+        "flags": "AX"
+      },
+      {
+        "name": ".text",
+        "type": "NOBITS",
+        "addr": 89408,
+        "off": 320,
+        "size": 3322724,
+        "flags": "AX"
+      },
+      {
+        "name": ".fini",
+        "type": "NOBITS",
+        "addr": 3412132,
+        "off": 320,
+        "size": 8,
+        "flags": "AX"
+      }
+    ],
+    "build_id_bytes": [
+      20
+    ],
+    "has_arm_attributes": true,
+    "note_is_SHT_NOTE": true
+  },
+  "links": [
+    {
+      "path": "usr/lib/debug/.build-id/f9/60461f63c852474257f51267b7b543afffdc9c",
+      "link_text": "../../../../../usr/lib/libavcodec.so.62.11.100",
+      "resolved": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100",
+      "exists": true,
+      "is_debug_file": false,
+      "is_runtime_file": true,
+      "sha256": "ba6f821afc9d7d96630aedb8fc00914d71dcfb9e8973a396edf4eb6e7f5f80de"
+    },
+    {
+      "path": "usr/lib/debug/.build-id/f9/60461f63c852474257f51267b7b543afffdc9c.debug",
+      "link_text": "../../../../../usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+      "resolved": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+      "exists": true,
+      "is_debug_file": true,
+      "is_runtime_file": false,
+      "sha256": "747916edc1bccd8a8a9ffddcec0d4d8fcbb0d255166396f57968dfd9c35a2afd"
+    }
+  ],
+  "ids_equal": true,
+  "cflags_unchanged": true,
+  "ldflags_before": " -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments",
+  "ldflags_after": " -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments",
+  "ldflags_only_add_sha1": true
+}
+07 vs 08 mapping totals: 27/5882/6489 -> 27/5883/6489 ($a/$t/$d).
+$t by section: .text 5861 -> 5862; .plt 21 -> 21.
+Map regex: ^\$[atdx](?:\.\d+)?$, .symtab only. No boundary test repeated.

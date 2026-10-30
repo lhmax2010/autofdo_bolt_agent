@@ -26,7 +26,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-10-30；v0.4归档与主机/RPi4冻结前核实，已完成）
+## 当前授权与执行状态（2026-10-30；v0.5归档与build-id调试拆分核实，已完成）
+
+- 设计当前版本为 [v0.5](profgen/design/02_llvm_profgen_enhance_design_v0.5.md)，正文未修改；SHA-256=`1e70bac98024bfa45dc5505bb315565fd7a1591c9cfcf5ba0e24747b3d45a8cf`。校验后用mv移入指定Downloads文件，源路径已不存在，其他Downloads文件及v0.1–v0.4不动。
+- 本轮不连接开发板、不改LLVM、不开始实现。07的临时FFmpeg worktree分支afdo/v05-buildid仅在spec configure调用新增一行`--extra-ldflags="-Wl,--build-id=sha1"`；原src/ffmpeg干净。临时提交8a50cbfdc1383a34b781756c73c6252d86e6e1ad只本地保留；不推FFmpeg/Gerrit。
+- GBS armv7l构建成功，64秒，真实GBS_EXIT=0、ALL-END 2026-10-30T21:20:41+08:00 OK；实际链接argv包含sha1选项，CFLAGS不变、LDFLAGS仅该新增项。[证据](probe/evidence/08/01_build.txt)
+- 运行文件与.debug均有可读`.note.gnu.build-id`、SHT_NOTE（非NOBITS），build-id同为`f960461f63c852474257f51267b7b543afffdc9c`，20字节完全一致；debuginfo RPM的两个.build-id链接正确。补齐07缺有ID拆分正例的缺口。[证据](probe/evidence/08/02_elf_split.txt)
+- 符号/属性保留方式与07一致；.debug的$a/$t/$d为27/5883/6489，其中$t比07多1；运行文件无.symtab及ARM属性。DWARF5 debugedit警告仍在，不据note成功认定完整行表/源码路径修写质量通过。未重做边界核对。
+- 剩余冻结前项：RPi5的dsoff、`--buildid-mmap`、页大小；新LLVM发布后的原样构建复核（默认build-id及拆分结果）。第一阶段冻结仍待评审确认，不因本轮验证通过自动开工；IR/BFI等第二阶段前实验和主机perf决策保留。
+- [08报告](probe/08_buildid_split_check.md)、v0.5、两份证据（39326字节）及本STATUS同一commit提交。本轮仅指定Downloads移动这一用户授权例外，无新增已知其他边界例外。
+
+## 前轮授权与执行状态（2026-10-30；v0.4归档与主机/RPi4冻结前核实，历史）
 
 - 设计当前版本为 [v0.4](profgen/design/02_llvm_profgen_enhance_design_v0.4.md)，正文未改；SHA-256=`abceb98ae958e20c4436e88c45da88c154ec4d29e0bc56939f0828530ddef4cf`。按用户授权校验后用mv从指定Downloads路径移入，源文件已不存在，其他Downloads文件及v0.1–v0.3不动。
 - 本轮只做验证与记录，未改LLVM/原FFmpeg源码或spec；一次性边界脚本与测试包留在temp，不开始增强或Agent实现。v0.4第一阶段评审/冻结仍待确认，不以本轮验证结束自动开工。
@@ -145,11 +155,11 @@
 
 # 项目状态
 
-更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.4，主机与RPi4本轮冻结前核实已完成（07），第一阶段评审/冻结待确认；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-10-30（Asia/Shanghai）。阶段：RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.5，显式SHA-1构建与调试拆分验证通过（08），第一阶段评审/冻结待确认；冻结前不开工；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
-- 当前设计v0.4；本轮07完成默认FFmpeg调试文件/运行文件、Thumb边界及RPi4真实样例核实。剩余RPi5的dsoff、`--buildid-mmap`、页大小待后续；IR/BFI核实按v0.4第10节安排在第二阶段前完成。冻结前不开工，Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.5；08已验证显式SHA-1构建拆分后两份SHT_NOTE可读且ID一致。剩余冻结前项为RPi5的dsoff、`--buildid-mmap`、页大小，以及新LLVM发布后的原样构建复核。IR/BFI核实仍在第二阶段前完成；冻结前不开工，Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree，未经冻结与新授权不开始 LLVM 增强。
 
@@ -340,7 +350,7 @@
 
 ## 待人工裁决
 
-- [设计v0.4](profgen/design/02_llvm_profgen_enhance_design_v0.4.md)第一阶段冻结待评审确认。是否在工作目录内为x86_64构建主机perf仍由用户决定，决定`--perfdata`能否进入第一批；本轮未构建主机perf。
+- [设计v0.5](profgen/design/02_llvm_profgen_enhance_design_v0.5.md)第一阶段冻结待评审确认。是否在工作目录内为x86_64构建主机perf仍由用户决定，决定`--perfdata`能否进入第一批；本轮未构建主机perf。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -355,7 +365,7 @@
 
 ## 挂账
 
-- 冻结前剩余RPi5项（v0.4）：dsoff与公式核对、`--buildid-mmap`、页大小。Tizen调试文件映射符号/属性/代码NOBITS及Thumb长度规则已由07补证；默认FFmpeg无build-id，仍缺有ID时调试note保留正例。debugedit DWARF5警告、完整DWARF质量未核验。主机perf构建待用户决定；IR匹配/BFI按v0.4列为第二阶段前实验，不沿用旧百分比。([unknown])和LOST_SAMPLES仍无本轮实测。
+- 冻结前剩余项（v0.5）：RPi5的dsoff与公式核对、`--buildid-mmap`、页大小；新LLVM发布后的原样构建复核。07的映射符号/属性/Thumb长度规则和08的有ID调试note正例已完成；新默认工具链不能直接沿用显式SHA-1的长度/取值结论。debugedit DWARF5警告和完整DWARF质量仍未核验。主机perf构建待用户决定；IR匹配/BFI为第二阶段前实验，不沿用旧百分比。([unknown])和LOST_SAMPLES仍无本轮实测。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。

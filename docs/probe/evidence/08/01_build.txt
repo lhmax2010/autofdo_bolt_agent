@@ -1,0 +1,155 @@
+v0.5 archive and one-option FFmpeg build
+Design SHA256 1e70bac98024bfa45dc5505bb315565fd7a1591c9cfcf5ba0e24747b3d45a8cf; title prefix verified; mv completed; exact Downloads source absent.
+commit 8a50cbfdc1383a34b781756c73c6252d86e6e1ad
+Author:     Hao Lin <hao.lin@samsung.com>
+AuthorDate: Fri Oct 30 21:19:37 2026 +0800
+Commit:     Hao Lin <hao.lin@samsung.com>
+CommitDate: Fri Oct 30 21:19:37 2026 +0800
+
+    test: enable SHA-1 build ID for split debuginfo verification
+
+ packaging/ffmpeg.spec | 1 +
+ 1 file changed, 1 insertion(+)
+diff --git a/packaging/ffmpeg.spec b/packaging/ffmpeg.spec
+index 6f6c2f96..a33012c3 100644
+--- a/packaging/ffmpeg.spec
++++ b/packaging/ffmpeg.spec
+@@ -244,6 +244,7 @@ export CC=%{__cc} CXX=%{__cxx}
+     --libdir=%{_libdir} \
+     --shlibdir=%{_libdir} \
+     --datadir=%{_datadir}/%{name} \
++    --extra-ldflags="-Wl,--build-id=sha1" \
+     $CONFIGURE_OPTIONS
+ 
+ %build
+
+[general]
+# GBS uses its own tmpdir setting; TMPDIR alone does not override /var/tmp.
+tmpdir = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs-tmp-v04-ffmpeg
+profile = profile.tizen_unified_standard
+buildroot = /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG
+
+[profile.tizen_unified_standard]
+repos = repo.base-standard, repo.unified-standard
+
+[repo.base-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/reference/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260722.045200/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20260804.124315/repos/standard/packages/
+
+[repo.unified-standard]
+url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/reference/repos/standard/packages/
+#url=http://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260725.003315/repos/standard/packages/
+#url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20260804.223836/repos/standard/packages/
+
+START 2026-10-30T21:19:37+08:00
+END 2026-10-30T21:20:41+08:00
+GBS_EXIT 0
+WRAPPER_EXIT 0
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/doc-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-tool-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavfilter-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-debuginfo-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavcodec-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavformat-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-debugsource-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswresample-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libavutil-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/libswscale-devel-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/RPMS/ffmpeg-tool-8.0.1-1.armv7l.rpm
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/repos/tizen_unified_standard/armv7l/SRPMS/ffmpeg-8.0.1-1.src.rpm
+ALL-END 2026-10-30T21:20:41+08:00 OK
+
+Worker used: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/build.sh
+#!/bin/bash
+set -Eeuo pipefail
+W=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+export TMPDIR="$W/temp/tmp"
+run=${1:?run label required}
+[[ $run =~ ^[a-z0-9_-]+$ ]] || exit 2
+shift
+if [[ ${1:-} != --worker ]]; then
+    test ! -e /etc/gbs.conf
+    test -f "$W/temp/gbs-home/.gbs.conf"
+    test -z "$(git -C "$W/temp/v04/ffmpeg" status --porcelain)"
+    exec 9>"$W/temp/v05/build.lock"
+    flock -n 9 || { echo 'Another spike build is running'; exit 1; }
+    setsid --fork /bin/bash "$W/temp/v05/build.sh" "$run" --worker "$@" 9>&9 >"$W/temp/v05/logs/$run.log" 2>&1 </dev/null
+    echo "Worker launched: $W/temp/v05/logs/$run.status"
+    printf '\ntail -n 20 %s\ncat %s\n' "$W/temp/v05/logs/$run.log" "$W/temp/v05/logs/$run.status"
+    exit 0
+fi
+shift
+status="$W/temp/v05/logs/$run.status"
+start=$(date --iso-8601=seconds)
+rc=NOT_STARTED
+finish() {
+    code=$?
+    trap - EXIT
+    set +e
+    end=$(date --iso-8601=seconds)
+    verdict=FAILED
+    [[ $rc == 0 && $code == 0 ]] && verdict=OK
+    {
+        printf 'START %s\nEND %s\nGBS_EXIT %s\nWRAPPER_EXIT %s\n' "$start" "$end" "$rc" "$code"
+        find "$W/temp/GBS-ROOT-V04-FFMPEG/local/repos" -type f -name '*.rpm' -print
+        printf 'ALL-END %s %s\n' "$end" "$verdict"
+    } >"$status.tmp"
+    mv "$status.tmp" "$status"
+    cat "$status"
+}
+trap finish EXIT
+trap '' HUP
+trap 'exit 143' TERM
+trap 'exit 130' INT
+printf 'START %s\nPHASE BUILDING\nWORKER_PID %s\n' "$start" "$$" >"$status"
+cd "$W/temp/v04/ffmpeg"
+set +e
+setsid --wait env HOME="$W/temp/gbs-home" GIT_CONFIG_NOSYSTEM=1 TMPDIR="$W/temp/gbs-tmp-v04-ffmpeg" nice -n 19 ionice -c3 gbs -c "$W/temp/gbs/gbs_v05_ffmpeg.conf" build -A armv7l --threads 1 --define '_smp_mflags -j10' "$@"
+rc=$?
+exit "$rc"
+
+Actual link argv observation (ps -ww -eo pid,args, 0.2 second interval; not verbose make log):
+2026-10-30T21:20:22.601484+08:00 1952714 /bin/sh -c printf "LD\t%s\n" libavcodec/libavcodec.so.62; armv7l-tizen-linux-gnueabi-clang -shared -Wl,-soname,libavcodec.so.62 -Wl,-Bsymbolic -Wl,--version-script,libavcodec/libavcodec.ver -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavutil -Llibswscale -Llibswresample -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments  -o libavcodec/libavcodec.so.62 @libavcodec/libavcodec.so.62.objs -lavutil -pthread -lm -latomic -lm -latomic -pthread 
+2026-10-30T21:20:22.601575+08:00 1952715 armv7l-tizen-linux-gnueabi-clang -shared -Wl,-soname,libavcodec.so.62 -Wl,-Bsymbolic -Wl,--version-script,libavcodec/libavcodec.ver -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavutil -Llibswscale -Llibswresample -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments -o libavcodec/libavcodec.so.62 @libavcodec/libavcodec.so.62.objs -lavutil -pthread -lm -latomic -lm -latomic -pthread
+temp/v05/logs/ffmpeg.log
+251: [    7s] + ./configure --prefix=/usr --libdir=/usr/lib --shlibdir=/usr/lib --datadir=/usr/share/ffmpeg --extra-ldflags=-Wl,--build-id=sha1 --enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx --extra-cflags=-mfpu=neon
+1212: [   34s] LD	libavcodec/libavcodec.so.62
+1480: [   36s] + /usr/lib/rpm/find-debuginfo.sh -j10 --build-id-seed 8.0.1-1 --unique-debug-src-base ffmpeg-8.0.1-1.arm -S debugsourcefiles.list /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1
+1502: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavutil.so.60.8.100: Unknown debugging section .debug_line_str
+1503: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavutil.so.60.8.100: DWARF version 5 unhandled
+1504: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswresample.so.6.1.100: Unknown debugging section .debug_line_str
+1505: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswresample.so.6.1.100: DWARF version 5 unhandled
+1506: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswscale.so.9.1.100: Unknown debugging section .debug_line_str
+1507: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswscale.so.9.1.100: DWARF version 5 unhandled
+1508: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: Unknown debugging section .debug_line_str
+1509: [   36s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: DWARF version 5 unhandled
+
+CFLAGS_UNCHANGED=True
+LDFLAGS_ONLY_ADD_SHA1=True
+temp/v05/config_before.mak
+51: CFLAGS=-Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fno-strict-overflow -fstack-protector-all -fPIE  -mfpu=neon -std=c17 -fomit-frame-pointer -fPIC -mthumb -pthread -g -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -Wno-implicit-const-int-float-conversion -Wno-microsoft-enum-forward-reference -O3 -fno-math-errno -fno-signed-zeros -mstack-alignment=16 -Qunused-arguments -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type
+75: LDFLAGS= -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments
+temp/v05/config_after.mak
+51: CFLAGS=-Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fno-strict-overflow -fstack-protector-all -fPIE  -mfpu=neon -std=c17 -fomit-frame-pointer -fPIC -mthumb -pthread -g -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -Wno-implicit-const-int-float-conversion -Wno-microsoft-enum-forward-reference -O3 -fno-math-errno -fno-signed-zeros -mstack-alignment=16 -Qunused-arguments -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type
+75: LDFLAGS= -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments
+
+07 prior warnings for comparison:
+temp/v04/logs/ffmpeg.log
+1756: [  386s] + /usr/lib/rpm/find-debuginfo.sh -j10 --build-id-seed 8.0.1-1 --unique-debug-src-base ffmpeg-8.0.1-1.arm -S debugsourcefiles.list /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1
+1784: [  387s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: Unknown debugging section .debug_line_str
+1789: [  387s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: DWARF version 5 unhandled
+1791: [  387s] *** WARNING: No build ID note found in /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100
+1851: [  390s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100
+2018: [  391s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug
