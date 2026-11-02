@@ -1,0 +1,90 @@
+OLD 8f4fa360ade28a7b044fd5ef392d4839311545aa
+NEW 6e1b1b00c18b52de84351752767f0678113036f6
+commit 6e1b1b00c18b52de84351752767f0678113036f6
+Author:     Hao Lin <hao.lin@samsung.com>
+AuthorDate: Mon Nov 2 15:02:11 2026 +0800
+Commit:     Hao Lin <hao.lin@samsung.com>
+CommitDate: Mon Nov 2 16:21:34 2026 +0800
+
+    [llvm-profgen] Add IP sample reader and dsoff address conversion
+    
+    Add an explicitly gated IPPerfReader for fixed perf-script IP fields.
+    Preserve mapping identity records, filter events, PIDs and raw DSO paths,
+    and convert file offsets through unique executable ELF PT_LOAD segments.
+    Keep checked uint64 sample counts and period sums by ELF virtual address.
+    
+    Reject incompatible options and unadmitted perf.data input in IP mode.
+    Expose hidden deterministic counters for reader tests. Until profile
+    construction lands, return a fixed error without opening the output.
+    Leave the existing LBR reader and profile generation behavior unchanged.
+    
+    Add reader, address, option, malformed-input and output-preservation lit
+    coverage using the IP-mode inputs. Existing 50 lit results are unchanged;
+    all eight new tests pass and the frozen C1 matrix has zero differences.
+    
+    Validate complete retained RPi4/RPi5 exports and refine IP CLI diagnostics,
+    dsoff suffix parsing, and file headers during patch 2 follow-up.
+
+ llvm/test/tools/llvm-profgen/ip-addresses.test    |  25 ++
+ llvm/test/tools/llvm-profgen/ip-cli-followup.test |  16 +
+ llvm/test/tools/llvm-profgen/ip-invalid.test      |  74 ++++
+ llvm/test/tools/llvm-profgen/ip-options.test      |  69 ++++
+ llvm/test/tools/llvm-profgen/ip-real-records.test |  21 ++
+ llvm/test/tools/llvm-profgen/ip-segments.test     |  35 ++
+ llvm/test/tools/llvm-profgen/ip-selection.test    |  29 ++
+ llvm/test/tools/llvm-profgen/ip-transition.test   |   9 +
+ llvm/tools/llvm-profgen/CMakeLists.txt            |   1 +
+ llvm/tools/llvm-profgen/IPPerfReader.cpp          | 394 ++++++++++++++++++++++
+ llvm/tools/llvm-profgen/IPPerfReader.h            |  80 +++++
+ llvm/tools/llvm-profgen/Options.h                 |   1 +
+ llvm/tools/llvm-profgen/PerfReader.cpp            |   6 +-
+ llvm/tools/llvm-profgen/llvm-profgen.cpp          | 122 ++++++-
+ 14 files changed, 877 insertions(+), 5 deletions(-)
+
+NAME STATUS
+A	llvm/test/tools/llvm-profgen/ip-addresses.test
+A	llvm/test/tools/llvm-profgen/ip-cli-followup.test
+A	llvm/test/tools/llvm-profgen/ip-invalid.test
+A	llvm/test/tools/llvm-profgen/ip-options.test
+A	llvm/test/tools/llvm-profgen/ip-real-records.test
+A	llvm/test/tools/llvm-profgen/ip-segments.test
+A	llvm/test/tools/llvm-profgen/ip-selection.test
+A	llvm/test/tools/llvm-profgen/ip-transition.test
+M	llvm/tools/llvm-profgen/CMakeLists.txt
+A	llvm/tools/llvm-profgen/IPPerfReader.cpp
+A	llvm/tools/llvm-profgen/IPPerfReader.h
+M	llvm/tools/llvm-profgen/Options.h
+M	llvm/tools/llvm-profgen/PerfReader.cpp
+M	llvm/tools/llvm-profgen/llvm-profgen.cpp
+
+REMAINING TRACKED DIFF
+packaging/llvm.spec
+
+SPEC DIFF (unchanged)
+diff --git a/packaging/llvm.spec b/packaging/llvm.spec
+index c901dc5a2d5d..502fa7b52644 100644
+--- a/packaging/llvm.spec
++++ b/packaging/llvm.spec
+@@ -243,7 +243,7 @@ cmake \
+     -DLLVM_BUILD_EXAMPLES=OFF \
+     -DLLVM_INCLUDE_EXAMPLES=OFF \
+     -DLLVM_BUILD_TESTS=OFF \
+-    -DLLVM_INCLUDE_TESTS=OFF \
++    -DLLVM_INCLUDE_TESTS=ON \
+     -DLLVM_ENABLE_DOXYGEN=OFF \
+     -DLLVM_BUILD_DOCS=OFF \
+     -DLLVM_INCLUDE_DOCS=OFF \
+@@ -377,6 +377,10 @@ rm -rf %{buildroot}%{_libdir}/debug/*
+ rm -rf %{buildroot}/usr/lib/libear/*
+ rm -rf %{buildroot}/usr/lib/libscanbuild/*
+ 
++%check
++build/bin/llvm-lit -sv -j1 --xunit-xml-output=build/profgen-lit.xml build/test/tools/llvm-profgen > build/profgen-lit.log 2>&1 || true
++cat build/profgen-lit.log
++
+ %post -n clang -p /sbin/ldconfig
+ %postun -n clang -p /sbin/ldconfig
+ 
+
+REVERSE APPLY CHECK EXIT 0
+PATCH_SHA256 d2db36a3765419d7d423510544a4fd0a47ad331c4a12ac1befa12052485a87bb

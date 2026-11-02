@@ -1,0 +1,37 @@
+from pathlib import Path
+import os,time,hashlib,json,re,collections,sys
+W=Path('/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent');D=W/'temp/profgen-patch2-followup';R=W/'temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0';B=W/'temp/llvm-profgen-enh/build';phase=sys.argv[1] if len(sys.argv)>1 else 'before';O=D/phase;O.mkdir(exist_ok=True)
+cases=[]
+for k in ['fixed','multi','freq','buildid','lost']:cases.append(('05-'+k,'temp/rpi4-prefreeze/'+k+'_dsoff.txt','temp/rpi4-prefreeze/libavcodec.so.62.11.100','/usr/lib/libavcodec.so.62.11.100'))
+for k,elf in [('fork','cases'),('exec','cases'),('exec','after'),('deleted','libdeleted_probe.so')]:cases.append(('07-'+k+'-'+elf,'temp/v04/'+k+'.txt','temp/v04/samples-extract/usr/bin/'+elf,'/opt/afdo_agent/work/'+elf+(' (deleted)' if k=='deleted' else '')))
+cases.append(('07-module','temp/v04/module.txt','temp/rpi4-followup/libs/usr_lib_libc.so.6','/usr/lib/libc.so.6'))
+for k in ['fixed','multi','freq','buildid']:cases.append(('09-'+k,'temp/rpi5-prefreeze/'+k+'_dsoff.txt','temp/rpi5-prefreeze/libavcodec','/usr/lib64/libavcodec.so.62.11.100'))
+sample=re.compile(r'^\s*(-?\d+)/(-?\d+)\s+(\d+)\s+(\S+):\s+([0-9a-fA-F]+) \((.*)\)$')
+results=[]
+for label,src,elf,target in cases:
+ p=W/src;elf=W/elf;assert p.exists() and elf.exists(),(p,elf)
+ counts=collections.Counter();examples={};dsos=collections.Counter();events=collections.Counter();special=collections.Counter();neg=0;deleted=0;lostL=0;n=0
+ for n,line in enumerate(p.open(),1):
+  line=line.rstrip('\n');m=sample.fullmatch(line)
+  if m:
+   pid,tid,period,event,ip,dso=m.groups();counts['samples']+=1;events[event]+=1
+   path=re.sub(r'\+0x[0-9a-fA-F]+$','',dso);dsos[path]+=1
+   if int(pid)==-1:neg+=1
+   if path.endswith(' (deleted)'):deleted+=1
+   if path.startswith('/lib/modules/') or path=='[kernel.kallsyms]':special[path]+=1
+  else:
+   mm=re.search(r'PERF_RECORD_\w+',line);kind=mm[0] if mm else 'OTHER';counts[kind]+=1
+   if len(examples.setdefault(kind,[]))<3:examples[kind].append({'line':n,'raw':line})
+   if kind=='PERF_RECORD_LOST':lostL+=int(line.rsplit(' ',1)[1])
+ regex='^'+re.escape(target)+'$'
+ cmd=['nice','-n','19','ionice','-c3',str(R/'lib64/ld-linux-x86-64.so.2'),'--library-path',f'{B}/lib64:{R}/lib64:{R}/usr/lib64',str(B/'bin/llvm-profgen'),'--ip-samples','--show-ip-address-counts','--show-mmap-events','--binary='+str(elf),'--binary-match-regex='+regex,'--perfscript='+str(p),'--output='+str(O/(label+'.profile'))]
+ if len(events)>1:cmd+=['--ip-event=cycles']
+ start=time.monotonic();pid=os.fork()
+ if pid==0:
+  out=os.open(O/(label+'.stdout'),os.O_WRONLY|os.O_CREAT|os.O_TRUNC,0o644);err=os.open(O/(label+'.stderr'),os.O_WRONLY|os.O_CREAT|os.O_TRUNC,0o644)
+  os.dup2(out,1);os.dup2(err,2);os.close(out);os.close(err);os.execvp(cmd[0],cmd)
+ _,status,usage=os.wait4(pid,0);elapsed=time.monotonic()-start;rc=os.waitstatus_to_exitcode(status)
+ stderr=(O/(label+'.stderr')).read_text();output=(O/(label+'.stdout')).read_text();stats={k:int(v) for k,v in re.findall(r'^IP-STATS (\w+)=(\d+)$',output,re.M)}
+ accepted=stderr=='llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n' and rc==1
+ row={'label':label,'input':src,'input_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'elf':str(elf.relative_to(W)),'elf_sha256':hashlib.sha256(elf.read_bytes()).hexdigest(),'target_path':target,'command':cmd,'lines':n,'independent_line_counts':dict(counts),'event_counts':dict(events),'input_pid_unknown':neg,'input_deleted_samples':deleted,'input_kernel_dso_counts':dict(special),'target_path_samples':dsos[target],'lost_L':lostL,'record_examples':examples,'exit':rc,'accepted_whole_file':accepted,'accepted_prefix_lines':n if accepted else int(re.search(r'line (\d+):',stderr)[1])-1 if re.search(r'line (\d+):',stderr) else None,'stderr':stderr,'tool_stats':stats,'wall_seconds':elapsed,'peak_RSS_KiB':usage.ru_maxrss,'output_created':(O/(label+'.profile')).exists()}
+ results.append(row);(O/'results.json').write_text(json.dumps(results,indent=2)+'\n');print(label,'ACCEPTED',accepted,'LINES',n,'TARGET',stats.get('target'),'EXIT',rc,stderr[:180].strip(),'RSS',usage.ru_maxrss,'SEC',round(elapsed,3),flush=True)

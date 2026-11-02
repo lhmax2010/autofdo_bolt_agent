@@ -1,0 +1,157 @@
+diff --git a/llvm/test/tools/llvm-profgen/ip-cli-followup.test b/llvm/test/tools/llvm-profgen/ip-cli-followup.test
+new file mode 100644
+index 000000000000..84b9f27d1e92
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-cli-followup.test
+@@ -0,0 +1,16 @@
++# Missing required binary is diagnosed specifically in IP mode, in either order.
++# RUN: not llvm-profgen --ip-samples --output=%t.out 2>&1 | FileCheck %s --check-prefix=BINARY
++# RUN: not llvm-profgen --output=%t.out --ip-samples 2>&1 | FileCheck %s --check-prefix=BINARY
++# BINARY: llvm-profgen: error: IP sample mode requires --binary
++# RUN: not llvm-profgen --ip-samples --binary=x --pid=-1 --output=%t.out 2>&1 | FileCheck %s --check-prefix=PID
++# RUN: not llvm-profgen --pid=-2 --binary=x --output=%t.out --ip-samples 2>&1 | FileCheck %s --check-prefix=PID
++# RUN: not llvm-profgen --pid -1 --binary=x --output=%t.out --ip-samples 2>&1 | FileCheck %s --check-prefix=PID
++# PID: llvm-profgen: error: IP sample mode requires a non-negative --pid; samples with pid -1 never match --pid
++# RUN: not llvm-profgen --binary=x --pid=-1 --output=%t.out 2>&1 | FileCheck %s --check-prefix=OLDPID
++# OLDPID: for the --pid option: '-1' value invalid for uint argument!
++# OLDPID-NOT: IP sample mode
++# RUN: not llvm-profgen --output=%t.out 2>&1 | FileCheck %s --check-prefix=OLDBINARY
++# OLDBINARY: for the --binary option: must be specified at least once!
++# OLDBINARY-NOT: IP sample mode
++# RUN: llvm-profgen --help | FileCheck %s --check-prefix=HELP
++# HELP: --binary-match-regex={{.*}}Search raw DSO paths (including the ' (deleted)' marker) with a regular expression, not a whole-string match; anchor with ^ and $ to match the entire path
+diff --git a/llvm/test/tools/llvm-profgen/ip-invalid.test b/llvm/test/tools/llvm-profgen/ip-invalid.test
+index 89ebdb83be86..15fcfb3c6146 100644
+--- a/llvm/test/tools/llvm-profgen/ip-invalid.test
++++ b/llvm/test/tools/llvm-profgen/ip-invalid.test
+@@ -61,3 +61,14 @@
+ # TOP-NEXT:   /d 3
+ # TOP-NEXT:   /e 2
+ # TOP-NOT: /f
++
++# A malformed suffix is a path byte sequence; the resulting file DSO lacks dsoff.
++# RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0xgarbage)" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PATHSUFFIX
++# RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0x)" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PATHSUFFIX
++# PATHSUFFIX: file DSO is missing dsoff
++# PATHSUFFIX-NOT: invalid dsoff offset
++# RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0x10000000000000000)" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OFFSETOVER
++# OFFSETOVER: invalid dsoff offset
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.cpp b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+index c9fc0f738a7d..7439ea51257f 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.cpp
++++ b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+@@ -1,5 +1,4 @@
+-//===- IPPerfReader.cpp - IP-only perf script reader
+-//------------------------===//
++//===- IPPerfReader.cpp - IP reader -----------------------------------===//
+ //
+ // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ // See https://llvm.org/LICENSE.txt for license information.
+@@ -201,11 +200,14 @@ Error IPPerfReader::parseLine(StringRef Line) {
+   size_t Plus = Rest.rfind("+0x");
+   if (Plus != StringRef::npos) {
+     uint64_t Offset;
+-    if (number(Rest.drop_front(Plus + 3), Offset, 16)) {
++    StringRef Suffix = Rest.drop_front(Plus + 3);
++    // A non-hex suffix is part of the path, not a damaged offset. A syntactic
++    // hex offset that exceeds uint64 is still an integer-format error.
++    if (!Suffix.empty() && llvm::all_of(Suffix, isHexDigit)) {
++      if (!number(Suffix, Offset, 16))
++        return invalid("invalid dsoff offset");
+       S.Offset = Offset;
+       Rest = Rest.take_front(Plus);
+-    } else {
+-      return invalid("invalid dsoff offset");
+     }
+   }
+   if (Rest.empty())
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.h b/llvm/tools/llvm-profgen/IPPerfReader.h
+index a0ebf7b39f0b..48357361cfa6 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.h
++++ b/llvm/tools/llvm-profgen/IPPerfReader.h
+@@ -1,5 +1,4 @@
+-//===- IPPerfReader.h - IP-only perf script reader ---------------*- C++
+-//-*-===//
++//===- IPPerfReader.h - IP reader --------------------------*- C++ -*-===//
+ //
+ // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ // See https://llvm.org/LICENSE.txt for license information.
+diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+index 99d187d2f879..8facc5e7ff25 100644
+--- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
++++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+@@ -16,6 +16,7 @@
+ #include "PerfReader.h"
+ #include "ProfileGenerator.h"
+ #include "ProfiledBinary.h"
++#include "llvm/ADT/SmallString.h"
+ #include "llvm/ADT/StringSwitch.h"
+ #include "llvm/DebugInfo/Symbolize/SymbolizableModule.h"
+ #include "llvm/Support/CommandLine.h"
+@@ -64,7 +65,20 @@ static cl::opt<std::string>
+                cl::desc("Path of profiled executable binary."),
+                cl::cat(ProfGenCategory));
+ 
+-static cl::opt<uint32_t>
++// Retain the unsigned parser's original diagnostics for non-IP invocations.
++// Remember a negative spelling even when parsing fails, so IP mode can give a
++// specific diagnostic after all options (in either order) have been parsed.
++static bool NegativeProcessId = false;
++class PIDParser : public cl::parser<uint32_t> {
++public:
++  using cl::parser<uint32_t>::parser;
++  bool parse(cl::Option &O, StringRef ArgName, StringRef Arg, uint32_t &Value) {
++    NegativeProcessId |= Arg.starts_with("-");
++    return cl::parser<uint32_t>::parse(O, ArgName, Arg, Value);
++  }
++};
++
++static cl::opt<uint32_t, false, PIDParser>
+     ProcessId("pid", cl::value_desc("process Id"), cl::init(0),
+               cl::desc("Process Id for the profiled executable binary."),
+               cl::cat(ProfGenCategory));
+@@ -91,7 +105,10 @@ static cl::opt<std::string> IPEvent(
+     cl::cat(ProfGenCategory));
+ static cl::opt<std::string> BinaryMatchRegex(
+     "binary-match-regex",
+-    cl::desc("Select IP sample DSO paths by regular expression"),
++    cl::desc(
++        "Search raw DSO paths (including the ' (deleted)' marker) with a "
++        "regular expression, not a whole-string match; anchor with ^ and $ "
++        "to match the entire path"),
+     cl::cat(ProfGenCategory));
+ static cl::opt<bool> ShowIPAddressCounts(
+     "show-ip-address-counts", cl::Hidden,
+@@ -104,6 +121,11 @@ static Error runIPMode() {
+   };
+   if (!IPSamples)
+     return Fail("IP-only options require --ip-samples");
++  if (BinaryPath.empty())
++    return Fail("IP sample mode requires --binary");
++  if (NegativeProcessId)
++    return Fail("IP sample mode requires a non-negative --pid; "
++                "samples with pid -1 never match --pid");
+   SmallVector<StringRef, 32> Rejected;
+   for (const auto &Entry : cl::getRegisteredOptions()) {
+     StringRef Name = Entry.first;
+@@ -232,7 +254,16 @@ int main(int argc, const char *argv[]) {
+   InitializeAllDisassemblers();
+ 
+   cl::HideUnrelatedOptions({&ProfGenCategory, &getColorCategory()});
+-  cl::ParseCommandLineOptions(argc, argv, "llvm SPGO profile generator\n");
++  // Buffer ordinary parser errors verbatim. The IP gate handles only its two
++  // specific diagnostics; all other command-line errors keep their old text.
++  SmallString<256> ParseErrors;
++  raw_svector_ostream ParseErrorStream(ParseErrors);
++  bool Parsed = cl::ParseCommandLineOptions(
++      argc, argv, "llvm SPGO profile generator\n", &ParseErrorStream);
++  if (!Parsed && !(IPSamples && (BinaryPath.empty() || NegativeProcessId))) {
++    errs() << ParseErrors;
++    return EXIT_FAILURE;
++  }
+   if (IPSamples || IPEvent.getNumOccurrences() ||
+       BinaryMatchRegex.getNumOccurrences() ||
+       ShowIPAddressCounts.getNumOccurrences()) {

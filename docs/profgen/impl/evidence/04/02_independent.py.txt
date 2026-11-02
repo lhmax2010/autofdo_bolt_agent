@@ -1,0 +1,43 @@
+from pathlib import Path
+import collections,re,json,hashlib
+W=Path.cwd();D=W/'temp/profgen-patch2-followup';rows=json.loads((D/'before/results.json').read_text());out=[]
+S=re.compile(r'^\s*(-?\d+)/(-?\d+)\s+(\d+)\s+(\S+):\s+([0-9a-fA-F]+) \((.*)\)$')
+M=re.compile(r'PERF_RECORD_MMAP2 (-?\d+)/(-?\d+): \[(0x[0-9a-f]+)\((0x[0-9a-f]+)\) @ (0x[0-9a-f]+|0) .*?\]: (\S+) (.*)$')
+for row in rows:
+ label=row['label']
+ if not label.startswith(('05-','09-')):continue
+ directory=W/('temp/rpi4-prefreeze' if label.startswith('05') else 'temp/rpi5-prefreeze');kind=label.split('-')[1]
+ saved=directory/('perf_analysis.json' if label.startswith('05') else 'analysis.json');old=json.loads(saved.read_text())[kind]
+ loads=[]
+ for line in (directory/'libavcodec_segments.txt').read_text().splitlines():
+  a=line.split()
+  if a and a[0]=='LOAD' and 'E' in a:loads.append(tuple(int(a[i],16) for i in (1,2,4)))
+ maps=collections.defaultdict(list);hist=collections.defaultdict(lambda:[0,0]);bad=[];checked=0;sample_total=0
+ with (D/(label+'-independent.tsv')).open('w') as f:
+  f.write('line\tpid\tip\tstart\tpgoff\treported_dsoff\tcalculated_dsoff\tvaddr\tperiod\n')
+  for n,line in enumerate((W/row['input']).open(),1):
+   line=line.rstrip('\n');mm=M.search(line)
+   if mm:
+    p,t,start,length,off,prot,path=mm.groups();maps[int(p)].append((int(start,16),int(length,16),int(off,16),path))
+   sm=S.fullmatch(line)
+   if not sm:continue
+   sample_total+=1;p,t,period,event,ip,dso=sm.groups();suffix=re.search(r'\+0x([0-9a-fA-F]+)$',dso)
+   if not suffix or dso[:suffix.start()]!=row['target_path']:continue
+   checked+=1;ip=int(ip,16);off=int(suffix[1],16);choices=[x for x in maps[int(p)] if x[3]==row['target_path'] and x[0]<=ip<x[0]+x[1]]
+   mp=choices[-1] if choices else None;calc=ip-mp[0]+mp[2] if mp else None
+   segs=[x for x in loads if calc is not None and x[0]<=calc<x[0]+x[2]]
+   if calc!=off or len(segs)!=1:bad.append({'line':n,'calculated':calc,'reported':off,'segments':len(segs)});continue
+   va=segs[0][1]+calc-segs[0][0];hist[va][0]+=1;hist[va][1]+=int(period)
+   f.write(f'{n}\t{p}\t{ip:#x}\t{mp[0]:#x}\t{mp[2]:#x}\t{off:#x}\t{calc:#x}\t{va:#x}\t{period}\n')
+ got={int(a,16):[int(b),int(c)] for a,b,c in re.findall(r'^IP-ADDRESS (0x[0-9a-f]+) sample_count=(\d+) period_sum=(\d+)$',(D/'before'/(label+'.stdout')).read_text(),re.M)}
+ mismatches=[{'vaddr':hex(a),'independent':hist.get(a),'reader':got.get(a)} for a in sorted(set(hist)|set(got)) if hist.get(a)!=got.get(a)]
+ result={'label':label,'saved_summary':str(saved.relative_to(W)),'saved_samples':old['samples'],'saved_target':old.get('lib_samples',old.get('target_samples')),'saved_formula_matches':old['formula_matches'],'current_samples':sample_total,'target_checked':checked,'formula_segment_mismatches':bad,'unique_addresses':len(hist),'address_counter_mismatches':mismatches,'per_sample_tsv':str((D/(label+'-independent.tsv')).relative_to(W)),'basis':'Recompute each row from original MMAP2/IP using archived 05/09 algorithm and saved GBS readelf PT_LOAD; prior JSON retained totals and examples, not all per-address values.'}
+ assert checked==result['saved_target'] and sample_total==old['samples'] and not bad and not mismatches,result
+ out.append(result);print(label,'samples',checked,'VA keys',len(hist),'differences',len(mismatches),flush=True)
+(D/'independent.json').write_text(json.dumps(out,indent=2)+'\n')
+# 06 preserved only filtered LOST output, not a complete perf-script stream.
+p=W/'temp/rpi4-followup/loss1_lost_lines.json';r=json.loads(p.read_text());lines=r['stdout'].splitlines();lost=[(n,s) for n,s in enumerate(lines,1) if 'PERF_RECORD_LOST lost ' in s]
+assert len(lost)==942
+lst={'source':str(p.relative_to(W)),'scope':'JSON stdout: filtered LOST records only, no full sample text retained','LOST_records':len(lost),'L':sum(int(s.rsplit(' ',1)[1]) for _,s in lost),'record_samples':703821,'exported_sample_count':None,'command':r['command'],'other_stdout_lines':[(n,s) for n,s in enumerate(lines,1) if (n,s) not in lost],'examples':lost[:3]}
+assert lst['L']==61667
+(D/'loss06.json').write_text(json.dumps(lst,indent=2)+'\n');print('06 LOST',len(lost),lst['L'],'sample-count unknown')

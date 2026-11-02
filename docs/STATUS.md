@@ -26,7 +26,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-02；llvm-profgen 补丁2，已完成）
+## 当前授权与执行状态（2026-11-02；补丁2收尾，已完成）
+
+- 完整真实导出先验收后修改：05/07/09共13份完整文本、14次目标运行，全部行被接受；修改后stdout/stderr逐字节一致。05单/双目标6,496/13,289与09单/双5,865/14,331，按保存MMAP2/PT_LOAD独立重算逐VA计数及period和均0差异。[报告](profgen/impl/04_patch2_followup.md)、[前后比对](profgen/impl/evidence/04/05_real_export_comparison.json)
+- 06完整loss1文本未保留，仅有过滤LOST行及perf.data；独立核对942条、L=61,667，但无法证明完整样本行数等于record的703,821。未重导或重采，没有发现需用户裁决的新格式。07 deleted/模块分类正确；07无-1样本，09 multi的1条-1/-1计为pid_unknown与kernel。[材料限制](profgen/impl/evidence/04/02_loss06.json)
+- 完成缺binary、负pid、regex help、非法hex尾缀和LLVM文件头小修；LLVM补丁2从 `8f4fa360ade28a7b044fd5ef392d4839311545aa` amend为 `6e1b1b00c18b52de84351752767f0678113036f6`，最终14文件+877/-5行，8个IP lit文件。导出补丁已覆盖，反向应用检查通过；spec未提交、内容未变。[审计](profgen/impl/evidence/04/06_amend_audit.txt)
+- 同配置GBS增量一次成功：15:56:59–16:13:52+08:00，1,012.782秒、Ninja105步、GBS_EXIT=0、ALL-END OK；available最低15,812MiB。新工具SHA `0afa78538527548dfaf9f0f373475f52d621ceb8be1b37db20ce1dc5485926e4`。[构建](profgen/impl/evidence/04/04_build.txt)
+- lit 58项：PASS56、FAIL0、UNSUPPORTED1、XFAIL1，原50结果不变、新8项全通过；C1每遍636条，两遍一致且与既有清单0差异。[lit](profgen/impl/evidence/04/04_lit_summary.json)、[C1](profgen/impl/evidence/04/05_c1_summary.json)
+- 最大完整导出1,044,585行，旧/新工具墙钟1.405509/1.384008秒，子进程峰值RSS304,924/305,012KiB，单次热缓存观测。冻结设计与C1基线未改；未连接板子、未推Gerrit、未改认证。下一步等待补丁3授权，IP profile生成仍未实现；开发spec **正式非增量构建前必须撤销**。无新增已知项目文件边界例外。
+
+## 前轮授权与执行状态（2026-11-02；llvm-profgen 补丁2，收尾前，历史）
 
 - 已按本轮授权实现 IP 文本读取、显式选项门控、dsoff→ELF VA 换算和 AddressCounter。冻结版 v0.7 与 C1 基线清单未改；未连接开发板、未推 Gerrit、未开始 Agent 开发。[报告](profgen/impl/03_patch2_reader.md)
 - LLVM 本地提交 `8f4fa360ade28a7b044fd5ef392d4839311545aa`，13 个文件、+816/-3 行，范围仅 llvm/tools/llvm-profgen 与 llvm/test/tools/llvm-profgen；导出[补丁2](../patches/profgen/0002-llvm-profgen-Add-IP-sample-reader-and-dsoff-address-conversion.patch)，52,407 字节，反向应用检查通过。spec 未提交；GBS 的未跟踪生成物保留在 temp。[审计](profgen/impl/evidence/03/07_commit_audit.txt)
@@ -240,7 +249,12 @@
 
 ## 进度
 
-### llvm-profgen 补丁2（当前，已完成）
+### llvm-profgen 补丁2收尾（当前，已完成）
+
+- 13份完整导出、14次目标运行前后逐字节一致；独立MMAP2/PT_LOAD逐地址核对0差异。06缺完整文本的限制详见挂账。[报告](profgen/impl/04_patch2_followup.md)
+- 小修后GBS增量1,012.782秒、105步成功；lit 56 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，C1两遍636条且与原基线0差异。补丁2已amend，等待补丁3授权。
+
+### llvm-profgen 补丁2（收尾前，历史）
 
 - 显式IP读取器、dsoff程序头换算、checked uint64计数与隐藏诊断完成；输出仍固定过渡失败，不生成profile。[报告](profgen/impl/03_patch2_reader.md)
 - 最终GBS增量812.070秒、106步成功；7个新lit全部通过，原50项不变；C1两遍636行及基线比对均0差异。已导出LLVM本地补丁，下一步等待补丁3。
@@ -373,6 +387,8 @@
 
 ## 已闭合结论（附证据路径）
 
+- 补丁2收尾：完整真实文本全部接受、修改前后计数与输出不变；新CLI/dsoff尾缀负对照通过，原行为C1零差异。8个IP lit全通过，原50项不变。[收尾报告](profgen/impl/04_patch2_followup.md)、[逐地址](profgen/impl/evidence/04/02_independent.json)、[lit](profgen/impl/evidence/04/04_lit_summary.json)
+
 - 补丁2的IP读取/地址换算与选项拒绝通过7个lit测试文件；默认LBR行为保持原50项lit结果和C1基线0差异。新工具确实重新链接；固定过渡失败不创建/覆盖output。[实现与规则表](profgen/impl/03_patch2_reader.md)、[lit](profgen/impl/evidence/03/04_lit_classification.json)、[C1](profgen/impl/evidence/03/05_c1_summary.json)
 
 - LLVM site配置已生成，原有lit 50项基线取得（48 PASS、0 FAIL、1 UNSUPPORTED、1 XFAIL）；C1固定登记范围且存档/构建后复核均0差异。[lit](profgen/impl/evidence/02/09_lit.log)、[C1](profgen/impl/evidence/02/10_rebuilt_c1.json)
@@ -445,6 +461,8 @@
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
+
+- 06的完整loss1 perf-script文本未保留；703,821条样本与完整导出行数是否相等尚不可核对。本轮仅确认过滤后942条LOST及L=61,667，未重采或重导。[收尾报告](profgen/impl/04_patch2_followup.md)
 
 - 开发工作树 `temp/llvm-profgen-enh/packaging/llvm.spec` 的LLVM_INCLUDE_TESTS=ON和%check改动只本地保留，**正式非增量构建前必须撤销**，不得进入增强补丁。LLVM site配置与原有lit基线已闭合；assertions专用测试在当前No配置下仍为UNSUPPORTED。[报告](profgen/impl/02_lit_env.md)
 

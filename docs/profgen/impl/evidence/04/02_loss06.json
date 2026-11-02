@@ -1,0 +1,29 @@
+{
+  "source": "temp/rpi4-followup/loss1_lost_lines.json",
+  "scope": "JSON stdout: filtered LOST records only, no full sample text retained",
+  "LOST_records": 942,
+  "L": 61667,
+  "record_samples": 703821,
+  "exported_sample_count": null,
+  "command": "export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; /usr/bin/bash -c 'nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid script -i /opt/afdo_agent/work/loss1.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff | awk '\"'\"'/LOST|LOST_SAMPLES|lost samples/ {print}'\"'\"'; codes=(\"${PIPESTATUS[@]}\"); printf \"PERF_EXIT=%s FILTER_EXIT=%s\\n\" \"${codes[0]}\" \"${codes[1]}\"; exit \"${codes[0]}\"'",
+  "other_stdout_lines": [
+    [
+      943,
+      "PERF_EXIT=0 FILTER_EXIT=0"
+    ]
+  ],
+  "examples": [
+    [
+      1,
+      "  30043/30043   PERF_RECORD_LOST lost 138"
+    ],
+    [
+      2,
+      "  30043/30043   PERF_RECORD_LOST lost 25"
+    ],
+    [
+      3,
+      "  30041/30041   PERF_RECORD_LOST lost 61"
+    ]
+  ]
+}

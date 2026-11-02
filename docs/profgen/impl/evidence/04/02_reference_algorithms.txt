@@ -1,0 +1,134 @@
+temp/rpi4-prefreeze/analyze_perf.py
+1: from pathlib import Path
+2: import re,json,collections
+3: D=Path(__file__).parent
+4: sample=re.compile(r'^\s*(\d+)/(\d+)\s+(\d+)\s+(\S+):\s+([0-9a-f]+) (.*)\((.*)\)\s*$')
+5: mmap=re.compile(r'PERF_RECORD_MMAP2 (\d+)/(\d+): \[(0x[0-9a-f]+)\((0x[0-9a-f]+)\) @ (0x[0-9a-f]+|0) .*?\]: (\S+) (.*)$')
+6: loads=[]
+7: for l in (D/'libavcodec_segments.txt').read_text().splitlines():
+8:  a=l.split()
+9:  if a and a[0]=='LOAD' and 'E' in a:loads.append({'offset':int(a[1],16),'vaddr':int(a[2],16),'filesz':int(a[4],16)})
+10: syms={}
+11: for l in (D/'libavcodec_dynsym.txt').read_text().splitlines():
+12:  a=l.split()
+13:  if len(a)>=8 and a[3]=='FUNC' and a[6]!='UND':
+14:   syms[a[7].split('@')[0]]=(int(a[1],16),int(a[2]))
+15: results={}
+16: for kind in ['fixed','freq','multi','buildid','lost']:
+17:  maps=collections.defaultdict(list);periods=collections.Counter();bad=[];checked=0;segok=0;by_pid=collections.defaultdict(set);counts=collections.Counter();special=collections.Counter();examples=[];lost=[];firstlib=[]
+18:  for n,l in enumerate((D/(kind+'_dsoff.txt')).read_text().splitlines(),1):
+19:   m=mmap.search(l)
+20:   if m:
+21:    pid,tid,start,length,off,prot,path=m.groups();maps[int(pid)].append((int(start,16),int(length,16),int(off,16),path))
+22:    if 'libavcodec' in path:by_pid[pid].add(start)
+23:   if 'LOST' in l:lost.append((n,l))
+24:   m=sample.match(l)
+25:   if not m:continue
+26:   pid,tid,period,event,ip,sym,dso=m.groups();periods[int(period)]+=1;ip=int(ip,16)
+27:   if dso.startswith('['):special[dso]+=1
+28:   if 'libavcodec' not in dso:continue
+29:   if len(firstlib)<20:firstlib.append((n,l))
+30:   path,off=dso.rsplit('+0x',1);off=int(off,16);checked+=1;counts[pid]+=1
+31:   candidates=[x for x in maps[int(pid)] if x[3]==path and x[0]<=ip<x[0]+x[1]]
+32:   calc=ip-candidates[-1][0]+candidates[-1][2] if candidates else None
+33:   if calc!=off:bad.append({'line':n,'ip':hex(ip),'reported':hex(off),'calculated':hex(calc) if calc is not None else None})
+34:   if sum(x['offset']<=off<x['offset']+x['filesz'] for x in loads)==1:segok+=1
+35:   if len(examples)<5:examples.append({'line':n,'pid':pid,'tid':tid,'ip':hex(ip),'mmap':candidates[-1] if candidates else None,'dsoff':hex(off),'calculated':hex(calc) if calc is not None else None})
+36:  # Symbol interval independent check: exclude PLT, unknown and undefined dynsym.
+37:  checked_sym=0;rawhits=0;thumbhits=0;excluded=collections.Counter();symbad=[];symexamples=[]
+38:  for n,l in enumerate((D/(kind+'_symbols.txt')).read_text().splitlines(),1):
+39:   m=sample.match(l)
+40:   if not m:continue
+41:   pid,tid,period,event,ip,sym,dso=m.groups()
+42:   if 'libavcodec' not in dso:continue
+43:   sym=sym.strip()
+44:   if sym=='[unknown]':excluded['unknown']+=1;continue
+45:   if '@plt' in sym:excluded['plt_not_defined_dynsym']+=1;continue
+46:   name=sym.rsplit('+0x',1)[0]
+47:   if name not in syms:excluded['not_defined_func_dynsym']+=1;continue
+48:   off=int(dso.rsplit('+0x',1)[1],16);segments=[x for x in loads if x['offset']<=off<x['offset']+x['filesz']]
+49:   if len(segments)!=1:excluded['not_unique_exec_load']+=1;continue
+50:   vaddr=segments[0]['vaddr']+off-segments[0]['offset'];value,size=syms[name];checked_sym+=1
+51:   rawhits+=value<=vaddr<value+size
+52:   thumbhits+=(value&~1)<=vaddr<(value&~1)+size
+53:   item={'line':n,'name':name,'ip':ip,'dsoff':hex(off),'vaddr':hex(vaddr),'symbol_value':hex(value),'symbol_size':size}
+54:   if not value<=vaddr<value+size:symbad.append(item)
+55:   if len(symexamples)<8:symexamples.append(item)
+56:  results[kind]={'samples':sum(periods.values()),'period_distribution':dict(periods),'lib_samples':checked,'formula_matches':checked-len(bad),'formula_mismatches':bad,'exec_load_matches':segok,'lib_mappings':{k:sorted(v) for k,v in by_pid.items()},'lib_samples_per_pid':dict(counts),'special_dsos':dict(special),'examples':examples,'first20lib':firstlib,'lost_records':lost,'dynsym_checked':checked_sym,'dynsym_raw_hits':rawhits,'dynsym_thumb_normalized_hits':thumbhits,'dynsym_excluded':dict(excluded),'dynsym_raw_mismatches':symbad,'dynsym_examples':symexamples}
+57: (D/'perf_analysis.json').write_text(json.dumps(results,indent=2))
+58: for k,r in results.items():print(k,{x:r[x] for x in ['samples','lib_samples','formula_matches','exec_load_matches','dynsym_checked','dynsym_raw_hits','dynsym_thumb_normalized_hits','special_dsos']},'period_unique',len(r['period_distribution']),'LOST',len(r['lost_records']))
+
+temp/rpi5-prefreeze/analyze.py
+1: from pathlib import Path
+2: import re,json,collections
+3: D=Path(__file__).parent
+4: sample=re.compile(r'^\s*(-?\d+)/(-?\d+)\s+(\d+)\s+(\S+):\s+([0-9a-f]+) \((.*)\)\s*$')
+5: mmap=re.compile(r'PERF_RECORD_MMAP2 (\d+)/(\d+): \[(0x[0-9a-f]+)\((0x[0-9a-f]+)\) @ (0x[0-9a-f]+|0) (.*?)\]: (\S+) (.*)$')
+6: loads=[]
+7: for l in (D/'libavcodec_segments.txt').read_text().splitlines():
+8:  a=l.split()
+9:  if a and a[0]=='LOAD' and 'E' in a:loads.append({'offset':int(a[1],16),'vaddr':int(a[2],16),'filesz':int(a[4],16)})
+10: results={'loads':loads}
+11: for kind in ['fixed','multi','freq','buildid']:
+12:  maps=collections.defaultdict(list); periods=collections.Counter(); counts=collections.Counter();bad=[];seg_bad=[];examples=[];target=[];special={};unknown=[];by_pid=collections.defaultdict(set);id_maps=[];unparsed=[];segment_counts=collections.Counter();all_samples=0
+13:  for n,l in enumerate((D/(kind+'_dsoff.txt')).read_text().splitlines(),1):
+14:   m=mmap.search(l)
+15:   if m:
+16:    pid,tid,start,length,off,identity,prot,path=m.groups()
+17:    item={'start':int(start,16),'length':int(length,16),'pgoff':int(off,16),'path':path,'line':n}
+18:    maps[int(pid)].append(item)
+19:    if 'libavcodec' in path:by_pid[pid].add(start)
+20:    if 'libc.so.6' in path or 'libavcodec' in path:id_maps.append({'line':n,'pid':pid,'identity':identity,'path':path,'raw':l})
+21:   m=sample.match(l)
+22:   if not m:
+23:    if l.strip() and 'PERF_RECORD_' not in l:unparsed.append({'line':n,'raw':l})
+24:    continue
+25:   pid,tid,period,event,ip,dso=m.groups();periods[int(period)]+=1;all_samples+=1;ip=int(ip,16)
+26:   if dso.startswith('['):special.setdefault(dso.split('+0x')[0],{'line':n,'raw':l})
+27:   if dso=='[unknown]':unknown.append({'line':n,'raw':l})
+28:   if 'libavcodec' not in dso:continue
+29:   path,off=dso.rsplit('+0x',1);off=int(off,16);counts[pid]+=1
+30:   candidates=[x for x in maps[int(pid)] if x['start']<=ip<x['start']+x['length']]
+31:   last=candidates[-1] if candidates else None
+32:   calc=ip-last['start']+last['pgoff'] if last else None
+33:   item={'line':n,'pid':pid,'tid':tid,'ip':hex(ip),'reported':hex(off),'map':last,'calculated':hex(calc) if calc is not None else None}
+34:   if calc!=off or last['path']!=path:bad.append(item)
+35:   segments=[(j,x) for j,x in enumerate(loads) if x['offset']<=off<x['offset']+x['filesz']]
+36:   if len(segments)!=1:seg_bad.append(item)
+37:   else:
+38:    j,x=segments[0];segment_counts[j]+=1;item['vaddr']=hex(x['vaddr']+off-x['offset'])
+39:   if len(examples)<5:examples.append(item)
+40:   if len(target)<20:target.append({'line':n,'raw':l})
+41:  (D/(kind+'_periods.tsv')).write_text('period\tsamples\n'+''.join(f'{k}\t{v}\n' for k,v in sorted(periods.items())))
+42:  results[kind]={'samples':all_samples,'period_unique':len(periods),'period_min':min(periods),'period_max':max(periods),'period_top20':periods.most_common(20),'period_histogram':{f'[{10**i},{10**(i+1)})':sum(c for p,c in periods.items() if 10**i<=p<10**(i+1)) for i in range(9)},'target_samples':sum(counts.values()),'counts_per_pid':dict(counts),'formula_matches':sum(counts.values())-len(bad),'formula_mismatches':bad,'unique_segment_matches':sum(counts.values())-len(seg_bad),'segment_mismatches':seg_bad,'segment_counts':dict(segment_counts),'mappings':{p:sorted(v) for p,v in by_pid.items()},'examples':examples,'first20target':target,'special':special,'unknown_samples':len(unknown),'identity_mmaps':id_maps,'unparsed_lines':unparsed}
+43: libcid=re.search(r'Build ID: ([0-9a-f]+)',(D/'libc_notes.txt').read_text())[1]
+44: idmaps=[x for x in results['buildid']['identity_mmaps'] if x['path'].endswith('/libc.so.6')]
+45: results['buildid_comparison']={'elf_path':'/usr/lib64/libc.so.6','elf_id':libcid,'id_bytes':len(libcid)//2,'mmap_count':len(idmaps),'matches':sum(x['identity']=='<'+libcid+'>' for x in idmaps),'maps':idmaps}
+46: (D/'analysis.json').write_text(json.dumps(results,indent=2))
+47: for k in ['fixed','multi','freq','buildid']:
+48:  r=results[k];print(k,{x:r[x] for x in ['samples','target_samples','formula_matches','unique_segment_matches','counts_per_pid','period_unique','period_min','period_max','mappings','unparsed_lines']})
+49: print('LOADS',loads);print('BUILDID',results['buildid_comparison'])
+
+temp/rpi4-followup/lost_probe.py
+1: from common import *
+2: import hashlib
+3: B='/opt/afdo_agent/work/';src=W/'media/bbb_1080p_h264_60s.mp4'
+4: assert host('push_video',['nice','-n','19','ionice','-c3','sdb','-s',S,'push',str(src),B+'video.mp4'])['exit']==0
+5: r=remote('video_sha','sha256sum '+B+'video.mp4',True,True);assert r['stdout'].split()[0]==hashlib.sha256(src.read_bytes()).hexdigest()
+6: L='gst-launch-1.0 -q filesrc location='+B+'video.mp4 ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=600 ! fakesink sync=false'
+7: for name,cmd in [('loss1',L),('loss2','sh -c '+shlex.quote(L+' & p1=$!; '+L+' & p2=$!; wait "$p1"; r1=$?; wait "$p2"; r2=$?; echo DECODER_EXIT=$r1,$r2; test "$r1" = 0 && test "$r2" = 0'))]:
+8:  monitor='( while :; do date +%s; grep -E "^(pswpin|pswpout) " /proc/vmstat; sleep 1; done ) > '+B+name+'_vmstat.txt & mon=$!; '
+9:  record=PERF+' record -e cycles -c 10007 -m 1 -o '+B+name+'.data -- '+cmd
+10:  r=remote(name+'_record',monitor+record+'; rc=$?; kill -TERM "$mon"; wait "$mon" 2>/dev/null; exit "$rc"',True,True);print(r['stderr']);assert r['remote_exit']==0
+11:  r=remote(name+'_report',PERF+' report -i '+B+name+'.data --stdio --sort dso --header',True,True);print(r['stdout'][-2000:]);assert r['remote_exit']==0
+12:  body=PERF+' script -i '+B+name+'.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff | awk '+shlex.quote('/LOST|LOST_SAMPLES|lost samples/ {print}')+'; codes=("${PIPESTATUS[@]}"); printf "PERF_EXIT=%s FILTER_EXIT=%s\\n" "${codes[0]}" "${codes[1]}"; exit "${codes[0]}"'
+13:  r2=remote(name+'_lost_lines','/usr/bin/bash -c '+shlex.quote(body),True,True);assert r2['remote_exit']==0
+14:  remote(name+'_evlist',PERF+' evlist -v -i '+B+name+'.data',True,True)
+15:  for f in [name+'.data',name+'_vmstat.txt']:
+16:   q=remote(name+'_sha_'+f,'sha256sum '+B+f,True,True)
+17:   assert host('pull_'+f,['nice','-n','19','ionice','-c3','sdb','-s',S,'pull',B+f,str(D/f)])['exit']==0
+18:   assert hashlib.sha256((D/f).read_bytes()).hexdigest()==q['stdout'].split()[0]
+19:  remote(name+'_disk','df -k /opt; du -sk /opt/afdo_agent/work',True,True)
+20:  # Remove data after its host copy and report to leave space for a possible second try.
+21:  remote(name+'_remove','rm -f '+B+name+'.data '+B+name+'_vmstat.txt',True,True)
+22:  if re.search(r'Total Lost Samples:\s*[1-9]',r['stdout']) or 'PERF_RECORD_LOST' in r2['stdout']:break

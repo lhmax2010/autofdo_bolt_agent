@@ -1,5 +1,7 @@
 # 补丁 2：IP 文本读取与 dsoff 地址换算
 
+> 历史记录：本页对应收尾前的8f4fa360提交及当时工具；补丁2已amend，导出补丁链接现指向新版。当前提交、完整导出验收和最终测试结果见[收尾报告04](04_patch2_followup.md)。
+
 2026-11-02。本补丁只实现读取、筛选与 ELF 地址计数；**尚不能生成 IP profile**。成功读取后仍按本轮要求返回固定的过渡错误，退出 1，不创建或覆盖 output。
 
 冻结设计 v0.7 SHA-256 为 `eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be`，文档未改。LLVM 起点为补丁 1 `00fa352d531680f0bf4a55dec21b30bacfcd4092`；工作树 `temp/llvm-profgen-enh`、分支 `afdo/profgen-enhance`。没有连接开发板、没有向 LLVM 远端或 Gerrit 推送。

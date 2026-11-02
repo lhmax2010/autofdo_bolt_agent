@@ -1,0 +1,1262 @@
+[
+  {
+    "label": "05-fixed",
+    "input": "temp/rpi4-prefreeze/fixed_dsoff.txt",
+    "input_sha256": "f3d9245d0cd2971cadc6561159bc92ba202264bd39b1cec61e47e5c35480f9cd",
+    "elf": "temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+    "elf_sha256": "9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56",
+    "target_path": "/usr/lib/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/05-fixed.profile"
+    ],
+    "lines": 7703,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "PERF_RECORD_MMAP2": 33,
+      "samples": 7659
+    },
+    "event_counts": {
+      "cycles": 7659
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 393
+    },
+    "target_path_samples": 6496,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 12,
+          "raw": "  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0x47c000(0x8000) @ 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0"
+        },
+        {
+          "line": 13,
+          "raw": "  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6f0a000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3"
+        },
+        {
+          "line": 14,
+          "raw": "  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xbefda000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 7703,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 7659,
+      "after_event": 7659,
+      "after_pid": 7659,
+      "pid_unknown": 0,
+      "kernel": 393,
+      "other_dso": 770,
+      "unmapped": 0,
+      "target": 6496,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 44
+    },
+    "wall_seconds": 0.06376713002100587,
+    "peak_RSS_KiB": 39952,
+    "output_created": false
+  },
+  {
+    "label": "05-multi",
+    "input": "temp/rpi4-prefreeze/multi_dsoff.txt",
+    "input_sha256": "1c8e914aa1216944981e742213ef42881fddfe961730201602a5e23d936821de",
+    "elf": "temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+    "elf_sha256": "9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56",
+    "target_path": "/usr/lib/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/multi_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/05-multi.profile"
+    ],
+    "lines": 27112,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "PERF_RECORD_MMAP2": 4439,
+      "samples": 22662
+    },
+    "event_counts": {
+      "cycles": 22662
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 41,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 2572,
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/proc-tsm.ko": 1,
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/logger.ko": 1
+    },
+    "target_path_samples": 13289,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 12,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0x4d5000(0xe9000) @ 0 b3:02 9132 0]: r-xp /usr/lib/systemd/systemd"
+        },
+        {
+          "line": 13,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0xb6ab6000(0x3000) @ 0 b3:02 8618 0]: r-xp /usr/lib/libattr.so.1.1.2501"
+        },
+        {
+          "line": 14,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0xb6abb000(0xe000) @ 0 b3:02 1166 0]: r-xp /usr/lib/libz.so.1.3.1"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 27112,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 22662,
+      "after_event": 22662,
+      "after_pid": 22662,
+      "pid_unknown": 0,
+      "kernel": 2574,
+      "other_dso": 6799,
+      "unmapped": 0,
+      "target": 13289,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 4450
+    },
+    "wall_seconds": 0.05017219699220732,
+    "peak_RSS_KiB": 47004,
+    "output_created": false
+  },
+  {
+    "label": "05-freq",
+    "input": "temp/rpi4-prefreeze/freq_dsoff.txt",
+    "input_sha256": "8d5072cdb757e9551c357331d86638ce02d13eb6e22c9a5a997932c86e9b6bab",
+    "elf": "temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+    "elf_sha256": "9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56",
+    "target_path": "/usr/lib/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/freq_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/05-freq.profile"
+    ],
+    "lines": 4930,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "samples": 4886,
+      "PERF_RECORD_MMAP2": 33
+    },
+    "event_counts": {
+      "cycles": 4886
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 305
+    },
+    "target_path_samples": 4096,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 18,
+          "raw": "  12277/12277   PERF_RECORD_MMAP2 12277/12277: [0x446000(0x8000) @ 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0"
+        },
+        {
+          "line": 19,
+          "raw": "  12277/12277   PERF_RECORD_MMAP2 12277/12277: [0xb6fcc000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3"
+        },
+        {
+          "line": 20,
+          "raw": "  12277/12277   PERF_RECORD_MMAP2 12277/12277: [0xbeec8000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 4930,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 4886,
+      "after_event": 4886,
+      "after_pid": 4886,
+      "pid_unknown": 0,
+      "kernel": 305,
+      "other_dso": 485,
+      "unmapped": 0,
+      "target": 4096,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 44
+    },
+    "wall_seconds": 0.023583517991937697,
+    "peak_RSS_KiB": 39240,
+    "output_created": false
+  },
+  {
+    "label": "05-buildid",
+    "input": "temp/rpi4-prefreeze/buildid_dsoff.txt",
+    "input_sha256": "35a3f83f03440d7cfe4e0bfb2e97bc052a3aed95ffbd8047dc0b4fd47079ba45",
+    "elf": "temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+    "elf_sha256": "9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56",
+    "target_path": "/usr/lib/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/buildid_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/05-buildid.profile"
+    ],
+    "lines": 7510,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP2": 44,
+      "samples": 7466
+    },
+    "event_counts": {
+      "cycles": 7466
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 395
+    },
+    "target_path_samples": 6322,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000 <d9c293aaae06e2f3b9a2136fed98e6f1677d5312>]: ---p [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xbf000000(0x3000) @ 0 <cbcff7e74fc8c6dd5590ba90b752b2ec08bcc222>]: ---p /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xbf002000(0x3000) @ 0 <676e89ab623e8f176afd3984120c7025918c46d7>]: ---p /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 7510,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 7466,
+      "after_event": 7466,
+      "after_pid": 7466,
+      "pid_unknown": 0,
+      "kernel": 395,
+      "other_dso": 749,
+      "unmapped": 0,
+      "target": 6322,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 44
+    },
+    "wall_seconds": 0.026016154035460204,
+    "peak_RSS_KiB": 39864,
+    "output_created": false
+  },
+  {
+    "label": "05-lost",
+    "input": "temp/rpi4-prefreeze/lost_dsoff.txt",
+    "input_sha256": "52128c99b268ff8d23137e92184d399dcb585d0344f49ce7c0588e1950b47de5",
+    "elf": "temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+    "elf_sha256": "9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56",
+    "target_path": "/usr/lib/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/lost_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/05-lost.profile"
+    ],
+    "lines": 1044585,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "PERF_RECORD_MMAP2": 33,
+      "samples": 1044541
+    },
+    "event_counts": {
+      "cycles": 1044541
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 19464
+    },
+    "target_path_samples": 943893,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 12,
+          "raw": "  12555/12555   PERF_RECORD_MMAP2 12555/12555: [0x496000(0x8000) @ 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0"
+        },
+        {
+          "line": 15,
+          "raw": "  12555/12555   PERF_RECORD_MMAP2 12555/12555: [0xb6f35000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3"
+        },
+        {
+          "line": 17,
+          "raw": "  12555/12555   PERF_RECORD_MMAP2 12555/12555: [0xbef44000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 1044585,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 1044541,
+      "after_event": 1044541,
+      "after_pid": 1044541,
+      "pid_unknown": 0,
+      "kernel": 19464,
+      "other_dso": 81184,
+      "unmapped": 0,
+      "target": 943893,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 44
+    },
+    "wall_seconds": 1.4055091330083087,
+    "peak_RSS_KiB": 304924,
+    "output_created": false
+  },
+  {
+    "label": "07-fork-cases",
+    "input": "temp/v04/fork.txt",
+    "input_sha256": "f6d81393f616f0fb142bd95a250fd11f67d49feb12c99d3e5eec4228da744cc5",
+    "elf": "temp/v04/samples-extract/usr/bin/cases",
+    "elf_sha256": "4b2d2b6476c3241e572af6bd143aa938b663673fe6240c41ee4b02969caa4ac8",
+    "target_path": "/opt/afdo_agent/work/cases",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+      "--binary-match-regex=^/opt/afdo_agent/work/cases$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/fork.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/07-fork-cases.profile"
+    ],
+    "lines": 9861,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "PERF_RECORD_MMAP2": 5,
+      "samples": 9845
+    },
+    "event_counts": {
+      "cycles": 9845
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 5
+    },
+    "target_path_samples": 9840,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 12,
+          "raw": "   6736/6736    PERF_RECORD_MMAP2 6736/6736: [0x420000(0x2000) @ 0 b3:03 893 2005307221]: r-xp /opt/afdo_agent/work/cases"
+        },
+        {
+          "line": 13,
+          "raw": "   6736/6736    PERF_RECORD_MMAP2 6736/6736: [0xb6f15000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3"
+        },
+        {
+          "line": 14,
+          "raw": "   6736/6736    PERF_RECORD_MMAP2 6736/6736: [0xbedf8000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 9861,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 9845,
+      "after_event": 9845,
+      "after_pid": 9845,
+      "pid_unknown": 0,
+      "kernel": 5,
+      "other_dso": 0,
+      "unmapped": 0,
+      "target": 9840,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 16
+    },
+    "wall_seconds": 0.027519772003870457,
+    "peak_RSS_KiB": 40364,
+    "output_created": false
+  },
+  {
+    "label": "07-exec-cases",
+    "input": "temp/v04/exec.txt",
+    "input_sha256": "5f53efea966b42dd49cb69a9c041e2d7c4c29c24ca71ffbb8d03602155dc0fe5",
+    "elf": "temp/v04/samples-extract/usr/bin/cases",
+    "elf_sha256": "4b2d2b6476c3241e572af6bd143aa938b663673fe6240c41ee4b02969caa4ac8",
+    "target_path": "/opt/afdo_agent/work/cases",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+      "--binary-match-regex=^/opt/afdo_agent/work/cases$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/exec.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/07-exec-cases.profile"
+    ],
+    "lines": 5946,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "PERF_RECORD_MMAP2": 10,
+      "samples": 5925
+    },
+    "event_counts": {
+      "cycles": 5925
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 10
+    },
+    "target_path_samples": 4833,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 12,
+          "raw": "   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0x420000(0x2000) @ 0 b3:03 893 2005307221]: r-xp /opt/afdo_agent/work/cases"
+        },
+        {
+          "line": 13,
+          "raw": "   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0xb6f46000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3"
+        },
+        {
+          "line": 14,
+          "raw": "   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0xbedab000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 5946,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 5925,
+      "after_event": 5925,
+      "after_pid": 5925,
+      "pid_unknown": 0,
+      "kernel": 10,
+      "other_dso": 1082,
+      "unmapped": 0,
+      "target": 4833,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 21
+    },
+    "wall_seconds": 0.018450836010742933,
+    "peak_RSS_KiB": 39236,
+    "output_created": false
+  },
+  {
+    "label": "07-exec-after",
+    "input": "temp/v04/exec.txt",
+    "input_sha256": "5f53efea966b42dd49cb69a9c041e2d7c4c29c24ca71ffbb8d03602155dc0fe5",
+    "elf": "temp/v04/samples-extract/usr/bin/after",
+    "elf_sha256": "e56d57aa2bf6c0eae8d10198af2bb5203d9d8827e10fa695e4df405e80a3e8b0",
+    "target_path": "/opt/afdo_agent/work/after",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/after",
+      "--binary-match-regex=^/opt/afdo_agent/work/after$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/exec.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/07-exec-after.profile"
+    ],
+    "lines": 5946,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "PERF_RECORD_MMAP2": 10,
+      "samples": 5925
+    },
+    "event_counts": {
+      "cycles": 5925
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 10
+    },
+    "target_path_samples": 1081,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 12,
+          "raw": "   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0x420000(0x2000) @ 0 b3:03 893 2005307221]: r-xp /opt/afdo_agent/work/cases"
+        },
+        {
+          "line": 13,
+          "raw": "   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0xb6f46000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3"
+        },
+        {
+          "line": 14,
+          "raw": "   6835/6835    PERF_RECORD_MMAP2 6835/6835: [0xbedab000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 5946,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 5925,
+      "after_event": 5925,
+      "after_pid": 5925,
+      "pid_unknown": 0,
+      "kernel": 10,
+      "other_dso": 4834,
+      "unmapped": 0,
+      "target": 1081,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 21
+    },
+    "wall_seconds": 0.013910012959968299,
+    "peak_RSS_KiB": 39216,
+    "output_created": false
+  },
+  {
+    "label": "07-deleted-libdeleted_probe.so",
+    "input": "temp/v04/deleted.txt",
+    "input_sha256": "5e86a39b0886c980803ec967bd93b9f921f20049d16f73d329c66a252ef09c8b",
+    "elf": "temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+    "elf_sha256": "b3820436cd861caecf32477ef77972621bcd5092183b4f6f4780f145c9fdc4ce",
+    "target_path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+      "--binary-match-regex=^/opt/afdo_agent/work/libdeleted_probe\\.so\\ \\(deleted\\)$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/deleted.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/07-deleted-libdeleted_probe.so.profile"
+    ],
+    "lines": 169,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP2": 18,
+      "samples": 151
+    },
+    "event_counts": {
+      "cycles": 151
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 151,
+    "input_kernel_dso_counts": {},
+    "target_path_samples": 151,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000 <d9c293aaae06e2f3b9a2136fed98e6f1677d5312>]: ---p [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xbf000000(0x3000) @ 0 <cbcff7e74fc8c6dd5590ba90b752b2ec08bcc222>]: ---p /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xbf002000(0x3000) @ 0 <676e89ab623e8f176afd3984120c7025918c46d7>]: ---p /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 169,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 151,
+      "after_event": 151,
+      "after_pid": 151,
+      "pid_unknown": 0,
+      "kernel": 0,
+      "other_dso": 0,
+      "unmapped": 0,
+      "target": 151,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 18
+    },
+    "wall_seconds": 0.011476140993181616,
+    "peak_RSS_KiB": 38404,
+    "output_created": false
+  },
+  {
+    "label": "07-module",
+    "input": "temp/v04/module.txt",
+    "input_sha256": "125622a5bf522ad32839d0a1b645aae49e30c7e4d2a0972dd46312233a963689",
+    "elf": "temp/rpi4-followup/libs/usr_lib_libc.so.6",
+    "elf_sha256": "5265d103c649dee96819be42f444c31fe1045d49c0abf7c095459e13366a0d82",
+    "target_path": "/usr/lib/libc.so.6",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libc.so.6",
+      "--binary-match-regex=^/usr/lib/libc\\.so\\.6$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/module.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/07-module.profile"
+    ],
+    "lines": 334304,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 11,
+      "PERF_RECORD_MMAP2": 15911,
+      "samples": 318382
+    },
+    "event_counts": {
+      "cycles": 318382
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 274,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 134607,
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko": 1663,
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/logger.ko": 56,
+      "/lib/modules/6.12.80-arm-rpi4-v7l/extra/proc-tsm.ko": 10
+    },
+    "target_path_samples": 51874,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 12,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0x4d5000(0xe9000) @ 0 b3:02 9132 0]: r-xp /usr/lib/systemd/systemd"
+        },
+        {
+          "line": 13,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0xb6ab6000(0x3000) @ 0 b3:02 8618 0]: r-xp /usr/lib/libattr.so.1.1.2501"
+        },
+        {
+          "line": 14,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0xb6abb000(0xe000) @ 0 b3:02 1166 0]: r-xp /usr/lib/libz.so.1.3.1"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 334304,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 318382,
+      "after_event": 318382,
+      "after_pid": 318382,
+      "pid_unknown": 0,
+      "kernel": 136336,
+      "other_dso": 130172,
+      "unmapped": 0,
+      "target": 51874,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 15922
+    },
+    "wall_seconds": 0.17740509001305327,
+    "peak_RSS_KiB": 136292,
+    "output_created": false
+  },
+  {
+    "label": "09-fixed",
+    "input": "temp/rpi5-prefreeze/fixed_dsoff.txt",
+    "input_sha256": "721ee62217d6b904642ef977b14b6e4113dcdeb48946d7aa4738250dbcd5f864",
+    "elf": "temp/rpi5-prefreeze/libavcodec",
+    "elf_sha256": "0aaecd3a290fdedb6fa0ba6088fd49cea8635bf7d89c1cbe94efe5506cc63166",
+    "target_path": "/usr/lib64/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/09-fixed.profile"
+    ],
+    "lines": 7661,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 13,
+      "PERF_RECORD_MMAP2": 31,
+      "samples": 7617
+    },
+    "event_counts": {
+      "cycles": 7617
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 238
+    },
+    "target_path_samples": 5865,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff800080000000(0x21d3200) @ 0xffff800080000000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b0000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/inform-reboot.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b6000(0x7000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-core.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 14,
+          "raw": "   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xaaaaab3d0000(0x21000) @ 0 b3:02 8898 1572954365]: r-xp /usr/bin/gst-launch-1.0"
+        },
+        {
+          "line": 15,
+          "raw": "   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3b8b000(0x42000) @ 0 b3:02 656 3540038822]: r-xp /usr/lib64/ld-linux-aarch64.so.1"
+        },
+        {
+          "line": 16,
+          "raw": "   2085/2085    PERF_RECORD_MMAP2 2085/2085: [0xffffb3bc7000(0x2000) @ 0 00:00 0 0]: r-xp [vdso]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 7661,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 7617,
+      "after_event": 7617,
+      "after_pid": 7617,
+      "pid_unknown": 0,
+      "kernel": 238,
+      "other_dso": 1514,
+      "unmapped": 0,
+      "target": 5865,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 44
+    },
+    "wall_seconds": 0.06753848301013932,
+    "peak_RSS_KiB": 40076,
+    "output_created": false
+  },
+  {
+    "label": "09-multi",
+    "input": "temp/rpi5-prefreeze/multi_dsoff.txt",
+    "input_sha256": "0974d7dc13cfb23a16b6832eb425e97c369b540930d2f4ebf4e74fb75fff3c93",
+    "elf": "temp/rpi5-prefreeze/libavcodec",
+    "elf_sha256": "0aaecd3a290fdedb6fa0ba6088fd49cea8635bf7d89c1cbe94efe5506cc63166",
+    "target_path": "/usr/lib64/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/multi_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/09-multi.profile"
+    ],
+    "lines": 31066,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 13,
+      "PERF_RECORD_MMAP2": 4275,
+      "samples": 26778
+    },
+    "event_counts": {
+      "cycles": 26778
+    },
+    "input_pid_unknown": 1,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 2601
+    },
+    "target_path_samples": 14331,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff800080000000(0x21d3200) @ 0xffff800080000000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b0000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/inform-reboot.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b6000(0x7000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-core.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 14,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0xaaaabf2a0000(0x13b000) @ 0 b3:02 7761 0]: r-xp /usr/lib/systemd/systemd"
+        },
+        {
+          "line": 15,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0xffffa1090000(0x4000) @ 0 b3:02 6316 0]: r-xp /usr/lib64/libattr.so.1.1.2501"
+        },
+        {
+          "line": 16,
+          "raw": "      0/0       PERF_RECORD_MMAP2 1/1: [0xffffa10c0000(0x12000) @ 0 b3:02 753 0]: r-xp /usr/lib64/libz.so.1.3.1"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 31066,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 26778,
+      "after_event": 26778,
+      "after_pid": 26778,
+      "pid_unknown": 1,
+      "kernel": 2601,
+      "other_dso": 9846,
+      "unmapped": 0,
+      "target": 14331,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 4288
+    },
+    "wall_seconds": 0.05528591899201274,
+    "peak_RSS_KiB": 47844,
+    "output_created": false
+  },
+  {
+    "label": "09-freq",
+    "input": "temp/rpi5-prefreeze/freq_dsoff.txt",
+    "input_sha256": "b74da23fc9da2a7722fa27432ac738b29ec0578a41e95854ccc3104112369a15",
+    "elf": "temp/rpi5-prefreeze/libavcodec",
+    "elf_sha256": "0aaecd3a290fdedb6fa0ba6088fd49cea8635bf7d89c1cbe94efe5506cc63166",
+    "target_path": "/usr/lib64/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/freq_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/09-freq.profile"
+    ],
+    "lines": 2625,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP": 13,
+      "samples": 2581,
+      "PERF_RECORD_MMAP2": 31
+    },
+    "event_counts": {
+      "cycles": 2581
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 123
+    },
+    "target_path_samples": 2006,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff800080000000(0x21d3200) @ 0xffff800080000000]: x [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b0000(0x3000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/extra/inform-reboot.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP -1/0: [0xffff80007a2b6000(0x7000) @ 0]: x /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-core.ko"
+        }
+      ],
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 19,
+          "raw": "   2295/2295    PERF_RECORD_MMAP2 2295/2295: [0xaaaab68f0000(0x21000) @ 0 b3:02 8898 1572954365]: r-xp /usr/bin/gst-launch-1.0"
+        },
+        {
+          "line": 20,
+          "raw": "   2295/2295    PERF_RECORD_MMAP2 2295/2295: [0xffffb11e4000(0x42000) @ 0 b3:02 656 3540038822]: r-xp /usr/lib64/ld-linux-aarch64.so.1"
+        },
+        {
+          "line": 21,
+          "raw": "   2295/2295    PERF_RECORD_MMAP2 2295/2295: [0xffffb1220000(0x2000) @ 0 00:00 0 0]: r-xp [vdso]"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 2625,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 2581,
+      "after_event": 2581,
+      "after_pid": 2581,
+      "pid_unknown": 0,
+      "kernel": 123,
+      "other_dso": 452,
+      "unmapped": 0,
+      "target": 2006,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 44
+    },
+    "wall_seconds": 0.01771200797520578,
+    "peak_RSS_KiB": 38796,
+    "output_created": false
+  },
+  {
+    "label": "09-buildid",
+    "input": "temp/rpi5-prefreeze/buildid_dsoff.txt",
+    "input_sha256": "380202c9985f193c3663e3f8f9c36c0556ff6a57aef143abb7a357caf75f45ad",
+    "elf": "temp/rpi5-prefreeze/libavcodec",
+    "elf_sha256": "0aaecd3a290fdedb6fa0ba6088fd49cea8635bf7d89c1cbe94efe5506cc63166",
+    "target_path": "/usr/lib64/libavcodec.so.62.11.100",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/buildid_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch2-followup/before/09-buildid.profile"
+    ],
+    "lines": 7270,
+    "independent_line_counts": {
+      "PERF_RECORD_MMAP2": 44,
+      "samples": 7226
+    },
+    "event_counts": {
+      "cycles": 7226
+    },
+    "input_pid_unknown": 0,
+    "input_deleted_samples": 0,
+    "input_kernel_dso_counts": {
+      "[kernel.kallsyms]": 231
+    },
+    "target_path_samples": 5611,
+    "lost_L": 0,
+    "record_examples": {
+      "PERF_RECORD_MMAP2": [
+        {
+          "line": 1,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xffff800080000000(0x21d3200) @ 0xffff800080000000 <454cebacdfdefd52941d4157f10cb2ed5e38ef2d>]: ---p [kernel.kallsyms]_text"
+        },
+        {
+          "line": 2,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xffff80007a2b0000(0x3000) @ 0 <f7a312b3da14eeee03e3ae79db292635ae29422b>]: ---p /lib/modules/6.12.80-arm64-rpi4-v8/extra/inform-reboot.ko"
+        },
+        {
+          "line": 3,
+          "raw": "      0/0       PERF_RECORD_MMAP2 -1/0: [0xffff80007a2b6000(0x7000) @ 0 <b426fda0362c0c5fcff7b85f35041f1f64d47365>]: ---p /lib/modules/6.12.80-arm64-rpi4-v8/kernel/drivers/i2c/busses/i2c-designware-core.ko"
+        }
+      ]
+    },
+    "exit": 1,
+    "accepted_whole_file": true,
+    "accepted_prefix_lines": 7270,
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "tool_stats": {
+      "input": 7226,
+      "after_event": 7226,
+      "after_pid": 7226,
+      "pid_unknown": 0,
+      "kernel": 231,
+      "other_dso": 1384,
+      "unmapped": 0,
+      "target": 5611,
+      "unmapped_in_target": 0,
+      "lost_records": 0,
+      "lost_L": 0,
+      "mappings": 44
+    },
+    "wall_seconds": 0.02327440696535632,
+    "peak_RSS_KiB": 39732,
+    "output_created": false
+  }
+]
