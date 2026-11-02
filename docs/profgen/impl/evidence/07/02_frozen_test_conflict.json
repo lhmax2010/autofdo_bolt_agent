@@ -1,0 +1,48 @@
+{
+  "design_sha256": "eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be",
+  "golden_sha256": "3ea33f704b33d36ea0370e67a277cb25039870bd4440d72a10dd5c52f5790971",
+  "input_sha256": {
+    "pure-a64": "12868b7bc185c73c712f528ba0fe66ef8db6b199250e51c117b9621fce144f92",
+    "bad-a64-start": "7906cba77182eec5c45e4c6986d975b016376ed07f552a9523602e091be5bd0f",
+    "bad-a64-end": "c3512d7ee145f8355defee594b7440d3bb17e7708245aba8e4f5d15d5fe4bedb"
+  },
+  "golden": {
+    "pure-a64.perfbin": {
+      "ranges": [
+        [
+          "anchor",
+          "anchor+8"
+        ]
+      ],
+      "starts": [
+        4096,
+        4100
+      ],
+      "data": [],
+      "expect": "pass"
+    },
+    "bad-a64-start.perfbin": {
+      "ranges": [
+        [
+          "anchor+2",
+          "anchor+8"
+        ]
+      ],
+      "starts": [],
+      "data": [],
+      "expect": "boundary failure"
+    },
+    "bad-a64-end.perfbin": {
+      "ranges": [
+        [
+          "anchor",
+          "anchor+6"
+        ]
+      ],
+      "starts": [],
+      "data": [],
+      "expect": "boundary failure"
+    }
+  },
+  "conflict": "All three have local STT_NOTYPE $x and $d at .text 0x1000; frozen 5.7.2.3/6 must reject before start/end checks. No conflicting state was ignored and no original fixture/golden was changed."
+}

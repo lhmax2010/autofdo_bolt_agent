@@ -26,7 +26,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-02；补丁3修正与补丁4已完成）
+## 当前授权与执行状态（2026-11-02；补丁4小修完成，补丁5因素材冲突停止）
+
+- 计划：先补丁4小修及GBS/lit/C1，再完成补丁5按需边界、avg、补零、skid及全部交叉核对。冻结v0.7 SHA仍为 `eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be`；未改设计、未连接板子、不推LLVM远端/Gerrit。[报告](profgen/impl/07_patch5_boundaries.md)
+- 已闭合：补丁4从 `de8171b77cec5e547c8ffc2f7a5039a8b39b8577` amend为 `aef395b32e27d5f63468c5d49f76f43508dbf270`，修正sample+显式period-unit错误、非叶子原始line0诊断；相对原补丁4为8文件+54/-5行及3704B素材。重新导出0004；spec原有diff逐字节不变、未提交。[审计](profgen/impl/evidence/07/11_commit_audit.json)
+- GBS增量22:30:41–22:48:17+08:00成功，1056.634秒、Ninja105步、GBS_EXIT0/ALL-END OK。GBS内首次lit因旧测试输出有1 FAIL；负对照增加清理自身旧输出后，用同一GBS工具重跑全lit为69 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，原50逐项不变。C1每遍636项、两遍一致、0差异。通过后才开始补丁5。[构建/失败/复测](profgen/impl/07_patch5_boundaries.md#3-构建litc1与失败原文)
+- 人工裁决前提：补丁1的pure-a64、bad-a64-start/end在.text 0x1000均有合法局部NOTYPE的$x和$d；冻结5.7.2要求冲突失败，而指定pure-a64 golden要求通过，另外两项不能独立覆盖起止边界错误。按“无法按原文测试则停下”停止，未自行放行、改golden或修正原素材。[原始证据](profgen/impl/evidence/07/01_a64_mapping_conflict.txt)、[预期冲突](profgen/impl/evidence/07/02_frozen_test_conflict.json)
+- 补丁5仅有本地未提交草稿与有行表的派生素材；无LLVM补丁5 SHA、无正式0005导出、无第二轮GBS验收。真实20函数/objdump、完整测试矩阵、耗时/RSS、全导出重放均未做，不用补丁4结果替代。继续前需PM裁决是否允许修正三份A64素材的代码表达（如同字节.inst），保持冻结规则和golden。[草稿清单](profgen/impl/evidence/07/12_patch5_wip_manifest.json)
+- 挂账：head补零兜底尚未验收，不能关闭；IP 新选项改为枚举类型与 cl::values，补丁 7 处理；非叶子帧行号为 0 的处理，上板后按实测数据决定。spec本地改动正式非增量构建前必须撤销；不修改结果仓库未跟踪config/、gbs_*.conf。
+
+## 前轮授权与执行状态（2026-11-02；补丁3修正与补丁4已完成，历史）
 
 - LLVM补丁3从 `30ceb73e9dcbe233f747d1ed8c97d9e3919564b0` amend为 `399a72494db096f27e5c06f7464a5815a659f5fa`；无关buildid-list冲突仅诊断，候选冲突仍mismatch。独立GBS/lit/C1通过后才开始补丁4。
 - LLVM补丁4 `de8171b77cec5e547c8ffc2f7a5039a8b39b8577`，33文件、+1,045/-198行，新增7项lit；完成IP专用加载、period/sample、sum/max、精确取整、分层total、顶层head估计、分类与安全写profile。[报告](profgen/impl/06_patch4_counting.md)、[补丁4](../patches/profgen/0004-llvm-profgen-Generate-line-level-profiles-from-IP-sa.patch)、[提交审计](profgen/impl/evidence/06/17_commit_audit.json)。只提交工具/测试目录，未推LLVM远端或Gerrit。
@@ -491,6 +500,8 @@
 
 ## 挂账
 
+- IP 新选项改为枚举类型与 cl::values，补丁 7 处理。
+- 非叶子帧行号为 0 的处理，上板后按实测数据决定。
 - 补丁5实现补零后，补head兜底测试：有样本函数中，最小行号的位置为补零写入的0，第一个采到的位置在其后；开启 `--ip-head-samples=entry-estimate --ip-zero-fill=sampled-functions`，预期head=1，来自库函数total为正时至少返回1的兜底，不得用函数total替代入口计数。本轮用户已授权补丁4记录不可达证明并延期该用例。
 
 - 本轮授权generation=0为未知；inode被复用且一条记录generation为0时，替换可能无法发现。不能将allow-missing后的unverified提升为verified；源码与限制见[补丁3规则修正登记](profgen/impl/05_patch3_identity.md)。

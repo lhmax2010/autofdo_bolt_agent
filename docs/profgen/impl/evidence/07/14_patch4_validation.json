@@ -1,0 +1,62 @@
+{
+  "checks": [
+    {
+      "command": [
+        "git",
+        "-C",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh",
+        "diff",
+        "--exit-code",
+        "384f915f0c24c6f0de6490bd51637fbc09e5851b",
+        "aef395b32e27d5f63468c5d49f76f43508dbf270",
+        "--",
+        "llvm/tools/llvm-profgen/"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh",
+        "diff",
+        "--check",
+        "de8171b77cec5e547c8ffc2f7a5039a8b39b8577",
+        "aef395b32e27d5f63468c5d49f76f43508dbf270"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh",
+        "read-tree",
+        "aef395b32e27d5f63468c5d49f76f43508dbf270"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh",
+        "apply",
+        "--cached",
+        "--reverse",
+        "--check",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/patches/profgen/0004-llvm-profgen-Generate-line-level-profiles-from-IP-sa.patch"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "note": "Result-repository git diff --check flags literal single-space context lines inside format-patch; LLVM source diff --check above passes. Format-patch content is not hand-edited."
+}

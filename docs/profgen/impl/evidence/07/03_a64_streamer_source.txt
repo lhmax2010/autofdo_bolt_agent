@@ -1,0 +1,52 @@
+FILE /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/lib/Target/AArch64/MCTargetDesc/AArch64ELFStreamer.cpp
+368:       C = uint8_t(Inst);
+369:       Inst >>= 8;
+370:     }
+371: 
+372:     emitA64MappingSymbol();
+373:     MCELFStreamer::emitBytes(StringRef(Buffer, 4));
+374:   }
+375: 
+376:   /// This is one of the functions used to emit data into an ELF section, so the
+377:   /// AArch64 streamer overrides it to add the appropriate mapping symbol ($d)
+378:   /// if necessary.
+379:   void emitBytes(StringRef Data) override {
+380:     emitDataMappingSymbol();
+381:     MCELFStreamer::emitBytes(Data);
+382:   }
+383: 
+384:   /// This is one of the functions used to emit data into an ELF section, so the
+385:   /// AArch64 streamer overrides it to add the appropriate mapping symbol ($d)
+386:   /// if necessary.
+387:   void emitValueImpl(const MCExpr *Value, unsigned Size, SMLoc Loc) override {
+388:     emitDataMappingSymbol();
+389:     MCELFStreamer::emitValueImpl(Value, Size, Loc);
+390:   }
+391: 
+392:   void emitFill(const MCExpr &NumBytes, uint64_t FillValue,
+393:                                   SMLoc Loc) override {
+394:     emitDataMappingSymbol();
+395:     MCObjectStreamer::emitFill(NumBytes, FillValue, Loc);
+396:   }
+397: 
+398: private:
+399:   enum ElfMappingSymbol {
+400:     EMS_None,
+401:     EMS_A64,
+402:     EMS_Data
+403:   };
+404: 
+405:   void emitDataMappingSymbol() {
+406:     if (LastEMS == EMS_Data)
+407:       return;
+408:     emitMappingSymbol("$d");
+409:     LastEMS = EMS_Data;
+410:   }
+411: 
+412:   void emitA64MappingSymbol() {
+413:     if (LastEMS == EMS_A64)
+414:       return;
+415:     emitMappingSymbol("$x");
+416:     LastEMS = EMS_A64;
+417:   }
+418: 

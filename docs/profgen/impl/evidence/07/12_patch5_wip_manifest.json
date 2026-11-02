@@ -1,0 +1,221 @@
+{
+  "status": "STOPPED; uncommitted and unvalidated",
+  "tracked_diff": " llvm/tools/llvm-profgen/CMakeLists.txt       |   1 +\n llvm/tools/llvm-profgen/ProfileGenerator.cpp | 142 ++++++++++++++++++++++++---\n llvm/tools/llvm-profgen/ProfileGenerator.h   |   9 ++\n llvm/tools/llvm-profgen/ProfiledBinary.h     |   1 +\n llvm/tools/llvm-profgen/llvm-profgen.cpp     |  20 ++--\n 5 files changed, 153 insertions(+), 20 deletions(-)\n",
+  "untracked_files": [
+    {
+      "path": "temp/llvm-profgen-enh/llvm/tools/llvm-profgen/IPBoundary.cpp",
+      "bytes": 8772,
+      "sha256": "ae7dd4d602e735e7b8d5019a248c51c68174c464bd356a1cd78af5c382239431"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/tools/llvm-profgen/IPBoundary.h",
+      "bytes": 2056,
+      "sha256": "dba5e3b69da296e70fe07721846924995b7934f8e751b12bb9637898932caacc"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.s",
+      "bytes": 3293,
+      "sha256": "580f34a9b016fb6b6f4fa0a80d001f447ad361de516f3b7a99889b7a671b6857"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.perfbin",
+      "bytes": 9488,
+      "sha256": "5473d2c4ffbb8903e95224a2d09a00fe09e530f678f8d934d06e2f076e920700"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin",
+      "bytes": 6160,
+      "sha256": "ae72ecc69931a6544c8a4b77642eddcff650665631053de60899d8904e39fd04"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.perfbin",
+      "bytes": 5524,
+      "sha256": "d3bd060004018f162386b4333791aab3d61fbcee96177887449eeb827bf42ff9"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.s",
+      "bytes": 3296,
+      "sha256": "0e81071ff87755109778a8b0bcde9415436d7267de645d631ef273ffa5f7e736"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.perfbin",
+      "bytes": 5520,
+      "sha256": "d4f11e2e6ef3e27acb6a8f7613a3020f21b9471d2811b03fb01974475d2c0694"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.s",
+      "bytes": 3299,
+      "sha256": "ebe904cb7867cc8b9c29fbfb757cae635bdbf23c31bbc2d2e1c031c4ec8905f4"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.s",
+      "bytes": 3328,
+      "sha256": "7d9f75bf40f37ec3fdbc4a94dd9595ba57291fc2626528e4b9e3283486fa4b33"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.s",
+      "bytes": 1390,
+      "sha256": "b5740a9c8383430539db1541eb944c66e4bd1b7a0f17a099ce892135d5b6c9ea"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.perfbin",
+      "bytes": 5576,
+      "sha256": "54d9c548d2f690c1876b5d67cf6fb5e8d5ade0353f7cba4de70d74d3440f5293"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.s",
+      "bytes": 2978,
+      "sha256": "ed25b1dd5e78f39cb30d499757d61960fdacef06cf8e0e6ba506ad869793c486"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.debug",
+      "bytes": 5824,
+      "sha256": "85385b39ba76ff9b8331f34e62b9c422974ad036f1b66837c55ede0ec298e117"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.stripped.perfbin",
+      "bytes": 4928,
+      "sha256": "b2ff7cd6becfc29212919b227b8b2110af6bbf40079c58a49010cc994b288a6e"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.s",
+      "bytes": 3298,
+      "sha256": "1339daaffe47e1a1427f2740483d4034c1eeb8c8b38f889098c04eb5b2a9dd25"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.perfbin",
+      "bytes": 5888,
+      "sha256": "f1d439c7a01348e9863262ace002181504dd658586c632921b3a6862aed2755e"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.perfbin",
+      "bytes": 5884,
+      "sha256": "9688c8ccc5d9fc8022e4d27f3437c1cf4464a2c97f60841f75dfd8a10f6bfaea"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.s",
+      "bytes": 3294,
+      "sha256": "318566f6502eb0d21056ed2e4b086e542d50b97df33abd46859c74240121bfb6"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.s",
+      "bytes": 1747,
+      "sha256": "b710356d7694fdbcd240c4095afc03953bc25cf92df353e57b7a3b18cb8ad892"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.s",
+      "bytes": 1553,
+      "sha256": "d2b67195bcda440032f12b0850f6fe031504b97882b13420b32c6d54b1f387de"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.s",
+      "bytes": 1523,
+      "sha256": "bf58d20393292560078fb17d80debc882d438e17563c94c0c3ea48e83ef45588"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.perfbin",
+      "bytes": 5884,
+      "sha256": "f0115260d123a271c07f8deced432e4f81382bb273085d632318f1900bcfa3a6"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.perfbin",
+      "bytes": 5892,
+      "sha256": "41fe8396c1749aaa57edd513da01728364d6fdc3fbf114d5094ddd7637affac5"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.s",
+      "bytes": 1551,
+      "sha256": "e9b3e1a3c24b7845a497ea23b733ce0319900f11df8eff3394f6b111ca34ca47"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.s",
+      "bytes": 1453,
+      "sha256": "8eda8bc63c3a6b6ecc6f0457e4782c133b7d0857ea0ad62730552304eba1eb97"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.perfbin",
+      "bytes": 6120,
+      "sha256": "feba4188555c930c1bb766e13b6e3f49cbe29156ae51cf99756bb7495f917204"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt",
+      "bytes": 1200,
+      "sha256": "9245660c964c7a0edfc7c92d245ba3f7fcbde3f8cc9ce42cc788d1668c79a74c"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.perfbin",
+      "bytes": 5824,
+      "sha256": "848a8f98a8b1a049b7601f48dec702161383fd290672345f636d868aabd0b897"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.s",
+      "bytes": 1550,
+      "sha256": "919b50a02fae9bc0af3e6e4740037da8127ff3e68f6186c4312f32a4c2626010"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.perfbin",
+      "bytes": 6120,
+      "sha256": "fdb033dd7813a17f1037f2a3bee0bf7c7144ccd5dd737b31b2b37c82c575ddc0"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.perfbin",
+      "bytes": 5480,
+      "sha256": "01659a1003dfe18675af814b5ede4a3f8d8748bd5ee0eb9eb55b56fec545586f"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.s",
+      "bytes": 1550,
+      "sha256": "26bee31b13648aa6d406f9447941ac8d22567b6cd7d1941592c85676c19a374c"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.s",
+      "bytes": 3298,
+      "sha256": "8e01536ed094eec7110988514979757f6826aa3cbd5d9db48047af84f2e9f1b5"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.perfbin",
+      "bytes": 5880,
+      "sha256": "abfc9c91c188ae06b73216738bc0ad013fa30ee34754e0a8f1d828762071df40"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.perfbin",
+      "bytes": 5884,
+      "sha256": "7ae3f38507ff12310dc1ba08e7a4e19f15f501bcd4ab60eb27a52bac9bad6028"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.perfbin",
+      "bytes": 5508,
+      "sha256": "3ae2052cf06430123e516149e8048e905cf221580511bdef79363c2fad871586"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.perfbin",
+      "bytes": 5884,
+      "sha256": "ae1936ef93effbf674eea3db40b2a4cd676a630417634fca8eeed1fa25087458"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.s",
+      "bytes": 3294,
+      "sha256": "955d213891273993aed4157e89b62ebcb21e1cd6855c147e7cf7601ecc57c8c0"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.perfbin",
+      "bytes": 5884,
+      "sha256": "638202f7ef0152f35761732101e9d841f0d666d493bb746049c4b11f2c2fec4b"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.s",
+      "bytes": 1557,
+      "sha256": "8592833aca208b5ea9c96c027c74c82f435414771ac5e3c012fc9ccc0ed6e906"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.perfbin",
+      "bytes": 6128,
+      "sha256": "e816500ec9117a3191775bc85d0f89f97e0ffd10788d951a26716cf458747f73"
+    },
+    {
+      "path": "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.s",
+      "bytes": 1480,
+      "sha256": "e0b36624923246efb9594eb784be35b140e658b5d0fcc77bc4257f105ae5f306"
+    }
+  ]
+}

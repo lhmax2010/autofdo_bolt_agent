@@ -1,0 +1,246 @@
+-- Testing: 71 tests, 1 workers --
+Testing:  0.. 10.. 20.. 30.. 40.. 50.. 60.. 70
+FAIL: LLVM :: tools/llvm-profgen/ip-counting-arithmetic.test (13 of 71)
+******************** TEST 'LLVM :: tools/llvm-profgen/ip-counting-arithmetic.test' FAILED ********************
+Exit Code: 1
+
+Command Output (stdout):
+--
+# RUN: at line 3
+split-file /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp
+# executed command: split-file /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp
+# RUN: at line 5
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fraction --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=10 > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fraction --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=10
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 50.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 6
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=FRACTION
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=FRACTION
+# RUN: at line 10
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/half --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=10 > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/half --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=10
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 50.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 11
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=HALF
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=HALF
+# RUN: at line 15
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/beyond53 --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=2 > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/beyond53 --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=2
+# .---command stderr------------
+# | warning: IP body or total exceeds UINT32_MAX
+# `-----------------------------
+# RUN: at line 16
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=BEYOND53
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=BEYOND53
+# RUN: at line 20
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/tiny --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=18446744073709551615 > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/tiny --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=18446744073709551615
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 50.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 21
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=TINY
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=TINY
+# RUN: at line 25
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 10.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 26
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=MEDIAN
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=MEDIAN
+# RUN: at line 29
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log --check-prefix=MEDIANUNIT
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log --check-prefix=MEDIANUNIT
+# RUN: at line 32
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/explicit --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=10 > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/log
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/explicit --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=10
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 5.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 33
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=EXPLICIT
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=EXPLICIT
+# RUN: at line 36
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fixed --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample --ip-aggregation=sum --ip-weight=sample
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fixed --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample --ip-aggregation=sum --ip-weight=sample
+# .---command stdout------------
+# | IP-ADDRESS 0x13f4 sample_count=3 period_sum=21
+# | IP-STATS input=3
+# | IP-EVENT cycles samples=3
+# | IP-STATS after_event=3
+# | IP-STATS after_pid=3
+# | IP-STATS pid_unknown=0
+# | IP-STATS kernel=0
+# | IP-STATS other_dso=0
+# | IP-STATS unmapped=0
+# | IP-STATS target=3
+# | IP-STATS unmapped_in_target=0
+# | IP-STATS lost_records=0
+# | IP-STATS lost_L=0
+# | IP-STATS mappings=0
+# | IP-IDENTITY observed_mmap_build_id=false
+# | IP-IDENTITY binary="/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin" binary_realpath="/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin" build_id=280854d1cea103bf480e219b336025e337e5a10e
+# | IP-IDENTITY debug_binary=none build_id=none
+# | IP-IDENTITY selection=regex
+# | IP-IDENTITY candidate="/target" deleted=false
+# | IP-IDENTITY path="/target" source=buildid-list build_id=none result=missing
+# | IP-IDENTITY path="/target" executable_mappings=0 result=unverified
+# | IP-IDENTITY final=unverified
+# | IP-GENERATION p_ref=1 source=automatic weight=sample aggregation=sum fs_discriminator=false
+# | IP-GENERATION in_cu_no_subprogram samples=0 period_sum=0
+# | IP-GENERATION in_func_no_line samples=0 period_sum=0
+# | IP-GENERATION no_cu samples=0 period_sum=0
+# | IP-GENERATION outside_dwarf_func samples=0 period_sum=0
+# | IP-GENERATION plt samples=0 period_sum=0
+# | IP-GENERATION usable samples=3 period_sum=21
+# | IP-GENERATION usable_nonleaf_line_zero samples=0 period_sum=0
+# `-----------------------------
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 16.7x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 37
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample --check-prefix=FIXED
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample --check-prefix=FIXED
+# RUN: at line 38
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fixed --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/period --ip-aggregation=sum --ip-weight=period
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fixed --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/period --ip-aggregation=sum --ip-weight=period
+# .---command stdout------------
+# | IP-ADDRESS 0x13f4 sample_count=3 period_sum=21
+# | IP-STATS input=3
+# | IP-EVENT cycles samples=3
+# | IP-STATS after_event=3
+# | IP-STATS after_pid=3
+# | IP-STATS pid_unknown=0
+# | IP-STATS kernel=0
+# | IP-STATS other_dso=0
+# | IP-STATS unmapped=0
+# | IP-STATS target=3
+# | IP-STATS unmapped_in_target=0
+# | IP-STATS lost_records=0
+# | IP-STATS lost_L=0
+# | IP-STATS mappings=0
+# | IP-IDENTITY observed_mmap_build_id=false
+# | IP-IDENTITY binary="/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin" binary_realpath="/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin" build_id=280854d1cea103bf480e219b336025e337e5a10e
+# | IP-IDENTITY debug_binary=none build_id=none
+# | IP-IDENTITY selection=regex
+# | IP-IDENTITY candidate="/target" deleted=false
+# | IP-IDENTITY path="/target" source=buildid-list build_id=none result=missing
+# | IP-IDENTITY path="/target" executable_mappings=0 result=unverified
+# | IP-IDENTITY final=unverified
+# | IP-GENERATION p_ref=7 source=automatic weight=period aggregation=sum fs_discriminator=false
+# | IP-GENERATION in_cu_no_subprogram samples=0 period_sum=0
+# | IP-GENERATION in_func_no_line samples=0 period_sum=0
+# | IP-GENERATION no_cu samples=0 period_sum=0
+# | IP-GENERATION outside_dwarf_func samples=0 period_sum=0
+# | IP-GENERATION plt samples=0 period_sum=0
+# | IP-GENERATION usable samples=3 period_sum=21
+# | IP-GENERATION usable_nonleaf_line_zero samples=0 period_sum=0
+# `-----------------------------
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 16.7x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 39
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/period --check-prefix=FIXED
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/period --check-prefix=FIXED
+# RUN: at line 42
+diff /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/period /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample
+# executed command: diff /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/period /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample
+# RUN: at line 44
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/near --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=max --ip-period-unit=1 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/err
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/near --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=max --ip-period-unit=1
+# .---command stdout------------
+# | IP-ADDRESS 0x1318 sample_count=1 period_sum=4611686018427387903
+# | IP-STATS input=1
+# | IP-EVENT cycles samples=1
+# | IP-STATS after_event=1
+# | IP-STATS after_pid=1
+# | IP-STATS pid_unknown=0
+# | IP-STATS kernel=0
+# | IP-STATS other_dso=0
+# | IP-STATS unmapped=0
+# | IP-STATS target=1
+# | IP-STATS unmapped_in_target=0
+# | IP-STATS lost_records=0
+# | IP-STATS lost_L=0
+# | IP-STATS mappings=0
+# | IP-IDENTITY observed_mmap_build_id=false
+# | IP-IDENTITY binary="/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin" binary_realpath="/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin" build_id=280854d1cea103bf480e219b336025e337e5a10e
+# | IP-IDENTITY debug_binary=none build_id=none
+# | IP-IDENTITY selection=regex
+# | IP-IDENTITY candidate="/target" deleted=false
+# | IP-IDENTITY path="/target" source=buildid-list build_id=none result=missing
+# | IP-IDENTITY path="/target" executable_mappings=0 result=unverified
+# | IP-IDENTITY final=unverified
+# | IP-GENERATION p_ref=1 source=explicit weight=period aggregation=max fs_discriminator=false
+# | IP-GENERATION in_cu_no_subprogram samples=0 period_sum=0
+# | IP-GENERATION in_func_no_line samples=0 period_sum=0
+# | IP-GENERATION no_cu samples=0 period_sum=0
+# | IP-GENERATION outside_dwarf_func samples=0 period_sum=0
+# | IP-GENERATION plt samples=0 period_sum=0
+# | IP-GENERATION usable samples=1 period_sum=4611686018427387903
+# | IP-GENERATION usable_nonleaf_line_zero samples=0 period_sum=0
+# `-----------------------------
+# RUN: at line 45
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=NEAR
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --check-prefix=NEAR
+# RUN: at line 48
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/err --check-prefix=LARGE
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/err --check-prefix=LARGE
+# RUN: at line 50
+rm /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out
+# executed command: rm /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out
+# RUN: at line 51
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/overflow --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=max --ip-period-unit=1 2>&1 | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --check-prefix=OVERFLOW
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/overflow --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=max --ip-period-unit=1
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --check-prefix=OVERFLOW
+# RUN: at line 53
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out
+# RUN: at line 54
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sumoverflow --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=1 2>&1 | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --check-prefix=SUMOVER
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --format=text --show-ip-address-counts --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sumoverflow --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/out --ip-aggregation=sum --ip-period-unit=1
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --check-prefix=SUMOVER
+# RUN: at line 59
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target.prof --format=text --ip-aggregation=sum --show-ip-address-counts > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target.log
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target.prof --format=text --ip-aggregation=sum --show-ip-address-counts
+# .---command stderr------------
+# | warning: Sample PGO is estimated to optimize better with 50.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.
+# `-----------------------------
+# RUN: at line 60
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target.log --check-prefix=TARGETMEDIAN
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target.log --check-prefix=TARGETMEDIAN
+# RUN: at line 62
+/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target.prof --check-prefix=TINY
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --input-file=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/median-target.prof --check-prefix=TINY
+# RUN: at line 64
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fixed --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample-explicit --format=text --ip-aggregation=sum --ip-weight=sample --ip-period-unit=20 2>&1 | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --check-prefix=SAMPLEUNIT
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --allow-missing-build-id '--binary-match-regex=^/target$' --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/fixed --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample-explicit --format=text --ip-aggregation=sum --ip-weight=sample --ip-period-unit=20
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test --check-prefix=SAMPLEUNIT
+# RUN: at line 66
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample-explicit
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-counting-arithmetic.test.tmp/sample-explicit
+# note: command had no output on stdout or stderr
+# error: command failed with exit status: 1
+
+--
+
+********************
+Testing:  0.. 10.. 20.. 30.. 40.. 50.. 60.. 70.. 80.. 90..
+********************
+Failed Tests (1):
+  LLVM :: tools/llvm-profgen/ip-counting-arithmetic.test
+
+
+Testing Time: 11.72s
+
+Total Discovered Tests: 71
+  Unsupported      :  1 (1.41%)
+  Passed           : 68 (95.77%)
+  Expectedly Failed:  1 (1.41%)
+  Failed           :  1 (1.41%)

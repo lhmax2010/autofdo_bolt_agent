@@ -1,4 +1,4 @@
-From de8171b77cec5e547c8ffc2f7a5039a8b39b8577 Mon Sep 17 00:00:00 2001
+From aef395b32e27d5f63468c5d49f76f43508dbf270 Mon Sep 17 00:00:00 2001
 From: Hao Lin <hao.lin@samsung.com>
 Date: Mon, 2 Nov 2026 20:53:36 +0800
 Subject: [PATCH] [llvm-profgen] Generate line-level profiles from IP samples
@@ -11,9 +11,11 @@ Load IP binaries without disassembly, generate checked integer sum/max profiles,
  .../ip-mode/counting-extra/classification.s   |  30 +++
  .../Inputs/ip-mode/counting-extra/head.c      |  14 ++
  .../ip-mode/counting-extra/head.perfbin       | Bin 0 -> 3704 bytes
+ .../counting-extra/nonleaf-zero.README.txt    |   9 +
+ .../counting-extra/nonleaf-zero.perfbin       | Bin 0 -> 3704 bytes
  .../test/tools/llvm-profgen/ip-addresses.test |  12 +-
  .../tools/llvm-profgen/ip-cli-followup.test   |  10 +-
- .../llvm-profgen/ip-counting-arithmetic.test  | 100 ++++++++
+ .../llvm-profgen/ip-counting-arithmetic.test  | 102 ++++++++
  .../ip-counting-classification.test           |  25 ++
  .../llvm-profgen/ip-counting-inline.test      |  41 ++++
  .../llvm-profgen/ip-counting-options.test     |  36 +++
@@ -23,9 +25,10 @@ Load IP binaries without disassembly, generate checked integer sum/max profiles,
  .../llvm-profgen/ip-identity-ambiguity.test   |  44 ++--
  .../tools/llvm-profgen/ip-identity-chain.test |  36 +--
  .../tools/llvm-profgen/ip-identity-list.test  |  30 +--
- .../llvm-profgen/ip-identity-matrix.test      |  76 +++----
+ .../llvm-profgen/ip-identity-matrix.test      |  76 +++---
  .../tools/llvm-profgen/ip-identity-probe.test |  22 +-
  llvm/test/tools/llvm-profgen/ip-invalid.test  |  50 ++--
+ .../tools/llvm-profgen/ip-nonleaf-zero.test   |  23 ++
  llvm/test/tools/llvm-profgen/ip-options.test  |  64 +++---
  .../tools/llvm-profgen/ip-real-records.test   |   4 +-
  llvm/test/tools/llvm-profgen/ip-segments.test |   8 +-
@@ -33,18 +36,20 @@ Load IP binaries without disassembly, generate checked integer sum/max profiles,
  .../tools/llvm-profgen/ip-transition.test     |   6 +-
  llvm/tools/llvm-profgen/IPPerfReader.cpp      |  11 +
  llvm/tools/llvm-profgen/IPPerfReader.h        |   1 +
- llvm/tools/llvm-profgen/ProfileGenerator.cpp  | 213 ++++++++++++++++++
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  | 217 ++++++++++++++++++
  llvm/tools/llvm-profgen/ProfileGenerator.h    |  17 ++
- llvm/tools/llvm-profgen/ProfiledBinary.cpp    |  68 +++++-
- llvm/tools/llvm-profgen/ProfiledBinary.h      |   8 +-
- llvm/tools/llvm-profgen/llvm-profgen.cpp      |  78 ++++++-
- 33 files changed, 1045 insertions(+), 198 deletions(-)
+ llvm/tools/llvm-profgen/ProfiledBinary.cpp    |  71 +++++-
+ llvm/tools/llvm-profgen/ProfiledBinary.h      |  13 +-
+ llvm/tools/llvm-profgen/llvm-profgen.cpp      |  81 ++++++-
+ 36 files changed, 1094 insertions(+), 198 deletions(-)
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/README.txt
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/classification.lds
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/classification.perfbin
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/classification.s
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.c
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.README.txt
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin
  create mode 100644 llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test
  create mode 100644 llvm/test/tools/llvm-profgen/ip-counting-classification.test
  create mode 100644 llvm/test/tools/llvm-profgen/ip-counting-inline.test
@@ -52,6 +57,7 @@ Load IP binaries without disassembly, generate checked integer sum/max profiles,
  create mode 100644 llvm/test/tools/llvm-profgen/ip-counting-split.test
  create mode 100644 llvm/test/tools/llvm-profgen/ip-counting-writer.test
  create mode 100644 llvm/test/tools/llvm-profgen/ip-counting.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test
 
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/README.txt
 new file mode 100644
@@ -213,6 +219,58 @@ DyKN^^
 literal 0
 HcmV?d00001
 
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.README.txt
+new file mode 100644
+index 000000000000..45d451ec7c54
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.README.txt
+@@ -0,0 +1,9 @@
++#===- nonleaf-zero.README.txt - Raw zero call-line fixture ----------------===#
++Derived from head.perfbin (same instruction bytes and leaf lines).
++GNU readelf --debug-dump=info identifies DW_AT_call_line at .debug_info
++relative offsets 0xcc and 0xe8, both data1=12. The .debug_info file offset
++is 0x4ac (readelf -SW). Replace these two bytes with zero; do not alter
++leaf line tables, function ranges or code. This creates raw non-leaf
++line zero without making usable leaf lines zero.
++Input SHA256 5e0915fe1b904a1f629095862be1f21a13c5eb2723399d35969abe75e364cbd9
++Output SHA256 bf765a922ef5a8bac8cf646064fa2dd4b2a98aa176292ed3a8a5668d919d4c19
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..a215f37c56cd6516d637ecf8319831b35e85226e
+GIT binary patch
+literal 3704
+zcmbtXO>7%Q6n^9N+Oaoroj9T~B*kh{Xe6@4apL?GwSk7B{7{7;R8oYD9dGO{_Byql
+zl1hOF3B-{ckT@YYAR#0UAR$#15~>6TPADhDkqh^r0zyI}ytgyYKbu6f;wiK5z3;tm
+zW_I??jC1SRrAs~`fJKAb(DVRiRbVT`8H7zi2%o*s0|A8n*k)DOtN&7+vF=cL1QYK#
+z`OzmMtRX6W;_2A-RD7>T;;f&NF0gLp(OjdNOo$G)>kY-*?^H(1c*NULyq%PcvsT&7
+zcTqf=-u;Zn<MO(!{94b`y4>$P`CGk!JR0vog~p;brPkA{hg65GDVKzFFE(11=Pthl
+zuNM6M{qKBw_58@5{(d|j*KQ5o!_cup^QP+YemBCoJuKNfG#X*4uRqwPX;LG<O>&ib
+z5dmDsy<Y$((dZ6s47?bA`{JEp0gLk@w19Qfi(Pex5DWXk7#3lp18oo?<F1zZiTdL;
+zd`+!~K_E(>RBr8&`Gbmw70$dr{yC@+w5#I0USBF-r5{pUb^?~!OsFJ3+!M<mv&SC-
+z6WQcimx<o4M-{+X0#>~#qFbDa#B?nZJ^4taTlC<|_{Kqt%*SSobA}J!U7LXU7=DK#
+zM9&)ru8M97C!$3t;qmx<EP+r!$0z}m8Z@!jp1^G1htI^DX&2)7iFELtY$k@r+uZPg
+zNXCfyvaxDh!Cnna?@MBju#ZiyXNREL8-TTzH)*XT-w6y{z$Sbljkl^chk*Y&K7xLI
+z7}d9w5F}Itt~G4X-$J`YzROTC*M?y0D57$QvJC3M-M?-pt{ciBcAKJ|6b&!p<7ahL
+zQ7H*HZHVPp(1LIQANwjsr-y((jJ-iIfG6#Zk#Z$(jaXatY8GnQQXSSxS*MV=VO48(
+z#Yv2fnMrdBGFO)-s&=7Rzh-7Kn~r_mOpT?dC&wmJqtnT$DYBCj)2Y$P^jI3*WI8>X
+zoSsNcPD9bk=FK(Of|9jfhfSwu7aS{}u$?+}I!@>V_gMvZKe`iwqbIy%JFi>SnZ(l4
+z9KQp;FMZbo6hE%0*gn<yC@lgC;Uul=PktVoA5P&@2=RBMi<CM)1iu;OLCD8cEiCkC
+zcv06b>Aj13IIy7iF6bu~bS?0vj&KYC^df;3y%SAs!H1{Mq2tEw6CV`t!*2)dvzF(1
+z^L%3*3mQ2g;G*=a0DX9zWCK?)P~BsVu-niNxfb=-F1Wu?_y}pn`dzcDv5p*(>l<OW
+zp-;OOZKHNM<GOOTt&tIOd_mxQm1AeoIO?1S)2Y-gv*2u+xlOy2AF=ab=5IQ+n`Lm(
+zVzyQUQ$7i=SHY~~CUCQ|WqS?Gs#U61G8@@^-gXLL=4v$zTDi?arc}YOG_$!})w;o+
+z?W|YWcDr1wl*<-Yy2@U!X3G{kCEGz8XH?JTP#2LPEvdP@hPLFk9LmFyf9_7m%&lI2
+z`uX{bye|J&Q{4rz@wIZ?z0Korov}~*iK>VBeBZGiRf+Uli^h`m+`I>=p8h;Is4$=J
+zJJtz|lW?5*5(Rh+4eFcYd_S`0`<CN8f7VYRmwtP2obO}Sd>><qE8Yz}jwoTA$A`n7
+z>X2_s$>w{9J%Aa-r8$sr-Sh9Z4GA}XFYx>G&Y?mejQKl*lF;~_>Dj{G`LB5SsdhfE
+zlSB{C{|W}YeNrxu|1J}i_U7gg_hOW)tARgLJXYRZS|2Y)xnC&$?@UzMo4buTVO*!2
+z{s|Qo%J)(=p3G<c9!8Gh^N(oyeb6e*W4(((wp;UdRY7^@#owQEKRSkgSMiISsI+&i
+z&k^U^Z%sW*hXTs7BGCQOg^kDOef1S$TzhCXWJ@J}*FdD<9se7IkK&(G|0kyZga0q&
+Ct|vPH
+
+literal 0
+HcmV?d00001
+
 diff --git a/llvm/test/tools/llvm-profgen/ip-addresses.test b/llvm/test/tools/llvm-profgen/ip-addresses.test
 index 0011cb026624..f818aeb554d3 100644
 --- a/llvm/test/tools/llvm-profgen/ip-addresses.test
@@ -267,10 +325,10 @@ index 84b9f27d1e92..03d1298dccc4 100644
  # OLDPID: for the --pid option: '-1' value invalid for uint argument!
 diff --git a/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test b/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test
 new file mode 100644
-index 000000000000..22f99e7b7a1f
+index 000000000000..f32ce13506d7
 --- /dev/null
 +++ b/llvm/test/tools/llvm-profgen/ip-counting-arithmetic.test
-@@ -0,0 +1,100 @@
+@@ -0,0 +1,102 @@
 +#===- ip-counting-arithmetic.test - IP profile generation tests ------------===#
 +# REQUIRES: aarch64-registered-target
 +# RUN: split-file %s %t
@@ -333,9 +391,11 @@ index 000000000000..22f99e7b7a1f
 +# RUN: FileCheck %s --input-file=%t/median-target.log --check-prefix=TARGETMEDIAN
 +# TARGETMEDIAN: p_ref=100 source=automatic
 +# RUN: FileCheck %s --input-file=%t/median-target.prof --check-prefix=TINY
-+# sample weights always use unit1, even with an explicit positive period unit.
-+# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/fixed --output=%t/sample-explicit --format=text --ip-aggregation=sum --ip-weight=sample --ip-period-unit=20
-+# RUN: diff %t/sample %t/sample-explicit
++# An explicit period unit is meaningless with sample weighting and is rejected.
++# RUN: rm -f %t/sample-explicit
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/fixed --output=%t/sample-explicit --format=text --ip-aggregation=sum --ip-weight=sample --ip-period-unit=20 2>&1 | FileCheck %s --check-prefix=SAMPLEUNIT
++# SAMPLEUNIT: IP sample mode: --ip-period-unit has no effect with --ip-weight=sample
++# RUN: test ! -e %t/sample-explicit
 +
 +#--- fraction
 +17/17 3 cycles: 13f4 (/target+0x3f4)
@@ -1429,6 +1489,35 @@ index 896835c8399e..d6b6544cbe40 100644
 -# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OFFSETOVER
 +# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-aggregation=sum --format=gcc --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OFFSETOVER
  # OFFSETOVER: invalid dsoff offset
+diff --git a/llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test b/llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test
+new file mode 100644
+index 000000000000..a0ca20925339
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test
+@@ -0,0 +1,23 @@
++#===- ip-nonleaf-zero.test - Diagnose zero non-leaf lines -----------------===#
++# REQUIRES: aarch64-registered-target
++# RUN: split-file %s %t
++# The two inline samples have raw caller line zero, but positive leaf lines.
++# Count each usable sample once: 2 samples, 3+7=10 periods; top-only sample
++# remains usable and does not contribute to the diagnostic subset.
++# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin --binary-match-regex=^/target$ --perfscript=%t/input --format=text --output=%t/profile --ip-aggregation=sum --ip-period-unit=1 --show-ip-address-counts > %t/log
++# RUN: FileCheck %s --check-prefix=ZERO --input-file=%t/log
++# ZERO: IP-GENERATION usable samples=3 period_sum=110
++# ZERO-NEXT: IP-GENERATION usable_nonleaf_line_zero samples=2 period_sum=10
++# RUN: FileCheck %s --check-prefix=TOTAL --input-file=%t/profile
++# TOTAL: both:110:0
++# Unmodified fixture is a negative control; the extra diagnostic must not
++# classify the usual positive caller line as zero just because offsets differ.
++# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/head.perfbin --binary-match-regex=^/target$ --perfscript=%t/input --format=text --output=%t/control --ip-aggregation=sum --ip-period-unit=1 --show-ip-address-counts > %t/control.log
++# RUN: FileCheck %s --check-prefix=CONTROL --input-file=%t/control.log
++# CONTROL: IP-GENERATION usable samples=3 period_sum=110
++# CONTROL-NEXT: IP-GENERATION usable_nonleaf_line_zero samples=0 period_sum=0
++# RUN: FileCheck %s --check-prefix=TOTAL --input-file=%t/control
++#--- input
++17/17 3 cycles: 12f0 (/target+0x2f0)
++17/17 7 cycles: 12d8 (/target+0x2d8)
++17/17 100 cycles: 1300 (/target+0x300)
 diff --git a/llvm/test/tools/llvm-profgen/ip-options.test b/llvm/test/tools/llvm-profgen/ip-options.test
 index cbb9592765d5..29d671bf1476 100644
 --- a/llvm/test/tools/llvm-profgen/ip-options.test
@@ -1671,7 +1760,7 @@ index 9eb0c3f1f61e..6daa5be397ba 100644
    const std::vector<IPMapping> &getMappings() const { return Mappings; }
    void printAddressCounts(raw_ostream &OS) const;
 diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
-index 33931f3ef993..db072c6236c0 100644
+index 33931f3ef993..662384111d90 100644
 --- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
 +++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
 @@ -11,8 +11,11 @@
@@ -1686,7 +1775,7 @@ index 33931f3ef993..db072c6236c0 100644
  #include <algorithm>
  #include <float.h>
  #include <unordered_set>
-@@ -189,6 +192,216 @@ void ProfileGeneratorBase::write() {
+@@ -189,6 +192,220 @@ void ProfileGeneratorBase::write() {
    write(std::move(WriterOrErr.get()), ProfileMap);
  }
  
@@ -1749,8 +1838,9 @@ index 33931f3ef993..db072c6236c0 100644
 +  FunctionSamples::ProfileIsFS = UseFSDiscriminator;
 +  FunctionSamples::ProfileIsCS = false;
 +  FunctionSamples::ProfileIsProbeBased = false;
-+  for (StringRef Name : {"usable", "in_func_no_line", "outside_dwarf_func",
-+                         "plt", "in_cu_no_subprogram", "no_cu"})
++  for (StringRef Name :
++       {"usable", "in_func_no_line", "outside_dwarf_func", "plt",
++        "in_cu_no_subprogram", "no_cu", "usable_nonleaf_line_zero"})
 +    Statistics.Counts[Name.str()] = {};
 +  auto Classify = [&](StringRef Name, const IPAddressCount &C) -> Error {
 +    auto &Sum = Statistics.Counts[Name.str()];
@@ -1779,6 +1869,9 @@ index 33931f3ef993..db072c6236c0 100644
 +    }
 +    if (Error E = Classify("usable", C))
 +      return E;
++    if (Binary->hasIPNonLeafZeroLine(Address))
++      if (Error E = Classify("usable_nonleaf_line_zero", C))
++        return E;
 +    uint64_t Numerator = Options.SampleWeight ? C.SampleCount : C.PeriodSum;
 +    SampleContextFrameVector Prefix;
 +    FunctionSamples *Leaf = nullptr;
@@ -1946,7 +2039,7 @@ index a4b738016ec3..03e2a04e439e 100644
  
  private:
 diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.cpp b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
-index aa16b66b2588..7d57c028ef99 100644
+index aa16b66b2588..e63972432486 100644
 --- a/llvm/tools/llvm-profgen/ProfiledBinary.cpp
 +++ b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
 @@ -183,14 +183,14 @@ void BinarySizeContextTracker::trackInlineesOptimizedAway(
@@ -2054,7 +2147,7 @@ index aa16b66b2588..7d57c028ef99 100644
          continue;
  
        // We may want to know all ranges for one function. Here group the
-@@ -1073,6 +1130,9 @@ SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
+@@ -1073,12 +1130,18 @@ SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
                      SymbolizerPath);
  
    SampleContextFrameVector CallStack;
@@ -2064,22 +2157,32 @@ index aa16b66b2588..7d57c028ef99 100644
    for (int32_t I = InlineStack.getNumberOfFrames() - 1; I >= 0; I--) {
      const auto &CallerFrame = InlineStack.getFrame(I);
      if (CallerFrame.FunctionName.empty() ||
+         (CallerFrame.FunctionName == "<invalid>"))
+       break;
+ 
++    if (IPMode && I > 0 && CallerFrame.Line == 0)
++      IPNonLeafZeroLineAddresses.insert(IP.Address);
++
+     StringRef FunctionName(CallerFrame.FunctionName);
+     if (UseCanonicalFnName)
+       FunctionName = FunctionSamples::getCanonicalFnName(FunctionName);
 diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.h b/llvm/tools/llvm-profgen/ProfiledBinary.h
-index 1a83f8221df1..7b208bea3b8f 100644
+index 1a83f8221df1..735c662ab516 100644
 --- a/llvm/tools/llvm-profgen/ProfiledBinary.h
 +++ b/llvm/tools/llvm-profgen/ProfiledBinary.h
-@@ -203,6 +203,10 @@ class ProfiledBinary {
+@@ -203,6 +203,11 @@ class ProfiledBinary {
    std::string Path;
    // Path of the debug info binary.
    std::string DebugBinaryPath;
 +  // IP loading never constructs the disassembler or uses a runtime base.
 +  bool IPMode = false;
++  std::unordered_set<uint64_t> IPNonLeafZeroLineAddresses;
 +  std::vector<std::pair<uint64_t, uint64_t>> IPCURanges, IPPLTRanges;
 +  Expected<bool> loadIPMetadata(object::ObjectFile &Obj);
    // The target triple.
    Triple TheTriple;
    // Path of symbolizer path which should be pointed to binary with debug info.
-@@ -408,7 +412,9 @@ class ProfiledBinary {
+@@ -408,7 +413,9 @@ class ProfiledBinary {
    void load();
  
  public:
@@ -2090,8 +2193,19 @@ index 1a83f8221df1..7b208bea3b8f 100644
    ~ProfiledBinary();
  
    /// Symbolize an address and return the symbol name. The returned StringRef is
+@@ -480,6 +487,10 @@ public:
+     return CodeAddressVec[Index];
+   }
+ 
++  bool hasIPNonLeafZeroLine(uint64_t Address) const {
++    return IPNonLeafZeroLineAddresses.count(Address);
++  }
++
+   size_t getCodeAddrVecSize() const { return CodeAddressVec.size(); }
+ 
+   bool usePseudoProbes() const { return UsePseudoProbes; }
 diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
-index a583d206f0d5..9196056af574 100644
+index a583d206f0d5..0d61fdc1f929 100644
 --- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
 +++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
 @@ -123,6 +123,30 @@ static cl::opt<bool> ShowIPAddressCounts(
@@ -2125,12 +2239,15 @@ index a583d206f0d5..9196056af574 100644
  static Error runIPMode() {
    auto Fail = [](const Twine &Message) {
      return createStringError(inconvertibleErrorCode(), Message);
-@@ -169,6 +193,36 @@ static Error runIPMode() {
+@@ -169,6 +193,39 @@ static Error runIPMode() {
                  "text exported on the board");
    if (!PerfScriptFilename.getNumOccurrences())
      return Fail("IP sample mode requires --perfscript");
 +  if (!IPAggregation.getNumOccurrences())
 +    return Fail("IP sample mode requires --ip-aggregation during evaluation");
++  if (IPWeight == "sample" && IPPeriodUnit.getNumOccurrences())
++    return Fail("IP sample mode: --ip-period-unit has no effect with "
++                "--ip-weight=sample");
 +  if (IPWeight != "period" && IPWeight != "sample")
 +    return Fail("IP sample mode: invalid --ip-weight");
 +  if (IPAggregation != "sum" && IPAggregation != "max" &&
@@ -2162,7 +2279,7 @@ index a583d206f0d5..9196056af574 100644
    IPReaderOptions Options;
    if (IPEvent.getNumOccurrences())
      Options.Event = IPEvent;
-@@ -193,8 +247,23 @@ static Error runIPMode() {
+@@ -193,8 +250,23 @@ static Error runIPMode() {
      Reader.printAddressCounts(outs());
      Reader.printIdentity(outs());
    }
@@ -2188,7 +2305,7 @@ index a583d206f0d5..9196056af574 100644
  }
  
  // Validate the command line input.
-@@ -289,7 +358,10 @@ int main(int argc, const char *argv[]) {
+@@ -289,7 +361,10 @@ int main(int argc, const char *argv[]) {
        BinaryMatchRegex.getNumOccurrences() ||
        ShowIPAddressCounts.getNumOccurrences() ||
        PerfBuildIDList.getNumOccurrences() ||
