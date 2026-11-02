@@ -1,0 +1,66 @@
+Generation ambiguity: original input lines, not filtered input supplied to the tool.
+
+FILE temp/rpi4-prefreeze/multi_dsoff.txt
+SHA256 1c8e914aa1216944981e742213ef42881fddfe961730201602a5e23d936821de
+COUNTS {"0 b3:02 1702 0": 1, "0 b3:02 1702 4080200201": 2}
+temp/rpi4-prefreeze/multi_dsoff.txt:3115:       0/0       PERF_RECORD_MMAP2 1977/1977: [0xb59d1000(0x2d6000) @ 0 b3:02 1702 0]: r-xp /usr/lib/libavcodec.so.62.11.100
+temp/rpi4-prefreeze/multi_dsoff.txt:4463:   12122/12122   PERF_RECORD_MMAP2 12122/12122: [0xb6109000(0x55e000) @ 0 b3:02 1702 4080200201]: r-xp /usr/lib/libavcodec.so.62.11.100
+
+FILE temp/v04/module.txt
+SHA256 125622a5bf522ad32839d0a1b645aae49e30c7e4d2a0972dd46312233a963689
+COUNTS {"0 b3:02 1073 0": 60, "0 b3:02 1073 583608144": 535}
+temp/v04/module.txt:20:       0/0       PERF_RECORD_MMAP2 1/1: [0xb6bff000(0x15a000) @ 0 b3:02 1073 0]: r-xp /usr/lib/libc.so.6
+temp/v04/module.txt:4277:    8015/8015    PERF_RECORD_MMAP2 8015/8015: [0xb6da4000(0x162000) @ 0 b3:02 1073 583608144]: r-xp /usr/lib/libc.so.6
+
+FILE temp/rpi5-prefreeze/multi_dsoff.txt
+SHA256 0974d7dc13cfb23a16b6832eb425e97c369b540930d2f4ebf4e74fb75fff3c93
+COUNTS {"0 b3:02 1290 0": 2, "0 b3:02 1290 3403977211": 2}
+temp/rpi5-prefreeze/multi_dsoff.txt:3595:       0/0       PERF_RECORD_MMAP2 911/911: [0xffff93c60000(0x4b7000) @ 0 b3:02 1290 0]: r-xp /usr/lib64/libavcodec.so.62.11.100
+temp/rpi5-prefreeze/multi_dsoff.txt:4318:    2179/2179    PERF_RECORD_MMAP2 2179/2179: [0xffff8eaf0000(0x75c000) @ 0 b3:02 1290 3403977211]: r-xp /usr/lib64/libavcodec.so.62.11.100
+
+SOURCE linux-rpi commit 42aeefac58edeb081aff440f0b60be71cbe49755
+
+src/linux-rpi/tools/perf/util/synthetic-events.c
+484: 		}
+485: 
+486: 		event->mmap2.ino_generation = 0;
+487: 
+488: 		/*
+489: 		 * Just like the kernel, see __perf_event_mmap in kernel/perf_event.c
+490: 		 */
+491: 		if (machine__is_host(machine))
+492: 			event->header.misc = PERF_RECORD_MISC_USER;
+493: 		else
+
+src/linux-rpi/kernel/events/core.c
+9016: 		inode = file_user_inode(vma->vm_file);
+9017: 		dev = inode->i_sb->s_dev;
+9018: 		ino = inode->i_ino;
+9019: 		gen = inode->i_generation;
+9020: 		maj = MAJOR(dev);
+9021: 		min = MINOR(dev);
+
+src/linux-rpi/kernel/events/core.c
+9052: 	mmap_event->file_name = name;
+9053: 	mmap_event->file_size = size;
+9054: 	mmap_event->maj = maj;
+9055: 	mmap_event->min = min;
+9056: 	mmap_event->ino = ino;
+9057: 	mmap_event->ino_generation = gen;
+9058: 	mmap_event->prot = prot;
+9059: 	mmap_event->flags = flags;
+
+src/linux-rpi/tools/perf/util/event.c
+343: 	} else {
+344: 		return fprintf(fp, " %d/%d: [%#" PRI_lx64 "(%#" PRI_lx64 ") @ %#" PRI_lx64
+345: 				   " %02x:%02x %"PRI_lu64" %"PRI_lu64"]: %c%c%c%c %s\n",
+346: 			       event->mmap2.pid, event->mmap2.tid, event->mmap2.start,
+347: 			       event->mmap2.len, event->mmap2.pgoff, event->mmap2.maj,
+348: 			       event->mmap2.min, event->mmap2.ino,
+349: 			       event->mmap2.ino_generation,
+350: 			       (event->mmap2.prot & PROT_READ) ? 'r' : '-',
+351: 			       (event->mmap2.prot & PROT_WRITE) ? 'w' : '-',
+352: 			       (event->mmap2.prot & PROT_EXEC) ? 'x' : '-',
+353: 			       (event->mmap2.flags & MAP_SHARED) ? 's' : 'p',
+
+Interpretation: different generation values are observed. Synthetic perf mappings explicitly set generation to 0, while kernel mappings use inode->i_generation. This does not prove the origin of each observed zero-generation line. Frozen design 5.3.3.5 compares the complete tuple, so the implementation rejects these unverified candidates.

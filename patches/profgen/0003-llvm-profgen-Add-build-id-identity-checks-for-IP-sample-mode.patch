@@ -1,0 +1,1587 @@
+From 30ceb73e9dcbe233f747d1ed8c97d9e3919564b0 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Mon, 2 Nov 2026 18:39:56 +0800
+Subject: [PATCH] [llvm-profgen] Add build-id identity checks for IP sample
+ mode
+
+Validate executable mapping evidence, buildid-list input and separate
+debug-file identity before counting addresses. Reject pseudo-probe builds
+and conflicting or ambiguous identity without changing the LBR path.
+
+Treat generation zero as unknown for unverified mappings: perf synthesizes
+zero for pre-existing mappings. Different devices or inodes and unequal
+nonzero generations remain ambiguous. Inode reuse may be undetectable when
+one generation is unknown.
+
+Cover identity grades, missing evidence, debug chains, probe rejection and
+generation ambiguity with lit tests and full recorded-input replays.
+---
+ .../test/tools/llvm-profgen/ip-addresses.test |  12 +-
+ .../llvm-profgen/ip-identity-ambiguity.test   | 164 ++++++++++
+ .../tools/llvm-profgen/ip-identity-chain.test | 137 ++++++++
+ .../tools/llvm-profgen/ip-identity-list.test  | 102 ++++++
+ .../llvm-profgen/ip-identity-matrix.test      | 283 +++++++++++++++++
+ .../tools/llvm-profgen/ip-identity-probe.test |  83 +++++
+ llvm/test/tools/llvm-profgen/ip-invalid.test  |  50 +--
+ .../tools/llvm-profgen/ip-real-records.test   |   4 +-
+ llvm/test/tools/llvm-profgen/ip-segments.test |   8 +-
+ .../test/tools/llvm-profgen/ip-selection.test |  20 +-
+ .../tools/llvm-profgen/ip-transition.test     |   4 +-
+ llvm/tools/llvm-profgen/CMakeLists.txt        |   1 +
+ llvm/tools/llvm-profgen/IPIdentity.cpp        | 297 ++++++++++++++++++
+ llvm/tools/llvm-profgen/IPPerfReader.cpp      |  48 +--
+ llvm/tools/llvm-profgen/IPPerfReader.h        |  10 +
+ llvm/tools/llvm-profgen/llvm-profgen.cpp      |  33 +-
+ 16 files changed, 1185 insertions(+), 71 deletions(-)
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-identity-ambiguity.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-identity-chain.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-identity-list.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-identity-matrix.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-identity-probe.test
+ create mode 100644 llvm/tools/llvm-profgen/IPIdentity.cpp
+
+diff --git a/llvm/test/tools/llvm-profgen/ip-addresses.test b/llvm/test/tools/llvm-profgen/ip-addresses.test
+index 172313f30e92..0011cb026624 100644
+--- a/llvm/test/tools/llvm-profgen/ip-addresses.test
++++ b/llvm/test/tools/llvm-profgen/ip-addresses.test
+@@ -1,21 +1,21 @@
+ # REQUIRES: aarch64-registered-target, arm-registered-target
+-# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%S/Inputs/ip-mode/a64-pie.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A64PIE
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%S/Inputs/ip-mode/a64-pie.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A64PIE
+ # A64PIE: IP-ADDRESS 0x13f4 sample_count=1 period_sum=1000003
+ # A64PIE: IP-STATS target=1
+-# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-16k.perfbin --perfscript=%S/Inputs/ip-mode/a64-16k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6416K
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-16k.perfbin --perfscript=%S/Inputs/ip-mode/a64-16k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6416K
+ # A6416K: IP-ADDRESS 0x44a4 sample_count=1 period_sum=1000003
+ # A6416K: IP-STATS target=1
+-# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-64k.perfbin --perfscript=%S/Inputs/ip-mode/a64-64k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6464K
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-64k.perfbin --perfscript=%S/Inputs/ip-mode/a64-64k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6464K
+ # A6464K: IP-ADDRESS 0x104a4 sample_count=1 period_sum=1000003
+ # A6464K: IP-STATS target=1
+-# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/thumb-count.perfbin --perfscript=%S/Inputs/ip-mode/thumb-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=THUMBCOUNT
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --show-ip-address-counts --binary=%S/Inputs/ip-mode/thumb-count.perfbin --perfscript=%S/Inputs/ip-mode/thumb-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=THUMBCOUNT
+ # THUMBCOUNT: IP-ADDRESS 0x1344 sample_count=1 period_sum=1000003
+ # THUMBCOUNT: IP-STATS target=1
+-# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/arm-count.perfbin --perfscript=%S/Inputs/ip-mode/arm-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=ARMCOUNT
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --show-ip-address-counts --binary=%S/Inputs/ip-mode/arm-count.perfbin --perfscript=%S/Inputs/ip-mode/arm-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=ARMCOUNT
+ # ARMCOUNT: IP-ADDRESS 0x139c sample_count=1 period_sum=1000003
+ # ARMCOUNT: IP-STATS target=1
+ # RUN: cat %S/Inputs/ip-mode/a64-multi-load.perfscript %S/Inputs/ip-mode/a64-multi-gap.perfscript > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTI
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTI
+ # MULTI: IP-ADDRESS 0x10000 sample_count=1 period_sum=1000003
+ # MULTI: IP-ADDRESS 0x10004 sample_count=1 period_sum=1000003
+ # MULTI: IP-ADDRESS 0x30000 sample_count=1 period_sum=1000003
+diff --git a/llvm/test/tools/llvm-profgen/ip-identity-ambiguity.test b/llvm/test/tools/llvm-profgen/ip-identity-ambiguity.test
+new file mode 100644
+index 000000000000..747c0c9a3589
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-identity-ambiguity.test
+@@ -0,0 +1,164 @@
++# REQUIRES: aarch64-registered-target
++# RUN: split-file %s %t
++
++# Deleted cannot use list False
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C1.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target \(deleted\)$' --perf-buildid-list=%t/C1.ids > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C1
++# C1: IP-IDENTITY final=unverified
++# C1: missing build-id evidence
++# RUN: test ! -e %t/out
++
++# Deleted cannot use list True
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C2.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target \(deleted\)$' --perf-buildid-list=%t/C2.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C2
++# C2: IP-IDENTITY final=unverified
++# C2: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Deleted verified by its own mmap
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C3.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target \(deleted\)$' --perf-buildid-list=%t/C3.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C3
++# C3: IP-IDENTITY final=verified
++# C3: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Deleted known conflict cannot be allowed
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C4.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target \(deleted\)$' --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C4
++# C4: IP-IDENTITY final=mismatch
++# C4: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Two basenames across pids
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C5.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=target --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C5
++# C5: IP-IDENTITY final=unverified
++# C5: ambiguous unverified identity; use --binary-match-regex or build-id
++# RUN: test ! -e %t/out
++
++# Regex excludes second candidate completely
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C6.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/a/target$ --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C6
++# C6: IP-IDENTITY final=unverified
++# C6: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Same path different inode across pids
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C7.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C7
++# C7: IP-IDENTITY final=unverified
++# C7: ambiguous unverified identity
++# RUN: test ! -e %t/out
++
++# Deleted and live mapping candidates
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C8.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=target --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C8
++# C8: IP-IDENTITY final=unverified
++# C8: ambiguous unverified identity
++# RUN: test ! -e %t/out
++
++# Explicit regex excludes live path
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C9.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex='^/target \(deleted\)$' --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C9
++# C9: IP-IDENTITY final=unverified
++# C9: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Zero and known generation, same inode
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C10.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C10
++# C10: IP-IDENTITY final=unverified
++# C10: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Known then zero generation, same inode
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C11.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C11
++# C11: IP-IDENTITY final=unverified
++# C11: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Two unequal known generations, same inode
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C12.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C12
++# C12: IP-IDENTITY final=unverified
++# C12: ambiguous unverified identity
++# RUN: test ! -e %t/out
++
++# Two zero generations, same inode
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C13.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C13
++# C13: IP-IDENTITY final=unverified
++# C13: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Different inode remains ambiguous with unknown generation
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C14.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C14
++# C14: IP-IDENTITY final=unverified
++# C14: ambiguous unverified identity
++# RUN: test ! -e %t/out
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --perfscript=%t/basename.perfscript --output=%t/out 2>&1 | FileCheck %s --check-prefix=BASE
++# BASE: ambiguous unverified identity
++
++#--- C1.perfscript
++17/17 7 cycles: 13f4 (/target (deleted)+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target (deleted)
++#--- C1.ids
++280854d1cea103bf480e219b336025e337e5a10e /target (deleted)
++#--- C2.perfscript
++17/17 7 cycles: 13f4 (/target (deleted)+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target (deleted)
++#--- C2.ids
++280854d1cea103bf480e219b336025e337e5a10e /target (deleted)
++#--- C3.perfscript
++17/17 7 cycles: 13f4 (/target (deleted)+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target (deleted)
++#--- C3.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C4.perfscript
++17/17 7 cycles: 13f4 (/target (deleted)+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <5ad150dcf23c310a3f89c1be4108698bbc73d89b>]: r-xp /target (deleted)
++#--- C5.perfscript
++17/17 7 cycles: 13f4 (/a/target+0x3f4)
++18/18 7 cycles: 13f4 (/b/target+0x3f4)
++#--- C6.perfscript
++17/17 7 cycles: 13f4 (/a/target+0x3f4)
++18/18 7 cycles: 13f4 (/b/target+0x3f4)
++#--- C7.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 2 0]: r-xp /target
++#--- C8.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++18/18 7 cycles: 13f4 (/target (deleted)+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target (deleted)
++#--- C9.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++18/18 7 cycles: 13f4 (/target (deleted)+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target (deleted)
++#--- C10.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 42]: r-xp /target
++#--- C11.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 42]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C12.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 41]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 42]: r-xp /target
++#--- C13.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C14.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 2 42]: r-xp /target
++#--- basename.perfscript
++17/17 7 cycles: 13f4 (/a/a64-no-id.perfbin+0x3f4)
++18/18 7 cycles: 13f4 (/b/a64-no-id.perfbin+0x3f4)
+diff --git a/llvm/test/tools/llvm-profgen/ip-identity-chain.test b/llvm/test/tools/llvm-profgen/ip-identity-chain.test
+new file mode 100644
+index 000000000000..ba37b37183e5
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-identity-chain.test
+@@ -0,0 +1,137 @@
++# REQUIRES: aarch64-registered-target
++# RUN: split-file %s %t
++
++# Same ID before/after split: a64-pie.perfbin
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C1.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-pie.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C1
++# C1: IP-ADDRESS 0x13f4 sample_count=1 period_sum=7
++# C1: IP-IDENTITY final=verified
++# C1: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Same ID before/after split: a64-pie.stripped.perfbin
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C2.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.stripped.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-pie.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C2
++# C2: IP-ADDRESS 0x13f4 sample_count=1 period_sum=7
++# C2: IP-IDENTITY final=verified
++# C2: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Debug chain mismatch a64-pie.perfbin/a64-no-id.debug
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C3.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-no-id.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C3
++# C3: IP-IDENTITY final=mismatch
++# C3: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Debug chain mismatch a64-no-id.perfbin/a64-pie.debug
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C4.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-pie.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C4
++# C4: IP-IDENTITY final=mismatch
++# C4: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Debug chain mismatch a64-fast.perfbin/a64-pie.debug
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C5.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-fast.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-pie.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C5
++# C5: IP-IDENTITY final=mismatch
++# C5: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Debug chain mismatch other/a64-pie.perfbin/a64-pie.debug
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C6.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/other/a64-pie.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-pie.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C6
++# C6: IP-IDENTITY final=mismatch
++# C6: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Input ID but target has no note: mmapFalse
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C7.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C7
++# C7: IP-IDENTITY final=mismatch
++# C7: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Input ID but target has no note: mmapTrue
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C8.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C8
++# C8: IP-IDENTITY final=mismatch
++# C8: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Input ID but target has no note: listFalse
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C9.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C9.ids > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C9
++# C9: IP-IDENTITY final=mismatch
++# C9: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Input ID but target has no note: listTrue
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C10.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C10.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C10
++# C10: IP-IDENTITY final=mismatch
++# C10: build-id mismatch
++# RUN: test ! -e %t/out
++
++# 8-byte target and matching 8-byte mmap succeeds
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C11.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-fast.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C11
++# C11: IP-IDENTITY final=verified
++# C11: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Different-ID pre-package artifact mismatch
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C12.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/other/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C12
++# C12: IP-IDENTITY final=mismatch
++# C12: build-id mismatch
++# RUN: test ! -e %t/out
++# RUN: mkdir -p %t/BUILD
++# RUN: cp %S/Inputs/ip-mode/a64-pie.perfbin %t/BUILD/a64-pie.perfbin
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%t/BUILD/a64-pie.perfbin --binary-match-regex=^/target$ --perfscript=%t/C1.perfscript --output=%t/out > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=BUILD
++# BUILD: IP-ADDRESS 0x13f4 sample_count=1 period_sum=7
++# BUILD: IP-IDENTITY final=verified
++# BUILD: profile generation is not implemented yet
++# RUN: ln -sf %S/Inputs/ip-mode/other/a64-pie.perfbin %t/link
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%t/link --binary-match-regex=^/target$ --perfscript=%t/C1.perfscript --output=%t/out > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=LINK
++# LINK: IP-IDENTITY final=mismatch
++# LINK: build-id mismatch
++
++#--- C1.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C2.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C3.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C4.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C5.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C6.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C7.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C8.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C9.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C9.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C10.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C10.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C11.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <78019ef653ca2521>]: r-xp /target
++#--- C12.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
+diff --git a/llvm/test/tools/llvm-profgen/ip-identity-list.test b/llvm/test/tools/llvm-profgen/ip-identity-list.test
+new file mode 100644
+index 000000000000..51e9255f7a91
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-identity-list.test
+@@ -0,0 +1,102 @@
++# REQUIRES: aarch64-registered-target
++# RUN: split-file %s %t
++
++# Malformed list 'f /target\n'
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C1.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C1.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C1
++# C1: invalid buildid-list line 1
++# RUN: test ! -e %t/out
++
++# Malformed list 'zz /target\n'
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C2.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C2.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C2
++# C2: invalid buildid-list line 1
++# RUN: test ! -e %t/out
++
++# Malformed list 'ff\n'
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C3.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C3.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C3
++# C3: invalid buildid-list line 1
++# RUN: test ! -e %t/out
++
++# Malformed list '\n'
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C4.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C4.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C4
++# C4: invalid buildid-list line 1
++# RUN: test ! -e %t/out
++
++# Malformed list 'garbage path\n'
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C5.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C5.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C5
++# C5: invalid buildid-list line 1
++# RUN: test ! -e %t/out
++
++# Malformed list 'ff \n'
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C6.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C6.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C6
++# C6: invalid buildid-list line 1
++# RUN: test ! -e %t/out
++
++# Path with spaces is preserved
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C7.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target with \(spaces\)$' --perf-buildid-list=%t/C7.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C7
++# C7: IP-IDENTITY final=verified-path
++# C7: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Empty-ID path with spaces
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C8.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target with spaces$' --perf-buildid-list=%t/C8.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C8
++# C8: IP-IDENTITY final=unverified
++# C8: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++# RUN: not llvm-profgen --binary=x --output=%t/out --perf-buildid-list=x 2>&1 | FileCheck %s --check-prefix=GATE
++# RUN: not llvm-profgen --binary=x --output=%t/out --allow-missing-build-id=false 2>&1 | FileCheck %s --check-prefix=GATE
++# GATE: IP-only options require --ip-samples
++# RUN: not llvm-profgen --ip-samples --output=%t/out --unknown-ip-option 2>&1 | FileCheck %s --check-prefix=CLI
++# CLI: Unknown command line argument
++# CLI: IP sample mode requires --binary
++# RUN: not llvm-profgen --ip-samples --binary=x --pid=-1 --output=%t/out --unknown-ip-option 2>&1 | FileCheck %s --check-prefix=PID
++# PID: Unknown command line argument
++# PID: samples with pid -1 never match --pid
++
++#--- C1.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C1.ids
++f /target
++#--- C2.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C2.ids
++zz /target
++#--- C3.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C3.ids
++ff
++#--- C4.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C4.ids
++
++#--- C5.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C5.ids
++garbage path
++#--- C6.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C6.ids
++ff 
++#--- C7.perfscript
++17/17 7 cycles: 13f4 (/target with (spaces)+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target with (spaces)
++#--- C7.ids
++280854d1cea103bf480e219b336025e337e5a10e /target with (spaces)
++#--- C8.perfscript
++17/17 7 cycles: 13f4 (/target with spaces+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target with spaces
++#--- C8.ids
++                                         /target with spaces
+diff --git a/llvm/test/tools/llvm-profgen/ip-identity-matrix.test b/llvm/test/tools/llvm-profgen/ip-identity-matrix.test
+new file mode 100644
+index 000000000000..8c463f43119f
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-identity-matrix.test
+@@ -0,0 +1,283 @@
++# REQUIRES: aarch64-registered-target
++# RUN: split-file %s %t
++
++# all mappings; consistent list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C1.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C1.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C1
++# C1: IP-IDENTITY final=verified
++# C1: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# all mappings; missing list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C2.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C2
++# C2: IP-IDENTITY final=verified
++# C2: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# all mappings; conflict list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C3.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C3.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C3
++# C3: IP-IDENTITY final=mismatch
++# C3: build-id mismatch
++# RUN: test ! -e %t/out
++
++# partial mappings; consistent list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C4.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C4.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C4
++# C4: IP-IDENTITY final=verified-path
++# C4: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# partial mappings; missing list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C5.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C5
++# C5: IP-IDENTITY final=unverified
++# C5: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# partial mappings; conflict list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C6.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C6.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C6
++# C6: IP-IDENTITY final=mismatch
++# C6: build-id mismatch
++# RUN: test ! -e %t/out
++
++# none mappings; consistent list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C7.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C7.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C7
++# C7: IP-IDENTITY final=verified-path
++# C7: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# none mappings; missing list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C8.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C8
++# C8: IP-IDENTITY final=unverified
++# C8: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# none mappings; conflict list
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C9.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C9.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C9
++# C9: IP-IDENTITY final=mismatch
++# C9: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Empty ID field from perf 6.12 is missing
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C10.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C10.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C10
++# C10: IP-IDENTITY final=unverified
++# C10: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# No mappings, even a consistent list cannot verify
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C11.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C11.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C11
++# C11: IP-IDENTITY final=unverified
++# C11: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Non-executable only, consistent
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C12.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C12.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C12
++# C12: IP-IDENTITY final=unverified
++# C12: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Non-executable only, missing
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C13.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C13
++# C13: IP-IDENTITY final=unverified
++# C13: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Non-executable only, conflict
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C14.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C14.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C14
++# C14: IP-IDENTITY final=mismatch
++# C14: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Non-executable missing evidence does not lower verified
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C15.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C15
++# C15: IP-IDENTITY final=verified
++# C15: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Non-executable conflicting evidence overrides verified
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C16.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C16
++# C16: IP-IDENTITY final=mismatch
++# C16: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Non-executable conflict wins over missing
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C17.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C17
++# C17: IP-IDENTITY final=mismatch
++# C17: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Three missing sides allowed
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C18.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-no-id.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C18
++# C18: IP-IDENTITY final=unverified
++# C18: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# Three missing sides rejected by default
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C19.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/a64-no-id.debug > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C19
++# C19: IP-IDENTITY final=unverified
++# C19: missing build-id evidence
++# RUN: test ! -e %t/out
++
++# No mappings rejected by default
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C20.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C20
++# C20: IP-IDENTITY final=unverified
++# C20: missing build-id evidence
++# RUN: test ! -e %t/out
++
++# Non-executable only rejected by default
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C21.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C21.ids > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C21
++# C21: IP-IDENTITY final=unverified
++# C21: missing build-id evidence
++# RUN: test ! -e %t/out
++
++# Conflicting list entries do not use last entry
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C22.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C22.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C22
++# C22: IP-IDENTITY final=mismatch
++# C22: build-id mismatch
++# RUN: test ! -e %t/out
++
++# Duplicate identical ID and upper-case hex agree
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C23.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C23.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C23
++# C23: IP-IDENTITY final=verified
++# C23: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++# MMAP executable uses path-level evidence
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C24.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=%t/C24.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C24
++# C24: IP-IDENTITY final=verified-path
++# C24: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++
++#--- C1.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C1.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C2.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C3.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C3.ids
++5ad150dcf23c310a3f89c1be4108698bbc73d89b /target
++#--- C4.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C4.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C5.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C6.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C6.ids
++5ad150dcf23c310a3f89c1be4108698bbc73d89b /target
++#--- C7.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C7.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C8.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C9.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C9.ids
++5ad150dcf23c310a3f89c1be4108698bbc73d89b /target
++#--- C10.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C10.ids
++                                         /target
++#--- C11.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C11.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C12.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r--p /target
++#--- C12.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C13.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r--p /target
++#--- C14.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r--p /target
++#--- C14.ids
++5ad150dcf23c310a3f89c1be4108698bbc73d89b /target
++#--- C15.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 b3:02 1 0]: rw-p /target
++#--- C16.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 <5ad150dcf23c310a3f89c1be4108698bbc73d89b>]: r--p /target
++#--- C17.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 <5ad150dcf23c310a3f89c1be4108698bbc73d89b>]: r--p /target
++#--- C18.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C19.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
++#--- C20.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C21.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r--p /target
++#--- C21.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C22.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- C22.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++5ad150dcf23c310a3f89c1be4108698bbc73d89b /target
++#--- C23.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854D1CEA103BF480E219B336025E337E5A10E>]: r-xp /target
++#--- C23.ids
++280854D1CEA103BF480E219B336025E337E5A10E /target
++280854d1cea103bf480e219b336025e337e5a10e /target
++#--- C24.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP 17/17: [0x1000(0x1000) @ 0]: x /target
++#--- C24.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
+diff --git a/llvm/test/tools/llvm-profgen/ip-identity-probe.test b/llvm/test/tools/llvm-profgen/ip-identity-probe.test
+new file mode 100644
+index 000000000000..e9e99803add2
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-identity-probe.test
+@@ -0,0 +1,83 @@
++# REQUIRES: aarch64-registered-target
++# RUN: split-file %s %t
++
++# probe-run
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C1.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/probe-run.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/probe-run.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C1
++# C1: IP sample mode is not admitted for pseudo-probe builds yet; use a sampling build without -fpseudo-probe-for-profiling and with matching DWARF
++# RUN: test ! -e %t/out
++
++# probe-run --use-dwarf-correlation
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C2.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/probe-run.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/probe-run.debug --use-dwarf-correlation --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C2
++# C2: IP sample mode is not admitted for pseudo-probe builds yet; use a sampling build without -fpseudo-probe-for-profiling and with matching DWARF
++# RUN: test ! -e %t/out
++
++# probe-debug
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C3.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/probe-debug.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/probe-debug.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C3
++# C3: IP sample mode is not admitted for pseudo-probe builds yet; use a sampling build without -fpseudo-probe-for-profiling and with matching DWARF
++# RUN: test ! -e %t/out
++
++# probe-debug --use-dwarf-correlation
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C4.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/probe-debug.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/probe-debug.debug --use-dwarf-correlation --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C4
++# C4: IP sample mode is not admitted for pseudo-probe builds yet; use a sampling build without -fpseudo-probe-for-profiling and with matching DWARF
++# RUN: test ! -e %t/out
++
++# probe-desc-only
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C5.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/probe-desc-only.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/probe-desc-only.debug --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C5
++# C5: IP sample mode is not admitted for pseudo-probe builds yet; use a sampling build without -fpseudo-probe-for-profiling and with matching DWARF
++# RUN: test ! -e %t/out
++
++# probe-desc-only --use-dwarf-correlation
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C6.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/probe-desc-only.perfbin --binary-match-regex=^/target$ --debug-binary=%S/Inputs/ip-mode/probe-desc-only.debug --use-dwarf-correlation --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C6
++# C6: IP sample mode is not admitted for pseudo-probe builds yet; use a sampling build without -fpseudo-probe-for-profiling and with matching DWARF
++# RUN: test ! -e %t/out
++
++# Ordinary DWARF remains allowed
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C7.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$ --use-dwarf-correlation --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=C7
++# C7: IP-IDENTITY final=verified
++# C7: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++# RUN: echo sentinel > %t/old
++# RUN: not llvm-profgen --ip-samples --binary=%S/Inputs/ip-mode/other/a64-pie.perfbin --binary-match-regex=^/target$ --perfscript=%t/preserve7 --output=%t/old 2>&1 | FileCheck %s --check-prefix=P8
++# P8: build-id mismatch
++# RUN: FileCheck %s --check-prefix=OLD < %t/old
++# RUN: echo sentinel > %t/old
++# RUN: not llvm-profgen --ip-samples --binary=%S/Inputs/ip-mode/a64-pie.perfbin --debug-binary=%S/Inputs/ip-mode/probe-debug.debug --binary-match-regex=^/target$ --perfscript=%t/preserve8 --output=%t/old 2>&1 | FileCheck %s --check-prefix=P9
++# P9: pseudo-probe builds
++# RUN: FileCheck %s --check-prefix=OLD < %t/old
++# RUN: echo sentinel > %t/old
++# RUN: not llvm-profgen --ip-samples --binary=%S/Inputs/ip-mode/a64-no-id.perfbin --allow-missing-build-id --binary-match-regex=target --perfscript=%t/preserve9 --output=%t/old 2>&1 | FileCheck %s --check-prefix=P10
++# P10: ambiguous unverified identity
++# RUN: FileCheck %s --check-prefix=OLD < %t/old
++# OLD: sentinel
++
++#--- C1.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C2.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C3.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C4.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C5.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C6.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++#--- C7.perfscript
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- preserve7
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- preserve8
++17/17 7 cycles: 13f4 (/target+0x3f4)
++0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <280854d1cea103bf480e219b336025e337e5a10e>]: r-xp /target
++#--- preserve9
++17/17 7 cycles: 13f4 (/a/target+0x3f4)
++18/18 7 cycles: 13f4 (/b/target+0x3f4)
+diff --git a/llvm/test/tools/llvm-profgen/ip-invalid.test b/llvm/test/tools/llvm-profgen/ip-invalid.test
+index 15fcfb3c6146..896835c8399e 100644
+--- a/llvm/test/tools/llvm-profgen/ip-invalid.test
++++ b/llvm/test/tools/llvm-profgen/ip-invalid.test
+@@ -1,59 +1,59 @@
+ # REQUIRES: aarch64-registered-target
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=E0
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=E0
+ # E0: multiple events require --ip-event
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-zero-period.perfscript 2>&1 | FileCheck %s --check-prefix=E1
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-zero-period.perfscript 2>&1 | FileCheck %s --check-prefix=E1
+ # E1: invalid or zero period
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-invalid-pid.perfscript 2>&1 | FileCheck %s --check-prefix=E2
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-invalid-pid.perfscript 2>&1 | FileCheck %s --check-prefix=E2
+ # E2: invalid pid/tid
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-invalid-tid.perfscript 2>&1 | FileCheck %s --check-prefix=E3
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-invalid-tid.perfscript 2>&1 | FileCheck %s --check-prefix=E3
+ # E3: invalid pid/tid
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-truncated.perfscript 2>&1 | FileCheck %s --check-prefix=E4
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-truncated.perfscript 2>&1 | FileCheck %s --check-prefix=E4
+ # E4: invalid DSO field
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-unknown-line.perfscript 2>&1 | FileCheck %s --check-prefix=E5
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-unknown-line.perfscript 2>&1 | FileCheck %s --check-prefix=E5
+ # E5: invalid pid/tid
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-with-brstack.perfscript 2>&1 | FileCheck %s --check-prefix=E6
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-with-brstack.perfscript 2>&1 | FileCheck %s --check-prefix=E6
+ # E6: invalid DSO field
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-missing-dsoff.perfscript 2>&1 | FileCheck %s --check-prefix=E7
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/synthetic-missing-dsoff.perfscript 2>&1 | FileCheck %s --check-prefix=E7
+ # E7: file DSO is missing dsoff
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=missing --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=EMPTY
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --ip-event=missing --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=EMPTY
+ # EMPTY: event filter selected no samples
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --binary-match-regex=nomatch --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=TARGET
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --binary-match-regex=nomatch --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=TARGET
+ # TARGET: no target samples; use --binary-match-regex; top file DSOs:
+ # TARGET: /synthetic/a64-multi-load.perfbin 4
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --binary-match-regex=[ --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=RE
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --binary-match-regex=[ --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=RE
+ # RE: invalid --binary-match-regex
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=cycles --pid=0 --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=PIDEMPTY
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --ip-event=cycles --pid=0 --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=PIDEMPTY
+ # PIDEMPTY: no target samples
+ # RUN: echo "17/17 18446744073709551615 cycles: 1000 (/a64-multi-load.perfbin+0x1000)" > %t.in
+ # RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0x1000)" >> %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
+ # OVER: counter overflow
+ # RUN: echo "17/17 18446744073709551616 cycles: 1000 (/a64-multi-load.perfbin+0x1000)" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=INTEGER
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=INTEGER
+ # INTEGER: invalid or zero period
+ # RUN: echo "0/0 PERF_RECORD_LOST lost 18446744073709551615" > %t.in
+ # RUN: echo "0/0 PERF_RECORD_LOST lost 1" >> %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
+ # RUN: echo "0/0 PERF_RECORD_LOST_SAMPLES lost 1" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TYPE
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TYPE
+ # TYPE: unrecognized record type
+ 
+ # RUN: echo "0/0 PERF_RECORD_MMAP2 1/1: [0xffffffffffffffff(0x2) @ 0 b3:02 1 0]: r-xp /x" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
+ # RUN: echo "0/0 PERF_RECORD_MMAP2 1/1: [0x0(0x2) @ 0xffffffffffffffff b3:02 1 0]: r-xp /x" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
+ # RUN: echo "0/0 PERF_RECORD_MMAP2 -2/1: [0x0(0x2) @ 0 b3:02 1 0]: r-xp /x" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MPID
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MPID
+ # MPID: invalid mapping pid/tid
+ # RUN: echo "0/0 PERF_RECORD_MMAP2 1/1: [0x0(0x2) @ 0 <xyz>]: r-xp /x" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MID
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MID
+ # MID: invalid mapping build-id
+ # RUN: %python -c "import pathlib; pathlib.Path(r'%t.in').write_bytes(b'17/17 1 cycles: 1000 (/x\\0+0x1000)\\n')"
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=NUL
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=NUL
+ # NUL: unrepresentable input line
+ 
+ # RUN: %python -c "import pathlib; pathlib.Path(r'%t.in').write_text(''.join('17/17 1 cycles: 1000 (/'+c+'+0x1000)\\n' for i,c in enumerate('abcdef') for n in range(6-i)))"
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TOP
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TOP
+ # TOP: no target samples; use --binary-match-regex; top file DSOs:
+ # TOP-NEXT:   /a 6
+ # TOP-NEXT:   /b 5
+@@ -64,11 +64,11 @@
+ 
+ # A malformed suffix is a path byte sequence; the resulting file DSO lacks dsoff.
+ # RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0xgarbage)" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PATHSUFFIX
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PATHSUFFIX
+ # RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0x)" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PATHSUFFIX
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PATHSUFFIX
+ # PATHSUFFIX: file DSO is missing dsoff
+ # PATHSUFFIX-NOT: invalid dsoff offset
+ # RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0x10000000000000000)" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OFFSETOVER
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OFFSETOVER
+ # OFFSETOVER: invalid dsoff offset
+diff --git a/llvm/test/tools/llvm-profgen/ip-real-records.test b/llvm/test/tools/llvm-profgen/ip-real-records.test
+index 2d534e43950b..a062f7141fb5 100644
+--- a/llvm/test/tools/llvm-profgen/ip-real-records.test
++++ b/llvm/test/tools/llvm-profgen/ip-real-records.test
+@@ -1,7 +1,7 @@
+ # REQUIRES: aarch64-registered-target
+ # RUN: cat %S/Inputs/ip-mode/real-sample.perfscript %S/Inputs/ip-mode/real-mmap2-inode.perfscript %S/Inputs/ip-mode/real-mmap2-buildid.perfscript %S/Inputs/ip-mode/real-module-mmap.perfscript %S/Inputs/ip-mode/real-lost.perfscript %S/Inputs/ip-mode/real-vdso.perfscript %S/Inputs/ip-mode/real-kernel.perfscript %S/Inputs/ip-mode/real-negative-pid.perfscript %S/Inputs/ip-mode/real-deleted.perfscript %S/Inputs/ip-mode/real-module-sample.perfscript %S/Inputs/ip-mode/synthetic-unknown.perfscript %S/Inputs/ip-mode/a64-multi-load.perfscript > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-mmap-events --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REAL
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --pid=17 --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PID
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-mmap-events --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REAL
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --pid=17 --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PID
+ # REAL: 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0
+ # REAL: <eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c>]: r-xp /usr/lib/libc.so.6
+ # REAL: IP-STATS input=11
+diff --git a/llvm/test/tools/llvm-profgen/ip-segments.test b/llvm/test/tools/llvm-profgen/ip-segments.test
+index c663499ab109..50d8cfa939ce 100644
+--- a/llvm/test/tools/llvm-profgen/ip-segments.test
++++ b/llvm/test/tools/llvm-profgen/ip-segments.test
+@@ -1,16 +1,16 @@
+ # REQUIRES: aarch64-registered-target
+ # RUN: echo "17/17 1 cycles: 1000 (/x+0x1000)" > %t.in
+ # RUN: yaml2obj -DOFFSET=0x1000 -DVADDR=0x10000 %s -o %t.elf
+-# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTIPLE
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTIPLE
+ # MULTIPLE: dsoff matches multiple executable PT_LOAD segments
+ # RUN: yaml2obj -DOFFSET=0xffffffffffffffff -DVADDR=0x10000 %s -o %t.elf
+-# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
+ # RUN: yaml2obj -DOFFSET=0x1000 -DVADDR=0xffffffffffffffff %s -o %t.elf
+-# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
+ # OVER: counter overflow
+ # RUN: yaml2obj -DOFFSET=0x1000 -DVADDR=0x10000 %s -o %t.elf
+ # RUN: echo "17/17 1 cycles: 1008 (/x+0x1008)" > %t.in
+-# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=END
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=END
+ # END-NOT: IP-ADDRESS
+ # END: IP-STATS target=1
+ # END-NEXT: IP-STATS unmapped_in_target=1
+diff --git a/llvm/test/tools/llvm-profgen/ip-selection.test b/llvm/test/tools/llvm-profgen/ip-selection.test
+index 9d13f158ca92..ebbbfdfc9d26 100644
+--- a/llvm/test/tools/llvm-profgen/ip-selection.test
++++ b/llvm/test/tools/llvm-profgen/ip-selection.test
+@@ -1,29 +1,31 @@
+ # REQUIRES: aarch64-registered-target
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-spaces.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-parentheses.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-plus.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-spaces.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-parentheses.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-plus.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
+ # PATH: IP-ADDRESS 0x10004 sample_count=1 period_sum=1000003
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --ip-event=cycles:u --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=MOD
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --binary-match-regex=libx --ip-event=cycles:u --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=MOD
+ # MOD: IP-EVENT cycles:u samples=1
+ # RUN: echo "17/17 2 cycles: 1000 (/chosen/a64-multi-load.perfbin+0x1000)" > %t.in
+ # RUN: echo "18/18 3 cycles: 1000 (/excluded/a64-multi-load.perfbin+0x1000)" >> %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=^/chosen/ --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REGEX
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --binary-match-regex=^/chosen/ --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REGEX
+ # REGEX: IP-ADDRESS 0x10000 sample_count=1 period_sum=2
+ # REGEX: IP-STATS other_dso=1
+ # REGEX: IP-STATS target=1
++# RUN: echo "0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 <80ef839e96fd9179728db73ba10c229a2637410c>]: r-xp /chosen/a64-multi-load.perfbin" >> %t.in
++# RUN: echo "0/0 PERF_RECORD_MMAP2 18/18: [0x1000(0x1000) @ 0 <80ef839e96fd9179728db73ba10c229a2637410c>]: r-xp /excluded/a64-multi-load.perfbin" >> %t.in
+ # RUN: ln -sf %S/Inputs/ip-mode/a64-multi-load.perfbin %t.alias
+-# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%t.alias --output=%t.out --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=LINK
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --show-ip-address-counts --binary=%t.alias --output=%t.out --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=LINK
+ # LINK: IP-ADDRESS 0x10000 sample_count=2 period_sum=5
+ # RUN: echo "17/17 7 cycles: 1000 (/chosen/a64-multi-load.perfbin (deleted)+0x1000)" > %t.in
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=DELETED
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=DELETED
+ # DELETED: IP-ADDRESS 0x10000 sample_count=1 period_sum=7
+ 
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --ip-event=cpu-clock --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=MIX
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --binary-match-regex=libx --ip-event=cpu-clock --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=MIX
+ # MIX: IP-ADDRESS 0x10004 sample_count=1 period_sum=999
+ # MIX: IP-STATS input=2
+ # MIX-NEXT: IP-EVENT cpu-clock samples=1
+ # MIX-NEXT: IP-EVENT cycles samples=1
+ # MIX-NEXT: IP-STATS after_event=1
+ # MIX-NEXT: IP-STATS after_pid=1
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=cycles --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=EXACT
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --ip-event=cycles --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=EXACT
+ # EXACT: event filter selected no samples
+diff --git a/llvm/test/tools/llvm-profgen/ip-transition.test b/llvm/test/tools/llvm-profgen/ip-transition.test
+index abce0443d094..03d270045cd7 100644
+--- a/llvm/test/tools/llvm-profgen/ip-transition.test
++++ b/llvm/test/tools/llvm-profgen/ip-transition.test
+@@ -1,9 +1,9 @@
+ # REQUIRES: aarch64-registered-target
+ # RUN: rm -f %t.out
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --show-ip-address-counts --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END
+ # RUN: not test -e %t.out
+ # RUN: echo OLD-PROFILE > %t.out
+-# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --allow-missing-build-id --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END
+ # RUN: FileCheck %s --check-prefix=OLD --input-file=%t.out
+ # END: llvm-profgen: error: IP sample mode: profile generation is not implemented yet
+ # OLD: OLD-PROFILE
+diff --git a/llvm/tools/llvm-profgen/CMakeLists.txt b/llvm/tools/llvm-profgen/CMakeLists.txt
+index af53ee65ae4e..bc02274de696 100644
+--- a/llvm/tools/llvm-profgen/CMakeLists.txt
++++ b/llvm/tools/llvm-profgen/CMakeLists.txt
+@@ -19,6 +19,7 @@ add_llvm_tool(llvm-profgen
+   llvm-profgen.cpp
+   PerfReader.cpp
+   IPPerfReader.cpp
++  IPIdentity.cpp
+   CSPreInliner.cpp
+   ProfiledBinary.cpp
+   ProfileGenerator.cpp
+diff --git a/llvm/tools/llvm-profgen/IPIdentity.cpp b/llvm/tools/llvm-profgen/IPIdentity.cpp
+new file mode 100644
+index 000000000000..061a453488bf
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPIdentity.cpp
+@@ -0,0 +1,297 @@
++//===- IPIdentity.cpp - IP sample identity checks
++//--------------------------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#include "IPPerfReader.h"
++#include "llvm/ADT/StringExtras.h"
++#include "llvm/Object/BuildID.h"
++#include "llvm/Object/ELFObjectFile.h"
++#include "llvm/Support/MemoryBuffer.h"
++#include "llvm/Support/Path.h"
++#include "llvm/Support/raw_ostream.h"
++#include <algorithm>
++#include <tuple>
++
++using namespace llvm;
++using namespace llvm::object;
++
++namespace {
++Error identityError(const Twine &Message) {
++  return createStringError(inconvertibleErrorCode(),
++                           "IP sample mode: " + Message);
++}
++
++// All text IDs are validated before normalization. Compare every byte, not a
++// fixed-size prefix or an inferred linker-specific ID size.
++std::string hexID(BuildIDRef ID) { return toHex(ID, /*LowerCase=*/true); }
++StringRef displayID(StringRef ID) { return ID.empty() ? "none" : ID; }
++std::string quote(StringRef S) {
++  std::string Result;
++  raw_string_ostream OS(Result);
++  OS << '"';
++  OS.write_escaped(S);
++  OS << '"';
++  return Result;
++}
++StringRef livePath(StringRef P) {
++  P.consume_back(" (deleted)");
++  return P;
++}
++
++enum class Grade { Mismatch, Unverified, VerifiedPath, Verified };
++StringRef name(Grade G) {
++  switch (G) {
++  case Grade::Mismatch:
++    return "mismatch";
++  case Grade::Unverified:
++    return "unverified";
++  case Grade::VerifiedPath:
++    return "verified-path";
++  case Grade::Verified:
++    return "verified";
++  }
++  llvm_unreachable("invalid identity grade");
++}
++
++Expected<std::string> readObjectIdentity(StringRef Path) {
++  auto Object = ObjectFile::createObjectFile(Path);
++  if (!Object)
++    return Object.takeError();
++  const ObjectFile *O = Object->getBinary();
++  if (!isa<ELFObjectFileBase>(O))
++    return identityError("identity input must be an ELF object");
++  // Independent of --use-dwarf-correlation; either section in either object
++  // is sufficient to reject an unadmitted probe build.
++  for (const SectionRef &Section : O->sections()) {
++    auto Name = Section.getName();
++    if (!Name)
++      return Name.takeError();
++    if (*Name == ".pseudo_probe" || *Name == ".pseudo_probe_desc")
++      return createStringError(
++          inconvertibleErrorCode(),
++          "IP sample mode is not admitted for pseudo-probe builds yet; use a "
++          "sampling build without -fpseudo-probe-for-profiling and with "
++          "matching DWARF");
++  }
++  return hexID(getBuildID(O));
++}
++
++using PathIDs = std::map<std::string, std::set<std::string>>;
++Expected<PathIDs> readBuildIDList(StringRef Path) {
++  auto Buffer = MemoryBuffer::getFile(Path);
++  if (!Buffer)
++    return createStringError(Buffer.getError(),
++                             "IP sample mode: cannot read buildid-list");
++  PathIDs Result;
++  StringRef Text = (*Buffer)->getBuffer();
++  unsigned LineNumber = 0;
++  while (!Text.empty()) {
++    auto [Line, Tail] = Text.split('\n');
++    Text = Tail;
++    ++LineNumber;
++    auto Bad = [&]() {
++      return identityError("invalid buildid-list line " + Twine(LineNumber));
++    };
++    if (Line.empty() || Line.contains('\0') || Line.contains('\r'))
++      return Bad();
++    StringRef ID, File;
++    if (Line.front() == ' ' || Line.front() == '\t') {
++      // perf prints a blank ID field followed by the complete DSO path.
++      File = Line.ltrim(" \t");
++    } else {
++      size_t Space = Line.find_first_of(" \t");
++      if (Space == StringRef::npos)
++        return Bad();
++      ID = Line.take_front(Space);
++      if (ID.empty() || ID.size() % 2 || !llvm::all_of(ID, isHexDigit))
++        return Bad();
++      File = Line.drop_front(Space).ltrim(" \t");
++    }
++    if (File.empty())
++      return Bad();
++    auto &IDs = Result[File.str()];
++    if (!ID.empty())
++      IDs.insert(hexID(parseBuildID(ID)));
++  }
++  return Result;
++}
++} // namespace
++
++Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
++  bool Observed = llvm::any_of(
++      Mappings, [](const IPMapping &M) { return !M.BuildID.empty(); });
++  IdentityDiagnostics.push_back("observed_mmap_build_id=" +
++                                std::string(Observed ? "true" : "false"));
++  auto ID = readObjectIdentity(BinaryPath);
++  if (!ID)
++    return ID.takeError();
++  BinaryID = *ID;
++  if (Options.DebugBinary) {
++    auto Debug = readObjectIdentity(*Options.DebugBinary);
++    if (!Debug)
++      return Debug.takeError();
++    DebugID = *Debug;
++  }
++  IdentityDiagnostics.push_back("binary=" + quote(BinaryPath) +
++                                " binary_realpath=" + quote(BinaryRealPath) +
++                                " build_id=" + displayID(BinaryID).str());
++  IdentityDiagnostics.push_back(
++      "debug_binary=" +
++      (Options.DebugBinary ? quote(*Options.DebugBinary) : "none") +
++      " build_id=" + displayID(DebugID).str());
++  IdentityDiagnostics.push_back(
++      "selection=" +
++      std::string(Options.BinaryMatchRegex ? "regex" : "basename"));
++
++  PathIDs List;
++  if (Options.BuildIDList) {
++    auto Parsed = readBuildIDList(*Options.BuildIDList);
++    if (!Parsed)
++      return Parsed.takeError();
++    List = std::move(*Parsed);
++  }
++  Grade Overall = Grade::Verified;
++  if (Options.DebugBinary) {
++    if (DebugID != BinaryID)
++      Overall = Grade::Mismatch;
++    IdentityDiagnostics.push_back("source=debug-binary result=" +
++                                  std::string(DebugID != BinaryID ? "mismatch"
++                                              : DebugID.empty()
++                                                  ? "missing"
++                                                  : "consistent"));
++  }
++
++  // Preserve all known conflicts, even in a non-executable mapping. An empty
++  // executable set is missing evidence, not a vacuous successful proof.
++  for (const std::string &Path : Candidates) {
++    const bool Deleted = StringRef(Path).ends_with(" (deleted)");
++    Grade PathGrade = Grade::Verified;
++    auto It = List.find(Path);
++    const std::set<std::string> *IDs = It == List.end() ? nullptr : &It->second;
++    if (IDs)
++      for (const auto &Evidence : *IDs)
++        if (Evidence != BinaryID)
++          PathGrade = Grade::Mismatch;
++    IdentityDiagnostics.push_back("candidate=" + quote(Path) +
++                                  " deleted=" + (Deleted ? "true" : "false"));
++    if (IDs && !IDs->empty()) {
++      for (const auto &Evidence : *IDs)
++        IdentityDiagnostics.push_back(
++            "path=" + quote(Path) +
++            " source=buildid-list origin=unknown build_id=" + Evidence +
++            " result=" + (Evidence == BinaryID ? "consistent" : "mismatch"));
++    } else {
++      IdentityDiagnostics.push_back(
++          "path=" + quote(Path) +
++          " source=buildid-list build_id=none result=missing");
++    }
++    size_t ExecutableCount = 0;
++    for (size_t Index = 0; Index < Mappings.size(); ++Index) {
++      const IPMapping &M = Mappings[Index];
++      if (M.Path != Path)
++        continue;
++      bool Executable = M.Permissions.find('x') != std::string::npos;
++      std::string MappedID =
++          M.BuildID.empty() ? "" : hexID(parseBuildID(M.BuildID));
++      Grade G = Grade::Unverified;
++      StringRef Source = "missing";
++      if (!MappedID.empty()) {
++        Source = "mmap2";
++        G = MappedID == BinaryID ? Grade::Verified : Grade::Mismatch;
++      } else if (!Deleted && IDs && IDs->count(BinaryID) && !BinaryID.empty()) {
++        Source = "buildid-list";
++        G = Grade::VerifiedPath;
++      }
++      if (Executable) {
++        ++ExecutableCount;
++        PathGrade = std::min(PathGrade, G);
++      } else if (G == Grade::Mismatch) {
++        PathGrade = Grade::Mismatch;
++      }
++      IdentityDiagnostics.push_back(
++          "mapping=" + std::to_string(Index) + " path=" + quote(Path) +
++          " pid=" + std::to_string(M.PID) + " executable=" +
++          (Executable ? "true" : "false") + " source=" + Source.str() +
++          " build_id=" + displayID(MappedID).str() + " result=" +
++          (Executable || G == Grade::Mismatch ? name(G).str()
++                                              : "not-required"));
++    }
++    if (!ExecutableCount)
++      PathGrade = std::min(PathGrade, Grade::Unverified);
++    Overall = std::min(Overall, PathGrade);
++    IdentityDiagnostics.push_back(
++        "path=" + quote(Path) + " executable_mappings=" +
++        std::to_string(ExecutableCount) + " result=" + name(PathGrade).str());
++  }
++  // Conflicting IDs for the same list path are invalid evidence even if that
++  // path was not selected as the target. Do not silently choose the last ID.
++  for (const auto &[Path, IDs] : List)
++    if (IDs.size() > 1) {
++      Overall = Grade::Mismatch;
++      IdentityDiagnostics.push_back(
++          "path=" + quote(Path) +
++          " source=buildid-list result=mismatch reason=conflicting-ids");
++    }
++  IdentityDiagnostics.push_back("final=" + name(Overall).str());
++  if (Overall == Grade::Mismatch)
++    return identityError("build-id mismatch");
++  if (Overall != Grade::Unverified)
++    return Error::success();
++
++  // This is ambiguity detection, not identity proof. Inode fields are parsed
++  // numerically so different zero-padding/case spellings compare equally.
++  std::map<std::string, std::string> Basenames;
++  using InodeKey = std::tuple<uint64_t, uint64_t, uint64_t>;
++  std::map<std::string, std::set<InodeKey>> Inodes;
++  std::map<std::string, std::set<uint64_t>> KnownGenerations;
++  std::map<std::string, unsigned> DeletedStates;
++  bool Ambiguous = false;
++  for (const std::string &Path : Candidates) {
++    std::string Live = livePath(Path).str();
++    std::string Base = sys::path::filename(Live).str();
++    auto [It, Inserted] = Basenames.emplace(Base, Live);
++    Ambiguous |= !Inserted && It->second != Live;
++    for (const IPMapping &M : Mappings) {
++      if (M.Path != Path)
++        continue;
++      DeletedStates[Live] |= M.Deleted ? 2 : 1;
++      if (M.Device.empty())
++        continue;
++      auto [Major, Minor] = StringRef(M.Device).split(':');
++      uint64_t A, B, I, G;
++      // parseLine already validated these fields and their ranges.
++      bool Invalid = Major.getAsInteger(16, A) || Minor.getAsInteger(16, B) ||
++                     StringRef(M.Inode).getAsInteger(10, I) ||
++                     StringRef(M.Generation).getAsInteger(10, G);
++      if (Invalid)
++        return identityError("invalid inode identity");
++      Inodes[Live].insert({A, B, I});
++      // perf's synthesized pre-existing mappings report generation zero,
++      // meaning unknown. Only two unequal known generations conflict.
++      // Inode reuse cannot be detected when one generation is unknown.
++      if (G)
++        KnownGenerations[Live].insert(G);
++    }
++    Ambiguous |= Inodes[Live].size() > 1 || KnownGenerations[Live].size() > 1 ||
++                 DeletedStates[Live] == 3;
++  }
++  if (Ambiguous)
++    return identityError(
++        "ambiguous unverified identity; use --binary-match-regex "
++        "or build-id to distinguish candidates");
++  if (!Options.AllowMissingBuildID)
++    return identityError(
++        "missing build-id evidence; use --allow-missing-build-id "
++        "only for unverified identity");
++  return Error::success();
++}
++
++void IPPerfReader::printIdentity(raw_ostream &OS) const {
++  for (const std::string &Line : IdentityDiagnostics)
++    OS << "IP-IDENTITY " << Line << '\n';
++}
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.cpp b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+index 7439ea51257f..58effc6bd4a5 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.cpp
++++ b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+@@ -306,9 +306,31 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+     }
+     if (Error E = add(Stats.Target, 1))
+       return E;
++    Candidates.insert(S.Path);
++    SelectedSamples.push_back(&S);
++  }
++  if (Options.Event && !Stats.AfterEvent)
++    return invalid("event filter selected no samples");
++  if (!Stats.Target) {
++    std::vector<std::pair<std::string, uint64_t>> Top(Files.begin(),
++                                                      Files.end());
++    llvm::sort(Top, [](const auto &A, const auto &B) {
++      return A.second != B.second ? A.second > B.second : A.first < B.first;
++    });
++    std::string Message =
++        "no target samples; use --binary-match-regex; top file DSOs:";
++    for (size_t I = 0; I < std::min<size_t>(5, Top.size()); ++I)
++      Message += "\n  " + Top[I].first + " " + std::to_string(Top[I].second);
++    return invalid(Message);
++  }
++  return Error::success();
++}
++
++Error IPPerfReader::countAddresses() {
++  for (const Sample *S : SelectedSamples) {
+     const Segment *Found = nullptr;
+     for (const Segment &Seg : Segments) {
+-      if (*S.Offset < Seg.Offset || *S.Offset >= Seg.End)
++      if (*S->Offset < Seg.Offset || *S->Offset >= Seg.End)
+         continue;
+       if (Found)
+         return invalid("dsoff matches multiple executable PT_LOAD segments");
+@@ -320,28 +342,14 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+       continue;
+     }
+     uint64_t VA = Found->VAddr;
+-    if (Error E = add(VA, *S.Offset - Found->Offset))
++    if (Error E = add(VA, *S->Offset - Found->Offset))
+       return E;
+     auto &C = Counts[VA];
+     if (Error E = add(C.SampleCount, 1))
+       return E;
+-    if (Error E = add(C.PeriodSum, S.Period))
++    if (Error E = add(C.PeriodSum, S->Period))
+       return E;
+   }
+-  if (Options.Event && !Stats.AfterEvent)
+-    return invalid("event filter selected no samples");
+-  if (!Stats.Target) {
+-    std::vector<std::pair<std::string, uint64_t>> Top(Files.begin(),
+-                                                      Files.end());
+-    llvm::sort(Top, [](const auto &A, const auto &B) {
+-      return A.second != B.second ? A.second > B.second : A.first < B.first;
+-    });
+-    std::string Message =
+-        "no target samples; use --binary-match-regex; top file DSOs:";
+-    for (size_t I = 0; I < std::min<size_t>(5, Top.size()); ++I)
+-      Message += "\n  " + Top[I].first + " " + std::to_string(Top[I].second);
+-    return invalid(Message);
+-  }
+   return Error::success();
+ }
+ 
+@@ -363,7 +371,11 @@ Error IPPerfReader::read(StringRef Trace, StringRef Binary,
+   }
+   if (Error E = loadBinary(Binary))
+     return E;
+-  return selectSamples(Options);
++  if (Error E = selectSamples(Options))
++    return E;
++  if (Error E = validateIdentity(Options))
++    return E;
++  return countAddresses();
+ }
+ 
+ void IPPerfReader::printAddressCounts(raw_ostream &OS) const {
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.h b/llvm/tools/llvm-profgen/IPPerfReader.h
+index 48357361cfa6..9eb0c3f1f61e 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.h
++++ b/llvm/tools/llvm-profgen/IPPerfReader.h
+@@ -13,6 +13,7 @@
+ #include <cstdint>
+ #include <map>
+ #include <optional>
++#include <set>
+ #include <string>
+ #include <vector>
+ 
+@@ -38,6 +39,8 @@ struct IPReaderOptions {
+   std::optional<std::string> Event;
+   std::optional<std::string> BinaryMatchRegex;
+   std::optional<uint32_t> PID;
++  std::optional<std::string> BuildIDList, DebugBinary;
++  bool AllowMissingBuildID = false;
+ };
+ 
+ class IPPerfReader {
+@@ -62,11 +65,17 @@ class IPPerfReader {
+   std::vector<IPMapping> Mappings;
+   std::vector<Segment> Segments;
+   AddressCounter Counts;
++  std::vector<const Sample *> SelectedSamples;
++  std::set<std::string> Candidates;
++  std::vector<std::string> IdentityDiagnostics;
++  std::string BinaryID, DebugID;
+   std::string BinaryPath, BinaryRealPath;
+ 
+   Error parseLine(StringRef Line);
+   Error loadBinary(StringRef Path);
+   Error selectSamples(const IPReaderOptions &Options);
++  Error countAddresses();
++  Error validateIdentity(const IPReaderOptions &Options);
+ 
+ public:
+   Error read(StringRef Trace, StringRef Binary, const IPReaderOptions &Options);
+@@ -74,6 +83,7 @@ public:
+   const std::vector<IPMapping> &getMappings() const { return Mappings; }
+   void printAddressCounts(raw_ostream &OS) const;
+   void printMmapEvents(raw_ostream &OS) const;
++  void printIdentity(raw_ostream &OS) const;
+ };
+ 
+ } // namespace llvm
+diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+index 8facc5e7ff25..a583d206f0d5 100644
+--- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
++++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+@@ -110,6 +110,14 @@ static cl::opt<std::string> BinaryMatchRegex(
+         "regular expression, not a whole-string match; anchor with ^ and $ "
+         "to match the entire path"),
+     cl::cat(ProfGenCategory));
++static cl::opt<std::string>
++    PerfBuildIDList("perf-buildid-list",
++                    cl::desc("Board perf buildid-list output for IP identity"),
++                    cl::cat(ProfGenCategory));
++static cl::opt<bool> AllowMissingBuildID(
++    "allow-missing-build-id",
++    cl::desc("Allow unverified IP identity, never a known build-id mismatch"),
++    cl::cat(ProfGenCategory));
+ static cl::opt<bool> ShowIPAddressCounts(
+     "show-ip-address-counts", cl::Hidden,
+     cl::desc("Print IP address counters and reader statistics"),
+@@ -168,13 +176,23 @@ static Error runIPMode() {
+     Options.BinaryMatchRegex = BinaryMatchRegex;
+   if (ProcessId.getNumOccurrences())
+     Options.PID = ProcessId;
++  if (PerfBuildIDList.getNumOccurrences())
++    Options.BuildIDList = PerfBuildIDList;
++  if (DebugBinPath.getNumOccurrences())
++    Options.DebugBinary = DebugBinPath;
++  Options.AllowMissingBuildID = AllowMissingBuildID;
+   IPPerfReader Reader;
+-  if (Error E = Reader.read(PerfScriptFilename, BinaryPath, Options))
++  if (Error E = Reader.read(PerfScriptFilename, BinaryPath, Options)) {
++    if (ShowIPAddressCounts)
++      Reader.printIdentity(outs());
+     return E;
++  }
+   if (ShowMmapEvents)
+     Reader.printMmapEvents(outs());
+-  if (ShowIPAddressCounts)
++  if (ShowIPAddressCounts) {
+     Reader.printAddressCounts(outs());
++    Reader.printIdentity(outs());
++  }
+   // No writer and no output file are opened until profile generation exists.
+   return Fail("IP sample mode: profile generation is not implemented yet");
+ }
+@@ -260,13 +278,18 @@ int main(int argc, const char *argv[]) {
+   raw_svector_ostream ParseErrorStream(ParseErrors);
+   bool Parsed = cl::ParseCommandLineOptions(
+       argc, argv, "llvm SPGO profile generator\n", &ParseErrorStream);
+-  if (!Parsed && !(IPSamples && (BinaryPath.empty() || NegativeProcessId))) {
++  if (!Parsed) {
++    // Even the IP-specific missing-binary/negative-pid diagnoses must not
++    // swallow unrelated parser errors (e.g. an unknown option).
+     errs() << ParseErrors;
+-    return EXIT_FAILURE;
++    if (!(IPSamples && (BinaryPath.empty() || NegativeProcessId)))
++      return EXIT_FAILURE;
+   }
+   if (IPSamples || IPEvent.getNumOccurrences() ||
+       BinaryMatchRegex.getNumOccurrences() ||
+-      ShowIPAddressCounts.getNumOccurrences()) {
++      ShowIPAddressCounts.getNumOccurrences() ||
++      PerfBuildIDList.getNumOccurrences() ||
++      AllowMissingBuildID.getNumOccurrences()) {
+     if (Error E = runIPMode()) {
+       logAllUnhandledErrors(std::move(E), errs(), "llvm-profgen: error: ");
+       return EXIT_FAILURE;
+-- 
+2.43.0
+

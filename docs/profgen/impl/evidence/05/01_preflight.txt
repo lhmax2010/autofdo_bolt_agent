@@ -1,0 +1,46 @@
+LLVM HEAD 6e1b1b00c18b52de84351752767f0678113036f6
+DESIGN_SHA256 eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be
+SPEC local diff unchanged against evidence/02/03_spec_local.diff
+BUILDID-LIST SOURCE docs/probe/evidence/05/02_perf_formats_mapping.txt
+97: === buildid_buildids ===
+98: $ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid buildid-list -i /opt/afdo_agent/work/buildid.data
+99: EXIT 0; TRANSPORT 0
+100: STDOUT:
+101:                                          /usr/lib/gstreamer-1.0/libgstcoreelements.so
+102:                                          /usr/lib/gstreamer-1.0/libgstisomp4.so
+103:                                          /usr/lib/gstreamer-1.0/libgstlibav.so
+104:                                          /usr/lib/gstreamer-1.0/libgstvideoparsersbad.so
+105: 7d50a721f278fb1c861daa91e8a17d6ca7df7c8c /usr/lib/ld-linux.so.3
+106:                                          /usr/lib/libavcodec.so.62.11.100
+107:                                          /usr/lib/libavutil.so.60.8.100
+108: eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c /usr/lib/libc.so.6
+109:                                          /usr/lib/libglib-2.0.so.0.8000.5
+110:                                          /usr/lib/libgobject-2.0.so.0.8000.5
+111:                                          /usr/lib/libgstbase-1.0.so.0.2411.0
+112:                                          /usr/lib/libgstcodecparsers-1.0.so.0.2411.0
+113:                                          /usr/lib/libgstreamer-1.0.so.0.2411.0
+114:                                          /usr/lib/libgstvideo-1.0.so.0.2411.0
+115: d9c293aaae06e2f3b9a2136fed98e6f1677d5312 [kernel.kallsyms]
+116: 
+117: STDERR:
+118: 
+119: 
+120: === fixed_buildids ===
+121: $ export LC_ALL=C HOME=/opt/afdo_agent/work/home TMPDIR=/opt/afdo_agent/work/tmp PERF_CONFIG=/opt/afdo_agent/work/perfconfig LD_LIBRARY_PATH=/opt/afdo_agent/lib GST_REGISTRY=/opt/afdo_agent/work/registry.bin XDG_CACHE_HOME=/opt/afdo_agent/work/cache; nice -n 19 ionice -c3 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid buildid-list -i /opt/afdo_agent/work/fixed.data
+122: EXIT 0; TRANSPORT 0
+123: STDOUT:
+124: 7d50a721f278fb1c861daa91e8a17d6ca7df7c8c /usr/lib/ld-linux.so.3
+125: eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c /usr/lib/libc.so.6
+126: d9c293aaae06e2f3b9a2136fed98e6f1677d5312 [kernel.kallsyms]
+127: b28d4cd3ec398b3cdfe34f88c907eafdfa27e3b2 [vdso]
+128: 
+
+GBS readelf actual fixture IDs (no host ELF tool)
+{
+  "a64-pie.perfbin": "280854d1cea103bf480e219b336025e337e5a10e",
+  "a64-fast.perfbin": "78019ef653ca2521",
+  "a64-multi-load.perfbin": "80ef839e96fd9179728db73ba10c229a2637410c",
+  "other/a64-pie.perfbin": "5ad150dcf23c310a3f89c1be4108698bbc73d89b"
+}
+
+CURRENT TOOL SHA256 a0358528585f264faa65c4b52de8b1476ecdec79c65f4b1652506bb9146624d9 (newly linked in current build)

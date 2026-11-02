@@ -1,0 +1,326 @@
+[
+  {
+    "label": "09-buildid-libc",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libc",
+      "--binary-match-regex=^/usr/lib64/libc\\.so\\.6$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/buildid_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/09-buildid-libc.out"
+    ],
+    "exit": 1,
+    "expected_grade": "verified",
+    "grade": [
+      "verified"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=true",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libc\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libc\" build_id=8b45bf5b6a314fc498c8c73f164d6259c895405b",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/usr/lib64/libc.so.6\" deleted=false",
+      "IP-IDENTITY path=\"/usr/lib64/libc.so.6\" source=buildid-list build_id=none result=missing",
+      "IP-IDENTITY mapping=20 path=\"/usr/lib64/libc.so.6\" pid=2386 executable=true source=mmap2 build_id=8b45bf5b6a314fc498c8c73f164d6259c895405b result=verified",
+      "IP-IDENTITY path=\"/usr/lib64/libc.so.6\" executable_mappings=1 result=verified",
+      "IP-IDENTITY final=verified"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "profile_created": false,
+    "input_sha256": "380202c9985f193c3663e3f8f9c36c0556ff6a57aef143abb7a357caf75f45ad",
+    "elf_sha256": "e28a87adc858f1f166ab7d781621f6afc79a2fef83323c19d66e64e003b6ee90"
+  },
+  {
+    "label": "09-fixed-libc",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libc",
+      "--binary-match-regex=^/usr/lib64/libc\\.so\\.6$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/09-fixed-libc.out",
+      "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/09-fixed.buildids"
+    ],
+    "exit": 1,
+    "expected_grade": "verified-path",
+    "grade": [
+      "verified-path"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=false",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libc\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libc\" build_id=8b45bf5b6a314fc498c8c73f164d6259c895405b",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/usr/lib64/libc.so.6\" deleted=false",
+      "IP-IDENTITY path=\"/usr/lib64/libc.so.6\" source=buildid-list origin=unknown build_id=8b45bf5b6a314fc498c8c73f164d6259c895405b result=consistent",
+      "IP-IDENTITY mapping=20 path=\"/usr/lib64/libc.so.6\" pid=2085 executable=true source=buildid-list build_id=none result=verified-path",
+      "IP-IDENTITY path=\"/usr/lib64/libc.so.6\" executable_mappings=1 result=verified-path",
+      "IP-IDENTITY final=verified-path"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "profile_created": false,
+    "input_sha256": "721ee62217d6b904642ef977b14b6e4113dcdeb48946d7aa4738250dbcd5f864",
+    "elf_sha256": "e28a87adc858f1f166ab7d781621f6afc79a2fef83323c19d66e64e003b6ee90"
+  },
+  {
+    "label": "05-default",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/05-default.out"
+    ],
+    "exit": 1,
+    "expected_grade": "unverified",
+    "grade": [
+      "unverified"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=false",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100\" build_id=none",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/usr/lib/libavcodec.so.62.11.100\" deleted=false",
+      "IP-IDENTITY path=\"/usr/lib/libavcodec.so.62.11.100\" source=buildid-list build_id=none result=missing",
+      "IP-IDENTITY mapping=40 path=\"/usr/lib/libavcodec.so.62.11.100\" pid=11948 executable=true source=missing build_id=none result=unverified",
+      "IP-IDENTITY path=\"/usr/lib/libavcodec.so.62.11.100\" executable_mappings=1 result=unverified",
+      "IP-IDENTITY final=unverified"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: missing build-id evidence; use --allow-missing-build-id only for unverified identity\n",
+    "profile_created": false,
+    "input_sha256": "f3d9245d0cd2971cadc6561159bc92ba202264bd39b1cec61e47e5c35480f9cd",
+    "elf_sha256": "9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56"
+  },
+  {
+    "label": "05-allow",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/05-allow.out",
+      "--allow-missing-build-id"
+    ],
+    "exit": 1,
+    "expected_grade": "unverified",
+    "grade": [
+      "unverified"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=false",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100\" build_id=none",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/usr/lib/libavcodec.so.62.11.100\" deleted=false",
+      "IP-IDENTITY path=\"/usr/lib/libavcodec.so.62.11.100\" source=buildid-list build_id=none result=missing",
+      "IP-IDENTITY mapping=40 path=\"/usr/lib/libavcodec.so.62.11.100\" pid=11948 executable=true source=missing build_id=none result=unverified",
+      "IP-IDENTITY path=\"/usr/lib/libavcodec.so.62.11.100\" executable_mappings=1 result=unverified",
+      "IP-IDENTITY final=unverified"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "profile_created": false,
+    "input_sha256": "f3d9245d0cd2971cadc6561159bc92ba202264bd39b1cec61e47e5c35480f9cd",
+    "elf_sha256": "9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56"
+  },
+  {
+    "label": "09-default",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/09-default.out"
+    ],
+    "exit": 1,
+    "expected_grade": "unverified",
+    "grade": [
+      "unverified"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=false",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec\" build_id=none",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/usr/lib64/libavcodec.so.62.11.100\" deleted=false",
+      "IP-IDENTITY path=\"/usr/lib64/libavcodec.so.62.11.100\" source=buildid-list build_id=none result=missing",
+      "IP-IDENTITY mapping=40 path=\"/usr/lib64/libavcodec.so.62.11.100\" pid=2085 executable=true source=missing build_id=none result=unverified",
+      "IP-IDENTITY path=\"/usr/lib64/libavcodec.so.62.11.100\" executable_mappings=1 result=unverified",
+      "IP-IDENTITY final=unverified"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: missing build-id evidence; use --allow-missing-build-id only for unverified identity\n",
+    "profile_created": false,
+    "input_sha256": "721ee62217d6b904642ef977b14b6e4113dcdeb48946d7aa4738250dbcd5f864",
+    "elf_sha256": "0aaecd3a290fdedb6fa0ba6088fd49cea8635bf7d89c1cbe94efe5506cc63166"
+  },
+  {
+    "label": "09-allow",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/09-allow.out",
+      "--allow-missing-build-id"
+    ],
+    "exit": 1,
+    "expected_grade": "unverified",
+    "grade": [
+      "unverified"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=false",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec\" build_id=none",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/usr/lib64/libavcodec.so.62.11.100\" deleted=false",
+      "IP-IDENTITY path=\"/usr/lib64/libavcodec.so.62.11.100\" source=buildid-list build_id=none result=missing",
+      "IP-IDENTITY mapping=40 path=\"/usr/lib64/libavcodec.so.62.11.100\" pid=2085 executable=true source=missing build_id=none result=unverified",
+      "IP-IDENTITY path=\"/usr/lib64/libavcodec.so.62.11.100\" executable_mappings=1 result=unverified",
+      "IP-IDENTITY final=unverified"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "profile_created": false,
+    "input_sha256": "721ee62217d6b904642ef977b14b6e4113dcdeb48946d7aa4738250dbcd5f864",
+    "elf_sha256": "0aaecd3a290fdedb6fa0ba6088fd49cea8635bf7d89c1cbe94efe5506cc63166"
+  },
+  {
+    "label": "07-default",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+      "--binary-match-regex=^/opt/afdo_agent/work/libdeleted_probe\\.so\\ \\(deleted\\)$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/deleted.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/07-default.out"
+    ],
+    "exit": 1,
+    "expected_grade": "unverified",
+    "grade": [
+      "unverified"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=true",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so\" build_id=390adaa690f0167d6f59403cc8d7deb4a04a7d86",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" deleted=true",
+      "IP-IDENTITY path=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" source=buildid-list build_id=none result=missing",
+      "IP-IDENTITY mapping=13 path=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" pid=7933 executable=true source=missing build_id=none result=unverified",
+      "IP-IDENTITY path=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" executable_mappings=1 result=unverified",
+      "IP-IDENTITY final=unverified"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: missing build-id evidence; use --allow-missing-build-id only for unverified identity\n",
+    "profile_created": false,
+    "input_sha256": "5e86a39b0886c980803ec967bd93b9f921f20049d16f73d329c66a252ef09c8b",
+    "elf_sha256": "b3820436cd861caecf32477ef77972621bcd5092183b4f6f4780f145c9fdc4ce"
+  },
+  {
+    "label": "07-allow",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--show-ip-address-counts",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+      "--binary-match-regex=^/opt/afdo_agent/work/libdeleted_probe\\.so\\ \\(deleted\\)$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/deleted.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch3/identity-real/07-allow.out",
+      "--allow-missing-build-id"
+    ],
+    "exit": 1,
+    "expected_grade": "unverified",
+    "grade": [
+      "unverified"
+    ],
+    "identity": [
+      "IP-IDENTITY observed_mmap_build_id=true",
+      "IP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so\" build_id=390adaa690f0167d6f59403cc8d7deb4a04a7d86",
+      "IP-IDENTITY debug_binary=none build_id=none",
+      "IP-IDENTITY selection=regex",
+      "IP-IDENTITY candidate=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" deleted=true",
+      "IP-IDENTITY path=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" source=buildid-list build_id=none result=missing",
+      "IP-IDENTITY mapping=13 path=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" pid=7933 executable=true source=missing build_id=none result=unverified",
+      "IP-IDENTITY path=\"/opt/afdo_agent/work/libdeleted_probe.so (deleted)\" executable_mappings=1 result=unverified",
+      "IP-IDENTITY final=unverified"
+    ],
+    "stderr": "llvm-profgen: error: IP sample mode: profile generation is not implemented yet\n",
+    "profile_created": false,
+    "input_sha256": "5e86a39b0886c980803ec967bd93b9f921f20049d16f73d329c66a252ef09c8b",
+    "elf_sha256": "b3820436cd861caecf32477ef77972621bcd5092183b4f6f4780f145c9fdc4ce"
+  }
+]

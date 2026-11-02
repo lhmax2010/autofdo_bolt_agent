@@ -1,0 +1,137 @@
+STATUS
+START 2026-11-02T17:39:22+08:00
+BUILD_START 2026-11-02T17:39:22+08:00
+END 2026-11-02T17:57:18+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 1076.547
+NINJA_TOTAL_OBSERVED 100
+STOP_REASON 
+ALL-END 2026-11-02T17:57:18+08:00 OK
+
+PREFLIGHT
+TIME 2026-11-02T17:39:22+08:00
+
+HEAVY_COUNT 0
+
+RESOURCES
+TIME 2026-11-02T17:39:22+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15304        3788         915       13820       16235
+Swap:           4095        4007          88
+EXIT 0
+$ uptime
+ 17:39:22 up 5 days, 19:16,  1 user,  load average: 4.45, 3.45, 2.26
+EXIT 0
+TIME 2026-11-02T17:49:22+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       17077        8200         880        7601       14463
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 17:49:23 up 5 days, 19:26,  1 user,  load average: 4.57, 5.80, 4.11
+EXIT 0
+TIME 2026-11-02T17:57:18+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       16985       10005         870        5878       14554
+Swap:           4095        4093           2
+EXIT 0
+$ uptime
+ 17:57:18 up 5 days, 19:34,  1 user,  load average: 11.85, 6.93, 4.78
+EXIT 0
+
+SELECTED LOG LINES
+1: BUILD_START 2026-11-02T17:39:22+08:00 COMMAND ['setsid', '--wait', 'nice', '-n', '19', 'ionice', '-c3', 'gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_baseline.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--incremental', '--threads', '1', '--define', '_smp_mflags -j10', '--define', 'mlgo_build_jobs 10']
+2116: [   25s] [96/100] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPIdentity.cpp.o
+2117: [   25s] [97/100] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPPerfReader.cpp.o
+2119: [   27s] [99/100] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o
+2120: [   28s] [100/100] Linking CXX executable bin/llvm-profgen
+8309: [  862s] -- Testing: 63 tests, 1 workers --
+8310: [  862s] Testing:  0.. 10.. 20.. 30.. 40.. 50.. 60.. 70.. 80.. 90.. 
+8315: [  862s]   Unsupported      :  1 (1.59%)
+8316: [  862s]   Passed           : 61 (96.83%)
+8317: [  862s]   Expectedly Failed:  1 (1.59%)
+
+LOG LAST 80
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.hwasan_aliases-x86_64.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.memprof-x86_64.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.nsan-x86_64.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.scudo_standalone-x86_64.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.tsan-x86_64.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_minimal-x86_64.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_standalone-x86_64.so.debug
+[  910s] Provides: compiler-rt-debuginfo = 22.1.8-1 compiler-rt-debuginfo(x86-64) = 22.1.8-1
+[  910s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  910s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  910s] Processing files: libomp-debuginfo-22.1.8-1.x86_64
+[  910s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  910s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  910s] 
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libarcher.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libomp.so.debug
+[  910s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libompd.so.debug
+[  910s] Provides: libomp-debuginfo = 22.1.8-1 libomp-debuginfo(x86-64) = 22.1.8-1
+[  910s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  910s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  910s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[  919s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-22.1.8-1.x86_64.rpm
+[  928s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debugsource-22.1.8-1.x86_64.rpm
+[  932s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-22.1.8-1.x86_64.rpm
+[  941s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-static-devel-22.1.8-1.x86_64.rpm
+[  949s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-22.1.8-1.x86_64.rpm
+[  956s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-22.1.8-1.x86_64.rpm
+[  959s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-22.1.8-1.x86_64.rpm
+[  963s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-22.1.8-1.x86_64.rpm
+[  968s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-22.1.8-1.x86_64.rpm
+[  971s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-22.1.8-1.x86_64.rpm
+[  971s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-22.1.8-1.x86_64.rpm
+[  971s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-devel-22.1.8-1.x86_64.rpm
+[  971s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/python-clang-22.1.8-1.x86_64.rpm
+[  988s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debuginfo-22.1.8-1.x86_64.rpm
+[  988s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 1005s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-debuginfo-22.1.8-1.x86_64.rpm
+[ 1037s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-debuginfo-22.1.8-1.x86_64.rpm
+[ 1041s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 1050s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-debuginfo-22.1.8-1.x86_64.rpm
+[ 1057s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 1059s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+[ 1059s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-debuginfo-22.1.8-1.x86_64.rpm
+[ 1059s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.bNOWPo
+[ 1059s] + umask 022
+[ 1059s] + cd /home/abuild/rpmbuild/BUILD
+[ 1059s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 1061s] + cd llvm-22.1.8
+[ 1061s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 1061s] + exit 0
+[ 1061s] + rpmbuild --define '_smp_mflags -j10' --define 'mlgo_build_jobs 10' --define '_srcdefattr (-,root,root)' --nosignature --target=x86_64 --define '_build_create_debug 1' --short-circuit -bs /home/abuild/rpmbuild/SOURCES/llvm.spec
+[ 1064s] Building target platforms: x86_64
+[ 1064s] Building for target x86_64
+[ 1064s] Wrote: /home/abuild/rpmbuild/SRPMS/llvm-22.1.8-1.src.rpm
+[ 1064s] ... checking for files with abuild user/group
+[ 1064s] 
+[ 1064s] linhao-linux finished "build llvm.spec" at Mon Nov  2 09:57:15 UTC 2026.
+[ 1064s] 
+info: finished building llvm
+info: updating local repo
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.*
+START 2026-11-02T17:39:22+08:00
+BUILD_START 2026-11-02T17:39:22+08:00
+END 2026-11-02T17:57:18+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 1076.547
+NINJA_TOTAL_OBSERVED 100
+STOP_REASON 
+ALL-END 2026-11-02T17:57:18+08:00 OK

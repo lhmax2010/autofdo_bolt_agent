@@ -1,0 +1,17 @@
+from pathlib import Path
+import re,json,hashlib
+W=Path('/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent');E=W/'docs/profgen/impl/evidence/05'
+sample=re.compile(r'^\s*-?\d+/-?\d+\s+\d+\s+\S+:\s+[0-9a-fA-F]+ \(')
+mm=re.compile(r'^\s*-?\d+/-?\d+\s+PERF_RECORD_MMAP2\s+(-?\d+)/(-?\d+):.* @ \S+ ([0-9a-fA-F]+:[0-9a-fA-F]+) (\d+) (\d+)\]: (\S+) (.*)$')
+res=[]
+for file,target in [('temp/rpi4-prefreeze/multi_dsoff.txt','/usr/lib/libavcodec.so.62.11.100'),('temp/rpi5-prefreeze/multi_dsoff.txt','/usr/lib64/libavcodec.so.62.11.100'),('temp/v04/module.txt','/usr/lib/libc.so.6')]:
+ p=W/file;first=None;zero=[];nonzero=[];values=set();maps=[]
+ for n,line in enumerate(p.open(),1):
+  if first is None and sample.match(line):first=n
+  m=mm.fullmatch(line.rstrip('\n'))
+  if not m or m[7]!=target:continue
+  pid,tid,dev,inode,gen,perm,path=m.groups();gen=int(gen);(zero if gen==0 else nonzero).append(n);values.add(gen)
+  maps.append({'line':n,'pid':int(pid),'device':dev,'inode':int(inode),'generation':gen,'permissions':perm})
+ row={'input':file,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'candidate_path':target,'first_sample_line':first,'zero_count':len(zero),'nonzero_count':len(nonzero),'generation_values':sorted(values),'zero_line_numbers':zero,'nonzero_line_numbers':nonzero,'all_zero_before_first_sample':all(n<first for n in zero),'zero_before_first_sample':sum(n<first for n in zero),'zero_after_first_sample':sum(n>first for n in zero),'mappings':maps}
+ res.append(row);print(file,'first',first,'zero',len(zero),'nonzero',len(nonzero),'all_zero_before',row['all_zero_before_first_sample'])
+(E/'08_generation_positions.json').write_text(json.dumps(res,indent=2)+'\n')

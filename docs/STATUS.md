@@ -26,7 +26,18 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-02；补丁2收尾，已完成）
+## 当前授权与执行状态（2026-11-02；llvm-profgen补丁3，已完成）
+
+- LLVM本地提交 `30ceb73e9dcbe233f747d1ed8c97d9e3919564b0`，16文件、+1,185/-71行，新增5个lit文件；只改工具/测试目录。[报告](profgen/impl/05_patch3_identity.md)、[补丁3](../patches/profgen/0003-llvm-profgen-Add-build-id-identity-checks-for-IP-sample-mode.patch)、[提交审计](profgen/impl/evidence/05/14_commit_audit.txt)。未向LLVM远端或Gerrit推送。
+- 实现build-id证据分级、保守汇总、分离调试文件身份链、probe拒绝及身份失败无输出副作用。用户澄清：目标无ID/输入有ID为mismatch；目标有ID/输入缺证据为unverified；目标与debug单边缺ID双向均为mismatch。
+- **生效的授权规则修正（5.3.3.5）：** generation=0视为未知；只有不同非零generation才冲突，设备/inode不同仍冲突。理由、源码、测试单独登记在[报告3.2节](profgen/impl/05_patch3_identity.md)；设计v0.7文件正文和SHA保持不变。已知局限：inode复用且一条generation未知时，替换可能无法被发现，等级仍为unverified。
+- 最终GBS增量18:15:40–18:31:17+08:00成功，936.802秒、Ninja105步、GBS_EXIT=0、ALL-END OK；两次成功构建计时合计2,013.349秒，第二次为授权generation修正。available最低13,009MiB。最终工具SHA `745d9994dc94394a1125836c6196935fbcd8dc3e274b87d4609202f5da4fbcb6`。[构建](profgen/impl/evidence/05/10_final_build.txt)
+- 最终lit 63项：PASS61、FAIL0、UNSUPPORTED1、XFAIL1；原50逐项不变，补丁2的8项与补丁3的5项全部PASS。C1每遍636条、两遍一致、与既有基线0差异；13个新IP测试按规则排除。[lit](profgen/impl/evidence/05/11_final_lit_summary.json)、[C1](profgen/impl/evidence/05/12_final_c1_summary.json)
+- 8次真实身份验收符合预期；14次完整导出目标重放均通过身份门禁后到达固定过渡错误，地址计数与补丁2逐字节一致（仅排除新增IP-IDENTITY诊断）。仍不生成profile。[完整重放](profgen/impl/evidence/05/09_final_full_exports.json)、[身份重验](profgen/impl/evidence/05/09_final_real_identity.json)
+- 05 multi/09 multi/07 module候选路径的generation=0/非0映射数分别1/2、2/2、60/535；零值行均在首个样本前，仅作佐证、不作判定规则。[逐条位置](profgen/impl/evidence/05/08_generation_positions.json)
+- 下一步等待补丁4授权；不开始Agent设计开发。spec本地改动保持原样且未提交，**正式非增量构建前必须撤销**。未连接板子，未修改认证或索要密码，无新增已知项目文件边界例外。
+
+## 前轮授权与执行状态（2026-11-02；补丁2收尾，已完成，历史）
 
 - 完整真实导出先验收后修改：05/07/09共13份完整文本、14次目标运行，全部行被接受；修改后stdout/stderr逐字节一致。05单/双目标6,496/13,289与09单/双5,865/14,331，按保存MMAP2/PT_LOAD独立重算逐VA计数及period和均0差异。[报告](profgen/impl/04_patch2_followup.md)、[前后比对](profgen/impl/evidence/04/05_real_export_comparison.json)
 - 06完整loss1文本未保留，仅有过滤LOST行及perf.data；独立核对942条、L=61,667，但无法证明完整样本行数等于record的703,821。未重导或重采，没有发现需用户裁决的新格式。07 deleted/模块分类正确；07无-1样本，09 multi的1条-1/-1计为pid_unknown与kernel。[材料限制](profgen/impl/evidence/04/02_loss06.json)
@@ -226,9 +237,9 @@
 
 ## 计划
 
-- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；下一步等待补丁3授权，Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；下一步等待补丁4授权，Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
-- v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1和补丁2已授权完成，其余补丁等待新授权。
+- v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1至补丁3已授权完成，其余补丁等待新授权。
 
 - 本轮工具 spike 已完成，不重复采集/构建。建议 RPi5 默认插桩 PGO；RPi4 先验证 ARM runtime/全链路。Google 无 LBR 转换和 BOLT -ba 保留为需后续授权验证的候选。
 
@@ -249,7 +260,12 @@
 
 ## 进度
 
-### llvm-profgen 补丁2收尾（当前，已完成）
+### llvm-profgen 补丁3（当前，已完成）
+
+- 身份分级/链、probe拒绝及generation授权修正已实现；最终GBS936.802秒/105步，lit61/0/1/1，C1零差异，14次完整重放计数不变。[报告](profgen/impl/05_patch3_identity.md)
+- LLVM本地补丁已提交并导出，等待补丁4授权；profile生成仍为过渡错误。
+
+### llvm-profgen 补丁2收尾（历史，已完成）
 
 - 13份完整导出、14次目标运行前后逐字节一致；独立MMAP2/PT_LOAD逐地址核对0差异。06缺完整文本的限制详见挂账。[报告](profgen/impl/04_patch2_followup.md)
 - 小修后GBS增量1,012.782秒、105步成功；lit 56 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，C1两遍636条且与原基线0差异。补丁2已amend，等待补丁3授权。
@@ -387,6 +403,8 @@
 
 ## 已闭合结论（附证据路径）
 
+- 补丁3身份验证已闭合：真实libc分别verified/verified-path，无证据库与deleted默认拒绝、allow后unverified；generation=0修正后14个真实目标地址计数不变，lit无FAIL、C1零差异。[实现与规则修正](profgen/impl/05_patch3_identity.md)、[最终验收](profgen/impl/evidence/05/09_final_real_identity.json)
+
 - 补丁2收尾：完整真实文本全部接受、修改前后计数与输出不变；新CLI/dsoff尾缀负对照通过，原行为C1零差异。8个IP lit全通过，原50项不变。[收尾报告](profgen/impl/04_patch2_followup.md)、[逐地址](profgen/impl/evidence/04/02_independent.json)、[lit](profgen/impl/evidence/04/04_lit_summary.json)
 
 - 补丁2的IP读取/地址换算与选项拒绝通过7个lit测试文件；默认LBR行为保持原50项lit结果和C1基线0差异。新工具确实重新链接；固定过渡失败不创建/覆盖output。[实现与规则表](profgen/impl/03_patch2_reader.md)、[lit](profgen/impl/evidence/03/04_lit_classification.json)、[C1](profgen/impl/evidence/03/05_c1_summary.json)
@@ -447,7 +465,7 @@
 
 ## 待人工裁决
 
-- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1、C1/lit准备及补丁2已完成，等待补丁3授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式目前明确拒绝perfdata，尚不生成profile。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1、C1/lit准备、补丁2及补丁3已完成，等待补丁4授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式目前明确拒绝perfdata，尚不生成profile。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -461,6 +479,8 @@
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
+
+- 本轮授权generation=0为未知；inode被复用且一条记录generation为0时，替换可能无法发现。不能将allow-missing后的unverified提升为verified；源码与限制见[补丁3规则修正登记](profgen/impl/05_patch3_identity.md)。
 
 - 06的完整loss1 perf-script文本未保留；703,821条样本与完整导出行数是否相等尚不可核对。本轮仅确认过滤后942条LOST及L=61,667，未重采或重导。[收尾报告](profgen/impl/04_patch2_followup.md)
 

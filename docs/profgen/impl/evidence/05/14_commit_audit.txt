@@ -1,0 +1,66 @@
+LLVM COMMIT 30ceb73e9dcbe233f747d1ed8c97d9e3919564b0
+commit 30ceb73e9dcbe233f747d1ed8c97d9e3919564b0
+Author:     Hao Lin <hao.lin@samsung.com>
+AuthorDate: Mon Nov 2 18:39:56 2026 +0800
+Commit:     Hao Lin <hao.lin@samsung.com>
+CommitDate: Mon Nov 2 18:39:56 2026 +0800
+
+    [llvm-profgen] Add build-id identity checks for IP sample mode
+    
+    Validate executable mapping evidence, buildid-list input and separate
+    debug-file identity before counting addresses. Reject pseudo-probe builds
+    and conflicting or ambiguous identity without changing the LBR path.
+    
+    Treat generation zero as unknown for unverified mappings: perf synthesizes
+    zero for pre-existing mappings. Different devices or inodes and unequal
+    nonzero generations remain ambiguous. Inode reuse may be undetectable when
+    one generation is unknown.
+    
+    Cover identity grades, missing evidence, debug chains, probe rejection and
+    generation ambiguity with lit tests and full recorded-input replays.
+
+ llvm/test/tools/llvm-profgen/ip-addresses.test     |  12 +-
+ .../tools/llvm-profgen/ip-identity-ambiguity.test  | 164 ++++++++++++
+ .../test/tools/llvm-profgen/ip-identity-chain.test | 137 ++++++++++
+ llvm/test/tools/llvm-profgen/ip-identity-list.test | 102 +++++++
+ .../tools/llvm-profgen/ip-identity-matrix.test     | 283 ++++++++++++++++++++
+ .../test/tools/llvm-profgen/ip-identity-probe.test |  83 ++++++
+ llvm/test/tools/llvm-profgen/ip-invalid.test       |  50 ++--
+ llvm/test/tools/llvm-profgen/ip-real-records.test  |   4 +-
+ llvm/test/tools/llvm-profgen/ip-segments.test      |   8 +-
+ llvm/test/tools/llvm-profgen/ip-selection.test     |  20 +-
+ llvm/test/tools/llvm-profgen/ip-transition.test    |   4 +-
+ llvm/tools/llvm-profgen/CMakeLists.txt             |   1 +
+ llvm/tools/llvm-profgen/IPIdentity.cpp             | 297 +++++++++++++++++++++
+ llvm/tools/llvm-profgen/IPPerfReader.cpp           |  48 ++--
+ llvm/tools/llvm-profgen/IPPerfReader.h             |  10 +
+ llvm/tools/llvm-profgen/llvm-profgen.cpp           |  33 ++-
+ 16 files changed, 1185 insertions(+), 71 deletions(-)
+
+6	6	llvm/test/tools/llvm-profgen/ip-addresses.test
+164	0	llvm/test/tools/llvm-profgen/ip-identity-ambiguity.test
+137	0	llvm/test/tools/llvm-profgen/ip-identity-chain.test
+102	0	llvm/test/tools/llvm-profgen/ip-identity-list.test
+283	0	llvm/test/tools/llvm-profgen/ip-identity-matrix.test
+83	0	llvm/test/tools/llvm-profgen/ip-identity-probe.test
+25	25	llvm/test/tools/llvm-profgen/ip-invalid.test
+2	2	llvm/test/tools/llvm-profgen/ip-real-records.test
+4	4	llvm/test/tools/llvm-profgen/ip-segments.test
+11	9	llvm/test/tools/llvm-profgen/ip-selection.test
+2	2	llvm/test/tools/llvm-profgen/ip-transition.test
+1	0	llvm/tools/llvm-profgen/CMakeLists.txt
+297	0	llvm/tools/llvm-profgen/IPIdentity.cpp
+30	18	llvm/tools/llvm-profgen/IPPerfReader.cpp
+10	0	llvm/tools/llvm-profgen/IPPerfReader.h
+28	5	llvm/tools/llvm-profgen/llvm-profgen.cpp
+
+PATCH patches/profgen/0003-llvm-profgen-Add-build-id-identity-checks-for-IP-sample-mode.patch
+SHA256 23a215600259c5fda345595bf09523aa2ead49f97c4bceea1feac5c63296e53f
+BYTES 98108
+REVERSE_APPLY_CHECK 0
+SPEC_DIFF_IDENTICAL_TO_E02 true
+COMMIT_SCOPE_ONLY_TOOL_AND_TEST true
+WHITESPACE_CHECK 2
+llvm/test/tools/llvm-profgen/ip-identity-list.test:92: trailing whitespace.
++ff 
+Intentional malformed buildid-list C6 input: hex ID followed by separator but missing path; retain exact fixture bytes. No other whitespace errors.
