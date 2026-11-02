@@ -1,0 +1,90 @@
+
+FILE /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/cs-preinline-cost.test
+1: ; REQUIRES: asserts
+2: ; Test default using size of profile as a proxy
+3: ; RUN: llvm-profgen --format=text --perfscript=%S/Inputs/cs-preinline-cost.perfscript --binary=%S/Inputs/cs-preinline-cost.perfbin --csspgo-preinliner --debug-only=cs-preinliner --use-context-cost-for-preinliner=0 --output=/dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-DEFAULT
+4: 
+5: ; Test use-context-cost-for-preinliner using inlinee's byte size as context-sensitive inline cost
+6: ; RUN: llvm-profgen --format=text --perfscript=%S/Inputs/cs-preinline-cost.perfscript --binary=%S/Inputs/cs-preinline-cost.perfbin --csspgo-preinliner --debug-only=cs-preinliner --use-context-cost-for-preinliner --output=/dev/null 2>&1 | FileCheck %s --check-prefix=CHECK-CSCOST
+7: 
+8: CHECK-DEFAULT:      Process main for context-sensitive pre-inlining (pre-inline size: 9, size limit: 108)
+
+FILE /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/invalid-perfscript.test
+1: ; RUN: llvm-profgen --perfscript=%s --binary=%S/Inputs/noinline-cs-noprobe.perfbin --output=%t 2>%t1
+2: ; RUN: FileCheck %s --input-file %t1
+3: 
+4: 	          4005dc
+5: 	          400634
+6: 	          400684
+7: 	    7f68c5788793
+8: 
+9: ; XFAIL: *
+
+FILE /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/utils/lit/lit/reports.py
+115: 
+116: class XunitReport(Report):
+117:     skipped_codes = {lit.Test.EXCLUDED, lit.Test.SKIPPED, lit.Test.UNSUPPORTED}
+118: 
+119:     def _write_results_to_file(self, tests, elapsed, file):
+120:         tests.sort(key=by_suite_and_test_path)
+121:         tests_by_suite = itertools.groupby(tests, lambda t: t.suite)
+122: 
+123:         file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+124:         file.write('<testsuites time="{time:.2f}">\n'.format(time=elapsed))
+125:         for suite, test_iter in tests_by_suite:
+126:             self._write_testsuite(file, suite, list(test_iter))
+127:         file.write("</testsuites>\n")
+128: 
+129:     def _write_testsuite(self, file, suite, tests):
+130:         skipped = 0
+131:         failures = 0
+132:         time = 0.0
+133: 
+134:         for t in tests:
+135:             if t.result.code in self.skipped_codes:
+136:                 skipped += 1
+137:             if t.isFailure():
+138:                 failures += 1
+139:             time += t.result.elapsed or 0.0
+140: 
+141:         name = suite.config.name.replace(".", "-")
+142:         file.write(
+143:             f'<testsuite name={quo(name)} tests="{len(tests)}" failures="{failures}" skipped="{skipped}" time="{time:.2f}">\n'
+144:         )
+145:         for test in tests:
+146:             self._write_test(file, test, name)
+147:         file.write("</testsuite>\n")
+148: 
+149:     def _write_test(self, file, test, suite_name):
+150:         path = "/".join(test.path_in_suite[:-1]).replace(".", "_")
+151:         class_name = f"{suite_name}.{path or suite_name}"
+152:         name = test.path_in_suite[-1]
+153:         time = test.result.elapsed or 0.0
+154:         file.write(
+155:             f'<testcase classname={quo(class_name)} name={quo(name)} time="{time:.2f}"'
+156:         )
+157: 
+158:         if test.isFailure():
+159:             file.write(">\n  <failure><![CDATA[")
+160:             # In the unlikely case that the output contains the CDATA
+161:             # terminator we wrap it by creating a new CDATA block.
+162:             output = test.result.output.replace("]]>", "]]]]><![CDATA[>")
+163:             if isinstance(output, bytes):
+164:                 output = output.decode("utf-8", "ignore")
+165: 
+166:             # Failing test  output sometimes contains control characters like
+167:             # \x1b (e.g. if there was some -fcolor-diagnostics output) which are
+168:             # not allowed inside XML files.
+169:             # This causes problems with CI systems: for example, the Jenkins
+170:             # JUnit XML will throw an exception when ecountering those
+171:             # characters and similar problems also occur with GitLab CI.
+172:             output = remove_invalid_xml_chars(output)
+173:             file.write(output)
+174:             file.write("]]></failure>\n</testcase>\n")
+175:         elif test.result.code in self.skipped_codes:
+176:             reason = self._get_skip_reason(test)
+177:             file.write(f">\n  <skipped message={quo(reason)}/>\n</testcase>\n")
+178:         else:
+179:             file.write("/>\n")
+180: 
+181:     def _get_skip_reason(self, test):

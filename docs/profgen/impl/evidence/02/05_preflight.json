@@ -1,0 +1,55 @@
+[
+  {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exit": 0,
+    "stdout": " M tools/profgen/c1_baseline.py\n?? config/\n?? docs/profgen/impl/evidence/02/\n?? gbs_gcc.conf\n?? gbs_llvm.conf\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "temp/llvm-profgen-enh",
+      "diff",
+      "--",
+      "packaging/llvm.spec"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "sudo",
+      "-n",
+      "-l"
+    ],
+    "exit": 0,
+    "stdout": "Matching Defaults entries for linhao on linhao-linux:\n    env_reset, mail_badpass, secure_path=/usr/local/sbin\\:/usr/local/bin\\:/usr/sbin\\:/usr/bin\\:/sbin\\:/bin\\:/snap/bin, use_pty, env_keep+=http_proxy, env_keep+=no_proxy, env_keep+=https_proxy, env_keep+=HTTP_PROXY, env_keep+=HTTPS_PROXY, env_keep+=BUILD_DIR, !use_pty\n\nUser linhao may run the following commands on linhao-linux:\n    (ALL : ALL) ALL\n    (ALL) NOPASSWD: /bin/mount -o bind /*/* */scratch.*\n    (ALL) NOPASSWD: /bin/umount -l */scratch.*\n    (ALL) NOPASSWD: /bin/umount -l -f */scratch.*\n    (ALL) NOPASSWD: /bin/mkdir -p */scratch.*\n    (ALL) NOPASSWD: /usr/bin/build\n    (ALL) NOPASSWD: /bin/cp *.conf */scratch.*/*.conf\n    (ALL) NOPASSWD: /bin/rm -f */.build.log\n    (ALL) NOPASSWD: /bin/mv */.build.log */log.txt\n    (ALL) NOPASSWD: /bin/echo -n\n    (ALL) NOPASSWD: /usr/sbin/chroot */scratch.*\n    (ALL) NOPASSWD: /usr/bin/chroot */scratch.*\n    (ALL) NOPASSWD: /usr/bin/ln */*.rpm */local/repos/*\n    (ALL) NOPASSWD: /bin/ln */*.rpm */local/repos/*\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "df",
+      "-h",
+      "."
+    ],
+    "exit": 0,
+    "stdout": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1       1.8T  1.5T  246G  86% /home\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "ps",
+      "-eo",
+      "pid,ppid,stat,etime,pcpu,rss,comm,args"
+    ],
+    "exit": 0,
+    "stdout": "    PID    PPID STAT     ELAPSED %CPU   RSS COMMAND         COMMAND\n\nHEAVY_COUNT 0\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,24 @@
+diff --git a/packaging/llvm.spec b/packaging/llvm.spec
+index c901dc5a2d5d..502fa7b52644 100644
+--- a/packaging/llvm.spec
++++ b/packaging/llvm.spec
+@@ -243,7 +243,7 @@ cmake \
+     -DLLVM_BUILD_EXAMPLES=OFF \
+     -DLLVM_INCLUDE_EXAMPLES=OFF \
+     -DLLVM_BUILD_TESTS=OFF \
+-    -DLLVM_INCLUDE_TESTS=OFF \
++    -DLLVM_INCLUDE_TESTS=ON \
+     -DLLVM_ENABLE_DOXYGEN=OFF \
+     -DLLVM_BUILD_DOCS=OFF \
+     -DLLVM_INCLUDE_DOCS=OFF \
+@@ -377,6 +377,10 @@ rm -rf %{buildroot}%{_libdir}/debug/*
+ rm -rf %{buildroot}/usr/lib/libear/*
+ rm -rf %{buildroot}/usr/lib/libscanbuild/*
+ 
++%check
++build/bin/llvm-lit -sv -j1 --xunit-xml-output=build/profgen-lit.xml build/test/tools/llvm-profgen > build/profgen-lit.log 2>&1 || true
++cat build/profgen-lit.log
++
+ %post -n clang -p /sbin/ldconfig
+ %postun -n clang -p /sbin/ldconfig
+ 

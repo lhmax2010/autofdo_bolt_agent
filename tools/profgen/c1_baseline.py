@@ -7,6 +7,8 @@ that path, archive exact stdout/stderr/profile bytes, and compare without
 normalization. FileCheck/not/redirection are harness constructs, not profgen
 arguments. Required fixture preparation is replayed via a small allowlist;
 unrecognized shell constructs fail closed. No tests or RUNs are generated.
+Compare mode freezes the baseline test/RUN/format set and rejects modified
+original tests. Archive library paths are supported; argv[0] stays stable.
 """
 import argparse, hashlib, json, os, re, resource, shlex, shutil, subprocess
 from pathlib import Path
@@ -14,6 +16,7 @@ W = Path(__file__).resolve().parents[2]
 L = W / 'temp/llvm-profgen-enh'
 R = W / 'temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0'
 B = L / 'build'
+BASE_COMMIT = 'f999bd406c0a70fe8107aa992164fe6945c5d46a'
 EXPECTED = 'a31073338f9315a0fd6d2934e36431d9135086882ebfb07bd1bda7c36d7f9f1e'
 
 def sha(b): return hashlib.sha256(b).hexdigest()
@@ -22,9 +25,9 @@ def under(path, root):
     if not p.is_relative_to(root.resolve()): raise ValueError(f'outside allowed root: {p}')
     return p
 
-def loaded(exe):
+def loaded(exe, library_dirs=None, argv0=None):
     return ['nice', '-n', '19', 'ionice', '-c3', str(R/'lib64/ld-linux-x86-64.so.2'),
-            '--library-path', ':'.join(map(str, [B/'lib64', R/'lib64', R/'usr/lib64'])), str(exe)]
+            '--library-path', ':'.join(map(str, (library_dirs or [B/'lib64']) + [R/'lib64', R/'usr/lib64'])), *(['--argv0', argv0] if argv0 else []), str(exe)]
 
 def runlines(path):
     pending = ''; start = 0
@@ -93,9 +96,46 @@ def prep(cmd, cwd, scratch, env):
     if op in ['FileCheck','diff','llvm-profdata']: return cwd,None
     raise ValueError(f'unsupported preparation: {cmd}')
 
+def comparison_scope(baseline, discovered):
+    names = sorted({r['test'] for r in baseline['records'] if r['test'] != 'pure-ip-from-05'})
+    paths = [under(L / name, L / 'llvm/test/tools/llvm-profgen') for name in names]
+    # Compare the index AND working tree to the original commit, not just HEAD.
+    check = subprocess.run(['git', '-C', str(L), 'diff', '--exit-code',
+                            BASE_COMMIT, '--', *names], capture_output=True, text=True)
+    if check.returncode:
+        raise SystemExit('C1 original test files changed; no tool executed.\n' +
+                         check.stdout + check.stderr)
+    if any(not p.is_file() for p in paths):
+        raise SystemExit('C1 original test file missing; no tool executed.')
+    extra = sorted(str(p.relative_to(L)) for p in set(discovered) - set(paths))
+    print('新增、未纳入 C1 的测试文件: ' + json.dumps(extra, ensure_ascii=False), flush=True)
+    registered = {}
+    for row in baseline['records']:
+        if row['test'] != 'pure-ip-from-05':
+            registered.setdefault((row['test'], row['line']), []).append(row['format'])
+    return paths, registered, extra
+
+
+def compare_records(old, new):
+    # Validate complete row identity before looking at any measured byte hashes.
+    if len(old) != len(new):
+        raise ValueError(f'C1 matrix row count differs: {len(old)} != {len(new)}')
+    identities = [(i, tuple(a.get(k) for k in ('test', 'line', 'format')),
+                       tuple(b.get(k) for k in ('test', 'line', 'format')))
+                  for i, (a, b) in enumerate(zip(old, new))
+                  if any(a.get(k) != b.get(k) for k in ('test', 'line', 'format'))]
+    if identities:
+        raise ValueError('C1 matrix row identity differs (content not compared): ' + repr(identities))
+    return [i for i, (a, b) in enumerate(zip(old, new))
+            if any(a.get(k) != b.get(k) for k in
+                   ('exit', 'profile_sha256', 'stderr_sha256'))]
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--tool',type=Path,default=B/'bin/llvm-profgen')
+    ap.add_argument('--library-dir', type=Path, action='append',
+                    help='Tool library directory; repeatable, ahead of GBS runtime libraries')
     ap.add_argument('--scratch',type=Path,default=W/'temp/profgen-c1-baseline')
     ap.add_argument('--manifest',type=Path,default=W/'tools/profgen/c1-baseline.json')
     ap.add_argument('--compare',type=Path)
@@ -106,10 +146,14 @@ def main():
     under(opt.tool,W);scratch=under(opt.scratch,W/'temp');under(opt.manifest,W)
     digest=sha(opt.tool.read_bytes())
     if opt.expected_tool_sha and digest!=opt.expected_tool_sha:raise SystemExit('tool SHA mismatch: '+digest)
+    library_dirs=[under(p,W) for p in opt.library_dir] if opt.library_dir else None
+    baseline=json.loads(under(opt.compare,W).read_text()) if opt.compare else None
+    discovered=sorted(p for p in (L/'llvm/test/tools/llvm-profgen').rglob('*') if p.suffix in ['.test','.ll','.s','.yaml'] and 'Inputs' not in p.parts and p.is_file())
+    tool_argv0=baseline.get('argv0',baseline['tool']) if baseline else str(B/'bin/llvm-profgen')
+    tests,registered,extra=comparison_scope(baseline,discovered) if baseline else (discovered,None,[])
     scratch.mkdir(parents=True,exist_ok=True)
     resource.setrlimit(resource.RLIMIT_CORE,(0,0))
     env={**os.environ,'TMPDIR':str(W/'temp/tmp'),'LC_ALL':'C','PYTHONDONTWRITEBYTECODE':'1'}
-    tests=sorted(p for p in (L/'llvm/test/tools/llvm-profgen').rglob('*') if p.suffix in ['.test','.ll','.s','.yaml'] and 'Inputs' not in p.parts and p.is_file())
     passes=[];preparations=[]
     for turn in [1,2]:
         work=scratch/'work'
@@ -124,12 +168,14 @@ def main():
                     cwd,r=prep(cmd,cwd,scratch,env)
                     if r:preparations.append({'pass':turn,'test':test.name,'line':line,**r})
                     continue
+                key=(str(test.relative_to(L)),line)
+                if registered is not None and key not in registered:continue
                 args=args_only(cmd)
                 ident=f'{test.stem}-{line}'
                 original=option(args,['--output','-o']);original_bytes=None
                 # Fixed superset of C1: binary on CS/probe/diagnostic paths is
                 # extra error-behavior coverage, never a supported-profile claim.
-                modes=['original','text','extbinary','gcc','binary']
+                modes=registered[key] if registered is not None else ['original','text','extbinary','gcc','binary']
                 for fmt in modes:
                     av=args[1:] if fmt=='original' else change_format(args[1:],fmt)
                     output=option(av,['--output','-o'])
@@ -138,7 +184,7 @@ def main():
                     if output and output not in ['-', '/dev/null']:
                         pth=under(output,scratch)
                         if pth.exists():pth.unlink()
-                    c=loaded(opt.tool)+av
+                    c=loaded(opt.tool,library_dirs,tool_argv0)+av
                     p=subprocess.run(c,cwd=cwd,env=env,capture_output=True,timeout=180)
                     profile=p.stdout if output=='-' else (Path(output).read_bytes() if output and Path(output).is_file() else None)
                     tag=ident+'-'+fmt
@@ -159,7 +205,7 @@ def main():
         selected=[(n,l) for n,l in enumerate(source.read_text().splitlines(),1) if re.match(r'^\s*\d+/\d+\s+\d+ cycles:\s+[a-f0-9]+ \(',l)][:20]
         assert selected;pure.write_text('\n'.join(l for _,l in selected)+'\n')
         av=['--perfscript='+str(pure),'--binary='+str(L/'llvm/test/tools/llvm-profgen/Inputs/inline-noprobe.perfbin'),'--output='+str(work/'pure.profile')]
-        c=loaded(opt.tool)+av;p=subprocess.run(c,env=env,cwd=work,capture_output=True)
+        c=loaded(opt.tool,library_dirs,tool_argv0)+av;p=subprocess.run(c,env=env,cwd=work,capture_output=True)
         (archive/'pure-ip.stderr').write_bytes(p.stderr);(archive/'pure-ip.stdout').write_bytes(p.stdout)
         pure_output=work/'pure.profile'
         pure_profile=pure_output.read_bytes() if pure_output.exists() else None
@@ -168,13 +214,10 @@ def main():
         passes.append(records)
     differences=[{'index':i,'first':x,'second':y} for i,(x,y) in enumerate(zip(*passes)) if x!=y]
     assert len(passes[0])==len(passes[1])
-    result={'launch_prefix':loaded(opt.tool),'command_expansion':'replace leading llvm-profgen token with launch_prefix; no normalization of measured bytes','tool_sha256':digest,'tool':str(opt.tool),'scratch':str(scratch),'tests_scanned':len(tests),'original_commands':sum(x['format']=='original' for x in passes[0])-1,'pure_ip_commands':1,'format_variants':sum(x['format']!='original' for x in passes[0]),'runs_per_pass':len(passes[0]),'two_pass_equal':not differences,'differences':differences,'preparations':preparations,'records':passes[0]}
+    result={'argv0':tool_argv0,'excluded_new_tests':extra,'launch_prefix':loaded(opt.tool,library_dirs,tool_argv0),'command_expansion':'replace leading llvm-profgen token with launch_prefix; no normalization of measured bytes','tool_sha256':digest,'tool':str(opt.tool),'scratch':str(scratch),'tests_scanned':len(tests),'original_commands':sum(x['format']=='original' for x in passes[0])-1,'pure_ip_commands':1,'format_variants':sum(x['format']!='original' for x in passes[0]),'runs_per_pass':len(passes[0]),'two_pass_equal':not differences,'differences':differences,'preparations':preparations,'records':passes[0]}
     opt.manifest.parent.mkdir(parents=True,exist_ok=True);opt.manifest.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     if opt.compare:
-        old=json.loads(opt.compare.read_text());diff=[]
-        for i,(a,b) in enumerate(zip(old['records'],result['records'])):
-            if any(a.get(k)!=b.get(k) for k in ['test','line','format','exit','profile_sha256','stderr_sha256']):diff.append(i)
-        assert len(old['records'])==len(result['records']), 'matrix changed'
+        diff=compare_records(baseline['records'],result['records'])
         print('candidate differing rows:',diff)
         if diff:raise SystemExit(1)
     print(json.dumps({k:result[k] for k in ['tests_scanned','original_commands','format_variants','runs_per_pass','two_pass_equal']},indent=2))

@@ -26,7 +26,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-02；llvm-profgen 补丁 1，已完成）
+## 当前授权与执行状态（2026-11-02；补丁2前C1/lit准备，已完成）
+
+- 本轮只修正项目侧C1脚本、存档基线工具、补齐开发用lit环境；未修改llvm-profgen源码、既有测试或设计，未连接开发板、未推Gerrit，未开始补丁2。[报告](profgen/impl/02_lit_env.md)
+- 构建前存档到 `temp/profgen-baseline-tool/`：llvm-profgen SHA `a31073338f9315a0fd6d2934e36431d9135086882ebfb07bd1bda7c36d7f9f1e`，实际加载的libLLVM.so.22.1 SHA `2c07f047841853eaeab97ab69a285e28941e8b8983706ec76183065791dd914a`；GBS loader --list确认来源及存档解析。[证据](profgen/impl/evidence/02/01_archive.json)
+- C1 compare固定为基线登记的测试/行/格式；原测试相对f999bd4有改动即停止；先验矩阵对齐再比较内容。增加库目录参数，实际argv0固定以消除存档路径引起的帮助提示差异，不归一化stderr。存档与构建后工具各两遍636行，均与原基线0差异；原清单不变。[存档复核](profgen/impl/evidence/02/04_archive_c1.json)、[构建后复核](profgen/impl/evidence/02/10_rebuilt_c1.json)
+- 同一root/config/worktree的GBS增量构建成功：11:05:43–11:20:13+08:00，870.697秒，GBS_EXIT=0、ALL-END OK，Ninja126步（原基线7633）。没有重跑、没有未打包文件错误。新工具SHA及mtime不变，没有重新链接。[构建](profgen/impl/evidence/02/07_build_record.txt)
+- 原有lit基线：PASS48、FAIL0、UNSUPPORTED1（cs-preinline-cost.test，requires asserts）、XFAIL1（invalid-perfscript.test）；assertions=No保持不变，没有修复或额外跳过测试。LLVM site配置缺失已闭合。[lit日志](profgen/impl/evidence/02/09_lit.log)、[xunit](profgen/impl/evidence/02/09_lit.xml)
+- 开发工作树 `packaging/llvm.spec` 仅开启LLVM_INCLUDE_TESTS并添加%check；未提交到LLVM分支，HEAD仍为补丁1。**正式非增量构建前必须撤销**；后续补丁只显式暂存工具、测试、文档，不能把该spec带入。
+- 下一步等待补丁2授权。Agent设计与开发仍在llvm-profgen增强完成后；无新增已知项目文件边界例外，未改认证配置或索要密码。
+
+## 前轮授权与执行状态（2026-11-02；llvm-profgen 补丁 1，历史）
 
 - 已获本轮实现授权，范围为测试素材与 C1 原行为基线；冻结设计仍为 v0.7，SHA 不变。没有修改 llvm-profgen 源码、既有测试、spec 或设计，没有 GBS 构建、板上操作或 Gerrit 推送。
 - LLVM 本地分支 afdo/profgen-enhance 提交 `00fa352d531680f0bf4a55dec21b30bacfcd4092`，只新增 Inputs/ip-mode 的104个文件、366795字节（46个ELF共255656字节）；二进制 format-patch 已在独立 index 对原基线应用检查通过。[报告](profgen/impl/01_patch1_test_inputs.md)、[补丁](../patches/profgen/0001-llvm-profgen-Add-test-inputs-for-IP-sample-mode.patch)
@@ -193,7 +203,7 @@
 
 # 项目状态
 
-更新：2026-11-02（Asia/Shanghai）。阶段：补丁1测试素材与C1基线完成，等待补丁2；RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.7，v0.6限定范围复核处理见附录F，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；显式SHA-1构建与调试拆分验证通过（08），RPi5 dsoff/buildid-mmap/页大小验证通过（09），本轮已获补丁1授权并完成，不开始补丁2；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-11-02（Asia/Shanghai）。阶段：补丁1完成，补丁2前C1脚本/存档/lit准备完成，等待补丁2；RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.7，v0.6限定范围复核处理见附录F，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；显式SHA-1构建与调试拆分验证通过（08），RPi5 dsoff/buildid-mmap/页大小验证通过（09），补丁1及本轮C1/lit准备已授权完成，不开始补丁2；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
 
 ## 计划
 
@@ -220,7 +230,12 @@
 
 ## 进度
 
-### llvm-profgen 补丁1（当前，已完成）
+### 补丁2前C1/lit准备（当前，已完成）
+
+- 存档工具与libLLVM；固定C1登记范围与原测试完整性门禁，存档/构建后工具复核均0差异。
+- GBS增量14分31秒、126步成功；lit PASS48/FAIL0/UNSUPPORTED1/XFAIL1，工具未重新链接。spec仅保留本地测试环境改动，正式非增量构建前必须撤销。[报告](profgen/impl/02_lit_env.md)
+
+### llvm-profgen 补丁1（历史，已完成）
 
 - 只提交输入素材的LLVM本地补丁；项目侧保存重放脚本、636行基线与逐命令stderr。没有修改增强实现。[报告](profgen/impl/01_patch1_test_inputs.md)
 - 两遍字节一致；lit缺site配置未运行。下一步等待补丁2。
@@ -343,6 +358,8 @@
 
 ## 已闭合结论（附证据路径）
 
+- LLVM site配置已生成，原有lit 50项基线取得（48 PASS、0 FAIL、1 UNSUPPORTED、1 XFAIL）；C1固定登记范围且存档/构建后复核均0差异。[lit](profgen/impl/evidence/02/09_lit.log)、[C1](profgen/impl/evidence/02/10_rebuilt_c1.json)
+
 - 补丁1的104份素材与C1固定矩阵归档；两遍636次实际行为一致，纯IP旧错误保留。此结论不包含lit通过或新IP功能实现。[素材验证](profgen/impl/evidence/01/04_fixture_checks.txt)、[C1摘要](profgen/impl/evidence/01/10_c1_summary.json)
 
 - RPi5页大小4096；libavcodec单进程5,865/双进程14,331条dsoff公式与唯一落段100%通过；libc MMAP2/ELF build-id一致，period行为符合v0.5；负pid/tid样例为新事实，不自动认定设计冻结。[09](probe/09_rpi5_prefreeze_checks.md)、[E3](probe/evidence/09/03_mapping_buildid_period.txt)
@@ -397,7 +414,7 @@
 
 ## 待人工裁决
 
-- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1已授权完成，等待补丁2授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，本轮未做GBS构建或增强源码实现。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1及补丁2前C1/lit准备已完成，等待补丁2授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，本轮已完成开发用GBS增量构建，未做增强源码实现。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -412,7 +429,7 @@
 
 ## 挂账
 
-- llvm-profgen lit缺LLVM site配置（LLVM_INCLUDE_TESTS=OFF）；辅助工具已在，无需本轮构建。完整lit验证及assertions专用测试后续补齐，当前C1只保留Release工具实测行为。[报告第6节](profgen/impl/01_patch1_test_inputs.md)
+- 开发工作树 `temp/llvm-profgen-enh/packaging/llvm.spec` 的LLVM_INCLUDE_TESTS=ON和%check改动只本地保留，**正式非增量构建前必须撤销**，不得进入增强补丁。LLVM site配置与原有lit基线已闭合；assertions专用测试在当前No配置下仍为UNSUPPORTED。[报告](profgen/impl/02_lit_env.md)
 
 - 交付前非★项（v0.7）：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`；probe构建拆分后`.pseudo_probe/.pseudo_probe_desc`的位置；补存DWARF5拆分核对与BUILD目录产物build-id的证据。`[unknown]`合成素材已由补丁1闭合；构造的probe组合不替代真实拆分核实。第一阶段已冻结；第二阶段待定事项见设计第12节，IR匹配/BFI不沿用旧百分比。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
