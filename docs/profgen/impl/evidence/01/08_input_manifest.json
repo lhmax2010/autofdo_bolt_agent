@@ -1,0 +1,1042 @@
+[
+  {
+    "name": "README.txt",
+    "arch": "说明/golden",
+    "purpose": "5.3/5.7.2/5.10；复现与人工预期",
+    "origin": "本轮记录",
+    "generation": "由实际生成命令、原文来源及手写编码记录",
+    "tools": "不适用",
+    "bytes": 18183,
+    "sha256": "ef2a1155df1123ae8a81ece20c89452d595c72dcfd05312eb58e6de673a37963"
+  },
+  {
+    "name": "a64-16k.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.1 PIE / segment offsets / alignment; 5.4 counting",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [a64-16k.perfbin]",
+    "tools": "T-A64",
+    "bytes": 6296,
+    "sha256": "d8f18deac14fa8ed6a2a5c7cc6661d0489e024ca871af5ed08442d9af4e76c67"
+  },
+  {
+    "name": "a64-16k.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.3.1 / 5.7",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x0003a0, p_vaddr=0x00000000000043a0, off=0x4a4 => VA=0x44a4",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 65,
+    "sha256": "3bd96f6f534d66d1efda08123b972ce5ebde4b44c87139134ed11226fae19c94"
+  },
+  {
+    "name": "a64-64k.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.1 PIE / segment offsets / alignment; 5.4 counting",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [a64-64k.perfbin]",
+    "tools": "T-A64",
+    "bytes": 6296,
+    "sha256": "e654a4cb6a45bd1ae0610374b7da04cb3b8e01997ac983988a475555fbcaac80"
+  },
+  {
+    "name": "a64-64k.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.3.1 / 5.7",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x0003a0, p_vaddr=0x00000000000103a0, off=0x4a4 => VA=0x104a4",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 65,
+    "sha256": "00245f27154fc202e7769db685dcebf5f752dd9e3b5993ddf249b2da67fa264b"
+  },
+  {
+    "name": "a64-fast.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.2/5.3.3 identity mismatch / missing ID",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [a64-fast.perfbin]",
+    "tools": "T-A64",
+    "bytes": 6280,
+    "sha256": "349535714d3b904f4accba9a87310673f93a2c471a96d61d439a488e5d4d4564"
+  },
+  {
+    "name": "a64-fs.debug",
+    "arch": "AArch64",
+    "purpose": "5.3.4/5.7.2 split-debug equivalence",
+    "origin": "合成；源 a64-fs.perfbin",
+    "generation": "01_generation_commands.txt 的 [a64-fs.debug]",
+    "tools": "T-A64",
+    "bytes": 6376,
+    "sha256": "d37405fe4f7564532f91676b63723cdac0df02d1ac29535b901f42791f08427b"
+  },
+  {
+    "name": "a64-fs.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.4/5.10 FS discriminator + split-debug",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [a64-fs.perfbin]",
+    "tools": "T-A64",
+    "bytes": 6456,
+    "sha256": "06ab09eca3175bc13df5b0f738122720f053c4eb919536c8946f0fdb188cc927"
+  },
+  {
+    "name": "a64-fs.stripped.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.4/5.7.2 split-debug equivalence",
+    "origin": "合成；源 a64-fs.perfbin",
+    "generation": "01_generation_commands.txt 的 [a64-fs.stripped.perfbin]",
+    "tools": "T-A64",
+    "bytes": 2704,
+    "sha256": "258cb776b4f803f248602d6a18bbbe13c5397fab9b6c678203a70263dd286cf9"
+  },
+  {
+    "name": "a64-multi-gap.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.3.1",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; off=0x1800 lies in neither exec PT_LOAD; reject unmapped_in_target",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 75,
+    "sha256": "03c3306f9fd00c818668d47c64d25296ec2fe91c255bb21c8e4740018b7752ff"
+  },
+  {
+    "name": "a64-multi-load.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.1 PIE / segment offsets / alignment; 5.4 counting",
+    "origin": "合成；源 multi-load.s",
+    "generation": "01_generation_commands.txt 的 [a64-multi-load.perfbin]",
+    "tools": "T-A64",
+    "bytes": 13824,
+    "sha256": "4db0649ae2a1142278702157e495dade5fd715c881875394d9fb28db90d8d497"
+  },
+  {
+    "name": "a64-multi-load.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.3.1",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; paired with multi-load.lds; expected VA 0x10000,0x10004,0x30000,0x30004",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 500,
+    "sha256": "5d7cd0a0ddc260dd10c47969467e450d7ffe03f658e62820fdffc1163dd5362f"
+  },
+  {
+    "name": "a64-no-id.debug",
+    "arch": "AArch64",
+    "purpose": "5.3.2/5.3.3 identity mismatch / missing ID",
+    "origin": "合成；源 a64-pie.debug",
+    "generation": "01_generation_commands.txt 的 [a64-no-id.debug]",
+    "tools": "T-A64",
+    "bytes": 5648,
+    "sha256": "10451a5178784f8da08f03c2ab5759720a82ae18f6732d0b4bdd173a3c7ac094"
+  },
+  {
+    "name": "a64-no-id.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.2/5.3.3 identity mismatch / missing ID",
+    "origin": "合成；源 a64-pie.perfbin",
+    "generation": "01_generation_commands.txt 的 [a64-no-id.perfbin]",
+    "tools": "T-A64",
+    "bytes": 5648,
+    "sha256": "8027b33b9980de956df6f0612378646aed25adb3f0728e26454244cf1234970c"
+  },
+  {
+    "name": "a64-pie.debug",
+    "arch": "AArch64",
+    "purpose": "5.3.4/5.7.2 split-debug equivalence",
+    "origin": "合成；源 a64-pie.perfbin",
+    "generation": "01_generation_commands.txt 的 [a64-pie.debug]",
+    "tools": "T-A64",
+    "bytes": 5728,
+    "sha256": "a13dcb56165f3fbb6c3cd57815fee948e181871a549062b8235c1e9bb59b1660"
+  },
+  {
+    "name": "a64-pie.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.1 PIE / segment offsets / alignment; 5.4 counting",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [a64-pie.perfbin]",
+    "tools": "T-A64",
+    "bytes": 5768,
+    "sha256": "54ffd743a9f414167602f3f9234c44e435baeeec926986f7cb6dba6a2995bac7"
+  },
+  {
+    "name": "a64-pie.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.3.1 / 5.7",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x0002f0, p_vaddr=0x00000000000012f0, off=0x3f4 => VA=0x13f4",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 65,
+    "sha256": "dc1872272087b7490376435f1d52788032dbb709532e2d3262a089e2cdeee029"
+  },
+  {
+    "name": "a64-pie.stripped.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.4/5.7.2 split-debug equivalence",
+    "origin": "合成；源 a64-pie.perfbin",
+    "generation": "01_generation_commands.txt 的 [a64-pie.stripped.perfbin]",
+    "tools": "T-A64",
+    "bytes": 2120,
+    "sha256": "74502a146b832b08bd29f8b606ecbeed43ee3ec797de7ea80fa4935526963b25"
+  },
+  {
+    "name": "a64-probe.debug",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.perfbin",
+    "generation": "01_generation_commands.txt 的 [a64-probe.debug]",
+    "tools": "T-A64",
+    "bytes": 6872,
+    "sha256": "a385632aa007bd4b712f7e76072143a49fc71dae8badfc47671baa38caca4812"
+  },
+  {
+    "name": "a64-probe.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [a64-probe.perfbin]",
+    "tools": "T-A64",
+    "bytes": 6952,
+    "sha256": "cf0b89e2a53cadab44d89ce154eff3f50f368e1004fde6621b37e5ab52253482"
+  },
+  {
+    "name": "a64-probe.stripped.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.perfbin",
+    "generation": "01_generation_commands.txt 的 [a64-probe.stripped.perfbin]",
+    "tools": "T-A64",
+    "bytes": 2640,
+    "sha256": "b59b9a6f70111da54df5cb7948cc3dab8e7a84a5ded3d37b54647dea11edd564"
+  },
+  {
+    "name": "arm-count.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.4/5.10 unroll, two inline call sites, nested inline; 5.7 ISA",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [arm-count.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5100,
+    "sha256": "4370b10c4933c6bf54d9cbc9732f2571054a6877b9bbe18214a83de59aa70a66"
+  },
+  {
+    "name": "arm-count.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.3.1 / 5.7",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x000298, p_vaddr=0x00001298, off=0x39c => VA=0x139c",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 67,
+    "sha256": "7f2db1950a003871c62bf0a83fa347e690b7977d6cd0985d6e5ec332caa080f4"
+  },
+  {
+    "name": "arm-literal.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 arm-literal.s",
+    "generation": "01_generation_commands.txt 的 [arm-literal.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5400,
+    "sha256": "1b6ceee72579d4ef7f780199536ff0869be4f90bc50263a4071a0da3ae94eff2"
+  },
+  {
+    "name": "arm-literal.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 703,
+    "sha256": "6a886f018e01d971cd95b9459ec80bc3604172afedf7be4e6b9dd32880a47c70"
+  },
+  {
+    "name": "bad-a64-end.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.7.2/5.10 boundary negative (well-formed DWARF container)",
+    "origin": "合成；源 bad-a64-end.s",
+    "generation": "01_generation_commands.txt 的 [bad-a64-end.perfbin]",
+    "tools": "T-A64",
+    "bytes": 5912,
+    "sha256": "c3512d7ee145f8355defee594b7440d3bb17e7708245aba8e4f5d15d5fe4bedb"
+  },
+  {
+    "name": "bad-a64-end.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 621,
+    "sha256": "68cbb4682cfd924db050fe103b98091a8664ed4b7433d5d31e5de56fc0c17d88"
+  },
+  {
+    "name": "bad-a64-start.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.7.2/5.10 boundary negative (well-formed DWARF container)",
+    "origin": "合成；源 bad-a64-start.s",
+    "generation": "01_generation_commands.txt 的 [bad-a64-start.perfbin]",
+    "tools": "T-A64",
+    "bytes": 5912,
+    "sha256": "7906cba77182eec5c45e4c6986d975b016376ed07f552a9523602e091be5bd0f"
+  },
+  {
+    "name": "bad-a64-start.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 625,
+    "sha256": "cfe23c121aed7fa6d30d1f690afa5dc484f6bbef8eb4e0e4324387b5b9d8b5f1"
+  },
+  {
+    "name": "bad-arm-start.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 boundary negative (well-formed DWARF container)",
+    "origin": "合成；源 bad-arm-start.s",
+    "generation": "01_generation_commands.txt 的 [bad-arm-start.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5592,
+    "sha256": "df63f7bdb24a15b99d3d75b6672a183690d3a6ea27b5983a13333c0a06572fce"
+  },
+  {
+    "name": "bad-arm-start.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1582,
+    "sha256": "166ee05d3d0d1c7aae8c305d15b2a475789cb73cdcf7239a22d61365b1e8e2a9"
+  },
+  {
+    "name": "bad-conflict.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 boundary negative (well-formed DWARF container)",
+    "origin": "合成；源 bad-conflict.s",
+    "generation": "01_generation_commands.txt 的 [bad-conflict.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5388,
+    "sha256": "317924dd837164d3503dfb482d17e84aee82411e99063c70dd8deb6069a16f18"
+  },
+  {
+    "name": "bad-conflict.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 633,
+    "sha256": "59648d3c5c76631298fa1b1f46082e145f3f5763e454add84054d1cb0e583908"
+  },
+  {
+    "name": "bad-no-map.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 boundary negative (well-formed DWARF container)",
+    "origin": "合成；源 bad-no-map.s",
+    "generation": "01_generation_commands.txt 的 [bad-no-map.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5348,
+    "sha256": "7536db5db1977d81c6f7529ffea75513446cb57a6be965847b30921184ac05e9"
+  },
+  {
+    "name": "bad-no-map.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 570,
+    "sha256": "497af692face93cc2128b990c1f22dbf78819848c166065132ea3c3e03466e52"
+  },
+  {
+    "name": "bad-thumb-end.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 boundary negative (well-formed DWARF container)",
+    "origin": "合成；源 bad-thumb-end.s",
+    "generation": "01_generation_commands.txt 的 [bad-thumb-end.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5592,
+    "sha256": "46d629cebf6d89fff4ece21c700918094611046da05f529c7623b3124589c7a0"
+  },
+  {
+    "name": "bad-thumb-end.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1578,
+    "sha256": "4d6e6e6bf983c30af09f921b37eef1590de3666c1268147b646b385fec7dfb24"
+  },
+  {
+    "name": "bad-thumb-start.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 boundary negative (well-formed DWARF container)",
+    "origin": "合成；源 bad-thumb-start.s",
+    "generation": "01_generation_commands.txt 的 [bad-thumb-start.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5592,
+    "sha256": "4fedb8d6a3ec3ee6f166eaf2747a6d493244252245a123090f00a66fd3fb2ff2"
+  },
+  {
+    "name": "bad-thumb-start.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1582,
+    "sha256": "2d7e0ab6159303775c1c7a14aec1e7a8bd70cd39d28f9043593cf43640bf4de5"
+  },
+  {
+    "name": "boundaries.debug",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 boundaries.perfbin",
+    "generation": "01_generation_commands.txt 的 [boundaries.debug]",
+    "tools": "T-ARM",
+    "bytes": 5528,
+    "sha256": "2bc1e2753cb454a9dc0098c6d82911bd02f461538beeff826da6454523f6f3b2"
+  },
+  {
+    "name": "boundaries.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 boundaries.s",
+    "generation": "01_generation_commands.txt 的 [boundaries.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5584,
+    "sha256": "ec5ebb5145c9a429148ba08bdd0ef7c81ee0c04d70cdae312dd51810174c4c9b"
+  },
+  {
+    "name": "boundaries.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1578,
+    "sha256": "7d637876e7d69e912330ed7891eff013ce60425d4d9071eb191811531f549a00"
+  },
+  {
+    "name": "boundaries.stripped.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 boundaries.perfbin",
+    "generation": "01_generation_commands.txt 的 [boundaries.stripped.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 4928,
+    "sha256": "07f6a5734a3dde2e997193ce193e3f6ab18e72025a21cb32ca075c3f224a1471"
+  },
+  {
+    "name": "boundary-after_data_a32.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 boundary-after_data_a32.s",
+    "generation": "01_generation_commands.txt 的 [boundary-after_data_a32.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5592,
+    "sha256": "4213bcb10b7367de65afd0a9e1cabddb6e37b9bc09078577ba7f9cc83c89fa5c"
+  },
+  {
+    "name": "boundary-after_data_a32.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1583,
+    "sha256": "b9b9d09cc753fff16e94f32c669e7d8537c25ed03d5298bfbc238986cdf85d3f"
+  },
+  {
+    "name": "boundary-at_state.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 boundary-at_state.s",
+    "generation": "01_generation_commands.txt 的 [boundary-at_state.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5588,
+    "sha256": "77743102ef67d36db9b1ba1f40962355ad750bea3026bdcb8d14f05c7eef1c5d"
+  },
+  {
+    "name": "boundary-at_state.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1577,
+    "sha256": "44386cb58fd212d63ecfd72c7892bc6c823c986679d6271345008bc4c0ad0622"
+  },
+  {
+    "name": "boundary-before_state.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 boundary-before_state.s",
+    "generation": "01_generation_commands.txt 的 [boundary-before_state.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5592,
+    "sha256": "2605a81da10738f34e2df128958f7780baf2c9fc746a8429f3a597445ec7c48a"
+  },
+  {
+    "name": "boundary-before_state.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1580,
+    "sha256": "19e32672cacb1e240ab1e75da687542d1e58988f8d4e4c68f5ab645c2f265c96"
+  },
+  {
+    "name": "boundary-discontinuous.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 boundary-discontinuous.s",
+    "generation": "01_generation_commands.txt 的 [boundary-discontinuous.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5600,
+    "sha256": "db843e8b9f71e4361cdae95a9c659a396c124f07f8c95bd815df81728ccf74a5"
+  },
+  {
+    "name": "boundary-discontinuous.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 1612,
+    "sha256": "a3814fa410096221641b7a8325d3c2d644f40c0e152f45031046adfa2290d33e"
+  },
+  {
+    "name": "boundary-golden.json",
+    "arch": "说明/golden",
+    "purpose": "5.3/5.7.2/5.10；复现与人工预期",
+    "origin": "本轮记录",
+    "generation": "由实际生成命令、原文来源及手写编码记录",
+    "tools": "不适用",
+    "bytes": 3549,
+    "sha256": "3ea33f704b33d36ea0370e67a277cb25039870bd4440d72a10dd5c52f5790971"
+  },
+  {
+    "name": "commands.txt",
+    "arch": "说明/golden",
+    "purpose": "5.3/5.7.2/5.10；复现与人工预期",
+    "origin": "本轮记录",
+    "generation": "由实际生成命令、原文来源及手写编码记录",
+    "tools": "不适用",
+    "bytes": 57792,
+    "sha256": "cb6e52372c223e1a3e0ed030706f6de5db71a742f5194fdc502418fdafe20822"
+  },
+  {
+    "name": "counting.c",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 755,
+    "sha256": "738df4cf695b7c0f78f30bb0344e4339f56df46f3f7482422de7c6406ffc2b90"
+  },
+  {
+    "name": "different.c",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 50,
+    "sha256": "f62605e2c535c44a95ef593ba917d09dd08befa89e1860f09f08085ae2d0ad6a"
+  },
+  {
+    "name": "multi-load.lds",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 473,
+    "sha256": "5d0dea8ab8c4a9b40d5eab7db4a236bed7b4831c624ac8003e87d59401e2c926"
+  },
+  {
+    "name": "multi-load.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 242,
+    "sha256": "d7585362987ed31181e4ef283ca56954bd5f89c106ac2f8113d7b7f3f1b2a6b6"
+  },
+  {
+    "name": "other/a64-pie.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.3.2/5.3.3 identity mismatch / missing ID",
+    "origin": "合成；源 different.c",
+    "generation": "01_generation_commands.txt 的 [other/a64-pie.perfbin]",
+    "tools": "T-A64",
+    "bytes": 2992,
+    "sha256": "37418b08b4d0da8045ebcc717a6ae97cc2609a38b8b8305d7c536d74909e3898"
+  },
+  {
+    "name": "paired-addresses.json",
+    "arch": "说明/golden",
+    "purpose": "5.3/5.7.2/5.10；复现与人工预期",
+    "origin": "本轮记录",
+    "generation": "由实际生成命令、原文来源及手写编码记录",
+    "tools": "不适用",
+    "bytes": 1646,
+    "sha256": "130c0f81c17b6c35e54a245ddd42edb3c2b95d67e4accdf610e17fcb176dd097"
+  },
+  {
+    "name": "probe-debug.debug",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.debug",
+    "generation": "01_generation_commands.txt 的 [probe-debug.debug]",
+    "tools": "T-A64",
+    "bytes": 6872,
+    "sha256": "a385632aa007bd4b712f7e76072143a49fc71dae8badfc47671baa38caca4812"
+  },
+  {
+    "name": "probe-debug.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.stripped.perfbin",
+    "generation": "01_generation_commands.txt 的 [probe-debug.perfbin]",
+    "tools": "T-A64",
+    "bytes": 2640,
+    "sha256": "b59b9a6f70111da54df5cb7948cc3dab8e7a84a5ded3d37b54647dea11edd564"
+  },
+  {
+    "name": "probe-desc-only.debug",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.debug",
+    "generation": "01_generation_commands.txt 的 [probe-desc-only.debug]",
+    "tools": "T-A64",
+    "bytes": 6256,
+    "sha256": "327ccae5253107fefa6798e7fe17580f9e83ee8df93fa599d7e1649fe7ac52d9"
+  },
+  {
+    "name": "probe-desc-only.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.perfbin",
+    "generation": "01_generation_commands.txt 的 [probe-desc-only.perfbin]",
+    "tools": "T-A64",
+    "bytes": 2944,
+    "sha256": "274ff8684dead5488852300854fc35ec1d5809312d6607cbc25718da3e91592c"
+  },
+  {
+    "name": "probe-run.debug",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.debug",
+    "generation": "01_generation_commands.txt 的 [probe-run.debug]",
+    "tools": "T-A64",
+    "bytes": 6256,
+    "sha256": "327ccae5253107fefa6798e7fe17580f9e83ee8df93fa599d7e1649fe7ac52d9"
+  },
+  {
+    "name": "probe-run.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.1.4/5.10 probe section rejection",
+    "origin": "合成；源 a64-probe.perfbin",
+    "generation": "01_generation_commands.txt 的 [probe-run.perfbin]",
+    "tools": "T-A64",
+    "bytes": 3208,
+    "sha256": "2694f0f10e486e56b7fe05c7f66b2315c8c2233d50b41557a5b98a3244f92a9d"
+  },
+  {
+    "name": "pure-a64.perfbin",
+    "arch": "AArch64",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 pure-a64.s",
+    "generation": "01_generation_commands.txt 的 [pure-a64.perfbin]",
+    "tools": "T-A64",
+    "bytes": 5912,
+    "sha256": "12868b7bc185c73c712f528ba0fe66ef8db6b199250e51c117b9621fce144f92"
+  },
+  {
+    "name": "pure-a64.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 618,
+    "sha256": "11e994feebf1889b6a55ccb2bfe13b69375f94b2d3d3ec3b22c1d2df04698220"
+  },
+  {
+    "name": "pure-arm.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 pure-arm.s",
+    "generation": "01_generation_commands.txt 的 [pure-arm.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 5372,
+    "sha256": "6e01c948670736c31bab59d7877c36aca91fe08bef089d7b2cd767231c81b0b9"
+  },
+  {
+    "name": "pure-arm.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 618,
+    "sha256": "854a6c57f065a00a95a00171a15ecce380de5596c489997c33dea4cf7a23fc1e"
+  },
+  {
+    "name": "real-deleted.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/07/04_board.txt:623; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 112,
+    "sha256": "fcc81c936c7daba68e0438e47ccc1807fe44b0d1a4c8a9b5823fa57c9ed3777e"
+  },
+  {
+    "name": "real-empty-buildid.txt",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/05/02_perf_formats_mapping.txt:106; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 74,
+    "sha256": "b70c35f676eb4808f504051aacf0f968f6841818b16ed83a3dc886aad80d7f20"
+  },
+  {
+    "name": "real-kernel.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/05/02_perf_formats_mapping.txt:292; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 73,
+    "sha256": "c365c493edbffdfb888f31a91e743a50823c5f968bb2c371d099837a0ea7b025"
+  },
+  {
+    "name": "real-lost.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/06/04_lost_cleanup.txt:193; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 42,
+    "sha256": "ac77ed492d3fd2e6ebb8a74d59b52a6d060981227ef5a6c77e6ac8e884ca5105"
+  },
+  {
+    "name": "real-mmap2-buildid.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/05/02_perf_formats_mapping.txt:719; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 142,
+    "sha256": "0112b0528fcb8a302551752521b2e005730179157ce9835936d89e9276413634"
+  },
+  {
+    "name": "real-mmap2-inode.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/05/02_perf_formats_mapping.txt:288; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 121,
+    "sha256": "ace6f5a54ac11fb302b92d0b453ae97a8897c8e35dc6bc5e23162fde73427b3c"
+  },
+  {
+    "name": "real-module-mmap.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/05/02_perf_formats_mapping.txt:278; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 127,
+    "sha256": "f9252605b2d845fe9c2c7ad72b73539440ed2f4febfea6c73795f712ffc266f7"
+  },
+  {
+    "name": "real-module-sample.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/07/04_board.txt:756; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 118,
+    "sha256": "744b772cb05bcade8a3c5da0e34568ef2f7520f3e9f749ceed73f10434297eb7"
+  },
+  {
+    "name": "real-negative-pid.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/09/02_sampling_formats.txt:902; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 74,
+    "sha256": "481bd2d824e3d27bf00dd5b0a500e56cf7985236c1ffc3072ede7821f5d894ba"
+  },
+  {
+    "name": "real-sample.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/05/02_perf_formats_mapping.txt:398; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 97,
+    "sha256": "3172922e4e2fe7b33ea9e53a4643507f7533cdd8b46870ce7104ba442141b3d2"
+  },
+  {
+    "name": "real-vdso.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.3",
+    "origin": "real: docs/probe/evidence/05/02_perf_formats_mapping.txt:724; exact line, no changes",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 69,
+    "sha256": "0ce190ac0dfc17e5df7356dbd9233b3c82eaf9a6d455da5168b3fa2acecb40f1"
+  },
+  {
+    "name": "section-adjacent.lds",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 67,
+    "sha256": "e12c82acf5d846c624be2ffa0e5c2409bb4175d7f36f784d65a73f4ebe2acd96"
+  },
+  {
+    "name": "section-adjacent.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 section-state.s",
+    "generation": "01_generation_commands.txt 的 [section-adjacent.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 9356,
+    "sha256": "a7c3d82354cdf81e484ccc2e1c5e353d74540cb3faa2cab9f63d0982eed6a763"
+  },
+  {
+    "name": "section-same-address.lds",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 67,
+    "sha256": "cd3a62d0cd2420519fa179915acd5b873ce366a174f7665f271bc251958e6c45"
+  },
+  {
+    "name": "section-same-address.perfbin",
+    "arch": "ARM/Thumb；见 golden",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 section-state.s",
+    "generation": "01_generation_commands.txt 的 [section-same-address.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 9352,
+    "sha256": "78e4f26075616d7c39fef277760c4c0ba125b988947b70611ac982279b994c15"
+  },
+  {
+    "name": "section-state.s",
+    "arch": "源/链接脚本",
+    "purpose": "5.3/5.4/5.7.2/5.10；对应同名或清单中的 ELF",
+    "origin": "手写合成",
+    "generation": "文件即完整源；由对应 ELF 命令编译/链接",
+    "tools": "不适用",
+    "bytes": 703,
+    "sha256": "1f7fc0e7a1c15762ba766c64dacb342850fcaa4094de833a0d9213e5d80c09f3"
+  },
+  {
+    "name": "synthetic-event-modifier.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 62,
+    "sha256": "2c09b73cd094a2b5463298331076f243b5ed4340c4b58b2883f841e352a1b636"
+  },
+  {
+    "name": "synthetic-invalid-pid.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 60,
+    "sha256": "4ffed7926a933f9d76ab9c68427ab6e30ef845d7b139df18ee4d8e4b23f3e18b"
+  },
+  {
+    "name": "synthetic-invalid-tid.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 60,
+    "sha256": "8dc24aa4d10d8315afcb04a4966aeec37e975e06c937b4ba5bcec848c50e4b3e"
+  },
+  {
+    "name": "synthetic-missing-dsoff.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 53,
+    "sha256": "af9abe3d3512eeb0cd401a55163fac8d625b4732a3fa4f1e1978da9ae1f1e6b5"
+  },
+  {
+    "name": "synthetic-multiple-events.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 119,
+    "sha256": "bfd5185e1c734af480504ffb83297806fbafca1e5cf9c45240dbd76d646f123d"
+  },
+  {
+    "name": "synthetic-path-parentheses.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 75,
+    "sha256": "24b9fe2e42e51a57b9043e94e7de2a724ff9ef929949918f2e9dd1f008652f53"
+  },
+  {
+    "name": "synthetic-path-plus.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 68,
+    "sha256": "12836842e60a70a760516453a00a36133125415ada30ca16af32d28197a964e3"
+  },
+  {
+    "name": "synthetic-path-spaces.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 71,
+    "sha256": "fb8d107e8f02071f885c0594c829b43b8894238f74410274a25abce016caadfd"
+  },
+  {
+    "name": "synthetic-truncated.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 58,
+    "sha256": "c349f77064e1369125659d6d12716cc97b2ce4872d0a75f54a7e9e541efda714"
+  },
+  {
+    "name": "synthetic-unknown-line.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 26,
+    "sha256": "0f5c62e1d3886e135d52a426a14bb1853e5703cb2d3d91d9f65ab3c0f2d3ee63"
+  },
+  {
+    "name": "synthetic-unknown.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 44,
+    "sha256": "43022805660cf9502c5c0b17b9cea5c65771a0456cca84600f13aebf7bc6ff2e"
+  },
+  {
+    "name": "synthetic-with-brstack.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 84,
+    "sha256": "7017f7f8067daa635a7c0aea41db40116e769b4d1e1594dea6f5ab186972db89"
+  },
+  {
+    "name": "synthetic-zero-period.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.2.2 / 5.2.3 / 5.10",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 54,
+    "sha256": "e70f8723ad1c691b436f4b6a43469dff8fe259c0f05c157ac049e57a7b720ac8"
+  },
+  {
+    "name": "thumb-count.debug",
+    "arch": "Thumb",
+    "purpose": "5.3.4/5.7.2 split-debug equivalence",
+    "origin": "合成；源 thumb-count.perfbin",
+    "generation": "01_generation_commands.txt 的 [thumb-count.debug]",
+    "tools": "T-ARM",
+    "bytes": 4908,
+    "sha256": "daa88acd1bb13a573b4a53cd3ff8ef897f9360e345713491c855ee76e3786856"
+  },
+  {
+    "name": "thumb-count.perfbin",
+    "arch": "Thumb",
+    "purpose": "5.4/5.10 unroll, two inline call sites, nested inline; 5.7 ISA",
+    "origin": "合成；源 counting.c",
+    "generation": "01_generation_commands.txt 的 [thumb-count.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 4960,
+    "sha256": "3de2b6621e572b26123638d8127d375374ccd9bc52a240ebc5b8e90391ce0230"
+  },
+  {
+    "name": "thumb-count.perfscript",
+    "arch": "perf 文本",
+    "purpose": "5.3.1 / 5.7",
+    "origin": "synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x000298, p_vaddr=0x00001298, off=0x344 => VA=0x1344",
+    "generation": "write exact UTF-8 text shown in this file; no tool generation",
+    "tools": "不适用",
+    "bytes": 69,
+    "sha256": "e5f80ef2d3d42ffa5f09ded03aec4d76fdfdc912b67b6193a7b410dc1d908084"
+  },
+  {
+    "name": "thumb-count.stripped.perfbin",
+    "arch": "Thumb",
+    "purpose": "5.3.4/5.7.2 split-debug equivalence",
+    "origin": "合成；源 thumb-count.perfbin",
+    "generation": "01_generation_commands.txt 的 [thumb-count.stripped.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 1956,
+    "sha256": "10d67bb418ffe9079424deb2d060bb514d010650a5bd7b9e16cd4dc7dfd3efcf"
+  },
+  {
+    "name": "thumb-no-attributes.perfbin",
+    "arch": "Thumb",
+    "purpose": "5.7.2/5.10 hand-known ISA/mapping boundaries",
+    "origin": "合成；源 thumb-count.perfbin",
+    "generation": "01_generation_commands.txt 的 [thumb-no-attributes.perfbin]",
+    "tools": "T-ARM",
+    "bytes": 4812,
+    "sha256": "215cc0eb67daf8303573d3dc15d08a0f093b4d05a22427700fe367a84234f136"
+  },
+  {
+    "name": "tools.txt",
+    "arch": "说明/golden",
+    "purpose": "5.3/5.7.2/5.10；复现与人工预期",
+    "origin": "本轮记录",
+    "generation": "由实际生成命令、原文来源及手写编码记录",
+    "tools": "不适用",
+    "bytes": 7767,
+    "sha256": "73fb813ff27b05ecec8dd3b26db9cba764d6b313b6f4da2110ea44e5084800ee"
+  }
+]

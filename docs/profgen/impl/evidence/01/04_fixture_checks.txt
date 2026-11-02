@@ -1,0 +1,28 @@
+thumb-count: split triple build-id=dfbdeeb909bf09bf3e93c3327e627d6ad246ffe5; debug .text=NOBITS
+a64-pie: split triple build-id=280854d1cea103bf480e219b336025e337e5a10e; debug .text=NOBITS
+a64-fs: split triple build-id=ecf31274c25e92d0717a94a25d2be5c620040f5a; debug .text=NOBITS
+boundaries: split triple build-id=80a100510aac2ab6578d1f45b3f854786e68ee8f; debug .text=NOBITS
+a64-probe: split triple build-id=8710083e290edc8b5d374b20e4cac0d555ecf28f; debug .text=NOBITS
+FS marker remains in stripped .dynsym as well as debug .symtab; not a fixture claiming runtime marker loss
+probe-run.perfbin: .pseudo_probe=True, .pseudo_probe_desc=True
+probe-run.debug: .pseudo_probe=False, .pseudo_probe_desc=False
+probe-debug.perfbin: .pseudo_probe=False, .pseudo_probe_desc=False
+probe-debug.debug: .pseudo_probe=True, .pseudo_probe_desc=True
+probe-desc-only.perfbin: .pseudo_probe=False, .pseudo_probe_desc=True
+probe-desc-only.debug: .pseudo_probe=False, .pseudo_probe_desc=False
+a64-16k.perfbin: PT_LOAD align=0x4000
+a64-64k.perfbin: PT_LOAD align=0x10000
+a64-multi-load: exec PT_LOAD (off,VA,size) = (0x1000,0x10000,8),(0x2000,0x30000,8); gap=0x1800
+manual boundary bytes and six mapping anchors exactly match handwritten .byte golden, without objdump
+pure-arm.perfbin: no $t; pure native mapping anchor
+pure-a64.perfbin: no $t; pure native mapping anchor
+boundaries: DWARF container verify exit0 (semantic boundary negative remains negative)
+boundary-before_state: DWARF container verify exit0 (semantic boundary negative remains negative)
+boundary-at_state: DWARF container verify exit0 (semantic boundary negative remains negative)
+boundary-discontinuous: DWARF container verify exit0 (semantic boundary negative remains negative)
+boundary-after_data_a32: DWARF container verify exit0 (semantic boundary negative remains negative)
+bad-thumb-start: DWARF container verify exit0 (semantic boundary negative remains negative)
+bad-arm-start: DWARF container verify exit0 (semantic boundary negative remains negative)
+bad-thumb-end: DWARF container verify exit0 (semantic boundary negative remains negative)
+bad-a64-start: DWARF container verify exit0 (semantic boundary negative remains negative)
+bad-a64-end: DWARF container verify exit0 (semantic boundary negative remains negative)

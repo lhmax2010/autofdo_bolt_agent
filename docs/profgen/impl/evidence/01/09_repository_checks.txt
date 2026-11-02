@@ -1,0 +1,158 @@
+$ git -C /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh show -s --format=fuller HEAD
+exit=0
+commit 00fa352d531680f0bf4a55dec21b30bacfcd4092
+Author:     Hao Lin <hao.lin@samsung.com>
+AuthorDate: Mon Nov 2 09:57:13 2026 +0800
+Commit:     Hao Lin <hao.lin@samsung.com>
+CommitDate: Mon Nov 2 09:58:50 2026 +0800
+
+    [llvm-profgen] Add test inputs for IP sample mode
+    
+    Add synthetic AArch64/ARM ELF, split-debug, probe and boundary inputs, with sources, exact generation commands and manual boundary goldens. Preserve minimal real perf excerpts with provenance and add explicitly synthetic format and address cases. No RUN tests or profgen implementation changes.
+
+$ git -C /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh diff --stat f999bd406c0a70fe8107aa992164fe6945c5d46a..HEAD
+exit=0
+ .../tools/llvm-profgen/Inputs/ip-mode/README.txt   | 151 ++++++++++++++
+ .../llvm-profgen/Inputs/ip-mode/a64-16k.perfbin    | Bin 0 -> 6296 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-16k.perfscript |   1 +
+ .../llvm-profgen/Inputs/ip-mode/a64-64k.perfbin    | Bin 0 -> 6296 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-64k.perfscript |   1 +
+ .../llvm-profgen/Inputs/ip-mode/a64-fast.perfbin   | Bin 0 -> 6280 bytes
+ .../tools/llvm-profgen/Inputs/ip-mode/a64-fs.debug | Bin 0 -> 6376 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-fs.perfbin     | Bin 0 -> 6456 bytes
+ .../Inputs/ip-mode/a64-fs.stripped.perfbin         | Bin 0 -> 2704 bytes
+ .../Inputs/ip-mode/a64-multi-gap.perfscript        |   1 +
+ .../Inputs/ip-mode/a64-multi-load.perfbin          | Bin 0 -> 13824 bytes
+ .../Inputs/ip-mode/a64-multi-load.perfscript       |   6 +
+ .../llvm-profgen/Inputs/ip-mode/a64-no-id.debug    | Bin 0 -> 5648 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-no-id.perfbin  | Bin 0 -> 5648 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-pie.debug      | Bin 0 -> 5728 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-pie.perfbin    | Bin 0 -> 5768 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-pie.perfscript |   1 +
+ .../Inputs/ip-mode/a64-pie.stripped.perfbin        | Bin 0 -> 2120 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-probe.debug    | Bin 0 -> 6872 bytes
+ .../llvm-profgen/Inputs/ip-mode/a64-probe.perfbin  | Bin 0 -> 6952 bytes
+ .../Inputs/ip-mode/a64-probe.stripped.perfbin      | Bin 0 -> 2640 bytes
+ .../llvm-profgen/Inputs/ip-mode/arm-count.perfbin  | Bin 0 -> 5100 bytes
+ .../Inputs/ip-mode/arm-count.perfscript            |   1 +
+ .../Inputs/ip-mode/arm-literal.perfbin             | Bin 0 -> 5400 bytes
+ .../llvm-profgen/Inputs/ip-mode/arm-literal.s      |  39 ++++
+ .../Inputs/ip-mode/bad-a64-end.perfbin             | Bin 0 -> 5912 bytes
+ .../llvm-profgen/Inputs/ip-mode/bad-a64-end.s      |  35 ++++
+ .../Inputs/ip-mode/bad-a64-start.perfbin           | Bin 0 -> 5912 bytes
+ .../llvm-profgen/Inputs/ip-mode/bad-a64-start.s    |  35 ++++
+ .../Inputs/ip-mode/bad-arm-start.perfbin           | Bin 0 -> 5592 bytes
+ .../llvm-profgen/Inputs/ip-mode/bad-arm-start.s    |  63 ++++++
+ .../Inputs/ip-mode/bad-conflict.perfbin            | Bin 0 -> 5388 bytes
+ .../llvm-profgen/Inputs/ip-mode/bad-conflict.s     |  38 ++++
+ .../llvm-profgen/Inputs/ip-mode/bad-no-map.perfbin | Bin 0 -> 5348 bytes
+ .../tools/llvm-profgen/Inputs/ip-mode/bad-no-map.s |  33 +++
+ .../Inputs/ip-mode/bad-thumb-end.perfbin           | Bin 0 -> 5592 bytes
+ .../llvm-profgen/Inputs/ip-mode/bad-thumb-end.s    |  63 ++++++
+ .../Inputs/ip-mode/bad-thumb-start.perfbin         | Bin 0 -> 5592 bytes
+ .../llvm-profgen/Inputs/ip-mode/bad-thumb-start.s  |  63 ++++++
+ .../llvm-profgen/Inputs/ip-mode/boundaries.debug   | Bin 0 -> 5528 bytes
+ .../llvm-profgen/Inputs/ip-mode/boundaries.perfbin | Bin 0 -> 5584 bytes
+ .../tools/llvm-profgen/Inputs/ip-mode/boundaries.s |  63 ++++++
+ .../Inputs/ip-mode/boundaries.stripped.perfbin     | Bin 0 -> 4928 bytes
+ .../Inputs/ip-mode/boundary-after_data_a32.perfbin | Bin 0 -> 5592 bytes
+ .../Inputs/ip-mode/boundary-after_data_a32.s       |  63 ++++++
+ .../Inputs/ip-mode/boundary-at_state.perfbin       | Bin 0 -> 5588 bytes
+ .../Inputs/ip-mode/boundary-at_state.s             |  63 ++++++
+ .../Inputs/ip-mode/boundary-before_state.perfbin   | Bin 0 -> 5592 bytes
+ .../Inputs/ip-mode/boundary-before_state.s         |  63 ++++++
+ .../Inputs/ip-mode/boundary-discontinuous.perfbin  | Bin 0 -> 5600 bytes
+ .../Inputs/ip-mode/boundary-discontinuous.s        |  65 ++++++
+ .../Inputs/ip-mode/boundary-golden.json            | 224 +++++++++++++++++++++
+ .../tools/llvm-profgen/Inputs/ip-mode/commands.txt | 168 ++++++++++++++++
+ .../tools/llvm-profgen/Inputs/ip-mode/counting.c   |  21 ++
+ .../tools/llvm-profgen/Inputs/ip-mode/different.c  |   1 +
+ .../llvm-profgen/Inputs/ip-mode/multi-load.lds     |  11 +
+ .../tools/llvm-profgen/Inputs/ip-mode/multi-load.s |  12 ++
+ .../Inputs/ip-mode/other/a64-pie.perfbin           | Bin 0 -> 2992 bytes
+ .../Inputs/ip-mode/paired-addresses.json           |  66 ++++++
+ .../llvm-profgen/Inputs/ip-mode/probe-debug.debug  | Bin 0 -> 6872 bytes
+ .../Inputs/ip-mode/probe-debug.perfbin             | Bin 0 -> 2640 bytes
+ .../Inputs/ip-mode/probe-desc-only.debug           | Bin 0 -> 6256 bytes
+ .../Inputs/ip-mode/probe-desc-only.perfbin         | Bin 0 -> 2944 bytes
+ .../llvm-profgen/Inputs/ip-mode/probe-run.debug    | Bin 0 -> 6256 bytes
+ .../llvm-profgen/Inputs/ip-mode/probe-run.perfbin  | Bin 0 -> 3208 bytes
+ .../llvm-profgen/Inputs/ip-mode/pure-a64.perfbin   | Bin 0 -> 5912 bytes
+ .../tools/llvm-profgen/Inputs/ip-mode/pure-a64.s   |  35 ++++
+ .../llvm-profgen/Inputs/ip-mode/pure-arm.perfbin   | Bin 0 -> 5372 bytes
+ .../tools/llvm-profgen/Inputs/ip-mode/pure-arm.s   |  35 ++++
+ .../Inputs/ip-mode/real-deleted.perfscript         |   1 +
+ .../Inputs/ip-mode/real-empty-buildid.txt          |   1 +
+ .../Inputs/ip-mode/real-kernel.perfscript          |   1 +
+ .../Inputs/ip-mode/real-lost.perfscript            |   1 +
+ .../Inputs/ip-mode/real-mmap2-buildid.perfscript   |   1 +
+ .../Inputs/ip-mode/real-mmap2-inode.perfscript     |   1 +
+ .../Inputs/ip-mode/real-module-mmap.perfscript     |   1 +
+ .../Inputs/ip-mode/real-module-sample.perfscript   |   1 +
+ .../Inputs/ip-mode/real-negative-pid.perfscript    |   1 +
+ .../Inputs/ip-mode/real-sample.perfscript          |   1 +
+ .../Inputs/ip-mode/real-vdso.perfscript            |   1 +
+ .../Inputs/ip-mode/section-adjacent.lds            |   1 +
+ .../Inputs/ip-mode/section-adjacent.perfbin        | Bin 0 -> 9356 bytes
+ .../Inputs/ip-mode/section-same-address.lds        |   1 +
+ .../Inputs/ip-mode/section-same-address.perfbin    | Bin 0 -> 9352 bytes
+ .../llvm-profgen/Inputs/ip-mode/section-state.s    |  39 ++++
+ .../ip-mode/synthetic-event-modifier.perfscript    |   1 +
+ .../ip-mode/synthetic-invalid-pid.perfscript       |   1 +
+ .../ip-mode/synthetic-invalid-tid.perfscript       |   1 +
+ .../ip-mode/synthetic-missing-dsoff.perfscript     |   1 +
+ .../ip-mode/synthetic-multiple-events.perfscript   |   2 +
+ .../ip-mode/synthetic-path-parentheses.perfscript  |   1 +
+ .../Inputs/ip-mode/synthetic-path-plus.perfscript  |   1 +
+ .../ip-mode/synthetic-path-spaces.perfscript       |   1 +
+ .../Inputs/ip-mode/synthetic-truncated.perfscript  |   1 +
+ .../ip-mode/synthetic-unknown-line.perfscript      |   1 +
+ .../Inputs/ip-mode/synthetic-unknown.perfscript    |   1 +
+ .../ip-mode/synthetic-with-brstack.perfscript      |   1 +
+ .../ip-mode/synthetic-zero-period.perfscript       |   1 +
+ .../llvm-profgen/Inputs/ip-mode/thumb-count.debug  | Bin 0 -> 4908 bytes
+ .../Inputs/ip-mode/thumb-count.perfbin             | Bin 0 -> 4960 bytes
+ .../Inputs/ip-mode/thumb-count.perfscript          |   1 +
+ .../Inputs/ip-mode/thumb-count.stripped.perfbin    | Bin 0 -> 1956 bytes
+ .../Inputs/ip-mode/thumb-no-attributes.perfbin     | Bin 0 -> 4812 bytes
+ .../tools/llvm-profgen/Inputs/ip-mode/tools.txt    |  75 +++++++
+ 104 files changed, 1563 insertions(+)
+
+$ git -C /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh diff --name-only HEAD
+exit=0
+
+$ git -C /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm status --porcelain
+exit=0
+
+SHA256 eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be  docs/profgen/design/02_llvm_profgen_enhance_design_v0.7.md
+
+SHA256 a31073338f9315a0fd6d2934e36431d9135086882ebfb07bd1bda7c36d7f9f1e  temp/llvm-profgen-enh/build/bin/llvm-profgen
+
+[
+  {
+    "command": [
+      "git",
+      "-C",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh",
+      "read-tree",
+      "f999bd406c0a70fe8107aa992164fe6945c5d46a"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh",
+      "apply",
+      "--cached",
+      "--check",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/patches/profgen/0001-llvm-profgen-Add-test-inputs-for-IP-sample-mode.patch"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

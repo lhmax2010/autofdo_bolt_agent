@@ -1,0 +1,151 @@
+IP sample mode inputs, patch 1 (no RUN lines)
+============================================
+Purpose: frozen design v0.7 5.2.2, 5.3, 5.4, 5.7.2, 5.10.
+Design SHA256: eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be.
+All new binaries are synthetic, never executed on a board. Existing profgen
+sources/tests are unchanged. Binary suffixes .perfbin/.debug and .perfscript
+follow nearby inputs. C/.s/.lds sources are provided; no executable tests yet.
+
+Reproduction: commands.txt contains each complete generation command, working
+directory and scratch directory setup; tools.txt contains actual paths/versions.
+All compiler/linker/objcopy commands use the loader+libraries from the indicated
+GBS root. Sources are relative to this directory. No GBS build is required.
+
+Binary input inventory (generation: corresponding [filename] in commands.txt):
+a64-pie.perfbin | a64 | 5.3.1 PIE / segment offsets / alignment; 5.4 counting | synthetic; source=counting.c
+a64-16k.perfbin | a64 | 5.3.1 PIE / segment offsets / alignment; 5.4 counting | synthetic; source=counting.c
+a64-64k.perfbin | a64 | 5.3.1 PIE / segment offsets / alignment; 5.4 counting | synthetic; source=counting.c
+thumb-count.perfbin | arm | 5.4/5.10 unroll, two inline call sites, nested inline; 5.7 ISA | synthetic; source=counting.c
+arm-count.perfbin | arm | 5.4/5.10 unroll, two inline call sites, nested inline; 5.7 ISA | synthetic; source=counting.c
+a64-fs.perfbin | a64 | 5.4/5.10 FS discriminator + split-debug | synthetic; source=counting.c
+a64-probe.perfbin | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=counting.c
+a64-fast.perfbin | a64 | 5.3.2/5.3.3 identity mismatch / missing ID | synthetic; source=counting.c
+other/a64-pie.perfbin | a64 | 5.3.2/5.3.3 identity mismatch / missing ID | synthetic; source=different.c
+a64-multi-load.perfbin | a64 | 5.3.1 PIE / segment offsets / alignment; 5.4 counting | synthetic; source=multi-load.s
+boundaries.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=boundaries.s
+boundary-before_state.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=boundary-before_state.s
+boundary-at_state.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=boundary-at_state.s
+boundary-discontinuous.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=boundary-discontinuous.s
+boundary-after_data_a32.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=boundary-after_data_a32.s
+bad-thumb-start.perfbin | arm | 5.7.2/5.10 boundary negative (well-formed DWARF container) | synthetic; source=bad-thumb-start.s
+bad-arm-start.perfbin | arm | 5.7.2/5.10 boundary negative (well-formed DWARF container) | synthetic; source=bad-arm-start.s
+bad-thumb-end.perfbin | arm | 5.7.2/5.10 boundary negative (well-formed DWARF container) | synthetic; source=bad-thumb-end.s
+pure-arm.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=pure-arm.s
+arm-literal.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=arm-literal.s
+pure-a64.perfbin | a64 | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=pure-a64.s
+bad-a64-start.perfbin | a64 | 5.7.2/5.10 boundary negative (well-formed DWARF container) | synthetic; source=bad-a64-start.s
+bad-a64-end.perfbin | a64 | 5.7.2/5.10 boundary negative (well-formed DWARF container) | synthetic; source=bad-a64-end.s
+bad-conflict.perfbin | arm | 5.7.2/5.10 boundary negative (well-formed DWARF container) | synthetic; source=bad-conflict.s
+bad-no-map.perfbin | arm | 5.7.2/5.10 boundary negative (well-formed DWARF container) | synthetic; source=bad-no-map.s
+section-adjacent.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=section-state.s
+section-same-address.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=section-state.s
+thumb-no-attributes.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=thumb-count.perfbin
+thumb-count.debug | arm | 5.3.4/5.7.2 split-debug equivalence | synthetic; source=thumb-count.perfbin
+thumb-count.stripped.perfbin | arm | 5.3.4/5.7.2 split-debug equivalence | synthetic; source=thumb-count.perfbin
+a64-pie.debug | a64 | 5.3.4/5.7.2 split-debug equivalence | synthetic; source=a64-pie.perfbin
+a64-pie.stripped.perfbin | a64 | 5.3.4/5.7.2 split-debug equivalence | synthetic; source=a64-pie.perfbin
+a64-fs.debug | a64 | 5.3.4/5.7.2 split-debug equivalence | synthetic; source=a64-fs.perfbin
+a64-fs.stripped.perfbin | a64 | 5.3.4/5.7.2 split-debug equivalence | synthetic; source=a64-fs.perfbin
+boundaries.debug | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=boundaries.perfbin
+boundaries.stripped.perfbin | arm | 5.7.2/5.10 hand-known ISA/mapping boundaries | synthetic; source=boundaries.perfbin
+a64-probe.debug | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.perfbin
+a64-probe.stripped.perfbin | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.perfbin
+a64-no-id.perfbin | a64 | 5.3.2/5.3.3 identity mismatch / missing ID | synthetic; source=a64-pie.perfbin
+a64-no-id.debug | a64 | 5.3.2/5.3.3 identity mismatch / missing ID | synthetic; source=a64-pie.debug
+probe-run.perfbin | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.perfbin
+probe-run.debug | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.debug
+probe-debug.perfbin | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.stripped.perfbin
+probe-debug.debug | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.debug
+probe-desc-only.perfbin | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.perfbin
+probe-desc-only.debug | a64 | 5.1.4/5.10 probe section rejection | synthetic; source=a64-probe.debug
+
+Hand-known boundaries:
+  See boundary-golden.json and the explicit encodings/comments in each .s.
+  boundaries .text=0x1000; instruction starts relative to .text:
+    0,2,6,8,10,18,24,28,32,34.
+  Data [14,18) and [22,24) is NOT code; bytes 00 bf decode as NOP if wrongly
+  treated as Thumb. A32 literal pool uses e1a00000, also valid instruction data.
+  TBB/TBH are four bytes; IT is two bytes and does not alter instruction size.
+  Other boundary-* files contain ONE subprogram DIE each, avoiding overlapping
+  sibling DWARF function ranges. Discontinuous function: [0x1002,0x1006) and
+  [0x1022,0x1024), starts 0x1002,0x1022; prefix at 0x1020 proves the second
+  start but is not counted. DWARF addresses are even (no Thumb state bit).
+  bad-thumb-start begins at 0x1004, inside MOV.W at 0x1002.
+  bad-arm-start begins at 0x101a; bad-a64-start begins at 0x1002.
+  bad-thumb-end stops at 0x1004; bad-a64-end stops at 0x1006.
+  bad-conflict puts local STT_NOTYPE $a and $t at the same address/section.
+  bad-no-map has no mapping symbol; enabling boundary-dependent features fails.
+  section-adjacent .plt data ends at 0x1004 and .text Thumb starts there.
+  section-same-address deliberately overlaps .plt/.text at 0x1000; use for
+  section-keyed boundary unit tests, NOT a positive unique-PT_LOAD integration
+  test. The linker uses --no-check-sections explicitly, not a normal binary.
+  pure-arm has only $a; pure-a64 has only $x (no $t needed).
+  Golden values come from encodings/labels, NOT objdump output.
+
+Paired sample addresses:
+  paired-addresses.json records explicit expected virtual addresses.
+  a64-multi-load: off 0x1000/0x1004 => VA 0x10000/0x10004;
+  off 0x2000/0x2004 => VA 0x30000/0x30004; off 0x1800 hits neither exec segment.
+  Formula: VA=p_vaddr+(off-p_offset). No page mask is used.
+
+Identity pairs (same basename includes parent directory other/):
+  a64-pie.perfbin + a64-pie.debug + a64-pie.stripped.perfbin: same 20-byte ID.
+  a64-fast.perfbin: lld --build-id=fast, 8-byte ID.
+  a64-no-id.perfbin: exact a64-pie with build-id note removed by objcopy.
+  a64-pie.stripped.perfbin + a64-no-id.debug: mismatch (only runtime has ID).
+  a64-no-id.perfbin + a64-pie.debug: mismatch (only debug has ID).
+  a64-no-id.perfbin + a64-no-id.debug: both missing (requires opt-in).
+  other/a64-pie.perfbin: different source/content/ID, identical basename.
+  Additional equal-ID split triples: thumb-count, boundaries, a64-fs, a64-probe.
+  .debug .text is NOBITS; read code from runtime file. FS marker survives in
+  the stripped .dynsym for THIS fixture, and also exists in the debug .symtab.
+
+Probe location pairs (explicit objcopy keep/remove, not a Tizen RPM split claim):
+  probe-run.perfbin + probe-run.debug: both probe sections only in runtime.
+  probe-debug.perfbin + probe-debug.debug: both only in debug.
+  probe-desc-only.perfbin + probe-desc-only.debug: only descriptor in runtime.
+  All three are IP rejection inputs, with or without dwarf correlation.
+
+Counting source: counting.c forces unroll 4 with volatile loads; volatile salt
+prevents collapsing the two inline call sites. DWARF has two middle inline
+instances (call lines 16 and 17), each with two nested leaf instances.
+No execution-derived count claim: for synthetic instruction counts c_i and
+N=4 duplication, use sum=N*sum(c_i), max=N*max(c_i), avg=N*mean(c_i) when adding
+counter tests. This patch supplies binaries, not an implemented profile reader.
+
+Perf text inventory (each file contains only the excerpt/records; provenance
+is HERE so comments do not become unknown input lines):
+real-sample.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/05/02_perf_formats_mapping.txt:398; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-mmap2-inode.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/05/02_perf_formats_mapping.txt:288; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-mmap2-buildid.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/05/02_perf_formats_mapping.txt:719; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-module-mmap.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/05/02_perf_formats_mapping.txt:278; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-vdso.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/05/02_perf_formats_mapping.txt:724; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-kernel.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/05/02_perf_formats_mapping.txt:292; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-lost.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/06/04_lost_cleanup.txt:193; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-negative-pid.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/09/02_sampling_formats.txt:902; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-deleted.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/07/04_board.txt:623; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-module-sample.perfscript | 5.2.2 / 5.3 | real: docs/probe/evidence/07/04_board.txt:756; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+real-empty-buildid.txt | 5.2.2 / 5.3 | real: docs/probe/evidence/05/02_perf_formats_mapping.txt:106; exact line, no changes | write exact UTF-8 text shown in this file; no tool generation
+synthetic-path-spaces.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-path-parentheses.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-path-plus.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-unknown.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-multiple-events.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-event-modifier.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-zero-period.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-invalid-pid.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-invalid-tid.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-truncated.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-unknown-line.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-with-brstack.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+synthetic-missing-dsoff.perfscript | 5.2.2 / 5.2.3 / 5.10 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output | write exact UTF-8 text shown in this file; no tool generation
+a64-multi-load.perfscript | 5.3.1 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; paired with multi-load.lds; expected VA 0x10000,0x10004,0x30000,0x30004 | write exact UTF-8 text shown in this file; no tool generation
+a64-multi-gap.perfscript | 5.3.1 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; off=0x1800 lies in neither exec PT_LOAD; reject unmapped_in_target | write exact UTF-8 text shown in this file; no tool generation
+a64-pie.perfscript | 5.3.1 / 5.7 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x0002f0, p_vaddr=0x00000000000012f0, off=0x3f4 => VA=0x13f4 | write exact UTF-8 text shown in this file; no tool generation
+a64-16k.perfscript | 5.3.1 / 5.7 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x0003a0, p_vaddr=0x00000000000043a0, off=0x4a4 => VA=0x44a4 | write exact UTF-8 text shown in this file; no tool generation
+a64-64k.perfscript | 5.3.1 / 5.7 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x0003a0, p_vaddr=0x00000000000103a0, off=0x4a4 => VA=0x104a4 | write exact UTF-8 text shown in this file; no tool generation
+thumb-count.perfscript | 5.3.1 / 5.7 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x000298, p_vaddr=0x00001298, off=0x344 => VA=0x1344 | write exact UTF-8 text shown in this file; no tool generation
+arm-count.perfscript | 5.3.1 / 5.7 | synthetic: src/linux-rpi/tools/perf/builtin-script.c:833,2271-2279,2324-2340; util/map.c:472-486 (v6.12.80); malformed cases intentionally violate this grammar, not claimed perf output; p_offset=0x000298, p_vaddr=0x00001298, off=0x39c => VA=0x139c | write exact UTF-8 text shown in this file; no tool generation
+
+Synthetic negatives are intentionally invalid, not claimed to be real perf output.
+No PERF_RECORD_LOST_SAMPLES positive fixture: v0.7 excludes it.
