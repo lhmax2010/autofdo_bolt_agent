@@ -1,0 +1,982 @@
+From 8f4fa360ade28a7b044fd5ef392d4839311545aa Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Mon, 2 Nov 2026 15:02:11 +0800
+Subject: [PATCH] [llvm-profgen] Add IP sample reader and dsoff address
+ conversion
+
+Add an explicitly gated IPPerfReader for fixed perf-script IP fields.
+Preserve mapping identity records, filter events, PIDs and raw DSO paths,
+and convert file offsets through unique executable ELF PT_LOAD segments.
+Keep checked uint64 sample counts and period sums by ELF virtual address.
+
+Reject incompatible options and unadmitted perf.data input in IP mode.
+Expose hidden deterministic counters for reader tests. Until profile
+construction lands, return a fixed error without opening the output.
+Leave the existing LBR reader and profile generation behavior unchanged.
+
+Add reader, address, option, malformed-input and output-preservation lit
+coverage using the IP-mode inputs. Existing 50 lit results are unchanged;
+all seven new tests pass and the frozen C1 matrix has zero differences.
+---
+ .../test/tools/llvm-profgen/ip-addresses.test |  25 ++
+ llvm/test/tools/llvm-profgen/ip-invalid.test  |  63 +++
+ llvm/test/tools/llvm-profgen/ip-options.test  |  69 +++
+ .../tools/llvm-profgen/ip-real-records.test   |  21 +
+ llvm/test/tools/llvm-profgen/ip-segments.test |  35 ++
+ .../test/tools/llvm-profgen/ip-selection.test |  29 ++
+ .../tools/llvm-profgen/ip-transition.test     |   9 +
+ llvm/tools/llvm-profgen/CMakeLists.txt        |   1 +
+ llvm/tools/llvm-profgen/IPPerfReader.cpp      | 392 ++++++++++++++++++
+ llvm/tools/llvm-profgen/IPPerfReader.h        |  81 ++++
+ llvm/tools/llvm-profgen/Options.h             |   1 +
+ llvm/tools/llvm-profgen/PerfReader.cpp        |   6 +-
+ llvm/tools/llvm-profgen/llvm-profgen.cpp      |  87 ++++
+ 13 files changed, 816 insertions(+), 3 deletions(-)
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-addresses.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-invalid.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-options.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-real-records.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-segments.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-selection.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-transition.test
+ create mode 100644 llvm/tools/llvm-profgen/IPPerfReader.cpp
+ create mode 100644 llvm/tools/llvm-profgen/IPPerfReader.h
+
+diff --git a/llvm/test/tools/llvm-profgen/ip-addresses.test b/llvm/test/tools/llvm-profgen/ip-addresses.test
+new file mode 100644
+index 000000000000..172313f30e92
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-addresses.test
+@@ -0,0 +1,25 @@
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%S/Inputs/ip-mode/a64-pie.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A64PIE
++# A64PIE: IP-ADDRESS 0x13f4 sample_count=1 period_sum=1000003
++# A64PIE: IP-STATS target=1
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-16k.perfbin --perfscript=%S/Inputs/ip-mode/a64-16k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6416K
++# A6416K: IP-ADDRESS 0x44a4 sample_count=1 period_sum=1000003
++# A6416K: IP-STATS target=1
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-64k.perfbin --perfscript=%S/Inputs/ip-mode/a64-64k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6464K
++# A6464K: IP-ADDRESS 0x104a4 sample_count=1 period_sum=1000003
++# A6464K: IP-STATS target=1
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/thumb-count.perfbin --perfscript=%S/Inputs/ip-mode/thumb-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=THUMBCOUNT
++# THUMBCOUNT: IP-ADDRESS 0x1344 sample_count=1 period_sum=1000003
++# THUMBCOUNT: IP-STATS target=1
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/arm-count.perfbin --perfscript=%S/Inputs/ip-mode/arm-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=ARMCOUNT
++# ARMCOUNT: IP-ADDRESS 0x139c sample_count=1 period_sum=1000003
++# ARMCOUNT: IP-STATS target=1
++# RUN: cat %S/Inputs/ip-mode/a64-multi-load.perfscript %S/Inputs/ip-mode/a64-multi-gap.perfscript > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTI
++# MULTI: IP-ADDRESS 0x10000 sample_count=1 period_sum=1000003
++# MULTI: IP-ADDRESS 0x10004 sample_count=1 period_sum=1000003
++# MULTI: IP-ADDRESS 0x30000 sample_count=1 period_sum=1000003
++# MULTI: IP-ADDRESS 0x30004 sample_count=1 period_sum=1000003
++# MULTI: IP-STATS target=5
++# MULTI: IP-STATS unmapped_in_target=1
++# MULTI: IP-STATS mappings=2
+diff --git a/llvm/test/tools/llvm-profgen/ip-invalid.test b/llvm/test/tools/llvm-profgen/ip-invalid.test
+new file mode 100644
+index 000000000000..89ebdb83be86
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-invalid.test
+@@ -0,0 +1,63 @@
++# REQUIRES: aarch64-registered-target
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=E0
++# E0: multiple events require --ip-event
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-zero-period.perfscript 2>&1 | FileCheck %s --check-prefix=E1
++# E1: invalid or zero period
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-invalid-pid.perfscript 2>&1 | FileCheck %s --check-prefix=E2
++# E2: invalid pid/tid
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-invalid-tid.perfscript 2>&1 | FileCheck %s --check-prefix=E3
++# E3: invalid pid/tid
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-truncated.perfscript 2>&1 | FileCheck %s --check-prefix=E4
++# E4: invalid DSO field
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-unknown-line.perfscript 2>&1 | FileCheck %s --check-prefix=E5
++# E5: invalid pid/tid
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-with-brstack.perfscript 2>&1 | FileCheck %s --check-prefix=E6
++# E6: invalid DSO field
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-missing-dsoff.perfscript 2>&1 | FileCheck %s --check-prefix=E7
++# E7: file DSO is missing dsoff
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=missing --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=EMPTY
++# EMPTY: event filter selected no samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --binary-match-regex=nomatch --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=TARGET
++# TARGET: no target samples; use --binary-match-regex; top file DSOs:
++# TARGET: /synthetic/a64-multi-load.perfbin 4
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --binary-match-regex=[ --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=RE
++# RE: invalid --binary-match-regex
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=cycles --pid=0 --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=PIDEMPTY
++# PIDEMPTY: no target samples
++# RUN: echo "17/17 18446744073709551615 cycles: 1000 (/a64-multi-load.perfbin+0x1000)" > %t.in
++# RUN: echo "17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0x1000)" >> %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# OVER: counter overflow
++# RUN: echo "17/17 18446744073709551616 cycles: 1000 (/a64-multi-load.perfbin+0x1000)" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=INTEGER
++# INTEGER: invalid or zero period
++# RUN: echo "0/0 PERF_RECORD_LOST lost 18446744073709551615" > %t.in
++# RUN: echo "0/0 PERF_RECORD_LOST lost 1" >> %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: echo "0/0 PERF_RECORD_LOST_SAMPLES lost 1" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TYPE
++# TYPE: unrecognized record type
++
++# RUN: echo "0/0 PERF_RECORD_MMAP2 1/1: [0xffffffffffffffff(0x2) @ 0 b3:02 1 0]: r-xp /x" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: echo "0/0 PERF_RECORD_MMAP2 1/1: [0x0(0x2) @ 0xffffffffffffffff b3:02 1 0]: r-xp /x" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: echo "0/0 PERF_RECORD_MMAP2 -2/1: [0x0(0x2) @ 0 b3:02 1 0]: r-xp /x" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MPID
++# MPID: invalid mapping pid/tid
++# RUN: echo "0/0 PERF_RECORD_MMAP2 1/1: [0x0(0x2) @ 0 <xyz>]: r-xp /x" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MID
++# MID: invalid mapping build-id
++# RUN: %python -c "import pathlib; pathlib.Path(r'%t.in').write_bytes(b'17/17 1 cycles: 1000 (/x\\0+0x1000)\\n')"
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=NUL
++# NUL: unrepresentable input line
++
++# RUN: %python -c "import pathlib; pathlib.Path(r'%t.in').write_text(''.join('17/17 1 cycles: 1000 (/'+c+'+0x1000)\\n' for i,c in enumerate('abcdef') for n in range(6-i)))"
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TOP
++# TOP: no target samples; use --binary-match-regex; top file DSOs:
++# TOP-NEXT:   /a 6
++# TOP-NEXT:   /b 5
++# TOP-NEXT:   /c 4
++# TOP-NEXT:   /d 3
++# TOP-NEXT:   /e 2
++# TOP-NOT: /f
+diff --git a/llvm/test/tools/llvm-profgen/ip-options.test b/llvm/test/tools/llvm-profgen/ip-options.test
+new file mode 100644
+index 000000000000..cbb9592765d5
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-options.test
+@@ -0,0 +1,69 @@
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --unsymbolized-profile=x 2>&1 | FileCheck %s --check-prefix=OPT0
++# OPT0: option --unsymbolized-profile is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --llvm-sample-profile=x 2>&1 | FileCheck %s --check-prefix=OPT1
++# OPT1: option --llvm-sample-profile is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --skip-symbolization 2>&1 | FileCheck %s --check-prefix=OPT2
++# OPT2: option --skip-symbolization is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --data-access-perftrace=x 2>&1 | FileCheck %s --check-prefix=OPT3
++# OPT3: option --data-access-perftrace is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ignore-stack-samples 2>&1 | FileCheck %s --check-prefix=OPT4
++# OPT4: option --ignore-stack-samples is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-merge-cold-context=false 2>&1 | FileCheck %s --check-prefix=OPT5
++# OPT5: option --csprof-merge-cold-context is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-max-cold-context-depth=2 2>&1 | FileCheck %s --check-prefix=OPT6
++# OPT6: option --csprof-max-cold-context-depth is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-max-context-depth=2 2>&1 | FileCheck %s --check-prefix=OPT7
++# OPT7: option --csprof-max-context-depth is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-max-unsymbolized-context-depth=2 2>&1 | FileCheck %s --check-prefix=OPT8
++# OPT8: option --csprof-max-unsymbolized-context-depth is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csspgo-preinliner=false 2>&1 | FileCheck %s --check-prefix=OPT9
++# OPT9: option --csspgo-preinliner is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csspgo-replay-preinline 2>&1 | FileCheck %s --check-prefix=OPT10
++# OPT10: option --csspgo-replay-preinline is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csspgo-preinliner-multiplier-for-previous-inlining=2 2>&1 | FileCheck %s --check-prefix=OPT11
++# OPT11: option --csspgo-preinliner-multiplier-for-previous-inlining is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --use-context-cost-for-preinliner 2>&1 | FileCheck %s --check-prefix=OPT12
++# OPT12: option --use-context-cost-for-preinliner is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --max-search-depth=2 2>&1 | FileCheck %s --check-prefix=OPT13
++# OPT13: option --max-search-depth is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --gen-cs-nested-profile=false 2>&1 | FileCheck %s --check-prefix=OPT14
++# OPT14: option --gen-cs-nested-profile is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --compress-recursion=2 2>&1 | FileCheck %s --check-prefix=OPT15
++# OPT15: option --compress-recursion is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --mark-all-context-preinlined 2>&1 | FileCheck %s --check-prefix=OPT16
++# OPT16: option --mark-all-context-preinlined is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --use-offset 2>&1 | FileCheck %s --check-prefix=OPT17
++# OPT17: option --use-offset is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --use-first-loadable-segment-as-base 2>&1 | FileCheck %s --check-prefix=OPT18
++# OPT18: option --use-first-loadable-segment-as-base is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --update-total-samples 2>&1 | FileCheck %s --check-prefix=OPT19
++# OPT19: option --update-total-samples is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --fill-zero-for-all-funcs 2>&1 | FileCheck %s --check-prefix=OPT20
++# OPT20: option --fill-zero-for-all-funcs is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --populate-profile-symbol-list 2>&1 | FileCheck %s --check-prefix=OPT21
++# OPT21: option --populate-profile-symbol-list is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --kernel 2>&1 | FileCheck %s --check-prefix=OPT22
++# OPT22: option --kernel is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-disassembly-only 2>&1 | FileCheck %s --check-prefix=OPT23
++# OPT23: option --show-disassembly-only is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --disassemble-functions=main 2>&1 | FileCheck %s --check-prefix=OPT24
++# OPT24: option --disassemble-functions is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-source-locations 2>&1 | FileCheck %s --check-prefix=OPT25
++# OPT25: option --show-source-locations is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-canonical-fname 2>&1 | FileCheck %s --check-prefix=OPT26
++# OPT26: option --show-canonical-fname is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-pseudo-probe 2>&1 | FileCheck %s --check-prefix=OPT27
++# OPT27: option --show-pseudo-probe is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --infer-missing-frames=false 2>&1 | FileCheck %s --check-prefix=OPT28
++# OPT28: option --infer-missing-frames is not supported with --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-event=cycles 2>&1 | FileCheck %s --check-prefix=GATE
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --binary-match-regex=x 2>&1 | FileCheck %s --check-prefix=GATE
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --show-ip-address-counts 2>&1 | FileCheck %s --check-prefix=GATE
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --show-ip-address-counts=false 2>&1 | FileCheck %s --check-prefix=GATE
++# GATE: IP-only options require --ip-samples
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=- --ip-samples 2>&1 | FileCheck %s --check-prefix=STDOUT
++# STDOUT: IP sample mode does not support --output=-
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfdata=missing 2>&1 | FileCheck %s --check-prefix=DATA
++# DATA: IP sample mode: --perfdata is not admitted; use perf script text exported on the board
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples 2>&1 | FileCheck %s --check-prefix=MISSING
++# MISSING: IP sample mode requires --perfscript
+diff --git a/llvm/test/tools/llvm-profgen/ip-real-records.test b/llvm/test/tools/llvm-profgen/ip-real-records.test
+new file mode 100644
+index 000000000000..2d534e43950b
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-real-records.test
+@@ -0,0 +1,21 @@
++# REQUIRES: aarch64-registered-target
++# RUN: cat %S/Inputs/ip-mode/real-sample.perfscript %S/Inputs/ip-mode/real-mmap2-inode.perfscript %S/Inputs/ip-mode/real-mmap2-buildid.perfscript %S/Inputs/ip-mode/real-module-mmap.perfscript %S/Inputs/ip-mode/real-lost.perfscript %S/Inputs/ip-mode/real-vdso.perfscript %S/Inputs/ip-mode/real-kernel.perfscript %S/Inputs/ip-mode/real-negative-pid.perfscript %S/Inputs/ip-mode/real-deleted.perfscript %S/Inputs/ip-mode/real-module-sample.perfscript %S/Inputs/ip-mode/synthetic-unknown.perfscript %S/Inputs/ip-mode/a64-multi-load.perfscript > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-mmap-events --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REAL
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --pid=17 --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PID
++# REAL: 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0
++# REAL: <eaca6bd9055788fd8f7ea36cd4ae91041bbf1a9c>]: r-xp /usr/lib/libc.so.6
++# REAL: IP-STATS input=11
++# REAL: IP-STATS pid_unknown=1
++# REAL: IP-STATS kernel=3
++# REAL: IP-STATS other_dso=3
++# REAL: IP-STATS unmapped=1
++# REAL: IP-STATS target=4
++# REAL: IP-STATS lost_records=1
++# REAL: IP-STATS lost_L=138
++# REAL: IP-STATS mappings=5
++# PID: IP-STATS after_pid=5
++# PID: IP-STATS pid_unknown=1
++# PID: IP-STATS kernel=0
++# PID: IP-STATS other_dso=0
++# PID: IP-STATS unmapped=1
++# PID: IP-STATS target=4
+diff --git a/llvm/test/tools/llvm-profgen/ip-segments.test b/llvm/test/tools/llvm-profgen/ip-segments.test
+new file mode 100644
+index 000000000000..c663499ab109
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-segments.test
+@@ -0,0 +1,35 @@
++# REQUIRES: aarch64-registered-target
++# RUN: echo "17/17 1 cycles: 1000 (/x+0x1000)" > %t.in
++# RUN: yaml2obj -DOFFSET=0x1000 -DVADDR=0x10000 %s -o %t.elf
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTIPLE
++# MULTIPLE: dsoff matches multiple executable PT_LOAD segments
++# RUN: yaml2obj -DOFFSET=0xffffffffffffffff -DVADDR=0x10000 %s -o %t.elf
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# RUN: yaml2obj -DOFFSET=0x1000 -DVADDR=0xffffffffffffffff %s -o %t.elf
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER
++# OVER: counter overflow
++# RUN: yaml2obj -DOFFSET=0x1000 -DVADDR=0x10000 %s -o %t.elf
++# RUN: echo "17/17 1 cycles: 1008 (/x+0x1008)" > %t.in
++# RUN: not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=END
++# END-NOT: IP-ADDRESS
++# END: IP-STATS target=1
++# END-NEXT: IP-STATS unmapped_in_target=1
++--- !ELF
++FileHeader:
++  Class: ELFCLASS64
++  Data: ELFDATA2LSB
++  Type: ET_EXEC
++  Machine: EM_AARCH64
++ProgramHeaders:
++  - Type: PT_LOAD
++    Flags: [ PF_R, PF_X ]
++    Offset: [[OFFSET]]
++    VAddr: [[VADDR]]
++    FileSize: 8
++    MemSize: 8
++  - Type: PT_LOAD
++    Flags: [ PF_R, PF_X ]
++    Offset: 0x1000
++    VAddr: 0x20000
++    FileSize: 8
++    MemSize: 8
+diff --git a/llvm/test/tools/llvm-profgen/ip-selection.test b/llvm/test/tools/llvm-profgen/ip-selection.test
+new file mode 100644
+index 000000000000..9d13f158ca92
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-selection.test
+@@ -0,0 +1,29 @@
++# REQUIRES: aarch64-registered-target
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-spaces.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-parentheses.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-plus.perfscript 2>&1 | FileCheck %s --check-prefix=PATH
++# PATH: IP-ADDRESS 0x10004 sample_count=1 period_sum=1000003
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --ip-event=cycles:u --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=MOD
++# MOD: IP-EVENT cycles:u samples=1
++# RUN: echo "17/17 2 cycles: 1000 (/chosen/a64-multi-load.perfbin+0x1000)" > %t.in
++# RUN: echo "18/18 3 cycles: 1000 (/excluded/a64-multi-load.perfbin+0x1000)" >> %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=^/chosen/ --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REGEX
++# REGEX: IP-ADDRESS 0x10000 sample_count=1 period_sum=2
++# REGEX: IP-STATS other_dso=1
++# REGEX: IP-STATS target=1
++# RUN: ln -sf %S/Inputs/ip-mode/a64-multi-load.perfbin %t.alias
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --binary=%t.alias --output=%t.out --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=LINK
++# LINK: IP-ADDRESS 0x10000 sample_count=2 period_sum=5
++# RUN: echo "17/17 7 cycles: 1000 (/chosen/a64-multi-load.perfbin (deleted)+0x1000)" > %t.in
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=DELETED
++# DELETED: IP-ADDRESS 0x10000 sample_count=1 period_sum=7
++
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --ip-event=cpu-clock --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=MIX
++# MIX: IP-ADDRESS 0x10004 sample_count=1 period_sum=999
++# MIX: IP-STATS input=2
++# MIX-NEXT: IP-EVENT cpu-clock samples=1
++# MIX-NEXT: IP-EVENT cycles samples=1
++# MIX-NEXT: IP-STATS after_event=1
++# MIX-NEXT: IP-STATS after_pid=1
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=cycles --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=EXACT
++# EXACT: event filter selected no samples
+diff --git a/llvm/test/tools/llvm-profgen/ip-transition.test b/llvm/test/tools/llvm-profgen/ip-transition.test
+new file mode 100644
+index 000000000000..abce0443d094
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-transition.test
+@@ -0,0 +1,9 @@
++# REQUIRES: aarch64-registered-target
++# RUN: rm -f %t.out
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END
++# RUN: not test -e %t.out
++# RUN: echo OLD-PROFILE > %t.out
++# RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END
++# RUN: FileCheck %s --check-prefix=OLD --input-file=%t.out
++# END: llvm-profgen: error: IP sample mode: profile generation is not implemented yet
++# OLD: OLD-PROFILE
+diff --git a/llvm/tools/llvm-profgen/CMakeLists.txt b/llvm/tools/llvm-profgen/CMakeLists.txt
+index 354c63f409ff..af53ee65ae4e 100644
+--- a/llvm/tools/llvm-profgen/CMakeLists.txt
++++ b/llvm/tools/llvm-profgen/CMakeLists.txt
+@@ -18,6 +18,7 @@ set(LLVM_LINK_COMPONENTS
+ add_llvm_tool(llvm-profgen
+   llvm-profgen.cpp
+   PerfReader.cpp
++  IPPerfReader.cpp
+   CSPreInliner.cpp
+   ProfiledBinary.cpp
+   ProfileGenerator.cpp
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.cpp b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+new file mode 100644
+index 000000000000..c9fc0f738a7d
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+@@ -0,0 +1,392 @@
++//===- IPPerfReader.cpp - IP-only perf script reader
++//------------------------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++#include "IPPerfReader.h"
++#include "llvm/ADT/SmallString.h"
++#include "llvm/ADT/StringExtras.h"
++#include "llvm/BinaryFormat/ELF.h"
++#include "llvm/Object/ELFObjectFile.h"
++#include "llvm/Support/FileSystem.h"
++#include "llvm/Support/Format.h"
++#include "llvm/Support/MemoryBuffer.h"
++#include "llvm/Support/Path.h"
++#include "llvm/Support/Regex.h"
++#include "llvm/Support/raw_ostream.h"
++#include <algorithm>
++#include <limits>
++
++using namespace llvm;
++using namespace llvm::object;
++
++namespace {
++Error invalid(StringRef What) {
++  return createStringError(inconvertibleErrorCode(), "IP sample mode: " + What);
++}
++Error add(uint64_t &Value, uint64_t Increment) {
++  if (Increment > std::numeric_limits<uint64_t>::max() - Value)
++    return invalid("counter overflow");
++  Value += Increment;
++  return Error::success();
++}
++
++/// Unlike getAsInteger alone, reject signs, prefixes and non-digit suffixes.
++bool number(StringRef Text, uint64_t &Value, unsigned Base,
++            bool AllowPrefix = false) {
++  if (AllowPrefix)
++    Text.consume_front("0x");
++  if (Text.empty() || !llvm::all_of(Text, [Base](char C) {
++        return Base == 16 ? isHexDigit(C) : isDigit(C);
++      }))
++    return false;
++  return !Text.getAsInteger(Base, Value);
++}
++
++bool id(StringRef Text, int64_t &Value) {
++  if (Text == "-1") {
++    Value = -1;
++    return true;
++  }
++  uint64_t U;
++  if (!number(Text, U, 10) || U > uint64_t(INT64_MAX))
++    return false;
++  Value = U;
++  return true;
++}
++
++StringRef word(StringRef &Text) {
++  Text = Text.ltrim(" \t");
++  size_t End = Text.find_first_of(" \t");
++  StringRef Result = Text.take_front(End);
++  Text = End == StringRef::npos ? StringRef() : Text.drop_front(End);
++  return Result;
++}
++
++bool ids(StringRef &Text, int64_t &PID, int64_t &TID, bool Inner = false) {
++  StringRef Pair = word(Text);
++  if (Inner && !Pair.consume_back(":"))
++    return false;
++  auto [P, T] = Pair.split('/');
++  return id(P, PID) && id(T, TID);
++}
++
++bool deleted(StringRef Path) { return Path.ends_with(" (deleted)"); }
++StringRef livePath(StringRef Path) {
++  Path.consume_back(" (deleted)");
++  return Path;
++}
++bool kernel(StringRef Path) {
++  Path = livePath(Path);
++  return Path == "[kernel.kallsyms]" ||
++         (Path.starts_with("/lib/modules/") &&
++          (Path.ends_with(".ko") || Path.ends_with(".ko.xz") ||
++           Path.ends_with(".ko.zst") || Path.ends_with(".ko.gz")));
++}
++bool special(StringRef Path) {
++  // perf pseudo DSOs and JIT map names are not sampled object-file paths.
++  return Path.starts_with("[") || Path.starts_with("//") ||
++         (Path.starts_with("/tmp/perf-") && Path.ends_with(".map")) ||
++         (Path.starts_with("jitted-") && Path.ends_with(".so"));
++}
++} // namespace
++
++Error IPPerfReader::parseLine(StringRef Line) {
++  if (Line.contains('\0'))
++    return invalid("unrepresentable input line");
++  StringRef Rest = Line;
++  int64_t PID, TID;
++  if (!ids(Rest, PID, TID))
++    return invalid("invalid pid/tid");
++  StringRef Kind = word(Rest);
++  if (Kind == "PERF_RECORD_LOST") {
++    uint64_t N;
++    if (word(Rest) != "lost" || !number(word(Rest), N, 10) ||
++        !Rest.trim().empty())
++      return invalid("invalid LOST record");
++    if (Error E = add(Stats.LostRecords, 1))
++      return E;
++    return add(Stats.LostCount, N);
++  }
++  if (Kind == "PERF_RECORD_MMAP" || Kind == "PERF_RECORD_MMAP2") {
++    IPMapping M;
++    M.Raw = Line.str();
++    M.IsMmap2 = Kind == "PERF_RECORD_MMAP2";
++    if (!ids(Rest, M.PID, M.TID, true))
++      return invalid("invalid mapping pid/tid");
++    Rest = Rest.ltrim(" \t");
++    if (!Rest.consume_front("["))
++      return invalid("invalid mapping range");
++    auto [Start, Tail] = Rest.split('(');
++    Rest = Tail;
++    auto [Length, AfterLength] = Rest.split(')');
++    Rest = AfterLength;
++    if (!number(Start, M.Start, 16, true) ||
++        !number(Length, M.Length, 16, true) || !Rest.consume_front(" @ "))
++      return invalid("invalid mapping range");
++    size_t End = Rest.find("]: ");
++    if (End == StringRef::npos)
++      return invalid("truncated mapping record");
++    StringRef Identity = Rest.take_front(End);
++    Rest = Rest.drop_front(End + 3);
++    if (!number(word(Identity), M.PageOffset, 16, true))
++      return invalid("invalid mapping pgoff");
++    Identity = Identity.trim();
++    if (M.IsMmap2) {
++      if (Identity.starts_with("<")) {
++        if (!Identity.consume_front("<") || !Identity.consume_back(">") ||
++            Identity.empty() || Identity.size() % 2 ||
++            !llvm::all_of(Identity, isHexDigit))
++          return invalid("invalid mapping build-id");
++        M.BuildID = Identity.str();
++      } else {
++        StringRef Device = word(Identity), Inode = word(Identity);
++        StringRef Generation = word(Identity);
++        auto [Major, Minor] = Device.split(':');
++        uint64_t V;
++        if (!number(Major, V, 16) || !number(Minor, V, 16) ||
++            !number(Inode, V, 10) || !number(Generation, V, 10) ||
++            !Identity.trim().empty())
++          return invalid("invalid mapping inode identity");
++        M.Device = Device.str();
++        M.Inode = Inode.str();
++        M.Generation = Generation.str();
++      }
++    } else if (!Identity.empty()) {
++      return invalid("unexpected MMAP identity");
++    }
++    StringRef Permissions = word(Rest);
++    bool ValidPermissions =
++        M.IsMmap2 ? Permissions.size() == 4 &&
++                        (Permissions[0] == 'r' || Permissions[0] == '-') &&
++                        (Permissions[1] == 'w' || Permissions[1] == '-') &&
++                        (Permissions[2] == 'x' || Permissions[2] == '-') &&
++                        (Permissions[3] == 'p' || Permissions[3] == 's')
++                  : Permissions == "x" || Permissions == "r";
++    if (!ValidPermissions || !Rest.consume_front(" ") || Rest.empty())
++      return invalid("invalid mapping permissions or path");
++    uint64_t RangeEnd = M.Start, OffsetEnd = M.PageOffset;
++    if (Error E = add(RangeEnd, M.Length))
++      return E;
++    if (Error E = add(OffsetEnd, M.Length))
++      return E;
++    M.Permissions = Permissions.str();
++    M.Path = Rest.str();
++    M.Deleted = deleted(Rest);
++    Mappings.push_back(std::move(M));
++    return Error::success();
++  }
++  if (Kind.starts_with("PERF_RECORD_"))
++    return invalid("unrecognized record type");
++
++  Sample S;
++  S.PID = PID;
++  S.TID = TID;
++  if (!number(Kind, S.Period, 10) || !S.Period)
++    return invalid("invalid or zero period");
++  StringRef Event = word(Rest);
++  if (!Event.consume_back(":") || Event.empty())
++    return invalid("missing event name");
++  S.Event = Event.str();
++  if (!number(word(Rest), S.IP, 16))
++    return invalid("invalid instruction pointer");
++  // Consume the fixed prefix FIRST. Parentheses inside a DSO are path bytes,
++  // not delimiters: never split on the last " (" in a sample line.
++  Rest = Rest.ltrim(" \t");
++  if (!Rest.consume_front("(") || !Rest.consume_back(")") || Rest.empty())
++    return invalid("invalid DSO field (expected dsoff, no branch/call stack)");
++  size_t Plus = Rest.rfind("+0x");
++  if (Plus != StringRef::npos) {
++    uint64_t Offset;
++    if (number(Rest.drop_front(Plus + 3), Offset, 16)) {
++      S.Offset = Offset;
++      Rest = Rest.take_front(Plus);
++    } else {
++      return invalid("invalid dsoff offset");
++    }
++  }
++  if (Rest.empty())
++    return invalid("empty DSO path");
++  S.Path = Rest.str();
++  S.Deleted = deleted(Rest);
++  if (!S.Offset && !special(Rest) && Rest != "[kernel.kallsyms]")
++    return invalid("file DSO is missing dsoff");
++  if (Error E = add(Stats.Input, 1))
++    return E;
++  if (Error E = add(Stats.Events[S.Event], 1))
++    return E;
++  if (PID == -1)
++    if (Error E = add(Stats.PIDUnknown, 1))
++      return E;
++  Samples.push_back(std::move(S));
++  return Error::success();
++}
++
++Error IPPerfReader::loadBinary(StringRef Path) {
++  BinaryPath = Path.str();
++  SmallString<256> Real;
++  if (std::error_code EC = sys::fs::real_path(Path, Real))
++    return createStringError(EC, "IP sample mode: cannot resolve binary");
++  BinaryRealPath = Real.str().str();
++  auto Object = ObjectFile::createObjectFile(Path);
++  if (!Object)
++    return Object.takeError();
++  auto Load = [&](const auto *ELFObject) -> Error {
++    auto Headers = ELFObject->getELFFile().program_headers();
++    if (!Headers)
++      return Headers.takeError();
++    for (const auto &H : *Headers) {
++      if (H.p_type != ELF::PT_LOAD || !(H.p_flags & ELF::PF_X))
++        continue;
++      uint64_t End = H.p_offset, VEnd = H.p_vaddr;
++      if (Error E = add(End, H.p_filesz))
++        return E;
++      if (Error E = add(VEnd, H.p_filesz))
++        return E;
++      Segments.push_back({H.p_offset, End, H.p_vaddr});
++    }
++    return Error::success();
++  };
++  const ObjectFile *O = Object->getBinary();
++  if (const auto *E = dyn_cast<ELF32LEObjectFile>(O))
++    return Load(E);
++  if (const auto *E = dyn_cast<ELF64LEObjectFile>(O))
++    return Load(E);
++  if (const auto *E = dyn_cast<ELF32BEObjectFile>(O))
++    return Load(E);
++  if (const auto *E = dyn_cast<ELF64BEObjectFile>(O))
++    return Load(E);
++  return invalid("binary must be an ELF object");
++}
++
++Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
++  if (!Options.Event && Stats.Events.size() > 1)
++    return invalid("multiple events require --ip-event");
++  std::optional<Regex> Match;
++  if (Options.BinaryMatchRegex) {
++    Match.emplace(*Options.BinaryMatchRegex);
++    std::string Why;
++    if (!Match->isValid(Why))
++      return invalid("invalid --binary-match-regex: " + Why);
++  }
++  std::map<std::string, uint64_t> Files;
++  for (const Sample &S : Samples) {
++    if (Options.Event && S.Event != *Options.Event)
++      continue;
++    if (Error E = add(Stats.AfterEvent, 1))
++      return E;
++    if (Options.PID && (S.PID == -1 || uint64_t(S.PID) != *Options.PID))
++      continue;
++    if (Error E = add(Stats.AfterPID, 1))
++      return E;
++    if (kernel(S.Path)) {
++      if (Error E = add(Stats.Kernel, 1))
++        return E;
++      continue;
++    }
++    if (special(S.Path)) {
++      if (Error E = add(S.Offset ? Stats.OtherDSO : Stats.Unmapped, 1))
++        return E;
++      continue;
++    }
++    if (Error E = add(Files[S.Path], 1))
++      return E;
++    bool Selected = Match ? Match->match(S.Path)
++                          : sys::path::filename(livePath(S.Path)) ==
++                                sys::path::filename(BinaryRealPath);
++    if (!Selected) {
++      if (Error E = add(Stats.OtherDSO, 1))
++        return E;
++      continue;
++    }
++    if (Error E = add(Stats.Target, 1))
++      return E;
++    const Segment *Found = nullptr;
++    for (const Segment &Seg : Segments) {
++      if (*S.Offset < Seg.Offset || *S.Offset >= Seg.End)
++        continue;
++      if (Found)
++        return invalid("dsoff matches multiple executable PT_LOAD segments");
++      Found = &Seg;
++    }
++    if (!Found) {
++      if (Error E = add(Stats.UnmappedInTarget, 1))
++        return E;
++      continue;
++    }
++    uint64_t VA = Found->VAddr;
++    if (Error E = add(VA, *S.Offset - Found->Offset))
++      return E;
++    auto &C = Counts[VA];
++    if (Error E = add(C.SampleCount, 1))
++      return E;
++    if (Error E = add(C.PeriodSum, S.Period))
++      return E;
++  }
++  if (Options.Event && !Stats.AfterEvent)
++    return invalid("event filter selected no samples");
++  if (!Stats.Target) {
++    std::vector<std::pair<std::string, uint64_t>> Top(Files.begin(),
++                                                      Files.end());
++    llvm::sort(Top, [](const auto &A, const auto &B) {
++      return A.second != B.second ? A.second > B.second : A.first < B.first;
++    });
++    std::string Message =
++        "no target samples; use --binary-match-regex; top file DSOs:";
++    for (size_t I = 0; I < std::min<size_t>(5, Top.size()); ++I)
++      Message += "\n  " + Top[I].first + " " + std::to_string(Top[I].second);
++    return invalid(Message);
++  }
++  return Error::success();
++}
++
++Error IPPerfReader::read(StringRef Trace, StringRef Binary,
++                         const IPReaderOptions &Options) {
++  auto Buffer = MemoryBuffer::getFile(Trace);
++  if (!Buffer)
++    return createStringError(Buffer.getError(),
++                             "IP sample mode: cannot read input");
++  StringRef Text = (*Buffer)->getBuffer();
++  unsigned LineNumber = 0;
++  while (!Text.empty()) {
++    auto [Line, Tail] = Text.split('\n');
++    Text = Tail;
++    ++LineNumber;
++    if (Error E = parseLine(Line))
++      return invalid("line " + Twine(LineNumber).str() + ": " +
++                     toString(std::move(E)));
++  }
++  if (Error E = loadBinary(Binary))
++    return E;
++  return selectSamples(Options);
++}
++
++void IPPerfReader::printAddressCounts(raw_ostream &OS) const {
++  for (const auto &[Address, Count] : Counts)
++    OS << "IP-ADDRESS " << format_hex(Address, 1)
++       << " sample_count=" << Count.SampleCount
++       << " period_sum=" << Count.PeriodSum << '\n';
++  OS << "IP-STATS input=" << Stats.Input << '\n';
++  for (const auto &[Event, Count] : Stats.Events)
++    OS << "IP-EVENT " << Event << " samples=" << Count << '\n';
++  OS << "IP-STATS after_event=" << Stats.AfterEvent << '\n'
++     << "IP-STATS after_pid=" << Stats.AfterPID << '\n'
++     << "IP-STATS pid_unknown=" << Stats.PIDUnknown << '\n'
++     << "IP-STATS kernel=" << Stats.Kernel << '\n'
++     << "IP-STATS other_dso=" << Stats.OtherDSO << '\n'
++     << "IP-STATS unmapped=" << Stats.Unmapped << '\n'
++     << "IP-STATS target=" << Stats.Target << '\n'
++     << "IP-STATS unmapped_in_target=" << Stats.UnmappedInTarget << '\n'
++     << "IP-STATS lost_records=" << Stats.LostRecords << '\n'
++     << "IP-STATS lost_L=" << Stats.LostCount << '\n'
++     << "IP-STATS mappings=" << Mappings.size() << '\n';
++}
++
++void IPPerfReader::printMmapEvents(raw_ostream &OS) const {
++  for (const IPMapping &M : Mappings)
++    if (M.IsMmap2)
++      OS << M.Raw << '\n';
++}
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.h b/llvm/tools/llvm-profgen/IPPerfReader.h
+new file mode 100644
+index 000000000000..a0ebf7b39f0b
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPPerfReader.h
+@@ -0,0 +1,81 @@
++//===- IPPerfReader.h - IP-only perf script reader ---------------*- C++
++//-*-===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++#ifndef LLVM_TOOLS_LLVM_PROFGEN_IPPERFREADER_H
++#define LLVM_TOOLS_LLVM_PROFGEN_IPPERFREADER_H
++
++#include "llvm/ADT/StringRef.h"
++#include "llvm/Support/Error.h"
++#include <cstdint>
++#include <map>
++#include <optional>
++#include <string>
++#include <vector>
++
++namespace llvm {
++class raw_ostream;
++
++struct IPAddressCount {
++  uint64_t SampleCount = 0;
++  uint64_t PeriodSum = 0;
++};
++using AddressCounter = std::map<uint64_t, IPAddressCount>;
++
++/// Observed records, not a pid/fork/exec mapping table. Preserve the raw
++/// identity spelling for later identity validation; do not infer an identity.
++struct IPMapping {
++  int64_t PID = 0, TID = 0;
++  uint64_t Start = 0, Length = 0, PageOffset = 0;
++  bool IsMmap2 = false, Deleted = false;
++  std::string Permissions, Path, BuildID, Device, Inode, Generation, Raw;
++};
++
++struct IPReaderOptions {
++  std::optional<std::string> Event;
++  std::optional<std::string> BinaryMatchRegex;
++  std::optional<uint32_t> PID;
++};
++
++class IPPerfReader {
++  struct Sample {
++    int64_t PID, TID;
++    uint64_t Period, IP;
++    std::optional<uint64_t> Offset;
++    std::string Event, Path;
++    bool Deleted;
++  };
++  struct Segment {
++    uint64_t Offset, End, VAddr;
++  };
++  struct Statistics {
++    uint64_t Input = 0, AfterEvent = 0, AfterPID = 0, PIDUnknown = 0;
++    uint64_t Kernel = 0, OtherDSO = 0, Unmapped = 0, Target = 0;
++    uint64_t UnmappedInTarget = 0, LostRecords = 0, LostCount = 0;
++    std::map<std::string, uint64_t> Events;
++  } Stats;
++
++  std::vector<Sample> Samples;
++  std::vector<IPMapping> Mappings;
++  std::vector<Segment> Segments;
++  AddressCounter Counts;
++  std::string BinaryPath, BinaryRealPath;
++
++  Error parseLine(StringRef Line);
++  Error loadBinary(StringRef Path);
++  Error selectSamples(const IPReaderOptions &Options);
++
++public:
++  Error read(StringRef Trace, StringRef Binary, const IPReaderOptions &Options);
++  const AddressCounter &getAddressCounts() const { return Counts; }
++  const std::vector<IPMapping> &getMappings() const { return Mappings; }
++  void printAddressCounts(raw_ostream &OS) const;
++  void printMmapEvents(raw_ostream &OS) const;
++};
++
++} // namespace llvm
++#endif
+diff --git a/llvm/tools/llvm-profgen/Options.h b/llvm/tools/llvm-profgen/Options.h
+index b2c941fb0194..a7a05e7331e3 100644
+--- a/llvm/tools/llvm-profgen/Options.h
++++ b/llvm/tools/llvm-profgen/Options.h
+@@ -16,6 +16,7 @@ extern cl::OptionCategory ProfGenCategory;
+ 
+ extern cl::opt<std::string> OutputFilename;
+ extern cl::opt<bool> ShowDisassemblyOnly;
++extern cl::opt<bool> ShowMmapEvents;
+ extern cl::opt<bool> ShowSourceLocations;
+ extern cl::opt<bool> SkipSymbolization;
+ extern cl::opt<bool> ShowDetailedWarning;
+diff --git a/llvm/tools/llvm-profgen/PerfReader.cpp b/llvm/tools/llvm-profgen/PerfReader.cpp
+index 1dc59321fd91..d4f23968cf76 100644
+--- a/llvm/tools/llvm-profgen/PerfReader.cpp
++++ b/llvm/tools/llvm-profgen/PerfReader.cpp
+@@ -27,9 +27,9 @@ cl::opt<bool> SkipSymbolization("skip-symbolization",
+                                          "output for CS profile generation."),
+                                 cl::cat(ProfGenCategory));
+ 
+-static cl::opt<bool> ShowMmapEvents("show-mmap-events",
+-                                    cl::desc("Print binary load events."),
+-                                    cl::cat(ProfGenCategory));
++cl::opt<bool> ShowMmapEvents("show-mmap-events",
++                             cl::desc("Print binary load events."),
++                             cl::cat(ProfGenCategory));
+ 
+ static cl::opt<bool>
+     UseOffset("use-offset", cl::init(true),
+diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+index 8d2ed2850e38..99d187d2f879 100644
+--- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
++++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+@@ -11,10 +11,12 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "ErrorHandling.h"
++#include "IPPerfReader.h"
+ #include "Options.h"
+ #include "PerfReader.h"
+ #include "ProfileGenerator.h"
+ #include "ProfiledBinary.h"
++#include "llvm/ADT/StringSwitch.h"
+ #include "llvm/DebugInfo/Symbolize/SymbolizableModule.h"
+ #include "llvm/Support/CommandLine.h"
+ #include "llvm/Support/FileSystem.h"
+@@ -79,6 +81,82 @@ static cl::opt<std::string> DataAccessProfileFilename(
+              "-D`) consisting of memory access events."),
+     cl::cat(ProfGenCategory));
+ 
++static cl::opt<bool> IPSamples(
++    "ip-samples", cl::init(false),
++    cl::desc("Read IP-only perf script samples (profile generation pending)"),
++    cl::cat(ProfGenCategory));
++static cl::opt<std::string> IPEvent(
++    "ip-event",
++    cl::desc("Select the complete perf event name, including modifiers"),
++    cl::cat(ProfGenCategory));
++static cl::opt<std::string> BinaryMatchRegex(
++    "binary-match-regex",
++    cl::desc("Select IP sample DSO paths by regular expression"),
++    cl::cat(ProfGenCategory));
++static cl::opt<bool> ShowIPAddressCounts(
++    "show-ip-address-counts", cl::Hidden,
++    cl::desc("Print IP address counters and reader statistics"),
++    cl::cat(ProfGenCategory));
++
++static Error runIPMode() {
++  auto Fail = [](const Twine &Message) {
++    return createStringError(inconvertibleErrorCode(), Message);
++  };
++  if (!IPSamples)
++    return Fail("IP-only options require --ip-samples");
++  SmallVector<StringRef, 32> Rejected;
++  for (const auto &Entry : cl::getRegisteredOptions()) {
++    StringRef Name = Entry.first;
++    if (!Entry.second->getNumOccurrences())
++      continue;
++    bool Forbidden =
++        Name.starts_with("csprof-") || Name.starts_with("csspgo-") ||
++        StringSwitch<bool>(Name)
++            .Cases({"unsymbolized-profile", "llvm-sample-profile"}, true)
++            .Cases({"skip-symbolization", "data-access-perftrace"}, true)
++            .Cases({"ignore-stack-samples", "use-context-cost-for-preinliner"},
++                   true)
++            .Cases({"max-search-depth", "gen-cs-nested-profile"}, true)
++            .Cases({"compress-recursion", "mark-all-context-preinlined"}, true)
++            .Cases({"use-offset", "use-first-loadable-segment-as-base"}, true)
++            .Cases({"update-total-samples", "fill-zero-for-all-funcs"}, true)
++            .Cases({"populate-profile-symbol-list", "kernel"}, true)
++            .Cases({"show-disassembly-only", "disassemble-functions"}, true)
++            .Cases({"show-source-locations", "show-canonical-fname"}, true)
++            .Cases({"show-pseudo-probe", "infer-missing-frames"}, true)
++            .Default(false);
++    if (Forbidden)
++      Rejected.push_back(Name);
++  }
++  llvm::sort(Rejected);
++  if (!Rejected.empty())
++    return Fail("option --" + Rejected.front() +
++                " is not supported with --ip-samples");
++  if (OutputFilename == "-")
++    return Fail("IP sample mode does not support --output=-");
++  if (PerfDataFilename.getNumOccurrences())
++    return Fail("IP sample mode: --perfdata is not admitted; use perf script "
++                "text exported on the board");
++  if (!PerfScriptFilename.getNumOccurrences())
++    return Fail("IP sample mode requires --perfscript");
++  IPReaderOptions Options;
++  if (IPEvent.getNumOccurrences())
++    Options.Event = IPEvent;
++  if (BinaryMatchRegex.getNumOccurrences())
++    Options.BinaryMatchRegex = BinaryMatchRegex;
++  if (ProcessId.getNumOccurrences())
++    Options.PID = ProcessId;
++  IPPerfReader Reader;
++  if (Error E = Reader.read(PerfScriptFilename, BinaryPath, Options))
++    return E;
++  if (ShowMmapEvents)
++    Reader.printMmapEvents(outs());
++  if (ShowIPAddressCounts)
++    Reader.printAddressCounts(outs());
++  // No writer and no output file are opened until profile generation exists.
++  return Fail("IP sample mode: profile generation is not implemented yet");
++}
++
+ // Validate the command line input.
+ static void validateCommandLine() {
+   // Allow the missing perfscript if we only use to show binary disassembly.
+@@ -155,6 +233,15 @@ int main(int argc, const char *argv[]) {
+ 
+   cl::HideUnrelatedOptions({&ProfGenCategory, &getColorCategory()});
+   cl::ParseCommandLineOptions(argc, argv, "llvm SPGO profile generator\n");
++  if (IPSamples || IPEvent.getNumOccurrences() ||
++      BinaryMatchRegex.getNumOccurrences() ||
++      ShowIPAddressCounts.getNumOccurrences()) {
++    if (Error E = runIPMode()) {
++      logAllUnhandledErrors(std::move(E), errs(), "llvm-profgen: error: ");
++      return EXIT_FAILURE;
++    }
++    return EXIT_SUCCESS;
++  }
+   validateCommandLine();
+ 
+   // Load symbols and disassemble the code of a given binary.
+-- 
+2.43.0
+

@@ -1,0 +1,806 @@
+ATTEMPT attempt1
+
+START 2026-11-02T14:23:14+08:00
+BUILD_START 2026-11-02T14:23:14+08:00
+END 2026-11-02T14:23:44+08:00
+GBS_EXIT 1
+ELAPSED_SECONDS 30.040
+NINJA_TOTAL_OBSERVED 110
+STOP_REASON 
+ALL-END 2026-11-02T14:23:44+08:00 FAILED
+
+
+RESOURCE RAW
+TIME 2026-11-02T14:23:14+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15296        2781         854       14774       16244
+Swap:           4095        3612         483
+EXIT 0
+$ uptime
+ 14:23:14 up 5 days, 16:00,  1 user,  load average: 0.70, 0.78, 0.84
+EXIT 0
+TIME 2026-11-02T14:23:44+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       16314        1822         855       15089       15226
+Swap:           4095        3612         483
+EXIT 0
+$ uptime
+ 14:23:44 up 5 days, 16:01,  1 user,  load average: 1.62, 0.98, 0.91
+EXIT 0
+
+
+PROCESS PREFLIGHT
+TIME 2026-11-02T14:23:14+08:00
+
+HEAVY_COUNT 0
+
+
+SELECTED BUILD LINES
+1: BUILD_START 2026-11-02T14:23:14+08:00 COMMAND ['setsid', '--wait', 'nice', '-n', '19', 'ionice', '-c3', 'gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_baseline.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--incremental', '--threads', '1', '--define', '_smp_mflags -j10', '--define', 'mlgo_build_jobs 10']
+2123: [   14s] [103/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPPerfReader.cpp.o
+2125: [   16s] [105/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o
+2126: [   16s] FAILED: [code=1] tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o 
+2127: [   16s] /bin/x86_64-tizen-linux-gnu-clang++ -D_GLIBCXX_USE_CXX11_ABI=1 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/tools/llvm-profgen -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/mlgo_verify_assets/mlgo_sysroot/include -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/include -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include -Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument -momit-leaf-frame-pointer  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -fdiagnostics-color=never -m64 -march=nehalem -msse4.2 -mfpmath=sse -fasynchronous-unwind-tables -fno-omit-frame-pointer -g -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -pedantic -Wno-long-long -Wc++98-compat-extra-semi -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -O3 -DNDEBUG -std=c++17 -fno-exceptions -funwind-tables -MD -MT tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o -MF tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o.d -o tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o -c /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp
+2128: [   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:109:28: error: no member named 'getKey' in 'llvm::detail::DenseMapPair<llvm::StringRef, llvm::cl::Option *>'
+2197: [   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:160:37: error: function definition is not allowed here
+2200: [   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:209:43: error: function definition is not allowed here
+2203: [   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:245:3: error: use of undeclared identifier 'validateCommandLine'
+2206: [   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:270:30: error: use of undeclared identifier 'getPerfInputFile'; did you mean 'PerfInputFile'?
+2212: [   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:304:2: error: expected '}'
+2224: [   18s] error: Bad exit status from /var/tmp/rpm-tmp.utliuv (%build)
+2247: error: <gbs>some packages failed to be built
+
+LAST 200 LINES
+[   12s] [36/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [37/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [38/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [39/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [40/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [41/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [42/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [43/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [44/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [45/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [46/110] Building C object lib64/tf_runtime/CMakeFiles/tf_xla_runtime.dir/tf_xla_runtime_dummy.c.o
+[   12s] [47/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [48/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [49/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [50/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [51/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [52/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [53/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [54/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [55/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [56/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [57/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [58/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [59/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [60/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [61/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [62/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [63/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [64/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [65/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [66/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [67/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [68/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [69/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [70/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [71/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [72/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [73/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [74/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [75/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [76/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [77/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [78/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [79/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [80/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [81/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [82/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [83/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [84/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [85/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [86/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [87/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [88/110] Building CXX object projects/compiler-rt/lib/ubsan/CMakeFiles/RTUbsan_dynamic_version_script_dummy.x86_64.dir/dummy.cpp.o
+[   12s] [89/110] Building CXX object projects/compiler-rt/lib/asan/CMakeFiles/RTAsan_dynamic_version_script_dummy.x86_64.dir/dummy.cpp.o
+[   12s] [90/110] Building CXX object projects/compiler-rt/lib/nsan/CMakeFiles/RTNsan_dynamic_version_script_dummy.x86_64.dir/dummy.cpp.o
+[   12s] [91/110] Building CXX object projects/compiler-rt/lib/memprof/CMakeFiles/RTMemprof_dynamic_version_script_dummy.x86_64.dir/dummy.cpp.o
+[   12s] [92/110] LLDB headers: stage LLDB headers in include directory
+[   12s] [93/110] Building CXX object projects/compiler-rt/lib/hwasan/CMakeFiles/RTHwasan_dynamic_version_script_dummy.x86_64.dir/dummy.cpp.o
+[   13s] [94/110] Running utility command for liblldb-header-staging
+[   13s] [95/110] Linking CXX shared library lib64/clang/22/lib/linux/libclang_rt.ubsan_standalone-x86_64.so
+[   13s] [96/110] Linking C static library lib64/libtf_xla_runtime.a
+[   13s] [97/110] Linking CXX shared library lib64/clang/22/lib/linux/libclang_rt.asan-x86_64.so
+[   13s] [98/110] Linking CXX shared library lib64/clang/22/lib/linux/libclang_rt.hwasan-x86_64.so
+[   13s] [99/110] Linking CXX shared library lib64/clang/22/lib/linux/libclang_rt.hwasan_aliases-x86_64.so
+[   13s] [100/110] Linking CXX shared library lib64/clang/22/lib/linux/libclang_rt.nsan-x86_64.so
+[   14s] [101/110] Linking CXX shared library lib64/clang/22/lib/linux/libclang_rt.memprof-x86_64.so
+[   14s] [102/110] Building CXX object tools/llvm-config/CMakeFiles/llvm-config.dir/llvm-config.cpp.o
+[   14s] [103/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPPerfReader.cpp.o
+[   16s] [104/110] Linking CXX executable bin/llvm-config
+[   16s] [105/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o
+[   16s] FAILED: [code=1] tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o 
+[   16s] /bin/x86_64-tizen-linux-gnu-clang++ -D_GLIBCXX_USE_CXX11_ABI=1 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/tools/llvm-profgen -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/mlgo_verify_assets/mlgo_sysroot/include -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/include -I/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include -Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument -momit-leaf-frame-pointer  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -fdiagnostics-color=never -m64 -march=nehalem -msse4.2 -mfpmath=sse -fasynchronous-unwind-tables -fno-omit-frame-pointer -g -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -pedantic -Wno-long-long -Wc++98-compat-extra-semi -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -O3 -DNDEBUG -std=c++17 -fno-exceptions -funwind-tables -MD -MT tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o -MF tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o.d -o tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o -c /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:109:28: error: no member named 'getKey' in 'llvm::detail::DenseMapPair<llvm::StringRef, llvm::cl::Option *>'
+[   16s]   109 |     StringRef Name = Entry.getKey();
+[   16s]       |                      ~~~~~ ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:115:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   115 |             .Cases("unsymbolized-profile", "llvm-sample-profile", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:116:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   116 |             .Cases("skip-symbolization", "data-access-perftrace", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:117:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   117 |             .Cases("ignore-stack-samples", "use-context-cost-for-preinliner",
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:119:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   119 |             .Cases("max-search-depth", "gen-cs-nested-profile", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:120:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   120 |             .Cases("compress-recursion", "mark-all-context-preinlined", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:121:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   121 |             .Cases("use-offset", "use-first-loadable-segment-as-base", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:122:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   122 |             .Cases("update-total-samples", "fill-zero-for-all-funcs", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:123:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   123 |             .Cases("populate-profile-symbol-list", "kernel", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:124:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   124 |             .Cases("show-disassembly-only", "disassemble-functions", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:125:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   125 |             .Cases("show-source-locations", "show-canonical-fname", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:126:14: warning: 'Cases' is deprecated: Pass cases in std::initializer_list instead [-Wdeprecated-declarations]
+[   16s]   126 |             .Cases("show-pseudo-probe", "infer-missing-frames", true)
+[   16s]       |              ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/include/llvm/ADT/StringSwitch.h:93:5: note: 'Cases' has been explicitly marked deprecated here
+[   16s]    93 |   [[deprecated("Pass cases in std::initializer_list instead")]]
+[   16s]       |     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:160:37: error: function definition is not allowed here
+[   16s]   160 |   static void validateCommandLine() {
+[   16s]       |                                     ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:209:43: error: function definition is not allowed here
+[   16s]   209 |   static PerfInputFile getPerfInputFile() {
+[   16s]       |                                           ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:245:3: error: use of undeclared identifier 'validateCommandLine'
+[   16s]   245 |   validateCommandLine();
+[   16s]       |   ^~~~~~~~~~~~~~~~~~~
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:270:30: error: use of undeclared identifier 'getPerfInputFile'; did you mean 'PerfInputFile'?
+[   16s]   270 |     PerfInputFile PerfFile = getPerfInputFile();
+[   16s]       |                              ^~~~~~~~~~~~~~~~
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/PerfReader.h:76:8: note: 'PerfInputFile' declared here
+[   16s]    76 | struct PerfInputFile {
+[   16s]       |        ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:304:2: error: expected '}'
+[   16s]   304 | }
+[   16s]       |  ^
+[   16s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/llvm-profgen.cpp:30:16: note: to match this '{'
+[   16s]    30 | namespace llvm {
+[   16s]       |                ^
+[   16s] 11 warnings and 6 errors generated.
+[   17s] [106/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/MissingFrameInferrer.cpp.o
+[   17s] [107/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/PerfReader.cpp.o
+[   18s] [108/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/ProfileGenerator.cpp.o
+[   18s] [109/110] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/ProfiledBinary.cpp.o
+[   18s] ninja: build stopped: subcommand failed.
+[   18s] error: Bad exit status from /var/tmp/rpm-tmp.utliuv (%build)
+[   18s] 
+[   18s] 
+[   18s] RPM build errors:
+[   18s]     Bad exit status from /var/tmp/rpm-tmp.utliuv (%build)
+[   18s] 
+[   18s] linhao-linux failed "build llvm.spec" at Mon Nov  2 06:23:40 UTC 2026.
+[   18s] 
+warning: build failed, Leaving the logs in /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs/fail/llvm-22.1.8-1/log.txt
+info: *** Build Status Summary ***
+=== the following packages failed to build due to rpmbuild issue (1) ===
+llvm: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs/fail/llvm-22.1.8-1/log.txt
+=== Total succeeded built packages: (0) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.*
+error: <gbs>some packages failed to be built
+START 2026-11-02T14:23:14+08:00
+BUILD_START 2026-11-02T14:23:14+08:00
+END 2026-11-02T14:23:44+08:00
+GBS_EXIT 1
+ELAPSED_SECONDS 30.040
+NINJA_TOTAL_OBSERVED 110
+STOP_REASON 
+ALL-END 2026-11-02T14:23:44+08:00 FAILED
+
+ATTEMPT attempt2
+
+START 2026-11-02T14:25:33+08:00
+BUILD_START 2026-11-02T14:25:33+08:00
+END 2026-11-02T14:41:35+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 962.800
+NINJA_TOTAL_OBSERVED 104
+STOP_REASON 
+ALL-END 2026-11-02T14:41:35+08:00 OK
+
+
+RESOURCE RAW
+TIME 2026-11-02T14:25:33+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15725        2411         851       15085       15815
+Swap:           4095        3612         483
+EXIT 0
+$ uptime
+ 14:25:33 up 5 days, 16:03,  1 user,  load average: 0.68, 0.81, 0.85
+EXIT 0
+TIME 2026-11-02T14:35:35+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15255        6558         903       11087       16285
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 14:35:35 up 5 days, 16:13,  1 user,  load average: 3.71, 3.82, 2.47
+EXIT 0
+TIME 2026-11-02T14:41:35+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15358        8010         826        9828       16182
+Swap:           4095        4083          12
+EXIT 0
+$ uptime
+ 14:41:35 up 5 days, 16:19,  1 user,  load average: 11.54, 7.10, 4.11
+EXIT 0
+
+
+PROCESS PREFLIGHT
+TIME 2026-11-02T14:25:33+08:00
+
+HEAVY_COUNT 0
+
+
+SELECTED BUILD LINES
+1: BUILD_START 2026-11-02T14:25:33+08:00 COMMAND ['setsid', '--wait', 'nice', '-n', '19', 'ionice', '-c3', 'gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_baseline.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--incremental', '--threads', '1', '--define', '_smp_mflags -j10', '--define', 'mlgo_build_jobs 10']
+2123: [   11s] [103/104] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o
+2124: [   11s] [104/104] Linking CXX executable bin/llvm-profgen
+5181: [  165s] -- Installing: /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+5182: [  165s] -- Set non-toolchain portion of runtime path of "/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen" to "$ORIGIN/../lib64"
+8050: [  193s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+8066: [  193s] *** WARNING: No build ID note found in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+8280: [  741s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8282: [  741s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8284: [  741s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8286: [  741s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8293: [  741s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8295: [  741s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8297: [  741s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8299: [  741s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8318: [  747s] Total Discovered Tests: 56
+8319: [  747s]   Unsupported      :  1 (1.79%)
+8320: [  747s]   Passed           : 54 (96.43%)
+8321: [  747s]   Expectedly Failed:  1 (1.79%)
+8371: [  747s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+8634: [  756s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profgen.debug
+8821: [  786s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+9084: [  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profgen.debug
+
+LAST 200 LINES
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-offload-binary.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-offload-wrapper.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-opt-report.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-pdbutil.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profdata.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profgen.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-rc.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-readobj.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-readtapi.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-reduce.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-remarkutil.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-rtdyld.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-sim.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-size.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-split.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-stress.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-strings.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-symbolizer.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-tblgen.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-tli-checker.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-undname.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-xray.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/offload-arch.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/opt.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/pp-trace.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/reduce-chunk-list.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/sancov.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/sanstats.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/verify-uselistorder.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/yaml2macho-core.debug
+[  795s] Provides: llvm-debuginfo = 22.1.8-1 llvm-debuginfo(x86-64) = 22.1.8-1
+[  795s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  795s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  795s] Processing files: llvm-devel-debuginfo-22.1.8-1.x86_64
+[  795s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  795s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  795s] 
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/LLVMgold.so.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libLTO.so.22.1.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libRemarks.so.22.1.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/share/gdb/python/ompd/ompdModule.so.debug
+[  795s] Provides: llvm-devel-debuginfo = 22.1.8-1 llvm-devel-debuginfo(x86-64) = 22.1.8-1
+[  795s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  795s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  795s] Processing files: libllvm-debuginfo-22.1.8-1.x86_64
+[  795s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  795s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  795s] 
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libLLVM.so.22.1.debug
+[  795s] Provides: libllvm-debuginfo = 22.1.8-1 libllvm-debuginfo(x86-64) = 22.1.8-1
+[  795s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  795s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  795s] Processing files: clang-debuginfo-22.1.8-1.x86_64
+[  795s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  795s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  795s] 
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-22.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-apply-replacements.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-change-namespace.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-check.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-doc.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-extdef-mapping.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-format.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-include-cleaner.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-include-fixer.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-installapi.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-move.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-nvlink-wrapper.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-offload-bundler.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-query.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-refactor.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-reorder-fields.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-scan-deps.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-sycl-linker.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-tidy.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clangd.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/find-all-symbols.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/modularize.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libclang-cpp.so.22.1.debug
+[  795s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libclang.so.22.1.8.debug
+[  796s] Provides: clang-debuginfo = 22.1.8-1 clang-debuginfo(x86-64) = 22.1.8-1
+[  796s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  796s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  796s] Processing files: clang-devel-debuginfo-22.1.8-1.x86_64
+[  796s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  796s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  796s] 
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-tblgen.debug
+[  796s] Provides: clang-devel-debuginfo = 22.1.8-1 clang-devel-debuginfo(x86-64) = 22.1.8-1
+[  796s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  796s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  796s] Processing files: lldb-debuginfo-22.1.8-1.x86_64
+[  796s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  796s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  796s] 
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb.debug
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-argdumper.debug
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-server.debug
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/lib64/liblldb.so.22.1.8.debug
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/lldb-mcp.debug
+[  796s] Provides: lldb-debuginfo = 22.1.8-1 lldb-debuginfo(x86-64) = 22.1.8-1
+[  796s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  796s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  796s] Processing files: lldb-devel-debuginfo-22.1.8-1.x86_64
+[  796s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  796s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  796s] 
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/lldb-tblgen.debug
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/liblldb.so.22.1.8.debug
+[  796s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/liblldbIntelFeatures.so.22.1.debug
+[  797s] Provides: lldb-devel-debuginfo = 22.1.8-1 lldb-devel-debuginfo(x86-64) = 22.1.8-1
+[  797s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  797s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  797s] Processing files: compiler-rt-debuginfo-22.1.8-1.x86_64
+[  797s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  797s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  797s] 
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.asan-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.dyndd-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.hwasan-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.hwasan_aliases-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.memprof-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.nsan-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.scudo_standalone-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.tsan-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_minimal-x86_64.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_standalone-x86_64.so.debug
+[  797s] Provides: compiler-rt-debuginfo = 22.1.8-1 compiler-rt-debuginfo(x86-64) = 22.1.8-1
+[  797s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  797s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  797s] Processing files: libomp-debuginfo-22.1.8-1.x86_64
+[  797s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  797s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  797s] 
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libarcher.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libomp.so.debug
+[  797s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libompd.so.debug
+[  797s] Provides: libomp-debuginfo = 22.1.8-1 libomp-debuginfo(x86-64) = 22.1.8-1
+[  797s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  797s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  797s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[  806s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-22.1.8-1.x86_64.rpm
+[  815s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debugsource-22.1.8-1.x86_64.rpm
+[  819s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-22.1.8-1.x86_64.rpm
+[  829s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-static-devel-22.1.8-1.x86_64.rpm
+[  837s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-22.1.8-1.x86_64.rpm
+[  844s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-22.1.8-1.x86_64.rpm
+[  847s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-22.1.8-1.x86_64.rpm
+[  851s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-22.1.8-1.x86_64.rpm
+[  856s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-22.1.8-1.x86_64.rpm
+[  859s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-22.1.8-1.x86_64.rpm
+[  859s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-22.1.8-1.x86_64.rpm
+[  859s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-devel-22.1.8-1.x86_64.rpm
+[  859s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/python-clang-22.1.8-1.x86_64.rpm
+[  877s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debuginfo-22.1.8-1.x86_64.rpm
+[  877s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-debuginfo-22.1.8-1.x86_64.rpm
+[  895s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-debuginfo-22.1.8-1.x86_64.rpm
+[  925s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-debuginfo-22.1.8-1.x86_64.rpm
+[  929s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-debuginfo-22.1.8-1.x86_64.rpm
+[  938s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-debuginfo-22.1.8-1.x86_64.rpm
+[  946s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+[  947s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+[  948s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-debuginfo-22.1.8-1.x86_64.rpm
+[  948s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.WKPjLd
+[  948s] + umask 022
+[  948s] + cd /home/abuild/rpmbuild/BUILD
+[  948s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[  949s] + cd llvm-22.1.8
+[  949s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[  949s] + exit 0
+[  949s] + rpmbuild --define '_smp_mflags -j10' --define 'mlgo_build_jobs 10' --define '_srcdefattr (-,root,root)' --nosignature --target=x86_64 --define '_build_create_debug 1' --short-circuit -bs /home/abuild/rpmbuild/SOURCES/llvm.spec
+[  951s] Building target platforms: x86_64
+[  951s] Building for target x86_64
+[  951s] Wrote: /home/abuild/rpmbuild/SRPMS/llvm-22.1.8-1.src.rpm
+[  951s] ... checking for files with abuild user/group
+[  952s] 
+[  952s] linhao-linux finished "build llvm.spec" at Mon Nov  2 06:41:32 UTC 2026.
+[  952s] 
+info: finished building llvm
+info: updating local repo
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.*
+START 2026-11-02T14:25:33+08:00
+BUILD_START 2026-11-02T14:25:33+08:00
+END 2026-11-02T14:41:35+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 962.800
+NINJA_TOTAL_OBSERVED 104
+STOP_REASON 
+ALL-END 2026-11-02T14:41:35+08:00 OK
+
+ATTEMPT final
+
+START 2026-11-02T14:42:43+08:00
+BUILD_START 2026-11-02T14:42:43+08:00
+END 2026-11-02T14:56:15+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 812.070
+NINJA_TOTAL_OBSERVED 106
+STOP_REASON 
+ALL-END 2026-11-02T14:56:15+08:00 OK
+
+
+RESOURCE RAW
+TIME 2026-11-02T14:42:43+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15247        8098         831        9856       16292
+Swap:           4095        4083          12
+EXIT 0
+$ uptime
+ 14:42:43 up 5 days, 16:20,  1 user,  load average: 4.11, 5.80, 3.87
+EXIT 0
+TIME 2026-11-02T14:52:45+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15163       10170         852        7517       16377
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 14:52:45 up 5 days, 16:30,  1 user,  load average: 2.82, 3.55, 3.64
+EXIT 0
+TIME 2026-11-02T14:56:15+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       15115       11415         861        6328       16425
+Swap:           4095        4065          30
+EXIT 0
+$ uptime
+ 14:56:15 up 5 days, 16:33,  1 user,  load average: 12.82, 7.45, 5.06
+EXIT 0
+
+
+PROCESS PREFLIGHT
+TIME 2026-11-02T14:42:43+08:00
+
+HEAVY_COUNT 0
+
+
+SELECTED BUILD LINES
+1: BUILD_START 2026-11-02T14:42:43+08:00 COMMAND ['setsid', '--wait', 'nice', '-n', '19', 'ionice', '-c3', 'gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_baseline.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--incremental', '--threads', '1', '--define', '_smp_mflags -j10', '--define', 'mlgo_build_jobs 10']
+2123: [   19s] [103/106] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPPerfReader.cpp.o
+2125: [   21s] [105/106] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o
+2126: [   22s] [106/106] Linking CXX executable bin/llvm-profgen
+5183: [  171s] -- Installing: /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+5184: [  171s] -- Set non-toolchain portion of runtime path of "/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen" to "$ORIGIN/../lib64"
+8051: [  201s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+8061: [  201s] *** WARNING: No build ID note found in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+8282: [  588s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8284: [  588s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8286: [  588s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8288: [  588s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8295: [  588s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8297: [  588s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8299: [  588s] error: Unable to open /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8301: [  588s] error: query of specfile /home/abuild/rpmbuild/SOURCES/libcxx-runtimes.spec
+8320: [  595s] Total Discovered Tests: 57
+8321: [  595s]   Unsupported      :  1 (1.75%)
+8322: [  595s]   Passed           : 55 (96.49%)
+8323: [  595s]   Expectedly Failed:  1 (1.75%)
+8373: [  595s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+8636: [  603s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profgen.debug
+8823: [  634s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/llvm-profgen
+9086: [  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profgen.debug
+
+LAST 200 LINES
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-offload-binary.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-offload-wrapper.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-opt-report.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-pdbutil.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profdata.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-profgen.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-rc.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-readobj.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-readtapi.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-reduce.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-remarkutil.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-rtdyld.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-sim.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-size.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-split.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-stress.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-strings.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-symbolizer.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-tblgen.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-tli-checker.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-undname.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-xray.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/offload-arch.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/opt.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/pp-trace.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/reduce-chunk-list.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/sancov.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/sanstats.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/verify-uselistorder.debug
+[  642s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/yaml2macho-core.debug
+[  643s] Provides: llvm-debuginfo = 22.1.8-1 llvm-debuginfo(x86-64) = 22.1.8-1
+[  643s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  643s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  643s] Processing files: llvm-devel-debuginfo-22.1.8-1.x86_64
+[  643s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  643s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  643s] 
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/LLVMgold.so.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libLTO.so.22.1.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libRemarks.so.22.1.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/share/gdb/python/ompd/ompdModule.so.debug
+[  643s] Provides: llvm-devel-debuginfo = 22.1.8-1 llvm-devel-debuginfo(x86-64) = 22.1.8-1
+[  643s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  643s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  643s] Processing files: libllvm-debuginfo-22.1.8-1.x86_64
+[  643s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  643s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  643s] 
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libLLVM.so.22.1.debug
+[  643s] Provides: libllvm-debuginfo = 22.1.8-1 libllvm-debuginfo(x86-64) = 22.1.8-1
+[  643s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  643s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  643s] Processing files: clang-debuginfo-22.1.8-1.x86_64
+[  643s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  643s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  643s] 
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-22.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-apply-replacements.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-change-namespace.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-check.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-doc.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-extdef-mapping.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-format.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-include-cleaner.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-include-fixer.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-installapi.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-move.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-nvlink-wrapper.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-offload-bundler.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-query.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-refactor.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-reorder-fields.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-scan-deps.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-sycl-linker.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-tidy.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clangd.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/find-all-symbols.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/modularize.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libclang-cpp.so.22.1.debug
+[  643s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libclang.so.22.1.8.debug
+[  644s] Provides: clang-debuginfo = 22.1.8-1 clang-debuginfo(x86-64) = 22.1.8-1
+[  644s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  644s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  644s] Processing files: clang-devel-debuginfo-22.1.8-1.x86_64
+[  644s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  644s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  644s] 
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-tblgen.debug
+[  644s] Provides: clang-devel-debuginfo = 22.1.8-1 clang-devel-debuginfo(x86-64) = 22.1.8-1
+[  644s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  644s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  644s] Processing files: lldb-debuginfo-22.1.8-1.x86_64
+[  644s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  644s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  644s] 
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-argdumper.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-server.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/lib64/liblldb.so.22.1.8.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/lldb-mcp.debug
+[  644s] Provides: lldb-debuginfo = 22.1.8-1 lldb-debuginfo(x86-64) = 22.1.8-1
+[  644s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  644s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  644s] Processing files: lldb-devel-debuginfo-22.1.8-1.x86_64
+[  644s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  644s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  644s] 
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/lldb-tblgen.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/liblldb.so.22.1.8.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/liblldbIntelFeatures.so.22.1.debug
+[  644s] Provides: lldb-devel-debuginfo = 22.1.8-1 lldb-devel-debuginfo(x86-64) = 22.1.8-1
+[  644s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  644s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  644s] Processing files: compiler-rt-debuginfo-22.1.8-1.x86_64
+[  644s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  644s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  644s] 
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.asan-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.dyndd-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.hwasan-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.hwasan_aliases-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.memprof-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.nsan-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.scudo_standalone-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.tsan-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_minimal-x86_64.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_standalone-x86_64.so.debug
+[  644s] Provides: compiler-rt-debuginfo = 22.1.8-1 compiler-rt-debuginfo(x86-64) = 22.1.8-1
+[  644s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  644s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  644s] Processing files: libomp-debuginfo-22.1.8-1.x86_64
+[  644s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  644s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  644s] 
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libarcher.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libomp.so.debug
+[  644s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libompd.so.debug
+[  644s] Provides: libomp-debuginfo = 22.1.8-1 libomp-debuginfo(x86-64) = 22.1.8-1
+[  644s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  644s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[  644s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[  653s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-22.1.8-1.x86_64.rpm
+[  662s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debugsource-22.1.8-1.x86_64.rpm
+[  667s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-22.1.8-1.x86_64.rpm
+[  676s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-static-devel-22.1.8-1.x86_64.rpm
+[  685s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-22.1.8-1.x86_64.rpm
+[  692s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-22.1.8-1.x86_64.rpm
+[  695s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-22.1.8-1.x86_64.rpm
+[  699s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-22.1.8-1.x86_64.rpm
+[  704s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-22.1.8-1.x86_64.rpm
+[  707s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-22.1.8-1.x86_64.rpm
+[  707s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-22.1.8-1.x86_64.rpm
+[  707s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-devel-22.1.8-1.x86_64.rpm
+[  707s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/python-clang-22.1.8-1.x86_64.rpm
+[  724s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debuginfo-22.1.8-1.x86_64.rpm
+[  724s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-debuginfo-22.1.8-1.x86_64.rpm
+[  742s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-debuginfo-22.1.8-1.x86_64.rpm
+[  773s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-debuginfo-22.1.8-1.x86_64.rpm
+[  777s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-debuginfo-22.1.8-1.x86_64.rpm
+[  786s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-debuginfo-22.1.8-1.x86_64.rpm
+[  794s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+[  796s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+[  796s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-debuginfo-22.1.8-1.x86_64.rpm
+[  796s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.a1t2uA
+[  796s] + umask 022
+[  796s] + cd /home/abuild/rpmbuild/BUILD
+[  796s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[  797s] + cd llvm-22.1.8
+[  797s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[  797s] + exit 0
+[  797s] + rpmbuild --define '_smp_mflags -j10' --define 'mlgo_build_jobs 10' --define '_srcdefattr (-,root,root)' --nosignature --target=x86_64 --define '_build_create_debug 1' --short-circuit -bs /home/abuild/rpmbuild/SOURCES/llvm.spec
+[  800s] Building target platforms: x86_64
+[  800s] Building for target x86_64
+[  800s] Wrote: /home/abuild/rpmbuild/SRPMS/llvm-22.1.8-1.src.rpm
+[  800s] ... checking for files with abuild user/group
+[  800s] 
+[  800s] linhao-linux finished "build llvm.spec" at Mon Nov  2 06:56:12 UTC 2026.
+[  800s] 
+info: finished building llvm
+info: updating local repo
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.*
+START 2026-11-02T14:42:43+08:00
+BUILD_START 2026-11-02T14:42:43+08:00
+END 2026-11-02T14:56:15+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 812.070
+NINJA_TOTAL_OBSERVED 106
+STOP_REASON 
+ALL-END 2026-11-02T14:56:15+08:00 OK

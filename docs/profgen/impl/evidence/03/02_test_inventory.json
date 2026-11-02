@@ -1,0 +1,477 @@
+{
+  "tests": 7,
+  "RUN_lines": 109,
+  "files": [
+    {
+      "file": "test/tools/llvm-profgen/ip-addresses.test",
+      "run_lines": [
+        {
+          "line": 2,
+          "run": "not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%S/Inputs/ip-mode/a64-pie.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A64PIE"
+        },
+        {
+          "line": 5,
+          "run": "not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-16k.perfbin --perfscript=%S/Inputs/ip-mode/a64-16k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6416K"
+        },
+        {
+          "line": 8,
+          "run": "not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-64k.perfbin --perfscript=%S/Inputs/ip-mode/a64-64k.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=A6464K"
+        },
+        {
+          "line": 11,
+          "run": "not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/thumb-count.perfbin --perfscript=%S/Inputs/ip-mode/thumb-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=THUMBCOUNT"
+        },
+        {
+          "line": 14,
+          "run": "not llvm-profgen --ip-samples --show-ip-address-counts --binary=%S/Inputs/ip-mode/arm-count.perfbin --perfscript=%S/Inputs/ip-mode/arm-count.perfscript --output=%t.out 2>&1 | FileCheck %s --check-prefix=ARMCOUNT"
+        },
+        {
+          "line": 17,
+          "run": "cat %S/Inputs/ip-mode/a64-multi-load.perfscript %S/Inputs/ip-mode/a64-multi-gap.perfscript > %t.in"
+        },
+        {
+          "line": 18,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTI"
+        }
+      ]
+    },
+    {
+      "file": "test/tools/llvm-profgen/ip-invalid.test",
+      "run_lines": [
+        {
+          "line": 2,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=E0"
+        },
+        {
+          "line": 4,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-zero-period.perfscript 2>&1 | FileCheck %s --check-prefix=E1"
+        },
+        {
+          "line": 6,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-invalid-pid.perfscript 2>&1 | FileCheck %s --check-prefix=E2"
+        },
+        {
+          "line": 8,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-invalid-tid.perfscript 2>&1 | FileCheck %s --check-prefix=E3"
+        },
+        {
+          "line": 10,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-truncated.perfscript 2>&1 | FileCheck %s --check-prefix=E4"
+        },
+        {
+          "line": 12,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-unknown-line.perfscript 2>&1 | FileCheck %s --check-prefix=E5"
+        },
+        {
+          "line": 14,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-with-brstack.perfscript 2>&1 | FileCheck %s --check-prefix=E6"
+        },
+        {
+          "line": 16,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/synthetic-missing-dsoff.perfscript 2>&1 | FileCheck %s --check-prefix=E7"
+        },
+        {
+          "line": 18,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=missing --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=EMPTY"
+        },
+        {
+          "line": 20,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --binary-match-regex=nomatch --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=TARGET"
+        },
+        {
+          "line": 23,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --binary-match-regex=[ --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=RE"
+        },
+        {
+          "line": 25,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=cycles --pid=0 --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=PIDEMPTY"
+        },
+        {
+          "line": 27,
+          "run": "echo \"17/17 18446744073709551615 cycles: 1000 (/a64-multi-load.perfbin+0x1000)\" > %t.in"
+        },
+        {
+          "line": 28,
+          "run": "echo \"17/17 1 cycles: 1000 (/a64-multi-load.perfbin+0x1000)\" >> %t.in"
+        },
+        {
+          "line": 29,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER"
+        },
+        {
+          "line": 31,
+          "run": "echo \"17/17 18446744073709551616 cycles: 1000 (/a64-multi-load.perfbin+0x1000)\" > %t.in"
+        },
+        {
+          "line": 32,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=INTEGER"
+        },
+        {
+          "line": 34,
+          "run": "echo \"0/0 PERF_RECORD_LOST lost 18446744073709551615\" > %t.in"
+        },
+        {
+          "line": 35,
+          "run": "echo \"0/0 PERF_RECORD_LOST lost 1\" >> %t.in"
+        },
+        {
+          "line": 36,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER"
+        },
+        {
+          "line": 37,
+          "run": "echo \"0/0 PERF_RECORD_LOST_SAMPLES lost 1\" > %t.in"
+        },
+        {
+          "line": 38,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TYPE"
+        },
+        {
+          "line": 41,
+          "run": "echo \"0/0 PERF_RECORD_MMAP2 1/1: [0xffffffffffffffff(0x2) @ 0 b3:02 1 0]: r-xp /x\" > %t.in"
+        },
+        {
+          "line": 42,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER"
+        },
+        {
+          "line": 43,
+          "run": "echo \"0/0 PERF_RECORD_MMAP2 1/1: [0x0(0x2) @ 0xffffffffffffffff b3:02 1 0]: r-xp /x\" > %t.in"
+        },
+        {
+          "line": 44,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER"
+        },
+        {
+          "line": 45,
+          "run": "echo \"0/0 PERF_RECORD_MMAP2 -2/1: [0x0(0x2) @ 0 b3:02 1 0]: r-xp /x\" > %t.in"
+        },
+        {
+          "line": 46,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MPID"
+        },
+        {
+          "line": 48,
+          "run": "echo \"0/0 PERF_RECORD_MMAP2 1/1: [0x0(0x2) @ 0 <xyz>]: r-xp /x\" > %t.in"
+        },
+        {
+          "line": 49,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MID"
+        },
+        {
+          "line": 51,
+          "run": "%python -c \"import pathlib; pathlib.Path(r'%t.in').write_bytes(b'17/17 1 cycles: 1000 (/x\\\\0+0x1000)\\\\n')\""
+        },
+        {
+          "line": 52,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=NUL"
+        },
+        {
+          "line": 55,
+          "run": "%python -c \"import pathlib; pathlib.Path(r'%t.in').write_text(''.join('17/17 1 cycles: 1000 (/'+c+'+0x1000)\\\\n' for i,c in enumerate('abcdef') for n in range(6-i)))\""
+        },
+        {
+          "line": 56,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=TOP"
+        }
+      ]
+    },
+    {
+      "file": "test/tools/llvm-profgen/ip-options.test",
+      "run_lines": [
+        {
+          "line": 1,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --unsymbolized-profile=x 2>&1 | FileCheck %s --check-prefix=OPT0"
+        },
+        {
+          "line": 3,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --llvm-sample-profile=x 2>&1 | FileCheck %s --check-prefix=OPT1"
+        },
+        {
+          "line": 5,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --skip-symbolization 2>&1 | FileCheck %s --check-prefix=OPT2"
+        },
+        {
+          "line": 7,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --data-access-perftrace=x 2>&1 | FileCheck %s --check-prefix=OPT3"
+        },
+        {
+          "line": 9,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ignore-stack-samples 2>&1 | FileCheck %s --check-prefix=OPT4"
+        },
+        {
+          "line": 11,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-merge-cold-context=false 2>&1 | FileCheck %s --check-prefix=OPT5"
+        },
+        {
+          "line": 13,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-max-cold-context-depth=2 2>&1 | FileCheck %s --check-prefix=OPT6"
+        },
+        {
+          "line": 15,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-max-context-depth=2 2>&1 | FileCheck %s --check-prefix=OPT7"
+        },
+        {
+          "line": 17,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csprof-max-unsymbolized-context-depth=2 2>&1 | FileCheck %s --check-prefix=OPT8"
+        },
+        {
+          "line": 19,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csspgo-preinliner=false 2>&1 | FileCheck %s --check-prefix=OPT9"
+        },
+        {
+          "line": 21,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csspgo-replay-preinline 2>&1 | FileCheck %s --check-prefix=OPT10"
+        },
+        {
+          "line": 23,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --csspgo-preinliner-multiplier-for-previous-inlining=2 2>&1 | FileCheck %s --check-prefix=OPT11"
+        },
+        {
+          "line": 25,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --use-context-cost-for-preinliner 2>&1 | FileCheck %s --check-prefix=OPT12"
+        },
+        {
+          "line": 27,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --max-search-depth=2 2>&1 | FileCheck %s --check-prefix=OPT13"
+        },
+        {
+          "line": 29,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --gen-cs-nested-profile=false 2>&1 | FileCheck %s --check-prefix=OPT14"
+        },
+        {
+          "line": 31,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --compress-recursion=2 2>&1 | FileCheck %s --check-prefix=OPT15"
+        },
+        {
+          "line": 33,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --mark-all-context-preinlined 2>&1 | FileCheck %s --check-prefix=OPT16"
+        },
+        {
+          "line": 35,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --use-offset 2>&1 | FileCheck %s --check-prefix=OPT17"
+        },
+        {
+          "line": 37,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --use-first-loadable-segment-as-base 2>&1 | FileCheck %s --check-prefix=OPT18"
+        },
+        {
+          "line": 39,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --update-total-samples 2>&1 | FileCheck %s --check-prefix=OPT19"
+        },
+        {
+          "line": 41,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --fill-zero-for-all-funcs 2>&1 | FileCheck %s --check-prefix=OPT20"
+        },
+        {
+          "line": 43,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --populate-profile-symbol-list 2>&1 | FileCheck %s --check-prefix=OPT21"
+        },
+        {
+          "line": 45,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --kernel 2>&1 | FileCheck %s --check-prefix=OPT22"
+        },
+        {
+          "line": 47,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-disassembly-only 2>&1 | FileCheck %s --check-prefix=OPT23"
+        },
+        {
+          "line": 49,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --disassemble-functions=main 2>&1 | FileCheck %s --check-prefix=OPT24"
+        },
+        {
+          "line": 51,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-source-locations 2>&1 | FileCheck %s --check-prefix=OPT25"
+        },
+        {
+          "line": 53,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-canonical-fname 2>&1 | FileCheck %s --check-prefix=OPT26"
+        },
+        {
+          "line": 55,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-pseudo-probe 2>&1 | FileCheck %s --check-prefix=OPT27"
+        },
+        {
+          "line": 57,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --infer-missing-frames=false 2>&1 | FileCheck %s --check-prefix=OPT28"
+        },
+        {
+          "line": 59,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-event=cycles 2>&1 | FileCheck %s --check-prefix=GATE"
+        },
+        {
+          "line": 60,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --binary-match-regex=x 2>&1 | FileCheck %s --check-prefix=GATE"
+        },
+        {
+          "line": 61,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --show-ip-address-counts 2>&1 | FileCheck %s --check-prefix=GATE"
+        },
+        {
+          "line": 62,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --show-ip-address-counts=false 2>&1 | FileCheck %s --check-prefix=GATE"
+        },
+        {
+          "line": 64,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=- --ip-samples 2>&1 | FileCheck %s --check-prefix=STDOUT"
+        },
+        {
+          "line": 66,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfdata=missing 2>&1 | FileCheck %s --check-prefix=DATA"
+        },
+        {
+          "line": 68,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples 2>&1 | FileCheck %s --check-prefix=MISSING"
+        }
+      ]
+    },
+    {
+      "file": "test/tools/llvm-profgen/ip-real-records.test",
+      "run_lines": [
+        {
+          "line": 2,
+          "run": "cat %S/Inputs/ip-mode/real-sample.perfscript %S/Inputs/ip-mode/real-mmap2-inode.perfscript %S/Inputs/ip-mode/real-mmap2-buildid.perfscript %S/Inputs/ip-mode/real-module-mmap.perfscript %S/Inputs/ip-mode/real-lost.perfscript %S/Inputs/ip-mode/real-vdso.perfscript %S/Inputs/ip-mode/real-kernel.perfscript %S/Inputs/ip-mode/real-negative-pid.perfscript %S/Inputs/ip-mode/real-deleted.perfscript %S/Inputs/ip-mode/real-module-sample.perfscript %S/Inputs/ip-mode/synthetic-unknown.perfscript %S/Inputs/ip-mode/a64-multi-load.perfscript > %t.in"
+        },
+        {
+          "line": 3,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-mmap-events --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REAL"
+        },
+        {
+          "line": 4,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --pid=17 --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=PID"
+        }
+      ]
+    },
+    {
+      "file": "test/tools/llvm-profgen/ip-segments.test",
+      "run_lines": [
+        {
+          "line": 2,
+          "run": "echo \"17/17 1 cycles: 1000 (/x+0x1000)\" > %t.in"
+        },
+        {
+          "line": 3,
+          "run": "yaml2obj -DOFFSET=0x1000 -DVADDR=0x10000 %s -o %t.elf"
+        },
+        {
+          "line": 4,
+          "run": "not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=MULTIPLE"
+        },
+        {
+          "line": 6,
+          "run": "yaml2obj -DOFFSET=0xffffffffffffffff -DVADDR=0x10000 %s -o %t.elf"
+        },
+        {
+          "line": 7,
+          "run": "not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER"
+        },
+        {
+          "line": 8,
+          "run": "yaml2obj -DOFFSET=0x1000 -DVADDR=0xffffffffffffffff %s -o %t.elf"
+        },
+        {
+          "line": 9,
+          "run": "not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=OVER"
+        },
+        {
+          "line": 11,
+          "run": "yaml2obj -DOFFSET=0x1000 -DVADDR=0x10000 %s -o %t.elf"
+        },
+        {
+          "line": 12,
+          "run": "echo \"17/17 1 cycles: 1008 (/x+0x1008)\" > %t.in"
+        },
+        {
+          "line": 13,
+          "run": "not llvm-profgen --binary=%t.elf --binary-match-regex=/x --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=END"
+        }
+      ]
+    },
+    {
+      "file": "test/tools/llvm-profgen/ip-selection.test",
+      "run_lines": [
+        {
+          "line": 2,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-spaces.perfscript 2>&1 | FileCheck %s --check-prefix=PATH"
+        },
+        {
+          "line": 3,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-parentheses.perfscript 2>&1 | FileCheck %s --check-prefix=PATH"
+        },
+        {
+          "line": 4,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-path-plus.perfscript 2>&1 | FileCheck %s --check-prefix=PATH"
+        },
+        {
+          "line": 6,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --ip-event=cycles:u --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=MOD"
+        },
+        {
+          "line": 8,
+          "run": "echo \"17/17 2 cycles: 1000 (/chosen/a64-multi-load.perfbin+0x1000)\" > %t.in"
+        },
+        {
+          "line": 9,
+          "run": "echo \"18/18 3 cycles: 1000 (/excluded/a64-multi-load.perfbin+0x1000)\" >> %t.in"
+        },
+        {
+          "line": 10,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=^/chosen/ --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=REGEX"
+        },
+        {
+          "line": 14,
+          "run": "ln -sf %S/Inputs/ip-mode/a64-multi-load.perfbin %t.alias"
+        },
+        {
+          "line": 15,
+          "run": "not llvm-profgen --ip-samples --show-ip-address-counts --binary=%t.alias --output=%t.out --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=LINK"
+        },
+        {
+          "line": 17,
+          "run": "echo \"17/17 7 cycles: 1000 (/chosen/a64-multi-load.perfbin (deleted)+0x1000)\" > %t.in"
+        },
+        {
+          "line": 18,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%t.in 2>&1 | FileCheck %s --check-prefix=DELETED"
+        },
+        {
+          "line": 21,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --binary-match-regex=libx --ip-event=cpu-clock --perfscript=%S/Inputs/ip-mode/synthetic-multiple-events.perfscript 2>&1 | FileCheck %s --check-prefix=MIX"
+        },
+        {
+          "line": 28,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-event=cycles --binary-match-regex=libx --perfscript=%S/Inputs/ip-mode/synthetic-event-modifier.perfscript 2>&1 | FileCheck %s --check-prefix=EXACT"
+        }
+      ]
+    },
+    {
+      "file": "test/tools/llvm-profgen/ip-transition.test",
+      "run_lines": [
+        {
+          "line": 2,
+          "run": "rm -f %t.out"
+        },
+        {
+          "line": 3,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --show-ip-address-counts --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END"
+        },
+        {
+          "line": 4,
+          "run": "not test -e %t.out"
+        },
+        {
+          "line": 5,
+          "run": "echo OLD-PROFILE > %t.out"
+        },
+        {
+          "line": 6,
+          "run": "not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --perfscript=%S/Inputs/ip-mode/a64-multi-load.perfscript 2>&1 | FileCheck %s --check-prefix=END"
+        },
+        {
+          "line": 7,
+          "run": "FileCheck %s --check-prefix=OLD --input-file=%t.out"
+        }
+      ]
+    }
+  ]
+}

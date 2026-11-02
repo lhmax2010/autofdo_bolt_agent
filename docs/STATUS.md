@@ -26,7 +26,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-02；补丁2前C1/lit准备，已完成）
+## 当前授权与执行状态（2026-11-02；llvm-profgen 补丁2，已完成）
+
+- 已按本轮授权实现 IP 文本读取、显式选项门控、dsoff→ELF VA 换算和 AddressCounter。冻结版 v0.7 与 C1 基线清单未改；未连接开发板、未推 Gerrit、未开始 Agent 开发。[报告](profgen/impl/03_patch2_reader.md)
+- LLVM 本地提交 `8f4fa360ade28a7b044fd5ef392d4839311545aa`，13 个文件、+816/-3 行，范围仅 llvm/tools/llvm-profgen 与 llvm/test/tools/llvm-profgen；导出[补丁2](../patches/profgen/0002-llvm-profgen-Add-IP-sample-reader-and-dsoff-address-conversion.patch)，52,407 字节，反向应用检查通过。spec 未提交；GBS 的未跟踪生成物保留在 temp。[审计](profgen/impl/evidence/03/07_commit_audit.txt)
+- IP 模式仍为分阶段实现：成功读取/换算后固定退出1，报 `IP sample mode: profile generation is not implemented yet`，不创建或覆盖 output。隐藏诊断 `--show-ip-address-counts` 为本轮授权的测试接口，未加入冻结设计表；身份/权重/生成/边界/报告等留后续补丁。
+- GBS增量共三轮：首次新代码编译错误已修正并保留失败证据；第二轮成功，6个新lit通过；补强边界后最终轮14:42:43–14:56:15+08:00成功，812.070秒、106步、GBS_EXIT=0、ALL-END OK。三轮构建计时合计1804.910秒；available最低15,226MiB，无低于2GiB采样点。[构建](profgen/impl/evidence/03/03_build_records.txt)
+- 新工具已重新编译/链接，SHA `b60ba7bb7dd07270da60bae8ff8b292209b506ef2c763f6e0ebe9722b596c69e`。最终lit 57项：PASS55、FAIL0、UNSUPPORTED1、XFAIL1；原50项保持48/0/1/1，新增7项全部通过。[lit](profgen/impl/evidence/03/04_lit_classification.json)
+- C1：127原命令＋508格式变体＋1纯IP负对照，636行/遍，两遍一致，与原清单0差异；7个新测试正确排除，原50测试相对f999不变。默认纯IP仍退出1及原 `Invalid perf script input!`。[复核](profgen/impl/evidence/03/05_c1_summary.json)
+- 下一步等待补丁3授权；没有发现需改冻结规则才能完成本补丁范围的情况。开发spec两处改动继续仅本地保留，**正式非增量构建前必须撤销**。无新增已知项目文件边界例外，未改认证配置或索要密码。
+
+## 前轮授权与执行状态（2026-11-02；补丁2前C1/lit准备，历史）
 
 - 本轮只修正项目侧C1脚本、存档基线工具、补齐开发用lit环境；未修改llvm-profgen源码、既有测试或设计，未连接开发板、未推Gerrit，未开始补丁2。[报告](profgen/impl/02_lit_env.md)
 - 构建前存档到 `temp/profgen-baseline-tool/`：llvm-profgen SHA `a31073338f9315a0fd6d2934e36431d9135086882ebfb07bd1bda7c36d7f9f1e`，实际加载的libLLVM.so.22.1 SHA `2c07f047841853eaeab97ab69a285e28941e8b8983706ec76183065791dd914a`；GBS loader --list确认来源及存档解析。[证据](profgen/impl/evidence/02/01_archive.json)
@@ -207,9 +217,9 @@
 
 ## 计划
 
-- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；下一步等待补丁2授权，Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；下一步等待补丁3授权，Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
-- v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1已授权完成，其余补丁等待新授权。
+- v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1和补丁2已授权完成，其余补丁等待新授权。
 
 - 本轮工具 spike 已完成，不重复采集/构建。建议 RPi5 默认插桩 PGO；RPi4 先验证 ARM runtime/全链路。Google 无 LBR 转换和 BOLT -ba 保留为需后续授权验证的候选。
 
@@ -230,7 +240,12 @@
 
 ## 进度
 
-### 补丁2前C1/lit准备（当前，已完成）
+### llvm-profgen 补丁2（当前，已完成）
+
+- 显式IP读取器、dsoff程序头换算、checked uint64计数与隐藏诊断完成；输出仍固定过渡失败，不生成profile。[报告](profgen/impl/03_patch2_reader.md)
+- 最终GBS增量812.070秒、106步成功；7个新lit全部通过，原50项不变；C1两遍636行及基线比对均0差异。已导出LLVM本地补丁，下一步等待补丁3。
+
+### 补丁2前C1/lit准备（历史，已完成）
 
 - 存档工具与libLLVM；固定C1登记范围与原测试完整性门禁，存档/构建后工具复核均0差异。
 - GBS增量14分31秒、126步成功；lit PASS48/FAIL0/UNSUPPORTED1/XFAIL1，工具未重新链接。spec仅保留本地测试环境改动，正式非增量构建前必须撤销。[报告](profgen/impl/02_lit_env.md)
@@ -358,6 +373,8 @@
 
 ## 已闭合结论（附证据路径）
 
+- 补丁2的IP读取/地址换算与选项拒绝通过7个lit测试文件；默认LBR行为保持原50项lit结果和C1基线0差异。新工具确实重新链接；固定过渡失败不创建/覆盖output。[实现与规则表](profgen/impl/03_patch2_reader.md)、[lit](profgen/impl/evidence/03/04_lit_classification.json)、[C1](profgen/impl/evidence/03/05_c1_summary.json)
+
 - LLVM site配置已生成，原有lit 50项基线取得（48 PASS、0 FAIL、1 UNSUPPORTED、1 XFAIL）；C1固定登记范围且存档/构建后复核均0差异。[lit](profgen/impl/evidence/02/09_lit.log)、[C1](profgen/impl/evidence/02/10_rebuilt_c1.json)
 
 - 补丁1的104份素材与C1固定矩阵归档；两遍636次实际行为一致，纯IP旧错误保留。此结论不包含lit通过或新IP功能实现。[素材验证](profgen/impl/evidence/01/04_fixture_checks.txt)、[C1摘要](profgen/impl/evidence/01/10_c1_summary.json)
@@ -414,7 +431,7 @@
 
 ## 待人工裁决
 
-- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1及补丁2前C1/lit准备已完成，等待补丁2授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，本轮已完成开发用GBS增量构建，未做增强源码实现。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1、C1/lit准备及补丁2已完成，等待补丁3授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式目前明确拒绝perfdata，尚不生成profile。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -434,7 +451,7 @@
 - 交付前非★项（v0.7）：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`；probe构建拆分后`.pseudo_probe/.pseudo_probe_desc`的位置；补存DWARF5拆分核对与BUILD目录产物build-id的证据。`[unknown]`合成素材已由补丁1闭合；构造的probe组合不替代真实拆分核实。第一阶段已冻结；第二阶段待定事项见设计第12节，IR匹配/BFI不沿用旧百分比。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
-- 本轮未改 LLVM，故单文件增量时间仅估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；新 profgen 无 GNU build-id，未改 spec。
+- 本轮补丁2已实测少量源码增量：最终Ninja106步、完整GBS812.070秒（包含安装/拆分/打包），不再只依赖单文件估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；基线 profgen 无 GNU build-id，本轮未改 spec。
 
 - Google create_llvm_prof --use_lbr=false 的端到端运行/行计数质量、ARM/Thumb 正确性和 BOLT -ba 优化仍未实测；RPi4 插桩 PGO 的 armv7l 小程序闭环已于本轮完成。当前 llvm-profgen 的纯 IP 拒绝已闭合，不待重试。
 - 本轮性能测量次数少且未随机交错，PGO −0.12% 仅为观测差；真实场景收益、跨输入泛化需独立评估。
