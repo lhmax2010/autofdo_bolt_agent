@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites time="6.91">
+<testsuite name="LLVM" tests="70" failures="2" skipped="1" time="6.68">
+<testcase classname="LLVM.tools/llvm-profgen" name="afdo-with-vtable-pie.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="afdo-with-vtable.test" time="0.44"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="callback-external-addr.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="coff-profile.test" time="0.12"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cold-profile-trimming-symbolized.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cold-profile-trimming.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="context-depth.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="coroutine.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-extbinary.test" time="0.13"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-external-address.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-interrupt.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-invalid-ret-addr.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-preinline-cost.test" time="0.00">
+  <skipped message="Missing required feature(s): asserts"/>
+</testcase>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-preinline-sample-profile.test" time="0.03"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-preinline.test" time="0.12"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="cs-tailcall.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="disassemble.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="filter-ambiguous-profile.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="fname-canonicalization.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="fs-discriminator-probe.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="fs-discriminator.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="func-split.test" time="0.03"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="help.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="inline-cs-noprobe.test" time="0.05"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="inline-cs-pseudoprobe.test" time="0.05"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="inline-force-dwarf.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="inline-noprobe.test" time="0.09"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="inline-noprobe2.test" time="0.05"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="inline-probe-afdo.test" time="0.05"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="inline-pseudoprobe.test" time="0.03"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="invalid-perfscript.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="invalid-range.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-addresses.test" time="0.11"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-cli-followup.test" time="0.05"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-counting-arithmetic.test" time="0.22"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-counting-classification.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-counting-inline.test" time="0.03"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-counting-options.test" time="0.14"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-counting-split.test" time="0.85"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-counting-writer.test" time="0.18"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-counting.test" time="0.08"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-identity-ambiguity.test" time="0.39"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-identity-chain.test" time="0.48"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-identity-list.test" time="0.22">
+  <failure><![CDATA[Exit Code: 1
+
+Command Output (stdout):
+--
+# RUN: at line 2
+split-file /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp
+# executed command: split-file /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp
+# RUN: at line 5
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C1.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C1.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C1.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C1.ids --allow-missing-build-id
+# RUN: at line 6
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C1
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C1
+# RUN: at line 8
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 11
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C2.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C2.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C2.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C2.ids --allow-missing-build-id
+# RUN: at line 12
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C2
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C2
+# RUN: at line 14
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 17
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C3.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C3.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C3.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C3.ids --allow-missing-build-id
+# RUN: at line 18
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C3
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C3
+# RUN: at line 20
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 23
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C4.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C4.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C4.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C4.ids --allow-missing-build-id
+# RUN: at line 24
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C4
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C4
+# RUN: at line 26
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 29
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C5.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C5.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C5.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C5.ids --allow-missing-build-id
+# RUN: at line 30
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C5
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C5
+# RUN: at line 32
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 35
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C6.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$  --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C6.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C6.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C6.ids --allow-missing-build-id
+# RUN: at line 36
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C6
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C6
+# RUN: at line 38
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 41
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C7.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target with \(spaces\)$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C7.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C7.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target with \(spaces\)$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C7.ids --allow-missing-build-id
+# RUN: at line 42
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C7
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C7
+# RUN: at line 45
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 48
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C8.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex='^/target with spaces$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C8.ids --allow-missing-build-id > /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout 2> /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --ip-samples --ip-aggregation=sum --format=gcc --show-ip-address-counts --perfscript=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C8.perfscript --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin '--binary-match-regex=^/target with spaces$' --perf-buildid-list=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/C8.ids --allow-missing-build-id
+# RUN: at line 49
+cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C8
+# executed command: cat /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stdout /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/stderr
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=C8
+# RUN: at line 52
+test ! -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# executed command: test '!' -e /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out
+# RUN: at line 53
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --binary=x --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --perf-buildid-list=x 2>&1 | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=GATE
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --binary=x --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-identity-list.test.tmp/out --perf-buildid-list=x
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test --check-prefix=GATE
+# .---command stderr------------
+# | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test:55:9: error: GATE: expected string not found in input
+# | # GATE: IP-only options require --ip-samples --ip-aggregation=sum --format=gcc
+# |         ^
+# | <stdin>:1:1: note: scanning from here
+# | llvm-profgen: error: IP-only options require --ip-samples
+# | ^
+# | <stdin>:1:22: note: possible intended match here
+# | llvm-profgen: error: IP-only options require --ip-samples
+# |                      ^
+# | 
+# | Input file: <stdin>
+# | Check file: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-identity-list.test
+# | 
+# | -dump-input=help explains the following input dump.
+# | 
+# | Input was:
+# | <<<<<<
+# |             1: llvm-profgen: error: IP-only options require --ip-samples 
+# | check:55'0     X~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ error: no match found
+# | check:55'1                          ?                                     possible intended match
+# | >>>>>>
+# `-----------------------------
+# error: command failed with exit status: 1
+
+--
+]]></failure>
+</testcase>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-identity-matrix.test" time="0.73"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-identity-probe.test" time="0.25"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-invalid.test" time="0.29"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-options.test" time="0.05">
+  <failure><![CDATA[Exit Code: 1
+
+Command Output (stdout):
+--
+# RUN: at line 1
+not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-multi-load.perfbin --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-options.test.tmp.out --ip-samples --ip-aggregation=sum --format=gcc --unsymbolized-profile=x 2>&1 | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-options.test --check-prefix=OPT0
+# executed command: not /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-profgen --binary=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-multi-load.perfbin --output=/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/test/tools/llvm-profgen/Output/ip-options.test.tmp.out --ip-samples --ip-aggregation=sum --format=gcc --unsymbolized-profile=x
+# executed command: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/FileCheck /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-options.test --check-prefix=OPT0
+# .---command stderr------------
+# | /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-options.test:2:9: error: OPT0: expected string not found in input
+# | # OPT0: option --unsymbolized-profile is not supported with --ip-samples --ip-aggregation=sum --format=gcc
+# |         ^
+# | <stdin>:1:1: note: scanning from here
+# | llvm-profgen: error: option --unsymbolized-profile is not supported with --ip-samples
+# | ^
+# | <stdin>:1:22: note: possible intended match here
+# | llvm-profgen: error: option --unsymbolized-profile is not supported with --ip-samples
+# |                      ^
+# | 
+# | Input file: <stdin>
+# | Check file: /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/test/tools/llvm-profgen/ip-options.test
+# | 
+# | -dump-input=help explains the following input dump.
+# | 
+# | Input was:
+# | <<<<<<
+# |            1: llvm-profgen: error: option --unsymbolized-profile is not supported with --ip-samples 
+# | check:2'0     X~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ error: no match found
+# | check:2'1                          ?                                                                 possible intended match
+# | >>>>>>
+# `-----------------------------
+# error: command failed with exit status: 1
+
+--
+]]></failure>
+</testcase>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-real-records.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-segments.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-selection.test" time="0.07"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="ip-transition.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="merge-cold-profile.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="missing-dwarf.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="mmapEvent.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="multi-load-segs.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="noinline-cs-noprobe.test" time="0.12"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="noinline-cs-pseudoprobe.test" time="0.05"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="noinline-noprobe.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="noinline-pseudoprobe.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="profile-density.test" time="0.03"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="pseudoprobe-decoding-discriminator.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="pseudoprobe-decoding.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="recursion-compression-noprobe.test" time="0.04"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="recursion-compression-pseudoprobe.test" time="0.05"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="separate-debuginfo-binary.test" time="0.09"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="split-dwarf.test" time="0.25"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="symbolize.test" time="0.02"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="truncated-pseudoprobe.test" time="0.01"/>
+<testcase classname="LLVM.tools/llvm-profgen" name="update-samples.test" time="0.02"/>
+</testsuite>
+</testsuites>

@@ -1,0 +1,134 @@
+Initial post validator expected stderr to contain only the final error; the existing no-DWARF warning caused its assertion to fail. Actual .plt samples additionally contradict the task prediction of all no_cu, but follow frozen 5.4.2. The final validator independently checked GNU ELF section ranges and accepted outside=no_cu+plt, usable=0, exit1, no output. No LLVM code changed.
+The system Python apport exception hook failed during imports (a local temp inspect.py shadowed stdlib inspect); no external crash-file write was observed. Its full traceback follows.
+
+TOOL 82af1d6a442bcb3771609c0fbdfe05570471321276042b3c8d22ec09c7953ac0
+LIT_FINAL_PASS original50 unchanged
+RUN ['python3', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/c1_baseline.py', '--expected-tool-sha', '82af1d6a442bcb3771609c0fbdfe05570471321276042b3c8d22ec09c7953ac0', '--manifest', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/counting-final/c1.json', '--compare', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/c1-baseline.json']
+EXIT 0
+RUN ['python3', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/check_ip_counts_addr2line.py', '--output-dir', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/independent-final']
+EXIT 0
+RUN ['python3', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/run_full.py', 'full-final']
+EXIT 0
+Traceback (most recent call last):
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/post_final.py", line 27, in <module>
+    assert r['exit']==1 and not r['output_created'] and r['stderr']=='llvm-profgen: error: IP sample mode: no usable samples\n',r
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'label': '05-fixed', 'input': 'temp/rpi4-prefreeze/fixed_dsoff.txt', 'input_sha256': 'f3d9245d0cd2971cadc6561159bc92ba202264bd39b1cec61e47e5c35480f9cd', 'elf': 'temp/rpi4-prefreeze/libavcodec.so.62.11.100', 'elf_sha256': '9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56', 'target_path': '/usr/lib/libavcodec.so.62.11.100', 'command': ['nice', '-n', '19', 'ionice', '-c3', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2', '--library-path', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen', '--ip-samples', '--ip-aggregation=sum', '--format=text', '--allow-missing-build-id', '--show-ip-address-counts', '--show-mmap-events', '--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100', '--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$', '--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/fixed_dsoff.txt', '--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/full-final/05-fixed.profile'], 'lines': 7703, 'independent_line_counts': {'PERF_RECORD_MMAP': 11, 'PERF_RECORD_MMAP2': 33, 'samples': 7659}, 'event_counts': {'cycles': 7659}, 'input_pid_unknown': 0, 'input_deleted_samples': 0, 'input_kernel_dso_counts': {'[kernel.kallsyms]': 393}, 'target_path_samples': 6496, 'lost_L': 0, 'record_examples': {'PERF_RECORD_MMAP': [{'line': 1, 'raw': '      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text'}, {'line': 2, 'raw': '      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko'}, {'line': 3, 'raw': '      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko'}], 'PERF_RECORD_MMAP2': [{'line': 12, 'raw': '  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0x47c000(0x8000) @ 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0'}, {'line': 13, 'raw': '  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6f0a000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3'}, {'line': 14, 'raw': '  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xbefda000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]'}]}, 'exit': 1, 'accepted_whole_file': False, 'accepted_prefix_lines': None, 'stderr': 'warning: Loading of DWARF info completed, but no binary functions have been retrieved.\nllvm-profgen: error: IP sample mode: no usable samples\n', 'tool_stats': {'input': 7659, 'after_event': 7659, 'after_pid': 7659, 'pid_unknown': 0, 'kernel': 393, 'other_dso': 770, 'unmapped': 0, 'target': 6496, 'unmapped_in_target': 0, 'lost_records': 0, 'lost_L': 0, 'mappings': 44}, 'wall_seconds': 0.06769638601690531, 'peak_RSS_KiB': 40372, 'output_created': False, 'generation': ['IP-GENERATION p_ref=1000003 source=automatic weight=period aggregation=sum fs_discriminator=false', 'IP-GENERATION in_cu_no_subprogram samples=0 period_sum=0', 'IP-GENERATION in_func_no_line samples=0 period_sum=0', 'IP-GENERATION no_cu samples=6473 period_sum=6473019419', 'IP-GENERATION outside_dwarf_func samples=6496 period_sum=6496019488', 'IP-GENERATION plt samples=23 period_sum=23000069', 'IP-GENERATION usable samples=0 period_sum=0']}
+Error in sys.excepthook:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 228, in partial_apport_excepthook
+    return apport_excepthook(binary, exc_type, exc_obj, exc_tb)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/apport_python_hook.py", line 66, in apport_excepthook
+    import apport.report
+  File "/usr/lib/python3/dist-packages/apport/__init__.py", line 8, in <module>
+    from apport.report import Report
+  File "/usr/lib/python3/dist-packages/apport/report.py", line 45, in <module>
+    import apport.fileutils
+  File "/usr/lib/python3/dist-packages/apport/fileutils.py", line 32, in <module>
+    from problem_report import ProblemReport
+  File "/usr/lib/python3/dist-packages/problem_report.py", line 215, in <module>
+    @dataclasses.dataclass
+     ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1268, in dataclass
+    return wrap(cls)
+           ^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1258, in wrap
+    return _process_class(cls, init, repr, eq, order, unsafe_hash,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 970, in _process_class
+    cls_annotations = inspect.get_annotations(cls)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'inspect' has no attribute 'get_annotations'
+
+Original exception was:
+Traceback (most recent call last):
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/post_final.py", line 27, in <module>
+    assert r['exit']==1 and not r['output_created'] and r['stderr']=='llvm-profgen: error: IP sample mode: no usable samples\n',r
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'label': '05-fixed', 'input': 'temp/rpi4-prefreeze/fixed_dsoff.txt', 'input_sha256': 'f3d9245d0cd2971cadc6561159bc92ba202264bd39b1cec61e47e5c35480f9cd', 'elf': 'temp/rpi4-prefreeze/libavcodec.so.62.11.100', 'elf_sha256': '9c72c8cc96dbfd101a03414ff772fe1c6f2f41b4014234869de1be03d6ea5f56', 'target_path': '/usr/lib/libavcodec.so.62.11.100', 'command': ['nice', '-n', '19', 'ionice', '-c3', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2', '--library-path', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen', '--ip-samples', '--ip-aggregation=sum', '--format=text', '--allow-missing-build-id', '--show-ip-address-counts', '--show-mmap-events', '--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100', '--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$', '--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/fixed_dsoff.txt', '--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/full-final/05-fixed.profile'], 'lines': 7703, 'independent_line_counts': {'PERF_RECORD_MMAP': 11, 'PERF_RECORD_MMAP2': 33, 'samples': 7659}, 'event_counts': {'cycles': 7659}, 'input_pid_unknown': 0, 'input_deleted_samples': 0, 'input_kernel_dso_counts': {'[kernel.kallsyms]': 393}, 'target_path_samples': 6496, 'lost_L': 0, 'record_examples': {'PERF_RECORD_MMAP': [{'line': 1, 'raw': '      0/0       PERF_RECORD_MMAP -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000]: x [kernel.kallsyms]_text'}, {'line': 2, 'raw': '      0/0       PERF_RECORD_MMAP -1/0: [0xbf000000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/extcon-usb-fixed.ko'}, {'line': 3, 'raw': '      0/0       PERF_RECORD_MMAP -1/0: [0xbf002000(0x3000) @ 0]: x /lib/modules/6.12.80-arm-rpi4-v7l/extra/inform-reboot.ko'}], 'PERF_RECORD_MMAP2': [{'line': 12, 'raw': '  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0x47c000(0x8000) @ 0 b3:02 5297 140845986]: r-xp /usr/bin/gst-launch-1.0'}, {'line': 13, 'raw': '  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xb6f0a000(0x2e000) @ 0 b3:02 1070 1436046806]: r-xp /usr/lib/ld-linux.so.3'}, {'line': 14, 'raw': '  11948/11948   PERF_RECORD_MMAP2 11948/11948: [0xbefda000(0x1000) @ 0 00:00 0 0]: r-xp [sigpage]'}]}, 'exit': 1, 'accepted_whole_file': False, 'accepted_prefix_lines': None, 'stderr': 'warning: Loading of DWARF info completed, but no binary functions have been retrieved.\nllvm-profgen: error: IP sample mode: no usable samples\n', 'tool_stats': {'input': 7659, 'after_event': 7659, 'after_pid': 7659, 'pid_unknown': 0, 'kernel': 393, 'other_dso': 770, 'unmapped': 0, 'target': 6496, 'unmapped_in_target': 0, 'lost_records': 0, 'lost_L': 0, 'mappings': 44}, 'wall_seconds': 0.06769638601690531, 'peak_RSS_KiB': 40372, 'output_created': False, 'generation': ['IP-GENERATION p_ref=1000003 source=automatic weight=period aggregation=sum fs_discriminator=false', 'IP-GENERATION in_cu_no_subprogram samples=0 period_sum=0', 'IP-GENERATION in_func_no_line samples=0 period_sum=0', 'IP-GENERATION no_cu samples=6473 period_sum=6473019419', 'IP-GENERATION outside_dwarf_func samples=6496 period_sum=6496019488', 'IP-GENERATION plt samples=23 period_sum=23000069', 'IP-GENERATION usable samples=0 period_sum=0']}
+a64-pie  contains 19 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS counting.c
+     2: 00000000000012f0     0 NOTYPE  LOCAL  DEFAULT    7 $x
+     3: 00000000000002c0     0 NOTYPE  LOCAL  DEFAULT    6 $d
+     4: 00000000000034e0     4 OBJECT  LOCAL  DEFAULT   10 salt
+     5: 00000000000002d0     0 NOTYPE  LOCAL  DEFAULT    6 $d
+     6: 00000000000034e0     0 NOTYPE  LOCAL  DEFAULT   10 $d
+     7: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   11 $d
+     8: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   12 $d
+     9: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   13 $d
+    10: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   14 $d
+    11: 000000000000001f     0 NOTYPE  LOCAL  DEFAULT   15 $d
+    12: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   16 $d
+    13: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   17 $d
+    14: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   18 $d
+    15: 0000000000002450     0 NOTYPE  LOCAL  HIDDEN     8 _DYNAMIC
+    16: 00000000000012f0   156 FUNC    GLOBAL DEFAULT    7 count_loop
+    17: 000000000000138c   104 FUNC    GLOBAL DEFAULT    7 two_sites
+    18: 00000000000013f4    88 FUNC    GLOBAL DEFAULT    7 main
+
+a64-fs       Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS counting.c
+     2: 00000000000013e4     0 NOTYPE  LOCAL  DEFAULT    8 $x
+     3: 00000000000003b0     0 NOTYPE  LOCAL  DEFAULT    7 $d
+     4: 0000000000003658     4 OBJECT  LOCAL  DEFAULT   13 salt
+     5: 00000000000003c0     0 NOTYPE  LOCAL  DEFAULT    7 $d
+     6: 0000000000003658     0 NOTYPE  LOCAL  DEFAULT   13 $d
+     7: 00000000000003e0     0 NOTYPE  LOCAL  DEFAULT    7 $d
+     8: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   14 $d
+     9: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   15 $d
+    10: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   16 $d
+    11: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   17 $d
+    12: 000000000000001f     0 NOTYPE  LOCAL  DEFAULT   18 $d
+    13: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   19 $d
+    14: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   20 $d
+    15: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT   21 $d
+    16: 0000000000002580     0 NOTYPE  LOCAL  HIDDEN    10 _DYNAMIC
+    17: 00000000000013e4   156 FUNC    GLOBAL DEFAULT    8 count_loop
+    18: 0000000000001480   104 FUNC    GLOBAL DEFAULT    8 two_sites
+    19: 00000000000014e8    88 FUNC    GLOBAL DEFAULT    8 main
+    20: 00000000000003e0     1 OBJECT  WEAK   DEFAULT    7 __llvm_fs_discriminator__
+
+thumb-count  contains 17 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00000000     0 FILE    LOCAL  DEFAULT  ABS counting.c
+     2: 00001298     0 NOTYPE  LOCAL  DEFAULT    9 $t
+     3: 00001340     0 NOTYPE  LOCAL  DEFAULT    9 $d
+     4: 0000342c     4 OBJECT  LOCAL  DEFAULT   14 salt
+     5: 00001344     0 NOTYPE  LOCAL  DEFAULT    9 $t
+     6: 00001378     0 NOTYPE  LOCAL  DEFAULT    9 $d
+     7: 00001380     0 NOTYPE  LOCAL  DEFAULT   10 $a
+     8: 00001390     0 NOTYPE  LOCAL  DEFAULT   10 $d
+     9: 000013a0     0 NOTYPE  LOCAL  DEFAULT   10 $a
+    10: 000013ac     0 NOTYPE  LOCAL  DEFAULT   10 $d
+    11: 000013b0     0 NOTYPE  LOCAL  DEFAULT   10 $a
+    12: 000013bc     0 NOTYPE  LOCAL  DEFAULT   10 $d
+    13: 000023c0     0 NOTYPE  LOCAL  HIDDEN    11 _DYNAMIC
+    14: 00001299   106 FUNC    GLOBAL DEFAULT    9 count_loop
+    15: 00001305    64 FUNC    GLOBAL DEFAULT    9 two_sites
+    16: 00001345    56 FUNC    GLOBAL DEFAULT    9 main
+
+arm-count  contains 17 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00000000     0 FILE    LOCAL  DEFAULT  ABS counting.c
+     2: 00001298     0 NOTYPE  LOCAL  DEFAULT    9 $a
+     3: 0000138c     0 NOTYPE  LOCAL  DEFAULT    9 $d
+     4: 0000349c     4 OBJECT  LOCAL  DEFAULT   14 salt
+     5: 0000139c     0 NOTYPE  LOCAL  DEFAULT    9 $a
+     6: 000013e4     0 NOTYPE  LOCAL  DEFAULT    9 $d
+     7: 000013f0     0 NOTYPE  LOCAL  DEFAULT   10 $a
+     8: 00001400     0 NOTYPE  LOCAL  DEFAULT   10 $d
+     9: 00001410     0 NOTYPE  LOCAL  DEFAULT   10 $a
+    10: 0000141c     0 NOTYPE  LOCAL  DEFAULT   10 $d
+    11: 00001420     0 NOTYPE  LOCAL  DEFAULT   10 $a
+    12: 0000142c     0 NOTYPE  LOCAL  DEFAULT   10 $d
+    13: 00002430     0 NOTYPE  LOCAL  HIDDEN    11 _DYNAMIC
+    14: 00001298   148 FUNC    GLOBAL DEFAULT    9 count_loop
+    15: 0000132c   112 FUNC    GLOBAL DEFAULT    9 two_sites
+    16: 0000139c    76 FUNC    GLOBAL DEFAULT    9 main
+

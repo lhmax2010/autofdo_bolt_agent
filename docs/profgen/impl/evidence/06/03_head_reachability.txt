@@ -1,0 +1,78 @@
+docs/profgen/design/02_llvm_profgen_enhance_design_v0.7.md
+306: #### 5.4.4 聚合方式（`--ip-aggregation`）与取整
+307: 
+308: 设 `d(a)` 为从 discriminator 解码出的 duplication factor，`n(k)` 为聚合键为 k 的指令总数：包括未采到的指令，包括各展开副本，跨该函数的全部 DWARF 区间，排除数据（`$d`）。
+309: 
+310: | 方式 | 整数分子 | 写出值 |
+311: |---|---|---|
+312: | `sum` | `Σ u(a)`，a 取键 k 的全部地址 | 分子 / P_ref |
+313: | `max` | `max (u(a) × d(a))` | 分子 / P_ref |
+314: | `avg` | `Σ (u(a) × d(a))` | 分子 / (P_ref × n(k)) |
+315: 
+316: 推导（理想化）：一段代码展开为 d 份、每份执行 N/d 次，设指令 i 的代价为 c_i，则 `u(a) ∝ (N/d)·c_i`。`sum` 不乘 d，自然得到 `N·Σc_i`；`max` 的原始最大值为 `(N/d)·max c_i`，乘 d 后为 `N·max c_i`；`avg` 乘 d 并除以含全部副本的 `n(k)` 后为 `N·c̄`。`max` 的语义与现有 LBR 路径（`L/ProfileGenerator.cpp:393–412`）及 Google 的实现（`symbol_map.cc:622–624`、`:648–655`）一致。
+317: 
+318: 1. 整数累计：所有分子用整数保存，乘法与加法用 LLVM Support 的宽整数或溢出检查完成；任何中间值或最终值超出 uint64 时报错。不在逐地址、逐内联帧插入时提前取整。
+319: 2. 取整：聚合完成后，每个键只做一次除法与取整（四舍五入，0.5 向上）。写出值为 0 而分子为正（即被采到的键）时写 1，避免把采到的位置写成 0。
+320: 3. 写出前任一 body 或 total 超过 UINT32_MAX 时告警并写入报告（归一化后正常不应出现）。
+321: 4. `avg` 的 `n(k)` 由 5.7.2 的按需枚举得到。指令边界无法确定时按 5.7.2 第 6 条处理（整次运行失败）。
+322: 5. 默认值不在设计阶段拍板，由 5.8、5.9 的评估决定，判据见 5.8 第 6 条。证据不足以区分各方式时选 `max`，因为它与两个参考实现对齐；这是保守选择，不称为统计等价。
+323: 
+324: #### 5.4.5 函数 total
+325: 
+326: 1. 每个样本的整数分子 `u(a)` 对其内联链上每一层的 FunctionSamples（叶子及全部祖先）各计一次，不乘指令长度（LBR 路径按字节累计，`L/ProfileGenerator.cpp:715–720`），也不把已含 inlinee 的父 total 与 inlinee total 重复相加。
+327: 2. total 在独立的整数结构中累计，最后与 body 一样只做一次除以 P_ref 的取整；正分子对应的 profile，其 total 写出后至少为 1。
+328: 3. total 与聚合方式无关，只有 body 随聚合方式变化，这样比较聚合方式时只改变一个变量。
+329: 
+330: #### 5.4.6 入口计数（`--ip-head-samples`）
+331: 
+332: 1. 消费端行为：
+333:    - 不开 profi 时，入口块所在等价类的权重和函数入口计数都是 `HeadSamples + 1`（`llvm/include/llvm/Transforms/Utils/SampleProfileLoaderBaseImpl.h:624–627`、`:1060–1061`）。不写 head 时所有函数的入口计数都是 1，基于入口计数的判定（`isFunctionEntryCold`，`ProfileSummaryInfo.cpp:105–116`）会把这类函数当作冷入口；是否落在冷阈值内取决于该 profile 的 summary（`isColdCount`，`:186–188`）。`isFunctionColdInCallGraph` 需要入口、调用与全部块都冷才判冷，不受此单独影响。
+334:    - 开 profi 时，入口计数取 profi 推断出的入口块权重，推断结果为 0 时才回退到 `HeadSamples + 1`（`SampleProfileLoaderBaseImpl.h:1089–1095`）。
+335:    - 非 CS profile 的内联决策用 `getHeadSamplesEstimate` 估计 head（`llvm/include/llvm/ProfileData/SampleProf.h:1000–1021`）。
+336: 2. `none`：不写 head samples。前提是编译与链接两步都开启 profi：
+337:    - 非 LTO 构建：clang 驱动在编译作业中默认注入 profi（第 1 节第 6 条）。
+338:    - (Thin)LTO 构建：链接步骤不会自动注入，post-link 的 sample loader 默认关闭 profi，必须在链接步骤另外传入（lld 写法为 `-Wl,-mllvm,-sample-profile-use-profi`；其他链接器的写法未核实），链接步骤还须传入同一 profile（5.9 第 1 条）。目前的 optflags 与 `ffmpeg.spec` 都不含 `-flto`。
+339:    - 报告的 `consumer_hints` 给出这两条提示。
+340: 3. `entry-estimate`：在 body、callsite 与 total 都构建完成后，对顶层 FunctionSamples 调用 `getHeadSamplesEstimate()`，把结果写入 head；内联调用点下的 profile 不额外写 head。该估计在最早的内联调用点行号更小时会递归使用调用点的估计，并在 total 为正时至少返回 1。它不等于真实的入口执行次数；不得用函数 total 冒充入口计数。
+341: 4. 默认值暂定 `none`，不能只因驱动默认开启 profi 就冻结；由 5.9 中"profi 开/关 × head 策略"的分组确定。
+342: 
+343: #### 5.4.7 补零（`--ip-zero-fill`）
+344: 
+345: 1. 背景：LBR 路径会给有样本函数的全部区间补 0（`L/ProfileGenerator.cpp:672–690`），编译器把 0 理解为"不执行"。对稀疏的 IP 采样，"没采到"不等于"没执行"，而 profi 会把 0 当作已知的冷块。
+346: 2. `none`：未采到的位置保持缺失（未知），不复用 LBR 的补零逻辑。
+347: 3. `sampled-functions`：对有样本的函数，把其 DWARF 区间内未采到的键写为 0。枚举方法、可用条件与失败处理同 5.7.2。
+348: 4. 无样本的函数在任何策略下都不写入。默认 `none`（暂定）。
+349: 
+350: #### 5.4.8 采样位置漂移（`--ip-skid`）
+351: 
+352: 1. 背景：异步采样得到的 IP 往往是"下一条将要执行的指令"，cpu-clock 是中断返回地址，PMU 溢出也有漂移。计数会系统性地前移，还可能越过已跳转的分支落到目标块。
+353: 2. `none`：不调整。
+354: 3. `prev-inst`：把地址换成布局上的前一条指令的地址，前提是前一条指令仍在同一函数区间内且不在数据范围中；否则不调整，计入 `skid_unadjusted`。前一条指令由 5.7.2 的边界枚举得到（Thumb 指令长度为 2 或 4 字节，不能向后猜）。可用条件与失败处理同 5.7.2。
+355: 4. 已知局限：跳转之后，实际上一条执行的指令不是布局上的上一条。默认 `none`（暂定），与聚合方式一起在 5.8 评估。
+
+temp/llvm-profgen-enh/llvm/include/llvm/ProfileData/SampleProf.h
+1000:   uint64_t getHeadSamplesEstimate() const {
+1001:     if (FunctionSamples::ProfileIsCS && getHeadSamples()) {
+1002:       // For CS profile, if we already have more accurate head samples
+1003:       // counted by branch sample from caller, use them as entry samples.
+1004:       return getHeadSamples();
+1005:     }
+1006:     uint64_t Count = 0;
+1007:     // Use either BodySamples or CallsiteSamples which ever has the smaller
+1008:     // lineno.
+1009:     if (!BodySamples.empty() &&
+1010:         (CallsiteSamples.empty() ||
+1011:          BodySamples.begin()->first < CallsiteSamples.begin()->first))
+1012:       Count = BodySamples.begin()->second.getSamples();
+1013:     else if (!CallsiteSamples.empty()) {
+1014:       // An indirect callsite may be promoted to several inlined direct calls.
+1015:       // We need to get the sum of them.
+1016:       for (const auto &FuncSamples : CallsiteSamples.begin()->second)
+1017:         Count += FuncSamples.second.getHeadSamplesEstimate();
+1018:     }
+1019:     // Return at least 1 if total sample is not 0.
+1020:     return Count ? Count : TotalSamples > 0;
+1021:   }
+1022: 
+
+Patch-4 admissible successful profiles: positive sampled body numerators round to at least 1; zero-fill=none inserts no unsampled zero positions. Each generated leaf has positive body. An internal node has positive body and/or children recursively having positive head estimate. Thus the raw Count in getHeadSamplesEstimate is positive (excluding arithmetic overflow, which must fail); the Count==0 && TotalSamples>0 fallback cannot be reached by legal patch-4 IP input. This is a test-scope issue, not a change to the head rule.

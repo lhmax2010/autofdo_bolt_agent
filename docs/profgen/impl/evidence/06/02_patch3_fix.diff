@@ -1,0 +1,74 @@
+diff --git a/llvm/test/tools/llvm-profgen/ip-identity-list.test b/llvm/test/tools/llvm-profgen/ip-identity-list.test
+index 51e9255f7a91..dcde930739b4 100644
+--- a/llvm/test/tools/llvm-profgen/ip-identity-list.test
++++ b/llvm/test/tools/llvm-profgen/ip-identity-list.test
+@@ -60,6 +60,20 @@
+ # PID: Unknown command line argument
+ # PID: samples with pid -1 never match --pid
+ 
++# Unrelated conflicts do not alter verified-path target evidence.
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C1.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$ --perf-buildid-list=%t/unrelated.ids > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=UNRELATED
++# UNRELATED: IP-IDENTITY path="/unrelated" unrelated buildid-list conflict
++# UNRELATED: IP-IDENTITY final=verified-path
++# UNRELATED: profile generation is not implemented yet
++# RUN: test ! -e %t/out
++# Candidate conflicts remain mismatch, even with allow-missing.
++# RUN: not llvm-profgen --ip-samples --show-ip-address-counts --perfscript=%t/C1.perfscript --output=%t/out --binary=%S/Inputs/ip-mode/a64-pie.perfbin --binary-match-regex=^/target$ --perf-buildid-list=%t/related.ids --allow-missing-build-id > %t/stdout 2> %t/stderr
++# RUN: cat %t/stdout %t/stderr | FileCheck %s --check-prefix=RELATED
++# RELATED: IP-IDENTITY final=mismatch
++# RELATED: IP sample mode: build-id mismatch
++# RUN: test ! -e %t/out
++
+ #--- C1.perfscript
+ 17/17 7 cycles: 13f4 (/target+0x3f4)
+ 0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target
+@@ -100,3 +114,10 @@ ff
+ 0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 b3:02 1 0]: r-xp /target with spaces
+ #--- C8.ids
+                                          /target with spaces
++#--- unrelated.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++11 /unrelated
++22 /unrelated
++#--- related.ids
++280854d1cea103bf480e219b336025e337e5a10e /target
++11 /target
+diff --git a/llvm/tools/llvm-profgen/IPIdentity.cpp b/llvm/tools/llvm-profgen/IPIdentity.cpp
+index 061a453488bf..71804eace844 100644
+--- a/llvm/tools/llvm-profgen/IPIdentity.cpp
++++ b/llvm/tools/llvm-profgen/IPIdentity.cpp
+@@ -1,5 +1,5 @@
+-//===- IPIdentity.cpp - IP sample identity checks
+-//--------------------------===//
++//===- IPIdentity.cpp - IP identity checks ------------------------------===//
++//
+ //
+ // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ // See https://llvm.org/LICENSE.txt for license information.
+@@ -228,14 +228,19 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+         "path=" + quote(Path) + " executable_mappings=" +
+         std::to_string(ExecutableCount) + " result=" + name(PathGrade).str());
+   }
+-  // Conflicting IDs for the same list path are invalid evidence even if that
+-  // path was not selected as the target. Do not silently choose the last ID.
++  // Only candidate paths participate in identity decisions. Retain unrelated
++  // conflicts as diagnostics without changing the target's evidence grade.
+   for (const auto &[Path, IDs] : List)
+     if (IDs.size() > 1) {
+-      Overall = Grade::Mismatch;
+-      IdentityDiagnostics.push_back(
+-          "path=" + quote(Path) +
+-          " source=buildid-list result=mismatch reason=conflicting-ids");
++      if (Candidates.count(Path)) {
++        Overall = Grade::Mismatch;
++        IdentityDiagnostics.push_back(
++            "path=" + quote(Path) +
++            " source=buildid-list result=mismatch reason=conflicting-ids");
++      } else {
++        IdentityDiagnostics.push_back("path=" + quote(Path) +
++                                      " unrelated buildid-list conflict");
++      }
+     }
+   IdentityDiagnostics.push_back("final=" + name(Overall).str());
+   if (Overall == Grade::Mismatch)

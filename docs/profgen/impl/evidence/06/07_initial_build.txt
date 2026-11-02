@@ -1,0 +1,115 @@
+STATUS
+START 2026-11-02T19:46:27+08:00
+BUILD_START 2026-11-02T19:46:27+08:00
+END 2026-11-02T20:18:50+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 1942.871
+NINJA_TOTAL_OBSERVED 112
+STOP_REASON 
+ALL-END 2026-11-02T20:18:50+08:00 OK
+
+PREFLIGHT
+TIME 2026-11-02T19:46:27+08:00
+
+HEAVY_COUNT 0
+
+RESOURCES
+TIME 2026-11-02T19:46:27+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       20848         388        1125       11886       10692
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 19:46:27 up 5 days, 21:24,  1 user,  load average: 11.40, 9.03, 5.70
+EXIT 0
+TIME 2026-11-02T19:56:30+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       20587        2899        1167        9679       10953
+Swap:           4095        4094           1
+EXIT 0
+$ uptime
+ 19:56:30 up 5 days, 21:34,  1 user,  load average: 5.92, 8.97, 7.68
+EXIT 0
+TIME 2026-11-02T20:06:30+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       20375        4167        1112        8567       11165
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 20:06:30 up 5 days, 21:44,  1 user,  load average: 2.27, 4.42, 6.25
+EXIT 0
+TIME 2026-11-02T20:16:30+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       23665        1135        1305        8502        7874
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 20:16:30 up 5 days, 21:54,  1 user,  load average: 7.17, 8.10, 8.28
+EXIT 0
+TIME 2026-11-02T20:18:50+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       21647        5285        1324        6682        9893
+Swap:           4095        4091           4
+EXIT 0
+$ uptime
+ 20:18:50 up 5 days, 21:56,  1 user,  load average: 8.53, 9.03, 8.65
+EXIT 0
+
+SELECTED LOG LINES
+1: BUILD_START 2026-11-02T19:46:27+08:00 COMMAND ['setsid', '--wait', 'nice', '-n', '19', 'ionice', '-c3', 'gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_baseline.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--incremental', '--threads', '1', '--define', '_smp_mflags -j10', '--define', 'mlgo_build_jobs 10']
+2123: [  275s] [103/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPIdentity.cpp.o
+2124: [  276s] [104/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPPerfReader.cpp.o
+2126: [  285s] [106/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/MissingFrameInferrer.cpp.o
+2127: [  287s] [107/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/CSPreInliner.cpp.o
+2128: [  288s] [108/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/llvm-profgen.cpp.o
+2129: [  289s] [109/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/PerfReader.cpp.o
+2130: [  290s] [110/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/ProfileGenerator.cpp.o
+2131: [  290s] /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/ProfileGenerator.cpp:367:18: warning: 'make_scope_exit<(lambda at /home/abuild/rpmbuild/BUILD/llvm-22.1.8/llvm/tools/llvm-profgen/ProfileGenerator.cpp:367:34)>' is deprecated: Prefer calling the constructor of llvm::scope_exit directly. [-Wdeprecated-declarations]
+2142: [  290s] [111/112] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/ProfiledBinary.cpp.o
+2143: [  290s] [112/112] Linking CXX executable bin/llvm-profgen
+LOG LAST 40
+[ 1863s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 1865s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+[ 1866s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-debuginfo-22.1.8-1.x86_64.rpm
+[ 1866s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.64ljpA
+[ 1866s] + umask 022
+[ 1866s] + cd /home/abuild/rpmbuild/BUILD
+[ 1866s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 1884s] + cd llvm-22.1.8
+[ 1884s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 1884s] + exit 0
+[ 1884s] + rpmbuild --define '_smp_mflags -j10' --define 'mlgo_build_jobs 10' --define '_srcdefattr (-,root,root)' --nosignature --target=x86_64 --define '_build_create_debug 1' --short-circuit -bs /home/abuild/rpmbuild/SOURCES/llvm.spec
+[ 1897s] Building target platforms: x86_64
+[ 1897s] Building for target x86_64
+[ 1897s] Wrote: /home/abuild/rpmbuild/SRPMS/llvm-22.1.8-1.src.rpm
+[ 1897s] ... checking for files with abuild user/group
+[ 1898s] 
+[ 1898s] linhao-linux finished "build llvm.spec" at Mon Nov  2 12:18:32 UTC 2026.
+[ 1898s] 
+info: finished building llvm
+info: updating local repo
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.*
+START 2026-11-02T19:46:27+08:00
+BUILD_START 2026-11-02T19:46:27+08:00
+END 2026-11-02T20:18:50+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 1942.871
+NINJA_TOTAL_OBSERVED 112
+STOP_REASON 
+ALL-END 2026-11-02T20:18:50+08:00 OK

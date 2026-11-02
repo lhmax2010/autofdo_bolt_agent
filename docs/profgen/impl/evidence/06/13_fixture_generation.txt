@@ -1,0 +1,26 @@
+===- README.txt - IP counting fixture provenance -----------------------===
+Synthetic fixtures, generated from this directory. Head uses -no-discriminators so both inlinees share the same LineLocation (line12, discriminator0). Tools are Tizen GBS aarch64-root x86_64 accelerators. No host toolchain.
+nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=aarch64-tizen-linux-gnu -c classification.s -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/fixtures/classification.o
+EXIT 0
+nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/ld.lld --build-id=sha1 -e anchor -T classification.lds /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/fixtures/classification.o -o classification.perfbin
+EXIT 0
+nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/clang --target=aarch64-tizen-linux-gnu -ffreestanding -fPIC -O2 -g -gdwarf-4 -fdebug-info-for-profiling -mllvm -no-discriminators -funique-internal-linkage-names -ffile-prefix-map=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra=/ip-mode-extra -c head.c -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/fixtures/head.o
+EXIT 0
+nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/ld.lld --build-id=sha1 -shared -z max-page-size=4096 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch4/fixtures/head.o -o head.perfbin
+EXIT 0
+TOOL VERSIONS
+clang version 22.1.8
+Target: x86_64-tizen-linux-gnu
+Thread model: posix
+InstalledDir: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64
+
+LLD 22.1.8 (compatible with GNU linkers)
+
+GNU readelf (GNU Binutils) 2.43
+Copyright (C) 2024 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) any later version.
+This program has absolutely no warranty.
+
+classification.perfbin 5400 SHA256 254b8c9512828d9eddd0c64bf624f43760c878635bc29a51e359b8c073a75060
+head.perfbin 3704 SHA256 5e0915fe1b904a1f629095862be1f21a13c5eb2723399d35969abe75e364cbd9

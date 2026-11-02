@@ -1,0 +1,98 @@
+STATUS
+START 2026-11-02T20:18:51+08:00
+BUILD_START 2026-11-02T20:18:51+08:00
+END 2026-11-02T20:47:19+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 1707.474
+NINJA_TOTAL_OBSERVED 102
+STOP_REASON 
+ALL-END 2026-11-02T20:47:19+08:00 OK
+
+PREFLIGHT
+TIME 2026-11-02T20:18:51+08:00
+
+HEAVY_COUNT 0
+
+RESOURCES
+TIME 2026-11-02T20:18:51+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       21582        5337        1285        6656        9957
+Swap:           4095        4091           4
+EXIT 0
+$ uptime
+ 20:18:51 up 5 days, 21:56,  1 user,  load average: 8.17, 8.95, 8.63
+EXIT 0
+TIME 2026-11-02T20:28:54+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       23958        4333        1190        4897        7582
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 20:28:54 up 5 days, 22:06,  1 user,  load average: 14.44, 10.92, 9.02
+EXIT 0
+TIME 2026-11-02T20:38:53+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       20146        4916        1172        8107       11393
+Swap:           4095        4095           0
+EXIT 0
+$ uptime
+ 20:38:53 up 5 days, 22:16,  1 user,  load average: 5.66, 9.03, 9.63
+EXIT 0
+TIME 2026-11-02T20:47:19+08:00
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:           31540       19450        5283        1054        8386       12089
+Swap:           4095        4059          36
+EXIT 0
+$ uptime
+ 20:47:19 up 5 days, 22:24,  1 user,  load average: 10.89, 8.65, 8.72
+EXIT 0
+
+SELECTED LOG LINES
+1: BUILD_START 2026-11-02T20:18:51+08:00 COMMAND ['setsid', '--wait', 'nice', '-n', '19', 'ionice', '-c3', 'gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_baseline.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--incremental', '--threads', '1', '--define', '_smp_mflags -j10', '--define', 'mlgo_build_jobs 10']
+2121: [   53s] [101/102] Building CXX object tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/ProfileGenerator.cpp.o
+2122: [   54s] [102/102] Linking CXX executable bin/llvm-profgen
+LOG LAST 40
+[ 1676s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 1678s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+[ 1678s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-debuginfo-22.1.8-1.x86_64.rpm
+[ 1678s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.vMm4ke
+[ 1678s] + umask 022
+[ 1678s] + cd /home/abuild/rpmbuild/BUILD
+[ 1678s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 1680s] + cd llvm-22.1.8
+[ 1680s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 1680s] + exit 0
+[ 1680s] + rpmbuild --define '_smp_mflags -j10' --define 'mlgo_build_jobs 10' --define '_srcdefattr (-,root,root)' --nosignature --target=x86_64 --define '_build_create_debug 1' --short-circuit -bs /home/abuild/rpmbuild/SOURCES/llvm.spec
+[ 1683s] Building target platforms: x86_64
+[ 1683s] Building for target x86_64
+[ 1683s] Wrote: /home/abuild/rpmbuild/SRPMS/llvm-22.1.8-1.src.rpm
+[ 1683s] ... checking for files with abuild user/group
+[ 1684s] 
+[ 1684s] linhao-linux finished "build llvm.spec" at Mon Nov  2 12:47:04 UTC 2026.
+[ 1684s] 
+info: finished building llvm
+info: updating local repo
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/repos/tizen_unified_standard/x86_64/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.*
+START 2026-11-02T20:18:51+08:00
+BUILD_START 2026-11-02T20:18:51+08:00
+END 2026-11-02T20:47:19+08:00
+GBS_EXIT 0
+ELAPSED_SECONDS 1707.474
+NINJA_TOTAL_OBSERVED 102
+STOP_REASON 
+ALL-END 2026-11-02T20:47:19+08:00 OK

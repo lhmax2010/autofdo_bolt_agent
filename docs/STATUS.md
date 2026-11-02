@@ -26,7 +26,18 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-02；llvm-profgen补丁3，已完成）
+## 当前授权与执行状态（2026-11-02；补丁3修正与补丁4已完成）
+
+- LLVM补丁3从 `30ceb73e9dcbe233f747d1ed8c97d9e3919564b0` amend为 `399a72494db096f27e5c06f7464a5815a659f5fa`；无关buildid-list冲突仅诊断，候选冲突仍mismatch。独立GBS/lit/C1通过后才开始补丁4。
+- LLVM补丁4 `de8171b77cec5e547c8ffc2f7a5039a8b39b8577`，33文件、+1,045/-198行，新增7项lit；完成IP专用加载、period/sample、sum/max、精确取整、分层total、顶层head估计、分类与安全写profile。[报告](profgen/impl/06_patch4_counting.md)、[补丁4](../patches/profgen/0004-llvm-profgen-Generate-line-level-profiles-from-IP-sa.patch)、[提交审计](profgen/impl/evidence/06/17_commit_audit.json)。只提交工具/测试目录，未推LLVM远端或Gerrit。
+- 三轮GBS均退出0：补丁3独立964.136秒/103步；补丁4初次1942.871秒/112步；补丁4最终1707.474秒/102步（20:18:51–20:47:19+08:00，ALL-END OK）。初次lit两项测试预期错误已修正并留证。主机available采样最低7,582MiB，无低于2GiB采样点。
+- 最终lit70项：PASS68、FAIL0、UNSUPPORTED1、XFAIL1，原50逐项不变；C1每遍636条、两遍一致、对原基线0差异，20个新增IP测试排除。[lit](profgen/impl/evidence/06/08_final_lit_summary.json)、[C1](profgen/impl/evidence/06/09_final_c1_summary.json)。新工具SHA `82af1d6a442bcb3771609c0fbdfe05570471321276042b3c8d22ec09c7953ac0`。
+- GNU addr2line/readelf独立核对9组完整profile树0差异；14次完整导出地址/reader输出与补丁2逐字节一致。[GNU核对](profgen/impl/evidence/06/10_independent_counts.json)、[真实重放](profgen/impl/evidence/06/11_full_export_comparison.json)。
+- 实测偏离任务预测：05/09的strip libavcodec目标全部outside、usable0而失败不落盘，但少量样本属于plt，其余no_cu；9份plt计数/period和均与GNU节范围独立核对一致，遵守冻结5.4.2，没有改分类规则。[证据](profgen/impl/evidence/06/15_real_plt_verification.json)。
+- 用户已授权head兜底用例延期：补丁4只创建正body与有样本的内联树，原始head估计为0分支不可达；报告附实际代码不变量证明，补丁5补零后补用例。设计与库函数不变。
+- 下一步等待补丁5授权。avg/补零/skid枚举留5，质量报告与兜底回调留6；Agent设计开发仍在增强完成后。spec本地diff保持02原样、未提交，**正式非增量构建前必须撤销**。未连接板子、不改认证或索要密码；无新增已观察到的越界文件写入。
+
+## 前轮授权与执行状态（2026-11-02；llvm-profgen补丁3，修正前已完成，历史）
 
 - LLVM本地提交 `30ceb73e9dcbe233f747d1ed8c97d9e3919564b0`，16文件、+1,185/-71行，新增5个lit文件；只改工具/测试目录。[报告](profgen/impl/05_patch3_identity.md)、[补丁3](../patches/profgen/0003-llvm-profgen-Add-build-id-identity-checks-for-IP-sample-mode.patch)、[提交审计](profgen/impl/evidence/05/14_commit_audit.txt)。未向LLVM远端或Gerrit推送。
 - 实现build-id证据分级、保守汇总、分离调试文件身份链、probe拒绝及身份失败无输出副作用。用户澄清：目标无ID/输入有ID为mismatch；目标有ID/输入缺证据为unverified；目标与debug单边缺ID双向均为mismatch。
@@ -479,6 +490,8 @@
 - SDB 共享 daemon 已打开外部日志，若要求消除该例外，需由用户协调服务启动方式；本轮不重启服务、不删除遗留。
 
 ## 挂账
+
+- 补丁5实现补零后，补head兜底测试：有样本函数中，最小行号的位置为补零写入的0，第一个采到的位置在其后；开启 `--ip-head-samples=entry-estimate --ip-zero-fill=sampled-functions`，预期head=1，来自库函数total为正时至少返回1的兜底，不得用函数total替代入口计数。本轮用户已授权补丁4记录不可达证明并延期该用例。
 
 - 本轮授权generation=0为未知；inode被复用且一条记录generation为0时，替换可能无法发现。不能将allow-missing后的unverified提升为verified；源码与限制见[补丁3规则修正登记](profgen/impl/05_patch3_identity.md)。
 
