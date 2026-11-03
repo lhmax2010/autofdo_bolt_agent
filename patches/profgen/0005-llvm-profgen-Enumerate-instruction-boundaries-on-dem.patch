@@ -1,0 +1,4441 @@
+From d7bd4795c7fddfc239510b96fa6803b56b94dbb4 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Tue, 3 Nov 2026 14:27:43 +0800
+Subject: [PATCH] [llvm-profgen] Enumerate instruction boundaries on demand for
+ IP samples
+
+Enumerate sampled DWARF ranges using section-local ARM/AArch64 mapping symbols and runtime instruction bytes. Add average aggregation, sampled-function zero filling, previous-instruction skid adjustment, and deterministic boundary diagnostics with tests.
+
+Repair three AArch64 inputs that used .byte for instructions and accidentally introduced conflicting data mappings; .inst preserves the code bytes and existing boundary goldens.
+---
+ .../Inputs/ip-mode/bad-a64-end.perfbin        | Bin 5912 -> 5888 bytes
+ .../llvm-profgen/Inputs/ip-mode/bad-a64-end.s |   6 +-
+ .../Inputs/ip-mode/bad-a64-start.perfbin      | Bin 5912 -> 5888 bytes
+ .../Inputs/ip-mode/bad-a64-start.s            |   6 +-
+ .../Inputs/ip-mode/boundary-extra/README.txt  |  47 ++++
+ .../ip-mode/boundary-extra/a64-no-map.perfbin | Bin 0 -> 6080 bytes
+ .../ip-mode/boundary-extra/a64-no-map.s       |  83 +++++++
+ .../boundary-extra/arm-literal.perfbin        | Bin 0 -> 5576 bytes
+ .../ip-mode/boundary-extra/arm-literal.s      | 101 ++++++++
+ .../boundary-extra/arm-uniform.perfbin        | Bin 0 -> 5508 bytes
+ .../ip-mode/boundary-extra/arm-uniform.s      |  78 ++++++
+ .../boundary-extra/bad-a64-end.perfbin        | Bin 0 -> 6096 bytes
+ .../ip-mode/boundary-extra/bad-a64-end.s      |  83 +++++++
+ .../boundary-extra/bad-a64-start.perfbin      | Bin 0 -> 6104 bytes
+ .../ip-mode/boundary-extra/bad-a64-start.s    |  83 +++++++
+ .../boundary-extra/bad-arm-start.perfbin      | Bin 0 -> 5884 bytes
+ .../ip-mode/boundary-extra/bad-arm-start.s    | 197 +++++++++++++++
+ .../boundary-extra/bad-conflict.perfbin       | Bin 0 -> 5520 bytes
+ .../ip-mode/boundary-extra/bad-conflict.s     |  76 ++++++
+ .../ip-mode/boundary-extra/bad-no-map.perfbin | Bin 0 -> 5480 bytes
+ .../ip-mode/boundary-extra/bad-no-map.s       |  71 ++++++
+ .../boundary-extra/bad-thumb-end.perfbin      | Bin 0 -> 5884 bytes
+ .../ip-mode/boundary-extra/bad-thumb-end.s    | 197 +++++++++++++++
+ .../boundary-extra/bad-thumb-start.perfbin    | Bin 0 -> 5888 bytes
+ .../ip-mode/boundary-extra/bad-thumb-start.s  | 197 +++++++++++++++
+ .../ip-mode/boundary-extra/boundaries.debug   | Bin 0 -> 5824 bytes
+ .../ip-mode/boundary-extra/boundaries.perfbin | Bin 0 -> 5884 bytes
+ .../ip-mode/boundary-extra/boundaries.s       | 197 +++++++++++++++
+ .../boundaries.stripped.perfbin               | Bin 0 -> 4928 bytes
+ .../boundary-after_data_a32.perfbin           | Bin 0 -> 5884 bytes
+ .../boundary-extra/boundary-after_data_a32.s  | 197 +++++++++++++++
+ .../boundary-extra/boundary-at_state.perfbin  | Bin 0 -> 5880 bytes
+ .../boundary-extra/boundary-at_state.s        | 197 +++++++++++++++
+ .../boundary-before_state.perfbin             | Bin 0 -> 5884 bytes
+ .../boundary-extra/boundary-before_state.s    | 197 +++++++++++++++
+ .../boundary-discontinuous.perfbin            | Bin 0 -> 5892 bytes
+ .../boundary-extra/boundary-discontinuous.s   | 199 +++++++++++++++
+ .../boundary-extra/check-boundaries.py        | 162 ++++++++++++
+ .../discontinuous-uniform.perfbin             | Bin 0 -> 5824 bytes
+ .../boundary-extra/discontinuous-uniform.s    | 164 +++++++++++++
+ .../ip-mode/boundary-extra/pure-a64.perfbin   | Bin 0 -> 6096 bytes
+ .../Inputs/ip-mode/boundary-extra/pure-a64.s  |  83 +++++++
+ .../ip-mode/boundary-extra/pure-arm.perfbin   | Bin 0 -> 5524 bytes
+ .../Inputs/ip-mode/boundary-extra/pure-arm.s  |  85 +++++++
+ .../boundary-extra/section-adjacent.perfbin   | Bin 0 -> 9488 bytes
+ .../ip-mode/boundary-extra/section-adjacent.s |  77 ++++++
+ .../Inputs/ip-mode/pure-a64.perfbin           | Bin 5912 -> 5888 bytes
+ .../llvm-profgen/Inputs/ip-mode/pure-a64.s    |   6 +-
+ .../ip-boundary-avg-counting.test             |   4 +
+ .../llvm-profgen/ip-boundary-avg-manual.test  |   4 +
+ .../llvm-profgen/ip-boundary-metadata.test    |  38 +++
+ .../llvm-profgen/ip-boundary-negative.test    |   4 +
+ .../llvm-profgen/ip-boundary-positive.test    |   4 +
+ .../tools/llvm-profgen/ip-boundary-skid.test  |   4 +
+ .../tools/llvm-profgen/ip-boundary-split.test |   4 +
+ .../tools/llvm-profgen/ip-boundary-zero.test  |   4 +
+ .../llvm-profgen/ip-counting-options.test     |   6 -
+ llvm/tools/llvm-profgen/CMakeLists.txt        |   1 +
+ llvm/tools/llvm-profgen/IPBoundary.cpp        | 232 ++++++++++++++++++
+ llvm/tools/llvm-profgen/IPBoundary.h          |  66 +++++
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  | 147 +++++++++--
+ llvm/tools/llvm-profgen/ProfileGenerator.h    |   9 +
+ llvm/tools/llvm-profgen/ProfiledBinary.h      |   1 +
+ llvm/tools/llvm-profgen/llvm-profgen.cpp      |  21 +-
+ 64 files changed, 3298 insertions(+), 40 deletions(-)
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.debug
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.stripped.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.s
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-avg-counting.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-avg-manual.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-negative.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-positive.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-skid.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-split.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-zero.test
+ create mode 100644 llvm/tools/llvm-profgen/IPBoundary.cpp
+ create mode 100644 llvm/tools/llvm-profgen/IPBoundary.h
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-end.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-end.perfbin
+index e20fc11193cb98bbd82970b971496c27136221f5..6309ef7259e43cc398ac0b12c6348dacab221266 100644
+GIT binary patch
+delta 165
+zcmbQC*Pu5+gOOpQ=6imTZ+<~Jvr_iIn!TWC*Y7X3=Qs{DZJK<MQD*W6L6*%v0!@sQ
+zp9u;{vNM1H7nnpQxF!n<iA#!rgqYYF78oGQF);8>b`&}|nN>J=@>)Um%`w6<%)Be0
+iD)@mk+vHX;ZAOR58^!E7?+QUAWG62a6rFrdgbM(BM<rwc
+
+delta 163
+zcmZqBo1r&BgHd9m=6ik-X_JJ%dzDT{xa>|ibfH9Yf$J@Ak;xYsWhQSBWZCQ^(8M@-
+zo1l;+I|B%Cf=Oh8Yw|-uaY<gV5I3>}m@Ph8P)M9nV6vvr!O72s!ZteyD=_mOfGXn$
+b((IFS#k3hCCeIYJ=lm)Jkx-btP(&U8rk5di
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-end.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-end.s
+index 74e7880441be..59545ed21768 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-end.s
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-end.s
+@@ -1,11 +1,9 @@
+ .section .text,"ax",%progbits
+ .balign 4
+-.local $x
+-.type $x,%notype
+-$x:
+ .globl anchor
+ anchor:
+-.byte 0x1f,0x20,0x03,0xd5,0xc0,0x03,0x5f,0xd6
++.inst 0xd503201f
++.inst 0xd65f03c0
+ 
+ .section .debug_abbrev,"",%progbits
+ .byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0,0
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-start.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-start.perfbin
+index 4eec39b7cd3d33f8ecd548853f79c0c28af914c3..1812a9c821c0828e60f1ad71c1a9488d078ae71d 100644
+GIT binary patch
+delta 165
+zcmbQC*Pu5+gOOpQ=6ik-&bQx|>KpWF-0QU}`z7b~@x)Bgg2@*dWhQSBWZCQ^(8M_T
+znV^s)I|B%Cfk|Y7YqFq_xTFY3h>4wHfdR4{0|W15N1=n0S%rfquN7q993w2l%)0`r
+hf*(k;O>Py_W^|amQOut6t`I~*cJe|&(aGmTxBywFBUk_c
+
+delta 163
+zcmZqBo1r&BgHd9m=6imTT{Zp2XHCpaxoxK?t!i&N6mpqAdh$g^naLXjSvLC!G%-%z
+zCMYDy&Hw_OU=o?&n*2~uT#^?o#EmQgW{Xc26cT3?n5-#uaPo7Zu+0v_3e3C*pvw4x
+bH2dUSF>S_($uq_5Ill@)Bornu6p;r2D(N7W
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-start.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-start.s
+index fcf2d8626fd3..4fa9e09327ea 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-start.s
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/bad-a64-start.s
+@@ -1,11 +1,9 @@
+ .section .text,"ax",%progbits
+ .balign 4
+-.local $x
+-.type $x,%notype
+-$x:
+ .globl anchor
+ anchor:
+-.byte 0x1f,0x20,0x03,0xd5,0xc0,0x03,0x5f,0xd6
++.inst 0xd503201f
++.inst 0xd65f03c0
+ 
+ .section .debug_abbrev,"",%progbits
+ .byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0,0
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
+new file mode 100644
+index 000000000000..d02f49b7d00e
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
+@@ -0,0 +1,47 @@
++#===- boundary-extra - Symbolized copies of patch1 fixtures ----------------===#
++# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++# See https://llvm.org/LICENSE.txt for license information.
++# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++#===----------------------------------------------------------------------===#
++Patch1 manual fixtures have function ranges but no line tables. These copies
++add only DW_AT_stmt_list, DW_AT_decl_line=1 and a DWARF4 line table. Machine
++bytes, mapping symbols and function ranges are unchanged. No golden was read
++from llvm-profgen: boundary-golden.json is the independent patch1 oracle.
++Byte rows: raw line=1+(address-anchor), decl_line=1. Two *-uniform copies instead
++map every byte to line1 for avg's whole-function and discontiguous denominators.
++a64-no-map uses .inst, then llvm-objcopy --globalize-symbol='$x' on the
++linked file; the non-local $x must not count as a mapping symbol.
++Reproduce each .s with platform clang --target=armv7l-tizen-linux-gnueabi
++(or --target=aarch64-tizen-linux-gnu for *a64*) -c; ld.lld -shared --build-id=sha1 -z max-page-size=4096 -Ttext=0x1000.
++section-adjacent uses ../section-adjacent.lds instead of -Ttext.
++boundaries.debug uses llvm-objcopy --only-keep-debug; stripped uses --strip-all.
++
++Exact reproduction (run from this directory; .s files already contain all DWARF):
++Tools: Tizen clang/LLD/llvm-objcopy 22.1.8, GNU readelf 2.43.
++AArch64 root: temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul
++ARM root: temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul
++Both paths are relative to the project WORKDIR. Launch each tool using its root's
++lib64/ld-linux-x86-64.so.2 --library-path ROOT/lib64:ROOT/usr/lib64 ROOT/usr/bin/TOOL.
++For every NAME.s, use that architecture's tool launcher for these commands:
++  clang --target=TARGET -c NAME.s -o WORKDIR/temp/profgen-patch5/fixtures/NAME.o
++  ld.lld -shared --build-id=sha1 -z max-page-size=4096 -Ttext=0x1000 \
++    WORKDIR/temp/profgen-patch5/fixtures/NAME.o -o NAME.perfbin
++For section-adjacent only, replace -Ttext=0x1000 with -T ../section-adjacent.lds.
++For a64-no-map only, then run llvm-objcopy --globalize-symbol='$x' a64-no-map.perfbin.
++For boundaries, also run:
++  llvm-objcopy --only-keep-debug boundaries.perfbin boundaries.debug
++  llvm-objcopy --strip-all boundaries.perfbin boundaries.stripped.perfbin
++
++NAME list (TARGET=armv7l-tizen-linux-gnueabi unless noted):
++  boundaries, boundary-before_state, boundary-at_state, boundary-discontinuous,
++  boundary-after_data_a32, pure-arm, arm-literal, section-adjacent,
++  bad-thumb-start, bad-thumb-end, bad-arm-start, bad-conflict, bad-no-map,
++  discontinuous-uniform, arm-uniform.
++TARGET=aarch64-tizen-linux-gnu:
++  pure-a64, bad-a64-start, bad-a64-end, a64-no-map.
++
++The patch1 pure-a64/bad-a64-start/bad-a64-end originals were corrected in patch5
++from .byte plus handwritten $x to identical .inst bytes and assembler-generated
++$x. This prevents the AArch64 assembler's automatic $d from conflicting with $x.
++Original golden addresses and all function ranges are unchanged. bad-conflict
++remains a dedicated same-address, different-state negative input.
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..552a365f59aac06f137a20e8292411fd2517216e
+GIT binary patch
+literal 6080
+zcmeHL&1(};5T8wIoBGwHe$;x<r36H<Yg(if^$@XsK`dA(C@9G$yC#dtZrmi&oXo*X
+zy?U_VCFmdFwSR&ay?gNBO$0>{tTX#&n(f+Z#gniP-kX`<%<p~7dz<jy<12-$2~7hj
+zNq7wd3n0&q-XVz~Y#v6j&A=E8BRqsP&+e%F#+`{waU8+K+o{Yalt(0_l})@oq_Q2A
+z(!WUY%Xlf~rF7~9K;)V-L1dUmYwR<xpHqP%o6IYXvBGgQ{oU|{FY{gc(6%TqyB&|y
+z3%8I*<Na-+v8e8pmn?TEl49c$XCTf%oPjt4aR%ZH#2JV)5N9CHK%9X%1OHzJPU^|G
+z>&fCfy4M}Xn#6i-aT$(2AG`fzeJ=fSwRz7zJNf2m|KX|Mt&Z-YX?i)}`>(_jF7-Hr
+z6h+wk<kV-nCsQSROEKL_&GUmhG~qd2dG{#+$5;k$0jRI(3fRlI+^4_%*zgD{>B=GZ
+z*B;vn9kg0TOQtf~_;7jxCuTr0wLEcw2EB+?kyBd3bUS8!y6kma%k&+)WwZu8a0U|1
+zj&Dz!bLRpNE{_u<7wr%sQ14<p1XI{*n)dzR0TPrHtQzo0U854j!e~Oe(-K-z`(uNh
+z6&&}0?Vr~Rg#~?f)|fHoRaZN-D$k?8coi;L9=H{*+5rlnko{pO&<|3Z7y)@lkpNoq
+zcISvvza0*SWtThEqFFBc_9HOb_DUO!iq~k^E-K3Dn{L%^q1AO;ZC_Bwz3(Zk+W@2L
+zc8r?Ys)6C#b>AyCP0MoJssz^^*9OD&+IA3G?l^U8+OYz@*>Eagv})LQ+bp9dvfCgV
+zvMa!+Icq_2;m+cvn>Q}Yg8xy{vlHcP^X*5zKRIrZ{^k4&+(2anD}94h<ULG|X;#6T
+zZIqu!5ACt=<vY#s_&H|M{Aix?UCQ@+9kH()8=mk>Is#Zq%+~`;{VtIze1@Tb3jGEM
+zzo#otkNGkV{jO1w`HMV*82N-RzawkRkB&!c2$vojv^MEq&U2snO%9g*k^a~XOXw#|
+z_~{u%NN1G%6nrR3r#3o1*-?z*gg;3}s6=Dw=P8O&_-P(LPe!OjV^5$jicz@3e4UI?
+ziN>1fi((YM%KQ=;p%RTff<D4>p%_v>GC%Ze9YhFU<O@V)?}Gqo#+9<pHtiSfq3oZW
+jt5w8g?>ICN>&$-@22q!B1%8IgcKixY9RG#3lqmlvM6{hr
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.s
+new file mode 100644
+index 000000000000..8ce2f5d13aa5
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.s
+@@ -0,0 +1,83 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.globl anchor
++anchor:
++.inst 0xd503201f
++.inst 0xd65f03c0
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 8
++.byte 1
++.asciz "manual-boundaries.s"
++.quad 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "pure-a64"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.quad anchor
++.quad anchor+8
++.quad 0
++.quad 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 9
++.byte 2
++.quad anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..9754e99703fa801208c808b5741b74b3144f564c
+GIT binary patch
+literal 5576
+zcmeHLziSjh6rQ=uk4uc2L@_Ec9^neXWOIgqk_d7nD#9hiU<#|ad%NB(-tC3GJu!-C
+z5wuBdCB#m!v((xyjS3bP7Af)vC>R96^ZRCZj`Na2tSt7yoA>K`v$Jnzig}MN=dVa9
+zg{Gu9BeXRI=Z`@Q3DG$v(xL~kLD4U|;9^X38VTeM_{cgRs-hckkQqaI7>A@z?t>tA
+zf_1!){&dKX;U>4{Zy>&r4fz6M!C|4+#ry>9_Bb(IH|JQ|3GDVb^BLpXuOkkzhnP<y
+zu62DG*kt<2F~t>#D-c&8u0ULYxB_tn;tIqSh$|3RAg(}Mf&Z@pn>!<oiESZXZ1e4U
+z6r2QKU04=h>$82Io^GB0xOKMh;KPLVYWLyK_Vx3<tlsfTNcDcEk9;ze{nWRUqu=;0
+zC#xLDCYfHLRQ1*SJewBc00MZ%tA4;b>|W?8@b_Ph>LP5evka+84#;F`Kn`~G58(rb
+zNT!yDW;n?VIDC+I$cpLJ&GNWat$ViVyH3rhMfv;`@=U)nUUmb=H_OU_RU*Q7z9#xR
+z#3)8|Onx3ZNWp&rOA$@HW)wnrXM*W6A(Qf-227qig{e%(v|J&NK<(=7&ZT5eqBq$m
+zM`hmi?l}H*I-j3QPfi-=47ND-kg9d_AEYWrs>MEr4E9kJCAtOLAb;$qFaqaZAPlb>
+zI7ZQ{8&=&d+vBb+413M1tyP5bmdsj77~x2N;H$V<aSOumow8qDSv76j^@{L2R=v1l
+zT9)tJ)t2ksu4>&ky`odoR@wC&VdR$P4KoOQ*Qy7M6{?kr<6&J`L10>tC44i~LMbw)
+z$k>M7(ddY+%-vkb&0m`h|MxG(Xn&i%C3PlR@^rta8$L46x9VG=#+iL^yc0Z{#PO_W
+zfrC)<^IM#c+rv|~+h|mY<C$NCa~L}BCP{yH3_AN}#PLp)fjbVp6-Vr3<RgxEY8^P<
+zDNX8}z?cTJ&&7PzUjt6}&fp5q4<swdeB$0^!N6TqhX)Rjo^Po|r=PeJR3g&2Td=jx
+z&==q?QHe;$cn7u4(C|R>xGJQM-EYH<0k^6U;h=F(VB#N|q36Jj?1Os-A9J!%>@9G-
+vlbRSKZ-QB4P49tQgaM&yr}y_IY}QUw8hzF`+JMySdkwu6_Zhg;``~^9QdqFa
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.s
+new file mode 100644
+index 000000000000..8a171e3a4cf7
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-literal.s
+@@ -0,0 +1,101 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.local $a
++.type $a,%notype
++$a:
++.globl anchor
++anchor:
++.byte 0x00,0x00,0x9f,0xe5,0x1e,0xff,0x2f,0xe1
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0x00,0xa0,0xe1
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "arm-literal"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor+12
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..6afd4391fc3a0a88b2a264610809a3df03b99dbd
+GIT binary patch
+literal 5508
+zcmeHLOKTHR6uy)6k=9pIm8xh7rGi2`#?pmU7Y(+Gk`^p>p_@9BOq0Q6rc5T%y0I(i
+zRs<J<_&{*0pbJ64zv03~LH~fL8^QX0cjlC_cHz>+9C~tI-?{h9nLCAh?#xs!7>1#Q
+zvg(8qYXZ*K1Nh0P?g>>?eTWUHyy}6AG2tQ-$X)P}B_FD$t8kDRLwXd4q)yI3kh{SW
+z&(U9ucnxlHGJhTM^-{!V5L?-&bY0BPz}_AwhIMm|`7dE@dz|@<vGyy7L;OX|ClQyd
+zZv-}(esW4_2ht9t9Y{Nnb|CFQ+JUqKX$R5{q#Z~*kapnz>%fzZq0Lhpytf_zXTcZe
+z7Sx-Wrz`JXmX@4+;oEiV<iq>VKE2;wyT0e+zD>&G=1g1oNTla!Z)AtR@=i|HIgndq
+zdDVs==)3u7QK?-Ba7oSr)?oKTayIb&*QQ^A%{m*9LPo*J<_g9@Pks;^m@1oF7(B~G
+zc;SyO<6TC}@;X*?%=SB8%?eznZMNh5sQS!uCve8BprySi5pG`ag)T$sQp5PgsO0C~
+zJrsNpu%Y5rSIue!@6IsY$QV2RA+>xAK+CagR~h@E_Vo9bb4FjLKfBu)HY%=n(+MVv
+zmCAH+eB3;3@<IM2ZmpZ7-G=TNXCaz0z0qUG<@3ELGjvu$WqN+-n02pX+8wu98*^*Q
+ztgU+O)t1uUhShE;Gy0`J40POTxm9HbPBZWqm#tdO_3H3DcBj5**>>RE63g|Le9;5T
+zt2=G6ny%+4vphd*T45Ntb|+-4>bF{shq_QfXxWer>=|j1R3ny(&&T5QwYl=_rStJq
+z{*#Db(bil@zt%*i%xZe!BlCRfnG<?9vICB1nn#N`p4Cy{AoTj&i|euNJSaalH+|xG
+zW-D+Wh0bq_B>Rp+=Q$^iXSxC0A?QgQvE#9ixV0h}IDQjC+?zBB=8TH@dNu}}%)Q{!
+z`!bJBq$KV`2@Kp6=3hdx-aH(lGe+ED0VQHL5<0^lfjdVfCRw8iTXcpF781ue5xbqx
+zi8~J59F>@4jk~b%49ntg12-fFq~IRJdMS?G1CAe_5OL(kVD?z(IdD@jAat+f{l188
+b2u+^>cq;~^?E4Bjdo1(_vsC_%6%yQUzZ<7#
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.s
+new file mode 100644
+index 000000000000..c88ff0a391f6
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/arm-uniform.s
+@@ -0,0 +1,78 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.local $a
++.type $a,%notype
++$a:
++.globl anchor
++anchor:
++.byte 0x00,0x00,0xa0,0xe1,0x1e,0xff,0x2f,0xe1
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "pure-arm"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor+8
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..f2a6f581807cd219dbcc8d9442ab5cb56b1caef1
+GIT binary patch
+literal 6096
+zcmeHLziSjh6rR1)<f6u0Vjybc60Q-<atR_K7Ks=Y;S3l^AqaPS*)>_c+Y9$Y5-m(+
+zC8(9b>I55`6lrWMBK{59Sy<Rvh@gmq@x7h*<t~#1BUZu=nR)ZR_r7_vZ)Psc+`Evw
+zn6NB`l2k8MOH*n>43Cb$gRxQ7MQyL@Q5^*DqdFmGQ+}7hAXDPUF!OdRqX}(+RB5d<
+zZ$EcMHzmf0gdOox!b{mah*FR%T2+wkJpRU}@S0ie2)Q7<LXULBkEg#E9{8B=^vAl#
+zdD&|`Nw2y}JdXFbg=2BuEiV}v5R!f45@#UJK%9X%191l848$3TGZ1GW&On@jI0OG*
+z22R+?x9iFLJHFTTQ%zF6G&Q6AA8U74$DiJO{<yi?|LXO7wf3g%1z`Jk@;x-oF9&k}
+zg$LuP#|30B#y%tmzwkYoE9+Z|8_v#Gs?i;q@vN<_2enW~MMiG{)L*eRa6oX}r@#K%
+zs4!HpwE_3nWzjX-YOP)?nd-IrI?@9)F-Ij+GXrNi=r~nPPFZC)Y`CSNVx<v!ZZ+_0
+zPOUY9WFS#=y&?C^=^;P#A|rjF<fg;O5xCc*5QEfOmi6;+Hw(@SRZB^*C1+N<cO@{K
+zm9Uc59~&Ah7lgO`>X@C&P1++P&agA8huW#-xKU(dt~v!>+bEq8g6y}<8o{cy@b0L4
+zs0B!mvQByLRCr&315ab8{iU3`zgSmJSgHHYT-b1mjiBTW1)g%erLeYCRuMYy*5;L?
+zTgL0v$nKVdS>;syQniv_a6K;w=Lq+Ujk&yAELQ#7(1P$r1^ucU&iOTHr6BZ`Gg~Q_
+z{gCEC5$kS|<UGaDJuOvcQDwZ=pX~4a<h7}DS1zB&cmAuC{jzy(ut^|sE)WOj0XnZE
+zS3Z+m@IHq3p^Sz%Ta(XcoL3usoZGDIqpUFbt%~Q0`QSYB?*F#2Q31bT6F{XPd^^(g
+z?-X~z7g(L54*w>AzieyEvhWdyf9JSh{*WVtu?>9uuB-^(jK|;5UdBk_Z^QW5$4%ic
+zh%?^mFrJtdZv@7`PY-KCx>w83hqXj&#-ApGiLo#E$3PTm`W6T`F?KyE@p*pj#q=$a
+z(ZtxlBz&8dwqp9;A)AS@`vc(@SZOP!?|rf{mTmLl?kC}!|HQzDd`P}n`z=HCX>DCV
+pUN1f;SU>EmCxl_`#5EG@!hg{YQXg>vKcmi0{6Hpd!%?Kk{|%gAr3U~2
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.s
+new file mode 100644
+index 000000000000..4b6a539276aa
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-end.s
+@@ -0,0 +1,83 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.globl anchor
++anchor:
++.inst 0xd503201f
++.inst 0xd65f03c0
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 8
++.byte 1
++.asciz "manual-boundaries.s"
++.quad 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "bad-a64-end"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.quad anchor
++.quad anchor+6
++.quad 0
++.quad 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 9
++.byte 2
++.quad anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..444afd796b22d3850cf54240766666d5a7ce3a2d
+GIT binary patch
+literal 6104
+zcmeHLL1+^}6rD|~P1Uw(6{<pUEx8D0NlTGZFD<r;Pzx4%5QJuvUDIH)shdPvFBT78
+z6a_Esu^xNTg9on#FJ3(;UOjkK5fq_d{eS1bW?fsYcoKHV%%A`MfAeSm%mij`Pfndr
+z7=}Vgs^_YuDK#dB)x+>$Y(#ZX+oQVGeuCSmj)^%czsX>bDe+^NdApU7gtkDcwAPuo
+zkGrBrCB}z@9r04aOPM@~Qjn`!RghsGf8(0))^gerazS|cZs~|0Pk%2w@G;++_YH^h
+zve$T$UUivx9Pe)n$KtwMUNSNuB>ToC&On@jI0JD8;ta$Yh%*ppAkILXfj9$k2L8Vc
+zoG_EGH<EL2_+EE}YLe=O=~?yS(fa0-SDBUSy^qg^PxilkdjC%U@4k-jp=o|Okozxu
+z8Am-XAbT<PE;;a-@5x+Q|EbtsalYmUcWB0QrnVl`LLC(uyaiBy)zrWN!EvAd@_nnu
+zP~OxA++UYP*J!IXdW>YM$LQUk?xTrWDw&$?JIg`GscLe{sM=oBu4D_frsvpx*{xgk
+z)(Db;M8S5l_L<>qy<z)}z-*|5WCyqH5G&|jrM68CP-_^*W>+T*&J0yUNw_7e82GA=
+z1d?qejHL0$h6bA|d)Hlm)SQ}{Fo%Y$L2E=0wR_9agZPnk)v4(Ch1eb-ScR5ZBUrr_
+z-WhZcwE*c+_9_4E3hyj%;A!l%&y>}07aPj*Y7N&ac}=U(ELWUt*-@6W<kgp|DnRG$
+z`n<Aq%Xq^N>~^(WRF>~n{My`t?KowxM7UdMmgek2!FO*$D|^>!==-);a_i74WzSVs
+zu~x0R9?gRyHtYh)d5WQXTB^*V$~di`?DM&aE7RkbE}p}8{;QN-vweQBRUmOb5C`W1
+zI<F&FKAT+dPKKSE(eQQ~<?~tR)dnBuHz)fjCro~`;<;izIM;jzzHV*Rz|WfmP{|A5
+z3^e_J#a-|PR;Q`M{|(?To7%E0e8l1ZJ1&?%<Pc$O10Vk{tHO`Q<8KI;QBwHZFh2J2
+zn(!CI8E<wNPt1xp0%PE(2Q?wxqvfYAEzw5f&yXRCu`l??KolAE%@ZEQ*!7gepJXLe
+zqP`WfMKN~wgm1DEDpB8CWQ$_#{y_M7RzfA}dzWmC<w8E({UH3%b9UeXKIB6}vG#$3
+wG^t+Q*$|!Ai_Zzx5Bq9`Fsz-p2I8gg*TW$75f|`d>g>e7Arm*@C^E|b0pT;ICjbBd
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.s
+new file mode 100644
+index 000000000000..75644cc19ead
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-a64-start.s
+@@ -0,0 +1,83 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.globl anchor
++anchor:
++.inst 0xd503201f
++.inst 0xd65f03c0
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 8
++.byte 1
++.asciz "manual-boundaries.s"
++.quad 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "bad-a64-start"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.quad anchor+2
++.quad anchor+8
++.quad 0
++.quad 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 9
++.byte 2
++.quad anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd92cab359462107ca1aa0d8397acf7f15ecb7a7
+GIT binary patch
+literal 5884
+zcmeHLy>A>v6n}H)*cSuFHVB7Ei4N-u7kFY@mOw#BIS3>OClHGu(O_o1%iW5-U2AVI
+zvT1;VkG}w=h(tPSIwOkf5Jg%F3KWb$GE@-~G@zK@Z+6F7T@uj}X`l4=ef{R^?aWB?
+zK6q*EWu=rjs>^~nYZcC?AIGOAM^>dNM-iKqX&Hx$F~?0bAdkUEcI}~BdIJtJV`!eo
+zA*qvF5ac6Z7jMzu%=t^W$>sJp5WlgM^RtMpJ}P!zY+r*t8YhPHW*_UnX8vfL?HS|T
+zFCh+b7qLBwxbpm3v<p9D6;&CiGEilp%0QKYDg#vpsti;as4`Gxpvpj%f&X0whOgaH
+z(ip1d&3(BgLmA%OpQe=SdnXT0?a6TK9N)Ao1JuFiE?$;vKm7dhrEji%`{|k6OPwFT
+z|Lvm>lix?zWorO<i<74Ds%}8?%}k=rxZ~qiKl3{6pX&2}%zbxdhhvfXmM7W%ay9>&
+zc(a?Nl8cQX_Vf4s`KHK2KyWD56Lw)wLOurm^Y%fq4V&w^3h7AAsCr{Y&5lpcVL&bQ
+z#^t%^*va$Y{6RmadL|y2Xwgdsv2W5a=<9ybK3`SMGybAUdyD<dq?rvVIgVJfST$Y0
+zfX8GWU({Uwo_d6$$byoh>m9vGD5hWIDpXC?)dTgxqS_}ge-jul6vfPsPfoNO>S%4U
+z{;--?YhnCeke+U?t(|SItmtLU;>-xy|9zM_WotK6C3^<=*^+$>_7f%hDcHwK_5$oX
+ze?rL%uvtH{RGSd17I^N@XAmgwSJ7Fpor#W<EYO{JpuIsD`HP`1+TV%$J3X=9uIYD0
+z=U@7>)W%IO+!UP#QJQRQ8Q%}%4*Y>P=xi9zOM@%U3gdSZr>7?F1bt^kVH}8VuV2t6
+z%hJ#rWQ=Vly<QMwUYJ2<JjgD_%(YxfE7Qx;@^utuL24q}-6W$2uqcq0(b%?hXC{n_
+z164j(8)x6T*uL<}i$${jTNFF`upY;4+$uH8kCey+d}N++TkE?Ij`stPBXK<6=Yd;-
+z&UzfjVt;VibM@E3K|&nQ`8J#o_8x&KjxuVR(0Mly$9v%FJ#g%E1?=viUEp?s<8F4u
+zu}P=FoC~qGCJCIYH^ODd<^9JDQW7_|48|t@X9`9^uD^BIPG^X?CkqUPi@j6Q=|2Hn
+zn@T|r7r}NqLvI6zDISuGy$_Gm8H|D3KSbS$eF7iWu;oH;&WfCL2Bhob^Fm)LVi|Cw
+u`6KoVF#m<4&w#rQ1H;>Vx&O-=FmvZ<0iAvA3`jTbSJ2D2J>Xuw2ku|s71*o*
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.s
+new file mode 100644
+index 000000000000..80cd65e4ff50
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-arm-start.s
+@@ -0,0 +1,197 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "bad-arm-start"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor+26
++.long anchor+32
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..8707f4052cedb67a979b7f20a70d1105e325caee
+GIT binary patch
+literal 5520
+zcmeHLO=uHA6rRoYC#_oBYN<+<P$E>YOD#P}^<XgC2x-w`1y6N1yG<68-Llz;k%AtI
+z7d`7yFCu~$kAk4!)vMk`^el>A3fAwN-3e>z!J~(L@b>+D-<z4doej*~K36`kX_`=?
+ziz%U^IV9hV;*k-(b0Q}OfQ^b_(T5Z<r8yK(dyu25dbm<9BS9sG@(72ePgQlj3A~5-
+zT%>o9rzYz+fp5-4dJ@>iULn`T@iK_JadNnBj<NhXw7YTE6XV)10f*Tktf!EdTwfkB
+zRpwz+Njs2sAnicffwTi@2ht9t9Y{Nnb|CFQ+JUqK|6K=OuP^Z2x*w`T7nWAUL{Pf&
+z<=9*O{`avDTc4i4d-AZoW7+bIkFz#q7^h~&N)JW;FyoK<<Tswjsj>#PBc@lW`GGu_
+zPvwNz1%N~H9$*9UAZ!-;<JY!dLd<pAuu8NMP0x;KqkY5Un7|Nvc4hn&2RRKT8BeWY
+zdM&d)ZTT(FHUrmb8cm5rQ=!f>?dgi|t<~L1C=o0ZtKb1&NfAzun8XuTC0j##XyPBM
+ziFo9;QHkii8J24qP1pW-pr~*d6w@&+S7`g-_6_zIvf4mqP~WXhYGv2E?gaC>a=DnB
+zoi$DvytC*Q*~8A#wCHCh;vp39UPMZ!U-Z+7alR*EgwD-S7@i+GM%8N>R?Ds1)2=NH
+zyX`gG4I#5Nvsn{H^khB^ByKj`iZBAF9{8*4rfs`k6?w;MRaZ^R3Y;4%a=kTQ`GM(G
+zou-QFuIC7&u)JuPVHmhpD<oF&8x6<9y0C)Kv|wwPGx8!U@}bC^BHl8q#j8t&#S3Sn
+z-}w*E_;q#eh~z6y)J5Ax$bPYB+^_Qf3BAkzg~vV4twtXA?i6@1a(vFk@z{25nxEU-
+zK6%{3B_t={^IM~+d5^>Az9)}++y?Ie{3MUu**HfYzmW~__>Cyx+?07J@2glZ@5#VZ
+zcVI}#d0EE}(vtUT1`1vgcVSA@c*{sApBQ-u6)AyTOZbG}gLj5bENYB8V&xMW8|iFQ
+z$yC^_F5Xe_N|F&h6z?uV{DyS}HNZQf0$9a+5c@MRb`Ly$ib}|%K7z8xN*;rE5dn<s
+hoqE4d5wmwnzJl;l1+Z$~7x0t3XSi3zzg9;S?>DCSr-c9j
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.s
+new file mode 100644
+index 000000000000..834774a0030c
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.s
+@@ -0,0 +1,76 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.local $t
++.type $t,%notype
++$t:
++.local $a
++.type $a,%notype
++$a:
++.globl anchor
++anchor:
++.byte 0x00,0xbf,0x70,0x47
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "bad-conflict"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor+4
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..07757d8bc45c0129345ca1a0fb99a1f3cc19a2df
+GIT binary patch
+literal 5480
+zcmeHLJ8KkC6uz^Yx35hiL`7wZQMPc$7*a?A!s2QoBmsk4SjCy0ad*h>OqiV&qX8|V
+z;2#i+h+t!FBPc!!TTv|h0T%uNK^wvNeRt-BO|-DIm;-0d>pS<}Idi7C=l1!z3x;7R
+zp{yz>u_obsID|(=bx*3i>PKuy<x~$`j0xwFK<<K%EcsA1U510q7}Dc7Bz3anb$7(O
+z=+DP|2YzyA{yO68<1wE>Y;B*?=i+)9*gNCI@Z4Nu@oVJlj5D7xp8XQy5PuN!NyK%Y
+zZwxkB`yo?GE09(otw36Vv;t`b(h8&%NGp(5Agw@JfwThuT?O8*%<$g2ADjixEL7Bq
+zjgOxmy(t`jK3zHWp>pd<_2s+QJI}4}__%A6a=10q7Csc~Ioe;cqu+QRC+i%@EwcP-
+zJqY!^ypUIF7Xn<8bAUD21CV{-@4q&KS=c<M11V$-8ri-<W2h%Lf(=ZS?W>GTbCD@9
+z!FU=?%Wqqaq8+q-#|k~SWwvxA-U@lP<rMv(*tAx(ABV&lc)b@YL+MhZcw$iUbMGFC
+z<W&uoth;JfV|aIl=|;xL8rvR7DjfmDaxL3a#xT^Lf!<P|(VrQ}?lwk^InQ5q!>Rn-
+zTsc26VV*WQvDi+m1!o?bGQDv<lY{abC^K?zM9TDo$Te$z+qBzW!zp@>GM!bwwc1qL
+zTen(uWyVkXqfp1KrdL&F=r+P&X~l9J&#%Gn+U?qsW!s^9T`bSP7Kk2Ne$8!()$n{*
+znWe>f(~6?dv)d74)u7pQeVhv?h%6hjjy+>7mMUq4rSg@9()`79$t(VgNIt~Y>_>mR
+zj>NbPl<I|#%s$j}CDd)~FF5utTZlOJWC1t`y*~HidMr8H;m77?KpcB>7S6-a`45p~
+z-;>bU&&08J9pDZ?@5B*1k@$#X@2>&J?=8f=No;M-p_s4dU%<(13ogAc^H@Vl;$Dq|
+zfh%LiB_!)D!XY|i#2pk+N9<~c&hTg8&QeK8)@Z;MouT1D`O#va#BT1u9RqGQhUll@
+z?!m%4tVn1XxT9h~3hqIok0-JF!0{&&B98nR%o+=A0LL7NxHlm2YU(MNwG(;|zzZ=T
+SW#4DeJ8^e0FXdW7g8L0af23&u
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.s
+new file mode 100644
+index 000000000000..d901b266d2ec
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-no-map.s
+@@ -0,0 +1,71 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++
++.globl anchor
++anchor:
++.byte 0x00,0xbf,0x70,0x47
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "bad-no-map"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor+4
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..07ff8899172cbabc407e7c40ba6fbadef4589907
+GIT binary patch
+literal 5884
+zcmeHL&ubi29RI%EZL*CTH(N1PX<5SxIhbb>14>2cYHh2gRf82oFnyDmW(Q|y!t88G
+zJm{@>5>L{by?GM^k$BpxhyD*Wppat`^r9F)pEvX37%N^a%oo1%{qgy{AM>5}2HyMl
+zmDTe~DREMld2!JSl21Q^M@^2cNJowXYfDQekRs-^g9g+Fa#YtIu9dfupb|s#9EYV(
+z?ZQxxK^@*@zLV>hNK?!0Zv(%*nCtVvRvs2RFSf5CK8lmWd9#nTpECa_&i2GO_qTw<
+z{6pBDLSA`(UB*S8SS3{jstQyUs47rZpsGMsfvN&k1*!^E6{spuRp5VDf$<x6l{Cky
+zb7x=f%2>vC_FJ@aYwz^IGkY@Ly1+9nuL0`N3zx6R`6r%AzJ0B=-+lJI_E(>t{pQAJ
+z9})hW*gF86#VIYEs++JpGgBB7clx;X&%Vj{hx**lv)^Ce;aF6j<tetm+|8dR-smT(
+z<YqmH{rr4?u_N*T7#xcC3A>1=U{64Q`QsqjM$GrQ3F}17sCsiowI^D$7*I>Sd1dwm
+zcJd-LKhQVSz{DdHEqKW&_DvcFLp?0o=WkW>jK7feM+0xcP6i<646ISSHQ7Hx8!|^s
+zso$m_qA9ANr09A_Z;*=V*VtUuR9)Ry54=?G6y|RN<AtJF`H88?UQ->fP1PS%b80n=
+zKM2w@oz>NIo#kb{q<J}WMC|uItemoUH`Aqf2K;s@K8g6zQv4+1lcjhbai<i&gqZh7
+zR%(-C-2&(Od=5Z)y^79)?M!r>WP#p{N7@^Ok-rf7qWztCxHAx&?VDj=bpB*MOD%2&
+z;fClmh|*+z%lLj6Zz3Ofqs?{Wd1-LnMPYm`aeivz&0y%FD2xNqy|qi)WLX+|qm0-_
+zG8hCg=7kw##)Iu+%-qYZbThpqU0+9G7NjO(+)pxQK#KzD8g0@6)0qjQVndbp)%v-2
+zFZV9J`f^dM|2D;nKD>|PGVYd|<y%T*5;-dOxV`K97aso)+>YdNe_sS|5kBwZI2QXu
+z%I>RQ4-OLYxX-tdgt7k-m|`pAP7^-=4dn4ZaPuBK_PGpo|Dav)cERIncEYhKXP}%5
+zx%N&HJa^xSlpUA<KUR>Iyv7m~i}?3x1ckW%)(|_N5P6Rk92$pRE&0r!0<TA>5XXxU
+zJD<?|;9-h~;;;{qaX!Hqy!}JgU)T-g@D5uJdZ#UN+6Az#kIxH#vA{C$j@FOdFQEJu
+oPCfze76J@!>*c;L?|@l5C-dm+I~TyZaleLN=Iw#^`aO7m0`=C@O#lD@
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.s
+new file mode 100644
+index 000000000000..b8eaef4d5e76
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-end.s
+@@ -0,0 +1,197 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "bad-thumb-end"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor+4
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..316b99cca0a667e82f9ce798d9cbdded3b89d93d
+GIT binary patch
+literal 5888
+zcmeHLzi%8x6n=Aeu`dS9*+FptB|5AtQp6M6G6IDH41ol2LSl#n4bH50<6C8K*V@~&
+zY#KT$Y825B(I6xmI#V4T6!{M*LL?$t6evOhCE|zqzS$kKa)M|<+9$nzKfZ5%z1>-9
+z=KYtKUQtSkle!!i7cC$;`xqWIIj|sYIS6c0S~7wZF{f=bpf-@By7q9byoCgn7@Fre
+zEPZMRhI#<%@DB6sTt7paT5f*>_>I|Ip9Qw?sMvY2eGTz`oE*-ZeJtP3{QWrF6XV=3
+z0*ARz*q%aOd43(nMV?qCRRyXFR28TyP*tF+KvjXN0#ya73RD%SDo|D6KUaa_8+Vj6
+zhpK&ZNAAc_hBtRwv~vB{vE7rmWVn8YXIfqZ)S+k2Uy|4U`1tcD-+l95Yw*qCr+@tJ
+z)35J-@zefw**gH7#VIYEs++JpGgBB7clw0&U%0^d`}*|HQ{QfEaV#p&@)X-&?&ePu
+zuXdAEa<dY|ety0`+ZK5U3=YNngl)uQu!o?({JEQKBIbIo!8%bBs@|MXlOwGu45+2v
+zyfpP3J9!?OALtvZXX1g0X1rt&`z8&8zU~+8^HtS6<IiN>LC>4%XC}=osH6dOq*ymo
+zKR_EYjVEqhej9&;rl^CGqVp}iN-7pm<2qDL)z$y%fkiDI#r#cRyigQtKQcDD*i;8=
+zWA%sCv|0+|t3i6Iy|i??JwLDKG_Pmw6Z_8hYNzb|&3GxEK#R#zd<5~~Qv4L+Bc=E_
+z;&v&15i#$Otkg!ux&_W}^ceu<Z&q{`Y-Xb4Bn$LfJkZ`CjQp9<7wvDw{jHwZY}fR=
+zqVp&7S!!|93s*&_L6jyd>&ExPcn$f$8?3Du&r5?17lrYa#QCX-*Mh!_qA(6bFD{?c
+zCd<;$8)U>*lU^@~F)z#@GahUgW9D9NrIYD7>G(PdvmiAQ<8G2M16mYF$7qxGn9fWX
+z6`QKOw^mNSbAIvMt1lJB`gc=&(|dPv{E$1PX8E=f8AXoDeQxjj{(;AT1h*u4+~a4#
+zn}yFiIgZ8tkg_}L*WKNOJnr>PBw_5o1g6-|A}8SU|3Du91=k+HW1sU-_aE8@ZyP**
+z&rUct<rI{2A=lnZg6HlWk+S3RAIJ*QlGm7n;v@cj96=$jzh%VECq&-k1&79AmrFkL
+zN5SJ5P8=^n!uiB5gNG^ZiNoGQ#`y%-!Q0tm{f&Kq9M-VzptmPQj=2EV_3=^R&lcDQ
+xc>C)|?k7;b3nw3fcO3zSxAk)Gm-oP|os$#j>?;?*x^cgRU*_Eg@AU`p{sQvm*n9v0
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.s
+new file mode 100644
+index 000000000000..bba998c1c31a
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-thumb-start.s
+@@ -0,0 +1,197 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "bad-thumb-start"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor+4
++.long anchor+6
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.debug b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.debug
+new file mode 100644
+index 0000000000000000000000000000000000000000..70b071b64ed91b3cd01a811efaed3a849dbcaea8
+GIT binary patch
+literal 5824
+zcmeHLL2J}N6n@#=w%e+;UA0wE2_*+TbZE;Sq*bI?t72PfQBWu>vrW1iOtLkb)%G9?
+z9=v+ggCG?2;873tKlBfH@?ynfPa@WX-<xDg*jDgpArIcnd++;ZGWn7$?0a%`X4)_e
+z(w3)lq_Z-L+s82EsH03KbptC=A9bR{n06Bj*bAt!>-7kg-9~|(F)WX9%p5DnWWhV&
+z8n=L1X5uKngQwST0^b~o9T1g|k~$Z!&mnKeFQCTf<~<g+BD)>u^^Eb^Zvn@&$9O#(
+z^V-j6C3VI!%M{2I$P~yF$P~yF$P~yF$P~yF$P~yF$P_q;3h;m0<M2HE+T0!5D13bV
+z{L@?i$Ir#(oiCrCJ^j}6>wmZ}qu<CE`;Ag(-yoU*g7U>XgA<2vvI%(n$Gl+pGH6L}
+zxY}q1whUdTDVoXI(K&$S9@QJ3Q}NwZ$5sV&1c31WeQjS66le$|Iww25M|k4C0o<Tu
+z<2A7q(>rpirI9o8hH;Pv+|=Y5+=6su)g^=5K%G5ZlSQLD*ONbN3>h<SaNh~X&6$}g
+zb8JkE3U0CNv1zXCYG=?{q`j$}bt|Rv^T-EMIodLGGL;V?H&gi~<lF~Rmg}M-2MOMX
+z$1#RfKReDz*iN-otH^3KbRLq3oYjcLQp5M10Kw$KtdLO@y46<XG&MPtK}}_AK{E<<
+z)eV*#h*4YfNz{UtsLN)ZMCf>7qp~7x+YM@(?74wMB4|X8VpdzOXAir!S}%QfiA1xG
+zy(3vgq~|rCbFv~)Z$u=6rFtVIO9~nKT#Tgak!1_djhs-b5PZ)`m=!0msWNqMZgTd<
+z73PmBk^XI9-C0Z3^I|>WR%&VdIT1ZZtqaaQH`TBE3vV7c@5j9BCLFvG#JoSh1H2zf
+zbQi99t7go@q<(uaC7&_TB4W*ZY3|SCJujws8wro!Wo>+Iwij^TkALG-UlE7VJwue#
+zbs5Lw*yR-<DEAS6_c9|ky&umyW`udCVu~6yHib;b3~YgSSux^4V*;s;8L|3zUvov&
+z*n>7+8NBa`5f7Tj-y!aGMMI}cq`pm^Yu*VII37uWaq!ypWBfgwpRKle@ZKQ7<&|Fg
+d`MyHV8f)7I?}JV->+7x~PV?4r(VP45{s8-tvF-o>
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..e0ca63e71d9e8a298dcd0a8aa354d3d70a161b8b
+GIT binary patch
+literal 5884
+zcmeHL&ubM|6h8O8XY!0~nxtZ^puC2+$U<*T2vl^TX>GMM+BWE-AiUm}8S{qDn+fyg
+zY2rpfX!{owH$_+NTIeFK-nI+>fv(a(Te6fwrPN~lzB_Z{5Ch$|FbB?@AK!O>%(-(1
+z?!EoN!iP#JaZ;6OanT%-#}DFBk$rR0ko~|WWK4#TBIdM#2GkmIRM#G^l`BY4iJ^Ih
+z!_ucVVW|6{4sSBw$n*!Ksm1n>fj>T(=_z1yZ-|{2+gA|p#>wHl*~j8<ska+vdt#jX
+zXTV`z5w@q0SDasyah@kuN?C!j0%Zlt3X~NnD^OOTtUy_TvI1oV$_kVf_|H{f@W~S;
+z^?_<^Y{?TD$Y5h@j8-0O9@~CrQwA#+c&6nwKoxr7@>N-{{rKJ2kG}6d{p;HGXB$7?
+zz4QCX-@D(--T~k&P8q|gx(>@TGlem6r$?-R?o-CURHy!!{OQIT$D;BqPqF=FZuT_M
+zQYTI%Gc7;zvh)4LhR6XhI27*_))9}uz6t&F`F6aDnD28B)`=Qd)%v)a7#f?zfLf~c
+ztCMHg$r)&Nps%T}iTWly(T@9(XOh70>0aJGd#lRLP8|BJZm{ZODiF*Vh<j&deudU#
+zikMQ*Mqj7NYoH|Wcug;nipf{lTvb$6{jVN)srjRrzwu2w5XHI=jSSD%)&9yz^))r6
+z7J}$YKRMl4SUBI9oz*j%S2M4OUGJ>2z?8ka87;))$W9dE!-x+R;<phWF2vJ_8-@5i
+z#JoSUQW+NO<~YC4cLBJyV=OxLS5whZocek>>g#qt2)z@5C)!(!dTU*=*^cRTL}yRt
+z)5PMY8!U-V{4j}IE5`GJXc>9G-Cu5*c02KJxG0FO$IeeowCwj>6b6wmdVcYeHffp!
+z?S4vZDeiXt2=l@WQqzX*V9d<RtTa<SBTY|-LFy+aWZa2UW<U#lX&P;kF4L(A!hAy&
+z_f_ls=a=U%ee`}_tbaH8H@$NoXZJy&S+=D_hLNLkkK4OG)W5k0kN*d5NAkG8FM`MQ
+z;(Z*)Vt-sZ?yRTV+cA0E=c`D<*#8JjzLjyO37`K4^7tRPw+D}X&O+TkXdS$D@c2DD
+z;n<YZP|k&1dnXB=yKh9wj?4caD@aRTZ3c>u_@7Y(xw!ro5j&p{d2i($8i##R@R>gf
+z-dQ@iI9`a@`Gl^4hbiue!)_tte1ai(TRW_m*jLEm9abE4WkTeb3t(Lz-{$_w98194
+uT|aW~L%9}Cz5(w60t|2K<<^&Xz^t8<X>|6;1+Z@1hwzKMP4GV6gZBdeci2S$
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.s
+new file mode 100644
+index 000000000000..0511e0dd56f8
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.s
+@@ -0,0 +1,197 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "whole_mixed"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor_end
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.stripped.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.stripped.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..9885d5df76cce54e8e780539e1f1f6c02715c87c
+GIT binary patch
+literal 4928
+zcmeHLO=}ZT6upzAZ5l-*3I)MBgn)uLt&oMwW})rE&#JpZnRKSjKr;!Gi6kop7y1*r
+z5nSmXa1mFtb<scIDt4iCSp<uy7|(f=S3^|Xx_B2(?z{J%`{vD=Y~Foz?Z$P>vP4@}
+zE{cvSNIpA-pNvdZ#Fkmqj!8kLkz!55Mgx&Uj?n#BD!Y#a!I~6Db$G6cG8{1l=z5uX
+zJH;!ciShnj)OQzCTt%&NQq;NFpFuoXCx_?e9;+W>Z?evQ)_C^2sKfnc?5B}8e!eo}
+zQJytpMggOMQNSo*6fg=H1&jhl0i%FXz$jo8`0o@*ZXZ~ZPb_<|F9(uHGT1ND%Zt7F
+z;liFIt!3V6&j49q`PKvJ=UzX5`sQWh@XOlfx52w7k3SZ^PQI6#0pKo9E8<q2hv%J{
+z#+Y@DvueF`hw=Mt>C@cXhdn-v;9Z`k_Dh%PuN!XEn~|h$-4DI=e!pT1W)y0SpymmE
+z#0A8sfzLmN%`RfT&knq{>N%`j->n5=kvCnKsphTOOd)&RDp}&hem54Ux_Z-b<2VXx
+zo!D=S<MqOJ9HqY35N9jwICZyO7bo(!qvm?c^}Hb55+`iNzN*$b!M1lf@Klf62sXrN
+z*Re<J*7Q;S>9uBR7C}9M@>mz&jkW~L0Mt*-QU1a^k2>`tkJ_z(w}>_O=d-vUQgQ(}
+z91ff0QNu2haOxYuDIWbLfO8!3sPWDpc-(Ui(BHQYULQPauT6jNdr0ss<f?fOczTvY
+wF8AVp>&nQJmqU=l-0J%Y1S8Y?Q4?@lI#1rb4&XI!E#)0mO5klCMZb7I0eeM!a{vGU
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..9b92e4e7ec731ccdc422e7c1d447851acd12a231
+GIT binary patch
+literal 5884
+zcmeHL&1)T16hHU9G<l6SCQmW7(DDp#(S^MxF`!hiruIvkHZ>T;)$_j0G;eU;Oqe&X
+zByPk_@h_0Bw4kNy?$XuUD7dJ*cHIUlWFc4--6+Q2@6OzGj1{*EbKuPR`rWTH_g=W?
+z<I@Xglv3iTDo4dxb8x=&96lA<Hzy6*k62yCWf(5T95>K_JOm%vwTEiyT{y^$p?MaE
+zq)u)^koSRIyh(o}<C}1ki|y|qerG!4*ASa~M(n)Uz5;u1oEXlVeJp*SdVAw+&lu<a
+z4&o4hBeo|ISDasycJ61aq%s3#2FeVS87MPQW}wVKnSn9`Wd_O&lo=>9@Sn@TVDXWX
+z+CVk#Z_6VY$l(6=IHg?QI<oWfmJHU;@=eP!KoxxU;<7CM`1#_E!HMPici+gD_rCh!
+z>rd|fymwu;27tFXX&kTW8YJJ$B-)HSK4kSbFVTKbo%(6=+bbI!i_Et?$@Z72+1ErX
+zoj8$9wEW1+-uLGkB2NLqp;%AYggpxREcll{cH(u|T+cN~M`}V<YZIzIJU)p5wNz`%
+zldrRrH^AA0en@pq)HmU=cHECVlLUTG_wx4Hsw(Dk>L)GFq^4zFnYA$`2N7)K%ckog
+zcu1!3MbYKAu>%x&8kFRHZ|D_5G5-pep(?7X{#PF?YW^_hZ+z1ZL^1Wlqa*V*wZAf2
+zeOgVag&_LSPmVVh7EU#0XZ4I`b>^>R|Mza<l&#&273>MX>jnED?B@&ii?Esej1($Y
+z#UG*MBy84?ELBFtsyUwf^Hl_j`&D%6ucxA;IQ8{v)Yt8P5PHV~PqeoY^)|X<y&co*
+zh|a$Br-_Z5Zm=Rc@xvr;tr^b?qE-0)c7L^H+U>-@;;bOL96LQR(W>8bRv1LS==r4!
+z+N5a`wEHPzD{;5$N0=98keW7R2V-VhCZ(C`8EJYt46r{<NV^lK^Z*w6(lpv6UAj{f
+zg!zFgo~zcW_b<+0c>Aq9S^qBb4ZT~B<1TI%nq@~yWCT7k&$zAi{R58o1CJwdJm2Sl
+zn}*JM9LHjRaM@$^>&{M09MAbWoDlXNfyj?CYMRh_HxS2r;Mx;#?30Js-9ekcZ34&5
+z?1*ENj)OTDVr@+lI9G3k%Z|(Yj~S#SZfFLKP5k>9jGSD5OR$~J5OFW$7z!8rprF%#
+z7`T&Ea&ov3w$mAE0f#B>l8b!=kJA~9f!p3iJ&s+44{KO+q4(+{N1Ora`uHr@r}J1J
+wxV`x!_6soog`-b_yAA`x+kCnI%Nj6q=jbRpyX_1}H|{OyMcfu}=bwQ46DN(>F#rGn
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.s
+new file mode 100644
+index 000000000000..1093d9ebebae
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-after_data_a32.s
+@@ -0,0 +1,197 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "after_data_a32"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor+24
++.long anchor+32
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..3dde0d9150b8c17fa7bfec8cac0dd8ab2ae98992
+GIT binary patch
+literal 5880
+zcmeHLzi%8x6n=B(*p5StZ4eGfu@37B7i6$4OCW;;2LUIF6B2`qG&$zHi*Lo=uG!m*
+zY#JJrDjgD}OFHUwrn;6Q;y;L-NI`NLAten_obQ|6aaNZgT9EchZ{Lsan_q8tR+{<Y
+zv(?X)QsSg4bK;^UB<EhoqasI^q$Wp!P054|BSp+<4GpM6$WdK;xK_SGf=Ud{GaQya
+zwGKl)0(E$u`C6vGB26u}zXSZve5UUMTY6ROyx6{icn~Lt^JX7wf2Q6b&i2GO_e;QG
+zUJ$mYkXM{vopGKgR!UicvI1oV$_kVfC@WA_psYYyfwBT+1<DGP75L9pp#Q}~C8K>+
+z+uN6i(wF|;{sgVux<7O9?tSTRt?*3CYk(?r<-)owCx3job>*Y=pT65$*}Z;S&-^mk
+z7+e?6(e`|A4Mu?FnVB+yQ#Ns@Z(0B2i;VA8XaAc1{pt?KqVg<HvHfLk_B7E(J5D4s
+zO+WIo^Zl8c$T2WD6z>yu5s$&X27UDOAl^pI_1u7Uq9#>!bW%+XPfTM#E!ENW=?~Zm
+zFAcH-{gCRIsAs}ct+*F?CJFqm?&j^YRaH#d?4~C5ZC1$?(r@GoX6gZSNM`ZGb<5x5
+z$7%8cD9L->(Ho><<`phLRa8~|uO3)b<0R&9eA5a<vFO8NBaKmYv@%wGMa`<!Ao|u%
+zmTRl4r)!IgdO@?qgJR$HVd<2;w;3<QlW4&5W}@T-oad!h@;2fV1$+*1tq^~Ln0H53
+zDkEau9Ot+B9)RMvDmwMIQ_)eJ`g$|!=~gcYy;FfF+S`e`I~}pvw&}J-XHVwS#NwtC
+zY=}<$Fo~O6#`A(`6M4VY+iaRvEAg+oD2Tp^ou8O!)9<<{3?g52W9_^)X_^GBUP^2u
+z?sWVJ^TG^L(}Hbd%*@NI)Kk46bx(&u>L(^-+>TRbKns1T8*P#f)2Ru<d@~jIRP*%Z
+z3yt$<Kh2Bv?<W7G5AWjm9oGxZvh5@?f*h6m+urm21CRd(ZbkCAx6gn#51)5&9E<%S
+zWjEI2gM*kn?(uCTVeCHyCf~*)@4)AOfjs^LZoGuYJ{O_x|Fa9;E_nQ$op5Z*GL&;6
+z*WO2h=k6Mjvg7jK#|qMtH?#o7NBm?QK`ySpHN?&*MBbY@hsI%F7kuVVg7+bvTpTY%
+z?0iC(!NU{}#bMtg<9vbvc>9N}=h!vmu!b!MU78Y^aRIFB<LBI;&#@T1!TOPV6Uukt
+n<VWysA;9pqUhe(!{+G3LQb%XMxd7IUdmDa{cNe^KFX24{9CFgS
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.s
+new file mode 100644
+index 000000000000..618beb95213e
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-at_state.s
+@@ -0,0 +1,197 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "at_state"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor+18
++.long anchor+22
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..e1919aebd94eec925e6ea2a4545f941bc690d8c9
+GIT binary patch
+literal 5884
+zcmeHL&u<k~6h8O8NBekcZL6_J0vVgP=t73JX(FNvsvr;xNJAGc%;QdH=$kNarkOX7
+zv?fMZ#=n5T3Rb#iS66TAg8u=UVA5q{qAVnq@4GX%4i&>zlR3$m^W*#Ok2y2<Cii}O
+zZs{|nlvt_DjM!)a$@kyJqb7$I#F4|mCS_bkkRoQ)K?7<7IjU_B*T^*_sKn4b$6@JH
+z+c4BaP>Z*jcXIs+X==IsL*Nf*b3FxY;Y~5~V*486gE%>yH~U!rHS-VRY)_1HzX}}Y
+zAHwz&^2+mTGcNMPDyb?^RiLUsRe`DkRRyXFR28TyP*tF+KvjXN0{^)R46p1eX%3b1
+zXh(KsD8olP<Fs;r`}p3;Z5ghg=b4t*0Cnj3%PaEZH&c(Fo^l%Bb#Fi2-Tv@N>*C!A
+z&<kSj0B{zkjN??@gyor;!kD<#qsBk;1>?u{>EEV)xwXl$s65M4On<qXKXts?O;X8C
+zCy4$0e1E|ac?}E>#ruRU#4XsjpuhjMmuw*B``m%Gq9#<mIiV&;#-}i#EA{5e)JN>(
+zV`zS$Z>XM*2Rb_8C4<=4X&Cg~e$hUEtC|<wNYbFw&vX_TL`e-$t9WUqo<JKijVG>L
+z{v3OQrYM4vqUTL_l~l~W#+OhvRagJ32VQFN80N17?S-OP_>tD=VpAQiwd${{X|)u_
+zH-q%Fv$S;9nV)y(T;9zb6!X3JOQ+1;%~&a(K!eFrd<5}3rT9I>M@sPwVy6^;f|&P5
+zMrxyC+ydwS`2m3P|0-@4Y-HlbNfx+k@xb*4VdS3(eR2KGxWCyGlkMt$SKR!`e3lwq
+z_rg_i(;!Nd&bs#fFkVAG@CIug?RjZ%%SK^*Be8y}<F%k~qbQ66aTk{_xjM_z&>LjL
+zR+C;Yh%qnBAk!Xf7h~pLZl#^MbJF(RD9nOXM~u5k#tdjtAZ_jHw8wO&!>CwL<#p9L
+z`{m`uOBX*aiuGz!{L=gPar}?lrDpk(5*bB~$~A88`u>H-{ejDoJg)Bx;LXD4eH_PP
+ze@K~y^~c^`LLS%o29hvlAAu>BGVV0tb8jGz`@o%-@Yv@()b2rB;BA4&-`NVsrksXy
+zF65d!N$~7_BT{Bu?tiQxEqRSOD1PE+V+abd{VgN5J|XhnEjTn5yI%5{KL*|zI)zvs
+zH)rb;`U*TuabGO<H8R#G*aL58pY=EPJ#u)5bqlRbiX68AtnK4=;m;OWAH0M0BljMZ
+p-@?id;N3@n;Z42l_vIZhYiDH!o&9VBSUc_m_+{QUc%Q$7_Z)Y=)(HRr
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.s
+new file mode 100644
+index 000000000000..44b3368a4e12
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-before_state.s
+@@ -0,0 +1,197 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "before_state"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor+2
++.long anchor+10
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..9e981f9228e3630b8c750455e0d6e191be057c4f
+GIT binary patch
+literal 5892
+zcmeHLPiP!f82{dEnrx%SBo<SJmNo35hxVC-fKn;A+S-a~wZR@d*!1nrm>ry*3A3{y
+zDS{XA>`96U_9EUy4~2NztA~Pk@M<koNP8+md$AaQzc=$_SX+8km=C`B{``LL-#7CH
+z-uw8}${R{4aZ-~b;-Y0Fmk;3K$-ZT2$bMk6GA-lGm$ZQf)G_3!u032U?;=4ZhUPgA
+zOP|_=q3(k^yvckc*Kd%fmfK$ketjX=mw_!mEp}dP?;#$=$>F@&$LjByKZ>(GG0y!w
+zaF~Ay+f&FZ&#%e2$P=risz6nNssdF7stQyUs47rZpsGMsfvN&k1*!`C=PEFK`>vAu
+zP&IDs%3T@C@W$>mtz5l%c<;rVGTb=LGcB(HYS7c?F394YUr%{IUHjyVpYMJ5?bq+$
+zI`QQ%*GAW6?*MQXr%dBiU5DkFnZlU3)90=K>N|{otIhv0_v7X^$D;BqPqF>wZvHfJ
+zr<<gbo3$YJ^Yi_ghR73Oa46m<>>!?meFl2(uf1doG1qei)`^-?wfc;j9iN`VfLdzx
+z3v;iqlM~SVKtHB>CLWmRSUVZSzDdKNulq&&d{v$w_B%<Oh4CO6<d6~%*f?|^>Q>KI
+zw`|Arc;fEm&#9+qifSk+hS=5}Qn3t=t5Ke+ssGgji)tOh{7qomp(wtA@yUr+UG4WK
+zYfq|qwGzf32I=v}%F4;c(vn`(yrdZs``)qqT$H`TnJUFI0A@?^LB!9N;ujDfEX79<
+zH%jqqh<T4>#hVc87C67tmjJjo$5?b0Y-OV3Bn$L<Jkaey82QISU$nm+_qTguvt85g
+ziq4<RXQ{<aFYJg;gD6ebHjM9w@jCKBd$7J{+U+#hbWs?8kT^dz@p{mAQ5433=+^34
+zZL%y4+k=c)C+YQq81upmGSi0bV$9sjtu!;eC{15SVHTt&V%$wKW<ZMqX&P<P9@Ci#
+zqhe!~_t)CV_s+G>zWI7ltjC+;i~i?cj-PR})GXgxA`{3_x!3KT-y?YZPjFk3$9;YV
+zyao8Ym*ZIM4=Lfky1%!VkjMSLg(QsqpTHDbTI48v{v*ia|KQ3)c<gft>i$JL;O&6N
+zuh|L5rW}WIF67#~N$}jgBT{x;{s&n>TJpvgq4<a&Od%-5^|y-H`Gm-OuHeu(>{7{R
+z{t$RAI)yl1gxL9nE`rDX;>2N>k#Ih-P4IRdsf2wBA8Xif(8XDi!!9WCJ}>-*0{aNO
+w(fV<`ub_MvPCf(gDgq2|>*d}r?}Ax7CkyE82N%G)xqlD8%)1TVTMyy=4K2{wd;kCd
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.s
+new file mode 100644
+index 000000000000..378bbaa6c4c2
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundary-discontinuous.s
+@@ -0,0 +1,199 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "discontinuous"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor+2
++.long anchor+6
++.long anchor+34
++.long anchor+36
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+new file mode 100644
+index 000000000000..9d7e7f85f6e9
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+@@ -0,0 +1,162 @@
++#===- check-boundaries.py - IP boundary golden checks ----------------------===#
++# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++# See https://llvm.org/LICENSE.txt for license information.
++# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++#===----------------------------------------------------------------------===#
++"""No ELF decoding: addresses and profile expectations are hand-derived.
++
++The patch1 JSON, not llvm-profgen or objdump, supplies instruction golden values.
++All generated input/output files are under the lit-provided temporary directory.
++"""
++import json
++import re
++import subprocess
++import sys
++from pathlib import Path
++
++TOOL, GROUP, TMP = sys.argv[1:]
++TMP = Path(TMP)
++TMP.mkdir(parents=True, exist_ok=True)
++HERE = Path(__file__).resolve().parent
++INPUTS = HERE.parent
++GOLDEN = json.loads((INPUTS / 'boundary-golden.json').read_text())
++SEQUENCE = 0
++
++
++def run(name, samples, options=(), failure=None, original=False, debug=None):
++    global SEQUENCE
++    SEQUENCE += 1
++    stem = TMP / str(SEQUENCE)
++    stem.with_suffix('.prof').unlink(missing_ok=True)
++    perf = stem.with_suffix('.perfscript')
++    # Boundary fixtures link .text at VA=file offset=0x1000.
++    # The original counting fixtures use VA=file offset+0x1000.
++    perf.write_text(''.join(f'17/17 {period} cycles: {addr:x} (/target+0x{addr-(0x1000 if original else -0x1000 if name=="section-adjacent" else 0):x})\n' for addr, period in samples))
++    binary = (INPUTS if original else HERE) / (name + '.perfbin')
++    cmd = [TOOL, '--ip-samples', '--allow-missing-build-id', '--binary-match-regex=^/target$', '--binary='+str(binary), '--perfscript='+str(perf), '--output='+str(stem.with_suffix('.prof')), '--format=text', '--show-ip-address-counts', '--show-ip-boundaries', *options]
++    if debug:
++        cmd.append('--debug-binary='+str(HERE/debug))
++    p = subprocess.run(cmd, capture_output=True, text=True)
++    stem.with_suffix('.stdout').write_text(p.stdout)
++    stem.with_suffix('.stderr').write_text(p.stderr)
++    if failure:
++        assert p.returncode != 0, (cmd, p.stdout)
++        assert (failure == 'avg denominator multiplication overflow' or 'failure_stage=boundary' in p.stderr) and failure in p.stderr, (cmd, p.stderr)
++        assert not stem.with_suffix('.prof').exists(), cmd
++        return p, ''
++    assert p.returncode == 0, (cmd, p.stdout, p.stderr)
++    return p, stem.with_suffix('.prof').read_text(errors='replace')
++
++
++def starts(p):
++    return [int(v, 16) for v in re.findall(r'^IP-BOUNDARY instruction=(0x[0-9a-f]+)', p.stdout, re.M)]
++
++
++def body(profile):
++    return {m[1]:int(m[2]) for line in profile.splitlines() if (m := re.fullmatch(r' (\d+(?:\.\d+)?): (\d+)',line))}
++
++
++if GROUP == 'positive':
++    for name in ['boundaries','boundary-before_state','boundary-at_state','boundary-discontinuous','boundary-after_data_a32','pure-arm','pure-a64','arm-literal','section-adjacent']:
++        g = GOLDEN[name+'.perfbin']
++        expected = g.get('expected_offsets',g.get('starts'))
++        if 'base' in g:
++            expected = [g['base']+x for x in expected]
++        p, profile = run(name,[(expected[0],10)],['--ip-aggregation=avg'])
++        assert starts(p) == expected, (name, starts(p), expected)
++        assert 'enumerated_functions=1' in p.stdout
++        assert 'boundary_source=' in p.stdout
++        print('PASS golden', name)
++    # Show-boundaries is IP-only, including explicitly false occurrences.
++    p = subprocess.run([TOOL,'--show-ip-boundaries','--binary=x','--output='+str(TMP/'gated')],capture_output=True,text=True)
++    assert p.returncode != 0 and 'IP-only options require --ip-samples' in p.stderr
++elif GROUP == 'negative':
++    for name,addr,why in [('bad-thumb-start',0x1004,'bad-thumb-start'),('bad-thumb-end',0x1000,'bad-thumb-end'),('bad-arm-start',0x101a,'bad-arm-start'),('bad-a64-start',0x1002,'unaligned A64'),('bad-a64-end',0x1000,'truncated A64'),('bad-conflict',0x1000,'conflicting mapping states'),('bad-no-map',0x1000,'no usable mapping symbols')]:
++        run(name,[(addr,10)],['--ip-aggregation=avg'],failure=why)
++        print('PASS negative',name)
++    for name in ['bad-no-map','a64-no-map']:
++        for opts in [['--ip-aggregation=avg'],['--ip-aggregation=sum','--ip-zero-fill=sampled-functions'],['--ip-aggregation=max','--ip-skid=prev-inst']]:
++            run(name,[(0x1000,10)],opts,failure='no usable mapping symbols')
++        for aggregation in ['sum','max']:
++            p,_=run(name,[(0x1000,10)],['--ip-aggregation='+aggregation])
++            assert 'enumerated_functions=0' in p.stdout and not starts(p)
++    for address in [0x1001,0x1004,0x100e]:
++        # Odd PC is not cleared; middle of MOV.W and decodable data both fail.
++        run('boundaries',[(address,10)],['--ip-aggregation=avg'],failure='sample is not an instruction start')
++    print('PASS no-map gating and invalid sampled PC')
++elif GROUP == 'zero':
++    p,plain=run('boundaries',[(0x1006,50)],['--ip-aggregation=sum','--ip-period-unit=1'])
++    p,zero=run('boundaries',[(0x1006,50)],['--ip-aggregation=sum','--ip-period-unit=1','--ip-zero-fill=sampled-functions','--ip-head-samples=entry-estimate'])
++    expected={str(n):0 for n in [0,2,6,8,10,18,24,28,32,34]};expected['6']=50
++    assert body(plain)=={'6':50} and body(zero)==expected, (plain,zero)
++    assert plain.splitlines()[0]=='whole_mixed:50:0'
++    assert zero.splitlines()[0]=='whole_mixed:50:1',zero
++    print('PASS zero keys, stable total and head fallback 1')
++elif GROUP == 'skid':
++    # Original->previous: 2->0 (16bit), 6->2 (32bit), 8->6 (IT).
++    # Range first, after inline tables, and cross-range cannot move.
++    for name,addr,previous,unadjusted in [('boundaries',0x1002,0x1000,0),('boundaries',0x1006,0x1002,0),('boundaries',0x1008,0x1006,0),('boundaries',0x1000,0x1000,1),('boundaries',0x1012,0x1012,1),('boundaries',0x1018,0x1018,1),('boundary-before_state',0x1002,0x1002,1),('boundary-discontinuous',0x1022,0x1022,1),('section-adjacent',0x1004,0x1004,1)]:
++        p,prof=run(name,[(addr,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'])
++        anchor=0x1004 if name=='section-adjacent' else 0x1000
++        assert body(prof)=={str(previous-anchor):1},(name,addr,prof)
++        assert f'skid_unadjusted samples={unadjusted} period_sum={7*unadjusted}' in p.stdout,p.stdout
++        assert 'p_ref=7 source=automatic' in p.stdout
++    # main's predecessor in layout belongs to two_sites, not main.
++    p,prof=run('a64-pie',[(0x13f4,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'],original=True)
++    assert 'skid_unadjusted samples=1 period_sum=7' in p.stdout
++    assert prof=='main:1:0\n 0: 1\n',prof
++    print('PASS skid predecessors, range/data/function barriers and original period')
++elif GROUP == 'avg-manual':
++    # Two instructions share one key. Only one is sampled: numerator=10,
++    # n(k)=2 (includes unsampled instruction), P_ref=1 => body=5, total=10.
++    for name,addr in [('arm-uniform',0x1000),('discontinuous-uniform',0x1002)]:
++        p,prof=run(name,[(addr,10)],['--ip-aggregation=avg','--ip-period-unit=1'])
++        assert body(prof)=={'0':5},prof
++        assert prof.splitlines()[0].split(':')[-2:] == ['10','0'],prof
++    run('arm-uniform',[(0x1000,1)],['--ip-aggregation=avg','--ip-period-unit=18446744073709551615'],failure='avg denominator multiplication overflow')
++    print('PASS avg unsampled and discontiguous denominators')
++elif GROUP == 'avg-counting':
++    # GNU addr2line + objdump independently identify 15 instructions with
++    # raw discriminator 1028 => base2, duplication4, line12-decl9=3.
++    # Seven unsampled instructions are part of n(k): round(32*4/15)=9.
++    addresses = {
++        'a64-pie':[0x1318,0x131c,0x1324,0x1328,0x1330,0x1334,0x133c,0x1340],
++        'arm-count':[0x12c8,0x12d0,0x12d8,0x12dc,0x12e0,0x12e4,0x12e8,0x12ec],
++        'thumb-count':[0x12be,0x12c4,0x12ca,0x12ce,0x12d2,0x12d4,0x12da,0x12de],
++        'thumb-no-attributes':[0x12be,0x12c4,0x12ca,0x12ce,0x12d2,0x12d4,0x12da,0x12de],
++    }
++    for name, aa in addresses.items():
++        sample=list(zip(aa,[2,6]*4))
++        for aggregation, expected in [('sum',32),('max',24),('avg',9)]:
++            p,prof=run(name,sample,['--ip-aggregation='+aggregation,'--ip-period-unit=1'],original=True)
++            assert prof=='count_loop:32:0\n 3.2: '+str(expected)+'\n', (name,aggregation,prof)
++            assert ('enumerated_functions=1' in p.stdout)==(aggregation=='avg')
++        # Same total after filling missing keys; other top-level functions
++        # (main and two_sites) must not appear.
++        _,prof=run(name,sample,['--ip-aggregation=avg','--ip-period-unit=1','--ip-zero-fill=sampled-functions'],original=True)
++        assert prof.splitlines()[0]=='count_loop:32:0' and body(prof)['3.2']==9
++        assert len([l for l in prof.splitlines() if l and not l.startswith(' ')])==1
++        assert any(v==0 for v in body(prof).values()),prof
++        # Positive numerator smaller than denominator is kept at one.
++        _,prof=run(name,[(aa[0],1)],['--ip-aggregation=avg','--ip-period-unit=1'],original=True)
++        assert prof=='count_loop:1:0\n 3.2: 1\n',prof
++    print('PASS avg unrolling, unsampled copies, min1 and zero-fill scope')
++elif GROUP == 'split':
++    opts=['--ip-aggregation=avg','--ip-period-unit=1','--ip-zero-fill=sampled-functions','--ip-skid=prev-inst']
++    samples=[(0x1006,10),(0x1012,20)]
++    p,plain=run('boundaries',samples,opts)
++    q,split=run('boundaries.stripped',samples,opts,debug='boundaries.debug')
++    assert plain==split
++    assert starts(p)==starts(q)
++    assert 'boundaries.debug' in q.stdout
++    for fmt in ['text','binary','extbinary']:
++        options=opts+['--format='+fmt]
++        p,_=run('boundaries',samples,options)
++        first=(TMP/(str(SEQUENCE)+'.prof')).read_bytes()
++        q,_=run('boundaries',samples,options)
++        second=(TMP/(str(SEQUENCE)+'.prof')).read_bytes()
++        assert first==second and p.stdout==q.stdout and p.stderr==q.stderr,(fmt,p.stderr,q.stderr)
++    print('PASS split debug and deterministic three formats')
++else:
++    raise ValueError(GROUP)
++print('PASS group',GROUP)
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..e936c8e347e306ced0a26b35a7c4b614a1949abb
+GIT binary patch
+literal 5824
+zcmeHLJ!~9B6n=B(*cS(kZ6G#Ci7wU^Dac@37NA5(ImjR462Kw_4QB3k<6E(}Ywhh>
+zc8bs?b($zu2uMll6p@_jM1h1*ddiRjl!C&F1PuuDeX~1g<pj|oiha7b@8|pG@7>Ny
+zGhdu+ol;7Pld2pR7cC*V{URO}*|Q{d*$Zr1CS?>UVovL5KpjDj>e|D#@-Y%rVrZV>
+zu=J@780sFV!yC-kGrfZ}wb=dv@CWmmz6EUQ1+nvD`wHUSI60g*`&j-d^>*WIPmFW_
+z2sq4B!uAyMit}qQ&hx}dDJxJ`psYYyfwBT+1<DGP6(}oER-mjvS%I<w|GNqdKiF1M
+z8>;%l$FeO$89sbGNh>!W9o%{Skqp;P^Gy2^v<f|a?!0{e%@6wy{rvL1E4QC~b>Vh$
+z_tMpG7k019-T~k&PMO51x(3TLGlem6r>|Q7_=k*ttj;}|`EGraV^MjQr`Y~7H+!0>
+z(~T3!%!(g*+4=rVU1T2^9E$e|TZqSDd5!VwpF8meVy@>ptP?e*s<kOKJvupq0ku?X
+z=Vy+wleeMSfqq2wOf)dzk#;<YJd*@|U-$F&*{UjD(C@@i8bpJ5kU>f+z(%2SP`7%v
+zx?ww>!xMKezfU|*lUGAYKE$T(kcwqgxEfVa|Je`IX&%7H#y9Oi6l*s+KGv+My_NCm
+zb81etg6MNUIa+VEPSh6{^@8U0%2Q(hGfX`bW$#}m3h@+x=|Vh<cz+>2gm|_PA4Xg+
+z#P1;H9gvmEm{>Q*`HsB_z*U{G=+xgxMMrV!>(ywW+k+tVjs%`)Z!_v|_QYnprr#Bv
+zJ(*7vi<@515uNy960fWo&kLee<o)(wb;Y#XiNEfmAi5AcKQYm&-*-_MM84?e@>y-t
+zGzr>+lvpS3_529)!VFT=hV5d^%*(7aQoSGzPlrM3CnjXvjZ<bo3w>!AZIT|-sR_b-
+zQxx~c%85_THP62HZeFZ^H~HK6_njJF!A7B3wk<@)kfU;++WWeH;Bk+0OOeMtdIr3C
+z_`Fl&SnLle;hy+yXD23)dvyaz82c@N$+x4(Yw)?h$>UzW{tO=bT!gys$QF28;PHKS
+z!m%kwp_~i3_FfS@cV~!{9hcuQR*;sw5q$MV@Dl$qfgl&x-!fw76C&@GoI~TV&k8>C
+z2f%C6$;I(P#Lg%5DR|s3P8@a-3Fi}A2k&b~Dqxr4V-0H#nw=Io=z;?8TJF#1*c;&O
+vt{=zy63YL=NejH22r#^@m-~NtkIULQ`31cDE`W7&zYD*}yM;mDe+KU_uu<2k
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.s
+new file mode 100644
+index 000000000000..5a46a2b6a418
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/discontinuous-uniform.s
+@@ -0,0 +1,164 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "discontinuous"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor+2
++.long anchor+6
++.long anchor+34
++.long anchor+36
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..2a480de840eb4fd4643c58cb82037a43da3f66b1
+GIT binary patch
+literal 6096
+zcmeHLL2DC16rN3Lo2s=*6>Gh?l!6F$O^cLLJyfiUPzx3c3QDqR)?_i+#7!ct7kdz)
+zUi8);qc?wn*Zc%8diUVLn+S>^Sl`=uU$d^QRy+wiWaiEL-uvdwzL^QkJiIi2Ibj$I
+zC8=JiuBOzi7@i%52V>K!pW2KXRJ{cEP@NTXRDPAgAXDPUF!OdR(+O>XRB5d<Zy$F>
+zk4lUW2|MDYgqJdT5TzhDwW=V)JpRVE@Y-4J2w4|ieo#8%$J5^n4}8pb@qM$%dD&|`
+zNw2z2JdXFbg=2BuEiYp-ASC<7CC)&cfj9$k2I36F8Hh6wXCTf%oPjt4aR&as44g2N
+zZ#v1`TfWyFp_-(6WnoDj-59*_s56y*v0lIJoEdrjq<!z?@4k-jp=o|Okozxu8Am-X
+zAbT<PE;;&%@5x+Q|EbvCa=GRQcWB15rnVl?LLCzsyaiBy)6~Fz!EvAd{C%s&P~OxA
+z++Wv3*J!sjGDb3$F@}26!!$8VB~weo=Q!wjs+ycKs<zj%E8~S)%PZQx>olxJcLd2m
+zqTceIaeL})V4=^G#NeVGA_U!A)b^-RY7N8qc4&YFCxxn^B+{z29QdmK1coybM$-6W
+zLxat`-d)F^G3V#!%*jb>!kX4Y?b34SAb4awbqe}_Vf6(Fvfnjp1gqA?2ZHXwE+9S1
+zI_14j;e7=TJdK_9m$I79N>f>0t?5`LuVoclZlyTx7L`?8^%|>H6`*CiQC6028E^W5
+z-LAUJ%JQ9xU(40)V$t<Vggb>+DQ6c7zH=X%>)olL@7rF<X+W#Eo};YgTD9tUG!Kf{
+zv<oE56hrs4RAVb@tl0g@{?5(aT)1%U>P39#ze?FM+vf)R1QO>0ac~}>^Ez_nGsy+-
+zW7xK18s2WBd_Lp6+Ti2dW@R5`g~@MKJXg#I=a~<{m#wWD_<556DtY0Xfu{ebxC_3(
+z>NIuuKLPwTQ(M-Ak2w54#|86;oFt5G;NyQ~Q~1$%{0-qULkfQz#>YNx3%@STc&o#B
+zVphBn7y~~&p$X}XmLCski8dO4kql9ceZe0AQDoFNPk0n#*HaRImX%P6`c}vm#n{~y
+zzR60cM13ESEsC-Gy72R?gi6%+G1(Z)hJ3jDLHMC(?7#zj$fty2?E?oiL%P!uo!5)c
+l3Dyt$YJ)JWowx>~Bm9?Pkot%V_&IfU;=3|&6OJOI{2ybip$Y&1
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.s
+new file mode 100644
+index 000000000000..8ce2f5d13aa5
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-a64.s
+@@ -0,0 +1,83 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.globl anchor
++anchor:
++.inst 0xd503201f
++.inst 0xd65f03c0
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 8
++.byte 1
++.asciz "manual-boundaries.s"
++.quad 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "pure-a64"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.quad anchor
++.quad anchor+8
++.quad 0
++.quad 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 9
++.byte 2
++.quad anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..ac237c86ce2867d6d188405c34650ede352cd27f
+GIT binary patch
+literal 5524
+zcmeHLy=xRv5Py4@k4yZzL}Q|8JVF8%$r?ini55AGO7J2W3{eo`-rah)c()t&_9U?}
+zHj>Ilu#KISg<xZ6p_TSxnL_^nQ9%UH-|y{CSWiJqiyfGquiw1)c6RRI&E0c_^M+w4
+zp|m=##F~clRX-jn)j6$lst2)tl~rAEF(#Zt0=WY|vgAY6bOjDFV@MC<kkrW;2y!P_
+z;u-pLA#cD<j^}S8zBw84Da6+HDSa;Hr(n0oiQ&1q#^Q&d+#Y8>V?6t1#36no=97qv
+zpKla4nSOFYNd=M$Bo#<1kW?V4KvIFE0!amu3M3UsDv(s*|Es{`?cvsmZQffCfYaa$
+zmzLD)?XjWEn}^?yeH@-&KDhku;@bxU?Pu5beB8H5S=^jy3m*>kEbZ;|$S2;($vOve
+zhb*^L^?ZFdAI~YZ3jr?4S-=MDUP#UczWiu;1=u`i6;jCPGt!wpqrWRVhz(4Y&MXa{
+z<|4fChnMjVqi(rPt2R;enr_+h9lK#RqWtjmsnw=$Pgs6kdvQd#dBGRD3Z+Ah;E7Sm
+z_q}^4_#$9KMXRoxr4ZhkV!Dws(#BsOSSWuKX_jpj9cAo?+SS{g&lo+a-t=x`#3(rK
+zE!&^T6$*2?sVVcM$=7Np9z_>T2Mk?9&PFt)y2CO=ufy-8%)nj?l<9hbZC2c-S!_DB
+z@`O`XW_jIhtk;$HR;@-=nc<WEz}IoB?v#}2+cn=?S+&Y#$F0C`7n_w8t622y+hRHH
+zO;2>+aw~R2teWH6%FHh=m{t(@PO%v<R`Tj~+r_zXg1{<5R<UQOg;I@LD(aV&xoem5
+z3-f2AxBMp&eX^Z7k^aoFOqtzu!$)Sn>KPPjH~I%0dz`IC9D8>hI0(Hy_u_giI~(U~
+ztK|{L9xlLn1Ui3fB-wWyI{ThD_IMSzA?R@&u~U(cxQ!ebIQ~Y2xHoAA%$XJQ^{fmy
+z_RlYKEZ8g}^ND*o2?lN!^DrS<ZxIgB86)nHfMT&5F`eP}z@4EIk*raJEjmL3eX%x<
+z#qPv(;>LixP9-8)<34P>!>ai20XHlLq~IP!`eYQ_0**gDA>zneVAfdZIdHQuAat$d
+f`#y<m2u+^>cp(O)?E4HlYb^8>vsM1*3JLBfSf!^T
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.s
+new file mode 100644
+index 000000000000..4b5e6ca8592f
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.s
+@@ -0,0 +1,85 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .text,"ax",%progbits
++.balign 4
++.local $a
++.type $a,%notype
++$a:
++.globl anchor
++anchor:
++.byte 0x00,0x00,0xa0,0xe1,0x1e,0xff,0x2f,0xe1
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "pure-arm"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor+8
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..b182308216a3fe3d615014a749a4bcffbca9e244
+GIT binary patch
+literal 9488
+zcmeHNOKTHR7`>CUX^d9VDpZTwF$8g82Q6J_1#K`|g|uj)LRalfGB$(BBqS4UK~Q%t
+zbSbXf+J%DPAMg+OCtSF2B?t;qu%2^gK5cyM+{pdPnfpD?edNq^F?a6Wi<L{3Wht?=
+zI<6#|Msl`*OG*t+D_aerHmdS*Juf|!x(AmS08ozWcI-3G!X*X)sb_8ESOZQYO=JMp
+zQ)vEF=NyagqT283ta0tvP)GBN>G6@3bqb*fhhSdUq+nX3fKk9GU=%P47zK<1MggOM
+zQNSo*6fg?>CkpU=cR!E@<`$OJ;)^d6Z*uP+g!gNYZqGk|HaWia>gS)zckBVYr_=J-
+z6<{nFkNrI3x9P%1zRMGg`^*ii^;V}ZWdfssQNSo*6fg=H1&jhl0i%FXz$jo8FbWt2
+z{*eN&75>_D{5H;S;JX37+VfleI*<eS?f%o(?N%8r_X}15F>Az1XGg5jOnwY6`i@Fx
+zm&VR=kQsnvT&<=X_T0v#*Xo5ew-fkXr>iURROlD^>(NR#ayyaETY7teM+3y-sd*Lw
+zhZVN=4zo$N94wWLyWv!0`e2H?6IRMfTYVRFDjf#J^<6Je);_qI+)ycN?Mmg+d#r+0
+z3BsFxXU48n%J$ThbIReVgnrZe7~dC`(b~vfh{9e7RM2M{bgxuaYbkZ^l_)1{MZU8Z
+z_8hMlG-{JUO*yrVu)EPzI$L+Ub>+lY=A({s+Kos#)JRj^W>AIWd%d+4*Yi65Es28g
+zMoavT8?O0Xi5fxZE2p$L@3>La3A|p!TD8?|`XNTe?2+rCtz*8}i(6H!>Dh}>Jb$ul
+zvr=AOD9vBF(67zkBI<@;ulIs94;mJCbci37crS{N5BH2%FM?;I<@3lf$fNv+fY008
+zE%M3)lFTut$#}=$voG_j1b7FM7>(wUdjd!U<ng&*2anIan7;1_cqWFvoK@lCWG<xj
+z+Sr}}gva|oVE6N+&w21T7U$OIVZh^4$2HT)<2o(_vIe+n)>i5uoy4Se9kKW<E!#?+
+zqm!7_JjCL&^u+$LcE(a`@9>%5wBxnVrwQ*4eEbH|wSBOaI+FNog!eG<PbRhDqe}4~
+vQH(s|F(CJnH5<IEXh#5QLgay`0JRfqgZEMbv>c1J3GC!e6fh<Wi3#r;A3>TB
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.s
+new file mode 100644
+index 000000000000..e84c136713a9
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.s
+@@ -0,0 +1,77 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.section .plt,"ax",%progbits
++.local $d.plt
++.type $d.plt,%notype
++$d.plt:
++.byte 0x00,0xbf,0x00,0xbf
++.section .text,"ax",%progbits
++.local $t.text
++.type $t.text,%notype
++$t.text:
++.globl anchor
++anchor:
++.byte 0x00,0xbf,0x70,0x47
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "text_start"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor+4
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.perfbin
+index 9768908b515542886e8523932f9680ce7112d765..cff0b31fa7ab39d87332fc56d771bd3dfa61bafb 100644
+GIT binary patch
+delta 165
+zcmbQC*Pu5+gOOpQ=6imT!n@A%3jI<=<-9YUpF2n|QaQIOdh$g^naLXjSvLC!G%-$o
+zCMYDy&Hw^jU=o?&nk*<JE-3;MVq#}lV1O*gz`#4%QRv`gR^i~uYX#Xi#|X<X^R9rZ
+h;0MxdlUv2K8675X6tm~ND+G~{oxD&`bn-b7E&y+;A+`Vj
+
+delta 163
+zcmZqBo1r&BgHd9m=6imTs7nSh2{JJ+9?sa)JEz)v)tnp?oyiv&WhQSBWZCQ^(8M@-
+zo1l;+I|B%Cf=Oh8Yw|-uaY<gV5I3>}m@Ph8P)M9nV6vvr!O72s!ZteyD=_mOfGXn$
+b((IFS#k3hCCeIYJ=lm)Jkx-btP(&U8-iaaG
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.s
+index d45a14582977..770fd7a91af9 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.s
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.s
+@@ -1,11 +1,9 @@
+ .section .text,"ax",%progbits
+ .balign 4
+-.local $x
+-.type $x,%notype
+-$x:
+ .globl anchor
+ anchor:
+-.byte 0x1f,0x20,0x03,0xd5,0xc0,0x03,0x5f,0xd6
++.inst 0xd503201f
++.inst 0xd65f03c0
+ 
+ .section .debug_abbrev,"",%progbits
+ .byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0,0
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-avg-counting.test b/llvm/test/tools/llvm-profgen/ip-boundary-avg-counting.test
+new file mode 100644
+index 000000000000..9362930e2c46
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-avg-counting.test
+@@ -0,0 +1,4 @@
++#===- ip-boundary-avg-counting.test - IP avg unrolling ---------------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/boundary-extra/check-boundaries.py llvm-profgen avg-counting %t | FileCheck %s
++# CHECK: PASS group avg-counting
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-avg-manual.test b/llvm/test/tools/llvm-profgen/ip-boundary-avg-manual.test
+new file mode 100644
+index 000000000000..2c769420a036
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-avg-manual.test
+@@ -0,0 +1,4 @@
++#===- ip-boundary-avg-manual.test - On-demand IP boundaries ----------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/boundary-extra/check-boundaries.py llvm-profgen avg-manual %t | FileCheck %s
++# CHECK: PASS group avg-manual
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test b/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
+new file mode 100644
+index 000000000000..ad722bd7c190
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
+@@ -0,0 +1,38 @@
++#===- ip-boundary-metadata.test - Mapping symbol prerequisites -------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: split-file %s %t
++# RUN: rm -f %t/out
++# A debug section with the same bytes/range but a different name must not match.
++# RUN: llvm-objcopy --rename-section=.text=.different %S/Inputs/ip-mode/boundary-extra/boundaries.debug %t/mismatch.debug
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%S/Inputs/ip-mode/boundary-extra/boundaries.stripped.perfbin --debug-binary=%t/mismatch.debug --perfscript=%t/mixed --ip-aggregation=avg --output=%t/out --show-ip-address-counts 2>&1 | FileCheck %s --check-prefix=SECTION
++# SECTION: failure_stage=boundary
++# SECTION: cannot match section by name and address range: .different
++# A global symbol with a mapping name is not a usable mapping symbol.
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%S/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin --perfscript=%t/mixed --ip-aggregation=avg --output=%t/out 2>&1 | FileCheck %s --check-prefix=NONE
++# NONE: failure_stage=boundary
++# NONE: no usable mapping symbols
++# Remove only the first Thumb state: later maps still exist, but cannot be
++# inherited backwards to the beginning of the function.
++# RUN: llvm-objcopy --strip-symbol='$t.1' %S/Inputs/ip-mode/boundary-extra/boundaries.perfbin %t/no-initial.perfbin
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%t/no-initial.perfbin --perfscript=%t/mixed --ip-aggregation=avg --output=%t/out 2>&1 | FileCheck %s --check-prefix=INITIAL
++# INITIAL: failure_stage=boundary
++# INITIAL: no initial mapping state in section .text
++# RUN: test ! -e %t/out
++# Each failed sampled function must be reported, not just the first one.
++# RUN: llvm-objcopy --strip-symbol='$x' %S/Inputs/ip-mode/a64-pie.perfbin %t/no-map-count.perfbin
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%t/no-map-count.perfbin --perfscript=%t/two --ip-aggregation=avg --output=%t/out --show-ip-address-counts 2>&1 | FileCheck %s --check-prefix=ALL
++# ALL-DAG: count_loop: no usable mapping symbols
++# ALL-DAG: main: no usable mapping symbols
++# ALL-DAG: IP-GENERATION enumerated_functions=2
++# RUN: test ! -e %t/out
++# Boundary failure must also leave an existing destination untouched.
++# RUN: echo OLD > %t/old
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%t/no-map-count.perfbin --perfscript=%t/two --ip-aggregation=avg --output=%t/old 2>&1 | FileCheck %s --check-prefix=ALL-ERR
++# ALL-ERR: failure_stage=boundary
++# RUN: FileCheck %s --input-file=%t/old --check-prefix=OLD
++# OLD: OLD
++#--- two
++17/17 10 cycles: 1318 (/target+0x318)
++17/17 10 cycles: 13f4 (/target+0x3f4)
++#--- mixed
++17/17 10 cycles: 1000 (/target+0x1000)
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-negative.test b/llvm/test/tools/llvm-profgen/ip-boundary-negative.test
+new file mode 100644
+index 000000000000..67ef11c3b0a1
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-negative.test
+@@ -0,0 +1,4 @@
++#===- ip-boundary-negative.test - On-demand IP boundaries ----------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/boundary-extra/check-boundaries.py llvm-profgen negative %t | FileCheck %s
++# CHECK: PASS group negative
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-positive.test b/llvm/test/tools/llvm-profgen/ip-boundary-positive.test
+new file mode 100644
+index 000000000000..221bc152ae2c
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-positive.test
+@@ -0,0 +1,4 @@
++#===- ip-boundary-positive.test - On-demand IP boundaries ----------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/boundary-extra/check-boundaries.py llvm-profgen positive %t | FileCheck %s
++# CHECK: PASS group positive
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-skid.test b/llvm/test/tools/llvm-profgen/ip-boundary-skid.test
+new file mode 100644
+index 000000000000..40630e3b4d3f
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-skid.test
+@@ -0,0 +1,4 @@
++#===- ip-boundary-skid.test - On-demand IP boundaries ----------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/boundary-extra/check-boundaries.py llvm-profgen skid %t | FileCheck %s
++# CHECK: PASS group skid
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-split.test b/llvm/test/tools/llvm-profgen/ip-boundary-split.test
+new file mode 100644
+index 000000000000..818bfce4161e
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-split.test
+@@ -0,0 +1,4 @@
++#===- ip-boundary-split.test - On-demand IP boundaries ----------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/boundary-extra/check-boundaries.py llvm-profgen split %t | FileCheck %s
++# CHECK: PASS group split
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-zero.test b/llvm/test/tools/llvm-profgen/ip-boundary-zero.test
+new file mode 100644
+index 000000000000..499d69e931dc
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-zero.test
+@@ -0,0 +1,4 @@
++#===- ip-boundary-zero.test - On-demand IP boundaries ----------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/boundary-extra/check-boundaries.py llvm-profgen zero %t | FileCheck %s
++# CHECK: PASS group zero
+diff --git a/llvm/test/tools/llvm-profgen/ip-counting-options.test b/llvm/test/tools/llvm-profgen/ip-counting-options.test
+index e810c95ad291..4c126ee53f86 100644
+--- a/llvm/test/tools/llvm-profgen/ip-counting-options.test
++++ b/llvm/test/tools/llvm-profgen/ip-counting-options.test
+@@ -10,12 +10,6 @@
+ # GATE: IP-only options require --ip-samples
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out  2>&1 | FileCheck %s --check-prefix=MISSING
+ # MISSING: IP sample mode requires --ip-aggregation during evaluation
+-# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-aggregation=avg 2>&1 | FileCheck %s --check-prefix=IP-AGGREGATION
+-# IP-AGGREGATION: IP sample mode: --ip-aggregation=avg requires instruction boundary enumeration, which is not implemented yet
+-# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-zero-fill=sampled-functions 2>&1 | FileCheck %s --check-prefix=IP-ZERO-FILL
+-# IP-ZERO-FILL: IP sample mode: --ip-zero-fill=sampled-functions requires instruction boundary enumeration, which is not implemented yet
+-# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-skid=prev-inst 2>&1 | FileCheck %s --check-prefix=IP-SKID
+-# IP-SKID: IP sample mode: --ip-skid=prev-inst requires instruction boundary enumeration, which is not implemented yet
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-period-unit=0 2>&1 | FileCheck %s --check-prefix=UNIT
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-period-unit=-1 2>&1 | FileCheck %s --check-prefix=UNIT
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-period-unit=xyz 2>&1 | FileCheck %s --check-prefix=UNIT
+diff --git a/llvm/tools/llvm-profgen/CMakeLists.txt b/llvm/tools/llvm-profgen/CMakeLists.txt
+index bc02274de696..a2cd02f94d92 100644
+--- a/llvm/tools/llvm-profgen/CMakeLists.txt
++++ b/llvm/tools/llvm-profgen/CMakeLists.txt
+@@ -20,6 +20,7 @@ add_llvm_tool(llvm-profgen
+   PerfReader.cpp
+   IPPerfReader.cpp
+   IPIdentity.cpp
++  IPBoundary.cpp
+   CSPreInliner.cpp
+   ProfiledBinary.cpp
+   ProfileGenerator.cpp
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.cpp b/llvm/tools/llvm-profgen/IPBoundary.cpp
+new file mode 100644
+index 000000000000..915abe4e2010
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPBoundary.cpp
+@@ -0,0 +1,232 @@
++//===-- IPBoundary.cpp - On-demand IP instruction boundaries
++//----------------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#include "IPBoundary.h"
++#include "llvm/Object/ELFObjectFile.h"
++#include "llvm/Support/CheckedArithmetic.h"
++#include "llvm/Support/Endian.h"
++#include "llvm/Support/Format.h"
++#include "llvm/Support/MathExtras.h"
++
++using namespace llvm;
++using namespace llvm::object;
++using namespace llvm::sampleprof;
++
++namespace {
++Error boundaryError(const Twine &Message) {
++  return createStringError(inconvertibleErrorCode(), Message);
++}
++char mappingISA(StringRef Name, bool ARM) {
++  if (Name.size() < 2 || Name[0] != '$' ||
++      (Name.size() > 2 && (Name[2] != '.' || Name.size() == 3)))
++    return 0;
++  char C = Name[1];
++  return C == 'd' || (ARM ? C == 'a' || C == 't' : C == 'x') ? C : 0;
++}
++} // namespace
++
++Error IPBoundaryMap::loadMappings(StringRef Path, bool Runtime) {
++  auto File = createBinary(Path);
++  if (!File)
++    return File.takeError();
++  auto *Obj = dyn_cast<ELFObjectFileBase>(File->getBinary());
++  if (!Obj ||
++      (!(isa<ELF32LEObjectFile>(Obj) && Obj->getEMachine() == ELF::EM_ARM) &&
++       !(isa<ELF64LEObjectFile>(Obj) && Obj->getEMachine() == ELF::EM_AARCH64)))
++    return boundaryError("requires ELF32 little-endian ARM or ELF64 "
++                         "little-endian AArch64");
++  if (Runtime) {
++    for (const SectionRef &S : Obj->sections()) {
++      if (!(ELFSectionRef(S).getFlags() & ELF::SHF_EXECINSTR) || !S.getSize())
++        continue;
++      auto Name = S.getName();
++      if (!Name)
++        return Name.takeError();
++      auto End = checkedAddUnsigned(S.getAddress(), S.getSize());
++      if (!End)
++        return boundaryError("section address overflow");
++      auto Bytes = S.getContents();
++      if (!Bytes)
++        return Bytes.takeError();
++      if (S.isBSS() || Bytes->size() != S.getSize())
++        return boundaryError("runtime executable section has no bytes");
++      Sections.push_back(
++          {Name->str(), Bytes->str(), S.getAddress(), *End, {}, {}});
++    }
++  }
++  // ELFObjectFileBase::symbols iterates .symtab, not .dynsym.
++  for (ELFSymbolRef Symbol : Obj->symbols()) {
++    auto Name = Symbol.getName();
++    if (!Name)
++      return Name.takeError();
++    char ISA = mappingISA(*Name, Obj->getEMachine() == ELF::EM_ARM);
++    if (!ISA || Symbol.getELFType() != ELF::STT_NOTYPE ||
++        Symbol.getBinding() != ELF::STB_LOCAL)
++      continue;
++    auto SI = Symbol.getSection();
++    if (!SI)
++      return SI.takeError();
++    if (*SI == Obj->section_end())
++      continue;
++    const SectionRef &S = **SI;
++    if (!(ELFSectionRef(S).getFlags() & ELF::SHF_EXECINSTR))
++      continue;
++    auto SN = S.getName();
++    if (!SN)
++      return SN.takeError();
++    auto Address = Symbol.getAddress();
++    if (!Address)
++      return Address.takeError();
++    if (*Address < S.getAddress() || *Address - S.getAddress() >= S.getSize())
++      continue;
++    Section *Match = nullptr;
++    for (auto &Candidate : Sections)
++      if (Candidate.Name == *SN && Candidate.Begin == S.getAddress() &&
++          Candidate.End - Candidate.Begin == S.getSize()) {
++        if (Match)
++          return boundaryError("ambiguous corresponding section " + *SN);
++        Match = &Candidate;
++      }
++    if (!Match)
++      return boundaryError("cannot match section by name and address range: " +
++                           *SN);
++    auto [It, Inserted] = Match->States.emplace(*Address, ISA);
++    if (!Inserted && It->second != ISA)
++      Match->Conflicts.insert(*Address);
++    Sources.insert(Path.str());
++  }
++  return Error::success();
++}
++
++Expected<IPBoundaryMap> IPBoundaryMap::load(StringRef Binary,
++                                            StringRef DebugBinary) {
++  IPBoundaryMap Result;
++  if (Error E = Result.loadMappings(Binary, true))
++    return std::move(E);
++  if (!DebugBinary.empty() && DebugBinary != Binary)
++    if (Error E = Result.loadMappings(DebugBinary, false))
++      return std::move(E);
++  if (Result.Sources.empty())
++    return boundaryError("no usable mapping symbols");
++  return Result;
++}
++
++Expected<IPFunctionBoundaries>
++IPBoundaryMap::enumerate(StringRef Name,
++                         ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
++                         StringRef SectionName) const {
++  IPFunctionBoundaries Result;
++  Result.Name = Name.str();
++  Result.Ranges.assign(Ranges.begin(), Ranges.end());
++  llvm::sort(Result.Ranges);
++  Result.Ranges.erase(std::unique(Result.Ranges.begin(), Result.Ranges.end()),
++                      Result.Ranges.end());
++  for (size_t RI = 0; RI < Result.Ranges.size(); ++RI) {
++    auto [Begin, End] = Result.Ranges[RI];
++    if (Begin >= End || (RI && Begin < Result.Ranges[RI - 1].second))
++      return boundaryError("invalid or overlapping DWARF ranges");
++    uint64_t Cursor = Begin;
++    while (Cursor < End) {
++      const Section *S = nullptr;
++      for (const auto &Candidate : Sections)
++        if (Cursor >= Candidate.Begin && Cursor < Candidate.End &&
++            (SectionName.empty() || Candidate.Name == SectionName)) {
++          if (S)
++            return boundaryError("ambiguous section for DWARF range");
++          S = &Candidate;
++        }
++      if (!S)
++        return boundaryError("no runtime code section for DWARF range");
++      if (!S->Conflicts.empty())
++        return boundaryError("conflicting mapping states in section " +
++                             S->Name);
++      auto It = S->States.upper_bound(Cursor);
++      if (It == S->States.begin())
++        return boundaryError("no initial mapping state in section " + S->Name);
++      --It;
++      auto Next = std::next(It);
++      uint64_t Stop =
++          std::min(End, Next == S->States.end() ? S->End : Next->first);
++      auto [Anchor, ISA] = *It;
++      Result.Intersections.push_back({Cursor, Stop, Anchor, ISA, S->Name});
++      if (ISA == 'd') {
++        Cursor = Stop;
++        continue;
++      }
++      if (ISA != 't' && ((Cursor % 4) || ((Cursor - Anchor) % 4)))
++        return boundaryError(ISA == 'a'
++                                 ? "bad-arm-start: unaligned A32 range start"
++                                 : "bad-a64-start: unaligned A64 range start");
++      if (ISA == 't' && Anchor % 2)
++        return boundaryError("unaligned Thumb mapping anchor");
++      // Prove a Thumb start from this mapping interval's anchor, never from
++      // an earlier ISA or data interval. Prefix instructions are not emitted.
++      uint64_t PC = ISA == 't' ? Anchor : Cursor;
++      while (PC < Stop) {
++        uint64_t Size = 4;
++        if (ISA == 't') {
++          if (S->End - PC < 2)
++            return boundaryError("truncated Thumb halfword");
++          Size = support::endian::read16le(S->Bytes.data() + PC - S->Begin) >=
++                         0xe800
++                     ? 4
++                     : 2;
++        }
++        if (PC < Cursor && Size > Cursor - PC)
++          return boundaryError(
++              "bad-thumb-start: range starts inside a Thumb instruction");
++        if (Size > Stop - PC)
++          return boundaryError(
++              ISA == 't'   ? "bad-thumb-end: truncated Thumb instruction"
++              : ISA == 'a' ? "bad-arm-end: truncated A32 instruction"
++                           : "bad-a64-end: truncated A64 instruction");
++        if (PC >= Cursor)
++          Result.Instructions.push_back({PC, Size, RI});
++        PC += Size;
++      }
++      Cursor = Stop;
++    }
++  }
++  return Result;
++}
++
++bool IPFunctionBoundaries::contains(uint64_t Address) const {
++  auto It = llvm::lower_bound(
++      Instructions, Address,
++      [](const IPInstruction &I, uint64_t A) { return I.Address < A; });
++  return It != Instructions.end() && It->Address == Address;
++}
++
++uint64_t IPFunctionBoundaries::predecessor(uint64_t Address) const {
++  auto It = llvm::lower_bound(
++      Instructions, Address,
++      [](const IPInstruction &I, uint64_t A) { return I.Address < A; });
++  if (It == Instructions.end() || It->Address != Address ||
++      It == Instructions.begin())
++    return Address;
++  const auto &Previous = *std::prev(It);
++  return Previous.RangeIndex == It->RangeIndex &&
++                 Previous.Address + Previous.Size == Address
++             ? Previous.Address
++             : Address;
++}
++
++void IPFunctionBoundaries::print(raw_ostream &OS) const {
++  OS << "IP-BOUNDARY function=" << Name << '\n';
++  for (auto [Begin, End] : Ranges)
++    OS << "IP-BOUNDARY range=" << format_hex(Begin, 0) << ':'
++       << format_hex(End, 0) << '\n';
++  for (const auto &I : Intersections)
++    OS << "IP-BOUNDARY intersection=" << format_hex(I.Begin, 0) << ':'
++       << format_hex(I.End, 0) << " section=" << I.Section << " isa=$" << I.ISA
++       << " anchor=" << format_hex(I.Anchor, 0) << '\n';
++  for (const auto &I : Instructions)
++    OS << "IP-BOUNDARY instruction=" << format_hex(I.Address, 0)
++       << " size=" << I.Size << " range_index=" << I.RangeIndex << '\n';
++}
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.h b/llvm/tools/llvm-profgen/IPBoundary.h
+new file mode 100644
+index 000000000000..ddd45baecfe9
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPBoundary.h
+@@ -0,0 +1,66 @@
++//===-- IPBoundary.h - On-demand IP instruction boundaries -------*- C++
++//-*-===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#ifndef LLVM_TOOLS_LLVM_PROFGEN_IPBOUNDARY_H
++#define LLVM_TOOLS_LLVM_PROFGEN_IPBOUNDARY_H
++
++#include "llvm/ADT/ArrayRef.h"
++#include "llvm/ADT/StringRef.h"
++#include "llvm/Support/Error.h"
++#include <map>
++#include <set>
++#include <string>
++#include <vector>
++
++namespace llvm {
++namespace sampleprof {
++
++struct IPInstruction {
++  uint64_t Address, Size;
++  size_t RangeIndex;
++};
++struct IPIntersection {
++  uint64_t Begin, End, Anchor;
++  char ISA;
++  std::string Section;
++};
++struct IPFunctionBoundaries {
++  std::string Name;
++  std::vector<std::pair<uint64_t, uint64_t>> Ranges;
++  std::vector<IPIntersection> Intersections;
++  std::vector<IPInstruction> Instructions;
++  void print(raw_ostream &OS) const;
++  // A layout predecessor must end exactly at Address in the same DWARF range.
++  uint64_t predecessor(uint64_t Address) const;
++  bool contains(uint64_t Address) const;
++};
++
++// Independent of ProfiledBinary's LBR disassembler. Loading mapping metadata
++// and reading instruction bytes are deferred until an IP feature needs them.
++class IPBoundaryMap {
++  struct Section {
++    std::string Name, Bytes;
++    uint64_t Begin, End;
++    std::map<uint64_t, char> States;
++    std::set<uint64_t> Conflicts;
++  };
++  std::vector<Section> Sections;
++  std::set<std::string> Sources;
++  Error loadMappings(StringRef Path, bool Runtime);
++
++public:
++  static Expected<IPBoundaryMap> load(StringRef Binary, StringRef DebugBinary);
++  const std::set<std::string> &sources() const { return Sources; }
++  Expected<IPFunctionBoundaries>
++  enumerate(StringRef Name, ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
++            StringRef SectionName = "") const;
++};
++} // namespace sampleprof
++} // namespace llvm
++#endif
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+index 662384111d90..2838f3251f69 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+@@ -237,11 +237,20 @@ void IPGenerationStatistics::print(raw_ostream &OS,
+   OS << "IP-GENERATION p_ref=" << Options.PeriodUnit
+      << " source=" << (Options.ExplicitPeriod ? "explicit" : "automatic")
+      << " weight=" << (Options.SampleWeight ? "sample" : "period")
+-     << " aggregation=" << (Options.MaxAggregation ? "max" : "sum")
++     << " aggregation="
++     << (Options.AverageAggregation ? "avg"
++         : Options.MaxAggregation   ? "max"
++                                    : "sum")
+      << " fs_discriminator=" << (FSDiscriminator ? "true" : "false") << '\n';
+   for (const auto &[Name, C] : Counts)
+     OS << "IP-GENERATION " << Name << " samples=" << C.SampleCount
+        << " period_sum=" << C.PeriodSum << '\n';
++  OS << "IP-GENERATION enumerated_functions=" << EnumeratedFunctions << '\n';
++  for (const auto &Source : BoundarySources)
++    OS << "IP-GENERATION boundary_source=" << Source << '\n';
++  for (const auto &[Name, Reason] : BoundaryFailures)
++    OS << "IP-GENERATION boundary_failure function=" << Name
++       << " reason=" << Reason << '\n';
+ }
+ 
+ Error ProfileGenerator::populateBodySamplesFromAddresses(
+@@ -251,9 +260,9 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+   FunctionSamples::ProfileIsFS = UseFSDiscriminator;
+   FunctionSamples::ProfileIsCS = false;
+   FunctionSamples::ProfileIsProbeBased = false;
+-  for (StringRef Name :
+-       {"usable", "in_func_no_line", "outside_dwarf_func", "plt",
+-        "in_cu_no_subprogram", "no_cu", "usable_nonleaf_line_zero"})
++  for (StringRef Name : {"usable", "in_func_no_line", "outside_dwarf_func",
++                         "plt", "in_cu_no_subprogram", "no_cu",
++                         "usable_nonleaf_line_zero", "skid_unadjusted"})
+     Statistics.Counts[Name.str()] = {};
+   auto Classify = [&](StringRef Name, const IPAddressCount &C) -> Error {
+     auto &Sum = Statistics.Counts[Name.str()];
+@@ -261,18 +270,73 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+       return E;
+     return addIPCount(Sum.PeriodSum, C.PeriodSum);
+   };
+-  // FunctionSamples nodes identify the entire inline callsite chain. Both
+-  // totals and body numerators remain exact integers until final
+-  // materialization.
+-  std::map<FunctionSamples *, uint64_t> Totals;
+-  std::map<FunctionSamples *, std::map<LineLocation, uint64_t>> Bodies;
++  // First identify eligible functions without enumerating unprofiled code.
++  std::map<std::string, BinaryFunction *> SampledFunctions;
++  std::map<uint64_t, BinaryFunction *> UsableAddresses;
+   for (const auto &[Address, C] : Counts) {
+-    if (!Binary->findFuncRange(Address)) {
++    auto *Range = Binary->findFuncRange(Address);
++    if (!Range) {
+       if (Error E = Classify("outside_dwarf_func", C))
+         return E;
+       if (Error E = Classify(Binary->classifyOutsideIP(Address), C))
+         return E;
+-      continue;
++    } else if (Binary->getCachedFrameLocationStack(Address).empty()) {
++      if (Error E = Classify("in_func_no_line", C))
++        return E;
++    } else {
++      SampledFunctions.emplace(Range->Func->FuncName.str(), Range->Func);
++      UsableAddresses.emplace(Address, Range->Func);
++    }
++  }
++  std::map<BinaryFunction *, size_t> BoundaryIndices;
++  if (Options.needsBoundaries() && !SampledFunctions.empty()) {
++    auto Map =
++        IPBoundaryMap::load(Binary->getPath(), Binary->getDebugBinaryPath());
++    std::string LoadFailure;
++    if (!Map)
++      LoadFailure = toString(Map.takeError());
++    else
++      Statistics.BoundarySources = Map->sources();
++    for (const auto &[Name, Function] : SampledFunctions) {
++      ++Statistics.EnumeratedFunctions;
++      if (!LoadFailure.empty()) {
++        Statistics.BoundaryFailures.emplace_back(Name, LoadFailure);
++        continue;
++      }
++      auto B = Map->enumerate(Name, Function->Ranges);
++      if (!B) {
++        Statistics.BoundaryFailures.emplace_back(Name, toString(B.takeError()));
++        continue;
++      }
++      for (const auto &[Address, F] : UsableAddresses)
++        if (F == Function && !B->contains(Address))
++          Statistics.BoundaryFailures.emplace_back(
++              Name,
++              "sample is not an instruction start: " + utohexstr(Address));
++      BoundaryIndices.emplace(Function, Statistics.Boundaries.size());
++      Statistics.Boundaries.push_back(std::move(*B));
++    }
++    if (!Statistics.BoundaryFailures.empty()) {
++      std::string Message = "failure_stage=boundary";
++      for (const auto &[Name, Reason] : Statistics.BoundaryFailures)
++        Message += "\n  " + Name + ": " + Reason;
++      return ipGenerationError(Message);
++    }
++  }
++  // FunctionSamples nodes identify the entire inline callsite chain. Both
++  // totals and body numerators stay integral until final materialization.
++  std::map<FunctionSamples *, uint64_t> Totals;
++  std::map<FunctionSamples *, std::map<LineLocation, uint64_t>> Bodies;
++  std::map<const FunctionSamples *, std::map<LineLocation, uint64_t>> Sizes;
++  for (const auto &[Original, Function] : UsableAddresses) {
++    uint64_t Address = Original;
++    const auto &C = Counts.at(Original);
++    if (Options.PrevInst) {
++      Address = Statistics.Boundaries[BoundaryIndices.at(Function)].predecessor(
++          Original);
++      if (Address == Original)
++        if (Error E = Classify("skid_unadjusted", C))
++          return E;
+     }
+     const auto &Frames = Binary->getCachedFrameLocationStack(Address);
+     if (Frames.empty()) {
+@@ -299,18 +363,63 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     LineLocation Key(Location.LineOffset,
+                      getBaseDiscriminator(Location.Discriminator));
+     auto &Body = Bodies[Leaf][Key];
+-    if (Options.MaxAggregation) {
++    if (Options.MaxAggregation || Options.AverageAggregation) {
+       auto Product = checkedMulUnsigned(
+           Numerator, uint64_t(getDuplicationFactor(Location.Discriminator)));
+       if (!Product)
+         return ipGenerationError("duplication multiplication overflow");
+-      Body = std::max(Body, *Product);
++      if (Options.MaxAggregation)
++        Body = std::max(Body, *Product);
++      else if (Error E = addIPCount(Body, *Product))
++        return E;
+     } else if (Error E = addIPCount(Body, Numerator)) {
+       return E;
+     }
+   }
+   if (!Statistics.Counts["usable"].SampleCount)
+     return ipGenerationError("no usable samples");
++  // Count all matching instructions, not just sampled addresses. For avg
++  // alone, look up existing contexts without creating unsampled profiles.
++  if (Options.AverageAggregation || Options.ZeroFill)
++    for (const auto &B : Statistics.Boundaries)
++      for (const auto &I : B.Instructions) {
++        const auto &Frames = Binary->getCachedFrameLocationStack(I.Address);
++        if (Frames.empty())
++          continue;
++        const FunctionSamples *Leaf = nullptr;
++        if (Options.ZeroFill) {
++          Leaf = &getLeafProfileAndAddTotalSamples(Frames, 0);
++        } else {
++          auto Top = ProfileMap.find(SampleContext(Frames.front().Func));
++          if (Top == ProfileMap.end())
++            continue;
++          Leaf = &Top->second;
++          for (size_t J = 1; J < Frames.size() && Leaf; ++J) {
++            const auto &L = Frames[J - 1].Location;
++            const auto &Calls = Leaf->getCallsiteSamples();
++            auto Call = Calls.find(LineLocation(
++                L.LineOffset, getBaseDiscriminator(L.Discriminator)));
++            if (Call == Calls.end()) {
++              Leaf = nullptr;
++              break;
++            }
++            auto Callee = Call->second.find(Frames[J].Func);
++            Leaf = Callee == Call->second.end() ? nullptr : &Callee->second;
++          }
++          if (!Leaf)
++            continue;
++        }
++        const auto &L = Frames.back().Location;
++        LineLocation Key(L.LineOffset, getBaseDiscriminator(L.Discriminator));
++        if (Error E = addIPCount(Sizes[Leaf][Key], 1))
++          return E;
++        if (Options.ZeroFill) {
++          // Only the zero-fill path constructs contexts, and returns mutable
++          // nodes owned by ProfileMap.
++          auto &Node = getLeafProfileAndAddTotalSamples(Frames, 0);
++          Bodies[&Node].try_emplace(Key, 0);
++        }
++      }
+   bool LargeCount = false;
+   for (auto [FS, Numerator] : Totals) {
+     uint64_t Count = roundIPCount(Numerator, Options.PeriodUnit);
+@@ -320,7 +429,17 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+   uint64_t AllBodyCounts = 0;
+   for (auto &[FS, Locations] : Bodies)
+     for (auto [Location, Numerator] : Locations) {
+-      uint64_t Count = roundIPCount(Numerator, Options.PeriodUnit);
++      uint64_t Unit = Options.PeriodUnit;
++      if (Options.AverageAggregation) {
++        uint64_t N = Sizes[FS][Location];
++        if (!N)
++          return ipGenerationError("missing instruction count for avg key");
++        auto Product = checkedMulUnsigned(Unit, N);
++        if (!Product)
++          return ipGenerationError("avg denominator multiplication overflow");
++        Unit = *Product;
++      }
++      uint64_t Count = roundIPCount(Numerator, Unit);
+       // Also guard the existing summary/density accumulation of body counts.
+       if (Error E = addIPCount(AllBodyCounts, Count))
+         return E;
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.h b/llvm/tools/llvm-profgen/ProfileGenerator.h
+index 03e2a04e439e..b4118872edac 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.h
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.h
+@@ -10,6 +10,7 @@
+ #define LLVM_TOOLS_LLVM_PROGEN_PROFILEGENERATOR_H
+ #include "CSPreInliner.h"
+ #include "ErrorHandling.h"
++#include "IPBoundary.h"
+ #include "IPPerfReader.h"
+ #include "PerfReader.h"
+ #include "ProfiledBinary.h"
+@@ -158,10 +159,18 @@ struct IPGenerationOptions {
+   uint64_t PeriodUnit = 1;
+   bool SampleWeight = false, MaxAggregation = false, EstimateHead = false;
+   bool ExplicitPeriod = false;
++  bool AverageAggregation = false, ZeroFill = false, PrevInst = false;
++  bool needsBoundaries() const {
++    return AverageAggregation || ZeroFill || PrevInst;
++  }
+ };
+ 
+ struct IPGenerationStatistics {
+   std::map<std::string, IPAddressCount> Counts;
++  uint64_t EnumeratedFunctions = 0;
++  std::set<std::string> BoundarySources;
++  std::vector<std::pair<std::string, std::string>> BoundaryFailures;
++  std::vector<IPFunctionBoundaries> Boundaries;
+   void print(raw_ostream &OS, const IPGenerationOptions &Options,
+              bool FSDiscriminator) const;
+ };
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.h b/llvm/tools/llvm-profgen/ProfiledBinary.h
+index 735c662ab516..ad2f9be493ad 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.h
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.h
+@@ -425,6 +425,7 @@ public:
+   void decodePseudoProbe();
+ 
+   StringRef getPath() const { return Path; }
++  StringRef getDebugBinaryPath() const { return DebugBinaryPath; }
+   StringRef getName() const { return llvm::sys::path::filename(Path); }
+   uint64_t getBaseAddress() const { return BaseAddress; }
+   void setBaseAddress(uint64_t Address) { BaseAddress = Address; }
+diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+index 0d61fdc1f929..42d19e048b84 100644
+--- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
++++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+@@ -123,6 +123,12 @@ static cl::opt<bool> ShowIPAddressCounts(
+     cl::desc("Print IP address counters and reader statistics"),
+     cl::cat(ProfGenCategory));
+ 
++static cl::opt<bool> ShowIPBoundaries(
++    "show-ip-boundaries", cl::Hidden,
++    cl::desc(
++        "Print on-demand IP function ranges, ISA intersections and starts"),
++    cl::cat(ProfGenCategory));
++
+ static cl::opt<std::string> IPWeight("ip-weight", cl::init("period"),
+                                      cl::desc("IP weight: period or sample"),
+                                      cl::cat(ProfGenCategory));
+@@ -209,17 +215,12 @@ static Error runIPMode() {
+     return Fail("IP sample mode: invalid --ip-zero-fill");
+   if (IPSkid != "none" && IPSkid != "prev-inst")
+     return Fail("IP sample mode: invalid --ip-skid");
+-  for (auto [Name, Value] : {std::pair<StringRef, StringRef>(
+-                                 "ip-aggregation", IPAggregation.getValue()),
+-                             {"ip-zero-fill", IPZeroFill.getValue()},
+-                             {"ip-skid", IPSkid.getValue()}})
+-    if (Value == "avg" || Value == "sampled-functions" || Value == "prev-inst")
+-      return Fail("IP sample mode: --" + Name + "=" + Value +
+-                  " requires instruction boundary enumeration, which is not "
+-                  "implemented yet");
+   IPGenerationOptions Generation;
+   Generation.SampleWeight = IPWeight == "sample";
+   Generation.MaxAggregation = IPAggregation == "max";
++  Generation.AverageAggregation = IPAggregation == "avg";
++  Generation.ZeroFill = IPZeroFill == "sampled-functions";
++  Generation.PrevInst = IPSkid == "prev-inst";
+   Generation.EstimateHead = IPHeadSamples == "entry-estimate";
+   Generation.ExplicitPeriod = IPPeriodUnit.getNumOccurrences();
+   if (Generation.ExplicitPeriod &&
+@@ -264,6 +265,9 @@ static Error runIPMode() {
+       Reader.getAddressCounts(), Generation, Statistics);
+   if (ShowIPAddressCounts)
+     Statistics.print(outs(), Generation, Binary.useFSDiscriminator());
++  if (ShowIPBoundaries)
++    for (const auto &B : Statistics.Boundaries)
++      B.print(outs());
+   if (E)
+     return E;
+   return Generator.writeIPProfile();
+@@ -360,6 +364,7 @@ int main(int argc, const char *argv[]) {
+   if (IPSamples || IPEvent.getNumOccurrences() ||
+       BinaryMatchRegex.getNumOccurrences() ||
+       ShowIPAddressCounts.getNumOccurrences() ||
++      ShowIPBoundaries.getNumOccurrences() ||
+       PerfBuildIDList.getNumOccurrences() ||
+       AllowMissingBuildID.getNumOccurrences() || IPWeight.getNumOccurrences() ||
+       IPPeriodUnit.getNumOccurrences() || IPAggregation.getNumOccurrences() ||
+-- 
+2.43.0
+

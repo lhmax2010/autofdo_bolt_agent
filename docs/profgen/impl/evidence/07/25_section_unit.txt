@@ -1,0 +1,42 @@
+Standalone unit (not lit); links the official GBS IPBoundary.cpp.o.
+SOURCE
+//===-- section-unit.cpp - Section-local boundary checks --------------------===//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#include "IPBoundary.h"
+#include "llvm/Support/raw_ostream.h"
+using namespace llvm;
+using namespace llvm::sampleprof;
+int main(int argc, char **argv) {
+  if (argc != 2) return 1;
+  auto M = IPBoundaryMap::load(argv[1], "");
+  if (!M) { logAllUnhandledErrors(M.takeError(), errs()); return 1; }
+  std::pair<uint64_t,uint64_t> Range{0x1000,0x1004};
+  auto Text=M->enumerate("text", {Range}, ".text");
+  auto Plt=M->enumerate("plt", {Range}, ".plt");
+  if (!Text) { logAllUnhandledErrors(Text.takeError(), errs()); return 1; }
+  if (!Plt) { logAllUnhandledErrors(Plt.takeError(), errs()); return 1; }
+  Text->print(outs()); Plt->print(outs());
+  if (Text->Instructions.size()!=2 || Text->Instructions[0].Address!=0x1000 ||
+      Text->Instructions[1].Address!=0x1002 || !Plt->Instructions.empty()) return 1;
+  auto Ambiguous=M->enumerate("ambiguous", {Range});
+  if (Ambiguous) return 1;
+  std::string E=toString(Ambiguous.takeError());
+  if (E!="ambiguous section for DWARF range") return 1;
+  outs()<<"PASS section-local state; unqualified query rejected: "<<E<<'\n';
+}
+
+COMMANDS AND OUTPUT
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/clang++ -D_GLIBCXX_USE_CXX11_ABI=1 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/tools/llvm-profgen -I/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-profgen -I/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/mlgo_verify_assets/mlgo_sysroot/include -I/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/include -I/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/include -Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument -momit-leaf-frame-pointer -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -fdiagnostics-color=never -m64 -march=nehalem -msse4.2 -mfpmath=sse -fasynchronous-unwind-tables -fno-omit-frame-pointer -g -fPIC -fno-semantic-interposition -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -Wall -Wextra -Wno-unused-parameter -Wwrite-strings -Wcast-qual -Wmissing-field-initializers -pedantic -Wno-long-long -Wc++98-compat-extra-semi -Wimplicit-fallthrough -Wcovered-switch-default -Wno-noexcept-type -Wnon-virtual-dtor -Wdelete-non-virtual-dtor -Wsuggest-override -Wstring-conversion -Wno-pass-failed -Wmisleading-indentation -Wctad-maybe-unsupported -fdiagnostics-color -ffunction-sections -fdata-sections -O3 -DNDEBUG -std=c++17 -fno-exceptions -funwind-tables --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0 -resource-dir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64/clang/22 -c /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/resume/section-unit.cpp -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/dev/section-unit.o
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/clang++ --sysroot=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0 --ld-path=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/dev/ld.lld /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/dev/section-unit.o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/tools/llvm-profgen/CMakeFiles/llvm-profgen.dir/IPBoundary.cpp.o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64/libLLVM.so.22.1 -o /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/dev/section-unit
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/dev/section-unit /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/section-same-address.perfbin
+IP-BOUNDARY function=text
+IP-BOUNDARY range=0x1000:0x1004
+IP-BOUNDARY intersection=0x1000:0x1004 section=.text isa=$t anchor=0x1000
+IP-BOUNDARY instruction=0x1000 size=2 range_index=0
+IP-BOUNDARY instruction=0x1002 size=2 range_index=0
+IP-BOUNDARY function=plt
+IP-BOUNDARY range=0x1000:0x1004
+IP-BOUNDARY intersection=0x1000:0x1004 section=.plt isa=$d anchor=0x1000
+PASS section-local state; unqualified query rejected: ambiguous section for DWARF range

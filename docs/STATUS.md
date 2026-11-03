@@ -26,7 +26,18 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-02；补丁4小修完成，补丁5因素材冲突停止）
+## 当前授权与执行状态（2026-11-03；补丁5完成）
+
+- 计划/授权：已按完整补丁5任务与两次素材/规模裁决完成；补丁4小修 `aef395b32e27d5f63468c5d49f76f43508dbf270` 未重做，冻结v0.7和golden未改。下一步等待补丁6授权；Agent设计开发仍在增强完成后。
+- LLVM本地补丁5 `d7bd4795c7fddfc239510b96fa6803b56b94dbb4`：64文件、+3298/-40行，新增8个lit。实现按需映射符号边界、avg、sampled-functions补零、prev-inst及隐藏诊断。[报告](profgen/impl/07_patch5_boundaries.md)、[提交审计](profgen/impl/evidence/07/33_patch5_commit_audit.json)、[0005](../patches/profgen/0005-llvm-profgen-Enumerate-instruction-boundaries-on-dem.patch)。仅工具/测试目录，未推LLVM远端/Gerrit；spec原diff保持不动且未提交。
+- 已闭合：三份A64原件与三个行表副本用同字节.inst修正，.text哈希与DWARF区间不变。最终70份ELF排查仅两份故意bad-conflict有同址异状态。[修复](profgen/impl/evidence/07/14_fixture_repair_proof.json)、[最终清单](profgen/impl/evidence/07/20_fixture_inventory_final.json)。
+- 已闭合：head补零兜底测试total50、首body0、head1通过；未用total冒充入口。13素材182起点与objdump一致；08最大20Thumb符号范围132859起点一致，现有DWARF按名合并后的全部137117起点也一致。[objdump](profgen/impl/evidence/07/26_fixture_objdump.json)、[20函数](profgen/impl/evidence/07/27_real20_boundaries.json)。
+- 构建：GBS 13:45:14–14:14:55+08成功，实际约1781秒、108 Ninja步；worker共2380.498秒含资源等待600秒，GBS_EXIT0/ALL-END OK。available最低9656MiB。[记录](profgen/impl/evidence/07/22_patch5_build.txt)
+- 正式GBS %check：79项，77 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，原50逐项不变、新8全PASS。C1每遍636、两遍一致、0差异，新增29测试排除；14次完整导出地址/reader与补丁2逐字节一致。[lit](profgen/impl/evidence/07/23_patch5_lit_summary.json)、[C1](profgen/impl/evidence/07/24_patch5_c1_summary.json)、[重放](profgen/impl/evidence/07/29_full_export_comparison.json)。
+- 新工具SHA `05ddac1c680fd34e21b4c2bfc424c792d2d1a1155fbed2e4d754e39242f4bfb6`。合成负载规模测量：20函数137117起点，avg+补零0.399秒/96000KiB；全部5594可执行范围输入，4598 usable→4090函数/1041309起点，2.572秒/306612KiB。996样本缺DWARF函数被排除，不能声称所有.text均补零。只作规模观测，不作实际采样或avg正确性证据。[两档](profgen/impl/evidence/07/28_synthetic_zero_scale.json)
+- 未连接板子，未改设计、认证或索要密码，无新增已知边界例外。正式非增量构建前必须撤销spec本地测试改动；原停止记录下列保留为历史。
+
+## 前轮授权与执行状态（2026-11-02；补丁4小修完成，补丁5因素材冲突停止，历史）
 
 - 计划：先补丁4小修及GBS/lit/C1，再完成补丁5按需边界、avg、补零、skid及全部交叉核对。冻结v0.7 SHA仍为 `eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be`；未改设计、未连接板子、不推LLVM远端/Gerrit。[报告](profgen/impl/07_patch5_boundaries.md)
 - 已闭合：补丁4从 `de8171b77cec5e547c8ffc2f7a5039a8b39b8577` amend为 `aef395b32e27d5f63468c5d49f76f43508dbf270`，修正sample+显式period-unit错误、非叶子原始line0诊断；相对原补丁4为8文件+54/-5行及3704B素材。重新导出0004；spec原有diff逐字节不变、未提交。[审计](profgen/impl/evidence/07/11_commit_audit.json)
@@ -485,7 +496,7 @@
 
 ## 待人工裁决
 
-- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1、C1/lit准备、补丁2及补丁3已完成，等待补丁4授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式目前明确拒绝perfdata，尚不生成profile。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–5已完成，等待补丁6授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -502,7 +513,7 @@
 
 - IP 新选项改为枚举类型与 cl::values，补丁 7 处理。
 - 非叶子帧行号为 0 的处理，上板后按实测数据决定。
-- 补丁5实现补零后，补head兜底测试：有样本函数中，最小行号的位置为补零写入的0，第一个采到的位置在其后；开启 `--ip-head-samples=entry-estimate --ip-zero-fill=sampled-functions`，预期head=1，来自库函数total为正时至少返回1的兜底，不得用函数total替代入口计数。本轮用户已授权补丁4记录不可达证明并延期该用例。
+- avg真实数据核对留到上板联调：用08产物重新采样，不复用旧镜像地址。本轮仅合成负载规模测量；head零估计挂账已由补丁5的total50/head1用例关闭。
 
 - 本轮授权generation=0为未知；inode被复用且一条记录generation为0时，替换可能无法发现。不能将allow-missing后的unverified提升为verified；源码与限制见[补丁3规则修正登记](profgen/impl/05_patch3_identity.md)。
 

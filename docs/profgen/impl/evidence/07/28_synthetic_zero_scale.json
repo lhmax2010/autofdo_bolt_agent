@@ -1,0 +1,133 @@
+{
+  "kind": "合成负载规模测量：不是实测采样，不验证avg数值",
+  "build_id": "f960461f63c852474257f51267b7b543afffdc9c",
+  "executable_function_symbols": 5614,
+  "deduplicated_extents": 5594,
+  "no_objdump_instruction": [],
+  "cohorts": [
+    {
+      "label": "合成负载规模测量/largest20",
+      "input_functions": 20,
+      "exit": 0,
+      "seconds": 0.39862767001613975,
+      "peak_rss_kib": 96000,
+      "enumerated_instruction_starts": 137117,
+      "generation_stats": {
+        "p_ref": "1000003 source=automatic weight=period aggregation=avg fs_discriminator=false",
+        "in_cu_no_subprogram": "samples=0 period_sum=0",
+        "in_func_no_line": "samples=0 period_sum=0",
+        "no_cu": "samples=0 period_sum=0",
+        "outside_dwarf_func": "samples=0 period_sum=0",
+        "plt": "samples=0 period_sum=0",
+        "skid_unadjusted": "samples=0 period_sum=0",
+        "usable": "samples=20 period_sum=20000060",
+        "usable_nonleaf_line_zero": "samples=0 period_sum=0",
+        "enumerated_functions": "20",
+        "boundary_source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+      },
+      "profile_entries": {
+        "top_level_functions": 20,
+        "inline_nodes": 2285,
+        "body_locations": 18497,
+        "zero_body_locations": 18477,
+        "lines": 20802
+      },
+      "profile_exists": true,
+      "profile_sha256": "b05da78a3e16a7d189f81bd7322d2e4cc49b2f3c345af8c85da636120f2be4dd",
+      "stderr": "warning: Sample PGO is estimated to optimize better with 91150.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n"
+    },
+    {
+      "label": "合成负载规模测量/all-executable",
+      "input_functions": 5594,
+      "exit": 0,
+      "seconds": 2.5716652730479836,
+      "peak_rss_kib": 306612,
+      "enumerated_instruction_starts": 1041309,
+      "generation_stats": {
+        "p_ref": "1000003 source=automatic weight=period aggregation=avg fs_discriminator=false",
+        "in_cu_no_subprogram": "samples=965 period_sum=965002895",
+        "in_func_no_line": "samples=0 period_sum=0",
+        "no_cu": "samples=31 period_sum=31000093",
+        "outside_dwarf_func": "samples=996 period_sum=996002988",
+        "plt": "samples=0 period_sum=0",
+        "skid_unadjusted": "samples=0 period_sum=0",
+        "usable": "samples=4598 period_sum=4598013794",
+        "usable_nonleaf_line_zero": "samples=0 period_sum=0",
+        "enumerated_functions": "4090",
+        "boundary_source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+      },
+      "profile_entries": {
+        "top_level_functions": 4090,
+        "inline_nodes": 20487,
+        "body_locations": 126599,
+        "zero_body_locations": 122509,
+        "lines": 151176
+      },
+      "profile_exists": true,
+      "profile_sha256": "4d4b1f76dcfc0185d6364dd528162c8c5637545fba41c7ff67b16e1afe0d50d4",
+      "stderr": "warning: Sample PGO is estimated to optimize better with 23300.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n"
+    }
+  ],
+  "limitations": "Only functions with usable DWARF samples participate in zero-fill; executable functions without usable DWARF are recorded outside/in_func_no_line, not invented. Counts include same-name CU ranges combined by existing loader.",
+  "alias_count": 20,
+  "commands": [
+    {
+      "label": "largest20",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/profgen",
+        "--ip-samples",
+        "--binary-match-regex=^/target$",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100",
+        "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/largest20.perfscript",
+        "--ip-aggregation=avg",
+        "--ip-zero-fill=sampled-functions",
+        "--show-ip-address-counts",
+        "--show-ip-boundaries",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/largest20.prof"
+      ],
+      "exit": 0,
+      "seconds": 0.39862767001613975,
+      "peak_rss_kib": 96000,
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/largest20.stdout",
+      "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/largest20.stderr",
+      "measurement": "lightweight launcher, direct tool child wait4 rusage"
+    },
+    {
+      "label": "all-executable",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/profgen",
+        "--ip-samples",
+        "--binary-match-regex=^/target$",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100",
+        "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/all-executable.perfscript",
+        "--ip-aggregation=avg",
+        "--ip-zero-fill=sampled-functions",
+        "--show-ip-address-counts",
+        "--show-ip-boundaries",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/all-executable.prof"
+      ],
+      "exit": 0,
+      "seconds": 2.5716652730479836,
+      "peak_rss_kib": 306612,
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/all-executable.stdout",
+      "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/all-executable.stderr",
+      "measurement": "lightweight launcher, direct tool child wait4 rusage"
+    }
+  ],
+  "raw_summary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/summary.json",
+  "raw_summary_sha256": "0fe1e0a1d6fc0b50e8fe9c851ada2dc5e14188e75f17b0ec2319df0141fd2756"
+}
