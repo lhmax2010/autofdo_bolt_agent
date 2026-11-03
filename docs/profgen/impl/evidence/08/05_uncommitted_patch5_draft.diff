@@ -1,0 +1,183 @@
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
+index d02f49b7d00e..e25db46896de 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
+@@ -45,3 +45,9 @@ from .byte plus handwritten $x to identical .inst bytes and assembler-generated
+ $x. This prevents the AArch64 assembler's automatic $d from conflicting with $x.
+ Original golden addresses and all function ranges are unchanged. bad-conflict
+ remains a dedicated same-address, different-state negative input.
++
++Patch5 follow-up: skid-no-line.s derives boundaries.s without changing code or ranges.
++The initial .debug_line row has line 0 at 0x1000; the second instruction
++at 0x1002 keeps line 3. This proves that prev-inst must retain 0x1002 when
++its predecessor lacks usable line information. Build with the ARM commands
++above, substituting skid-no-line for boundaries (clang/LLD 22.1.8).
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+index 9d7e7f85f6e9..18f5c5ceae3e 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+@@ -105,6 +105,18 @@ elif GROUP == 'skid':
+     p,prof=run('a64-pie',[(0x13f4,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'],original=True)
+     assert 'skid_unadjusted samples=1 period_sum=7' in p.stdout
+     assert prof=='main:1:0\n 0: 1\n',prof
++    for name,addr,reason in [('boundaries',0x1020,'data_or_state_change'),
++                             ('skid-no-line',0x1002,'predecessor_no_line')]:
++        p,prof=run(name,[(addr,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'])
++        assert body(prof)=={str(addr-0x1000):1},prof
++        assert f'skid_unadjusted_{reason} samples=1 period_sum=7' in p.stdout,p.stdout
++        assert 'IP-GENERATION usable samples=1 period_sum=7' in p.stdout
++        assert 'IP-GENERATION in_func_no_line samples=0 period_sum=0' in p.stdout
++        counts=re.findall(r'^IP-GENERATION skid_unadjusted_(?:first_instruction|range_gap|data_or_state_change|predecessor_no_line) samples=(\d+) period_sum=(\d+)$',p.stdout,re.M)
++        assert len(counts)==4 and sum(int(x[0]) for x in counts)==1 and sum(int(x[1]) for x in counts)==7,counts
++    p,prof=run('skid-no-line',[(0x1000,7),(0x1002,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'])
++    assert 'IP-GENERATION usable samples=1 period_sum=7' in p.stdout
++    assert 'IP-GENERATION in_func_no_line samples=1 period_sum=7' in p.stdout
+     print('PASS skid predecessors, range/data/function barriers and original period')
+ elif GROUP == 'avg-manual':
+     # Two instructions share one key. Only one is sampled: numerator=10,
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.cpp b/llvm/tools/llvm-profgen/IPBoundary.cpp
+index 915abe4e2010..9ada6e669614 100644
+--- a/llvm/tools/llvm-profgen/IPBoundary.cpp
++++ b/llvm/tools/llvm-profgen/IPBoundary.cpp
+@@ -187,7 +187,8 @@ IPBoundaryMap::enumerate(StringRef Name,
+               : ISA == 'a' ? "bad-arm-end: truncated A32 instruction"
+                            : "bad-a64-end: truncated A64 instruction");
+         if (PC >= Cursor)
+-          Result.Instructions.push_back({PC, Size, RI});
++          Result.Instructions.push_back(
++              {PC, Size, RI, Result.Intersections.size() - 1});
+         PC += Size;
+       }
+       Cursor = Stop;
+@@ -203,18 +204,30 @@ bool IPFunctionBoundaries::contains(uint64_t Address) const {
+   return It != Instructions.end() && It->Address == Address;
+ }
+ 
+-uint64_t IPFunctionBoundaries::predecessor(uint64_t Address) const {
++uint64_t IPFunctionBoundaries::predecessor(uint64_t Address,
++                                           StringRef &Reason) const {
+   auto It = llvm::lower_bound(
+       Instructions, Address,
+       [](const IPInstruction &I, uint64_t A) { return I.Address < A; });
++  Reason = "first_instruction";
+   if (It == Instructions.end() || It->Address != Address ||
+       It == Instructions.begin())
+     return Address;
+   const auto &Previous = *std::prev(It);
+-  return Previous.RangeIndex == It->RangeIndex &&
+-                 Previous.Address + Previous.Size == Address
+-             ? Previous.Address
+-             : Address;
++  if (Previous.RangeIndex != It->RangeIndex) {
++    Reason = "range_gap";
++    return Address;
++  }
++  if (Previous.MappingIndex != It->MappingIndex) {
++    Reason = "data_or_state_change";
++    return Address;
++  }
++  if (Previous.Address + Previous.Size != Address) {
++    Reason = "range_gap";
++    return Address;
++  }
++  Reason = "";
++  return Previous.Address;
+ }
+ 
+ void IPFunctionBoundaries::print(raw_ostream &OS) const {
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.h b/llvm/tools/llvm-profgen/IPBoundary.h
+index ddd45baecfe9..c46754ecc6f6 100644
+--- a/llvm/tools/llvm-profgen/IPBoundary.h
++++ b/llvm/tools/llvm-profgen/IPBoundary.h
+@@ -1,5 +1,4 @@
+-//===-- IPBoundary.h - On-demand IP instruction boundaries -------*- C++
+-//-*-===//
++//===- IPBoundary.h - IP instruction boundaries -----------------*- C++ -*-===//
+ //
+ // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ // See https://llvm.org/LICENSE.txt for license information.
+@@ -23,7 +22,7 @@ namespace sampleprof {
+ 
+ struct IPInstruction {
+   uint64_t Address, Size;
+-  size_t RangeIndex;
++  size_t RangeIndex, MappingIndex;
+ };
+ struct IPIntersection {
+   uint64_t Begin, End, Anchor;
+@@ -36,8 +35,8 @@ struct IPFunctionBoundaries {
+   std::vector<IPIntersection> Intersections;
+   std::vector<IPInstruction> Instructions;
+   void print(raw_ostream &OS) const;
+-  // A layout predecessor must end exactly at Address in the same DWARF range.
+-  uint64_t predecessor(uint64_t Address) const;
++  // Return Address and a stable reason when no valid predecessor exists.
++  uint64_t predecessor(uint64_t Address, StringRef &Reason) const;
+   bool contains(uint64_t Address) const;
+ };
+ 
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+index 2838f3251f69..2f0b254577a3 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+@@ -264,6 +264,10 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+                          "plt", "in_cu_no_subprogram", "no_cu",
+                          "usable_nonleaf_line_zero", "skid_unadjusted"})
+     Statistics.Counts[Name.str()] = {};
++  if (Options.PrevInst)
++    for (StringRef Reason : {"first_instruction", "range_gap",
++                             "data_or_state_change", "predecessor_no_line"})
++      Statistics.Counts[("skid_unadjusted_" + Reason).str()] = {};
+   auto Classify = [&](StringRef Name, const IPAddressCount &C) -> Error {
+     auto &Sum = Statistics.Counts[Name.str()];
+     if (Error E = addIPCount(Sum.SampleCount, C.SampleCount))
+@@ -273,6 +277,7 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+   // First identify eligible functions without enumerating unprofiled code.
+   std::map<std::string, BinaryFunction *> SampledFunctions;
+   std::map<uint64_t, BinaryFunction *> UsableAddresses;
++  std::map<BinaryFunction *, std::vector<uint64_t>> FunctionAddresses;
+   for (const auto &[Address, C] : Counts) {
+     auto *Range = Binary->findFuncRange(Address);
+     if (!Range) {
+@@ -286,6 +291,7 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     } else {
+       SampledFunctions.emplace(Range->Func->FuncName.str(), Range->Func);
+       UsableAddresses.emplace(Address, Range->Func);
++      FunctionAddresses[Range->Func].push_back(Address);
+     }
+   }
+   std::map<BinaryFunction *, size_t> BoundaryIndices;
+@@ -308,8 +314,8 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+         Statistics.BoundaryFailures.emplace_back(Name, toString(B.takeError()));
+         continue;
+       }
+-      for (const auto &[Address, F] : UsableAddresses)
+-        if (F == Function && !B->contains(Address))
++      for (uint64_t Address : FunctionAddresses.at(Function))
++        if (!B->contains(Address))
+           Statistics.BoundaryFailures.emplace_back(
+               Name,
+               "sample is not an instruction start: " + utohexstr(Address));
+@@ -332,11 +338,20 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     uint64_t Address = Original;
+     const auto &C = Counts.at(Original);
+     if (Options.PrevInst) {
++      StringRef Reason;
+       Address = Statistics.Boundaries[BoundaryIndices.at(Function)].predecessor(
+-          Original);
+-      if (Address == Original)
++          Original, Reason);
++      if (Address != Original &&
++          Binary->getCachedFrameLocationStack(Address).empty()) {
++        Address = Original;
++        Reason = "predecessor_no_line";
++      }
++      if (Address == Original) {
+         if (Error E = Classify("skid_unadjusted", C))
+           return E;
++        if (Error E = Classify(("skid_unadjusted_" + Reason).str(), C))
++          return E;
++      }
+     }
+     const auto &Frames = Binary->getCachedFrameLocationStack(Address);
+     if (Frames.empty()) {

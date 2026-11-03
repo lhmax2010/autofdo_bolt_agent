@@ -1,0 +1,18 @@
+本轮任务原文（第二部分第3条）：
+- profile 与报告指向同一文件（含相对路径、符号链接、硬链接别名）报错。
+- 任一步失败都删除临时文件，--output 不生成、已有文件不被覆盖。
+- 只要给了 --quality-report，失败时也写出失败报告（failure_stage 与原因），尚未计算的字段为 unknown。
+
+冻结v0.7：docs/profgen/design/02_llvm_profgen_enhance_design_v0.7.md:426 要求拒绝路径别名；:430 要求失败时旧output不覆盖。正文SHA仍为 eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be。
+
+最小反例（逻辑推导，未实际覆盖文件）：
+已有 temp/profgen-patch6/old.prof，内容为旧profile。
+同时指定 --output=temp/profgen-patch6/old.prof
+与 --quality-report=temp/profgen-patch6/old.prof。
+若向报告路径提交失败JSON，则旧profile被覆盖；若保留旧profile，则该路径没有失败JSON。
+直接同一路径已足以产生矛盾，无需借助硬链接或进程崩溃。
+
+候选处理（未实施，待用户裁决）：
+A. 路径冲突作为失败报告写入的显式例外；不写两种输出，stderr给出路径冲突，保留旧文件。
+B. 要求调用者先提供独立报告路径；在路径有效前仅stderr诊断，与A相同但划为前置条件。
+不自行生成未授权的旁路报告路径，不让失败报告覆盖旧profile。

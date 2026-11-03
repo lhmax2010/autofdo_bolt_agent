@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-03；补丁5完成）
+## 当前授权与执行状态（2026-11-03；补丁5小修＋补丁6因输出别名契约停止）
+
+- 已获本轮实现授权；按停止条件，在“报告路径与旧profile为同一文件时，既写失败JSON又保持旧profile不变”的冲突处停止，等待用户裁决。建议仅stderr报路径冲突、两种输出都不写，**尚未实施该例外**。[报告](profgen/impl/08_patch6_report.md)、[原文与反例](profgen/impl/evidence/08/01_contract_conflict.txt)
+- 补丁5小修草稿已写：同映射段/前驱有行信息、skid原因细分、按函数分组校验；新增无前驱行信息Thumb素材及测试。格式检查通过，但开发编译已TERM停止，未生成新工具；GBS/lit/C1/14份重放未运行，不能称小修完成。[状态](profgen/impl/evidence/08/06_stop_state.json)
+- LLVM HEAD仍为 `d7bd4795c7fddfc239510b96fa6803b56b94dbb4`；无amend、无补丁6提交，0005未改。spec原diff保持原样、不提交；设计v0.7与golden不变。只停止本任务自己的开发编译进程，已核对退出，未影响其他会话。
+- 下一步：用户裁决后先完成补丁5独立验收/amend，再开始补丁6。未连接板子、未推LLVM/Gerrit、未改认证或索要密码；原挂账继续保留，Agent设计开发仍在增强完成后。
+
+## 前轮授权与执行状态（2026-11-03；补丁5完成，历史）
 
 - 计划/授权：已按完整补丁5任务与两次素材/规模裁决完成；补丁4小修 `aef395b32e27d5f63468c5d49f76f43508dbf270` 未重做，冻结v0.7和golden未改。下一步等待补丁6授权；Agent设计开发仍在增强完成后。
 - LLVM本地补丁5 `d7bd4795c7fddfc239510b96fa6803b56b94dbb4`：64文件、+3298/-40行，新增8个lit。实现按需映射符号边界、avg、sampled-functions补零、prev-inst及隐藏诊断。[报告](profgen/impl/07_patch5_boundaries.md)、[提交审计](profgen/impl/evidence/07/33_patch5_commit_audit.json)、[0005](../patches/profgen/0005-llvm-profgen-Enumerate-instruction-boundaries-on-dem.patch)。仅工具/测试目录，未推LLVM远端/Gerrit；spec原diff保持不动且未提交。
