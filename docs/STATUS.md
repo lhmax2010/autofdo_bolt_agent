@@ -26,7 +26,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-03；补丁7完成）
+## 当前授权与执行状态（2026-11-03；第一批主机验证，Clang崩溃处停止）
+
+- 本轮授权只做主机验证；正式补丁7工具SHA仍为`334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30`，LLVM HEAD仍`e4642a8ad9e0acb990b45ade3ef7aca755cd80f2`。未改LLVM或设计、未连接板子、未推LLVM/Gerrit。[报告](profgen/impl/10_host_verification.md)
+- 已完成合并验证：max 20/10、受限sum 8/8、0.3及0.6各2/1、cold裁剪100/101；新增tools/profgen/check_merge_inputs.py，20项正反测试通过，输出建议命令不执行。[合并](profgen/impl/evidence/10/01_merge.json)、[门禁](profgen/impl/evidence/10/02_merge_checker.json)
+- 已完成aarch64/Thumb两格式消费：show与text回读一致，IR入口/分支/两处内联匹配；0/2调用点失配、0/150样本丢弃、无饱和权重。[消费](profgen/impl/evidence/10/03_consume.json)
+- 08 FFmpeg未带profiling debug与唯一内部名，带-mthumb及显式SHA1；最小双文件对照的name_merged_functions由2降为0，证明唯一后缀被profgen读取。正式FFmpeg评估必须重新按第9节构建，本轮未重建FFmpeg。[08选项](profgen/impl/evidence/10/05_ffmpeg.json)、[命名对照](profgen/impl/evidence/10/04_unique_names.json)
+- aarch64小包GBS成功：debug保留$x/$d；probe两节在debug、两位置拒绝成立；新构建DWARF5行表/20地址符号化/comp_dir前后一致，BUILD与RPM ID不同。旧08 BUILD产物缺失，不能声称复现原FFmpeg同一次构建。[拆分](profgen/impl/evidence/10/07_aarch64_split.json)、[DWARF](profgen/impl/evidence/10/08_DWARF5_split.json)
+- **停止原因**：armv7l旧快照不可用，沿用08 reference配置副本重试；普通构建成功，probe构建在ARM Instruction Selection/ScoreboardHazardRecognizer::EmitInstruction中Clang22.1.8段错误，GBS_EXIT1/ALL-END FAILED。任务进程已退出，预处理源码及重现脚本已保留，未运行/修复/换flags绕过。下一步等待用户决定独立定位或其他处理。[原始崩溃与候选方案](profgen/impl/evidence/10/09_stop.json)
+- 整体尚未完成：armv7l probe拆分、旧08同次构建复核未闭合；新LLVM默认build-id发布后复核与[unknown]真实样例继续挂账。已有spec本地测试diff保持原样；Agent设计开发未开始。
+
+## 前轮授权与执行状态（2026-11-03；补丁7完成，历史）
 
 - 补丁1–7已获授权并完成。补丁7 LLVM `e4642a8ad9e0acb990b45ade3ef7aca755cd80f2`，9文件+1633/-103行；完成五项IP枚举、显式aggregation、边界错误上下文、schema1的unknown/null约定、LOST分母溢出warning和用户/schema文档。[报告](profgen/impl/09_patch7_report.md)、[0007](../patches/profgen/0007-llvm-profgen-Document-IP-mode-and-finalize-options-and-reports.patch)、[提交审计](profgen/impl/evidence/09/15_commit_audit.json)
 - 正式GBS 21:24:56–21:44:56+08，1199.800秒、108 Ninja步，GBS_EXIT0/ALL-END OK。%check仍85项：83 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，与补丁6逐项一致。C1两遍各636条、两遍一致、对基线0差异。[构建](profgen/impl/evidence/09/08_build.json)、[lit](profgen/impl/evidence/09/09_lit.json)、[C1](profgen/impl/evidence/09/10_c1.json)
@@ -522,6 +532,8 @@
 
 ## 待人工裁决
 
+- 第一批主机验证按工具缺陷停止：是否授权用保留的armv7l Clang崩溃预处理/脚本独立定位，以及如何补齐probe拆分验证；本轮未改LLVM。08 FFmpeg缺第9节两个选项，正式评估构建留下一任务。
+
 - [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–7已完成，下一步等待用户授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 
 
@@ -537,6 +549,9 @@
 
 ## 挂账
 
+- 新增阻塞：平台Clang22.1.8在armv7l/Thumb的pseudo-probe小包构建中段错误，双架构probe拆分核实尚未完成；保留D/build重现材料，待单独授权定位，不能改flags绕过后宣布完成。[报告10停止节](profgen/impl/10_host_verification.md#44-停止证据与候选方案)
+- [unknown]真实板上样例未取得；已有合成素材仍有效，本轮不上板，真实样例继续保留。
+
 - 已关闭：IP新选项枚举与cl::values由补丁7完成，显式aggregation语义保持。[报告](profgen/impl/09_patch7_report.md)
 - 非叶子帧行号为 0 的处理，上板后按实测数据决定。
 - avg真实数据核对留到上板联调：用08产物重新采样，不复用旧镜像地址。本轮仅合成负载规模测量；head零估计挂账已由补丁5的total50/head1用例关闭。
@@ -547,7 +562,7 @@
 
 - 开发工作树 `temp/llvm-profgen-enh/packaging/llvm.spec` 的LLVM_INCLUDE_TESTS=ON和%check改动只本地保留，**正式非增量构建前必须撤销**，不得进入增强补丁。LLVM site配置与原有lit基线已闭合；assertions专用测试在当前No配置下仍为UNSUPPORTED。[报告](profgen/impl/02_lit_env.md)
 
-- 交付前非★项（v0.7）：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`；probe构建拆分后`.pseudo_probe/.pseudo_probe_desc`的位置；补存DWARF5拆分核对与BUILD目录产物build-id的证据。`[unknown]`合成素材已由补丁1闭合；构造的probe组合不替代真实拆分核实。第一阶段已冻结；第二阶段待定事项见设计第12节，IR匹配/BFI不沿用旧百分比。
+- 交付前非★项（v0.7）：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`已由本轮小包闭合；probe拆分aarch64已核实、armv7l因Clang崩溃挂账；新aarch64构建DWARF5拆分与BUILD/RPM ID差异已补证，原08 FFmpeg同次BUILD材料缺失，不外推为已复现。`[unknown]`合成素材已由补丁1闭合；构造的probe组合不替代真实拆分核实。第一阶段已冻结；第二阶段待定事项见设计第12节，IR匹配/BFI不沿用旧百分比。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮补丁2已实测少量源码增量：最终Ninja106步、完整GBS812.070秒（包含安装/拆分/打包），不再只依赖单文件估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；基线 profgen 无 GNU build-id，本轮未改 spec。

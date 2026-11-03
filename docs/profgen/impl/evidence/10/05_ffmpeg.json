@@ -1,0 +1,193 @@
+{
+  "evidence": [
+    {
+      "file": "temp/v05/config_after.mak",
+      "relevant_lines": [
+        {
+          "line": 4,
+          "text": "FFMPEG_CONFIGURATION=--prefix=/usr --libdir=/usr/lib --shlibdir=/usr/lib --datadir=/usr/share/ffmpeg --extra-ldflags='-Wl,--build-id=sha1' --enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx --extra-cflags='-mfpu=neon'"
+        },
+        {
+          "line": 51,
+          "text": "CFLAGS=-Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fno-strict-overflow -fstack-protector-all -fPIE  -mfpu=neon -std=c17 -fomit-frame-pointer -fPIC -mthumb -pthread -g -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -Wno-implicit-const-int-float-conversion -Wno-microsoft-enum-forward-reference -O3 -fno-math-errno -fno-signed-zeros -mstack-alignment=16 -Qunused-arguments -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type"
+        },
+        {
+          "line": 75,
+          "text": "LDFLAGS= -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments"
+        }
+      ],
+      "occurrences": {
+        "-fdebug-info-for-profiling": [],
+        "-funique-internal-linkage-names": [],
+        "-mthumb": [
+          51
+        ],
+        "--build-id=sha1": [
+          4,
+          75
+        ]
+      }
+    },
+    {
+      "file": "temp/v04/ffmpeg/packaging/ffmpeg.spec",
+      "relevant_lines": [
+        {
+          "line": 232,
+          "text": "CFLAGS=\"%{optflags} -fPIC -DEXPORT_API=\\\"__attribute__((visibility(\\\\\\\"default\\\\\\\")))\\\" \"; export CFLAGS"
+        },
+        {
+          "line": 247,
+          "text": "    --extra-ldflags=\"-Wl,--build-id=sha1\" \\"
+        }
+      ],
+      "occurrences": {
+        "-fdebug-info-for-profiling": [],
+        "-funique-internal-linkage-names": [],
+        "-mthumb": [],
+        "--build-id=sha1": [
+          247
+        ]
+      }
+    },
+    {
+      "file": "temp/v05/link_observed.txt",
+      "relevant_lines": [
+        {
+          "line": 1,
+          "text": "2026-10-30T21:20:22.601484+08:00 1952714 /bin/sh -c printf \"LD\\t%s\\n\" libavcodec/libavcodec.so.62; armv7l-tizen-linux-gnueabi-clang -shared -Wl,-soname,libavcodec.so.62 -Wl,-Bsymbolic -Wl,--version-script,libavcodec/libavcodec.ver -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavutil -Llibswscale -Llibswresample -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments  -o libavcodec/libavcodec.so.62 @libavcodec/libavcodec.so.62.objs -lavutil -pthread -lm -latomic -lm -latomic -pthread "
+        },
+        {
+          "line": 2,
+          "text": "2026-10-30T21:20:22.601575+08:00 1952715 armv7l-tizen-linux-gnueabi-clang -shared -Wl,-soname,libavcodec.so.62 -Wl,-Bsymbolic -Wl,--version-script,libavcodec/libavcodec.ver -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavutil -Llibswscale -Llibswresample -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments -o libavcodec/libavcodec.so.62 @libavcodec/libavcodec.so.62.objs -lavutil -pthread -lm -latomic -lm -latomic -pthread"
+        }
+      ],
+      "occurrences": {
+        "-fdebug-info-for-profiling": [],
+        "-funique-internal-linkage-names": [],
+        "-mthumb": [],
+        "--build-id=sha1": [
+          1,
+          2
+        ]
+      }
+    }
+  ],
+  "same_name_symbols": [
+    {
+      "line": 6948,
+      "text": "  6944: 00220b79   404 FUNC    LOCAL  DEFAULT   12 decode_frame"
+    },
+    {
+      "line": 8525,
+      "text": "  8521: 002667f1 17568 FUNC    LOCAL  DEFAULT   12 decode_frame"
+    },
+    {
+      "line": 10317,
+      "text": " 10313: 002e1971 10780 FUNC    LOCAL  DEFAULT   12 iadst_iadst_16x16_add_c"
+    },
+    {
+      "line": 10495,
+      "text": " 10491: 002f44f1 10780 FUNC    LOCAL  DEFAULT   12 iadst_iadst_16x16_add_c"
+    },
+    {
+      "line": 11105,
+      "text": " 11101: 0030bac1  4352 FUNC    LOCAL  DEFAULT   12 iadst_iadst_16x16_add_c"
+    }
+  ],
+  "recorded_flags_log": "ffmpeg-recorded-switches.json",
+  "recorded_switches": {
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+      "-p",
+      ".GCC.command.line",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+    "exit": 0,
+    "seconds": 0.05776355508714914,
+    "stderr": "",
+    "full_stdout_location": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/ffmpeg-recorded-switches.json",
+    "stdout_sha256": "e2293b7f9579a52bcf758179cd998bfa16be799c4122f0ed1baa94fd2f3456c8",
+    "line_count": 317,
+    "records": 314,
+    "clang_records": 311,
+    "GNU_records": 3,
+    "flags_occurrences": {
+      "-fdebug-info-for-profiling": 0,
+      "-funique-internal-linkage-names": 0,
+      "-mthumb": 625
+    },
+    "excerpts": [
+      {
+        "line": 3,
+        "text": "  [     0]  GNU C17 14.2.0 -mfpu=neon -mfloat-abi=softfp -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -mtls-dialect=gnu -march=armv7-a+simd -g2 -gdwarf-4 -g -g2 -gdwarf-4 -g -g0 -O2 -O2 -O2 -fmessage-length=0 -fno-inline-functions -fmessage-length=0 -finhibit-size-directive -fno-inline -fno-exceptions -fno-zero-initialized-in-bss -fno-toplevel-reorder -fno-tree-vectorize -fbuilding-libgcc -fno-stack-protector -fPIC --param=ssp-buffer-size=4 --param=ssp-buffer-size=4"
+      },
+      {
+        "line": 4,
+        "text": "  [   1e5]  /emul/usr/bin/clang-22 --target=armv7l-tizen-linux-gnueabi -resource-dir /usr/lib/clang/22 --target=armv7l-tizen-linux-gnueabi -I . -I ./ -U _FORTIFY_SOURCE -D _FORTIFY_SOURCE=2 -D _ISOC11_SOURCE -D _FILE_OFFSET_BITS=64 -D _LARGEFILE_SOURCE -D _POSIX_C_SOURCE=200112 -D _XOPEN_SOURCE=600 -D PIC -D HAVE_AV_CONFIG_H -D BUILDING_avcodec -Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-command-line -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D _FILE_OFFSET_BITS=64 -g -fPIC -D EXPORT_API=__attribute__((visibility(\"default\"))) -D __TIZEN__ -D TIZEN_FEATURE_LIBAV -fno-strict-overflow -fstack-protector-all -fPIE -mfpu=neon -std=c17 -fomit-frame-pointer -fPIC -mthumb -pthread -g -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -Wno-implicit-const-int-float-conversion -Wno-microsoft-enum-forward-reference -O3 -fno-math-errno -fno-signed-zeros -mstack-alignment=16 -Qunused-arguments -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type -MMD -MF libavcodec/aac/aacdec.d -MT libavcodec/aac/aacdec.o -c -o libavcodec/aac/aacdec.o libavcodec/aac/aacdec.c"
+      },
+      {
+        "line": 5,
+        "text": "  [   81b]  /emul/usr/bin/clang-22 --target=armv7l-tizen-linux-gnueabi -resource-dir /usr/lib/clang/22 --target=armv7l-tizen-linux-gnueabi -I . -I ./ -U _FORTIFY_SOURCE -D _FORTIFY_SOURCE=2 -D _ISOC11_SOURCE -D _FILE_OFFSET_BITS=64 -D _LARGEFILE_SOURCE -D _POSIX_C_SOURCE=200112 -D _XOPEN_SOURCE=600 -D PIC -D HAVE_AV_CONFIG_H -D BUILDING_avcodec -Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-command-line -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D _FILE_OFFSET_BITS=64 -g -fPIC -D EXPORT_API=__attribute__((visibility(\"default\"))) -D __TIZEN__ -D TIZEN_FEATURE_LIBAV -fno-strict-overflow -fstack-protector-all -fPIE -mfpu=neon -std=c17 -fomit-frame-pointer -fPIC -mthumb -pthread -g -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -Wno-implicit-const-int-float-conversion -Wno-microsoft-enum-forward-reference -O3 -fno-math-errno -fno-signed-zeros -mstack-alignment=16 -Qunused-arguments -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type -MMD -MF libavcodec/aac/aacdec_ac.d -MT libavcodec/aac/aacdec_ac.o -c -o libavcodec/aac/aacdec_ac.o libavcodec/aac/aacdec_ac.c"
+      }
+    ]
+  },
+  "DWARF_examples": {
+    "ffmpeg-dwarf-decode_frame.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/llvm-dwarfdump",
+        "--name=decode_frame",
+        "--show-form",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.14963754499331117,
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug:\tfile format elf32-littlearm\n\n0x00120757: DW_TAG_subprogram\n              DW_AT_name [DW_FORM_strp]\t(\"decode_frame\")\n              DW_AT_decl_file [DW_FORM_data1]\t(\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/flacdec.c\")\n              DW_AT_decl_line [DW_FORM_data2]\t(609)\n              DW_AT_prototyped [DW_FORM_flag_present]\t(true)\n              DW_AT_type [DW_FORM_ref4]\t(0x0011ca91 \"int\")\n              DW_AT_inline [DW_FORM_data1]\t(DW_INL_inlined)\n\n0x00120db5: DW_TAG_inlined_subroutine\n              DW_AT_abstract_origin [DW_FORM_ref4]\t(0x00120757 \"decode_frame\")\n              DW_AT_ranges [DW_FORM_sec_offset]\t(0x00013648\n                 [0x000bc686, 0x000bc6de)\n                 [0x000bc6f4, 0x000bc842)\n                 [0x000bc856, 0x000bcdba)\n                 [0x000bcdc0, 0x000bcdc4)\n                 [0x000bce58, 0x000bce70)\n                 [0x000bced0, 0x000bceda))\n              DW_AT_call_file [DW_FORM_data1]\t(\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/flacdec.c\")\n              DW_AT_call_line [DW_FORM_data2]\t(753)\n              DW_AT_call_column [DW_FORM_data1]\t(16)\n\n0x00331d99: DW_TAG_subprogram\n              DW_AT_low_pc [DW_FORM_addr]\t(0x00220b78)\n              DW_AT_high_pc [DW_FORM_data4]\t(0x00000194)\n              DW_AT_frame_base [DW_FORM_exprloc]\t(DW_OP_reg13 SP)\n              DW_AT_GNU_all_call_sites [DW_FORM_flag_present]\t(true)\n              DW_AT_name [DW_FORM_strp]\t(\"decode_frame\")\n              DW_AT_decl_file [DW_FORM_data1]\t(\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/mpegaudiodec_template.c\")\n              DW_AT_decl_line [DW_FORM_data2]\t(1553)\n              DW_AT_prototyped [DW_FORM_flag_present]\t(true)\n              DW_AT_type [DW_FORM_ref4]\t(0x0032e5d7 \"int\")\n\n0x003da39f: DW_TAG_subprogram\n              DW_AT_low_pc [DW_FORM_addr]\t(0x002667f0)\n              DW_AT_high_pc [DW_FORM_data4]\t(0x000044a0)\n              DW_AT_frame_base [DW_FORM_exprloc]\t(DW_OP_reg13 SP)\n              DW_AT_GNU_all_call_sites [DW_FORM_flag_present]\t(true)\n              DW_AT_name [DW_FORM_strp]\t(\"decode_frame\")\n              DW_AT_decl_file [DW_FORM_data1]\t(\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/tiff.c\")\n              DW_AT_decl_line [DW_FORM_data2]\t(1925)\n              DW_AT_prototyped [DW_FORM_flag_present]\t(true)\n              DW_AT_type [DW_FORM_ref4]\t(0x003cee72 \"int\")\n",
+      "stderr": ""
+    },
+    "ffmpeg-dwarf-iadst_iadst_16x16_add_c.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/llvm-dwarfdump",
+        "--name=iadst_iadst_16x16_add_c",
+        "--show-form",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.0976859739748761,
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug:\tfile format elf32-littlearm\n\n0x00471215: DW_TAG_subprogram\n              DW_AT_low_pc [DW_FORM_addr]\t(0x002e1970)\n              DW_AT_high_pc [DW_FORM_data4]\t(0x00002a1c)\n              DW_AT_frame_base [DW_FORM_exprloc]\t(DW_OP_reg13 SP)\n              DW_AT_GNU_all_call_sites [DW_FORM_flag_present]\t(true)\n              DW_AT_name [DW_FORM_strp]\t(\"iadst_iadst_16x16_add_c\")\n              DW_AT_decl_file [DW_FORM_data1]\t(\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/vp9dsp_template.c\")\n              DW_AT_decl_line [DW_FORM_data2]\t(1509)\n              DW_AT_prototyped [DW_FORM_flag_present]\t(true)\n\n0x004765a7: DW_TAG_subprogram\n              DW_AT_low_pc [DW_FORM_addr]\t(0x002f44f0)\n              DW_AT_high_pc [DW_FORM_data4]\t(0x00002a1c)\n              DW_AT_frame_base [DW_FORM_exprloc]\t(DW_OP_reg13 SP)\n              DW_AT_GNU_all_call_sites [DW_FORM_flag_present]\t(true)\n              DW_AT_name [DW_FORM_strp]\t(\"iadst_iadst_16x16_add_c\")\n              DW_AT_decl_file [DW_FORM_data1]\t(\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/vp9dsp_template.c\")\n              DW_AT_decl_line [DW_FORM_data2]\t(1509)\n              DW_AT_prototyped [DW_FORM_flag_present]\t(true)\n\n0x0048271b: DW_TAG_subprogram\n              DW_AT_low_pc [DW_FORM_addr]\t(0x0030bac0)\n              DW_AT_high_pc [DW_FORM_data4]\t(0x00001100)\n              DW_AT_frame_base [DW_FORM_exprloc]\t(DW_OP_reg13 SP)\n              DW_AT_GNU_all_call_sites [DW_FORM_flag_present]\t(true)\n              DW_AT_name [DW_FORM_strp]\t(\"iadst_iadst_16x16_add_c\")\n              DW_AT_decl_file [DW_FORM_data1]\t(\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/vp9dsp_template.c\")\n              DW_AT_decl_line [DW_FORM_data2]\t(1509)\n              DW_AT_prototyped [DW_FORM_flag_present]\t(true)\n",
+      "stderr": ""
+    }
+  },
+  "baseline08_buildid": {
+    "command": "nice -n 19 ionice -c3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64/ld-linux-x86-64.so.2 --library-path /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/lib64 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS/scratch.aarch64.0/emul/usr/bin/readelf -n /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100",
+    "exit": 0,
+    "stdout": "\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: f960461f63c852474257f51267b7b543afffdc9c\n",
+    "stderr": ""
+  }
+}

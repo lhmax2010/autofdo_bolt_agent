@@ -1,0 +1,440 @@
+{
+  "results": [
+    {
+      "kind": "plain",
+      "functions": [
+        {
+          "name": "decode_frame",
+          "address": 66088,
+          "offset": 552
+        },
+        {
+          "name": "iadst_iadst_16x16_add_c",
+          "address": 66094,
+          "offset": 558
+        },
+        {
+          "name": "decode_frame",
+          "address": 66120,
+          "offset": 584
+        },
+        {
+          "name": "iadst_iadst_16x16_add_c",
+          "address": 66124,
+          "offset": 588
+        }
+      ],
+      "profile": "decode_frame:20:0\n 0: 20\niadst_iadst_16x16_add_c:20:0\n 0: 20\n",
+      "name_merged_functions": 2,
+      "top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 20
+            },
+            "period_sum": 20,
+            "sample_count": 2
+          },
+          "name": "decode_frame",
+          "share": {
+            "denominator": 40,
+            "numerator": 20
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 20
+            },
+            "period_sum": 20,
+            "sample_count": 2
+          },
+          "name": "iadst_iadst_16x16_add_c",
+          "share": {
+            "denominator": 40,
+            "numerator": 20
+          }
+        }
+      ]
+    },
+    {
+      "kind": "unique",
+      "functions": [
+        {
+          "name": "_ZL12decode_framej.__uniq.200338890065916146067916621550098724088",
+          "address": 66088,
+          "offset": 552
+        },
+        {
+          "name": "_ZL23iadst_iadst_16x16_add_cj.__uniq.200338890065916146067916621550098724088",
+          "address": 66094,
+          "offset": 558
+        },
+        {
+          "name": "_ZL12decode_framej.__uniq.326785185349622253265111230872268319535",
+          "address": 66120,
+          "offset": 584
+        },
+        {
+          "name": "_ZL23iadst_iadst_16x16_add_cj.__uniq.326785185349622253265111230872268319535",
+          "address": 66124,
+          "offset": 588
+        }
+      ],
+      "profile": "_ZL12decode_framej.__uniq.200338890065916146067916621550098724088:10:0\n 0: 10\n_ZL12decode_framej.__uniq.326785185349622253265111230872268319535:10:0\n 0: 10\n_ZL23iadst_iadst_16x16_add_cj.__uniq.200338890065916146067916621550098724088:10:0\n 0: 10\n_ZL23iadst_iadst_16x16_add_cj.__uniq.326785185349622253265111230872268319535:10:0\n 0: 10\n",
+      "name_merged_functions": 0,
+      "top50": []
+    }
+  ],
+  "commands": {
+    "unique-unique-link.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/ld.lld",
+        "-shared",
+        "--build-id=sha1",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique-one.o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique-two.o",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.012707004090771079,
+      "stdout": "",
+      "stderr": ""
+    },
+    "unique-unique-two.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/clang",
+        "--target=armv7l-tizen-linux-gnueabi",
+        "-mthumb",
+        "-O2",
+        "-g",
+        "-gdwarf-5",
+        "-fPIC",
+        "-fdebug-info-for-profiling",
+        "-funique-internal-linkage-names",
+        "-c",
+        "two.c",
+        "-o",
+        "unique-two.o"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique",
+      "exit": 0,
+      "seconds": 0.014616096974350512,
+      "stdout": "",
+      "stderr": ""
+    },
+    "unique-plain-symbols.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+        "-sW",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.005177284008823335,
+      "stdout": "\nSymbol table '.dynsym' contains 3 entries:\n   Num:    Value  Size Type    Bind   Vis      Ndx Name\n     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND \n     1: 00010215    20 FUNC    GLOBAL DEFAULT    7 one\n     2: 00010235    20 FUNC    GLOBAL DEFAULT    7 two\n\nSymbol table '.symtab' contains 12 entries:\n   Num:    Value  Size Type    Bind   Vis      Ndx Name\n     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND \n     1: 00000000     0 FILE    LOCAL  DEFAULT  ABS one.c\n     2: 00010214     0 NOTYPE  LOCAL  DEFAULT    7 $t\n     3: 00010229     6 FUNC    LOCAL  DEFAULT    7 decode_frame\n     4: 0001022f     6 FUNC    LOCAL  DEFAULT    7 iadst_iadst_16x16_add_c\n     5: 00000000     0 FILE    LOCAL  DEFAULT  ABS two.c\n     6: 00010234     0 NOTYPE  LOCAL  DEFAULT    7 $t\n     7: 00010249     4 FUNC    LOCAL  DEFAULT    7 decode_frame\n     8: 0001024d     6 FUNC    LOCAL  DEFAULT    7 iadst_iadst_16x16_add_c\n     9: 00020254     0 NOTYPE  LOCAL  HIDDEN     8 _DYNAMIC\n    10: 00010215    20 FUNC    GLOBAL DEFAULT    7 one\n    11: 00010235    20 FUNC    GLOBAL DEFAULT    7 two\n",
+      "stderr": ""
+    },
+    "unique-plain-two.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/clang",
+        "--target=armv7l-tizen-linux-gnueabi",
+        "-mthumb",
+        "-O2",
+        "-g",
+        "-gdwarf-5",
+        "-fPIC",
+        "-fdebug-info-for-profiling",
+        "-c",
+        "two.c",
+        "-o",
+        "plain-two.o"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique",
+      "exit": 0,
+      "seconds": 0.016846711980178952,
+      "stdout": "",
+      "stderr": ""
+    },
+    "unique-unique-symbols.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+        "-sW",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.003999209031462669,
+      "stdout": "\nSymbol table '.dynsym' contains 3 entries:\n   Num:    Value  Size Type    Bind   Vis      Ndx Name\n     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND \n     1: 00010215    20 FUNC    GLOBAL DEFAULT    7 one\n     2: 00010235    20 FUNC    GLOBAL DEFAULT    7 two\n\nSymbol table '.symtab' contains 12 entries:\n   Num:    Value  Size Type    Bind   Vis      Ndx Name\n     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND \n     1: 00000000     0 FILE    LOCAL  DEFAULT  ABS one.c\n     2: 00010214     0 NOTYPE  LOCAL  DEFAULT    7 $t\n     3: 00010229     6 FUNC    LOCAL  DEFAULT    7 _ZL12decode_framej.__uniq.200338890065916146067916621550098724088\n     4: 0001022f     6 FUNC    LOCAL  DEFAULT    7 _ZL23iadst_iadst_16x16_add_cj.__uniq.200338890065916146067916621550098724088\n     5: 00000000     0 FILE    LOCAL  DEFAULT  ABS two.c\n     6: 00010234     0 NOTYPE  LOCAL  DEFAULT    7 $t\n     7: 00010249     4 FUNC    LOCAL  DEFAULT    7 _ZL12decode_framej.__uniq.326785185349622253265111230872268319535\n     8: 0001024d     6 FUNC    LOCAL  DEFAULT    7 _ZL23iadst_iadst_16x16_add_cj.__uniq.326785185349622253265111230872268319535\n     9: 00020254     0 NOTYPE  LOCAL  HIDDEN     8 _DYNAMIC\n    10: 00010215    20 FUNC    GLOBAL DEFAULT    7 one\n    11: 00010235    20 FUNC    GLOBAL DEFAULT    7 two\n",
+      "stderr": ""
+    },
+    "unique-unique-profile.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--allow-missing-build-id",
+        "--binary-match-regex=^/target$",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique.so",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique-unique-profile.perfscript",
+        "--ip-aggregation=sum",
+        "--ip-period-unit=1",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique-unique-profile.prof",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique-unique-profile.report.json"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.010542707052081823,
+      "stdout": "",
+      "stderr": "warning: Sample PGO is estimated to optimize better with 5.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n"
+    },
+    "unique-unique-segments.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+        "-lW",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.004215548979118466,
+      "stdout": "\nElf file type is DYN (Shared object file)\nEntry point 0x0\nThere are 9 program headers, starting at offset 52\n\nProgram Headers:\n  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n  PHDR           0x000034 0x00000034 0x00000034 0x00120 0x00120 R   0x4\n  LOAD           0x000000 0x00000000 0x00000000 0x00214 0x00214 R   0x10000\n  LOAD           0x000214 0x00010214 0x00010214 0x0003e 0x0003e R E 0x10000\n  LOAD           0x000254 0x00020254 0x00020254 0x00038 0x00dac RW  0x10000\n  DYNAMIC        0x000254 0x00020254 0x00020254 0x00038 0x00038 RW  0x4\n  GNU_RELRO      0x000254 0x00020254 0x00020254 0x00038 0x00dac R   0x1\n  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0\n  NOTE           0x000154 0x00000154 0x00000154 0x00024 0x00024 R   0x4\n  ARM_EXIDX      0x0001f4 0x000001f4 0x000001f4 0x00020 0x00020 R   0x4\n\n Section to Segment mapping:\n  Segment Sections...\n   00     \n   01     .note.gnu.build-id .dynsym .gnu.hash .hash .dynstr .ARM.exidx \n   02     .text \n   03     .dynamic .relro_padding \n   04     .dynamic \n   05     .dynamic .relro_padding \n   06     \n   07     .note.gnu.build-id \n   08     .ARM.exidx \n",
+      "stderr": ""
+    },
+    "unique-plain-link.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/ld.lld",
+        "-shared",
+        "--build-id=sha1",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain-one.o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain-two.o",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.8376118059968576,
+      "stdout": "",
+      "stderr": ""
+    },
+    "unique-unique-one.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/clang",
+        "--target=armv7l-tizen-linux-gnueabi",
+        "-mthumb",
+        "-O2",
+        "-g",
+        "-gdwarf-5",
+        "-fPIC",
+        "-fdebug-info-for-profiling",
+        "-funique-internal-linkage-names",
+        "-c",
+        "one.c",
+        "-o",
+        "unique-one.o"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique",
+      "exit": 0,
+      "seconds": 0.019549618009477854,
+      "stdout": "",
+      "stderr": ""
+    },
+    "unique-unique-dwarf.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/llvm-dwarfdump",
+        "--debug-info",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.004258154076524079,
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/unique.so:\tfile format elf32-littlearm\n\n.debug_info contents:\n0x00000000: Compile Unit: length = 0x00000075, format = DWARF32, version = 0x0005, unit_type = DW_UT_compile, abbr_offset = 0x0000, addr_size = 0x04 (next unit at 0x00000079)\n\n0x0000000c: DW_TAG_compile_unit\n              DW_AT_producer\t(\"clang version 22.1.8\")\n              DW_AT_language\t(DW_LANG_C11)\n              DW_AT_name\t(\"one.c\")\n              DW_AT_str_offsets_base\t(0x00000008)\n              DW_AT_stmt_list\t(0x00000000)\n              DW_AT_comp_dir\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique\")\n              DW_AT_low_pc\t(0x00010214)\n              DW_AT_high_pc\t(0x00010234)\n              DW_AT_addr_base\t(0x00000008)\n              DW_AT_loclists_base\t(0x0000000c)\n\n0x00000027:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010214)\n                DW_AT_high_pc\t(0x00010228)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"one\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                DW_AT_decl_line\t(3)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x00000074 \"unsigned int\")\n                DW_AT_external\t(true)\n\n0x00000036:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x0) loclist = 0x00000018: \n                     [0x00010214, 0x00010218): DW_OP_reg0 R0\n                     [0x00010218, 0x00010228): DW_OP_reg4 R4)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                  DW_AT_decl_line\t(3)\n                  DW_AT_type\t(0x00000074 \"unsigned int\")\n\n0x0000003f:     NULL\n\n0x00000040:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010228)\n                DW_AT_high_pc\t(0x0001022e)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_linkage_name\t(\"_ZL12decode_framej.__uniq.200338890065916146067916621550098724088\")\n                DW_AT_name\t(\"decode_frame\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                DW_AT_decl_line\t(1)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x00000074 \"unsigned int\")\n\n0x00000050:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x1) loclist = 0x00000023: \n                     [0x00010228, 0x0001022c): DW_OP_reg0 R0\n                     [0x0001022c, 0x0001022e): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                  DW_AT_decl_line\t(1)\n                  DW_AT_type\t(0x00000074 \"unsigned int\")\n\n0x00000059:     NULL\n\n0x0000005a:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x0001022e)\n                DW_AT_high_pc\t(0x00010234)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_linkage_name\t(\"_ZL23iadst_iadst_16x16_add_cj.__uniq.200338890065916146067916621550098724088\")\n                DW_AT_name\t(\"iadst_iadst_16x16_add_c\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                DW_AT_decl_line\t(2)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x00000074 \"unsigned int\")\n\n0x0000006a:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x2) loclist = 0x00000031: \n                     [0x0001022e, 0x00010232): DW_OP_reg0 R0\n                     [0x00010232, 0x00010234): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                  DW_AT_decl_line\t(2)\n                  DW_AT_type\t(0x00000074 \"unsigned int\")\n\n0x00000073:     NULL\n\n0x00000074:   DW_TAG_base_type\n                DW_AT_name\t(\"unsigned int\")\n                DW_AT_encoding\t(DW_ATE_unsigned)\n                DW_AT_byte_size\t(0x04)\n\n0x00000078:   NULL\n0x00000079: Compile Unit: length = 0x00000075, format = DWARF32, version = 0x0005, unit_type = DW_UT_compile, abbr_offset = 0x0067, addr_size = 0x04 (next unit at 0x000000f2)\n\n0x00000085: DW_TAG_compile_unit\n              DW_AT_producer\t(\"clang version 22.1.8\")\n              DW_AT_language\t(DW_LANG_C11)\n              DW_AT_name\t(\"two.c\")\n              DW_AT_str_offsets_base\t(0x00000038)\n              DW_AT_stmt_list\t(0x0000007a)\n              DW_AT_comp_dir\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique\")\n              DW_AT_low_pc\t(0x00010234)\n              DW_AT_high_pc\t(0x00010252)\n              DW_AT_addr_base\t(0x0000001c)\n              DW_AT_loclists_base\t(0x0000004b)\n\n0x000000a0:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010234)\n                DW_AT_high_pc\t(0x00010248)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"two\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                DW_AT_decl_line\t(3)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x000000ed \"unsigned int\")\n                DW_AT_external\t(true)\n\n0x000000af:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x0) loclist = 0x00000057: \n                     [0x00010234, 0x00010238): DW_OP_reg0 R0\n                     [0x00010238, 0x00010248): DW_OP_reg4 R4)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                  DW_AT_decl_line\t(3)\n                  DW_AT_type\t(0x000000ed \"unsigned int\")\n\n0x000000b8:     NULL\n\n0x000000b9:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010248)\n                DW_AT_high_pc\t(0x0001024c)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_linkage_name\t(\"_ZL12decode_framej.__uniq.326785185349622253265111230872268319535\")\n                DW_AT_name\t(\"decode_frame\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                DW_AT_decl_line\t(1)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x000000ed \"unsigned int\")\n\n0x000000c9:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x1) loclist = 0x00000062: \n                     [0x00010248, 0x0001024a): DW_OP_reg0 R0\n                     [0x0001024a, 0x0001024c): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                  DW_AT_decl_line\t(1)\n                  DW_AT_type\t(0x000000ed \"unsigned int\")\n\n0x000000d2:     NULL\n\n0x000000d3:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x0001024c)\n                DW_AT_high_pc\t(0x00010252)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_linkage_name\t(\"_ZL23iadst_iadst_16x16_add_cj.__uniq.326785185349622253265111230872268319535\")\n                DW_AT_name\t(\"iadst_iadst_16x16_add_c\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                DW_AT_decl_line\t(2)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x000000ed \"unsigned int\")\n\n0x000000e3:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x2) loclist = 0x00000070: \n                     [0x0001024c, 0x00010250): DW_OP_reg0 R0\n                     [0x00010250, 0x00010252): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                  DW_AT_decl_line\t(2)\n                  DW_AT_type\t(0x000000ed \"unsigned int\")\n\n0x000000ec:     NULL\n\n0x000000ed:   DW_TAG_base_type\n                DW_AT_name\t(\"unsigned int\")\n                DW_AT_encoding\t(DW_ATE_unsigned)\n                DW_AT_byte_size\t(0x04)\n\n0x000000f1:   NULL\n",
+      "stderr": ""
+    },
+    "unique-plain-profile.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--allow-missing-build-id",
+        "--binary-match-regex=^/target$",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain.so",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique-plain-profile.perfscript",
+        "--ip-aggregation=sum",
+        "--ip-period-unit=1",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique-plain-profile.prof",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique-plain-profile.report.json"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.0132631859742105,
+      "stdout": "",
+      "stderr": "warning: Sample PGO is estimated to optimize better with 2.5x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n"
+    },
+    "unique-plain-segments.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+        "-lW",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.021122124046087265,
+      "stdout": "\nElf file type is DYN (Shared object file)\nEntry point 0x0\nThere are 9 program headers, starting at offset 52\n\nProgram Headers:\n  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n  PHDR           0x000034 0x00000034 0x00000034 0x00120 0x00120 R   0x4\n  LOAD           0x000000 0x00000000 0x00000000 0x00214 0x00214 R   0x10000\n  LOAD           0x000214 0x00010214 0x00010214 0x0003e 0x0003e R E 0x10000\n  LOAD           0x000254 0x00020254 0x00020254 0x00038 0x00dac RW  0x10000\n  DYNAMIC        0x000254 0x00020254 0x00020254 0x00038 0x00038 RW  0x4\n  GNU_RELRO      0x000254 0x00020254 0x00020254 0x00038 0x00dac R   0x1\n  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0\n  NOTE           0x000154 0x00000154 0x00000154 0x00024 0x00024 R   0x4\n  ARM_EXIDX      0x0001f4 0x000001f4 0x000001f4 0x00020 0x00020 R   0x4\n\n Section to Segment mapping:\n  Segment Sections...\n   00     \n   01     .note.gnu.build-id .dynsym .gnu.hash .hash .dynstr .ARM.exidx \n   02     .text \n   03     .dynamic .relro_padding \n   04     .dynamic \n   05     .dynamic .relro_padding \n   06     \n   07     .note.gnu.build-id \n   08     .ARM.exidx \n",
+      "stderr": ""
+    },
+    "unique-plain-one.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/clang",
+        "--target=armv7l-tizen-linux-gnueabi",
+        "-mthumb",
+        "-O2",
+        "-g",
+        "-gdwarf-5",
+        "-fPIC",
+        "-fdebug-info-for-profiling",
+        "-c",
+        "one.c",
+        "-o",
+        "plain-one.o"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique",
+      "exit": 0,
+      "seconds": 0.23849170608446002,
+      "stdout": "",
+      "stderr": ""
+    },
+    "unique-plain-dwarf.json": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/llvm-dwarfdump",
+        "--debug-info",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain.so"
+      ],
+      "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+      "exit": 0,
+      "seconds": 0.16284161305520684,
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/plain.so:\tfile format elf32-littlearm\n\n.debug_info contents:\n0x00000000: Compile Unit: length = 0x00000073, format = DWARF32, version = 0x0005, unit_type = DW_UT_compile, abbr_offset = 0x0000, addr_size = 0x04 (next unit at 0x00000077)\n\n0x0000000c: DW_TAG_compile_unit\n              DW_AT_producer\t(\"clang version 22.1.8\")\n              DW_AT_language\t(DW_LANG_C11)\n              DW_AT_name\t(\"one.c\")\n              DW_AT_str_offsets_base\t(0x00000008)\n              DW_AT_stmt_list\t(0x00000000)\n              DW_AT_comp_dir\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique\")\n              DW_AT_low_pc\t(0x00010214)\n              DW_AT_high_pc\t(0x00010234)\n              DW_AT_addr_base\t(0x00000008)\n              DW_AT_loclists_base\t(0x0000000c)\n\n0x00000027:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010214)\n                DW_AT_high_pc\t(0x00010228)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"one\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                DW_AT_decl_line\t(3)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x00000072 \"unsigned int\")\n                DW_AT_external\t(true)\n\n0x00000036:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x0) loclist = 0x00000018: \n                     [0x00010214, 0x00010218): DW_OP_reg0 R0\n                     [0x00010218, 0x00010228): DW_OP_reg4 R4)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                  DW_AT_decl_line\t(3)\n                  DW_AT_type\t(0x00000072 \"unsigned int\")\n\n0x0000003f:     NULL\n\n0x00000040:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010228)\n                DW_AT_high_pc\t(0x0001022e)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"decode_frame\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                DW_AT_decl_line\t(1)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x00000072 \"unsigned int\")\n\n0x0000004f:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x1) loclist = 0x00000023: \n                     [0x00010228, 0x0001022c): DW_OP_reg0 R0\n                     [0x0001022c, 0x0001022e): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                  DW_AT_decl_line\t(1)\n                  DW_AT_type\t(0x00000072 \"unsigned int\")\n\n0x00000058:     NULL\n\n0x00000059:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x0001022e)\n                DW_AT_high_pc\t(0x00010234)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"iadst_iadst_16x16_add_c\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                DW_AT_decl_line\t(2)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x00000072 \"unsigned int\")\n\n0x00000068:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x2) loclist = 0x00000031: \n                     [0x0001022e, 0x00010232): DW_OP_reg0 R0\n                     [0x00010232, 0x00010234): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/one.c\")\n                  DW_AT_decl_line\t(2)\n                  DW_AT_type\t(0x00000072 \"unsigned int\")\n\n0x00000071:     NULL\n\n0x00000072:   DW_TAG_base_type\n                DW_AT_name\t(\"unsigned int\")\n                DW_AT_encoding\t(DW_ATE_unsigned)\n                DW_AT_byte_size\t(0x04)\n\n0x00000076:   NULL\n0x00000077: Compile Unit: length = 0x00000073, format = DWARF32, version = 0x0005, unit_type = DW_UT_compile, abbr_offset = 0x0065, addr_size = 0x04 (next unit at 0x000000ee)\n\n0x00000083: DW_TAG_compile_unit\n              DW_AT_producer\t(\"clang version 22.1.8\")\n              DW_AT_language\t(DW_LANG_C11)\n              DW_AT_name\t(\"two.c\")\n              DW_AT_str_offsets_base\t(0x00000030)\n              DW_AT_stmt_list\t(0x0000007a)\n              DW_AT_comp_dir\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique\")\n              DW_AT_low_pc\t(0x00010234)\n              DW_AT_high_pc\t(0x00010252)\n              DW_AT_addr_base\t(0x0000001c)\n              DW_AT_loclists_base\t(0x0000004b)\n\n0x0000009e:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010234)\n                DW_AT_high_pc\t(0x00010248)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"two\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                DW_AT_decl_line\t(3)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x000000e9 \"unsigned int\")\n                DW_AT_external\t(true)\n\n0x000000ad:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x0) loclist = 0x00000057: \n                     [0x00010234, 0x00010238): DW_OP_reg0 R0\n                     [0x00010238, 0x00010248): DW_OP_reg4 R4)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                  DW_AT_decl_line\t(3)\n                  DW_AT_type\t(0x000000e9 \"unsigned int\")\n\n0x000000b6:     NULL\n\n0x000000b7:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x00010248)\n                DW_AT_high_pc\t(0x0001024c)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"decode_frame\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                DW_AT_decl_line\t(1)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x000000e9 \"unsigned int\")\n\n0x000000c6:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x1) loclist = 0x00000062: \n                     [0x00010248, 0x0001024a): DW_OP_reg0 R0\n                     [0x0001024a, 0x0001024c): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                  DW_AT_decl_line\t(1)\n                  DW_AT_type\t(0x000000e9 \"unsigned int\")\n\n0x000000cf:     NULL\n\n0x000000d0:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x0001024c)\n                DW_AT_high_pc\t(0x00010252)\n                DW_AT_frame_base\t(DW_OP_reg13 SP)\n                DW_AT_call_all_calls\t(true)\n                DW_AT_name\t(\"iadst_iadst_16x16_add_c\")\n                DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                DW_AT_decl_line\t(2)\n                DW_AT_prototyped\t(true)\n                DW_AT_type\t(0x000000e9 \"unsigned int\")\n\n0x000000df:     DW_TAG_formal_parameter\n                  DW_AT_location\t(indexed (0x2) loclist = 0x00000070: \n                     [0x0001024c, 0x00010250): DW_OP_reg0 R0\n                     [0x00010250, 0x00010252): DW_OP_entry_value(DW_OP_reg0 R0), DW_OP_stack_value)\n                  DW_AT_name\t(\"x\")\n                  DW_AT_decl_file\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-host-verification/unique/two.c\")\n                  DW_AT_decl_line\t(2)\n                  DW_AT_type\t(0x000000e9 \"unsigned int\")\n\n0x000000e8:     NULL\n\n0x000000e9:   DW_TAG_base_type\n                DW_AT_name\t(\"unsigned int\")\n                DW_AT_encoding\t(DW_ATE_unsigned)\n                DW_AT_byte_size\t(0x04)\n\n0x000000ed:   NULL\n",
+      "stderr": ""
+    }
+  },
+  "sources": {
+    "two.c": "static __attribute__((noinline)) unsigned decode_frame(unsigned x) { return x * 4u; }\nstatic __attribute__((noinline)) unsigned iadst_iadst_16x16_add_c(unsigned x) { return x ^ 12u; }\nunsigned two(unsigned x) { return decode_frame(x)+iadst_iadst_16x16_add_c(x); }\n",
+    "one.c": "static __attribute__((noinline)) unsigned decode_frame(unsigned x) { return x * 3u; }\nstatic __attribute__((noinline)) unsigned iadst_iadst_16x16_add_c(unsigned x) { return x ^ 11u; }\nunsigned one(unsigned x) { return decode_frame(x)+iadst_iadst_16x16_add_c(x); }\n"
+  },
+  "harness": "from common import *\nimport re\nU=D/'unique';U.mkdir(exist_ok=True)\nfor i,name in enumerate(['one','two']):\n (U/(name+'.c')).write_text('static __attribute__((noinline)) unsigned decode_frame(unsigned x) { return x * '+str(i+3)+'u; }\\nstatic __attribute__((noinline)) unsigned iadst_iadst_16x16_add_c(unsigned x) { return x ^ '+str(i+11)+'u; }\\nunsigned '+name+'(unsigned x) { return decode_frame(x)+iadst_iadst_16x16_add_c(x); }\\n')\nresults=[]\nfor kind,flags in [('plain',[]),('unique',['-funique-internal-linkage-names'])]:\n for name in ['one','two']:\n  j=run('unique-'+kind+'-'+name,tool(T,'clang')+['--target=armv7l-tizen-linux-gnueabi','-mthumb','-O2','-g','-gdwarf-5','-fPIC','-fdebug-info-for-profiling',*flags,'-c',name+'.c','-o',kind+'-'+name+'.o'],cwd=U);assert not j['exit'],j\n elf=U/(kind+'.so');j=run('unique-'+kind+'-link',tool(T,'ld.lld')+['-shared','--build-id=sha1',U/(kind+'-one.o'),U/(kind+'-two.o'),'-o',elf]);assert not j['exit']\n syms=run('unique-'+kind+'-symbols',tool(T,'readelf')+['-sW',elf]);segments=run('unique-'+kind+'-segments',tool(T,'readelf')+['-lW',elf]);di=run('unique-'+kind+'-dwarf',tool(T,'llvm-dwarfdump')+['--debug-info',elf])\n funcs=[];loads=[]\n for line in segments['stdout'].splitlines():\n  v=line.split()\n  if v and v[0]=='LOAD':loads.append(tuple(int(v[i],16) for i in [1,2,4]))\n for line in syms['stdout'].splitlines():\n  v=line.split()\n  if len(v)>=8 and v[3]=='FUNC' and v[4]=='LOCAL' and any(x in v[7] for x in ['decode_frame','iadst_iadst_16x16_add_c']):\n   addr=int(v[1],16)&~1;seg=next(x for x in loads if x[1]<=addr<x[1]+x[2]);funcs.append({'name':v[7],'address':addr,'offset':seg[0]+addr-seg[1]})\n assert len(funcs)==4,funcs\n profile,report=gen('unique-'+kind+'-profile',[(f['offset'],10) for f in funcs],binary=elf)\n q=json.loads(report.read_text());results.append({'kind':kind,'functions':funcs,'profile':profile.read_text(),'name_merged_functions':q['coverage']['name_merged_functions'],'top50':q['coverage']['name_merged_top50']})\n assert q['coverage']['name_merged_functions']==(0 if kind=='unique' else 2),q\n(D/'unique-results.json').write_text(json.dumps(results,indent=2)+'\\n');print(results)\n"
+}
