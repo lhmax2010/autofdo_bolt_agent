@@ -1,0 +1,142 @@
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+index 18f5c5ceae3e..e1b09cdb2846 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+@@ -71,8 +71,10 @@ if GROUP == 'positive':
+     p = subprocess.run([TOOL,'--show-ip-boundaries','--binary=x','--output='+str(TMP/'gated')],capture_output=True,text=True)
+     assert p.returncode != 0 and 'IP-only options require --ip-samples' in p.stderr
+ elif GROUP == 'negative':
+-    for name,addr,why in [('bad-thumb-start',0x1004,'bad-thumb-start'),('bad-thumb-end',0x1000,'bad-thumb-end'),('bad-arm-start',0x101a,'bad-arm-start'),('bad-a64-start',0x1002,'unaligned A64'),('bad-a64-end',0x1000,'truncated A64'),('bad-conflict',0x1000,'conflicting mapping states'),('bad-no-map',0x1000,'no usable mapping symbols')]:
+-        run(name,[(addr,10)],['--ip-aggregation=avg'],failure=why)
++    for name,addr,why in [('bad-thumb-start',0x1004,'range starts inside a Thumb instruction'),('bad-thumb-end',0x1000,'truncated Thumb instruction'),('bad-arm-start',0x101a,'unaligned A32 range start'),('bad-a64-start',0x1002,'unaligned A64'),('bad-a64-end',0x1000,'truncated A64'),('bad-conflict',0x1000,'conflicting mapping states'),('bad-no-map',0x1000,'no usable mapping symbols')]:
++        p,_=run(name,[(addr,10)],['--ip-aggregation=avg'],failure=why)
++        assert 'function='+name in p.stderr and 'address=0x' in p.stderr and 'DWARF=[' in p.stderr
++        assert name+':' not in p.stderr
+         print('PASS negative',name)
+     for name in ['bad-no-map','a64-no-map']:
+         for opts in [['--ip-aggregation=avg'],['--ip-aggregation=sum','--ip-zero-fill=sampled-functions'],['--ip-aggregation=max','--ip-skid=prev-inst']]:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+index 7445b5a42374..e17a2fa8abd9 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+@@ -21,6 +21,14 @@ OLD = b'old profile must remain\n'
+ OLD_REPORT = b'{"verdict":{"conversion":"ok"}}\n'
+ 
+ 
++def no_empty_strings(value):
++    assert value != '', repr(value)
++    if isinstance(value, dict):
++        for item in value.values(): no_empty_strings(item)
++    elif isinstance(value, list):
++        for item in value: no_empty_strings(item)
++
++
+ def run(extra=(), data=DATA, binary=None, expect=0, stage=None, old=False,
+         report_preserved=False, label=None):
+     global SEQ
+@@ -50,6 +58,7 @@ def run(extra=(), data=DATA, binary=None, expect=0, stage=None, old=False,
+         assert report.read_bytes() == OLD_REPORT, report.read_text()
+         return p, None, d, cmd
+     q = json.loads(report.read_text())
++    no_empty_strings(q)
+     assert q['verdict']['conversion'] == ('failed' if expect else 'ok'), q
+     if stage:
+         assert q['verdict']['failure_stage'] == stage, q['verdict']
+@@ -128,6 +137,24 @@ if GROUP == 'fields':
+     assert r['isa']['unknown']['counts']['sample_count']==1
+     p,r,_,_=run(data='17/17 2 cycles: 1000 (/target+0x1000)\n',binary=I/'boundary-extra/bad-conflict.perfbin')
+     assert r['isa']['unknown']['counts']['sample_count']==1
++    for identity in ['b3:02 1 0', '<280854d1cea103bf480e219b336025e337e5a10e>']:
++        mmap='0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 '+identity+']: r-xp /target\n'
++        p,q,_,_=run(data=mmap+DATA)
++        record=q['mapping']['records'][0]
++        assert record['build_id']==(None if identity.startswith('b3:') else identity[1:-1])
++        assert q['identity']['debug_binary'] is None
++        assert q['identity']['debug_build_id'] is None
++    p,q,_,_=run(['--ip-event', ''], expect=1, old=True)
++    assert None in q['tool']['arguments']
++    # Synthetic same-name DWARF functions: shorten a name in a temporary copy,
++    # without moving bytes, sections, addresses or modifying the source fixture.
++    merged=TMP/'same-name.perfbin'
++    original=(I/'a64-pie.perfbin').read_bytes()
++    assert b'count_loop\0' in original
++    merged.write_bytes(original.replace(b'count_loop\0', b'two_sites\0\0'))
++    p,q,_,_=run(binary=merged, data=DATA+'17/17 3 cycles: 13b4 (/target+0x3b4)\n')
++    assert q['coverage']['name_merged_functions']==1
++    assert q['coverage']['name_merged_top50'][0]['name']=='two_sites'
+ elif GROUP == 'thresholds':
+     p,q,_,_=run();v=q['verdict']
+     for n in ['usable_ratio_check','sample_threshold_check','lost_ratio_check']:assert v[n]=='not_evaluated'
+@@ -158,6 +185,9 @@ elif GROUP == 'thresholds':
+     assert all(q['verdict'][n]=='unknown' for n in ['usable_ratio_check','sample_threshold_check','lost_ratio_check'])
+     p,q,_,_=run(['--unknown-quality-test-option'],expect=1,stage='parse',old=True)
+     assert 'Unknown command line argument' in p.stderr
++    assert p.stderr == q['verdict']['reason']
++    assert p.stderr.count('Unknown command line argument') == 1
++    assert 'llvm-profgen: error:' not in p.stderr
+     assert q['semantics']=='unknown'
+     assert q['coverage']['top50']=='unknown'
+     assert q['mapping']['records']=='unknown'
+@@ -166,9 +196,19 @@ elif GROUP == 'thresholds':
+     p,q,_,_=run(data='17/17 18446744073709551615 cycles: 1318 (/target+0x318)\n')
+     assert q['samples']['target']['usable']['period_sum']==18446744073709551615
+     no_floats(q)
+-    p,q,_,_=run(data=DATA+'17/17 PERF_RECORD_LOST lost 18446744073709551615\n',expect=1,stage='generate',old=True)
+-    assert 'LOST ratio denominator overflow' in p.stderr
+-    assert q['lost']['exported_lost_ratio']=='unknown'
++    for extra in [[], ['--ip-max-lost-ratio=0']]:
++        p,q,_,_=run(extra, data=DATA+'17/17 PERF_RECORD_LOST lost 18446744073709551615\n')
++        assert q['lost']['exported_lost_ratio']=='unknown'
++        assert q['verdict']['lost_ratio_check']==('unknown' if extra else 'not_evaluated')
++        assert q['verdict']['sampling_adequacy']=='unknown'
++        assert 'W_LOST_RATIO_OVERFLOW' in [x['code'] for x in q['warnings']]
++    for name in ['weight', 'aggregation', 'head-samples', 'zero-fill', 'skid']:
++        p,q,_,_=run(['--ip-'+name+'=bad'], expect=1, stage='parse', old=True,
++                    label='enum-'+name)
++        text="for the --ip-"+name+" option: Cannot find option named 'bad'!"
++        assert text in p.stderr and p.stderr.count(text)==1, p.stderr
++        assert p.stderr == q['verdict']['reason']
++        assert 'llvm-profgen: error:' not in p.stderr
+ elif GROUP == 'exits':
+     missing=TMP/'absent.perfbin'
+     missing.unlink(missing_ok=True)
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test b/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
+index ad722bd7c190..55023b408c9c 100644
+--- a/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
+@@ -21,8 +21,8 @@
+ # Each failed sampled function must be reported, not just the first one.
+ # RUN: llvm-objcopy --strip-symbol='$x' %S/Inputs/ip-mode/a64-pie.perfbin %t/no-map-count.perfbin
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%t/no-map-count.perfbin --perfscript=%t/two --ip-aggregation=avg --output=%t/out --show-ip-address-counts 2>&1 | FileCheck %s --check-prefix=ALL
+-# ALL-DAG: count_loop: no usable mapping symbols
+-# ALL-DAG: main: no usable mapping symbols
++# ALL-DAG: no usable mapping symbols (function=count_loop
++# ALL-DAG: no usable mapping symbols (function=main
+ # ALL-DAG: IP-GENERATION enumerated_functions=2
+ # RUN: test ! -e %t/out
+ # Boundary failure must also leave an existing destination untouched.
+diff --git a/llvm/test/tools/llvm-profgen/ip-counting-options.test b/llvm/test/tools/llvm-profgen/ip-counting-options.test
+index 4c126ee53f86..c1782a4a721c 100644
+--- a/llvm/test/tools/llvm-profgen/ip-counting-options.test
++++ b/llvm/test/tools/llvm-profgen/ip-counting-options.test
+@@ -16,15 +16,15 @@
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-period-unit=18446744073709551616 2>&1 | FileCheck %s --check-prefix=UNIT
+ # UNIT: --ip-period-unit must be a positive integer
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-aggregation=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-AGGREGATION
+-# BAD-IP-AGGREGATION: invalid --ip-aggregation
++# BAD-IP-AGGREGATION: for the --ip-aggregation option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-weight=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-WEIGHT
+-# BAD-IP-WEIGHT: invalid --ip-weight
++# BAD-IP-WEIGHT: for the --ip-weight option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-head-samples=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-HEAD-SAMPLES
+-# BAD-IP-HEAD-SAMPLES: invalid --ip-head-samples
++# BAD-IP-HEAD-SAMPLES: for the --ip-head-samples option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-zero-fill=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-ZERO-FILL
+-# BAD-IP-ZERO-FILL: invalid --ip-zero-fill
++# BAD-IP-ZERO-FILL: for the --ip-zero-fill option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-skid=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-SKID
+-# BAD-IP-SKID: invalid --ip-skid
++# BAD-IP-SKID: for the --ip-skid option: Cannot find option named 'bad'!
+ # RUN: test ! -e %t/out
+ #--- data
+ 17/17 1 cycles: 13f4 (/target+0x3f4)

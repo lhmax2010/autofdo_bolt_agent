@@ -1,0 +1,217 @@
+[
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 137,
+    "text": "static raw_ostream *IPOptionErrors = nullptr;"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 138,
+    "text": "template <class T> class IPEnumParser : public cl::parser<T> {"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 142,
+    "text": "    if (this->findOption(Arg) == this->getNumOptions() && IPOptionErrors)"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 144,
+    "text": "                     *IPOptionErrors);"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 150,
+    "text": "enum class IPAggregationKind { Unspecified, Sum, Max, Average };"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 155,
+    "text": "static cl::opt<IPWeightKind, false, IPEnumParser<IPWeightKind>> IPWeight("
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 165,
+    "text": "static cl::opt<IPAggregationKind, false, IPEnumParser<IPAggregationKind>>"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 166,
+    "text": "    IPAggregation("
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 172,
+    "text": "            clEnumValN(IPAggregationKind::Sum, \"sum\", \"Sum observed counts\"),"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 173,
+    "text": "            clEnumValN(IPAggregationKind::Max, \"max\", \"Maximum adjusted count\"),"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 174,
+    "text": "            clEnumValN(IPAggregationKind::Average, \"avg\","
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 177,
+    "text": "static cl::opt<IPHeadKind, false, IPEnumParser<IPHeadKind>> IPHeadSamples("
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 183,
+    "text": "static cl::opt<IPZeroFillKind, false, IPEnumParser<IPZeroFillKind>> IPZeroFill("
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 190,
+    "text": "static cl::opt<IPSkidKind, false, IPEnumParser<IPSkidKind>> IPSkid("
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 266,
+    "text": "  if (!IPAggregation.getNumOccurrences())"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 274,
+    "text": "  Generation.MaxAggregation = IPAggregation == IPAggregationKind::Max;"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 275,
+    "text": "  Generation.AverageAggregation = IPAggregation == IPAggregationKind::Average;"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 336,
+    "text": "                       StringRef ParserErrors, bool &VerbatimParserError) {"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 367,
+    "text": "  VerbatimParserError = OrdinaryParserFailure;"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 462,
+    "text": "  IPOptionErrors = &ParseErrorStream;"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 465,
+    "text": "  IPOptionErrors = nullptr;"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 480,
+    "text": "      IPPeriodUnit.getNumOccurrences() || IPAggregation.getNumOccurrences() ||"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 485,
+    "text": "    bool VerbatimParserError = false;"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 488,
+    "text": "                      VerbatimParserError)) {"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "line": 489,
+    "text": "      if (VerbatimParserError)"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPBoundary.cpp",
+    "line": 116,
+    "text": "    return boundaryError(\"no usable mapping symbols\");"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPBoundary.cpp",
+    "line": 121,
+    "text": "IPBoundaryMap::enumerate(StringRef Name,"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPBoundary.cpp",
+    "line": 133,
+    "text": "    auto At = [&](const Twine &Message, uint64_t Address) {"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 76,
+    "text": "json::Value stringOrNone(StringRef S) {"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 223,
+    "text": "    warn(\"W_LOST_RATIO_OVERFLOW\","
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 437,
+    "text": "    Args.push_back(stringOrNone(A));"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 440,
+    "text": "  Root[\"input\"] = json::Object{{\"path\", stringOrNone(Options.Trace)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 487,
+    "text": "        json::Object{{\"path\", stringOrNone(P)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 491,
+    "text": "        {\"path\", stringOrNone(E.Path)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 493,
+    "text": "        {\"build_id\", stringOrNone(E.ID)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 502,
+    "text": "      {\"binary\", stringOrNone(Options.Binary)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 505,
+    "text": "                              ? stringOrNone(Reader.BinaryID)"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 507,
+    "text": "      {\"debug_binary\", stringOrNone(Options.Debug)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 510,
+    "text": "                             ? stringOrNone(Reader.DebugID)"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 531,
+    "text": "                       {\"path\", stringOrNone(M.Path)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 533,
+    "text": "                       {\"build_id\", stringOrNone(M.BuildID)},"
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 645,
+    "text": "    warn(\"W_LOST_RATIO_OVERFLOW\","
+  },
+  {
+    "file": "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "line": 740,
+    "text": "      {\"failure_stage\","
+  }
+]

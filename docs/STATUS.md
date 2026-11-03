@@ -26,7 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-03；补丁5小修、补丁6完成）
+## 当前授权与执行状态（2026-11-03；补丁7完成）
+
+- 补丁1–7已获授权并完成。补丁7 LLVM `e4642a8ad9e0acb990b45ade3ef7aca755cd80f2`，9文件+1633/-103行；完成五项IP枚举、显式aggregation、边界错误上下文、schema1的unknown/null约定、LOST分母溢出warning和用户/schema文档。[报告](profgen/impl/09_patch7_report.md)、[0007](../patches/profgen/0007-llvm-profgen-Document-IP-mode-and-finalize-options-and-reports.patch)、[提交审计](profgen/impl/evidence/09/15_commit_audit.json)
+- 正式GBS 21:24:56–21:44:56+08，1199.800秒、108 Ninja步，GBS_EXIT0/ALL-END OK。%check仍85项：83 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，与补丁6逐项一致。C1两遍各636条、两遍一致、对基线0差异。[构建](profgen/impl/evidence/09/08_build.json)、[lit](profgen/impl/evidence/09/09_lit.json)、[C1](profgen/impl/evidence/09/10_c1.json)
+- 14次完整导出带quality-report各两遍；profile/诊断/退出码与补丁6一致，JSON只出现确认不存在值转null的授权差异，逐字段留证。110份lit报告345字段与schema文档双向差集0、空字符串值0。GBS无Sphinx/docutils，已做CMake RST子集解析，完整Sphinx检查未做。[重放](profgen/impl/evidence/09/11_full_replay.json)、[schema](profgen/impl/evidence/09/12_schema.json)、[文档检查](profgen/impl/evidence/09/04_rst_check.json)
+- 新工具SHA `334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30`。关闭“IP新选项改为枚举类型与cl::values”挂账；非叶子line0、06完整LOST缺失、08真实avg上板、非增量前撤销spec等继续保留。新约定已在报告“待设计v0.8登记”列明；冻结v0.7正文与golden逐字节未改。
+- 本轮单会话，无板上操作、无LLVM/Gerrit推送、无认证修改或密码索取，无新增已观察到的工具越界写入。spec本地测试diff保持原样、不提交；下一步等待用户授权，Agent设计开发仍在增强完成后，补丁完成不等于第二阶段或产品收益验证完成。
+
+## 前轮授权与执行状态（2026-11-03；补丁5小修、补丁6完成，历史）
 
 - 补丁5小修已独立验收/amend：LLVM `b843cf07f851985413c926a562f9135a272a3bea`，0005已重新导出；未重做补丁4。[审计](profgen/impl/evidence/08/11_patch5_amend_audit.json)
 - 补丁6 LLVM `1dd4b9acd84045c230e77cc68d85eafca58eae88`，26文件、+1559/-33行、新增6组lit；实现确定性质量JSON、精确可选门槛、ISA/覆盖诊断、原子输出和单次阶段回调。[报告](profgen/impl/08_patch6_report.md)、[0006](../patches/profgen/0006-llvm-profgen-Add-quality-reports-and-failure-contracts.patch)、[提交审计](profgen/impl/evidence/08/36_patch6_commit_audit.json)
@@ -282,13 +290,13 @@
 
 # 项目状态
 
-更新：2026-11-02（Asia/Shanghai）。阶段：补丁1完成，补丁2前C1脚本/存档/lit准备完成，等待补丁2；RPi4 PMUv3 新镜像与冻结前补充核实已完成，Thumb默认模式及IR匹配语义差异已补证；llvm-profgen设计当前版本v0.7，v0.6限定范围复核处理见附录F，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；显式SHA-1构建与调试拆分验证通过（08），RPi5 dsoff/buildid-mmap/页大小验证通过（09），补丁1及本轮C1/lit准备已授权完成，不开始补丁2；增强准备和 x86_64 未修改基线已完成；RPi5 AutoFDO/插桩 PGO 工具 spike 已完成；RPi5 环境/软硬件采样完成；RPi4 PMUv3 补丁与软件采样已完成，RPi4 新镜像硬件 PMU 已实测通过。**旧提交 e90492e 的探测结论全部作废；初轮从头重新采集，后续各轮增加独立证据。** RPi5 本轮已完成。每个新会话开场先读本文件，收尾时与报告在同一个 commit 更新。
+更新：2026-11-03（Asia/Shanghai）。当前设计v0.7第一阶段已冻结；llvm-profgen补丁1–7已完成，正式验收与待设计v0.8登记见上方当前状态。下一步等待用户授权；Agent设计开发尚未开始。各轮探测、spike、构建与历史停止记录保留。**旧提交 e90492e 的探测结论全部作废；后续各轮采用独立证据。** 每个新会话开场先读本文件，收尾时与报告在同一个commit更新。
 
 ## 计划
 
-- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；补丁6已完成，等待补丁7授权；Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；补丁1–7已完成，下一步等待用户授权；Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
-- v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1至补丁3已授权完成，其余补丁等待新授权。
+- v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1至补丁7已授权完成，后续评估与开发等待新授权。
 
 - 本轮工具 spike 已完成，不重复采集/构建。建议 RPi5 默认插桩 PGO；RPi4 先验证 ARM runtime/全链路。Google 无 LBR 转换和 BOLT -ba 保留为需后续授权验证的候选。
 
@@ -514,7 +522,7 @@
 
 ## 待人工裁决
 
-- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–6已完成，等待补丁7授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–7已完成，下一步等待用户授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
@@ -529,7 +537,7 @@
 
 ## 挂账
 
-- IP 新选项改为枚举类型与 cl::values，补丁 7 处理。
+- 已关闭：IP新选项枚举与cl::values由补丁7完成，显式aggregation语义保持。[报告](profgen/impl/09_patch7_report.md)
 - 非叶子帧行号为 0 的处理，上板后按实测数据决定。
 - avg真实数据核对留到上板联调：用08产物重新采样，不复用旧镜像地址。本轮仅合成负载规模测量；head零估计挂账已由补丁5的total50/head1用例关闭。
 

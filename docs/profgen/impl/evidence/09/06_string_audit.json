@@ -1,0 +1,995 @@
+{
+  "policy": "unknown = string unknown; confirmed absent = JSON null; enum policy value none remains text none; no empty string values",
+  "fields": [
+    {
+      "field": "tool.version",
+      "prior_source_or_invariant": "nonempty LLVM_VERSION_STRING",
+      "handling": "unchanged"
+    },
+    {
+      "field": "tool.arguments[]",
+      "prior_source_or_invariant": "arbitrary argv token; empty token is confirmed empty",
+      "handling": "stringOrNone; null retains its position"
+    },
+    {
+      "field": "input.path / identity.binary",
+      "prior_source_or_invariant": "absent required argument can occur during parse failure",
+      "handling": "stringOrNone -> null"
+    },
+    {
+      "field": "input.sha256 / event.selected / identity.binary_realpath",
+      "prior_source_or_invariant": "not acquired or selection unknown",
+      "handling": "stringOrUnknown"
+    },
+    {
+      "field": "event.before_filter[].name",
+      "prior_source_or_invariant": "parser requires nonempty event token",
+      "handling": "no empty value possible for accepted sample"
+    },
+    {
+      "field": "semantics.*",
+      "prior_source_or_invariant": "fixed enum strings or entire unknown object",
+      "handling": "none is a literal policy value, not absent data"
+    },
+    {
+      "field": "identity.candidates[].path / evidence[].path / mapping.records[].path",
+      "prior_source_or_invariant": "parser requires file path; defensive optional string wrapper",
+      "handling": "stringOrNone"
+    },
+    {
+      "field": "identity.binary_build_id",
+      "prior_source_or_invariant": "read=true and ID empty vs not read",
+      "handling": "null vs unknown"
+    },
+    {
+      "field": "identity.debug_binary / debug_build_id",
+      "prior_source_or_invariant": "no debug input; read absent ID; not yet read",
+      "handling": "null / null / unknown"
+    },
+    {
+      "field": "identity.evidence[].build_id",
+      "prior_source_or_invariant": "no ID on this evidence item (including summary item)",
+      "handling": "stringOrNone -> null"
+    },
+    {
+      "field": "identity.evidence[].source / result",
+      "prior_source_or_invariant": "closed nonempty strings and identity grade names in IPIdentity.cpp",
+      "handling": "unchanged"
+    },
+    {
+      "field": "identity.grade / verdict.identity",
+      "prior_source_or_invariant": "initialized unknown, then closed grade names",
+      "handling": "unchanged"
+    },
+    {
+      "field": "mapping.records[].build_id",
+      "prior_source_or_invariant": "parsed mapping has no ID field",
+      "handling": "stringOrNone -> null"
+    },
+    {
+      "field": "mapping.records[].evidence_class / mapping.completeness",
+      "prior_source_or_invariant": "closed nonempty literals",
+      "handling": "unchanged"
+    },
+    {
+      "field": "*.top20[].name / *.top50[].name",
+      "prior_source_or_invariant": "unresolved function name or symbol",
+      "handling": "stringOrUnknown; owned string"
+    },
+    {
+      "field": "boundaries.sources[]",
+      "prior_source_or_invariant": "nonempty binary/debug paths admitted before enumeration",
+      "handling": "unchanged"
+    },
+    {
+      "field": "boundaries.failures[].function",
+      "prior_source_or_invariant": "only usable frames; symbolize rejects empty FunctionName",
+      "handling": "unchanged"
+    },
+    {
+      "field": "boundaries.failures[].reason",
+      "prior_source_or_invariant": "every boundary failure creates a nonempty condition message",
+      "handling": "unchanged (diagnostic context expanded)"
+    },
+    {
+      "field": "consumer_hints[] / warnings[].code / warnings[].message",
+      "prior_source_or_invariant": "fixed nonempty explanations or original DWARF message",
+      "handling": "unchanged; recursive tests reject empty values"
+    },
+    {
+      "field": "verdict.failure_stage / reason",
+      "prior_source_or_invariant": "confirmed no failure on success",
+      "handling": "null; failure uses stage and original nonempty message"
+    },
+    {
+      "field": "other string fields",
+      "prior_source_or_invariant": "fixed units, state names, unknown marker",
+      "handling": "unchanged"
+    }
+  ],
+  "source_listing": [
+    [
+      38,
+      "  Tail.push_back(sys::path::filename(P).str());"
+    ],
+    [
+      42,
+      "    Tail.push_back(sys::path::filename(Parent).str());"
+    ],
+    [
+      73,
+      "json::Value stringOrUnknown(StringRef S) {"
+    ],
+    [
+      74,
+      "  return S.empty() ? json::Value(\"unknown\") : json::Value(S.str());"
+    ],
+    [
+      76,
+      "json::Value stringOrNone(StringRef S) {"
+    ],
+    [
+      77,
+      "  return S.empty() ? json::Value(nullptr) : json::Value(S.str());"
+    ],
+    [
+      88,
+      "  std::vector<std::pair<StringRef, StringRef>> Outputs{{\"output\", O.Output}};"
+    ],
+    [
+      92,
+      "      {\"perfscript\", O.Trace},"
+    ],
+    [
+      93,
+      "      {\"binary\", O.Binary},"
+    ],
+    [
+      94,
+      "      {\"debug-binary\", O.Debug},"
+    ],
+    [
+      95,
+      "      {\"perf-buildid-list\", O.BuildIDList},"
+    ],
+    [
+      96,
+      "      {\"dwp\", O.DWP}};"
+    ],
+    [
+      207,
+      "json::Value IPQualityReport::ratio(uint64_t N, uint64_t D) const {"
+    ],
+    [
+      210,
+      "  return json::Object{{\"numerator\", N}, {\"denominator\", D}};"
+    ],
+    [
+      212,
+      "json::Value IPQualityReport::count(const IPAddressCount &C) const {"
+    ],
+    [
+      213,
+      "  return json::Object{{\"sample_count\", C.SampleCount},"
+    ],
+    [
+      214,
+      "                      {\"period_sum\", C.PeriodSum},"
+    ],
+    [
+      215,
+      "                      {\"normalized_weight\","
+    ],
+    [
+      218,
+      "                                   : json::Value(\"unknown\")}};"
+    ],
+    [
+      325,
+      "        Symbols.push_back({*A & (ARM ? ~uint64_t(1) : ~uint64_t(0)),"
+    ],
+    [
+      347,
+      "        It->second.Maps.push_back({*A, State});"
+    ],
+    [
+      362,
+      "  for (StringRef N : {\"thumb\", \"a32\", \"a64\", \"unknown\"})"
+    ],
+    [
+      364,
+      "  for (StringRef N : {\"mapping-symbols\", \"SF_Thumb\", \"unknown\"})"
+    ],
+    [
+      432,
+      "json::Value IPQualityReport::build() {"
+    ],
+    [
+      433,
+      "  json::Object Root;"
+    ],
+    [
+      434,
+      "  Root[\"schema_version\"] = uint64_t(1);"
+    ],
+    [
+      435,
+      "  json::Array Args;"
+    ],
+    [
+      437,
+      "    Args.push_back(stringOrNone(A));"
+    ],
+    [
+      438,
+      "  Root[\"tool\"] = json::Object{{\"version\", LLVM_VERSION_STRING},"
+    ],
+    [
+      439,
+      "                              {\"arguments\", std::move(Args)}};"
+    ],
+    [
+      440,
+      "  Root[\"input\"] = json::Object{{\"path\", stringOrNone(Options.Trace)},"
+    ],
+    [
+      441,
+      "                               {\"sha256\", stringOrUnknown(Reader.InputHash)},"
+    ],
+    [
+      442,
+      "                               {\"projection\", \"ip-only\"}};"
+    ],
+    [
+      443,
+      "  json::Array Events;"
+    ],
+    [
+      445,
+      "    Events.push_back(json::Object{{\"name\", Name},"
+    ],
+    [
+      446,
+      "                                  {\"sample_count\", C.SampleCount},"
+    ],
+    [
+      447,
+      "                                  {\"period_sum\", C.PeriodSum}});"
+    ],
+    [
+      448,
+      "  Root[\"event\"] = json::Object{"
+    ],
+    [
+      449,
+      "      {\"selected\", stringOrUnknown(Reader.SelectedEvent)},"
+    ],
+    [
+      450,
+      "      {\"type\", \"unknown\"},"
+    ],
+    [
+      451,
+      "      {\"config\", \"unknown\"},"
+    ],
+    [
+      452,
+      "      {\"before_filter\", Reader.Parsed ? json::Value(std::move(Events))"
+    ],
+    [
+      453,
+      "                                      : json::Value(\"unknown\")}};"
+    ],
+    [
+      459,
+      "  Root[\"semantics\"] = json::Object{"
+    ],
+    [
+      460,
+      "      {\"weight\", Generation.SampleWeight ? \"sample\" : \"period\"},"
+    ],
+    [
+      461,
+      "      {\"raw_event_unit\", Raw},"
+    ],
+    [
+      462,
+      "      {\"output_count_unit\","
+    ],
+    [
+      464,
+      "      {\"p_ref\", PeriodKnown ? json::Value(Generation.PeriodUnit)"
+    ],
+    [
+      465,
+      "                            : json::Value(\"unknown\")},"
+    ],
+    [
+      466,
+      "      {\"p_ref_source\", Generation.SampleWeight     ? \"sample\""
+    ],
+    [
+      469,
+      "      {\"aggregation\", Generation.AverageAggregation ? \"avg\""
+    ],
+    [
+      472,
+      "      {\"dup_policy\", Generation.MaxAggregation || Generation.AverageAggregation"
+    ],
+    [
+      475,
+      "      {\"zero_fill\", Generation.ZeroFill ? \"sampled-functions\" : \"none\"},"
+    ],
+    [
+      476,
+      "      {\"head_samples\", Generation.EstimateHead ? \"entry-estimate\" : \"none\"},"
+    ],
+    [
+      477,
+      "      {\"skid\", Generation.PrevInst ? \"prev-inst\" : \"none\"},"
+    ],
+    [
+      478,
+      "      {\"mode\", \"dwarf\"},"
+    ],
+    [
+      479,
+      "      {\"fs_discriminator\", Statistics.Started"
+    ],
+    [
+      480,
+      "                               ? json::Value(Statistics.FSDiscriminator)"
+    ],
+    [
+      481,
+      "                               : json::Value(\"unknown\")}};"
+    ],
+    [
+      483,
+      "    Root[\"semantics\"] = \"unknown\";"
+    ],
+    [
+      484,
+      "  json::Array Candidates, Evidence;"
+    ],
+    [
+      486,
+      "    Candidates.push_back("
+    ],
+    [
+      487,
+      "        json::Object{{\"path\", stringOrNone(P)},"
+    ],
+    [
+      488,
+      "                     {\"deleted\", StringRef(P).ends_with(\" (deleted)\")}});"
+    ],
+    [
+      490,
+      "    Evidence.push_back(json::Object{"
+    ],
+    [
+      491,
+      "        {\"path\", stringOrNone(E.Path)},"
+    ],
+    [
+      492,
+      "        {\"source\", E.Source},"
+    ],
+    [
+      493,
+      "        {\"build_id\", stringOrNone(E.ID)},"
+    ],
+    [
+      494,
+      "        {\"result\", E.Result},"
+    ],
+    [
+      495,
+      "        {\"mapping_index\", E.MappingIndex ? json::Value(*E.MappingIndex)"
+    ],
+    [
+      496,
+      "                                         : json::Value(\"unknown\")}});"
+    ],
+    [
+      499,
+      "  Root[\"identity\"] = json::Object{"
+    ],
+    [
+      500,
+      "      {\"observed_mmap_build_id\","
+    ],
+    [
+      501,
+      "       Reader.Parsed ? json::Value(HasID) : json::Value(\"unknown\")},"
+    ],
+    [
+      502,
+      "      {\"binary\", stringOrNone(Options.Binary)},"
+    ],
+    [
+      503,
+      "      {\"binary_realpath\", stringOrUnknown(Reader.BinaryRealPath)},"
+    ],
+    [
+      504,
+      "      {\"binary_build_id\", Reader.BinaryIdentityRead"
+    ],
+    [
+      506,
+      "                              : json::Value(\"unknown\")},"
+    ],
+    [
+      507,
+      "      {\"debug_binary\", stringOrNone(Options.Debug)},"
+    ],
+    [
+      508,
+      "      {\"debug_build_id\", Options.Debug.empty() ? json::Value(nullptr)"
+    ],
+    [
+      511,
+      "                             : json::Value(\"unknown\")},"
+    ],
+    [
+      512,
+      "      {\"selection\", Reader.ReadOptions.BinaryMatchRegex ? \"regex\" : \"basename\"},"
+    ],
+    [
+      513,
+      "      {\"candidates\", Reader.Selected ? json::Value(std::move(Candidates))"
+    ],
+    [
+      514,
+      "                                     : json::Value(\"unknown\")},"
+    ],
+    [
+      515,
+      "      {\"evidence\", Reader.BinaryIdentityRead ? json::Value(std::move(Evidence))"
+    ],
+    [
+      516,
+      "                                             : json::Value(\"unknown\")},"
+    ],
+    [
+      517,
+      "      {\"grade\", Reader.IdentityGrade}};"
+    ],
+    [
+      520,
+      "  json::Array Maps;"
+    ],
+    [
+      528,
+      "      Maps.push_back("
+    ],
+    [
+      529,
+      "          json::Object{{\"pid\", M.PID},"
+    ],
+    [
+      530,
+      "                       {\"tid\", M.TID},"
+    ],
+    [
+      531,
+      "                       {\"path\", stringOrNone(M.Path)},"
+    ],
+    [
+      532,
+      "                       {\"executable\", X},"
+    ],
+    [
+      533,
+      "                       {\"build_id\", stringOrNone(M.BuildID)},"
+    ],
+    [
+      534,
+      "                       {\"evidence_class\", !M.BuildID.empty()  ? \"mmap2-build-id\""
+    ],
+    [
+      538,
+      "  Root[\"mapping\"] = json::Object{"
+    ],
+    [
+      539,
+      "      {\"pid_count\", Reader.Parsed ? json::Value(uint64_t(PIDs.size()))"
+    ],
+    [
+      540,
+      "                                  : json::Value(\"unknown\")},"
+    ],
+    [
+      541,
+      "      {\"candidate_executable_records\","
+    ],
+    [
+      542,
+      "       Reader.Selected ? json::Value(Exec) : json::Value(\"unknown\")},"
+    ],
+    [
+      543,
+      "      {\"candidate_nonexecutable_records\","
+    ],
+    [
+      544,
+      "       Reader.Selected ? json::Value(NonExec) : json::Value(\"unknown\")},"
+    ],
+    [
+      545,
+      "      {\"records\","
+    ],
+    [
+      546,
+      "       Reader.Selected ? json::Value(std::move(Maps)) : json::Value(\"unknown\")},"
+    ],
+    [
+      547,
+      "      {\"completeness\", \"unknown\"}};"
+    ],
+    [
+      548,
+      "  auto Layer = [&](StringRef N) -> json::Value {"
+    ],
+    [
+      551,
+      "                                                       : json::Value(\"unknown\");"
+    ],
+    [
+      553,
+      "  auto Gen = [&](StringRef N) -> json::Value {"
+    ],
+    [
+      557,
+      "               : json::Value(\"unknown\");"
+    ],
+    [
+      560,
+      "                 size_t Limit, uint64_t Denom) -> json::Array {"
+    ],
+    [
+      568,
+      "    json::Array A;"
+    ],
+    [
+      570,
+      "      A.push_back(json::Object{"
+    ],
+    [
+      571,
+      "          {\"name\", stringOrUnknown(Rows[I].first)},"
+    ],
+    [
+      572,
+      "          {\"counts\", count(Rows[I].second)},"
+    ],
+    [
+      573,
+      "          {\"share\","
+    ],
+    [
+      581,
+      "  json::Object Samples{"
+    ],
+    [
+      582,
+      "      {\"input_total\", Reader.Parsed ? json::Value(json::Object{"
+    ],
+    [
+      583,
+      "                                          {\"sample_count\", Reader.Stats.Input}})"
+    ],
+    [
+      584,
+      "                                    : json::Value(\"unknown\")}};"
+    ],
+    [
+      585,
+      "  for (StringRef N : {\"after_event\", \"after_pid\", \"pid_unknown\", \"kernel\","
+    ],
+    [
+      593,
+      "      Reader.Selected ? json::Value(Top(Reader.OtherDSOs, 20, OtherWeight))"
+    ],
+    [
+      594,
+      "                      : json::Value(\"unknown\");"
+    ],
+    [
+      595,
+      "  Samples[\"target\"] = json::Object{"
+    ],
+    [
+      596,
+      "      {\"counts\", Layer(\"target\")},"
+    ],
+    [
+      597,
+      "      {\"unmapped_in_target\","
+    ],
+    [
+      598,
+      "       Reader.Mapped ? Layer(\"unmapped_in_target\") : json::Value(\"unknown\")},"
+    ],
+    [
+      599,
+      "      {\"outside_dwarf_func\", Gen(\"outside_dwarf_func\")},"
+    ],
+    [
+      600,
+      "      {\"plt\", Gen(\"plt\")},"
+    ],
+    [
+      601,
+      "      {\"in_cu_no_subprogram\", Gen(\"in_cu_no_subprogram\")},"
+    ],
+    [
+      602,
+      "      {\"no_cu\", Gen(\"no_cu\")},"
+    ],
+    [
+      603,
+      "      {\"outside_symtab_top20\","
+    ],
+    [
+      604,
+      "       ISAObserved ? json::Value(Top(OutsideSymbols, 20, TargetWeight))"
+    ],
+    [
+      605,
+      "                   : json::Value(\"unknown\")},"
+    ],
+    [
+      606,
+      "      {\"in_func_no_line\", Gen(\"in_func_no_line\")},"
+    ],
+    [
+      607,
+      "      {\"usable\", Statistics.Classified ? count(Statistics.OriginalUsable)"
+    ],
+    [
+      608,
+      "                                       : json::Value(\"unknown\")}};"
+    ],
+    [
+      610,
+      "                                     ? json::Value(Statistics.WrittenPositions)"
+    ],
+    [
+      611,
+      "                                     : json::Value(\"unknown\");"
+    ],
+    [
+      613,
+      "  json::Object Reasons;"
+    ],
+    [
+      614,
+      "  for (StringRef R : {\"first_instruction\", \"range_gap\", \"data_or_state_change\","
+    ],
+    [
+      618,
+      "  Root[\"samples\"] = std::move(Samples);"
+    ],
+    [
+      619,
+      "  json::Object ISA, Source;"
+    ],
+    [
+      621,
+      "    ISA[N] = json::Object{"
+    ],
+    [
+      622,
+      "        {\"counts\", count(C)},"
+    ],
+    [
+      623,
+      "        {\"sample_ratio\", ratio(C.SampleCount, Reader.Stats.Target)},"
+    ],
+    [
+      624,
+      "        {\"weight_ratio\","
+    ],
+    [
+      629,
+      "  Root[\"isa\"] ="
+    ],
+    [
+      630,
+      "      ISAObserved ? json::Value(std::move(ISA)) : json::Value(\"unknown\");"
+    ],
+    [
+      631,
+      "  json::Array Sources, Failures;"
+    ],
+    [
+      633,
+      "    Sources.push_back(S);"
+    ],
+    [
+      635,
+      "    Failures.push_back(json::Object{{\"function\", N}, {\"reason\", R}});"
+    ],
+    [
+      636,
+      "  Root[\"boundaries\"] = json::Object{"
+    ],
+    [
+      637,
+      "      {\"requested\", Generation.needsBoundaries()},"
+    ],
+    [
+      638,
+      "      {\"function_count\", Statistics.Started"
+    ],
+    [
+      639,
+      "                             ? json::Value(Statistics.EnumeratedFunctions)"
+    ],
+    [
+      640,
+      "                             : json::Value(\"unknown\")},"
+    ],
+    [
+      641,
+      "      {\"sources\", std::move(Sources)},"
+    ],
+    [
+      642,
+      "      {\"failures\", std::move(Failures)}};"
+    ],
+    [
+      647,
+      "  json::Value LostRatio = \"unknown\";"
+    ],
+    [
+      652,
+      "  Root[\"lost\"] = json::Object{"
+    ],
+    [
+      653,
+      "      {\"records\", Reader.Parsed ? json::Value(Reader.Stats.LostRecords)"
+    ],
+    [
+      654,
+      "                                : json::Value(\"unknown\")},"
+    ],
+    [
+      655,
+      "      {\"L\", Reader.Parsed && Reader.Stats.LostRecords"
+    ],
+    [
+      656,
+      "                ? json::Value(Reader.Stats.LostCount)"
+    ],
+    [
+      657,
+      "                : json::Value(\"unknown\")},"
+    ],
+    [
+      658,
+      "      {\"S\", Reader.Parsed ? json::Value(Reader.Stats.Input)"
+    ],
+    [
+      659,
+      "                          : json::Value(\"unknown\")},"
+    ],
+    [
+      660,
+      "      {\"exported_lost_ratio\", std::move(LostRatio)},"
+    ],
+    [
+      661,
+      "      {\"scope\", \"input\"},"
+    ],
+    [
+      662,
+      "      {\"source\", \"PERF_RECORD_LOST\"},"
+    ],
+    [
+      663,
+      "      {\"count_unit\", \"records\"},"
+    ],
+    [
+      664,
+      "      {\"completeness\", \"unknown\"}};"
+    ],
+    [
+      665,
+      "  Root[\"throttle\"] = \"unknown\";"
+    ],
+    [
+      672,
+      "  Root[\"ratios\"] ="
+    ],
+    [
+      674,
+      "          ? json::Value(json::Object{"
+    ],
+    [
+      675,
+      "                {\"target_usable_ratio\","
+    ],
+    [
+      678,
+      "                {\"target_usable_sample_ratio\","
+    ],
+    [
+      680,
+      "                {\"target_usable_period_ratio\", ratio(U.PeriodSum, T.PeriodSum)},"
+    ],
+    [
+      681,
+      "                {\"line_resolution_ratio\","
+    ],
+    [
+      685,
+      "          : json::Value(\"unknown\");"
+    ],
+    [
+      686,
+      "  Root[\"sanity\"] ="
+    ],
+    [
+      687,
+      "      json::Object{{\"dwarf_function_ratio\","
+    ],
+    [
+      690,
+      "                        : json::Value(\"unknown\")},"
+    ],
+    [
+      691,
+      "                   {\"aarch64_alignment_ratio\","
+    ],
+    [
+      693,
+      "                                         : json::Value(\"unknown\")}};"
+    ],
+    [
+      698,
+      "  Root[\"coverage\"] = json::Object{"
+    ],
+    [
+      699,
+      "      {\"sampled_functions\","
+    ],
+    [
+      701,
+      "           ? json::Value(uint64_t(Statistics.Functions.size()))"
+    ],
+    [
+      702,
+      "           : json::Value(\"unknown\")},"
+    ],
+    [
+      703,
+      "      {\"unique_addresses\", Reader.Mapped"
+    ],
+    [
+      704,
+      "                               ? json::Value(uint64_t(Reader.Counts.size()))"
+    ],
+    [
+      705,
+      "                               : json::Value(\"unknown\")},"
+    ],
+    [
+      706,
+      "      {\"top50\", Statistics.Classified"
+    ],
+    [
+      707,
+      "                    ? json::Value(Top(Statistics.Functions, 50,"
+    ],
+    [
+      709,
+      "                    : json::Value(\"unknown\")},"
+    ],
+    [
+      710,
+      "      {\"name_merged_functions\", Statistics.Classified"
+    ],
+    [
+      711,
+      "                                    ? json::Value(uint64_t(Merged.size()))"
+    ],
+    [
+      712,
+      "                                    : json::Value(\"unknown\")},"
+    ],
+    [
+      713,
+      "      {\"name_merged_top50\","
+    ],
+    [
+      715,
+      "           ? json::Value(Top(Merged, 50, weight(U, Generation.SampleWeight)))"
+    ],
+    [
+      716,
+      "           : json::Value(\"unknown\")}};"
+    ],
+    [
+      717,
+      "  json::Array Hints;"
+    ],
+    [
+      719,
+      "    Hints.push_back(\"Keep profi enabled during compilation and linking; \""
+    ],
+    [
+      721,
+      "  Root[\"consumer_hints\"] = std::move(Hints);"
+    ],
+    [
+      734,
+      "  json::Array WA;"
+    ],
+    [
+      736,
+      "    WA.push_back(json::Object{{\"code\", C}, {\"message\", M}});"
+    ],
+    [
+      737,
+      "  Root[\"warnings\"] = std::move(WA);"
+    ],
+    [
+      738,
+      "  Root[\"verdict\"] = json::Object{"
+    ],
+    [
+      739,
+      "      {\"conversion\", Failure.empty() ? \"ok\" : \"failed\"},"
+    ],
+    [
+      740,
+      "      {\"failure_stage\","
+    ],
+    [
+      741,
+      "       Failure.empty() ? json::Value(nullptr) : json::Value(FailedStage)},"
+    ],
+    [
+      742,
+      "      {\"reason\", Failure.empty() ? json::Value(nullptr) : json::Value(Failure)},"
+    ],
+    [
+      743,
+      "      {\"identity\", Reader.IdentityGrade},"
+    ],
+    [
+      744,
+      "      {\"usable_ratio_check\", UsableCheck},"
+    ],
+    [
+      745,
+      "      {\"sample_threshold_check\", SampleCheck},"
+    ],
+    [
+      746,
+      "      {\"lost_ratio_check\", LostCheck},"
+    ],
+    [
+      747,
+      "      {\"sampling_adequacy\", SampleCheck == \"failed\" || LostCheck == \"exceeded\""
+    ],
+    [
+      750,
+      "      {\"fallback_callback_count\", CallbackCount}};"
+    ],
+    [
+      767,
+      "  json::OStream JSON(OS, 2);"
+    ]
+  ],
+  "function_name_guard": [
+    {
+      "file": "llvm/tools/llvm-profgen/ProfiledBinary.cpp",
+      "line": 1196,
+      "text": "    if (CallerFrame.FunctionName.empty() ||"
+    }
+  ]
+}

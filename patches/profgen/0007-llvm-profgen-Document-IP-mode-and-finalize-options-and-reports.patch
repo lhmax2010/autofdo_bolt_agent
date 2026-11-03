@@ -1,0 +1,2073 @@
+From e4642a8ad9e0acb990b45ade3ef7aca755cd80f2 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Tue, 3 Nov 2026 21:47:17 +0800
+Subject: [PATCH] [llvm-profgen] Document IP mode and finalize options and
+ reports
+
+Use enumerated IP options without introducing an aggregation default. Preserve parser diagnostics once and report parse failures. Clarify boundary errors without changing instruction goldens, distinguish unknown values from confirmed absence, and keep overflowing LOST ratios unknown. Document the IP workflow and complete version-1 report schema, with regression coverage for the clarified contracts.
+---
+ llvm/docs/CommandGuide/llvm-profgen.rst       | 1424 +++++++++++++++++
+ .../boundary-extra/check-boundaries.py        |    6 +-
+ .../Inputs/ip-mode/quality/check-quality.py   |   46 +-
+ .../llvm-profgen/ip-boundary-metadata.test    |    4 +-
+ .../llvm-profgen/ip-counting-options.test     |   10 +-
+ llvm/tools/llvm-profgen/IPBoundary.cpp        |   47 +-
+ llvm/tools/llvm-profgen/IPQualityReport.cpp   |   53 +-
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  |   22 +-
+ llvm/tools/llvm-profgen/llvm-profgen.cpp      |  124 +-
+ 9 files changed, 1633 insertions(+), 103 deletions(-)
+
+diff --git a/llvm/docs/CommandGuide/llvm-profgen.rst b/llvm/docs/CommandGuide/llvm-profgen.rst
+index e51561298389..222de2d43acb 100644
+--- a/llvm/docs/CommandGuide/llvm-profgen.rst
++++ b/llvm/docs/CommandGuide/llvm-profgen.rst
+@@ -54,3 +54,1427 @@ OPTIONS
+ 
+   Specify whether to print assembly code in AT&T syntax (the default) or Intel
+   syntax.
++
++IP sample input mode
++--------------------
++
++IP mode generates line-level DWARF sample profiles on systems without usable
++LBR, SPE, or ETM traces. It is explicitly enabled by ``--ip-samples``; ordinary
++IP input without this option retains the original error behavior. IP counts
++are sampled event weights, **not execution counts**. This mode does not infer
++branch histories, indirect-call targets, or workload representativeness.
++
++Collection and export
++~~~~~~~~~~~~~~~~~~~~~
++
++Use a binary built with matching DWARF, a build ID, and profiling discriminators
++(for example ``-gline-tables-only -fdebug-info-for-profiling
++-funique-internal-linkage-names -Wl,--build-id=sha1``). Do not use
++``-fpseudo-probe-for-profiling``: presence of either ``.pseudo_probe`` or
++``.pseudo_probe_desc`` in either runtime or debug file is rejected, even with
++``--use-dwarf-correlation``. This experimental mode has not admitted probe
++correlation or DWARF correlation of probe builds.
++
++Record and export on the recording system with the same perf version::
++
++  perf record --buildid-mmap -e cycles -c 1000003 -o perf.data -- ./workload
++  perf evlist -v -i perf.data
++  LC_ALL=C perf script -i perf.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > ip.perfscript
++  perf buildid-list -i perf.data > buildids.txt
++
++The evlist output is collection evidence, not an input to llvm-profgen. A
++frequency such as ``-F 1000`` may replace ``-c 1000003``. ``cpu-clock`` is an
++alternative event where hardware cycles are unavailable. Preserve the full
++field list, including ``event``: explicit ``-F`` replaces perf's default
++fields. Do not append call stacks or branch stacks. This command and its
++strict grammar correspond to the IP collection/export contract, sections
++5.2.1 and 5.2.2. The expected perf v6.12 sample spelling is::
++
++  123/123 1000003 cycles: 1234 (/path/to/program+0x234)
++
++The actual printed order is pid/tid, period, complete event name, IP, DSO plus
++file offset. Paths can contain spaces, parentheses, and internal ``+0x``;
++only a final valid hexadecimal ``+0xOFFSET`` is separated. A deleted suffix is
++part of the path before the offset. MMAP, MMAP2, and LOST records are accepted
++in that export's form. Unknown records, extra stack fields, malformed numbers,
++truncated records, and zero sample periods are errors. PID/TID -1 means unknown;
++values below -1 are invalid. Kernel and module samples are counted but do not
++produce kernel profiles; special DSOs are classified separately.
++
++``--perfdata`` is not admitted in IP mode. Export text on the recording system
++instead; matching perf version numbers alone do not establish cross-host
++export equivalence. Example conversion::
++
++  llvm-profgen --ip-samples --binary=workload --perfscript=ip.perfscript \
++    --perf-buildid-list=buildids.txt --ip-aggregation=sum \
++    --format=extbinary --output=workload.prof --quality-report=quality.json
++
++IP options
++~~~~~~~~~~
++
++These options require ``--ip-samples``; they are not an implicit fallback from
++LBR processing. Unknown enum values are diagnosed by the command-line parser.
++
++.. option:: --ip-samples
++
++  Explicitly select IP text input; default off.
++
++.. option:: --ip-event=<name>
++
++  Select the complete printed event name, including modifiers such as
++  ``cycles:u``. Unset by default. Multiple events without this option, or an
++  empty selection, are errors. Different event units are never summed.
++
++.. option:: --ip-weight=[period|sample]
++
++  Default ``period``. Use period sums normalized by P_ref, or sample counts.
++
++.. option:: --ip-period-unit=<N>
++
++  Explicit positive uint64 P_ref. Otherwise use the lower median of periods
++  of target samples, before symbolization and skid adjustment. It is an error to combine
++  this option with ``--ip-weight=sample``. To merge profiles, explicitly use
++  the same normalization unit across recordings.
++
++.. option:: --ip-aggregation=[sum|max|avg]
++
++  **No default during evaluation; must be explicitly specified.** This is a
++  transitional interface: a default must be decided before upstream release.
++
++.. option:: --ip-head-samples=[none|entry-estimate]
++
++  Default ``none`` (provisional): write zero head samples. ``entry-estimate``
++  uses the earliest body position or inline callsite estimate; a sampled
++  function with positive total has a minimum estimate of one. Function total
++  is never substituted for entry count. With ``none``, keep profi enabled
++  during compilation and linking, explicitly enabling it at the LTO link step.
++
++.. option:: --ip-zero-fill=[none|sampled-functions]
++
++  Default ``none`` (provisional). ``sampled-functions`` writes zero at
++  unsampled keys within top-level functions having usable samples. It does not
++  introduce functions without usable samples or change totals.
++
++.. option:: --ip-skid=[none|prev-inst]
++
++  Default ``none`` (provisional). ``prev-inst`` uses the preceding instruction
++  only in the same DWARF range and mapping-state interval, with adjacent bytes
++  and usable predecessor line information. Otherwise retain the original PC
++  and count an unadjusted sample. Normalization uses original sample periods.
++
++.. option:: --binary-match-regex=<regex>
++
++  Unset by default. Search the raw DSO path, including `` (deleted)``; this is
++  not a whole-string match, so use ``^`` and ``$`` to anchor one. A supplied
++  regex completely replaces basename selection. Otherwise match the basename
++  of the realpath of ``--binary``, ignoring a final deleted suffix for matching
++  only. Preserve the original path for identity evidence.
++
++.. option:: --perf-buildid-list=<file>
++
++  Optional buildid-list text exported on the recording system. Supplies
++  path-level identity evidence, not per-sample binding.
++
++.. option:: --allow-missing-build-id
++
++  Default off. Allow missing evidence as ``unverified``; never allow a known
++  mismatch or ambiguous candidates.
++
++.. option:: --quality-report=<file>
++
++  Optional deterministic JSON, schema version 1, described below. Failures
++  also produce failed reports subject to the output contract.
++
++.. option:: --ip-min-usable-ratio=<ratio>
++
++  Optional minimum raw usable/target weight ratio. No default during evaluation.
++  Accept only ``0``, ``1``, or ``0.`` followed by one to nine decimal digits.
++  Compare exact integer fractions, before aggregation, duplication or rounding.
++
++.. option:: --ip-min-target-samples=<N>
++
++  Optional minimum target sample count (decimal uint64). No default during
++  evaluation. Zero target or usable samples remains an independent error.
++
++.. option:: --ip-max-lost-ratio=<ratio>
++
++  Optional maximum visible LOST diagnostic ratio, with the same exact syntax
++  as the usable ratio. No default during evaluation. Unknown ratios do not
++  fail this check. A uint64 denominator overflow produces ``unknown`` and
++  ``W_LOST_RATIO_OVERFLOW``, not a conversion failure.
++
++Existing options
++~~~~~~~~~~~~~~~~
++
++The following retain their meaning: ``--binary``, ``--debug-binary``, ``--dwp``,
++``--output``/``-o``, ``--format``, ``--use-md5``, ``--pid``,
++``--show-mmap-events``, ``--show-detailed-warning``, ``--trim-cold-profile``,
++``--profile-density-*``, ``--show-density``, ``--load-function-from-symbol``,
++and ``--use-dwarf-correlation`` (which does not bypass probe rejection).
++``--pid`` selects that process, not children after fork, and never matches -1.
++Negative ``--pid`` is rejected. IP output supports text, binary, and extbinary;
++GCC format fails at writer creation. ``--use-md5`` applies only to extbinary
++and is otherwise ignored with a warning. ``--show-mmap-events`` prints parsed
++IP mappings, without claiming samples were independently rebound to them.
++
++Explicit use of any of these is rejected: ``--unsymbolized-profile``,
++``--llvm-sample-profile``, ``--skip-symbolization``, ``--data-access-perftrace``,
++``--ignore-stack-samples``, ``--csprof-*``, ``--csspgo-*``,
++``--use-context-cost-for-preinliner``, ``--max-search-depth``,
++``--gen-cs-nested-profile``, ``--compress-recursion``,
++``--mark-all-context-preinlined``, ``--use-offset``,
++``--use-first-loadable-segment-as-base``, ``--update-total-samples``,
++``--fill-zero-for-all-funcs``, ``--populate-profile-symbol-list``, ``--kernel``,
++``--show-disassembly-only``, ``--disassemble-functions``,
++``--show-source-locations``, ``--show-canonical-fname``, ``--show-pseudo-probe``,
++and ``--infer-missing-frames`` (even explicitly specifying its default).
++``--output=-`` and IP ``--perfdata`` are also rejected.
++
++Identity and address conversion
++~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
++A file offset must be in exactly one executable PT_LOAD file range. Convert
++using ``p_vaddr + (offset - p_offset)``; do not use a process base or page-size
++mask. Segment gaps are unmapped-in-target. Arithmetic overflow is an error.
++Identity is conservative across all candidate paths:
++
++* ``verified``: every required executable candidate mapping has matching
++  per-mapping build-ID evidence.
++* ``verified-path``: matching path-level evidence covers candidates, but
++  per-mapping evidence is incomplete.
++* ``unverified``: necessary evidence is missing and explicitly allowed.
++* ``mismatch``: a known ID conflict, asymmetric runtime/debug identity, or
++  ambiguous candidates. This is never bypassed.
++
++A non-executable mapping with a known ID conflict still causes mismatch; a
++non-executable mapping with no ID is not required evidence. A candidate with
++no executable mapping remains unverified. For a deleted path, buildid-list
++cannot substitute for a missing mapping ID.
++
++Runtime-with-ID/input-without-evidence is missing, not mismatch; the reverse
++is mismatch. Runtime/debug IDs must agree, including presence. Probe sections
++in either file are rejected. Paths with differing device/inode tuples are
++ambiguous. Generation zero means unknown: only unequal nonzero generations
++conflict. Inode reuse cannot be detected if one generation is unknown.
++Mapping-start and synthesized mapping IDs are not distinguished in text;
++path-level evidence does not prove when an image was read, nor does it bind
++each sample independently to a particular mapping.
++
++Counting and instruction boundaries
++~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
++For an address a, u(a) is sample_count or period_sum. Sample weighting uses
++P_ref=1; automatic period normalization uses target periods before symbolization,
++not only samples that later have line information. A key contains the full
++inline chain, relative leaf line, and base discriminator. Sum computes
++``sum(u(a)) / P_ref``; max computes ``max(u(a)*duplication(a)) / P_ref``;
++avg computes ``sum(u(a)*duplication(a)) / (P_ref*n(key))``. The avg denominator
++includes every instruction with the same key, including unsampled instructions
++and unrolled copies across all function ranges, excluding data and line zero.
++Each key is divided once and rounded half up; a sampled key is at least one.
++Checked integer arithmetic never wraps. Function totals sum normalized raw
++sample weights independently of body aggregation; inline ancestors receive
++those weights. The body sums need not equal total.
++
++Only avg, sampled-functions zero filling, or prev-inst requires instruction
++boundaries. Sum/max with none/none does not enumerate instructions. Enumeration
++is limited to functions with usable samples. It uses local STT_NOTYPE mapping
++symbols from the runtime and optional matching debug file .symtab, matched by
++section name and address range, never section index. ARM uses ``$a/$t/$d``;
++AArch64 uses ``$x/$d``; dot-suffixed variants are recognized. Runtime bytes are
++required even when debug code sections are NOBITS. No mapping state crosses
++section boundaries, and same-address conflicting states fail.
++
++A32/A64 instructions start on four-byte boundaries. Little-endian ELF32 Thumb
++is stepped forward from the current mapping anchor: a first halfword >=0xe800
++means four bytes, otherwise two. Data ranges are excluded, even if decodable.
++A DWARF intersection may not start inside or end halfway through an instruction.
++A prefix read to prove the first boundary is not part of the profile. Samples
++not at proven instruction starts fail rather than being rounded. All failed
++functions are reported; no partial profile or silent fallback is produced.
++
++Output and failure contract
++~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
++Before ELF loading or any temporary file, reject stdout output and any
++profile/report alias, including aliases to perfscript, binary, debug-binary,
++buildid-list or dwp inputs. Relative names, symlinks and hard links count.
++**Path conflict is the sole intentional no-failure-report exception**: neither
++output is written, all existing bytes are retained, and stderr explains it.
++
++For other failures, the old profile is always retained. Write and explicitly
++flush/close/check a same-directory profile temporary, atomically replace the
++quality report via its own checked temporary, then rename the profile last.
++Successful reports replace old reports; ordinary failures replace them with
++complete failed JSON. If the report itself cannot be written or committed,
++keep the old report and remove its temporary. If profile commit fails, try to
++replace the report with a failed report. No fallible operation follows a
++successful profile commit. This is not a two-file crash-atomic transaction;
++nonzero exit never authorizes use of a new profile. Disk failure, process
++crash, and LLVM fatal errors can prevent delivery of a report.
++
++IP errors return through the IP driver; existing shared loader/symbolizer exits
++have a one-shot stage-aware callback. Ordinary command-line parser diagnostics
++are emitted once, verbatim, and recorded as the parse-stage reason. A missing
++required IP binary or negative PID has its IP-specific diagnostic.
++
++Quality report schema (version 1)
++~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++
++This unreleased schema keeps version 1. An unavailable or uncomputed value is
++the string ``"unknown"``. Confirmed absence is JSON ``null`` (not an empty
++string), including no build ID, no debug binary, or no failure on success.
++An empty argv token is represented by null, retaining its position. Empty
++arrays mean a known empty list unless a field's definition explicitly says
++otherwise; a whole uncomputed object or list is unknown. Zero is a known numeric
++zero, not an unavailable value. JSON integers are exact uint64 (signed int64
++for PID/TID), never floating point. Fractions are objects with integer
++``numerator`` and ``denominator``; zero or unrepresentable denominators are
++unknown. Count weights retain raw numerator and P_ref without rounding.
++
++Arrays are deterministic: event/candidate names sort lexicographically;
++mapping/evidence records retain input order; top lists sort by selected raw
++weight descending, then name ascending. Boundary sources use sorted file names,
++failed functions use sorted names, and warnings use stable code order. Argument
++order is preserved. No timestamps or performance benefit claims are emitted.
++
++Let T=target, U=original usable, N=in-function without line information, L=sum
++of visible LOST N values, S=all pre-filter sample lines. Selected raw weight W
++is sample_count in sample mode and period_sum otherwise. Ratio definitions:
++
++* target_usable_ratio = W(U)/W(T); the sample/period alternatives use their
++  named counters. These precede skid, duplication, aggregation and trimming.
++* line_resolution_ratio = W(U)/(W(U)+W(N)).
++* dwarf_function_ratio = (U.sample_count+N.sample_count)/T.sample_count.
++* aarch64_alignment_ratio = proven aligned target samples/T.sample_count.
++* ISA sample_ratio and weight_ratio use T as denominator; unmapped target
++  offsets are not assigned an ISA, so the ratios need not sum to one.
++* Top shares use other_dso for other_dso_top20, target for outside_symtab_top20,
++  usable for coverage top50 and name_merged_top50.
++* exported_lost_ratio = L/(L+S), count-based and input-wide. LOST may include
++  sideband records and cannot be assigned to one event, DSO or PID. Its
++  completeness is always unknown. No visible LOST record means unknown L and
++  ratio, not zero loss. L+S overflow yields unknown plus a warning.
++
++Threshold precedence is: unset -> not_evaluated; set but unavailable or
++undefined -> unknown (warn, do not fail this check); otherwise compare exactly.
++Usable/sample comparisons are passed or failed; LOST is exceeded or
++not_exceeded. sampling_adequacy is insufficient only on failed minimum-sample
++or exceeded LOST checks, otherwise unknown, never ok. Independent failures
++(identity, empty target/usable, malformed input, boundaries, writer) still fail
++regardless of unset/unknown thresholds. conversion is ok or failed;
++failure_stage is load, parse, identity, generate, boundary, write or commit.
++On success failure_stage/reason are null. Other verdicts need not have been
++computed when an earlier independent failure prevents them.
++
++The field inventory below uses dot paths and ``[]`` for array elements.
++An object-valued field may instead be unknown when its prerequisite is absent.
++Count objects have sample_count (samples), period_sum (selected event units),
++and normalized_weight (raw selected weight/P_ref). Top entries contain name,
++counts, and share as defined above. Boundary failures contain function and
++reason; evidence items contain path, source, build_id, result and optional
++mapping_index (unknown when not applicable).
++
++Field paths
++^^^^^^^^^^^
++
++``boundaries`` (object)
++  On-demand enumeration observations.
++
++``boundaries.failures`` (array)
++  Failed functions and reasons, sorted by function name; empty if none collected yet.
++
++``boundaries.failures[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``boundaries.failures[].function`` (string)
++  DWARF function name whose boundary enumeration failed.
++
++``boundaries.failures[].reason`` (string)
++  Description of the failed boundary condition, with available function/address context.
++
++``boundaries.function_count`` (string | uint64)
++  Number of enumerated functions; unknown before generation starts.
++
++``boundaries.requested`` (boolean)
++  Whether avg, zero filling or skid requests enumeration; false before validated semantics.
++
++``boundaries.sources`` (array)
++  Sorted distinct mapping-symbol source paths; empty if none collected yet.
++
++``boundaries.sources[]`` (string)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``consumer_hints`` (array)
++  Compiler-use recommendations in fixed order, not runtime benefit claims.
++
++``consumer_hints[]`` (string)
++  Text recommendation; keep profi enabled when head estimation is disabled.
++
++``coverage`` (object)
++  Sampled function and address coverage; uncomputed children unknown.
++
++``coverage.name_merged_functions`` (string | uint64)
++  Number of sampled names sourced from more than one DWARF DIE start.
++
++``coverage.name_merged_top50`` (array | string)
++  Top 50 multi-DIE sampled names, same weight/name order; share denominator is all usable weight.
++
++``coverage.name_merged_top50[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``coverage.name_merged_top50[].counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``coverage.name_merged_top50[].counts.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``coverage.name_merged_top50[].counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``coverage.name_merged_top50[].counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``coverage.name_merged_top50[].counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``coverage.name_merged_top50[].counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``coverage.name_merged_top50[].name`` (string)
++  Event, DSO or function name; unresolved symbol names are unknown.
++
++``coverage.name_merged_top50[].share`` (object)
++  Selected original weight divided by the parent list's stated denominator.
++
++``coverage.name_merged_top50[].share.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``coverage.name_merged_top50[].share.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``coverage.sampled_functions`` (string | uint64)
++  Number of top-level names with usable samples (after existing name merging).
++
++``coverage.top50`` (array | string)
++  Top 50 sampled functions by selected original usable weight, then name.
++
++``coverage.top50[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``coverage.top50[].counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``coverage.top50[].counts.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``coverage.top50[].counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``coverage.top50[].counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``coverage.top50[].counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``coverage.top50[].counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``coverage.top50[].name`` (string)
++  Event, DSO or function name; unresolved symbol names are unknown.
++
++``coverage.top50[].share`` (object)
++  Selected original weight divided by the parent list's stated denominator.
++
++``coverage.top50[].share.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``coverage.top50[].share.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``coverage.unique_addresses`` (string | uint64)
++  Number of distinct successfully converted target virtual addresses, including later unusable addresses.
++
++``event`` (object)
++  Event selection and independent per-event counts.
++
++``event.before_filter`` (array | string)
++  Per-event pre-filter counts; lexicographic full event-name order. Unknown before parsing completes.
++
++``event.before_filter[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``event.before_filter[].name`` (string)
++  Event, DSO or function name; unresolved symbol names are unknown.
++
++``event.before_filter[].period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``event.before_filter[].sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``event.config`` (string)
++  Unknown; not inferred from the event name.
++
++``event.selected`` (string)
++  Complete selected event name, including modifiers; unknown before selection.
++
++``event.type`` (string)
++  Unknown; not inferred from the event name.
++
++``identity`` (object)
++  Target and debug identity chain.
++
++``identity.binary`` (string)
++  Given runtime path, null if omitted.
++
++``identity.binary_build_id`` (null | string)
++  Hex ID, null if read and absent, unknown if not yet inspected.
++
++``identity.binary_realpath`` (string)
++  Canonical runtime path, unknown until resolved.
++
++``identity.candidates`` (array | string)
++  Selected original paths, lexicographic order; unknown before selection.
++
++``identity.candidates[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``identity.candidates[].deleted`` (boolean)
++  Whether the original path ends in the deleted suffix.
++
++``identity.candidates[].path`` (string)
++  Unmodified input path; null only if absent.
++
++``identity.debug_binary`` (null | string)
++  Given debug path, null if omitted.
++
++``identity.debug_build_id`` (null | string)
++  Hex ID; null if no debug input or ID inspected and absent; unknown if given but not inspected.
++
++``identity.evidence`` (array | string)
++  Evidence in observation order, unknown before runtime identity read.
++
++``identity.evidence[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``identity.evidence[].build_id`` (null | string)
++  Hexadecimal build ID, null for confirmed absence.
++
++``identity.evidence[].mapping_index`` (string | uint64)
++  Zero-based parsed mapping index; unknown for non-mapping evidence.
++
++``identity.evidence[].path`` (string)
++  Unmodified input path; null only if absent.
++
++``identity.evidence[].result`` (string)
++  consistent, mismatch or missing for ID reads; mapping/path-summary grades verified, verified-path, unverified, mismatch; not-required for a non-executable mapping without conflict.
++
++``identity.evidence[].source`` (string)
++  debug-binary, buildid-list, mmap2, missing, or path-summary; interpreted with result.
++
++``identity.grade`` (string)
++  Conservative verified, verified-path, unverified, mismatch, or unknown.
++
++``identity.observed_mmap_build_id`` (boolean | string)
++  Whether any parsed mapping has an ID, not just candidates; unknown before full parsing.
++
++``identity.selection`` (string)
++  regex or basename; selection mechanism, not an identity proof.
++
++``input`` (object)
++  Input identity and projection.
++
++``input.path`` (string)
++  Given perfscript path; null if not supplied.
++
++``input.projection`` (string)
++  The literal ip-only; no branch or call-stack evidence is consumed.
++
++``input.sha256`` (string)
++  SHA-256 hex of the complete input bytes; unknown until read.
++
++``isa`` (object | string)
++  Diagnostic ISA buckets and sources; unknown until inspection.
++
++``isa.a32`` (object)
++  Diagnostic ISA bucket with raw counts and target-relative ratios.
++
++``isa.a32.counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``isa.a32.counts.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``isa.a32.counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.a32.counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.a32.counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``isa.a32.counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``isa.a32.sample_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.a32.sample_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.a32.sample_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.a32.weight_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.a32.weight_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.a32.weight_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.a64`` (object)
++  Diagnostic ISA bucket with raw counts and target-relative ratios.
++
++``isa.a64.counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``isa.a64.counts.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``isa.a64.counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.a64.counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.a64.counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``isa.a64.counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``isa.a64.sample_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.a64.sample_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.a64.sample_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.a64.weight_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.a64.weight_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.a64.weight_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.sources`` (object)
++  Mapping-symbol, SF_Thumb fallback and unknown-source count buckets.
++
++``isa.sources.SF_Thumb`` (object)
++  Count bucket for mapping-symbols, function-symbol SF_Thumb, or unknown evidence.
++
++``isa.sources.SF_Thumb.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``isa.sources.SF_Thumb.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.sources.SF_Thumb.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.sources.SF_Thumb.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``isa.sources.SF_Thumb.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``isa.sources.mapping-symbols`` (object)
++  Count bucket for mapping-symbols, function-symbol SF_Thumb, or unknown evidence.
++
++``isa.sources.mapping-symbols.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``isa.sources.mapping-symbols.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.sources.mapping-symbols.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.sources.mapping-symbols.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``isa.sources.mapping-symbols.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``isa.sources.unknown`` (object)
++  Diagnostic ISA bucket with raw counts and target-relative ratios.
++
++``isa.sources.unknown.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``isa.sources.unknown.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.sources.unknown.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.sources.unknown.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``isa.sources.unknown.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``isa.thumb`` (object)
++  Diagnostic ISA bucket with raw counts and target-relative ratios.
++
++``isa.thumb.counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``isa.thumb.counts.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``isa.thumb.counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.thumb.counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.thumb.counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``isa.thumb.counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``isa.thumb.sample_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.thumb.sample_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.thumb.sample_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.thumb.weight_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.thumb.weight_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.thumb.weight_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.unknown`` (object)
++  Diagnostic ISA bucket with raw counts and target-relative ratios.
++
++``isa.unknown.counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``isa.unknown.counts.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``isa.unknown.counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.unknown.counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.unknown.counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``isa.unknown.counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``isa.unknown.sample_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.unknown.sample_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.unknown.sample_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``isa.unknown.weight_ratio`` (object)
++  Parent ISA bucket divided by target, in sample-count or selected-weight units respectively.
++
++``isa.unknown.weight_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``isa.unknown.weight_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``lost`` (object)
++  Visible lost-output-record evidence.
++
++``lost.L`` (string | uint64)
++  Sum of visible lost output records; unknown if no LOST line or parsing incomplete.
++
++``lost.S`` (string | uint64)
++  All pre-filter sample line count, unknown if parsing incomplete.
++
++``lost.completeness`` (string)
++  Always unknown: not a bound on true lost IP samples.
++
++``lost.count_unit`` (string)
++  The literal records, potentially including sideband.
++
++``lost.exported_lost_ratio`` (object | string)
++  L/(L+S), input-wide count proxy; unknown with no evidence, zero denominator, or uint64 overflow.
++
++``lost.exported_lost_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``lost.exported_lost_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``lost.records`` (string | uint64)
++  Visible LOST line count, zero if parsed and none observed, unknown before parsing.
++
++``lost.scope`` (string)
++  The literal input: not event-, PID-, or target-specific.
++
++``lost.source`` (string)
++  The literal PERF_RECORD_LOST.
++
++``mapping`` (object)
++  Observed mappings, not independently replayed bindings.
++
++``mapping.candidate_executable_records`` (string | uint64)
++  Count of observed candidate executable mappings, not sample-to-map bindings.
++
++``mapping.candidate_nonexecutable_records`` (string | uint64)
++  Count of observed candidate non-executable mappings.
++
++``mapping.completeness`` (string)
++  Always unknown; no claim of complete mapping history.
++
++``mapping.pid_count`` (string | uint64)
++  Number of distinct known sample PIDs in the parsed input; unknown before parsing.
++
++``mapping.records`` (array | string)
++  Candidate mappings in input order, unknown before selection.
++
++``mapping.records[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``mapping.records[].build_id`` (null | string)
++  Hexadecimal build ID, null for confirmed absence.
++
++``mapping.records[].evidence_class`` (string)
++  mmap2-build-id, inode-tuple or missing.
++
++``mapping.records[].executable`` (boolean)
++  Whether the mapping permissions contain x.
++
++``mapping.records[].path`` (string)
++  Unmodified input path; null only if absent.
++
++``mapping.records[].pid`` (int64)
++  Signed process/thread ID; -1 is unknown, not inferred.
++
++``mapping.records[].tid`` (int64)
++  Signed process/thread ID; -1 is unknown, not inferred.
++
++``ratios`` (object | string)
++  Raw counting ratios; unknown before classification.
++
++``ratios.line_resolution_ratio`` (object | string)
++  W(U)/(W(U)+W(N)); report only.
++
++``ratios.line_resolution_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``ratios.line_resolution_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``ratios.target_usable_period_ratio`` (object)
++  U.period_sum/T.period_sum.
++
++``ratios.target_usable_period_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``ratios.target_usable_period_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``ratios.target_usable_ratio`` (object)
++  W(U)/W(T), selected raw-weight criterion before transformations.
++
++``ratios.target_usable_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``ratios.target_usable_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``ratios.target_usable_sample_ratio`` (object)
++  U.sample_count/T.sample_count.
++
++``ratios.target_usable_sample_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``ratios.target_usable_sample_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples`` (object)
++  Raw sample classification layers and written positions.
++
++``samples.after_event`` (object | string)
++  Selected complete event, before PID filtering.
++
++``samples.after_event.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.after_event.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.after_event.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.after_event.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.after_event.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.after_pid`` (object | string)
++  Selected event after explicit PID filtering.
++
++``samples.after_pid.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.after_pid.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.after_pid.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.after_pid.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.after_pid.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.input_total`` (object | string)
++  Pre-filter cross-event sample count only: period units must not be mixed.
++
++``samples.input_total.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.kernel`` (object | string)
++  Kernel and module samples classified by DSO name.
++
++``samples.kernel.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.kernel.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.kernel.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.kernel.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.kernel.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.other_dso`` (object | string)
++  Other file or special DSO samples with offsets.
++
++``samples.other_dso.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.other_dso.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.other_dso.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.other_dso.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.other_dso.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.other_dso_top20`` (array | string)
++  Top 20 other DSOs, raw weight then name; shares use other_dso weight.
++
++``samples.other_dso_top20[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``samples.other_dso_top20[].counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``samples.other_dso_top20[].counts.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.other_dso_top20[].counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.other_dso_top20[].counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.other_dso_top20[].counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.other_dso_top20[].counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.other_dso_top20[].name`` (string)
++  Event, DSO or function name; unresolved symbol names are unknown.
++
++``samples.other_dso_top20[].share`` (object)
++  Selected original weight divided by the parent list's stated denominator.
++
++``samples.other_dso_top20[].share.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.other_dso_top20[].share.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.pid_unknown`` (object | string)
++  Selected samples with PID -1; subset of post-filter classifications.
++
++``samples.pid_unknown.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.pid_unknown.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.pid_unknown.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.pid_unknown.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.pid_unknown.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.skid_unadjusted`` (object | string)
++  Samples retained at original PC while prev-inst requested.
++
++``samples.skid_unadjusted.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.skid_unadjusted.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.skid_unadjusted.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.skid_unadjusted.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.skid_unadjusted.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.skid_unadjusted_reasons`` (object)
++  Reason subsets whose counts sum to skid_unadjusted.
++
++``samples.skid_unadjusted_reasons.data_or_state_change`` (string)
++  Predecessor crosses a mapping-state interval or data.
++
++``samples.skid_unadjusted_reasons.first_instruction`` (string)
++  No preceding instruction in the enumerated function.
++
++``samples.skid_unadjusted_reasons.predecessor_no_line`` (string)
++  Predecessor has no usable line position.
++
++``samples.skid_unadjusted_reasons.range_gap`` (string)
++  Predecessor crosses a DWARF range or byte gap.
++
++``samples.target`` (object)
++  Target conversion and DWARF classification.
++
++``samples.target.counts`` (object | string)
++  All selected target samples, including unmapped offsets.
++
++``samples.target.counts.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.in_cu_no_subprogram`` (object | string)
++  Within a CU range, outside any supported subprogram range.
++
++``samples.target.in_cu_no_subprogram.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.in_cu_no_subprogram.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.in_cu_no_subprogram.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.in_cu_no_subprogram.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.in_cu_no_subprogram.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.in_func_no_line`` (object | string)
++  In a function but without a usable leaf source position.
++
++``samples.target.in_func_no_line.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.in_func_no_line.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.in_func_no_line.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.in_func_no_line.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.in_func_no_line.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.no_cu`` (object | string)
++  No matching DWARF CU range.
++
++``samples.target.no_cu.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.no_cu.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.no_cu.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.no_cu.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.no_cu.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.outside_dwarf_func`` (object | string)
++  No enclosing DWARF function, including plt, in_cu_no_subprogram and no_cu.
++
++``samples.target.outside_dwarf_func.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.outside_dwarf_func.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.outside_dwarf_func.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.outside_dwarf_func.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.outside_dwarf_func.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.outside_symtab_top20`` (array | string)
++  Top 20 outside-function names from .symtab only; unknown for unresolved symbols; denominator target weight.
++
++``samples.target.outside_symtab_top20[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``samples.target.outside_symtab_top20[].counts`` (object)
++  Count object for the parent bucket; raw samples/periods and normalization.
++
++``samples.target.outside_symtab_top20[].counts.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.outside_symtab_top20[].counts.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.outside_symtab_top20[].counts.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.outside_symtab_top20[].counts.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.outside_symtab_top20[].counts.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.outside_symtab_top20[].name`` (string)
++  Event, DSO or function name; unresolved symbol names are unknown.
++
++``samples.target.outside_symtab_top20[].share`` (object)
++  Selected original weight divided by the parent list's stated denominator.
++
++``samples.target.outside_symtab_top20[].share.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.outside_symtab_top20[].share.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.plt`` (object | string)
++  Addresses in a PLT section; outside-function category.
++
++``samples.target.plt.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.plt.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.plt.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.plt.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.plt.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.unmapped_in_target`` (object | string)
++  Offsets outside a unique executable PT_LOAD file range.
++
++``samples.target.unmapped_in_target.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.unmapped_in_target.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.unmapped_in_target.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.unmapped_in_target.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.unmapped_in_target.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.target.usable`` (object | string)
++  Original usable samples, before skid, duplication, aggregation or trimming.
++
++``samples.target.usable.normalized_weight`` (object)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.target.usable.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.target.usable.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.target.usable.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.target.usable.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.unmapped`` (object | string)
++  Special DSO samples without offsets.
++
++``samples.unmapped.normalized_weight`` (object | string)
++  Exact selected raw weight divided by P_ref; unknown until P_ref is known.
++
++``samples.unmapped.normalized_weight.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``samples.unmapped.normalized_weight.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``samples.unmapped.period_sum`` (uint64)
++  Sum of periods in the parent bucket (that event's units).
++
++``samples.unmapped.sample_count`` (uint64)
++  Number of samples in the parent bucket (samples).
++
++``samples.written_positions`` (string | uint64)
++  Count of body positions actually written after pruning; unknown until generation completes.
++
++``sanity`` (object)
++  Diagnostic alignment/DWARF coverage, not identity proof.
++
++``sanity.aarch64_alignment_ratio`` (object | string)
++  Proven aligned target sample count/T.sample_count; unknown on other architectures.
++
++``sanity.aarch64_alignment_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``sanity.aarch64_alignment_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``sanity.dwarf_function_ratio`` (object | string)
++  (U.sample_count+N.sample_count)/T.sample_count.
++
++``sanity.dwarf_function_ratio.denominator`` (uint64)
++  Positive integer denominator of the parent fraction (see ratio/weight definitions above).
++
++``sanity.dwarf_function_ratio.numerator`` (uint64)
++  Exact integer numerator of the parent fraction, in its stated raw units.
++
++``schema_version`` (uint64)
++  Format identifier, currently 1 (dimensionless).
++
++``semantics`` (object | string)
++  Validated counting policies; unknown before validation.
++
++``semantics.aggregation`` (string)
++  Explicitly requested sum, max or avg.
++
++``semantics.dup_policy`` (string)
++  observed-sum for sum; duplication-factor for max/avg.
++
++``semantics.fs_discriminator`` (boolean | string)
++  Boolean DWARF FS-discriminator mode, unknown before generation.
++
++``semantics.head_samples`` (string)
++  none or entry-estimate; literal policy names.
++
++``semantics.mode`` (string)
++  dwarf; probe builds are not admitted.
++
++``semantics.output_count_unit`` (string)
++  normalized-event-count or samples.
++
++``semantics.p_ref`` (string | uint64)
++  Positive normalization divisor, 1 in sample mode; unknown until chosen.
++
++``semantics.p_ref_source`` (string)
++  sample, explicit or automatic.
++
++``semantics.raw_event_unit`` (string)
++  cycles, ns, samples, or unknown; modifiers are removed only for this unit label.
++
++``semantics.skid`` (string)
++  none or prev-inst; literal policy names.
++
++``semantics.weight`` (string)
++  period or sample (default period).
++
++``semantics.zero_fill`` (string)
++  none or sampled-functions; these are literal policy names, not absence markers.
++
++``throttle`` (string)
++  Unknown: throttle records are not part of the admitted text grammar.
++
++``tool`` (object)
++  Tool identity and invocation.
++
++``tool.arguments`` (array)
++  Full argv in original order, with null for an empty token.
++
++``tool.arguments[]`` (null | string)
++  One argument token, or null for an explicitly empty token.
++
++``tool.version`` (string)
++  LLVM version string.
++
++``verdict`` (object)
++  Conversion outcome and optional threshold results.
++
++``verdict.conversion`` (string)
++  ok or failed; conversion validity, not performance benefit.
++
++``verdict.failure_stage`` (null | string)
++  load/parse/identity/generate/boundary/write/commit on failure; null on success.
++
++``verdict.fallback_callback_count`` (uint64)
++  Number of shared-code failure callback invocations (zero or one).
++
++``verdict.identity`` (string)
++  Same final conservative grade as identity.grade.
++
++``verdict.lost_ratio_check`` (string)
++  not_evaluated, unknown, exceeded or not_exceeded; overflow is unknown.
++
++``verdict.reason`` (null | string)
++  Original failure text (parser diagnostics verbatim), null on success.
++
++``verdict.sample_threshold_check`` (string)
++  not_evaluated, unknown, passed or failed, with threshold precedence above.
++
++``verdict.sampling_adequacy`` (string)
++  insufficient for a failed sample threshold or exceeded LOST check; otherwise unknown.
++
++``verdict.usable_ratio_check`` (string)
++  not_evaluated, unknown, passed or failed, with threshold precedence above.
++
++``warnings`` (array)
++  Distinct diagnostic codes in lexical order; original stderr remains separate.
++
++``warnings[]`` (object)
++  Array element with the child fields below; parent ordering and absence rules apply.
++
++``warnings[].code`` (string)
++  Stable warning identifier listed below.
++
++``warnings[].message`` (string)
++  Human-readable explanation, not a machine decision key.
++
++Warning codes
++^^^^^^^^^^^^^
++
++``W_CONSTANT_PERIOD``
++  All input periods are equal; caller must confirm fixed-period collection.
++
++``W_DUPLICATE_FUNCTION_START``
++  Existing DWARF loader encountered duplicate function starts.
++
++``W_DWARF_RECOVERABLE``
++  Existing recoverable DWARF diagnostic.
++
++``W_DWARF_WARNING``
++  Existing DWARF warning.
++
++``W_DWO_MISSING``
++  Split DWARF information is incomplete.
++
++``W_EMPTY_DENSITY``
++  Existing density analysis has no usable density positions.
++
++``W_IDENTITY_UNVERIFIED``
++  Missing necessary identity evidence was explicitly allowed.
++
++``W_LARGE_COUNT``
++  Generated counts exceed UINT32_MAX; consumers can saturate branch weights.
++
++``W_LOST_MAY_INCLUDE_SIDEBAND``
++  Visible loss may include mapping/other sideband records.
++
++``W_LOST_RATIO_OVERFLOW``
++  L+S cannot be represented by uint64; report ratio unknown and do not fail that check.
++
++``W_LOST_RATIO_UNKNOWN``
++  Configured visible LOST ratio unavailable or undefined.
++
++``W_LOW_DENSITY``
++  Existing density heuristic recommends more samples.
++
++``W_MD5_IGNORED``
++  Non-extbinary writer ignores use-md5.
++
++``W_NO_DWARF_FUNCTIONS``
++  No DWARF functions were loaded.
++
++``W_TARGET_COUNT_UNKNOWN``
++  Configured target count unavailable before its check.
++
++``W_USABLE_RATIO_UNKNOWN``
++  Configured usable ratio unavailable before its check.
++
++Known limitations
++~~~~~~~~~~~~~~~~~
++
++Same-name static functions are merged by the existing name-based profile map;
++coverage.name_merged_functions and its top list expose that behavior, not fix
++it. Inline non-leaf frames with line zero still follow existing behavior pending
++validation. No automatic threshold defaults are selected. LOST is an input-wide
++proxy, may include sideband records, does not include every loss source, and
++cannot prove mapping completeness. Missing IDs, inode reuse with unknown
++generation, profiling skid, PMU multiplexing, and nonrepresentative workloads
++can weaken the result. Profiles with different event units, normalization,
++aggregation or build identity must not be treated as interchangeable. Kernel
++and module generation, direct perf.data input, probe builds and production
++scale/performance qualification remain outside this admitted mode.
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+index 18f5c5ceae3e..e1b09cdb2846 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
+@@ -71,8 +71,10 @@ if GROUP == 'positive':
+     p = subprocess.run([TOOL,'--show-ip-boundaries','--binary=x','--output='+str(TMP/'gated')],capture_output=True,text=True)
+     assert p.returncode != 0 and 'IP-only options require --ip-samples' in p.stderr
+ elif GROUP == 'negative':
+-    for name,addr,why in [('bad-thumb-start',0x1004,'bad-thumb-start'),('bad-thumb-end',0x1000,'bad-thumb-end'),('bad-arm-start',0x101a,'bad-arm-start'),('bad-a64-start',0x1002,'unaligned A64'),('bad-a64-end',0x1000,'truncated A64'),('bad-conflict',0x1000,'conflicting mapping states'),('bad-no-map',0x1000,'no usable mapping symbols')]:
+-        run(name,[(addr,10)],['--ip-aggregation=avg'],failure=why)
++    for name,addr,why in [('bad-thumb-start',0x1004,'range starts inside a Thumb instruction'),('bad-thumb-end',0x1000,'truncated Thumb instruction'),('bad-arm-start',0x101a,'unaligned A32 range start'),('bad-a64-start',0x1002,'unaligned A64'),('bad-a64-end',0x1000,'truncated A64'),('bad-conflict',0x1000,'conflicting mapping states'),('bad-no-map',0x1000,'no usable mapping symbols')]:
++        p,_=run(name,[(addr,10)],['--ip-aggregation=avg'],failure=why)
++        assert 'function='+name in p.stderr and 'address=0x' in p.stderr and 'DWARF=[' in p.stderr
++        assert name+':' not in p.stderr
+         print('PASS negative',name)
+     for name in ['bad-no-map','a64-no-map']:
+         for opts in [['--ip-aggregation=avg'],['--ip-aggregation=sum','--ip-zero-fill=sampled-functions'],['--ip-aggregation=max','--ip-skid=prev-inst']]:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+index 7445b5a42374..e17a2fa8abd9 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+@@ -21,6 +21,14 @@ OLD = b'old profile must remain\n'
+ OLD_REPORT = b'{"verdict":{"conversion":"ok"}}\n'
+ 
+ 
++def no_empty_strings(value):
++    assert value != '', repr(value)
++    if isinstance(value, dict):
++        for item in value.values(): no_empty_strings(item)
++    elif isinstance(value, list):
++        for item in value: no_empty_strings(item)
++
++
+ def run(extra=(), data=DATA, binary=None, expect=0, stage=None, old=False,
+         report_preserved=False, label=None):
+     global SEQ
+@@ -50,6 +58,7 @@ def run(extra=(), data=DATA, binary=None, expect=0, stage=None, old=False,
+         assert report.read_bytes() == OLD_REPORT, report.read_text()
+         return p, None, d, cmd
+     q = json.loads(report.read_text())
++    no_empty_strings(q)
+     assert q['verdict']['conversion'] == ('failed' if expect else 'ok'), q
+     if stage:
+         assert q['verdict']['failure_stage'] == stage, q['verdict']
+@@ -128,6 +137,24 @@ if GROUP == 'fields':
+     assert r['isa']['unknown']['counts']['sample_count']==1
+     p,r,_,_=run(data='17/17 2 cycles: 1000 (/target+0x1000)\n',binary=I/'boundary-extra/bad-conflict.perfbin')
+     assert r['isa']['unknown']['counts']['sample_count']==1
++    for identity in ['b3:02 1 0', '<280854d1cea103bf480e219b336025e337e5a10e>']:
++        mmap='0/0 PERF_RECORD_MMAP2 17/17: [0x1000(0x1000) @ 0 '+identity+']: r-xp /target\n'
++        p,q,_,_=run(data=mmap+DATA)
++        record=q['mapping']['records'][0]
++        assert record['build_id']==(None if identity.startswith('b3:') else identity[1:-1])
++        assert q['identity']['debug_binary'] is None
++        assert q['identity']['debug_build_id'] is None
++    p,q,_,_=run(['--ip-event', ''], expect=1, old=True)
++    assert None in q['tool']['arguments']
++    # Synthetic same-name DWARF functions: shorten a name in a temporary copy,
++    # without moving bytes, sections, addresses or modifying the source fixture.
++    merged=TMP/'same-name.perfbin'
++    original=(I/'a64-pie.perfbin').read_bytes()
++    assert b'count_loop\0' in original
++    merged.write_bytes(original.replace(b'count_loop\0', b'two_sites\0\0'))
++    p,q,_,_=run(binary=merged, data=DATA+'17/17 3 cycles: 13b4 (/target+0x3b4)\n')
++    assert q['coverage']['name_merged_functions']==1
++    assert q['coverage']['name_merged_top50'][0]['name']=='two_sites'
+ elif GROUP == 'thresholds':
+     p,q,_,_=run();v=q['verdict']
+     for n in ['usable_ratio_check','sample_threshold_check','lost_ratio_check']:assert v[n]=='not_evaluated'
+@@ -158,6 +185,9 @@ elif GROUP == 'thresholds':
+     assert all(q['verdict'][n]=='unknown' for n in ['usable_ratio_check','sample_threshold_check','lost_ratio_check'])
+     p,q,_,_=run(['--unknown-quality-test-option'],expect=1,stage='parse',old=True)
+     assert 'Unknown command line argument' in p.stderr
++    assert p.stderr == q['verdict']['reason']
++    assert p.stderr.count('Unknown command line argument') == 1
++    assert 'llvm-profgen: error:' not in p.stderr
+     assert q['semantics']=='unknown'
+     assert q['coverage']['top50']=='unknown'
+     assert q['mapping']['records']=='unknown'
+@@ -166,9 +196,19 @@ elif GROUP == 'thresholds':
+     p,q,_,_=run(data='17/17 18446744073709551615 cycles: 1318 (/target+0x318)\n')
+     assert q['samples']['target']['usable']['period_sum']==18446744073709551615
+     no_floats(q)
+-    p,q,_,_=run(data=DATA+'17/17 PERF_RECORD_LOST lost 18446744073709551615\n',expect=1,stage='generate',old=True)
+-    assert 'LOST ratio denominator overflow' in p.stderr
+-    assert q['lost']['exported_lost_ratio']=='unknown'
++    for extra in [[], ['--ip-max-lost-ratio=0']]:
++        p,q,_,_=run(extra, data=DATA+'17/17 PERF_RECORD_LOST lost 18446744073709551615\n')
++        assert q['lost']['exported_lost_ratio']=='unknown'
++        assert q['verdict']['lost_ratio_check']==('unknown' if extra else 'not_evaluated')
++        assert q['verdict']['sampling_adequacy']=='unknown'
++        assert 'W_LOST_RATIO_OVERFLOW' in [x['code'] for x in q['warnings']]
++    for name in ['weight', 'aggregation', 'head-samples', 'zero-fill', 'skid']:
++        p,q,_,_=run(['--ip-'+name+'=bad'], expect=1, stage='parse', old=True,
++                    label='enum-'+name)
++        text="for the --ip-"+name+" option: Cannot find option named 'bad'!"
++        assert text in p.stderr and p.stderr.count(text)==1, p.stderr
++        assert p.stderr == q['verdict']['reason']
++        assert 'llvm-profgen: error:' not in p.stderr
+ elif GROUP == 'exits':
+     missing=TMP/'absent.perfbin'
+     missing.unlink(missing_ok=True)
+diff --git a/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test b/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
+index ad722bd7c190..55023b408c9c 100644
+--- a/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
++++ b/llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
+@@ -21,8 +21,8 @@
+ # Each failed sampled function must be reported, not just the first one.
+ # RUN: llvm-objcopy --strip-symbol='$x' %S/Inputs/ip-mode/a64-pie.perfbin %t/no-map-count.perfbin
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --binary=%t/no-map-count.perfbin --perfscript=%t/two --ip-aggregation=avg --output=%t/out --show-ip-address-counts 2>&1 | FileCheck %s --check-prefix=ALL
+-# ALL-DAG: count_loop: no usable mapping symbols
+-# ALL-DAG: main: no usable mapping symbols
++# ALL-DAG: no usable mapping symbols (function=count_loop
++# ALL-DAG: no usable mapping symbols (function=main
+ # ALL-DAG: IP-GENERATION enumerated_functions=2
+ # RUN: test ! -e %t/out
+ # Boundary failure must also leave an existing destination untouched.
+diff --git a/llvm/test/tools/llvm-profgen/ip-counting-options.test b/llvm/test/tools/llvm-profgen/ip-counting-options.test
+index 4c126ee53f86..c1782a4a721c 100644
+--- a/llvm/test/tools/llvm-profgen/ip-counting-options.test
++++ b/llvm/test/tools/llvm-profgen/ip-counting-options.test
+@@ -16,15 +16,15 @@
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-period-unit=18446744073709551616 2>&1 | FileCheck %s --check-prefix=UNIT
+ # UNIT: --ip-period-unit must be a positive integer
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-aggregation=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-AGGREGATION
+-# BAD-IP-AGGREGATION: invalid --ip-aggregation
++# BAD-IP-AGGREGATION: for the --ip-aggregation option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-weight=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-WEIGHT
+-# BAD-IP-WEIGHT: invalid --ip-weight
++# BAD-IP-WEIGHT: for the --ip-weight option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-head-samples=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-HEAD-SAMPLES
+-# BAD-IP-HEAD-SAMPLES: invalid --ip-head-samples
++# BAD-IP-HEAD-SAMPLES: for the --ip-head-samples option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-zero-fill=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-ZERO-FILL
+-# BAD-IP-ZERO-FILL: invalid --ip-zero-fill
++# BAD-IP-ZERO-FILL: for the --ip-zero-fill option: Cannot find option named 'bad'!
+ # RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary-match-regex=^/target$ --ip-aggregation=sum --show-ip-address-counts --binary=%S/Inputs/ip-mode/a64-pie.perfbin --perfscript=%t/data --output=%t/out --ip-skid=bad 2>&1 | FileCheck %s --check-prefix=BAD-IP-SKID
+-# BAD-IP-SKID: invalid --ip-skid
++# BAD-IP-SKID: for the --ip-skid option: Cannot find option named 'bad'!
+ # RUN: test ! -e %t/out
+ #--- data
+ 17/17 1 cycles: 13f4 (/target+0x3f4)
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.cpp b/llvm/tools/llvm-profgen/IPBoundary.cpp
+index 9ada6e669614..713653f9839c 100644
+--- a/llvm/tools/llvm-profgen/IPBoundary.cpp
++++ b/llvm/tools/llvm-profgen/IPBoundary.cpp
+@@ -1,5 +1,4 @@
+-//===-- IPBoundary.cpp - On-demand IP instruction boundaries
+-//----------------===//
++//===- IPBoundary.cpp - IP instruction boundaries -------------------------===//
+ //
+ // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ // See https://llvm.org/LICENSE.txt for license information.
+@@ -8,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "IPBoundary.h"
++#include "llvm/ADT/StringExtras.h"
+ #include "llvm/Object/ELFObjectFile.h"
+ #include "llvm/Support/CheckedArithmetic.h"
+ #include "llvm/Support/Endian.h"
+@@ -128,27 +128,33 @@ IPBoundaryMap::enumerate(StringRef Name,
+   Result.Ranges.erase(std::unique(Result.Ranges.begin(), Result.Ranges.end()),
+                       Result.Ranges.end());
+   for (size_t RI = 0; RI < Result.Ranges.size(); ++RI) {
+-    auto [Begin, End] = Result.Ranges[RI];
+-    if (Begin >= End || (RI && Begin < Result.Ranges[RI - 1].second))
+-      return boundaryError("invalid or overlapping DWARF ranges");
++    uint64_t Begin = Result.Ranges[RI].first, End = Result.Ranges[RI].second;
+     uint64_t Cursor = Begin;
++    auto At = [&](const Twine &Message, uint64_t Address) {
++      return boundaryError(Message + " (function=" + Name + " address=0x" +
++                           utohexstr(Address, true) + " DWARF=[0x" +
++                           utohexstr(Begin, true) + ",0x" +
++                           utohexstr(End, true) + "))");
++    };
++    if (Begin >= End || (RI && Begin < Result.Ranges[RI - 1].second))
++      return At("invalid or overlapping DWARF ranges", Cursor);
+     while (Cursor < End) {
+       const Section *S = nullptr;
+       for (const auto &Candidate : Sections)
+         if (Cursor >= Candidate.Begin && Cursor < Candidate.End &&
+             (SectionName.empty() || Candidate.Name == SectionName)) {
+           if (S)
+-            return boundaryError("ambiguous section for DWARF range");
++            return At("ambiguous section for DWARF range", Cursor);
+           S = &Candidate;
+         }
+       if (!S)
+-        return boundaryError("no runtime code section for DWARF range");
++        return At("no runtime code section for DWARF range", Cursor);
+       if (!S->Conflicts.empty())
+-        return boundaryError("conflicting mapping states in section " +
+-                             S->Name);
++        return At("conflicting mapping states in section " + S->Name,
++                  *S->Conflicts.begin());
+       auto It = S->States.upper_bound(Cursor);
+       if (It == S->States.begin())
+-        return boundaryError("no initial mapping state in section " + S->Name);
++        return At("no initial mapping state in section " + S->Name, Cursor);
+       --It;
+       auto Next = std::next(It);
+       uint64_t Stop =
+@@ -160,11 +166,11 @@ IPBoundaryMap::enumerate(StringRef Name,
+         continue;
+       }
+       if (ISA != 't' && ((Cursor % 4) || ((Cursor - Anchor) % 4)))
+-        return boundaryError(ISA == 'a'
+-                                 ? "bad-arm-start: unaligned A32 range start"
+-                                 : "bad-a64-start: unaligned A64 range start");
++        return At(ISA == 'a' ? "unaligned A32 range start"
++                             : "unaligned A64 range start",
++                  Cursor);
+       if (ISA == 't' && Anchor % 2)
+-        return boundaryError("unaligned Thumb mapping anchor");
++        return At("unaligned Thumb mapping anchor", Cursor);
+       // Prove a Thumb start from this mapping interval's anchor, never from
+       // an earlier ISA or data interval. Prefix instructions are not emitted.
+       uint64_t PC = ISA == 't' ? Anchor : Cursor;
+@@ -172,20 +178,19 @@ IPBoundaryMap::enumerate(StringRef Name,
+         uint64_t Size = 4;
+         if (ISA == 't') {
+           if (S->End - PC < 2)
+-            return boundaryError("truncated Thumb halfword");
++            return At("truncated Thumb halfword", PC);
+           Size = support::endian::read16le(S->Bytes.data() + PC - S->Begin) >=
+                          0xe800
+                      ? 4
+                      : 2;
+         }
+         if (PC < Cursor && Size > Cursor - PC)
+-          return boundaryError(
+-              "bad-thumb-start: range starts inside a Thumb instruction");
++          return At("range starts inside a Thumb instruction", Cursor);
+         if (Size > Stop - PC)
+-          return boundaryError(
+-              ISA == 't'   ? "bad-thumb-end: truncated Thumb instruction"
+-              : ISA == 'a' ? "bad-arm-end: truncated A32 instruction"
+-                           : "bad-a64-end: truncated A64 instruction");
++          return At(ISA == 't'   ? "truncated Thumb instruction"
++                    : ISA == 'a' ? "truncated A32 instruction"
++                                 : "truncated A64 instruction",
++                    PC);
+         if (PC >= Cursor)
+           Result.Instructions.push_back(
+               {PC, Size, RI, Result.Intersections.size() - 1});
+diff --git a/llvm/tools/llvm-profgen/IPQualityReport.cpp b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+index 726f027ac27f..5b71b2bba9b9 100644
+--- a/llvm/tools/llvm-profgen/IPQualityReport.cpp
++++ b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+@@ -71,7 +71,10 @@ uint64_t weight(const IPAddressCount &C, bool Sample) {
+   return Sample ? C.SampleCount : C.PeriodSum;
+ }
+ json::Value stringOrUnknown(StringRef S) {
+-  return S.empty() ? json::Value("unknown") : json::Value(S);
++  return S.empty() ? json::Value("unknown") : json::Value(S.str());
++}
++json::Value stringOrNone(StringRef S) {
++  return S.empty() ? json::Value(nullptr) : json::Value(S.str());
+ }
+ } // namespace
+ 
+@@ -217,7 +220,8 @@ json::Value IPQualityReport::count(const IPAddressCount &C) const {
+ Error IPQualityReport::checkThresholds() {
+   if (Reader.Parsed && Reader.Stats.LostRecords &&
+       Reader.Stats.LostCount > UINT64_MAX - Reader.Stats.Input)
+-    return failure("LOST ratio denominator overflow");
++    warn("W_LOST_RATIO_OVERFLOW",
++         "visible LOST ratio denominator exceeds uint64; ratio is unknown");
+   auto Greater = [](uint64_t N, uint64_t D, Fraction F) {
+     return (APInt(128, N) * APInt(128, F.D))
+         .ugt(APInt(128, D) * APInt(128, F.N));
+@@ -232,9 +236,10 @@ Error IPQualityReport::checkThresholds() {
+       UsableCheck =
+           Greater(MinUsable->N, MinUsable->D, {N, D}) ? "failed" : "passed";
+   }
+-  if (MaxLost && Reader.Parsed && Reader.Stats.LostRecords) {
++  if (MaxLost && Reader.Parsed && Reader.Stats.LostRecords &&
++      Reader.Stats.LostCount <= UINT64_MAX - Reader.Stats.Input) {
+     uint64_t L = Reader.Stats.LostCount, S = Reader.Stats.Input;
+-    // A 65-bit denominator and two 64-bit factors fit in 192 bits.
++    // Only compare a ratio representable by the schema uint64 fields.
+     auto Left = APInt(192, L) * APInt(192, MaxLost->D);
+     auto Right = (APInt(192, L) + APInt(192, S)) * APInt(192, MaxLost->N);
+     LostCheck = Left.ugt(Right) ? "exceeded" : "not_exceeded";
+@@ -429,10 +434,10 @@ json::Value IPQualityReport::build() {
+   Root["schema_version"] = uint64_t(1);
+   json::Array Args;
+   for (auto &A : Options.Arguments)
+-    Args.push_back(A);
++    Args.push_back(stringOrNone(A));
+   Root["tool"] = json::Object{{"version", LLVM_VERSION_STRING},
+                               {"arguments", std::move(Args)}};
+-  Root["input"] = json::Object{{"path", Options.Trace},
++  Root["input"] = json::Object{{"path", stringOrNone(Options.Trace)},
+                                {"sha256", stringOrUnknown(Reader.InputHash)},
+                                {"projection", "ip-only"}};
+   json::Array Events;
+@@ -478,13 +483,14 @@ json::Value IPQualityReport::build() {
+     Root["semantics"] = "unknown";
+   json::Array Candidates, Evidence;
+   for (auto &P : Reader.Candidates)
+-    Candidates.push_back(json::Object{
+-        {"path", P}, {"deleted", StringRef(P).ends_with(" (deleted)")}});
++    Candidates.push_back(
++        json::Object{{"path", stringOrNone(P)},
++                     {"deleted", StringRef(P).ends_with(" (deleted)")}});
+   for (const auto &E : Reader.Evidence)
+     Evidence.push_back(json::Object{
+-        {"path", E.Path},
++        {"path", stringOrNone(E.Path)},
+         {"source", E.Source},
+-        {"build_id", E.ID},
++        {"build_id", stringOrNone(E.ID)},
+         {"result", E.Result},
+         {"mapping_index", E.MappingIndex ? json::Value(*E.MappingIndex)
+                                          : json::Value("unknown")}});
+@@ -493,14 +499,16 @@ json::Value IPQualityReport::build() {
+   Root["identity"] = json::Object{
+       {"observed_mmap_build_id",
+        Reader.Parsed ? json::Value(HasID) : json::Value("unknown")},
+-      {"binary", Options.Binary},
++      {"binary", stringOrNone(Options.Binary)},
+       {"binary_realpath", stringOrUnknown(Reader.BinaryRealPath)},
+       {"binary_build_id", Reader.BinaryIdentityRead
+-                              ? json::Value(Reader.BinaryID)
++                              ? stringOrNone(Reader.BinaryID)
+                               : json::Value("unknown")},
+-      {"debug_binary", Options.Debug},
+-      {"debug_build_id", Reader.DebugIdentityRead ? json::Value(Reader.DebugID)
+-                                                  : json::Value("unknown")},
++      {"debug_binary", stringOrNone(Options.Debug)},
++      {"debug_build_id", Options.Debug.empty() ? json::Value(nullptr)
++                         : Reader.DebugIdentityRead
++                             ? stringOrNone(Reader.DebugID)
++                             : json::Value("unknown")},
+       {"selection", Reader.ReadOptions.BinaryMatchRegex ? "regex" : "basename"},
+       {"candidates", Reader.Selected ? json::Value(std::move(Candidates))
+                                      : json::Value("unknown")},
+@@ -520,9 +528,9 @@ json::Value IPQualityReport::build() {
+       Maps.push_back(
+           json::Object{{"pid", M.PID},
+                        {"tid", M.TID},
+-                       {"path", M.Path},
++                       {"path", stringOrNone(M.Path)},
+                        {"executable", X},
+-                       {"build_id", M.BuildID},
++                       {"build_id", stringOrNone(M.BuildID)},
+                        {"evidence_class", !M.BuildID.empty()  ? "mmap2-build-id"
+                                           : !M.Device.empty() ? "inode-tuple"
+                                                               : "missing"}});
+@@ -560,7 +568,7 @@ json::Value IPQualityReport::build() {
+     json::Array A;
+     for (size_t I = 0; I < std::min(Limit, Rows.size()); ++I)
+       A.push_back(json::Object{
+-          {"name", Rows[I].first},
++          {"name", stringOrUnknown(Rows[I].first)},
+           {"counts", count(Rows[I].second)},
+           {"share",
+            ratio(weight(Rows[I].second, Generation.SampleWeight), Denom)}});
+@@ -632,6 +640,10 @@ json::Value IPQualityReport::build() {
+                              : json::Value("unknown")},
+       {"sources", std::move(Sources)},
+       {"failures", std::move(Failures)}};
++  if (Reader.Parsed && Reader.Stats.LostRecords &&
++      Reader.Stats.LostCount > UINT64_MAX - Reader.Stats.Input)
++    warn("W_LOST_RATIO_OVERFLOW",
++         "visible LOST ratio denominator exceeds uint64; ratio is unknown");
+   json::Value LostRatio = "unknown";
+   if (Reader.Parsed && Reader.Stats.LostRecords &&
+       Reader.Stats.LostCount <= UINT64_MAX - Reader.Stats.Input)
+@@ -726,9 +738,8 @@ json::Value IPQualityReport::build() {
+   Root["verdict"] = json::Object{
+       {"conversion", Failure.empty() ? "ok" : "failed"},
+       {"failure_stage",
+-       Failure.empty() ? json::Value("unknown") : json::Value(FailedStage)},
+-      {"reason",
+-       Failure.empty() ? json::Value("unknown") : json::Value(Failure)},
++       Failure.empty() ? json::Value(nullptr) : json::Value(FailedStage)},
++      {"reason", Failure.empty() ? json::Value(nullptr) : json::Value(Failure)},
+       {"identity", Reader.IdentityGrade},
+       {"usable_ratio_check", UsableCheck},
+       {"sample_threshold_check", SampleCheck},
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+index df395355bd8f..61b7c725ad26 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+@@ -323,10 +323,23 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+       LoadFailure = toString(Map.takeError());
+     else
+       Statistics.BoundarySources = Map->sources();
+-    for (const auto &[Name, Function] : SampledFunctions) {
++    for (const auto &Entry : SampledFunctions) {
++      const auto &Name = Entry.first;
++      auto *Function = Entry.second;
+       ++Statistics.EnumeratedFunctions;
++      auto Context = [&](uint64_t Address) {
++        std::string Text =
++            " (function=" + Name + " address=0x" + utohexstr(Address, true);
++        for (auto [Begin, End] : Function->Ranges)
++          if (Address >= Begin && Address < End)
++            Text += " DWARF=[0x" + utohexstr(Begin, true) + ",0x" +
++                    utohexstr(End, true) + ")";
++        return Text + ")";
++      };
+       if (!LoadFailure.empty()) {
+-        Statistics.BoundaryFailures.emplace_back(Name, LoadFailure);
++        Statistics.BoundaryFailures.emplace_back(
++            Name,
++            LoadFailure + Context(FunctionAddresses.at(Function).front()));
+         continue;
+       }
+       auto B = Map->enumerate(Name, Function->Ranges);
+@@ -337,15 +350,14 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+       for (uint64_t Address : FunctionAddresses.at(Function))
+         if (!B->contains(Address))
+           Statistics.BoundaryFailures.emplace_back(
+-              Name,
+-              "sample is not an instruction start: " + utohexstr(Address));
++              Name, "sample is not an instruction start" + Context(Address));
+       BoundaryIndices.emplace(Function, Statistics.Boundaries.size());
+       Statistics.Boundaries.push_back(std::move(*B));
+     }
+     if (!Statistics.BoundaryFailures.empty()) {
+       std::string Message = "failure_stage=boundary";
+       for (const auto &[Name, Reason] : Statistics.BoundaryFailures)
+-        Message += "\n  " + Name + ": " + Reason;
++        Message += "\n  " + Reason;
+       return ipGenerationError(Message);
+     }
+   }
+diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+index e139023b0f68..2dfd2346880e 100644
+--- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
++++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+@@ -97,10 +97,10 @@ static cl::opt<std::string> DataAccessProfileFilename(
+              "-D`) consisting of memory access events."),
+     cl::cat(ProfGenCategory));
+ 
+-static cl::opt<bool> IPSamples(
+-    "ip-samples", cl::init(false),
+-    cl::desc("Read IP-only perf script samples (profile generation pending)"),
+-    cl::cat(ProfGenCategory));
++static cl::opt<bool>
++    IPSamples("ip-samples", cl::init(false),
++              cl::desc("Generate a profile from IP-only perf script samples"),
++              cl::cat(ProfGenCategory));
+ static cl::opt<std::string> IPEvent(
+     "ip-event",
+     cl::desc("Select the complete perf event name, including modifiers"),
+@@ -131,29 +131,68 @@ static cl::opt<bool> ShowIPBoundaries(
+         "Print on-demand IP function ranges, ISA intersections and starts"),
+     cl::cat(ProfGenCategory));
+ 
+-static cl::opt<std::string> IPWeight("ip-weight", cl::init("period"),
+-                                     cl::desc("IP weight: period or sample"),
+-                                     cl::cat(ProfGenCategory));
++// generic_parser_base's enum parser sends Option::error to errs() rather
++// than ParseCommandLineOptions' error stream. Keep its table and diagnostic,
++// but route enum errors to that same buffer for the IP failure contract.
++static raw_ostream *IPOptionErrors = nullptr;
++template <class T> class IPEnumParser : public cl::parser<T> {
++public:
++  using cl::parser<T>::parser;
++  bool parse(cl::Option &O, StringRef ArgName, StringRef Arg, T &Value) {
++    if (this->findOption(Arg) == this->getNumOptions() && IPOptionErrors)
++      return O.error("Cannot find option named '" + Arg + "'!",
++                     *IPOptionErrors);
++    return cl::parser<T>::parse(O, ArgName, Arg, Value);
++  }
++};
++
++enum class IPWeightKind { Period, Sample };
++enum class IPAggregationKind { Unspecified, Sum, Max, Average };
++enum class IPHeadKind { None, EntryEstimate };
++enum class IPZeroFillKind { None, SampledFunctions };
++enum class IPSkidKind { None, PreviousInstruction };
++
++static cl::opt<IPWeightKind, false, IPEnumParser<IPWeightKind>> IPWeight(
++    "ip-weight", cl::init(IPWeightKind::Period), cl::desc("IP sample weight"),
++    cl::values(clEnumValN(IPWeightKind::Period, "period",
++                          "Normalize period sums"),
++               clEnumValN(IPWeightKind::Sample, "sample", "Count samples")),
++    cl::cat(ProfGenCategory));
+ static cl::opt<std::string>
+     IPPeriodUnit("ip-period-unit",
+                  cl::desc("Positive integer IP period normalization unit"),
+                  cl::cat(ProfGenCategory));
+-static cl::opt<std::string>
+-    IPAggregation("ip-aggregation",
+-                  cl::desc("IP aggregation: sum, max or avg; must be specified "
+-                           "during evaluation (transitional, no default)"),
+-                  cl::cat(ProfGenCategory));
+-static cl::opt<std::string>
+-    IPHeadSamples("ip-head-samples", cl::init("none"),
+-                  cl::desc("IP head: none or entry-estimate"),
+-                  cl::cat(ProfGenCategory));
+-static cl::opt<std::string>
+-    IPZeroFill("ip-zero-fill", cl::init("none"),
+-               cl::desc("IP zero fill: none or sampled-functions"),
+-               cl::cat(ProfGenCategory));
+-static cl::opt<std::string> IPSkid("ip-skid", cl::init("none"),
+-                                   cl::desc("IP skid: none or prev-inst"),
+-                                   cl::cat(ProfGenCategory));
++static cl::opt<IPAggregationKind, false, IPEnumParser<IPAggregationKind>>
++    IPAggregation(
++        "ip-aggregation",
++        cl::desc(
++            "IP aggregation: no default during evaluation; must be explicitly "
++            "specified"),
++        cl::values(
++            clEnumValN(IPAggregationKind::Sum, "sum", "Sum observed counts"),
++            clEnumValN(IPAggregationKind::Max, "max", "Maximum adjusted count"),
++            clEnumValN(IPAggregationKind::Average, "avg",
++                       "Average across instructions")),
++        cl::cat(ProfGenCategory));
++static cl::opt<IPHeadKind, false, IPEnumParser<IPHeadKind>> IPHeadSamples(
++    "ip-head-samples", cl::init(IPHeadKind::None), cl::desc("IP head samples"),
++    cl::values(clEnumValN(IPHeadKind::None, "none", "Leave head samples zero"),
++               clEnumValN(IPHeadKind::EntryEstimate, "entry-estimate",
++                          "Estimate head samples")),
++    cl::cat(ProfGenCategory));
++static cl::opt<IPZeroFillKind, false, IPEnumParser<IPZeroFillKind>> IPZeroFill(
++    "ip-zero-fill", cl::init(IPZeroFillKind::None), cl::desc("IP zero filling"),
++    cl::values(clEnumValN(IPZeroFillKind::None, "none",
++                          "Do not add zero counts"),
++               clEnumValN(IPZeroFillKind::SampledFunctions, "sampled-functions",
++                          "Fill sampled functions")),
++    cl::cat(ProfGenCategory));
++static cl::opt<IPSkidKind, false, IPEnumParser<IPSkidKind>> IPSkid(
++    "ip-skid", cl::init(IPSkidKind::None), cl::desc("IP skid correction"),
++    cl::values(clEnumValN(IPSkidKind::None, "none", "Keep sampled addresses"),
++               clEnumValN(IPSkidKind::PreviousInstruction, "prev-inst",
++                          "Use the preceding instruction when eligible")),
++    cl::cat(ProfGenCategory));
+ 
+ static cl::opt<std::string>
+     QualityReport("quality-report",
+@@ -226,28 +265,17 @@ static Error runIPModeCore(IPQualityReport &Report, IPPerfReader &Reader,
+     return Fail("IP sample mode requires --perfscript");
+   if (!IPAggregation.getNumOccurrences())
+     return Fail("IP sample mode requires --ip-aggregation during evaluation");
+-  if (IPWeight == "sample" && IPPeriodUnit.getNumOccurrences())
++  if (IPWeight == IPWeightKind::Sample && IPPeriodUnit.getNumOccurrences())
+     return Fail("IP sample mode: --ip-period-unit has no effect with "
+                 "--ip-weight=sample");
+-  if (IPWeight != "period" && IPWeight != "sample")
+-    return Fail("IP sample mode: invalid --ip-weight");
+-  if (IPAggregation != "sum" && IPAggregation != "max" &&
+-      IPAggregation != "avg")
+-    return Fail("IP sample mode: invalid --ip-aggregation");
+-  if (IPHeadSamples != "none" && IPHeadSamples != "entry-estimate")
+-    return Fail("IP sample mode: invalid --ip-head-samples");
+-  if (IPZeroFill != "none" && IPZeroFill != "sampled-functions")
+-    return Fail("IP sample mode: invalid --ip-zero-fill");
+-  if (IPSkid != "none" && IPSkid != "prev-inst")
+-    return Fail("IP sample mode: invalid --ip-skid");
+   if (Error E = Report.validateOptions())
+     return E;
+-  Generation.SampleWeight = IPWeight == "sample";
+-  Generation.MaxAggregation = IPAggregation == "max";
+-  Generation.AverageAggregation = IPAggregation == "avg";
+-  Generation.ZeroFill = IPZeroFill == "sampled-functions";
+-  Generation.PrevInst = IPSkid == "prev-inst";
+-  Generation.EstimateHead = IPHeadSamples == "entry-estimate";
++  Generation.SampleWeight = IPWeight == IPWeightKind::Sample;
++  Generation.MaxAggregation = IPAggregation == IPAggregationKind::Max;
++  Generation.AverageAggregation = IPAggregation == IPAggregationKind::Average;
++  Generation.ZeroFill = IPZeroFill == IPZeroFillKind::SampledFunctions;
++  Generation.PrevInst = IPSkid == IPSkidKind::PreviousInstruction;
++  Generation.EstimateHead = IPHeadSamples == IPHeadKind::EntryEstimate;
+   Generation.ExplicitPeriod = IPPeriodUnit.getNumOccurrences();
+   if (Generation.ExplicitPeriod &&
+       (StringRef(IPPeriodUnit).getAsInteger(10, Generation.PeriodUnit) ||
+@@ -305,7 +333,7 @@ static Error runIPModeCore(IPQualityReport &Report, IPPerfReader &Reader,
+ }
+ 
+ static Error runIPMode(int Argc, const char *const *Argv,
+-                       StringRef ParserErrors) {
++                       StringRef ParserErrors, bool &VerbatimParserError) {
+   if (!IPSamples)
+     return createStringError(inconvertibleErrorCode(),
+                              "IP-only options require --ip-samples");
+@@ -336,6 +364,7 @@ static Error runIPMode(int Argc, const char *const *Argv,
+   IPQualityReport Report(std::move(Options), Reader, Statistics, Generation);
+   bool OrdinaryParserFailure =
+       !ParserErrors.empty() && !BinaryPath.empty() && !NegativeProcessId;
++  VerbatimParserError = OrdinaryParserFailure;
+   if (OrdinaryParserFailure)
+     Report.enter("parse");
+   if (!ParserErrors.empty() && !OrdinaryParserFailure)
+@@ -430,8 +459,10 @@ int main(int argc, const char *argv[]) {
+   // specific diagnostics; all other command-line errors keep their old text.
+   SmallString<256> ParseErrors;
+   raw_svector_ostream ParseErrorStream(ParseErrors);
++  IPOptionErrors = &ParseErrorStream;
+   bool Parsed = cl::ParseCommandLineOptions(
+       argc, argv, "llvm SPGO profile generator\n", &ParseErrorStream);
++  IPOptionErrors = nullptr;
+   if (!Parsed) {
+     // Even the IP-specific missing-binary/negative-pid diagnoses must not
+     // swallow unrelated parser errors (e.g. an unknown option).
+@@ -451,9 +482,14 @@ int main(int argc, const char *argv[]) {
+       IPSkid.getNumOccurrences() || QualityReport.getNumOccurrences() ||
+       IPMinUsable.getNumOccurrences() || IPMinSamples.getNumOccurrences() ||
+       IPMaxLost.getNumOccurrences() || IPTestFailure.getNumOccurrences()) {
++    bool VerbatimParserError = false;
+     if (Error E =
+-            runIPMode(argc, argv, Parsed ? StringRef() : ParseErrors.str())) {
+-      logAllUnhandledErrors(std::move(E), errs(), "llvm-profgen: error: ");
++            runIPMode(argc, argv, Parsed ? StringRef() : ParseErrors.str(),
++                      VerbatimParserError)) {
++      if (VerbatimParserError)
++        errs() << toString(std::move(E));
++      else
++        logAllUnhandledErrors(std::move(E), errs(), "llvm-profgen: error: ");
+       return EXIT_FAILURE;
+     }
+     return EXIT_SUCCESS;
+-- 
+2.43.0
+
