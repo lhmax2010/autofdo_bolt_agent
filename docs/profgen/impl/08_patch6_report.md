@@ -1,6 +1,8 @@
-# 补丁5小修与补丁6：输出别名契约待裁决，停止记录
+# 补丁5小修完成；补丁6截断DWARF必测项待裁决
 
-2026-11-03。本轮尚未完成补丁5小修验收，也没有开始补丁6实现。按任务“发现冻结规则无法按原文实现或测试则停下报告”的要求，停止于输出路径别名的失败契约冲突；没有自行加入例外、放宽规则或改golden。
+2026-11-03。最新状态：路径别名冲突已按用户裁决闭合；补丁5小修已独立验收并amend为 `b843cf07f851985413c926a562f9135a272a3bea`，见第7节。补丁6尚未修改LLVM代码：必测的“仅截断.debug_info、加载成功、首次符号化返回错误并触发退出回调”与当前LLVM API的可恢复处理不符；已以源码和平台工具验证，按任务停止条件等待裁决，见第8节。
+
+第1–5节保留上一停止点的原始历史；第6节为该停止点的裁决，第7节以后为本次恢复后的事实。冻结设计和golden均未修改。
 
 ## 1. 需要裁决的契约冲突
 
@@ -63,3 +65,83 @@ LLVM HEAD仍为`d7bd4795c7fddfc239510b96fa6803b56b94dbb4`，没有amend，0005�
 原有挂账不关闭：06完整LOST导出缺失；真实数据avg需用08产物重新采样；枚举选项/cl::values留补丁7；非叶子line0上板后决定。补丁6质量报告、失败回调、门槛和全部验收仍未完成。
 
 本轮只读取用户指定的任务附件作为任务输入；所有产生的文件均在工作目录内。未连接板子，未推LLVM/Gerrit，未改认证、未索要密码；未修改冻结文档或golden。没有新增已观察到的工具越界写入。
+
+
+## 6. 用户裁决后恢复（2026-11-03）
+
+第1节冲突已裁决，保留上文为停止历史，不再作为阻塞。路径验证在IP流程最前完成，早于任何文件写入、临时文件、ELF加载、回调注册。冲突集合扩大为：output是`-`；profile与报告互相别名；任一输出与任一给定输入（perfscript、binary、debug-binary、perf-buildid-list、dwp）别名。已有文件用equivalent，不存在文件比较规范父目录与文件名。冲突时只stderr固定诊断，不写报告、不写profile、不创建临时文件，旧文件不变。这是“失败也写报告”的唯一例外，待v0.8登记。实现与验证结果在后续续写，不能把裁决当作已经实现。
+
+恢复顺序：先补丁5小修独立GBS/lit/C1/完整导出验收并amend；再补丁6。原spec本地diff继续保持不变。
+
+## 7. 补丁5小修独立验收与amend（已完成）
+
+旧提交 `d7bd4795c7fddfc239510b96fa6803b56b94dbb4` amend为 `b843cf07f851985413c926a562f9135a272a3bea`。0005重新导出且反向应用检查通过；仅工具与测试目录，spec本地diff逐字节不变、未提交。[提交审计](evidence/08/11_patch5_amend_audit.json)
+
+- GBS：2026-11-03 16:41:39–17:08:10 +08:00，1590.649秒、Ninja106步，GBS_EXIT=0，ALL-END OK。available最低5135MiB，无低于2GiB采样点；已用内存采样峰值26405MiB，1/5/15分钟负载峰值14.62/10.48/10.45。[构建与资源](evidence/08/07_patch5_build.txt)
+- 正式%check lit 79项：77 PASS、0 FAIL、1 UNSUPPORTED（cs-preinline-cost，assertions=No）、1 XFAIL（invalid-perfscript）。原50及原补丁5全部结果不变；扩充既有skid测试，无新增lit文件。[日志](evidence/08/08_patch5_lit.log)、[xunit](evidence/08/08_patch5_lit.xml)
+- C1每遍636，两遍一致，与原基线0差异，29个新增IP测试排除。[C1](evidence/08/09_patch5_c1_summary.json)
+- 14次完整导出stdout/stderr及成功时profile与修前补丁5逐字节一致；默认关闭skid行为未变。[重放](evidence/08/10_patch5_full_comparison.json)
+- 工具SHA-256：`095a7497ccda26f60ad075a4ce567b8cbd9159e1c9006749800f5d558279ead1`。存档 `temp/profgen-patch6/patch5-baseline-tool/llvm-profgen`。
+- 小修完整diff：[源码与测试](evidence/08/07_patch5_fix.diff)。三个源码文件改动行GBS clang-format及dry-run通过，素材生成命令见第2节。黄金文件与冻结文档未改。
+
+以上完成后才进入补丁6实现/测试可行性检查。第1–5节保留为历史停止记录。
+
+## 8. 补丁6必测项的可行性核对与停止原因
+
+### 8.1 任务要求与实际接口
+
+本轮第二部分第4条指定：调试ELF头完整、`.debug_info`被截断；加载成功、首次符号化失败，检查generate阶段的退出兜底回调。仅使工具最终返回非0不足以验收这条要求，因为常规 `Error` 返回与 `exitWithError` 回调是不同路径。
+
+当前LLVM 22.1.8对这里的DWARF损坏采用可恢复诊断：
+
+- `llvm/lib/DebugInfo/DWARF/DWARFUnit.cpp:79–86` 把CU头解析错误交给WarningHandler；`:305–314`检测CU长度越过节边界。`DWARFContext.cpp:2452–2465`创建并返回context，不以Expected返回该诊断。
+- `llvm/lib/DebugInfo/Symbolize/Symbolize.cpp:104–131`仅在getOrCreateModuleInfo返回Error时返回Error；实际DWARF行查询返回`DIInliningInfo`值。`:820–826`创建DWARFContext并构造module。`SymbolizableObjectFile.cpp:30–70`中的Error来源为对象符号等读取，并非.debug_info内容解析。
+- `llvm/lib/DebugInfo/Symbolize/SymbolizableObjectFile.cpp:302–318`在DWARF查询无帧时补一个空帧，返回值，不生成Error。
+- `llvm/tools/llvm-profgen/ProfiledBinary.cpp:1054–1061`在加载阶段已经遍历CU；`:1128–1137`只对Symbolizer的Error调用unwrapOrError，空帧/line0返回空调用栈。
+
+上述源码摘录带逐行编号，见[接口证据](evidence/08/17_truncated_dwarf_source.txt)。结论限于**其他ELF元数据有效、仅截短.debug_info**的这一验收条件，不声称所有坏ELF或所有符号化错误都不能触发回调。
+
+### 8.2 可重现平台工具实验
+
+未改任何LLVM源码、原素材或golden。使用GBS root的LLVM 22.1.8工具，在 `temp/profgen-patch6/debug-truncation/` 生成临时副本：从 `Inputs/ip-mode/a64-pie.debug` 用llvm-objcopy导出原501字节`.debug_info`，截为指定长度，以`--update-section`替换；其他节的源内容不改。每份用GBS readelf验证ELF头可读。runtime使用匹配的 `a64-pie.stripped.perfbin`。
+
+为区别“空结果”与“Error”，临时C++观察程序依次调用createBinary、DWARFContext的compile_units/dies、首次symbolizeInlinedCode，打印真实Expected状态；链接本次未修改的libLLVM.so.22.1。源码及完整构建命令见[观察程序](evidence/08/15_api_probe_source.txt)、[GBS clang编译](evidence/08/14_api_probe_build.json)。这是一次性验证程序，既非测试注入，也未更改库的行为。由于通过加载器启动clang时驱动另起cc1的路径不能执行，使用同一平台clang `-###` 取得参数，再由平台加载器直接运行其cc1与LLD；未用主机工具链。
+
+| .debug_info保留字节 | ELF读取 / DWARF加载返回 | 首次符号化Expected | 当前profgen |
+|---|---|---|---|
+| 0、1、4、8、11、12、16、250、493、500 | 均成功返回；CU=0 | 均为Value，1个空帧，line=0；观察程序退出0 | 退出1：`IP sample mode: no usable samples`；no_cu=1，usable=0，无profile |
+| 501（完整正对照） | 成功，CU=1、49个DIE | Value，1帧，line=12 | 退出0，usable=1，写出profile |
+
+500字节副本的原文节选：
+
+```text
+ELF_LOAD_OK
+warning: DWARF unit from offset 0x00000000 incl. to offset  0x000001f5 excl. extends past section size 0x000001f4
+DWARF_LOAD_RETURNED units=0 dies=0
+FIRST_SYMBOLIZATION_BEGIN
+...
+FIRST_SYMBOLIZATION_VALUE frames=1 line=0
+```
+
+完整stdout/stderr、真实退出码及命令见[逐份结果](evidence/08/12_truncated_dwarf_results.json)、[原始命令输出](evidence/08/13_truncated_dwarf_commands.json)。额外用预置旧profile重跑500字节副本：退出1，前后SHA相同，见[旧输出保持](evidence/08/16_truncated_dwarf_old_output.json)。此处仍是补丁5工具，没有quality-report选项；不能声称已经取得generate阶段失败JSON或回调测试通过。
+
+### 8.3 待裁决方案与当前停止范围
+
+建议把验收拆成两条：
+
+1. 真实截断DWARF文件：检查现有的no usable samples错误，在补丁6中产生generate失败报告、保留旧输出。明确它验证普通Error返回，不声称触发退出回调。
+2. 按本轮已允许的隐藏注入方案，在**实际符号化调用点**令Expected返回Error，单独验证generate阶段兜底回调、无递归、旧输出及临时文件清理；加载后debug不可打开的测试仍按原要求执行，绝不删除输入文件。
+
+另一候选是新增IP专用的DWARF损坏诊断升级策略，但这会改变“哪些可恢复诊断应致命、何时失败”的规则，不能仅为满足测试自行引入。单纯修改测试的预期退出码也不能替代回调验收。以上均**未实施**，已向用户请求裁决。
+
+截至此停止点：补丁6源代码未改、无补丁6提交或0006导出、没有补丁6GBS构建/质量JSON/门槛/回调/真实数据报告验收。14次重放及77 PASS等是第7节的**补丁5独立验收**，不得冒充补丁6结果。新工具仍为 `095a7497ccda26f60ad075a4ce567b8cbd9159e1c9006749800f5d558279ead1`。
+
+## 9. 待设计v0.8登记与挂账（当前）
+
+- 已裁决、补丁5已实现验收：同映射段与前驱行信息条件，skid原因细分及原始地址分类；按函数分组起点检查。
+- 已裁决、待补丁6实现：路径冲突覆盖所有输入/输出别名，检查先于ELF加载/写入/临时文件/回调；只stderr、不写报告是失败报告义务的唯一例外。
+- 已授权、待补丁6实现：name_merged_functions；定点阈值精确比较及generate阶段失败；隐藏真实调用点错误注入（最终点名未定，尚无接口）。
+- 待本次裁决：第8节的真实截断DWARF与回调验收是否拆分。未修改冻结文档。
+- 原挂账不关闭：06完整LOST导出缺失；真实数据avg上板核对；选项枚举/cl::values留补丁7；非叶子line0实测后决定；正式非增量构建前撤销spec本地测试diff。
+
+所有实验输出留在WORKDIR/temp。未连接开发板、未推LLVM/Gerrit、未改认证或索要密码，无新增已观察到的项目文件边界例外。

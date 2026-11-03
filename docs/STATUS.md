@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-03；补丁5小修＋补丁6因输出别名契约停止）
+## 当前授权与执行状态（2026-11-03；补丁5小修完成，补丁6必测项待裁决）
+
+- 用户已裁决：IP流程最前校验输出路径，在创建临时文件、加载ELF、注册回调之前完成。output为`-`、profile/报告互相别名、任一输出与perfscript/binary/debug-binary/perf-buildid-list/dwp输入别名时，只stderr报冲突，不写任何输出或临时文件，旧文件逐字节不变。这是失败报告义务的唯一例外，待设计v0.8登记；实现待补丁5独立验收后开始。
+- 补丁5小修已独立验收并amend为 `b843cf07f851985413c926a562f9135a272a3bea`：GBS1590.649秒/106步/退出0；正式lit77 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL；C1两遍636条零差异；14次完整导出逐字节不变。0005已重新导出且反向应用检查通过。[审计](profgen/impl/evidence/08/11_patch5_amend_audit.json)。spec原diff不动、不提交；冻结设计/golden不改。补丁6测试可行性检查后暂停，见下一条。
+- 补丁6停止点：仅截短.debug_info的10种副本均为ELF加载成功、符号化返回成功空帧；当前工具因no usable samples正常Error返回，不能触发任务指定的首次符号化exitWithError回调。接口源码与平台API观察程序一致。[结果](profgen/impl/evidence/08/12_truncated_dwarf_results.json)、[源码](profgen/impl/evidence/08/17_truncated_dwarf_source.txt)、[报告第8节](profgen/impl/08_patch6_report.md#8-补丁6必测项的可行性核对与停止原因)。未改LLVM补丁6代码、无0006、未用补丁5结果冒充补丁6验收。
+- 待人工裁决：是否拆为真实截断文件普通generate失败测试＋真实符号化调用点注入Error的回调测试。未自行升级DWARF可恢复诊断、未改冻结规则/golden。此前路径冲突裁决已生效，不重复请求。spec撤销要求与原挂账保留；未连接板子、未推LLVM/Gerrit、未改认证或索要密码。
+
+## 前轮授权与执行状态（2026-11-03；输出别名契约停止，已获裁决，历史）
 
 - 已获本轮实现授权；按停止条件，在“报告路径与旧profile为同一文件时，既写失败JSON又保持旧profile不变”的冲突处停止，等待用户裁决。建议仅stderr报路径冲突、两种输出都不写，**尚未实施该例外**。[报告](profgen/impl/08_patch6_report.md)、[原文与反例](profgen/impl/evidence/08/01_contract_conflict.txt)
 - 补丁5小修草稿已写：同映射段/前驱有行信息、skid原因细分、按函数分组校验；新增无前驱行信息Thumb素材及测试。格式检查通过，但开发编译已TERM停止，未生成新工具；GBS/lit/C1/14份重放未运行，不能称小修完成。[状态](profgen/impl/evidence/08/06_stop_state.json)

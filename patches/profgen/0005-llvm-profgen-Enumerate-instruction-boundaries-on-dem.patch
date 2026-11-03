@@ -1,4 +1,4 @@
-From d7bd4795c7fddfc239510b96fa6803b56b94dbb4 Mon Sep 17 00:00:00 2001
+From b843cf07f851985413c926a562f9135a272a3bea Mon Sep 17 00:00:00 2001
 From: Hao Lin <hao.lin@samsung.com>
 Date: Tue, 3 Nov 2026 14:27:43 +0800
 Subject: [PATCH] [llvm-profgen] Enumerate instruction boundaries on demand for
@@ -7,53 +7,57 @@ Subject: [PATCH] [llvm-profgen] Enumerate instruction boundaries on demand for
 Enumerate sampled DWARF ranges using section-local ARM/AArch64 mapping symbols and runtime instruction bytes. Add average aggregation, sampled-function zero filling, previous-instruction skid adjustment, and deterministic boundary diagnostics with tests.
 
 Repair three AArch64 inputs that used .byte for instructions and accidentally introduced conflicting data mappings; .inst preserves the code bytes and existing boundary goldens.
+
+Keep skid predecessors within one mapping interval and require usable predecessor line information. Report unadjusted reasons and group sampled addresses by function before validating boundaries.
 ---
  .../Inputs/ip-mode/bad-a64-end.perfbin        | Bin 5912 -> 5888 bytes
  .../llvm-profgen/Inputs/ip-mode/bad-a64-end.s |   6 +-
  .../Inputs/ip-mode/bad-a64-start.perfbin      | Bin 5912 -> 5888 bytes
  .../Inputs/ip-mode/bad-a64-start.s            |   6 +-
- .../Inputs/ip-mode/boundary-extra/README.txt  |  47 ++++
+ .../Inputs/ip-mode/boundary-extra/README.txt  |  53 ++++
  .../ip-mode/boundary-extra/a64-no-map.perfbin | Bin 0 -> 6080 bytes
- .../ip-mode/boundary-extra/a64-no-map.s       |  83 +++++++
+ .../ip-mode/boundary-extra/a64-no-map.s       |  83 ++++++
  .../boundary-extra/arm-literal.perfbin        | Bin 0 -> 5576 bytes
  .../ip-mode/boundary-extra/arm-literal.s      | 101 ++++++++
  .../boundary-extra/arm-uniform.perfbin        | Bin 0 -> 5508 bytes
  .../ip-mode/boundary-extra/arm-uniform.s      |  78 ++++++
  .../boundary-extra/bad-a64-end.perfbin        | Bin 0 -> 6096 bytes
- .../ip-mode/boundary-extra/bad-a64-end.s      |  83 +++++++
+ .../ip-mode/boundary-extra/bad-a64-end.s      |  83 ++++++
  .../boundary-extra/bad-a64-start.perfbin      | Bin 0 -> 6104 bytes
- .../ip-mode/boundary-extra/bad-a64-start.s    |  83 +++++++
+ .../ip-mode/boundary-extra/bad-a64-start.s    |  83 ++++++
  .../boundary-extra/bad-arm-start.perfbin      | Bin 0 -> 5884 bytes
- .../ip-mode/boundary-extra/bad-arm-start.s    | 197 +++++++++++++++
+ .../ip-mode/boundary-extra/bad-arm-start.s    | 197 ++++++++++++++
  .../boundary-extra/bad-conflict.perfbin       | Bin 0 -> 5520 bytes
  .../ip-mode/boundary-extra/bad-conflict.s     |  76 ++++++
  .../ip-mode/boundary-extra/bad-no-map.perfbin | Bin 0 -> 5480 bytes
- .../ip-mode/boundary-extra/bad-no-map.s       |  71 ++++++
+ .../ip-mode/boundary-extra/bad-no-map.s       |  71 +++++
  .../boundary-extra/bad-thumb-end.perfbin      | Bin 0 -> 5884 bytes
- .../ip-mode/boundary-extra/bad-thumb-end.s    | 197 +++++++++++++++
+ .../ip-mode/boundary-extra/bad-thumb-end.s    | 197 ++++++++++++++
  .../boundary-extra/bad-thumb-start.perfbin    | Bin 0 -> 5888 bytes
- .../ip-mode/boundary-extra/bad-thumb-start.s  | 197 +++++++++++++++
+ .../ip-mode/boundary-extra/bad-thumb-start.s  | 197 ++++++++++++++
  .../ip-mode/boundary-extra/boundaries.debug   | Bin 0 -> 5824 bytes
  .../ip-mode/boundary-extra/boundaries.perfbin | Bin 0 -> 5884 bytes
- .../ip-mode/boundary-extra/boundaries.s       | 197 +++++++++++++++
+ .../ip-mode/boundary-extra/boundaries.s       | 197 ++++++++++++++
  .../boundaries.stripped.perfbin               | Bin 0 -> 4928 bytes
  .../boundary-after_data_a32.perfbin           | Bin 0 -> 5884 bytes
- .../boundary-extra/boundary-after_data_a32.s  | 197 +++++++++++++++
+ .../boundary-extra/boundary-after_data_a32.s  | 197 ++++++++++++++
  .../boundary-extra/boundary-at_state.perfbin  | Bin 0 -> 5880 bytes
- .../boundary-extra/boundary-at_state.s        | 197 +++++++++++++++
+ .../boundary-extra/boundary-at_state.s        | 197 ++++++++++++++
  .../boundary-before_state.perfbin             | Bin 0 -> 5884 bytes
- .../boundary-extra/boundary-before_state.s    | 197 +++++++++++++++
+ .../boundary-extra/boundary-before_state.s    | 197 ++++++++++++++
  .../boundary-discontinuous.perfbin            | Bin 0 -> 5892 bytes
- .../boundary-extra/boundary-discontinuous.s   | 199 +++++++++++++++
- .../boundary-extra/check-boundaries.py        | 162 ++++++++++++
+ .../boundary-extra/boundary-discontinuous.s   | 199 ++++++++++++++
+ .../boundary-extra/check-boundaries.py        | 174 +++++++++++++
  .../discontinuous-uniform.perfbin             | Bin 0 -> 5824 bytes
- .../boundary-extra/discontinuous-uniform.s    | 164 +++++++++++++
+ .../boundary-extra/discontinuous-uniform.s    | 164 ++++++++++++
  .../ip-mode/boundary-extra/pure-a64.perfbin   | Bin 0 -> 6096 bytes
- .../Inputs/ip-mode/boundary-extra/pure-a64.s  |  83 +++++++
+ .../Inputs/ip-mode/boundary-extra/pure-a64.s  |  83 ++++++
  .../ip-mode/boundary-extra/pure-arm.perfbin   | Bin 0 -> 5524 bytes
- .../Inputs/ip-mode/boundary-extra/pure-arm.s  |  85 +++++++
+ .../Inputs/ip-mode/boundary-extra/pure-arm.s  |  85 ++++++
  .../boundary-extra/section-adjacent.perfbin   | Bin 0 -> 9488 bytes
  .../ip-mode/boundary-extra/section-adjacent.s |  77 ++++++
+ .../boundary-extra/skid-no-line.perfbin       | Bin 0 -> 5884 bytes
+ .../ip-mode/boundary-extra/skid-no-line.s     | 199 ++++++++++++++
  .../Inputs/ip-mode/pure-a64.perfbin           | Bin 5912 -> 5888 bytes
  .../llvm-profgen/Inputs/ip-mode/pure-a64.s    |   6 +-
  .../ip-boundary-avg-counting.test             |   4 +
@@ -66,13 +70,13 @@ Repair three AArch64 inputs that used .byte for instructions and accidentally in
  .../tools/llvm-profgen/ip-boundary-zero.test  |   4 +
  .../llvm-profgen/ip-counting-options.test     |   6 -
  llvm/tools/llvm-profgen/CMakeLists.txt        |   1 +
- llvm/tools/llvm-profgen/IPBoundary.cpp        | 232 ++++++++++++++++++
- llvm/tools/llvm-profgen/IPBoundary.h          |  66 +++++
- llvm/tools/llvm-profgen/ProfileGenerator.cpp  | 147 +++++++++--
+ llvm/tools/llvm-profgen/IPBoundary.cpp        | 245 ++++++++++++++++++
+ llvm/tools/llvm-profgen/IPBoundary.h          |  65 +++++
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  | 162 +++++++++++-
  llvm/tools/llvm-profgen/ProfileGenerator.h    |   9 +
  llvm/tools/llvm-profgen/ProfiledBinary.h      |   1 +
  llvm/tools/llvm-profgen/llvm-profgen.cpp      |  21 +-
- 64 files changed, 3298 insertions(+), 40 deletions(-)
+ 66 files changed, 3542 insertions(+), 40 deletions(-)
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.s
@@ -115,6 +119,8 @@ Repair three AArch64 inputs that used .byte for instructions and accidentally in
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/pure-arm.s
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.perfbin
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/section-adjacent.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/skid-no-line.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/skid-no-line.s
  create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-avg-counting.test
  create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-avg-manual.test
  create mode 100644 llvm/test/tools/llvm-profgen/ip-boundary-metadata.test
@@ -190,10 +196,10 @@ index fcf2d8626fd3..4fa9e09327ea 100644
  .byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0,0
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
 new file mode 100644
-index 000000000000..d02f49b7d00e
+index 000000000000..e25db46896de
 --- /dev/null
 +++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/README.txt
-@@ -0,0 +1,47 @@
+@@ -0,0 +1,53 @@
 +#===- boundary-extra - Symbolized copies of patch1 fixtures ----------------===#
 +# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 +# See https://llvm.org/LICENSE.txt for license information.
@@ -241,6 +247,12 @@ index 000000000000..d02f49b7d00e
 +$x. This prevents the AArch64 assembler's automatic $d from conflicting with $x.
 +Original golden addresses and all function ranges are unchanged. bad-conflict
 +remains a dedicated same-address, different-state negative input.
++
++Patch5 follow-up: skid-no-line.s derives boundaries.s without changing code or ranges.
++The initial .debug_line row has line 0 at 0x1000; the second instruction
++at 0x1002 keeps line 3. This proves that prev-inst must retain 0x1002 when
++its predecessor lacks usable line information. Build with the ARM commands
++above, substituting skid-no-line for boundaries (clang/LLD 22.1.8).
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/a64-no-map.perfbin
 new file mode 100644
 index 0000000000000000000000000000000000000000..552a365f59aac06f137a20e8292411fd2517216e
@@ -2942,10 +2954,10 @@ index 000000000000..378bbaa6c4c2
 +.Lline_end:
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
 new file mode 100644
-index 000000000000..9d7e7f85f6e9
+index 000000000000..18f5c5ceae3e
 --- /dev/null
 +++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/check-boundaries.py
-@@ -0,0 +1,162 @@
+@@ -0,0 +1,174 @@
 +#===- check-boundaries.py - IP boundary golden checks ----------------------===#
 +# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 +# See https://llvm.org/LICENSE.txt for license information.
@@ -3053,6 +3065,18 @@ index 000000000000..9d7e7f85f6e9
 +    p,prof=run('a64-pie',[(0x13f4,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'],original=True)
 +    assert 'skid_unadjusted samples=1 period_sum=7' in p.stdout
 +    assert prof=='main:1:0\n 0: 1\n',prof
++    for name,addr,reason in [('boundaries',0x1020,'data_or_state_change'),
++                             ('skid-no-line',0x1002,'predecessor_no_line')]:
++        p,prof=run(name,[(addr,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'])
++        assert body(prof)=={str(addr-0x1000):1},prof
++        assert f'skid_unadjusted_{reason} samples=1 period_sum=7' in p.stdout,p.stdout
++        assert 'IP-GENERATION usable samples=1 period_sum=7' in p.stdout
++        assert 'IP-GENERATION in_func_no_line samples=0 period_sum=0' in p.stdout
++        counts=re.findall(r'^IP-GENERATION skid_unadjusted_(?:first_instruction|range_gap|data_or_state_change|predecessor_no_line) samples=(\d+) period_sum=(\d+)$',p.stdout,re.M)
++        assert len(counts)==4 and sum(int(x[0]) for x in counts)==1 and sum(int(x[1]) for x in counts)==7,counts
++    p,prof=run('skid-no-line',[(0x1000,7),(0x1002,7)],['--ip-aggregation=sum','--ip-skid=prev-inst'])
++    assert 'IP-GENERATION usable samples=1 period_sum=7' in p.stdout
++    assert 'IP-GENERATION in_func_no_line samples=1 period_sum=7' in p.stdout
 +    print('PASS skid predecessors, range/data/function barriers and original period')
 +elif GROUP == 'avg-manual':
 +    # Two instructions share one key. Only one is sampled: numerator=10,
@@ -3648,6 +3672,239 @@ index 000000000000..e84c136713a9
 +.byte 2,1
 +.byte 0,1,1
 +.Lline_end:
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/skid-no-line.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/skid-no-line.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..052fab58a8a58fbb8a1397d569876e3027633866
+GIT binary patch
+literal 5884
+zcmeHLzi%8x6n=Aeu`dRUZ4ge75)SJM7s(J?mVl%Hhd>f>31AVVNRcjc-o>|KZ`az}
+z3pR}_Q2v6*1rq6~=}dvHrASR1Tz~>q6e&Rng!#VN9cOh|qD`cI(%bjr`{vi%ot0*`
+z-fg|7loBUZnHLu=A$j6OJSuW%Ng8q(*o;ic7*fQXHqd}tLyqd&!?p4;5>#Snp5d_c
+zsZAK_A*jQf%r`Rq7HMj+{T<+UPG$NAu%+k4&Wr6Uh(~d9IB)i`@=NNC;%rZhbN>i9
+z%zuRKDdZLB*JPaMiIq}TpsYYyfwBT+1<DGP6(}oER-mjvS%I<wWd)wN3JgEEucSUy
+zjl1{cz6@n}_udq(+}=ID_u8%u*U$4z%WHrt^!(*3^3!(hmEhvnKWzOr2)@+U|7<<{
+z<IT}^**gH7#VJ!bRo7v8W~MME?(}8rzx^TOpR02ZW`De~$+4(B%TsKBnVUULwAzgm
+z$xPdiyzG2`p&{}N7#xcC2|I`<U|)bf{AVxTK+N@Q!#YvZs#>2`Gh<V;7*I>Ker5Iy
+zJ2?Z*4)itEGtt0=Cp+;V@=Ox=ecjL7XRE4w-i<@Q-3vB+Oa+1&1959+=2vJ<=7=fv
+z*W`0Fc@3209dGJYQZe}on^(6~MO7<&sHf$DWi21W3XE?$fhbmfY+`)5t`1iws?Vx9
+z)e54|{N!|_)jHQ$T+|Dimop<`-*;A7Aj;m|Ocvs4WM>NT5yUSQ;#UzLDa7-L8-@5R
+zV%{HFsf>$tbDZDj>j2!lV=OxLH&W42ocek#8tBd-2)&bmC)(SL`kOtm*{<n#MQ2au
+z)5PMY7p#g-{4j~z>&EkfXbpM4GgxbzPABnixG0D|jh&yEXwC1tC=4QB^zzCjZPGLe
+zI)jwhYTWDj5$1&%q^1Mg#h96wS!t$vL7JWpgVaw<$haG)%zzg9(lpv6J*HC=g!zUl
+z?yL5>tCyEAU3@1m*8iLQo8G^Vv-_aXEZb5d<H%9D$L(Do>fbzo$NvMjBYE847r^8D
+z;(Z*)Vt;&f+*yzI_G0q5&o_{SvHua6d@JKl6F&b9<nceSeE^SrE<)WuXa~F<@c1=5
+z;n<YZP|k&1dnXB=yKh9wj?4caD@aRTZ2^jp`0q&sxw!sT5Idg`c}H^&jl-@NeCCgV
+z_ZFR894|!dd_vd2!xZ<$VP7EQe1ai(zwfgiV_zYMHLN@6lNpiYE`W7?+{*n^IhKMq
+vT0e5Xf%08Axe4BF1Q_1d%e`OT0kd{a=F!>rE`W98eh0tE+Xe6a19<-e85q`o
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/skid-no-line.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/skid-no-line.s
+new file mode 100644
+index 000000000000..3811b43a8c74
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/skid-no-line.s
+@@ -0,0 +1,199 @@
++//===-- Boundary fixture - explicit bytes and DWARF ------------------------===//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//===----------------------------------------------------------------------===//
++.syntax unified
++.section .text,"ax",%progbits
++.balign 4
++.local $t.1
++.type $t.1,%notype
++$t.1:
++.globl anchor
++anchor:
++.byte 0x00,0xbf                       // 0: 16-bit NOP (prefix outside before_state)
++.byte 0x4f,0xf0,0x01,0x00             // 2: 32-bit MOV.W r0,#1
++.byte 0x08,0xbf                       // 6: IT EQ
++.byte 0x01,0x20                       // 8: 16-bit MOVS r0,#1 (inside IT)
++.byte 0xdf,0xe8,0x00,0xf0             // 10: TBB [pc,r0]
++.local $d.literal
++.type $d.literal,%notype
++$d.literal:
++.byte 0x00,0xbf,0x00,0xbf             // 14: table/data also valid NOP encodings
++.local $t.hot
++.type $t.hot,%notype
++$t.hot:
++.byte 0xdf,0xe8,0x10,0xf0             // 18: TBH [pc,r0,lsl #1]
++.local $d.table
++.type $d.table,%notype
++$d.table:
++.byte 0x00,0xbf                       // 22: halfword table
++.local $a.arm
++.type $a.arm,%notype
++$a.arm:
++.byte 0x00,0x00,0xa0,0xe1             // 24: A32 MOV r0,r0
++.byte 0x1e,0xff,0x2f,0xe1             // 28: A32 BX lr
++.local $t.tail
++.type $t.tail,%notype
++$t.tail:
++.byte 0x00,0xbf,0x70,0x47             // 32,34: Thumb NOP; BX lr
++.globl anchor_end
++anchor_end:
++
++.section .debug_abbrev,"",%progbits
++.byte 1,0x11,1, 0x03,0x08, 0x11,0x01, 0x12,0x06, 0x10,0x17, 0,0
++.byte 2,0x2e,0, 0x03,0x08, 0x55,0x17, 0x3b,0x0b, 0,0
++.byte 0
++.section .debug_info,"",%progbits
++.long .Lcu_end-.Lcu_start
++.Lcu_start:
++.short 4
++.long 0
++.byte 4
++.byte 1
++.asciz "manual-boundaries.s"
++.long 0
++.long 0x100000
++.long 0
++.byte 2
++.asciz "whole_mixed"
++.long .Lranges0-.Lranges_start
++.byte 1
++.byte 0
++.Lcu_end:
++.section .debug_ranges,"",%progbits
++.Lranges_start:
++.Lranges0:
++.long anchor
++.long anchor_end
++.long 0
++.long 0
++
++.section .debug_line,"",%progbits
++.long .Lline_end-.Lline_start
++.Lline_start:
++.short 4
++.long .Lheader_end-.Lheader_start
++.Lheader_start:
++.byte 1,1,1,251,14,13
++.byte 0,1,1,1,1,0,0,0,1,0,0,1
++.byte 0
++.asciz "boundary.c"
++.byte 0,0,0
++.byte 0
++.Lheader_end:
++.byte 0
++.uleb128 5
++.byte 2
++.long anchor
++.byte 3
++.sleb128 -1
++.byte 1
++.byte 2,1
++.byte 3,2
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 3,1
++.byte 1
++.byte 2,1
++.byte 0,1,1
++.Lline_end:
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/pure-a64.perfbin
 index 9768908b515542886e8523932f9680ce7112d765..cff0b31fa7ab39d87332fc56d771bd3dfa61bafb 100644
 GIT binary patch
@@ -3824,10 +4081,10 @@ index bc02274de696..a2cd02f94d92 100644
    ProfileGenerator.cpp
 diff --git a/llvm/tools/llvm-profgen/IPBoundary.cpp b/llvm/tools/llvm-profgen/IPBoundary.cpp
 new file mode 100644
-index 000000000000..915abe4e2010
+index 000000000000..9ada6e669614
 --- /dev/null
 +++ b/llvm/tools/llvm-profgen/IPBoundary.cpp
-@@ -0,0 +1,232 @@
+@@ -0,0 +1,245 @@
 +//===-- IPBoundary.cpp - On-demand IP instruction boundaries
 +//----------------===//
 +//
@@ -4017,7 +4274,8 @@ index 000000000000..915abe4e2010
 +              : ISA == 'a' ? "bad-arm-end: truncated A32 instruction"
 +                           : "bad-a64-end: truncated A64 instruction");
 +        if (PC >= Cursor)
-+          Result.Instructions.push_back({PC, Size, RI});
++          Result.Instructions.push_back(
++              {PC, Size, RI, Result.Intersections.size() - 1});
 +        PC += Size;
 +      }
 +      Cursor = Stop;
@@ -4033,18 +4291,30 @@ index 000000000000..915abe4e2010
 +  return It != Instructions.end() && It->Address == Address;
 +}
 +
-+uint64_t IPFunctionBoundaries::predecessor(uint64_t Address) const {
++uint64_t IPFunctionBoundaries::predecessor(uint64_t Address,
++                                           StringRef &Reason) const {
 +  auto It = llvm::lower_bound(
 +      Instructions, Address,
 +      [](const IPInstruction &I, uint64_t A) { return I.Address < A; });
++  Reason = "first_instruction";
 +  if (It == Instructions.end() || It->Address != Address ||
 +      It == Instructions.begin())
 +    return Address;
 +  const auto &Previous = *std::prev(It);
-+  return Previous.RangeIndex == It->RangeIndex &&
-+                 Previous.Address + Previous.Size == Address
-+             ? Previous.Address
-+             : Address;
++  if (Previous.RangeIndex != It->RangeIndex) {
++    Reason = "range_gap";
++    return Address;
++  }
++  if (Previous.MappingIndex != It->MappingIndex) {
++    Reason = "data_or_state_change";
++    return Address;
++  }
++  if (Previous.Address + Previous.Size != Address) {
++    Reason = "range_gap";
++    return Address;
++  }
++  Reason = "";
++  return Previous.Address;
 +}
 +
 +void IPFunctionBoundaries::print(raw_ostream &OS) const {
@@ -4062,12 +4332,11 @@ index 000000000000..915abe4e2010
 +}
 diff --git a/llvm/tools/llvm-profgen/IPBoundary.h b/llvm/tools/llvm-profgen/IPBoundary.h
 new file mode 100644
-index 000000000000..ddd45baecfe9
+index 000000000000..c46754ecc6f6
 --- /dev/null
 +++ b/llvm/tools/llvm-profgen/IPBoundary.h
-@@ -0,0 +1,66 @@
-+//===-- IPBoundary.h - On-demand IP instruction boundaries -------*- C++
-+//-*-===//
+@@ -0,0 +1,65 @@
++//===- IPBoundary.h - IP instruction boundaries -----------------*- C++ -*-===//
 +//
 +// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 +// See https://llvm.org/LICENSE.txt for license information.
@@ -4091,7 +4360,7 @@ index 000000000000..ddd45baecfe9
 +
 +struct IPInstruction {
 +  uint64_t Address, Size;
-+  size_t RangeIndex;
++  size_t RangeIndex, MappingIndex;
 +};
 +struct IPIntersection {
 +  uint64_t Begin, End, Anchor;
@@ -4104,8 +4373,8 @@ index 000000000000..ddd45baecfe9
 +  std::vector<IPIntersection> Intersections;
 +  std::vector<IPInstruction> Instructions;
 +  void print(raw_ostream &OS) const;
-+  // A layout predecessor must end exactly at Address in the same DWARF range.
-+  uint64_t predecessor(uint64_t Address) const;
++  // Return Address and a stable reason when no valid predecessor exists.
++  uint64_t predecessor(uint64_t Address, StringRef &Reason) const;
 +  bool contains(uint64_t Address) const;
 +};
 +
@@ -4133,7 +4402,7 @@ index 000000000000..ddd45baecfe9
 +} // namespace llvm
 +#endif
 diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
-index 662384111d90..2838f3251f69 100644
+index 662384111d90..2f0b254577a3 100644
 --- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
 +++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
 @@ -237,11 +237,20 @@ void IPGenerationStatistics::print(raw_ostream &OS,
@@ -4158,7 +4427,7 @@ index 662384111d90..2838f3251f69 100644
  }
  
  Error ProfileGenerator::populateBodySamplesFromAddresses(
-@@ -251,9 +260,9 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+@@ -251,28 +260,98 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
    FunctionSamples::ProfileIsFS = UseFSDiscriminator;
    FunctionSamples::ProfileIsCS = false;
    FunctionSamples::ProfileIsProbeBased = false;
@@ -4169,9 +4438,13 @@ index 662384111d90..2838f3251f69 100644
 +                         "plt", "in_cu_no_subprogram", "no_cu",
 +                         "usable_nonleaf_line_zero", "skid_unadjusted"})
      Statistics.Counts[Name.str()] = {};
++  if (Options.PrevInst)
++    for (StringRef Reason : {"first_instruction", "range_gap",
++                             "data_or_state_change", "predecessor_no_line"})
++      Statistics.Counts[("skid_unadjusted_" + Reason).str()] = {};
    auto Classify = [&](StringRef Name, const IPAddressCount &C) -> Error {
      auto &Sum = Statistics.Counts[Name.str()];
-@@ -261,18 +270,73 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     if (Error E = addIPCount(Sum.SampleCount, C.SampleCount))
        return E;
      return addIPCount(Sum.PeriodSum, C.PeriodSum);
    };
@@ -4183,6 +4456,7 @@ index 662384111d90..2838f3251f69 100644
 +  // First identify eligible functions without enumerating unprofiled code.
 +  std::map<std::string, BinaryFunction *> SampledFunctions;
 +  std::map<uint64_t, BinaryFunction *> UsableAddresses;
++  std::map<BinaryFunction *, std::vector<uint64_t>> FunctionAddresses;
    for (const auto &[Address, C] : Counts) {
 -    if (!Binary->findFuncRange(Address)) {
 +    auto *Range = Binary->findFuncRange(Address);
@@ -4198,6 +4472,7 @@ index 662384111d90..2838f3251f69 100644
 +    } else {
 +      SampledFunctions.emplace(Range->Func->FuncName.str(), Range->Func);
 +      UsableAddresses.emplace(Address, Range->Func);
++      FunctionAddresses[Range->Func].push_back(Address);
 +    }
 +  }
 +  std::map<BinaryFunction *, size_t> BoundaryIndices;
@@ -4220,8 +4495,8 @@ index 662384111d90..2838f3251f69 100644
 +        Statistics.BoundaryFailures.emplace_back(Name, toString(B.takeError()));
 +        continue;
 +      }
-+      for (const auto &[Address, F] : UsableAddresses)
-+        if (F == Function && !B->contains(Address))
++      for (uint64_t Address : FunctionAddresses.at(Function))
++        if (!B->contains(Address))
 +          Statistics.BoundaryFailures.emplace_back(
 +              Name,
 +              "sample is not an instruction start: " + utohexstr(Address));
@@ -4244,15 +4519,24 @@ index 662384111d90..2838f3251f69 100644
 +    uint64_t Address = Original;
 +    const auto &C = Counts.at(Original);
 +    if (Options.PrevInst) {
++      StringRef Reason;
 +      Address = Statistics.Boundaries[BoundaryIndices.at(Function)].predecessor(
-+          Original);
-+      if (Address == Original)
++          Original, Reason);
++      if (Address != Original &&
++          Binary->getCachedFrameLocationStack(Address).empty()) {
++        Address = Original;
++        Reason = "predecessor_no_line";
++      }
++      if (Address == Original) {
 +        if (Error E = Classify("skid_unadjusted", C))
 +          return E;
++        if (Error E = Classify(("skid_unadjusted_" + Reason).str(), C))
++          return E;
++      }
      }
      const auto &Frames = Binary->getCachedFrameLocationStack(Address);
      if (Frames.empty()) {
-@@ -299,18 +363,63 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+@@ -299,18 +378,63 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
      LineLocation Key(Location.LineOffset,
                       getBaseDiscriminator(Location.Discriminator));
      auto &Body = Bodies[Leaf][Key];
@@ -4318,7 +4602,7 @@ index 662384111d90..2838f3251f69 100644
    bool LargeCount = false;
    for (auto [FS, Numerator] : Totals) {
      uint64_t Count = roundIPCount(Numerator, Options.PeriodUnit);
-@@ -320,7 +429,17 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+@@ -320,7 +444,17 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
    uint64_t AllBodyCounts = 0;
    for (auto &[FS, Locations] : Bodies)
      for (auto [Location, Numerator] : Locations) {

@@ -1,0 +1,37 @@
+#include "llvm/DebugInfo/DWARF/DWARFContext.h"
+#include "llvm/DebugInfo/DWARF/DWARFUnit.h"
+#include "llvm/DebugInfo/Symbolize/Symbolize.h"
+#include "llvm/Object/Binary.h"
+#include "llvm/Object/ObjectFile.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/raw_ostream.h"
+using namespace llvm;
+int main(int argc, char **argv) {
+  if (argc != 3) return 2;
+  auto B = object::createBinary(argv[1]);
+  if (!B) { logAllUnhandledErrors(B.takeError(), errs(), "LOAD_ERROR "); return 3; }
+  auto *O = dyn_cast<object::ObjectFile>(B->getBinary());
+  if (!O) return 4;
+  errs() << "ELF_LOAD_OK\n";
+  auto C = DWARFContext::create(*O);
+  uint64_t Units = 0, DIEs = 0;
+  for (const auto &U : C->compile_units()) {
+    ++Units;
+    for (const auto &D : U->dies()) { (void)D; ++DIEs; }
+  }
+  errs() << "DWARF_LOAD_RETURNED units=" << Units << " dies=" << DIEs << "\n";
+  symbolize::LLVMSymbolizer::Options Opts;
+  Opts.PrintFunctions = DILineInfoSpecifier::FunctionNameKind::LinkageName;
+  Opts.Demangle = false; Opts.UseSymbolTable = false;
+  Opts.RelativeAddresses = false;
+  symbolize::LLVMSymbolizer S(Opts);
+  uint64_t PC; if (StringRef(argv[2]).getAsInteger(16, PC)) return 5;
+  errs() << "FIRST_SYMBOLIZATION_BEGIN\n";
+  auto I = S.symbolizeInlinedCode(StringRef(argv[1]),
+      {PC, object::SectionedAddress::UndefSection});
+  if (!I) { logAllUnhandledErrors(I.takeError(), errs(), "SYMBOLIZATION_ERROR "); return 6; }
+  errs() << "FIRST_SYMBOLIZATION_VALUE frames=" << I->getNumberOfFrames();
+  if (I->getNumberOfFrames()) errs() << " line=" << I->getFrame(0).Line;
+  errs() << "\n";
+  return 0;
+}

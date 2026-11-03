@@ -1,0 +1,264 @@
+LLVM commit b843cf07f851985413c926a562f9135a272a3bea
+
+
+llvm/lib/DebugInfo/DWARF/DWARFUnit.cpp
+65: void DWARFUnitVector::addUnitsImpl(
+66:     DWARFContext &Context, const DWARFObject &Obj, const DWARFSection &Section,
+67:     const DWARFDebugAbbrev *DA, const DWARFSection *RS,
+68:     const DWARFSection *LocSection, StringRef SS, const DWARFSection &SOS,
+69:     const DWARFSection *AOS, const DWARFSection &LS, bool LE, bool IsDWO,
+70:     bool Lazy, DWARFSectionKind SectionKind) {
+71:   DWARFDataExtractor Data(Obj, Section, LE, 0);
+72:   // Lazy initialization of Parser, now that we have all section info.
+73:   if (!Parser) {
+74:     Parser = [=, &Context, &Obj, &Section, &SOS,
+75:               &LS](uint64_t Offset, DWARFSectionKind SectionKind,
+76:                    const DWARFSection *CurSection,
+77:                    const DWARFUnitIndex::Entry *IndexEntry)
+78:         -> std::unique_ptr<DWARFUnit> {
+79:       const DWARFSection &InfoSection = CurSection ? *CurSection : Section;
+80:       DWARFDataExtractor Data(Obj, InfoSection, LE, 0);
+81:       if (!Data.isValidOffset(Offset))
+82:         return nullptr;
+83:       DWARFUnitHeader Header;
+84:       if (Error ExtractErr =
+85:               Header.extract(Context, Data, &Offset, SectionKind)) {
+86:         Context.getWarningHandler()(std::move(ExtractErr));
+87:         return nullptr;
+88:       }
+89:       if (!IndexEntry && IsDWO) {
+90:         const DWARFUnitIndex &Index = getDWARFUnitIndex(
+
+llvm/lib/DebugInfo/DWARF/DWARFUnit.cpp
+298:             errc::invalid_argument,
+299:             "DWARF unit at 0x%8.8" PRIx64 " cannot be parsed:", Offset),
+300:         std::move(Err));
+301: 
+302:   // Header fields all parsed, capture the size of this unit header.
+303:   assert(*offset_ptr - Offset <= 255 && "unexpected header size");
+304:   Size = uint8_t(*offset_ptr - Offset);
+305:   uint64_t NextCUOffset = Offset + getUnitLengthFieldByteSize() + getLength();
+306: 
+307:   if (!debug_info.isValidOffset(getNextUnitOffset() - 1))
+308:     return createStringError(errc::invalid_argument,
+309:                              "DWARF unit from offset 0x%8.8" PRIx64 " incl. "
+310:                              "to offset  0x%8.8" PRIx64 " excl. "
+311:                              "extends past section size 0x%8.8zx",
+312:                              Offset, NextCUOffset, debug_info.size());
+313: 
+314:   if (!DWARFContext::isSupportedVersion(getVersion()))
+315:     return createStringError(
+316:         errc::invalid_argument,
+317:         "DWARF unit at offset 0x%8.8" PRIx64 " "
+318:         "has unsupported version %" PRIu16 ", supported are 2-%u",
+319:         Offset, getVersion(), DWARFContext::getMaxSupportedVersion());
+320: 
+
+llvm/lib/DebugInfo/DWARF/DWARFContext.cpp
+2451: std::unique_ptr<DWARFContext>
+2452: DWARFContext::create(const object::ObjectFile &Obj,
+2453:                      ProcessDebugRelocations RelocAction,
+2454:                      const LoadedObjectInfo *L, std::string DWPName,
+2455:                      std::function<void(Error)> RecoverableErrorHandler,
+2456:                      std::function<void(Error)> WarningHandler,
+2457:                      bool ThreadSafe) {
+2458:   auto DObj = std::make_unique<DWARFObjInMemory>(
+2459:       Obj, L, RecoverableErrorHandler, WarningHandler, RelocAction);
+2460:   return std::make_unique<DWARFContext>(std::move(DObj),
+2461:                                         std::move(DWPName),
+2462:                                         RecoverableErrorHandler,
+2463:                                         WarningHandler,
+2464:                                         ThreadSafe);
+2465: }
+2466: 
+
+llvm/lib/DebugInfo/Symbolize/Symbolize.cpp
+103: template <typename T>
+104: Expected<DIInliningInfo> LLVMSymbolizer::symbolizeInlinedCodeCommon(
+105:     const T &ModuleSpecifier, object::SectionedAddress ModuleOffset) {
+106:   auto InfoOrErr = getOrCreateModuleInfo(ModuleSpecifier);
+107:   if (!InfoOrErr)
+108:     return InfoOrErr.takeError();
+109: 
+110:   SymbolizableModule *Info = *InfoOrErr;
+111: 
+112:   // A null module means an error has already been reported. Return an empty
+113:   // result.
+114:   if (!Info)
+115:     return DIInliningInfo();
+116: 
+117:   // If the user is giving us relative addresses, add the preferred base of the
+118:   // object to the offset before we do the query. It's what DIContext expects.
+119:   if (Opts.RelativeAddresses)
+120:     ModuleOffset.Address += Info->getModulePreferredBase();
+121: 
+122:   DIInliningInfo InlinedContext = Info->symbolizeInlinedCode(
+123:       ModuleOffset,
+124:       DILineInfoSpecifier(Opts.PathStyle, Opts.PrintFunctions,
+125:                           Opts.SkipLineZero),
+126:       Opts.UseSymbolTable);
+127:   if (Opts.Demangle) {
+128:     for (int i = 0, n = InlinedContext.getNumberOfFrames(); i < n; i++) {
+129:       auto *Frame = InlinedContext.getMutableFrame(i);
+130:       Frame->FunctionName = DemangleName(Frame->FunctionName, Info);
+131:     }
+132:   }
+133:   return InlinedContext;
+134: }
+135: 
+136: Expected<DIInliningInfo>
+137: LLVMSymbolizer::symbolizeInlinedCode(const ObjectFile &Obj,
+138:                                      object::SectionedAddress ModuleOffset) {
+139:   return symbolizeInlinedCodeCommon(Obj, ModuleOffset);
+140: }
+141: 
+
+llvm/lib/DebugInfo/Symbolize/Symbolize.cpp
+727: LLVMSymbolizer::createModuleInfo(const ObjectFile *Obj,
+728:                                  std::unique_ptr<DIContext> Context,
+729:                                  StringRef ModuleName) {
+730:   auto InfoOrErr = SymbolizableObjectFile::create(Obj, std::move(Context),
+731:                                                   Opts.UntagAddresses);
+732:   std::unique_ptr<SymbolizableModule> SymMod;
+733:   if (InfoOrErr)
+734:     SymMod = std::move(*InfoOrErr);
+735:   auto InsertResult = Modules.insert(
+736:       std::make_pair(std::string(ModuleName), std::move(SymMod)));
+737:   assert(InsertResult.second);
+738:   if (!InfoOrErr)
+739:     return InfoOrErr.takeError();
+740:   return InsertResult.first->second.get();
+
+llvm/lib/DebugInfo/Symbolize/Symbolize.cpp
+814:         }
+815:         Context.reset(new PDBContext(*CoffObject, std::move(Session)));
+816:       }
+817:     }
+818:   }
+819:   if (!Context)
+820:     Context = DWARFContext::create(
+821:         *Objects.second, DWARFContext::ProcessDebugRelocations::Process,
+822:         nullptr, Opts.DWPName);
+823:   auto ModuleOrErr =
+824:       createModuleInfo(Objects.first, std::move(Context), ModuleName);
+825:   if (ModuleOrErr) {
+826:     auto I = Modules.find(ModuleName);
+827:     BinaryForPath.find(BinaryName)->second.pushEvictor([this, I]() {
+828:       Modules.erase(I);
+829:     });
+830:   }
+831:   return ModuleOrErr;
+832: }
+833: 
+
+llvm/lib/DebugInfo/Symbolize/SymbolizableObjectFile.cpp
+30: SymbolizableObjectFile::create(const object::ObjectFile *Obj,
+31:                                std::unique_ptr<DIContext> DICtx,
+32:                                bool UntagAddresses) {
+33:   assert(DICtx);
+34:   std::unique_ptr<SymbolizableObjectFile> res(
+35:       new SymbolizableObjectFile(Obj, std::move(DICtx), UntagAddresses));
+36:   std::unique_ptr<DataExtractor> OpdExtractor;
+37:   uint64_t OpdAddress = 0;
+38:   // Find the .opd (function descriptor) section if any, for big-endian
+39:   // PowerPC64 ELF.
+40:   if (Obj->getArch() == Triple::ppc64) {
+41:     for (section_iterator Section : Obj->sections()) {
+42:       Expected<StringRef> NameOrErr = Section->getName();
+43:       if (!NameOrErr)
+44:         return NameOrErr.takeError();
+45: 
+46:       if (*NameOrErr == ".opd") {
+47:         Expected<StringRef> E = Section->getContents();
+48:         if (!E)
+49:           return E.takeError();
+50:         OpdExtractor.reset(new DataExtractor(*E, Obj->isLittleEndian(),
+51:                                              Obj->getBytesInAddress()));
+52:         OpdAddress = Section->getAddress();
+53:         break;
+54:       }
+55:     }
+56:   }
+57:   std::vector<std::pair<SymbolRef, uint64_t>> Symbols =
+58:       computeSymbolSizes(*Obj);
+59:   for (auto &P : Symbols)
+60:     if (Error E =
+61:             res->addSymbol(P.first, P.second, OpdExtractor.get(), OpdAddress))
+62:       return std::move(E);
+63: 
+64:   // If this is a COFF object and we didn't find any symbols, try the export
+65:   // table.
+66:   if (Symbols.empty()) {
+67:     if (auto *CoffObj = dyn_cast<COFFObjectFile>(Obj))
+68:       if (Error E = res->addCoffExportSymbols(CoffObj))
+69:         return std::move(E);
+70:   }
+
+llvm/lib/DebugInfo/Symbolize/SymbolizableObjectFile.cpp
+302: DIInliningInfo SymbolizableObjectFile::symbolizeInlinedCode(
+303:     object::SectionedAddress ModuleOffset,
+304:     DILineInfoSpecifier LineInfoSpecifier, bool UseSymbolTable) const {
+305:   if (ModuleOffset.SectionIndex == object::SectionedAddress::UndefSection)
+306:     ModuleOffset.SectionIndex =
+307:         getModuleSectionIndexForAddress(ModuleOffset.Address);
+308:   DIInliningInfo InlinedContext = DebugInfoContext->getInliningInfoForAddress(
+309:       ModuleOffset, LineInfoSpecifier);
+310: 
+311:   // Make sure there is at least one frame in context.
+312:   bool EmptyFrameAdded = false;
+313:   if (InlinedContext.getNumberOfFrames() == 0) {
+314:     EmptyFrameAdded = true;
+315:     InlinedContext.addFrame(DILineInfo());
+316:   }
+317: 
+318:   // Override the function name in lower frame with name from symbol table.
+319:   if (shouldOverrideWithSymbolTable(LineInfoSpecifier.FNKind, UseSymbolTable)) {
+320:     std::string FunctionName, FileName;
+321:     uint64_t Start, Size;
+322:     if (getNameFromSymbolTable(ModuleOffset.Address, FunctionName, Start, Size,
+323:                                FileName)) {
+324:       DILineInfo *LI = InlinedContext.getMutableFrame(
+325:           InlinedContext.getNumberOfFrames() - 1);
+326:       LI->FunctionName = FunctionName;
+327:       LI->StartAddress = Start;
+328:       // Only use the filename from symbol table if the debug info for the
+329:       // address is missing.
+330:       if (EmptyFrameAdded && !FileName.empty())
+331:         LI->FileName = FileName;
+332:     }
+333:   }
+334: 
+335:   return InlinedContext;
+336: }
+
+llvm/tools/llvm-profgen/ProfiledBinary.cpp
+1052: void ProfiledBinary::loadSymbolsFromDWARF(ObjectFile &Obj) {
+1053:   auto DebugContext = llvm::DWARFContext::create(
+1054:       Obj, DWARFContext::ProcessDebugRelocations::Process, nullptr, DWPPath);
+1055:   if (!DebugContext)
+1056:     exitWithError("Error creating the debug info context", Path);
+1057: 
+1058:   for (const auto &CompilationUnit : DebugContext->compile_units())
+1059:     loadSymbolsFromDWARFUnit(*CompilationUnit);
+1060: 
+1061:   // Handles DWO sections that can either be in .o, .dwo or .dwp files.
+
+llvm/tools/llvm-profgen/ProfiledBinary.cpp
+1123:                                                    bool UseCanonicalFnName,
+1124:                                                    bool UseProbeDiscriminator) {
+1125:   assert(this == IP.Binary &&
+1126:          "Binary should only symbolize its own instruction");
+1127:   DIInliningInfo InlineStack =
+1128:       unwrapOrError(Symbolizer->symbolizeInlinedCode(
+1129:                         SymbolizerPath.str(), getSectionedAddress(IP.Address)),
+1130:                     SymbolizerPath);
+1131: 
+1132:   SampleContextFrameVector CallStack;
+1133:   if (IPMode &&
+1134:       (!InlineStack.getNumberOfFrames() || InlineStack.getFrame(0).Line == 0))
+1135:     return CallStack;
+1136:   for (int32_t I = InlineStack.getNumberOfFrames() - 1; I >= 0; I--) {
+1137:     const auto &CallerFrame = InlineStack.getFrame(I);
+1138:     if (CallerFrame.FunctionName.empty() ||
+1139:         (CallerFrame.FunctionName == "<invalid>"))
+1140:       break;
