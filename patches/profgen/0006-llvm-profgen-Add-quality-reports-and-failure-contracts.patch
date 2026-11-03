@@ -1,0 +1,2473 @@
+From 1dd4b9acd84045c230e77cc68d85eafca58eae88 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Tue, 3 Nov 2026 20:46:50 +0800
+Subject: [PATCH] [llvm-profgen] Add quality reports and failure contracts for
+ IP samples
+
+Report raw per-event and selected-event counts, identity evidence, ISA,
+coverage and visible LOST diagnostics without conflating event units.
+Use exact optional thresholds and deterministic JSON with explicit unknowns.
+
+Validate output aliases before side effects and atomically replace reports
+before committing the profile. Preserve an old profile on every failure.
+Cover shared library exits with a single-shot stage-aware callback while
+leaving the unregistered LBR path unchanged.
+
+Exercise real damaged ELF and truncated DWARF inputs, plus hidden injections
+at actual failure sites, to check cleanup and existing-output preservation.
+---
+ .../Inputs/ip-mode/quality/README.txt         |  24 +
+ .../Inputs/ip-mode/quality/check-quality.py   | 262 ++++++
+ .../ip-mode/quality/invalid-symbol.debug      | Bin 0 -> 5728 bytes
+ .../ip-mode/quality/invalid-symbol.perfbin    | Bin 0 -> 5768 bytes
+ .../ip-mode/quality/thumb-absolute.perfbin    | Bin 0 -> 4756 bytes
+ .../ip-mode/quality/thumb-fallback.perfbin    | Bin 0 -> 4756 bytes
+ .../Inputs/ip-mode/quality/truncated.debug    | Bin 0 -> 5720 bytes
+ llvm/test/tools/llvm-profgen/ip-options.test  |   2 +-
+ .../tools/llvm-profgen/ip-quality-exits.test  |   4 +
+ .../tools/llvm-profgen/ip-quality-fields.test |   4 +
+ .../tools/llvm-profgen/ip-quality-output.test |   4 +
+ .../tools/llvm-profgen/ip-quality-paths.test  |   4 +
+ .../llvm-profgen/ip-quality-thresholds.test   |   4 +
+ .../tools/llvm-profgen/ip-quality-writer.test |   4 +
+ llvm/tools/llvm-profgen/CMakeLists.txt        |   1 +
+ llvm/tools/llvm-profgen/ErrorHandling.h       |  17 +
+ llvm/tools/llvm-profgen/IPIdentity.cpp        |  21 +-
+ llvm/tools/llvm-profgen/IPPerfReader.cpp      |  76 +-
+ llvm/tools/llvm-profgen/IPPerfReader.h        |  15 +
+ llvm/tools/llvm-profgen/IPQualityReport.cpp   | 803 ++++++++++++++++++
+ llvm/tools/llvm-profgen/IPQualityReport.h     |  80 ++
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  |  69 +-
+ llvm/tools/llvm-profgen/ProfileGenerator.h    |  11 +-
+ llvm/tools/llvm-profgen/ProfiledBinary.cpp    |  86 +-
+ llvm/tools/llvm-profgen/ProfiledBinary.h      |   1 +
+ llvm/tools/llvm-profgen/llvm-profgen.cpp      | 100 ++-
+ 26 files changed, 1559 insertions(+), 33 deletions(-)
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/README.txt
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/invalid-symbol.debug
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/invalid-symbol.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/thumb-absolute.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/thumb-fallback.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/truncated.debug
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-quality-exits.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-quality-fields.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-quality-output.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-quality-paths.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-quality-thresholds.test
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-quality-writer.test
+ create mode 100644 llvm/tools/llvm-profgen/IPQualityReport.cpp
+ create mode 100644 llvm/tools/llvm-profgen/IPQualityReport.h
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/README.txt
+new file mode 100644
+index 000000000000..9442442f304d
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/README.txt
+@@ -0,0 +1,24 @@
++Quality report/failure fixtures, design 5.6 and 5.10; synthetic, no board input.
++Tools: Tizen GBS x86_64 LLVM 22.1.8 llvm-objcopy and readelf.
++truncated.debug: from ../a64-pie.debug, .debug_info first 500 of 501 bytes.
++  llvm-objcopy --dump-section=.debug_info=info ../a64-pie.debug
++  python3 -c 'from pathlib import Path; p=Path("info"); p.write_bytes(p.read_bytes()[:500])'
++  llvm-objcopy --update-section=.debug_info=info ../a64-pie.debug truncated.debug
++Other sections including build-id unchanged. Original CU length preserved.
++LLVM emits its original warning and ignores the CU; this is not an Error from
++symbolizeInlinedCode. Test ordinary generate failure separately from injection.
++invalid-symbol.perfbin: from ../a64-pie.perfbin. readelf -SW gives .symtab file
++ offset and entry size (ELF64, 24 bytes). Change .symtab[1].st_name to 0xffffffff
++ in little endian; no other byte changed. ELF load/identity still succeed;
++ ProfiledBinary's real loadIPMetadata -> unwrapOrError fails, without injection.
++All outputs in check-quality.py are under the lit temporary directory.
++invalid-symbol.debug uses the same st_name mutation on ../a64-pie.debug.
++This exercises the separate debug metadata unwrap without injection.
++thumb-fallback.perfbin: llvm-objcopy --strip-symbols=mapping-names.txt
++ ../thumb-count.perfbin thumb-fallback.perfbin; mapping-names.txt contains
++ $a, $d, $t. Function SF_Thumb remains; code/debug/build-id unchanged.
++thumb-absolute.perfbin: from thumb-fallback.perfbin. GBS readelf -SW/-sW
++locates ELF32 count_loop at .symtab index 4 and .dynsym index 1. Change
++only both st_shndx (entry+14, 2 little-endian bytes) from section 9
++to SHN_ABS (0xfff1).
++The apparent function extent must not provide SF_Thumb ISA evidence.
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+new file mode 100644
+index 000000000000..7445b5a42374
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+@@ -0,0 +1,262 @@
++#===- check-quality.py - IP quality contract checks ----------------------===#
++# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++# See https://llvm.org/LICENSE.txt for license information.
++# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++#===----------------------------------------------------------------------===#
++import json
++import os
++from pathlib import Path
++import shutil
++import subprocess
++import sys
++
++TOOL, GROUP, TMP = sys.argv[1:]
++TMP = Path(TMP)
++TMP.mkdir(parents=True, exist_ok=True)
++HERE = Path(__file__).resolve().parent
++I = HERE.parent
++SEQ = 0
++DATA = '17/17 2 cycles: 1318 (/target+0x318)\n'
++OLD = b'old profile must remain\n'
++OLD_REPORT = b'{"verdict":{"conversion":"ok"}}\n'
++
++
++def run(extra=(), data=DATA, binary=None, expect=0, stage=None, old=False,
++        report_preserved=False, label=None):
++    global SEQ
++    SEQ += 1
++    d = TMP / (label or str(SEQ))
++    d.mkdir(exist_ok=True)
++    perf, out, report = d/'input.perfscript', d/'out.prof', d/'report.json'
++    perf.write_text(data)
++    out.unlink(missing_ok=True)
++    report.write_bytes(OLD_REPORT)
++    if old:
++        out.write_bytes(OLD)
++    cmd = [TOOL, '--ip-samples', '--allow-missing-build-id',
++           '--binary-match-regex=^/target$', '--ip-aggregation=sum',
++           '--ip-period-unit=1', '--format=text', '--binary='+str(binary or I/'a64-pie.perfbin'),
++           '--perfscript='+str(perf), '--output='+str(out),
++           '--quality-report='+str(report), *extra]
++    p = subprocess.run(cmd, capture_output=True, text=True)
++    (d/'stdout').write_text(p.stdout)
++    (d/'stderr').write_text(p.stderr)
++    assert (p.returncode == 0) == (expect == 0), (cmd, p.returncode, p.stderr)
++    assert 'LLVM ERROR' not in p.stderr and 'Stack dump' not in p.stderr, p.stderr
++    assert not list(d.glob('*.tmp-*')), list(d.iterdir())
++    if expect:
++        assert out.read_bytes() == OLD if old else not out.exists()
++    if report_preserved:
++        assert report.read_bytes() == OLD_REPORT, report.read_text()
++        return p, None, d, cmd
++    q = json.loads(report.read_text())
++    assert q['verdict']['conversion'] == ('failed' if expect else 'ok'), q
++    if stage:
++        assert q['verdict']['failure_stage'] == stage, q['verdict']
++    return p, q, d, cmd
++
++
++def ratio(n, d):
++    return {'numerator': n, 'denominator': d}
++
++
++def no_floats(x):
++    assert not isinstance(x, float), x
++    if isinstance(x, dict):
++        for v in x.values(): no_floats(v)
++    if isinstance(x, list):
++        for v in x: no_floats(v)
++
++
++if GROUP == 'fields':
++    data = (DATA + '17/17 3 cycles: 131c (/target+0x31c)\n'
++            '17/17 7 cpu-clock: 1318 (/target+0x318)\n'
++            '-1/-1 11 cycles: 1 ([kernel.kallsyms]+0x1)\n'
++            '17/17 13 cycles: 2 ([vdso]+0x2)\n'
++            '17/17 17 cycles: 3 ([unknown])\n'
++            '17/17 19 cycles: 4 (/other+0x4)\n'
++            '17/17 23 cycles: 9999 (/target+0x9999)\n'
++            '17/17 PERF_RECORD_LOST lost 3\n')
++    p,q,d,cmd = run(['--ip-event=cycles'],data)
++    assert set(q) == set('schema_version tool input event semantics identity mapping samples isa boundaries lost throttle ratios sanity coverage consumer_hints warnings verdict'.split())
++    assert q['input']['projection']=='ip-only' and len(q['input']['sha256'])==64
++    assert q['event']['type']==q['event']['config']=='unknown'
++    assert q['event']['before_filter']==[
++        {'name':'cpu-clock','sample_count':1,'period_sum':7},
++        {'name':'cycles','sample_count':7,'period_sum':88}]
++    s=q['samples'];assert s['input_total']=={'sample_count':8}
++    for name,n,w in [('after_event',7,88),('after_pid',7,88),('pid_unknown',1,11),('kernel',1,11),('other_dso',2,32),('unmapped',1,17)]:
++        assert s[name]['sample_count']==n and s[name]['period_sum']==w,(name,s[name])
++    t=s['target'];assert t['counts']['sample_count']==3 and t['counts']['period_sum']==28
++    assert t['unmapped_in_target']['sample_count']==1
++    assert t['usable']['sample_count']==2 and t['usable']['period_sum']==5
++    assert q['ratios']['target_usable_ratio']==ratio(5,28)
++    assert q['ratios']['target_usable_sample_ratio']==ratio(2,3)
++    assert q['lost']['records']==1 and q['lost']['L']==3 and q['lost']['S']==8
++    assert q['lost']['exported_lost_ratio']==ratio(3,11)
++    assert q['lost']['completeness']==q['mapping']['completeness']=='unknown'
++    assert 'W_LOST_MAY_INCLUDE_SIDEBAND' in [w['code'] for w in q['warnings']]
++    assert q['coverage']['sampled_functions']==1
++    assert q['coverage']['name_merged_functions']==0
++    assert q['isa']['a64']['counts']['sample_count']==2
++    no_floats(q)
++    profile=(d/'out.prof').read_bytes(); report=(d/'report.json').read_bytes()
++    p2=subprocess.run(cmd,capture_output=True,text=True);assert p2.returncode==0
++    assert profile==(d/'out.prof').read_bytes() and report==(d/'report.json').read_bytes()
++    for agg in ['sum','max','avg']:
++        p,r,_,_=run(['--ip-aggregation='+agg],DATA+'17/17 198 cycles: 9999 (/target+0x9999)\n')
++        assert r['ratios']['target_usable_ratio']==ratio(2,200)
++    p,r,_,_=run(['--trim-cold-profile','--profile-summary-cold-count=1000'],expect=1,stage='generate')
++    assert r['ratios']['target_usable_ratio']==ratio(2,2)
++    for name,isa in [('thumb-count','thumb'),('arm-count','a32')]:
++        addr,off=(0x12be,0x2be) if isa=='thumb' else (0x12c8,0x2c8)
++        p,r,_,_=run(data=f'17/17 2 cycles: {addr:x} (/target+0x{off:x})\n',binary=I/(name+'.perfbin'))
++        assert r['isa'][isa]['counts']['sample_count']==1
++    p,r,_,_=run(['--ip-period-unit=100'])
++    assert r['samples']['target']['usable']['normalized_weight']==ratio(2,100)
++    assert r['samples']['target']['usable']['sample_count']==1
++    p,r,_,_=run(['--ip-weight=sample'],DATA, expect=1)
++    assert 'has no effect with --ip-weight=sample' in p.stderr
++    p,r,_,_=run(data='17/17 2 cycles: 12be (/target+0x2be)\n',binary=HERE/'thumb-fallback.perfbin')
++    assert r['isa']['thumb']['counts']['sample_count']==1
++    assert r['isa']['sources']['SF_Thumb']['sample_count']==1
++    p,r,_,_=run(data='17/17 2 cycles: 12be (/target+0x2be)\n',binary=I/'thumb-count.stripped.perfbin',expect=1,stage='generate')
++    assert r['samples']['target']['outside_symtab_top20'][0]['name']=='unknown'
++    assert r['isa']['thumb']['counts']['sample_count']==1
++    assert r['isa']['sources']['SF_Thumb']['sample_count']==1
++    p,r,_,_=run(data='17/17 2 cycles: 12be (/target+0x2be)\n',binary=HERE/'thumb-absolute.perfbin')
++    assert r['isa']['unknown']['counts']['sample_count']==1
++    p,r,_,_=run(data='17/17 2 cycles: 1000 (/target+0x1000)\n',binary=I/'boundary-extra/bad-conflict.perfbin')
++    assert r['isa']['unknown']['counts']['sample_count']==1
++elif GROUP == 'thresholds':
++    p,q,_,_=run();v=q['verdict']
++    for n in ['usable_ratio_check','sample_threshold_check','lost_ratio_check']:assert v[n]=='not_evaluated'
++    assert v['sampling_adequacy']=='unknown'
++    for val in ['0','1','0.0','0.999999999']:
++        p,q,_,_=run(['--ip-min-usable-ratio='+val,'--ip-min-target-samples=1','--ip-max-lost-ratio='+val])
++        assert q['verdict']['usable_ratio_check']=='passed'
++        assert q['verdict']['sample_threshold_check']=='passed'
++        assert q['verdict']['lost_ratio_check']=='unknown'
++    for flag in ['ip-min-usable-ratio','ip-max-lost-ratio']:
++        for val in ['', '-0','-1','+0','1.0','1.1','0.1234567890','1e-1',' 0','0 ','0.','nan','2']:
++            p,q,_,_=run(['--'+flag+'='+val],expect=1,stage='parse',old=True)
++            assert '--'+flag in p.stderr
++    for val in ['-1','1.0','1e2','18446744073709551616','']:
++        p,q,_,_=run(['--ip-min-target-samples='+val],expect=1,stage='parse',old=True)
++        assert 'non-negative decimal uint64' in p.stderr
++    p,q,_,_=run(['--ip-min-target-samples=2'],expect=1,stage='generate',old=True)
++    assert q['verdict']['sample_threshold_check']=='failed' and q['verdict']['sampling_adequacy']=='insufficient'
++    p,q,_,_=run(['--ip-min-usable-ratio=0.5'],DATA+'17/17 3 cycles: 9999 (/target+0x9999)\n',expect=1,stage='generate')
++    assert q['verdict']['usable_ratio_check']=='failed'
++    for val,status,rc in [('0','exceeded',1),('0.5','not_exceeded',0),('1','not_exceeded',0)]:
++        p,q,_,_=run(['--ip-max-lost-ratio='+val],DATA+'17/17 PERF_RECORD_LOST lost 1\n',expect=rc,stage='generate' if rc else None)
++        assert q['verdict']['lost_ratio_check']==status
++    p,q,_,_=run(data='17/17 2 cycles: 1318 (/other+0x318)\n',expect=1)
++    assert 'no target samples' in p.stderr
++    assert q['verdict']['sample_threshold_check']=='not_evaluated'
++    p,q,_,_=run(['--ip-min-usable-ratio=0.1','--ip-min-target-samples=1','--ip-max-lost-ratio=0.1'],data='bad\n',expect=1,stage='parse')
++    assert all(q['verdict'][n]=='unknown' for n in ['usable_ratio_check','sample_threshold_check','lost_ratio_check'])
++    p,q,_,_=run(['--unknown-quality-test-option'],expect=1,stage='parse',old=True)
++    assert 'Unknown command line argument' in p.stderr
++    assert q['semantics']=='unknown'
++    assert q['coverage']['top50']=='unknown'
++    assert q['mapping']['records']=='unknown'
++    assert q['identity']['candidates']=='unknown'
++    assert q['event']['before_filter']=='unknown'
++    p,q,_,_=run(data='17/17 18446744073709551615 cycles: 1318 (/target+0x318)\n')
++    assert q['samples']['target']['usable']['period_sum']==18446744073709551615
++    no_floats(q)
++    p,q,_,_=run(data=DATA+'17/17 PERF_RECORD_LOST lost 18446744073709551615\n',expect=1,stage='generate',old=True)
++    assert 'LOST ratio denominator overflow' in p.stderr
++    assert q['lost']['exported_lost_ratio']=='unknown'
++elif GROUP == 'exits':
++    missing=TMP/'absent.perfbin'
++    missing.unlink(missing_ok=True)
++    p,q,_,_=run(binary=missing,expect=1,stage='load',old=True)
++    assert q['verdict']['fallback_callback_count']==0
++    damaged=TMP/'damaged.perfbin';damaged.write_bytes(b'not an ELF image')
++    p,q,_,_=run(binary=damaged,expect=1,stage='load',old=True)
++    assert q['verdict']['fallback_callback_count']==0
++    # Existing x86 fixture's foo: executable LOAD off=0, VA=0x400000;
++    # foo VA=0x400540, so the sample file offset is 0x540.
++    p,q,_,_=run(binary=I.parent/'split-dwarf-split.exe',data='17/17 2 cycles: 400540 (/target+0x540)\n',expect=1,stage='generate',old=True)
++    assert 'W_DWO_MISSING' in [w['code'] for w in q['warnings']]
++    for old in [False, True]:
++        p,q,_,_=run(['--debug-binary='+str(HERE/'truncated.debug')],binary=I/'a64-pie.stripped.perfbin',expect=1,stage='generate',old=old)
++        assert 'no usable samples' in p.stderr and 'extends past section size' in p.stderr
++        assert q['samples']['target']['no_cu']['sample_count']==1
++        assert q['samples']['target']['usable']['sample_count']==0
++        assert q['verdict']['fallback_callback_count']==0
++        p,q,_,_=run(binary=HERE/'invalid-symbol.perfbin',expect=1,stage='load',old=old)
++        assert q['verdict']['fallback_callback_count']==1
++        assert p.stderr.count('llvm-profgen: error:')==1
++        p,q,_,_=run(['--debug-binary='+str(HERE/'invalid-symbol.debug')],binary=I/'a64-pie.stripped.perfbin',expect=1,stage='load',old=old)
++        assert q['verdict']['fallback_callback_count']==1
++        for point in ['runtime-open','invalid-image','runtime-metadata','debug-open-load','debug-metadata','context-create','symbolize','debug-open']:
++            stage='generate' if point in ['symbolize','debug-open'] else 'load'
++            p,q,_,_=run(['--debug-binary='+str(I/'a64-pie.debug'),'--ip-test-inject-failure='+point],binary=I/'a64-pie.stripped.perfbin',expect=1,stage=stage,old=old)
++            assert q['verdict']['fallback_callback_count']==1,point
++            assert p.stderr.count('llvm-profgen: error:')==1,(point,p.stderr)
++    p,q,_,_=run(['--allow-missing-build-id=false'],expect=1,stage='identity',old=True)
++    assert 'missing build-id evidence' in p.stderr
++    p,q,_,_=run(['--ip-aggregation=avg'],data='17/17 2 cycles: 1000 (/target+0x1000)\n',binary=I/'boundary-extra/bad-conflict.perfbin',expect=1,stage='boundary',old=True)
++    assert q['boundaries']['failures']
++elif GROUP == 'output':
++    for point in ['profile-write','profile-flush','profile-close','profile-rename']:
++        for old in [False,True]:
++            p,q,_,_=run(['--ip-test-inject-failure='+point],expect=1,old=old,stage='commit' if point=='profile-rename' else 'write')
++            assert q['verdict']['fallback_callback_count']==0
++    for point in ['report-write','report-flush','report-close','report-rename']:
++        p,_,_,_=run(['--ip-test-inject-failure='+point],expect=1,old=True,report_preserved=True)
++        assert 'old report preserved' in p.stderr
++    p,q,_,_=run(['--format=gcc'],expect=1,stage='write',old=True)
++    assert 'profile serialization failed' in p.stderr
++    # A regular file in place of the parent directory works even under root.
++    parent=TMP/'not-directory';parent.write_text('sentinel')
++    p,q,_,_=run(['--output='+str(parent/'profile')],expect=1,stage='write',old=True)
++    assert 'cannot create profile temporary file' in p.stderr
++    p,_,_,_=run(['--quality-report='+str(parent/'report')],expect=1,old=True,report_preserved=True)
++    assert 'cannot create temporary file' in p.stderr
++elif GROUP == 'paths':
++    d=TMP/'aliases';d.mkdir(exist_ok=True)
++    inp=d/'input';inp.write_text(DATA);binary=d/'binary';shutil.copyfile(I/'a64-pie.perfbin',binary)
++    out=d/'out';rep=d/'report';out.write_bytes(OLD);rep.write_bytes(OLD_REPORT)
++    symlink=d/'sym';symlink.unlink(missing_ok=True);symlink.symlink_to(out.name)
++    hard=d/'hard';hard.unlink(missing_ok=True);os.link(out,hard)
++    (d/'real/child').mkdir(parents=True,exist_ok=True)
++    parent_link=d/'parent-link';parent_link.unlink(missing_ok=True)
++    parent_link.symlink_to('real/child',target_is_directory=True)
++    cases=[('-',str(rep),'--output'),(str(out),str(out),'--quality-report'),
++           (str(out),str(symlink),'--quality-report'),(str(out),str(hard),'--quality-report'),
++           (str(inp),str(rep),'--perfscript'),(str(out),str(inp),'--perfscript'),
++           (str(binary),str(rep),'--binary'),(str(out),str(binary),'--binary'),
++           (str(d/'missing'),str(d/'sub/../missing'),'--quality-report'),
++           (str(d/'parent-link/../missing2'),str(d/'real/missing2'),'--quality-report')]
++    for op,rp,check in cases:
++        before={str(f):f.read_bytes() for f in [inp,binary,out,rep]};files=set(d.rglob("*"))
++        cmd=[TOOL,'--ip-samples','--binary='+str(binary),'--perfscript='+str(inp),'--output='+op,'--quality-report='+rp]
++        p=subprocess.run(cmd,capture_output=True,text=True)
++        assert p.returncode and 'path conflict:' in p.stderr and check in p.stderr,p.stderr
++        assert p.stderr.count('llvm-profgen: error:')==1
++        assert before=={f:Path(f).read_bytes() for f in before}
++        assert set(d.rglob("*"))==files
++    for flag in ['quality-report=x','ip-min-usable-ratio=0','ip-min-target-samples=0','ip-max-lost-ratio=0','ip-test-inject-failure=symbolize']:
++        p=subprocess.run([TOOL,'--binary='+str(binary),'--output='+str(out),'--'+flag],capture_output=True,text=True)
++        assert p.returncode and 'IP-only options require --ip-samples' in p.stderr,p.stderr
++elif GROUP == 'writer':
++    p,q,d,_=run(['--use-md5']);assert 'W_MD5_IGNORED' in [w['code'] for w in q['warnings']]
++    p,q,a,_=run(['--format=extbinary','--use-md5'])
++    p,q,b,_=run(['--format=extbinary'])
++    assert (a/'out.prof').read_bytes()!=(b/'out.prof').read_bytes()
++    # Single [ip,ip] LBR range. Its byte-based total is normalized by the
++    # existing LBR update-total-samples option; IP totals remain unchanged.
++    f=I/'boundary-extra/pure-a64.perfbin'
++    p,q,d,_=run(['--ip-zero-fill=sampled-functions','--format=extbinary'],data='17/17 7 cycles: 1000 (/target+0x1000)\n',binary=f)
++    raw=TMP/'lbr.raw';raw.write_text('1\n1000-1000:7\n0\n')
++    lbr=TMP/'lbr.prof'
++    p=subprocess.run([TOOL,'--binary='+str(f),'--unsymbolized-profile='+str(raw),'--use-offset=0','--update-total-samples','--format=extbinary','--output='+str(lbr)],capture_output=True,text=True)
++    assert p.returncode==0,p.stderr
++    assert lbr.read_bytes()==(d/'out.prof').read_bytes(),(str(lbr),str(d/'out.prof'))
++else:
++    raise AssertionError(GROUP)
++print('PASS quality',GROUP)
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/invalid-symbol.debug b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/invalid-symbol.debug
+new file mode 100644
+index 0000000000000000000000000000000000000000..722202dd9a88c656ed6459f780ed5485cca525fc
+GIT binary patch
+literal 5728
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/invalid-symbol.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/invalid-symbol.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..118b04b04c1e7bdcbbec37f2d45a8bb031a7af9a
+GIT binary patch
+literal 5768
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/thumb-absolute.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/thumb-absolute.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..661abd9eafc7879ef475e110918854d3c2f181d3
+GIT binary patch
+literal 4756
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/thumb-fallback.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/thumb-fallback.perfbin
+new file mode 100644
+index 0000000000000000000000000000000000000000..d50f7618f8e188e64f5eafadeeef408086f368c1
+GIT binary patch
+literal 4756
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/truncated.debug b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/truncated.debug
+new file mode 100644
+index 0000000000000000000000000000000000000000..4b0ff307bc2cf8c1abe01515b7642cad5cb06c93
+GIT binary patch
+literal 5720
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/ip-options.test b/llvm/test/tools/llvm-profgen/ip-options.test
+index 29d671bf1476..e0d591f0cca0 100644
+--- a/llvm/test/tools/llvm-profgen/ip-options.test
++++ b/llvm/test/tools/llvm-profgen/ip-options.test
+@@ -62,7 +62,7 @@
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --show-ip-address-counts=false 2>&1 | FileCheck %s --check-prefix=GATE
+ # GATE: IP-only options require --ip-samples
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=- --ip-samples --ip-aggregation=sum --format=gcc 2>&1 | FileCheck %s --check-prefix=STDOUT
+-# STDOUT: IP sample mode does not support --output=-
++# STDOUT: IP sample mode: path conflict: --output='-' aliases --stdout='-'
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-aggregation=sum --format=gcc --perfdata=missing 2>&1 | FileCheck %s --check-prefix=DATA
+ # DATA: IP sample mode: --perfdata is not admitted; use perf script text exported on the board
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-aggregation=sum --format=gcc 2>&1 | FileCheck %s --check-prefix=MISSING
+diff --git a/llvm/test/tools/llvm-profgen/ip-quality-exits.test b/llvm/test/tools/llvm-profgen/ip-quality-exits.test
+new file mode 100644
+index 000000000000..9008fcdc3372
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-quality-exits.test
+@@ -0,0 +1,4 @@
++#===- ip-quality-exits.test - IP quality contract -------------------------===#
++# REQUIRES: x86-registered-target, aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/quality/check-quality.py llvm-profgen exits %t | FileCheck %s
++# CHECK: PASS quality exits
+diff --git a/llvm/test/tools/llvm-profgen/ip-quality-fields.test b/llvm/test/tools/llvm-profgen/ip-quality-fields.test
+new file mode 100644
+index 000000000000..f927f9cb65f9
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-quality-fields.test
+@@ -0,0 +1,4 @@
++#===- ip-quality-fields.test - IP quality contract -------------------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/quality/check-quality.py llvm-profgen fields %t | FileCheck %s
++# CHECK: PASS quality fields
+diff --git a/llvm/test/tools/llvm-profgen/ip-quality-output.test b/llvm/test/tools/llvm-profgen/ip-quality-output.test
+new file mode 100644
+index 000000000000..f8f359ebaa3c
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-quality-output.test
+@@ -0,0 +1,4 @@
++#===- ip-quality-output.test - IP quality contract -------------------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/quality/check-quality.py llvm-profgen output %t | FileCheck %s
++# CHECK: PASS quality output
+diff --git a/llvm/test/tools/llvm-profgen/ip-quality-paths.test b/llvm/test/tools/llvm-profgen/ip-quality-paths.test
+new file mode 100644
+index 000000000000..1c3e41ff6290
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-quality-paths.test
+@@ -0,0 +1,4 @@
++#===- ip-quality-paths.test - IP quality contract -------------------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/quality/check-quality.py llvm-profgen paths %t | FileCheck %s
++# CHECK: PASS quality paths
+diff --git a/llvm/test/tools/llvm-profgen/ip-quality-thresholds.test b/llvm/test/tools/llvm-profgen/ip-quality-thresholds.test
+new file mode 100644
+index 000000000000..73273009be1b
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-quality-thresholds.test
+@@ -0,0 +1,4 @@
++#===- ip-quality-thresholds.test - IP quality contract -------------------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/quality/check-quality.py llvm-profgen thresholds %t | FileCheck %s
++# CHECK: PASS quality thresholds
+diff --git a/llvm/test/tools/llvm-profgen/ip-quality-writer.test b/llvm/test/tools/llvm-profgen/ip-quality-writer.test
+new file mode 100644
+index 000000000000..5fdc4582c8f7
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-quality-writer.test
+@@ -0,0 +1,4 @@
++#===- ip-quality-writer.test - IP quality contract -------------------------===#
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/quality/check-quality.py llvm-profgen writer %t | FileCheck %s
++# CHECK: PASS quality writer
+diff --git a/llvm/tools/llvm-profgen/CMakeLists.txt b/llvm/tools/llvm-profgen/CMakeLists.txt
+index a2cd02f94d92..c3e8fb2c91f4 100644
+--- a/llvm/tools/llvm-profgen/CMakeLists.txt
++++ b/llvm/tools/llvm-profgen/CMakeLists.txt
+@@ -20,6 +20,7 @@ add_llvm_tool(llvm-profgen
+   PerfReader.cpp
+   IPPerfReader.cpp
+   IPIdentity.cpp
++  IPQualityReport.cpp
+   IPBoundary.cpp
+   CSPreInliner.cpp
+   ProfiledBinary.cpp
+diff --git a/llvm/tools/llvm-profgen/ErrorHandling.h b/llvm/tools/llvm-profgen/ErrorHandling.h
+index 17084bd785e6..33283c1ceb26 100644
+--- a/llvm/tools/llvm-profgen/ErrorHandling.h
++++ b/llvm/tools/llvm-profgen/ErrorHandling.h
+@@ -14,10 +14,18 @@
+ #include "llvm/Support/Error.h"
+ #include "llvm/Support/ErrorOr.h"
+ #include "llvm/Support/WithColor.h"
++#include <functional>
+ #include <system_error>
+ 
+ namespace llvm {
+ 
++// Empty for the legacy path. Move the callback before invocation so even a
++// failure while reporting cannot reenter it.
++inline std::function<void(StringRef)> ProfgenExitCallback;
++inline void setProfgenExitCallback(std::function<void(StringRef)> Callback) {
++  ProfgenExitCallback = std::move(Callback);
++}
++
+ [[noreturn]] inline void exitWithError(const Twine &Message,
+                                        StringRef Whence = StringRef(),
+                                        StringRef Hint = StringRef()) {
+@@ -27,6 +35,11 @@ namespace llvm {
+   errs() << Message << "\n";
+   if (!Hint.empty())
+     WithColor::note() << Hint.str() << "\n";
++  if (ProfgenExitCallback) {
++    auto Callback = std::move(ProfgenExitCallback);
++    ProfgenExitCallback = nullptr;
++    Callback((Whence.empty() ? Message : Twine(Whence) + ": " + Message).str());
++  }
+   ::exit(EXIT_FAILURE);
+ }
+ 
+@@ -36,6 +49,10 @@ namespace llvm {
+ }
+ 
+ [[noreturn]] inline void exitWithError(Error E, StringRef Whence) {
++  // IP's registered handler also covers StringError values that cannot be
++  // converted to error_code. Keep the legacy conversion untouched otherwise.
++  if (ProfgenExitCallback)
++    exitWithError(toString(std::move(E)), Whence);
+   exitWithError(errorToErrorCode(std::move(E)), Whence);
+ }
+ 
+diff --git a/llvm/tools/llvm-profgen/IPIdentity.cpp b/llvm/tools/llvm-profgen/IPIdentity.cpp
+index 71804eace844..d54f0c55ca76 100644
+--- a/llvm/tools/llvm-profgen/IPIdentity.cpp
++++ b/llvm/tools/llvm-profgen/IPIdentity.cpp
+@@ -131,11 +131,13 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+   if (!ID)
+     return ID.takeError();
+   BinaryID = *ID;
++  BinaryIdentityRead = true;
+   if (Options.DebugBinary) {
+     auto Debug = readObjectIdentity(*Options.DebugBinary);
+     if (!Debug)
+       return Debug.takeError();
+     DebugID = *Debug;
++    DebugIdentityRead = true;
+   }
+   IdentityDiagnostics.push_back("binary=" + quote(BinaryPath) +
+                                 " binary_realpath=" + quote(BinaryRealPath) +
+@@ -159,6 +161,11 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+   if (Options.DebugBinary) {
+     if (DebugID != BinaryID)
+       Overall = Grade::Mismatch;
++    Evidence.push_back({*Options.DebugBinary, "debug-binary", DebugID,
++                        DebugID != BinaryID ? "mismatch"
++                        : DebugID.empty()   ? "missing"
++                                            : "consistent",
++                        std::nullopt});
+     IdentityDiagnostics.push_back("source=debug-binary result=" +
+                                   std::string(DebugID != BinaryID ? "mismatch"
+                                               : DebugID.empty()
+@@ -180,12 +187,17 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+     IdentityDiagnostics.push_back("candidate=" + quote(Path) +
+                                   " deleted=" + (Deleted ? "true" : "false"));
+     if (IDs && !IDs->empty()) {
++      for (const auto &ID : *IDs)
++        Evidence.push_back({Path, "buildid-list", ID,
++                            ID == BinaryID ? "consistent" : "mismatch",
++                            std::nullopt});
+       for (const auto &Evidence : *IDs)
+         IdentityDiagnostics.push_back(
+             "path=" + quote(Path) +
+             " source=buildid-list origin=unknown build_id=" + Evidence +
+             " result=" + (Evidence == BinaryID ? "consistent" : "mismatch"));
+     } else {
++      Evidence.push_back({Path, "buildid-list", "", "missing", std::nullopt});
+       IdentityDiagnostics.push_back(
+           "path=" + quote(Path) +
+           " source=buildid-list build_id=none result=missing");
+@@ -213,6 +225,10 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+       } else if (G == Grade::Mismatch) {
+         PathGrade = Grade::Mismatch;
+       }
++      Evidence.push_back(
++          {Path, Source.str(), MappedID,
++           Executable || G == Grade::Mismatch ? name(G).str() : "not-required",
++           uint64_t(Index)});
+       IdentityDiagnostics.push_back(
+           "mapping=" + std::to_string(Index) + " path=" + quote(Path) +
+           " pid=" + std::to_string(M.PID) + " executable=" +
+@@ -224,6 +240,8 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+     if (!ExecutableCount)
+       PathGrade = std::min(PathGrade, Grade::Unverified);
+     Overall = std::min(Overall, PathGrade);
++    Evidence.push_back(
++        {Path, "path-summary", "", name(PathGrade).str(), std::nullopt});
+     IdentityDiagnostics.push_back(
+         "path=" + quote(Path) + " executable_mappings=" +
+         std::to_string(ExecutableCount) + " result=" + name(PathGrade).str());
+@@ -242,7 +260,8 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+                                       " unrelated buildid-list conflict");
+       }
+     }
+-  IdentityDiagnostics.push_back("final=" + name(Overall).str());
++  IdentityGrade = name(Overall).str();
++  IdentityDiagnostics.push_back("final=" + IdentityGrade);
+   if (Overall == Grade::Mismatch)
+     return identityError("build-id mismatch");
+   if (Overall != Grade::Unverified)
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.cpp b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+index 622ab4836773..273ed4d09c49 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.cpp
++++ b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+@@ -6,6 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ #include "IPPerfReader.h"
++#include "IPQualityReport.h"
+ #include "llvm/ADT/SmallString.h"
+ #include "llvm/ADT/StringExtras.h"
+ #include "llvm/BinaryFormat/ELF.h"
+@@ -15,6 +16,7 @@
+ #include "llvm/Support/MemoryBuffer.h"
+ #include "llvm/Support/Path.h"
+ #include "llvm/Support/Regex.h"
++#include "llvm/Support/SHA256.h"
+ #include "llvm/Support/raw_ostream.h"
+ #include <algorithm>
+ #include <limits>
+@@ -218,6 +220,13 @@ Error IPPerfReader::parseLine(StringRef Line) {
+     return invalid("file DSO is missing dsoff");
+   if (Error E = add(Stats.Input, 1))
+     return E;
++  if (CollectQuality) {
++    auto &EC = EventCounts[S.Event];
++    if (Error E = add(EC.SampleCount, 1))
++      return E;
++    if (Error E = add(EC.PeriodSum, S.Period))
++      return E;
++  }
+   if (Error E = add(Stats.Events[S.Event], 1))
+     return E;
+   if (PID == -1)
+@@ -274,22 +283,55 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+     if (!Match->isValid(Why))
+       return invalid("invalid --binary-match-regex: " + Why);
+   }
++  SelectedEvent =
++      Options.Event
++          ? *Options.Event
++          : (Stats.Events.empty() ? "unknown" : Stats.Events.begin()->first);
++  auto Count = [&](StringRef Name, const Sample &S) -> Error {
++    if (!CollectQuality)
++      return Error::success();
++    auto &C = Layers[Name.str()];
++    if (Error E = add(C.SampleCount, 1))
++      return E;
++    return add(C.PeriodSum, S.Period);
++  };
++  for (StringRef N : {"after_event", "after_pid", "pid_unknown", "kernel",
++                      "other_dso", "unmapped", "target", "unmapped_in_target"})
++    Layers[N.str()] = {};
+   std::map<std::string, uint64_t> Files;
+   for (const Sample &S : Samples) {
+     if (Options.Event && S.Event != *Options.Event)
+       continue;
++    if (Error E = Count("after_event", S))
++      return E;
++    if (S.PID == -1)
++      if (Error E = Count("pid_unknown", S))
++        return E;
+     if (Error E = add(Stats.AfterEvent, 1))
+       return E;
+     if (Options.PID && (S.PID == -1 || uint64_t(S.PID) != *Options.PID))
+       continue;
++    if (Error E = Count("after_pid", S))
++      return E;
+     if (Error E = add(Stats.AfterPID, 1))
+       return E;
+     if (kernel(S.Path)) {
++      if (Error E = Count("kernel", S))
++        return E;
+       if (Error E = add(Stats.Kernel, 1))
+         return E;
+       continue;
+     }
+     if (special(S.Path)) {
++      if (Error E = Count(S.Offset ? "other_dso" : "unmapped", S))
++        return E;
++      if (S.Offset && CollectQuality) {
++        auto &C = OtherDSOs[S.Path];
++        if (Error E = add(C.SampleCount, 1))
++          return E;
++        if (Error E = add(C.PeriodSum, S.Period))
++          return E;
++      }
+       if (Error E = add(S.Offset ? Stats.OtherDSO : Stats.Unmapped, 1))
+         return E;
+       continue;
+@@ -300,15 +342,27 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+                           : sys::path::filename(livePath(S.Path)) ==
+                                 sys::path::filename(BinaryRealPath);
+     if (!Selected) {
++      if (Error E = Count("other_dso", S))
++        return E;
++      if (CollectQuality) {
++        auto &C = OtherDSOs[S.Path];
++        if (Error E = add(C.SampleCount, 1))
++          return E;
++        if (Error E = add(C.PeriodSum, S.Period))
++          return E;
++      }
+       if (Error E = add(Stats.OtherDSO, 1))
+         return E;
+       continue;
+     }
++    if (Error E = Count("target", S))
++      return E;
+     if (Error E = add(Stats.Target, 1))
+       return E;
+     Candidates.insert(S.Path);
+     SelectedSamples.push_back(&S);
+   }
++  Selected = true;
+   if (Options.Event && !Stats.AfterEvent)
+     return invalid("event filter selected no samples");
+   if (!Stats.Target) {
+@@ -348,6 +402,13 @@ Error IPPerfReader::countAddresses() {
+       Found = &Seg;
+     }
+     if (!Found) {
++      if (CollectQuality) {
++        auto &U = Layers["unmapped_in_target"];
++        if (Error E = add(U.SampleCount, 1))
++          return E;
++        if (Error E = add(U.PeriodSum, S->Period))
++          return E;
++      }
+       if (Error E = add(Stats.UnmappedInTarget, 1))
+         return E;
+       continue;
+@@ -366,11 +427,16 @@ Error IPPerfReader::countAddresses() {
+ 
+ Error IPPerfReader::read(StringRef Trace, StringRef Binary,
+                          const IPReaderOptions &Options) {
++  ReadOptions = Options;
++  CollectQuality = needsIPQualityCounters();
++  setIPStage("parse");
+   auto Buffer = MemoryBuffer::getFile(Trace);
+   if (!Buffer)
+     return createStringError(Buffer.getError(),
+                              "IP sample mode: cannot read input");
+   StringRef Text = (*Buffer)->getBuffer();
++  if (CollectQuality)
++    InputHash = toHex(SHA256::hash(arrayRefFromStringRef(Text)), true);
+   unsigned LineNumber = 0;
+   while (!Text.empty()) {
+     auto [Line, Tail] = Text.split('\n');
+@@ -380,13 +446,21 @@ Error IPPerfReader::read(StringRef Trace, StringRef Binary,
+       return invalid("line " + Twine(LineNumber).str() + ": " +
+                      toString(std::move(E)));
+   }
++  Parsed = true;
++  setIPStage("load");
+   if (Error E = loadBinary(Binary))
+     return E;
++  setIPStage("parse");
+   if (Error E = selectSamples(Options))
+     return E;
++  setIPStage("identity");
+   if (Error E = validateIdentity(Options))
+     return E;
+-  return countAddresses();
++  setIPStage("generate");
++  if (Error E = countAddresses())
++    return E;
++  Mapped = true;
++  return Error::success();
+ }
+ 
+ void IPPerfReader::printAddressCounts(raw_ostream &OS) const {
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.h b/llvm/tools/llvm-profgen/IPPerfReader.h
+index 6daa5be397ba..9172d5767f17 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.h
++++ b/llvm/tools/llvm-profgen/IPPerfReader.h
+@@ -43,7 +43,22 @@ struct IPReaderOptions {
+   bool AllowMissingBuildID = false;
+ };
+ 
++class IPQualityReport;
+ class IPPerfReader {
++  friend class IPQualityReport;
++  bool Parsed = false, Selected = false, Mapped = false;
++  bool CollectQuality = false;
++  IPReaderOptions ReadOptions;
++  std::string InputHash, SelectedEvent;
++  std::map<std::string, IPAddressCount> Layers, EventCounts, OtherDSOs;
++  std::string IdentityGrade = "unknown";
++  bool BinaryIdentityRead = false, DebugIdentityRead = false;
++  struct IdentityEvidence {
++    std::string Path, Source, ID, Result;
++    std::optional<uint64_t> MappingIndex;
++  };
++  std::vector<IdentityEvidence> Evidence;
++
+   struct Sample {
+     int64_t PID, TID;
+     uint64_t Period, IP;
+diff --git a/llvm/tools/llvm-profgen/IPQualityReport.cpp b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+new file mode 100644
+index 000000000000..726f027ac27f
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+@@ -0,0 +1,803 @@
++//===- IPQualityReport.cpp - IP quality and output contract -------------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++#include "IPQualityReport.h"
++#include "ErrorHandling.h"
++#include "ProfileGenerator.h"
++#include "llvm/ADT/APInt.h"
++#include "llvm/ADT/ScopeExit.h"
++#include "llvm/ADT/SmallString.h"
++#include "llvm/ADT/StringExtras.h"
++#include "llvm/Config/llvm-config.h"
++#include "llvm/Object/ELFObjectFile.h"
++#include "llvm/Support/FileSystem.h"
++#include "llvm/Support/Path.h"
++
++using namespace llvm;
++using namespace llvm::sampleprof;
++using namespace llvm::object;
++namespace {
++IPQualityReport *ActiveReport = nullptr;
++Error failure(const Twine &Message) {
++  return createStringError(inconvertibleErrorCode(),
++                           "IP sample mode: " + Message);
++}
++bool decimal(StringRef S, uint64_t &N) {
++  return !S.empty() && llvm::all_of(S, isDigit) && !S.getAsInteger(10, N);
++}
++Expected<std::string> normalized(StringRef Path) {
++  SmallString<256> P(Path);
++  if (std::error_code EC = sys::fs::make_absolute(P))
++    return errorCodeToError(EC);
++  SmallString<256> Parent(sys::path::parent_path(P)), Real;
++  SmallVector<std::string, 8> Tail;
++  Tail.push_back(sys::path::filename(P).str());
++  while (!Parent.empty()) {
++    if (!sys::fs::real_path(Parent, Real))
++      break;
++    Tail.push_back(sys::path::filename(Parent).str());
++    auto Next = sys::path::parent_path(Parent);
++    if (Next == Parent)
++      break;
++    Parent = Next;
++  }
++  if (Real.empty())
++    Real = Parent;
++  for (auto I = Tail.rbegin(); I != Tail.rend(); ++I)
++    sys::path::append(Real, *I);
++  sys::path::remove_dots(Real, true);
++  return Real.str().str();
++}
++Expected<bool> sameFile(StringRef A, StringRef B) {
++  if (sys::fs::exists(A) && sys::fs::exists(B)) {
++    bool Equal;
++    if (std::error_code EC = sys::fs::equivalent(A, B, Equal))
++      return errorCodeToError(EC);
++    return Equal;
++  }
++  auto NA = normalized(A);
++  if (!NA)
++    return NA.takeError();
++  auto NB = normalized(B);
++  if (!NB)
++    return NB.takeError();
++  return *NA == *NB;
++}
++uint64_t weight(const IPAddressCount &C, bool Sample) {
++  return Sample ? C.SampleCount : C.PeriodSum;
++}
++json::Value stringOrUnknown(StringRef S) {
++  return S.empty() ? json::Value("unknown") : json::Value(S);
++}
++} // namespace
++
++Error llvm::validateIPOutputPaths(const IPQualityOptions &O) {
++  auto Conflict = [](StringRef A, StringRef AP, StringRef B, StringRef BP) {
++    return failure("path conflict: --" + A + "='" + AP + "' aliases --" + B +
++                   "='" + BP + "'");
++  };
++  if (O.Output == "-")
++    return Conflict("output", "-", "stdout", "-");
++  std::vector<std::pair<StringRef, StringRef>> Outputs{{"output", O.Output}};
++  if (!O.Report.empty())
++    Outputs.emplace_back("quality-report", O.Report);
++  std::vector<std::pair<StringRef, StringRef>> Inputs{
++      {"perfscript", O.Trace},
++      {"binary", O.Binary},
++      {"debug-binary", O.Debug},
++      {"perf-buildid-list", O.BuildIDList},
++      {"dwp", O.DWP}};
++  for (size_t I = 0; I < Outputs.size(); ++I) {
++    StringRef Name = Outputs[I].first;
++    StringRef Path = Outputs[I].second;
++    if (Path.empty())
++      continue;
++    auto Check = [&](StringRef N, StringRef P) -> Error {
++      if (P.empty())
++        return Error::success();
++      auto Same = sameFile(Path, P);
++      if (!Same)
++        return Same.takeError();
++      if (*Same)
++        return Conflict(Name, Path, N, P);
++      return Error::success();
++    };
++    for (size_t J = I + 1; J < Outputs.size(); ++J)
++      if (Error E = Check(Outputs[J].first, Outputs[J].second))
++        return E;
++    for (auto [N, P] : Inputs)
++      if (Error E = Check(N, P))
++        return E;
++  }
++  return Error::success();
++}
++bool llvm::needsIPQualityCounters() {
++  return ActiveReport && ActiveReport->needsCounters();
++}
++void llvm::setIPStage(StringRef S) {
++  if (ActiveReport)
++    ActiveReport->enter(S);
++}
++bool llvm::injectIPFailure(StringRef P) {
++  return ActiveReport && ActiveReport->inject(P);
++}
++void llvm::recordIPWarning(StringRef C, StringRef M) {
++  if (ActiveReport)
++    ActiveReport->warn(C, M);
++}
++
++IPQualityReport::IPQualityReport(IPQualityOptions O, const IPPerfReader &R,
++                                 const IPGenerationStatistics &S,
++                                 const IPGenerationOptions &G)
++    : Options(std::move(O)), Reader(R), Statistics(S), Generation(G) {
++  ActiveReport = this;
++  if (Options.MinUsable)
++    UsableCheck = "unknown";
++  if (Options.MinSamples)
++    SampleCheck = "unknown";
++  if (Options.MaxLost)
++    LostCheck = "unknown";
++  setProfgenExitCallback([this](StringRef Message) {
++    ++CallbackCount;
++    fail(Message);
++  });
++}
++IPQualityReport::~IPQualityReport() { finish(); }
++void IPQualityReport::finish() {
++  setProfgenExitCallback(nullptr);
++  if (!ProfileTemporary.empty()) {
++    sys::fs::remove(ProfileTemporary);
++    ProfileTemporary.clear();
++  }
++  ActiveReport = nullptr;
++}
++void IPQualityReport::warn(StringRef Code, StringRef Message) {
++  Warnings.try_emplace(Code.str(), Message.str());
++}
++Error IPQualityReport::validateOptions() {
++  auto Parse = [&](const std::optional<std::string> &Text,
++                   std::optional<Fraction> &F, StringRef Name) -> Error {
++    if (!Text)
++      return Error::success();
++    if (*Text == "0" || *Text == "1") {
++      F = Fraction{uint64_t((*Text)[0] - '0'), 1};
++      return Error::success();
++    }
++    StringRef S(*Text);
++    uint64_t N;
++    if (!S.consume_front("0.") || S.empty() || S.size() > 9 || !decimal(S, N))
++      return failure("--" + Name +
++                     " requires 0, 1, or 0. followed by 1-9 decimal digits");
++    uint64_t D = 1;
++    for (size_t I = 0; I < S.size(); ++I)
++      D *= 10;
++    F = Fraction{N, D};
++    return Error::success();
++  };
++  if (Error E = Parse(Options.MinUsable, MinUsable, "ip-min-usable-ratio"))
++    return E;
++  if (Error E = Parse(Options.MaxLost, MaxLost, "ip-max-lost-ratio"))
++    return E;
++  if (Options.MinSamples) {
++    uint64_t N;
++    if (!decimal(*Options.MinSamples, N))
++      return failure(
++          "--ip-min-target-samples requires a non-negative decimal uint64");
++    MinSamples = N;
++  }
++  static const StringRef Points[] = {
++      "profile-write",    "profile-flush",   "profile-close",
++      "profile-rename",   "report-write",    "report-flush",
++      "report-close",     "report-rename",   "symbolize",
++      "debug-open",       "runtime-open",    "invalid-image",
++      "runtime-metadata", "debug-open-load", "debug-metadata",
++      "context-create"};
++  if (!Options.Injection.empty() &&
++      !llvm::is_contained(Points, Options.Injection))
++    return failure("unknown --ip-test-inject-failure point");
++  return Error::success();
++}
++json::Value IPQualityReport::ratio(uint64_t N, uint64_t D) const {
++  if (!D)
++    return "unknown";
++  return json::Object{{"numerator", N}, {"denominator", D}};
++}
++json::Value IPQualityReport::count(const IPAddressCount &C) const {
++  return json::Object{{"sample_count", C.SampleCount},
++                      {"period_sum", C.PeriodSum},
++                      {"normalized_weight",
++                       PeriodKnown ? ratio(weight(C, Generation.SampleWeight),
++                                           Generation.PeriodUnit)
++                                   : json::Value("unknown")}};
++}
++Error IPQualityReport::checkThresholds() {
++  if (Reader.Parsed && Reader.Stats.LostRecords &&
++      Reader.Stats.LostCount > UINT64_MAX - Reader.Stats.Input)
++    return failure("LOST ratio denominator overflow");
++  auto Greater = [](uint64_t N, uint64_t D, Fraction F) {
++    return (APInt(128, N) * APInt(128, F.D))
++        .ugt(APInt(128, D) * APInt(128, F.N));
++  };
++  auto T = Reader.Layers.find("target");
++  if (MinSamples && Reader.Selected)
++    SampleCheck = Reader.Stats.Target < *MinSamples ? "failed" : "passed";
++  if (MinUsable && Statistics.Classified && T != Reader.Layers.end()) {
++    uint64_t N = weight(Statistics.OriginalUsable, Generation.SampleWeight),
++             D = weight(T->second, Generation.SampleWeight);
++    if (D)
++      UsableCheck =
++          Greater(MinUsable->N, MinUsable->D, {N, D}) ? "failed" : "passed";
++  }
++  if (MaxLost && Reader.Parsed && Reader.Stats.LostRecords) {
++    uint64_t L = Reader.Stats.LostCount, S = Reader.Stats.Input;
++    // A 65-bit denominator and two 64-bit factors fit in 192 bits.
++    auto Left = APInt(192, L) * APInt(192, MaxLost->D);
++    auto Right = (APInt(192, L) + APInt(192, S)) * APInt(192, MaxLost->N);
++    LostCheck = Left.ugt(Right) ? "exceeded" : "not_exceeded";
++  }
++  if (UsableCheck == "unknown")
++    warn("W_USABLE_RATIO_UNKNOWN", "configured usable ratio is unknown");
++  if (SampleCheck == "unknown")
++    warn("W_TARGET_COUNT_UNKNOWN", "configured target count is unknown");
++  if (LostCheck == "unknown")
++    warn("W_LOST_RATIO_UNKNOWN", "configured visible LOST ratio is unknown");
++  if (UsableCheck == "failed")
++    return failure("--ip-min-usable-ratio check failed");
++  if (SampleCheck == "failed")
++    return failure("--ip-min-target-samples check failed");
++  if (LostCheck == "exceeded")
++    return failure("--ip-max-lost-ratio check failed");
++  return Error::success();
++}
++
++// Diagnostic-only ELF inspection. Never promote failed metadata inspection to
++// a conversion error; boundary validation remains the authority when requested.
++void IPQualityReport::observeBinary() {
++  if (Options.Report.empty())
++    return;
++  struct Mapping {
++    uint64_t Address;
++    char State;
++  };
++  struct Symbol {
++    uint64_t Address, Size;
++    std::string Name;
++    bool Thumb, StaticTable;
++  };
++  struct Section {
++    uint64_t Address, Size;
++    std::vector<Mapping> Maps;
++  };
++  std::map<std::pair<std::string, uint64_t>, Section> Sections;
++  std::vector<Symbol> Symbols;
++  bool IsARM = false;
++  auto Inspect = [&](StringRef Path) {
++    auto Obj = ObjectFile::createObjectFile(Path);
++    if (!Obj) {
++      consumeError(Obj.takeError());
++      return;
++    }
++    auto *O = Obj->getBinary();
++    if (!isa<ELFObjectFileBase>(O))
++      return;
++    IsA64 = O->getArch() == Triple::aarch64;
++    bool ARM = O->getArch() == Triple::arm || O->getArch() == Triple::thumb;
++    IsARM = ARM;
++    for (const SectionRef &S : O->sections()) {
++      auto N = S.getName();
++      if (!N) {
++        consumeError(N.takeError());
++        continue;
++      }
++      if (S.isText())
++        Sections.try_emplace({N->str(), S.getAddress()},
++                             Section{S.getAddress(), S.getSize(), {}});
++    }
++    auto ReadSymbol = [&](const SymbolRef &S, bool AllowMapping) {
++      auto N = S.getName();
++      auto A = S.getAddress();
++      auto Sec = S.getSection();
++      auto F = S.getFlags();
++      if (!N || !A || !Sec || !F) {
++        if (!N)
++          consumeError(N.takeError());
++        if (!A)
++          consumeError(A.takeError());
++        if (!Sec)
++          consumeError(Sec.takeError());
++        if (!F)
++          consumeError(F.takeError());
++        return;
++      }
++      ELFSymbolRef ES(S);
++      if (ES.getELFType() == ELF::STT_FUNC &&
++          !(*F & (SymbolRef::SF_Undefined | SymbolRef::SF_Absolute)) &&
++          *Sec != O->section_end() && (*Sec)->isText())
++        Symbols.push_back({*A & (ARM ? ~uint64_t(1) : ~uint64_t(0)),
++                           ES.getSize(), N->str(),
++                           bool(*F & SymbolRef::SF_Thumb), AllowMapping});
++      if (!AllowMapping || *Sec == O->section_end() || !(*Sec)->isText())
++        return;
++      bool Name = N->size() >= 2 && (*N)[0] == '$' &&
++                  (N->size() == 2 || (N->size() > 3 && (*N)[2] == '.'));
++      if (!Name || ES.getELFType() != ELF::STT_NOTYPE ||
++          ES.getBinding() != ELF::STB_LOCAL)
++        return;
++      char State = (*N)[1];
++      if (!(State == 'd' || (ARM && (State == 'a' || State == 't')) ||
++            (IsA64 && State == 'x')))
++        return;
++      auto SN = (*Sec)->getName();
++      if (!SN) {
++        consumeError(SN.takeError());
++        return;
++      }
++      auto It = Sections.find({SN->str(), (*Sec)->getAddress()});
++      if (It != Sections.end() && *A >= It->second.Address &&
++          *A - It->second.Address < It->second.Size)
++        It->second.Maps.push_back({*A, State});
++    };
++    for (const SymbolRef &S : O->symbols())
++      ReadSymbol(S, true);
++    for (const SymbolRef &S :
++         cast<ELFObjectFileBase>(O)->getDynamicSymbolIterators())
++      ReadSymbol(S, false);
++  };
++  Inspect(Options.Binary);
++  if (!Options.Debug.empty())
++    Inspect(Options.Debug);
++  for (auto &[K, S] : Sections)
++    llvm::sort(S.Maps, [](auto A, auto B) {
++      return std::tie(A.Address, A.State) < std::tie(B.Address, B.State);
++    });
++  for (StringRef N : {"thumb", "a32", "a64", "unknown"})
++    ISACounts[N.str()] = {};
++  for (StringRef N : {"mapping-symbols", "SF_Thumb", "unknown"})
++    ISASources[N.str()] = {};
++  auto Add = [](IPAddressCount &A, const IPAddressCount &B) {
++    A.SampleCount += B.SampleCount;
++    A.PeriodSum += B.PeriodSum;
++  };
++  // All buckets are subsets of checked selected-event totals.
++  for (auto &[PC, C] : Reader.Counts) {
++    std::string ISA = "unknown", Source = "unknown";
++    unsigned Cover = 0;
++    bool HaveMap = false;
++    for (auto &[K, S] : Sections) {
++      if (PC < S.Address || PC - S.Address >= S.Size)
++        continue;
++      ++Cover;
++      auto It =
++          std::upper_bound(S.Maps.begin(), S.Maps.end(), PC,
++                           [](uint64_t P, Mapping M) { return P < M.Address; });
++      if (It == S.Maps.begin())
++        continue;
++      auto Last = std::prev(It);
++      bool Conflict = false;
++      for (auto J = Last; J != S.Maps.begin();) {
++        --J;
++        if (J->Address != Last->Address)
++          break;
++        if (J->State != Last->State)
++          Conflict = true;
++      }
++      HaveMap = true;
++      Source = "mapping-symbols";
++      if (!Conflict)
++        ISA = Last->State == 't'   ? "thumb"
++              : Last->State == 'a' ? "a32"
++              : Last->State == 'x' ? "a64"
++                                   : "unknown";
++    }
++    if (Cover > 1) {
++      ISA = "unknown";
++      Source = "unknown";
++      HaveMap = true;
++    }
++    if (!HaveMap && (IsA64 || IsARM))
++      for (const auto &S : Symbols)
++        if (PC >= S.Address && PC - S.Address < S.Size) {
++          ISA = IsA64 ? "a64" : S.Thumb ? "thumb" : "a32";
++          Source = "SF_Thumb";
++          break;
++        }
++    Add(ISACounts[ISA], C);
++    Add(ISASources[Source], C);
++    if (IsA64 && PC % 4 == 0) {
++      AlignmentCount += C.SampleCount;
++      AlignmentPeriod += C.PeriodSum;
++    }
++    if (Statistics.OutsideAddresses.count(PC)) {
++      std::string Name = "unknown";
++      for (const auto &S : Symbols)
++        if (S.StaticTable && PC >= S.Address && PC - S.Address < S.Size) {
++          Name = S.Name;
++          break;
++        }
++      Add(OutsideSymbols[Name], C);
++    }
++  }
++  ISAObserved = true;
++}
++
++json::Value IPQualityReport::build() {
++  json::Object Root;
++  Root["schema_version"] = uint64_t(1);
++  json::Array Args;
++  for (auto &A : Options.Arguments)
++    Args.push_back(A);
++  Root["tool"] = json::Object{{"version", LLVM_VERSION_STRING},
++                              {"arguments", std::move(Args)}};
++  Root["input"] = json::Object{{"path", Options.Trace},
++                               {"sha256", stringOrUnknown(Reader.InputHash)},
++                               {"projection", "ip-only"}};
++  json::Array Events;
++  for (auto &[Name, C] : Reader.EventCounts)
++    Events.push_back(json::Object{{"name", Name},
++                                  {"sample_count", C.SampleCount},
++                                  {"period_sum", C.PeriodSum}});
++  Root["event"] = json::Object{
++      {"selected", stringOrUnknown(Reader.SelectedEvent)},
++      {"type", "unknown"},
++      {"config", "unknown"},
++      {"before_filter", Reader.Parsed ? json::Value(std::move(Events))
++                                      : json::Value("unknown")}};
++  StringRef Event = StringRef(Reader.SelectedEvent).split(':').first;
++  StringRef Raw = Generation.SampleWeight ? "samples"
++                  : Event == "cycles"     ? "cycles"
++                  : Event == "cpu-clock"  ? "ns"
++                                          : "unknown";
++  Root["semantics"] = json::Object{
++      {"weight", Generation.SampleWeight ? "sample" : "period"},
++      {"raw_event_unit", Raw},
++      {"output_count_unit",
++       Generation.SampleWeight ? "samples" : "normalized-event-count"},
++      {"p_ref", PeriodKnown ? json::Value(Generation.PeriodUnit)
++                            : json::Value("unknown")},
++      {"p_ref_source", Generation.SampleWeight     ? "sample"
++                       : Generation.ExplicitPeriod ? "explicit"
++                                                   : "automatic"},
++      {"aggregation", Generation.AverageAggregation ? "avg"
++                      : Generation.MaxAggregation   ? "max"
++                                                    : "sum"},
++      {"dup_policy", Generation.MaxAggregation || Generation.AverageAggregation
++                         ? "duplication-factor"
++                         : "observed-sum"},
++      {"zero_fill", Generation.ZeroFill ? "sampled-functions" : "none"},
++      {"head_samples", Generation.EstimateHead ? "entry-estimate" : "none"},
++      {"skid", Generation.PrevInst ? "prev-inst" : "none"},
++      {"mode", "dwarf"},
++      {"fs_discriminator", Statistics.Started
++                               ? json::Value(Statistics.FSDiscriminator)
++                               : json::Value("unknown")}};
++  if (!SemanticsKnown)
++    Root["semantics"] = "unknown";
++  json::Array Candidates, Evidence;
++  for (auto &P : Reader.Candidates)
++    Candidates.push_back(json::Object{
++        {"path", P}, {"deleted", StringRef(P).ends_with(" (deleted)")}});
++  for (const auto &E : Reader.Evidence)
++    Evidence.push_back(json::Object{
++        {"path", E.Path},
++        {"source", E.Source},
++        {"build_id", E.ID},
++        {"result", E.Result},
++        {"mapping_index", E.MappingIndex ? json::Value(*E.MappingIndex)
++                                         : json::Value("unknown")}});
++  bool HasID =
++      llvm::any_of(Reader.Mappings, [](auto &M) { return !M.BuildID.empty(); });
++  Root["identity"] = json::Object{
++      {"observed_mmap_build_id",
++       Reader.Parsed ? json::Value(HasID) : json::Value("unknown")},
++      {"binary", Options.Binary},
++      {"binary_realpath", stringOrUnknown(Reader.BinaryRealPath)},
++      {"binary_build_id", Reader.BinaryIdentityRead
++                              ? json::Value(Reader.BinaryID)
++                              : json::Value("unknown")},
++      {"debug_binary", Options.Debug},
++      {"debug_build_id", Reader.DebugIdentityRead ? json::Value(Reader.DebugID)
++                                                  : json::Value("unknown")},
++      {"selection", Reader.ReadOptions.BinaryMatchRegex ? "regex" : "basename"},
++      {"candidates", Reader.Selected ? json::Value(std::move(Candidates))
++                                     : json::Value("unknown")},
++      {"evidence", Reader.BinaryIdentityRead ? json::Value(std::move(Evidence))
++                                             : json::Value("unknown")},
++      {"grade", Reader.IdentityGrade}};
++  uint64_t Exec = 0, NonExec = 0;
++  std::set<int64_t> PIDs;
++  json::Array Maps;
++  for (const auto &S : Reader.Samples)
++    if (S.PID >= 0)
++      PIDs.insert(S.PID);
++  for (const auto &M : Reader.Mappings)
++    if (Reader.Candidates.count(M.Path)) {
++      bool X = M.Permissions.find('x') != std::string::npos;
++      X ? ++Exec : ++NonExec;
++      Maps.push_back(
++          json::Object{{"pid", M.PID},
++                       {"tid", M.TID},
++                       {"path", M.Path},
++                       {"executable", X},
++                       {"build_id", M.BuildID},
++                       {"evidence_class", !M.BuildID.empty()  ? "mmap2-build-id"
++                                          : !M.Device.empty() ? "inode-tuple"
++                                                              : "missing"}});
++    }
++  Root["mapping"] = json::Object{
++      {"pid_count", Reader.Parsed ? json::Value(uint64_t(PIDs.size()))
++                                  : json::Value("unknown")},
++      {"candidate_executable_records",
++       Reader.Selected ? json::Value(Exec) : json::Value("unknown")},
++      {"candidate_nonexecutable_records",
++       Reader.Selected ? json::Value(NonExec) : json::Value("unknown")},
++      {"records",
++       Reader.Selected ? json::Value(std::move(Maps)) : json::Value("unknown")},
++      {"completeness", "unknown"}};
++  auto Layer = [&](StringRef N) -> json::Value {
++    auto I = Reader.Layers.find(N.str());
++    return Reader.Selected && I != Reader.Layers.end() ? count(I->second)
++                                                       : json::Value("unknown");
++  };
++  auto Gen = [&](StringRef N) -> json::Value {
++    auto I = Statistics.Counts.find(N.str());
++    return Statistics.Classified && I != Statistics.Counts.end()
++               ? count(I->second)
++               : json::Value("unknown");
++  };
++  auto Top = [&](const std::map<std::string, IPAddressCount> &Counts,
++                 size_t Limit, uint64_t Denom) -> json::Array {
++    std::vector<std::pair<std::string, IPAddressCount>> Rows(Counts.begin(),
++                                                             Counts.end());
++    llvm::sort(Rows, [&](const auto &A, const auto &B) {
++      auto X = weight(A.second, Generation.SampleWeight),
++           Y = weight(B.second, Generation.SampleWeight);
++      return X != Y ? X > Y : A.first < B.first;
++    });
++    json::Array A;
++    for (size_t I = 0; I < std::min(Limit, Rows.size()); ++I)
++      A.push_back(json::Object{
++          {"name", Rows[I].first},
++          {"counts", count(Rows[I].second)},
++          {"share",
++           ratio(weight(Rows[I].second, Generation.SampleWeight), Denom)}});
++    return A;
++  };
++  uint64_t TargetWeight =
++      Reader.Layers.count("target")
++          ? weight(Reader.Layers.at("target"), Generation.SampleWeight)
++          : 0;
++  json::Object Samples{
++      {"input_total", Reader.Parsed ? json::Value(json::Object{
++                                          {"sample_count", Reader.Stats.Input}})
++                                    : json::Value("unknown")}};
++  for (StringRef N : {"after_event", "after_pid", "pid_unknown", "kernel",
++                      "other_dso", "unmapped"})
++    Samples[N] = Layer(N);
++  uint64_t OtherWeight =
++      Reader.Layers.count("other_dso")
++          ? weight(Reader.Layers.at("other_dso"), Generation.SampleWeight)
++          : 0;
++  Samples["other_dso_top20"] =
++      Reader.Selected ? json::Value(Top(Reader.OtherDSOs, 20, OtherWeight))
++                      : json::Value("unknown");
++  Samples["target"] = json::Object{
++      {"counts", Layer("target")},
++      {"unmapped_in_target",
++       Reader.Mapped ? Layer("unmapped_in_target") : json::Value("unknown")},
++      {"outside_dwarf_func", Gen("outside_dwarf_func")},
++      {"plt", Gen("plt")},
++      {"in_cu_no_subprogram", Gen("in_cu_no_subprogram")},
++      {"no_cu", Gen("no_cu")},
++      {"outside_symtab_top20",
++       ISAObserved ? json::Value(Top(OutsideSymbols, 20, TargetWeight))
++                   : json::Value("unknown")},
++      {"in_func_no_line", Gen("in_func_no_line")},
++      {"usable", Statistics.Classified ? count(Statistics.OriginalUsable)
++                                       : json::Value("unknown")}};
++  Samples["written_positions"] = Statistics.Finished
++                                     ? json::Value(Statistics.WrittenPositions)
++                                     : json::Value("unknown");
++  Samples["skid_unadjusted"] = Gen("skid_unadjusted");
++  json::Object Reasons;
++  for (StringRef R : {"first_instruction", "range_gap", "data_or_state_change",
++                      "predecessor_no_line"})
++    Reasons[R] = Gen(("skid_unadjusted_" + R).str());
++  Samples["skid_unadjusted_reasons"] = std::move(Reasons);
++  Root["samples"] = std::move(Samples);
++  json::Object ISA, Source;
++  for (auto &[N, C] : ISACounts)
++    ISA[N] = json::Object{
++        {"counts", count(C)},
++        {"sample_ratio", ratio(C.SampleCount, Reader.Stats.Target)},
++        {"weight_ratio",
++         ratio(weight(C, Generation.SampleWeight), TargetWeight)}};
++  for (auto &[N, C] : ISASources)
++    Source[N] = count(C);
++  ISA["sources"] = std::move(Source);
++  Root["isa"] =
++      ISAObserved ? json::Value(std::move(ISA)) : json::Value("unknown");
++  json::Array Sources, Failures;
++  for (auto &S : Statistics.BoundarySources)
++    Sources.push_back(S);
++  for (auto &[N, R] : Statistics.BoundaryFailures)
++    Failures.push_back(json::Object{{"function", N}, {"reason", R}});
++  Root["boundaries"] = json::Object{
++      {"requested", Generation.needsBoundaries()},
++      {"function_count", Statistics.Started
++                             ? json::Value(Statistics.EnumeratedFunctions)
++                             : json::Value("unknown")},
++      {"sources", std::move(Sources)},
++      {"failures", std::move(Failures)}};
++  json::Value LostRatio = "unknown";
++  if (Reader.Parsed && Reader.Stats.LostRecords &&
++      Reader.Stats.LostCount <= UINT64_MAX - Reader.Stats.Input)
++    LostRatio = ratio(Reader.Stats.LostCount,
++                      Reader.Stats.LostCount + Reader.Stats.Input);
++  Root["lost"] = json::Object{
++      {"records", Reader.Parsed ? json::Value(Reader.Stats.LostRecords)
++                                : json::Value("unknown")},
++      {"L", Reader.Parsed && Reader.Stats.LostRecords
++                ? json::Value(Reader.Stats.LostCount)
++                : json::Value("unknown")},
++      {"S", Reader.Parsed ? json::Value(Reader.Stats.Input)
++                          : json::Value("unknown")},
++      {"exported_lost_ratio", std::move(LostRatio)},
++      {"scope", "input"},
++      {"source", "PERF_RECORD_LOST"},
++      {"count_unit", "records"},
++      {"completeness", "unknown"}};
++  Root["throttle"] = "unknown";
++  auto U = Statistics.OriginalUsable;
++  auto T = Reader.Layers.count("target") ? Reader.Layers.at("target")
++                                         : IPAddressCount{};
++  auto N = Statistics.Counts.count("in_func_no_line")
++               ? Statistics.Counts.at("in_func_no_line")
++               : IPAddressCount{};
++  Root["ratios"] =
++      Statistics.Classified
++          ? json::Value(json::Object{
++                {"target_usable_ratio",
++                 ratio(weight(U, Generation.SampleWeight),
++                       weight(T, Generation.SampleWeight))},
++                {"target_usable_sample_ratio",
++                 ratio(U.SampleCount, T.SampleCount)},
++                {"target_usable_period_ratio", ratio(U.PeriodSum, T.PeriodSum)},
++                {"line_resolution_ratio",
++                 ratio(weight(U, Generation.SampleWeight),
++                       weight(U, Generation.SampleWeight) +
++                           weight(N, Generation.SampleWeight))}})
++          : json::Value("unknown");
++  Root["sanity"] =
++      json::Object{{"dwarf_function_ratio",
++                    Statistics.Classified
++                        ? ratio(U.SampleCount + N.SampleCount, T.SampleCount)
++                        : json::Value("unknown")},
++                   {"aarch64_alignment_ratio",
++                    ISAObserved && IsA64 ? ratio(AlignmentCount, T.SampleCount)
++                                         : json::Value("unknown")}};
++  std::map<std::string, IPAddressCount> Merged;
++  for (auto &[Name, Origins] : Statistics.FunctionOrigins)
++    if (Origins.size() > 1)
++      Merged[Name] = Statistics.Functions.at(Name);
++  Root["coverage"] = json::Object{
++      {"sampled_functions",
++       Statistics.Classified
++           ? json::Value(uint64_t(Statistics.Functions.size()))
++           : json::Value("unknown")},
++      {"unique_addresses", Reader.Mapped
++                               ? json::Value(uint64_t(Reader.Counts.size()))
++                               : json::Value("unknown")},
++      {"top50", Statistics.Classified
++                    ? json::Value(Top(Statistics.Functions, 50,
++                                      weight(U, Generation.SampleWeight)))
++                    : json::Value("unknown")},
++      {"name_merged_functions", Statistics.Classified
++                                    ? json::Value(uint64_t(Merged.size()))
++                                    : json::Value("unknown")},
++      {"name_merged_top50",
++       Statistics.Classified
++           ? json::Value(Top(Merged, 50, weight(U, Generation.SampleWeight)))
++           : json::Value("unknown")}};
++  json::Array Hints;
++  if (!Generation.EstimateHead)
++    Hints.push_back("Keep profi enabled during compilation and linking; "
++                    "explicitly enable it at the LTO link step.");
++  Root["consumer_hints"] = std::move(Hints);
++  if (Reader.Stats.LostRecords)
++    warn("W_LOST_MAY_INCLUDE_SIDEBAND",
++         "visible lost records may include sideband; mapping completeness is "
++         "unknown");
++  if (Reader.Parsed && !Reader.Samples.empty() &&
++      llvm::all_of(Reader.Samples, [&](auto &S) {
++        return S.Period == Reader.Samples.front().Period;
++      }))
++    warn("W_CONSTANT_PERIOD", "all input periods are equal; variable-period "
++                              "weighting has not been demonstrated");
++  if (Reader.IdentityGrade == "unverified")
++    warn("W_IDENTITY_UNVERIFIED", "binary identity is not verified");
++  json::Array WA;
++  for (auto &[C, M] : Warnings)
++    WA.push_back(json::Object{{"code", C}, {"message", M}});
++  Root["warnings"] = std::move(WA);
++  Root["verdict"] = json::Object{
++      {"conversion", Failure.empty() ? "ok" : "failed"},
++      {"failure_stage",
++       Failure.empty() ? json::Value("unknown") : json::Value(FailedStage)},
++      {"reason",
++       Failure.empty() ? json::Value("unknown") : json::Value(Failure)},
++      {"identity", Reader.IdentityGrade},
++      {"usable_ratio_check", UsableCheck},
++      {"sample_threshold_check", SampleCheck},
++      {"lost_ratio_check", LostCheck},
++      {"sampling_adequacy", SampleCheck == "failed" || LostCheck == "exceeded"
++                                ? "insufficient"
++                                : "unknown"},
++      {"fallback_callback_count", CallbackCount}};
++  return Root;
++}
++
++Error IPQualityReport::writeReport() {
++  if (Options.Report.empty())
++    return Error::success();
++  SmallString<256> Temp;
++  int FD;
++  if (auto EC =
++          sys::fs::createUniqueFile(Options.Report + ".tmp-%%%%%%", FD, Temp)) {
++    ReportIOFailed = true;
++    return createStringError(EC,
++                             "IP quality report: cannot create temporary file");
++  }
++  scope_exit Cleanup([&] { sys::fs::remove(Temp); });
++  raw_fd_ostream OS(FD, true);
++  json::OStream JSON(OS, 2);
++  JSON.value(build());
++  OS << '\n';
++  bool InjectWrite = inject("report-write");
++  OS.flush();
++  bool InjectFlush = inject("report-flush");
++  OS.close();
++  auto EC = OS.error();
++  if (OS.has_error())
++    OS.clear_error();
++  if (InjectWrite || InjectFlush || inject("report-close"))
++    EC = std::make_error_code(std::errc::io_error);
++  if (!EC)
++    EC = inject("report-rename") ? std::make_error_code(std::errc::io_error)
++                                 : sys::fs::rename(Temp, Options.Report);
++  if (EC) {
++    ReportIOFailed = true;
++    return createStringError(
++        EC,
++        "IP quality report: write/close/commit failed; old report preserved");
++  }
++  return Error::success();
++}
++Error IPQualityReport::commitReport() {
++  enter("write");
++  return writeReport();
++}
++void IPQualityReport::fail(StringRef Message) {
++  Failure = Message.str();
++  FailedStage = Stage;
++  if (UsableCheck == "unknown")
++    warn("W_USABLE_RATIO_UNKNOWN",
++         "configured usable ratio was not available before failure");
++  if (SampleCheck == "unknown")
++    warn("W_TARGET_COUNT_UNKNOWN",
++         "configured target count was not available before failure");
++  if (LostCheck == "unknown")
++    warn("W_LOST_RATIO_UNKNOWN",
++         "configured visible LOST ratio was not available before failure");
++  if (!ProfileTemporary.empty()) {
++    sys::fs::remove(ProfileTemporary);
++    ProfileTemporary.clear();
++  }
++  if (!ReportIOFailed)
++    if (Error E = writeReport())
++      errs() << "llvm-profgen: could not write failure quality report: "
++             << toString(std::move(E)) << '\n';
++}
+diff --git a/llvm/tools/llvm-profgen/IPQualityReport.h b/llvm/tools/llvm-profgen/IPQualityReport.h
+new file mode 100644
+index 000000000000..90940d9b9c4c
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPQualityReport.h
+@@ -0,0 +1,80 @@
++//===- IPQualityReport.h - IP quality and output contract ---*- C++ -*-===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++#ifndef LLVM_TOOLS_LLVM_PROFGEN_IPQUALITYREPORT_H
++#define LLVM_TOOLS_LLVM_PROFGEN_IPQUALITYREPORT_H
++#include "IPPerfReader.h"
++#include "llvm/Support/JSON.h"
++#include <optional>
++namespace llvm {
++namespace sampleprof {
++struct IPGenerationOptions;
++struct IPGenerationStatistics;
++} // namespace sampleprof
++struct IPQualityOptions {
++  std::string Output, Report, Trace, Binary, Debug, BuildIDList, DWP;
++  std::string Injection;
++  std::optional<std::string> MinUsable, MinSamples, MaxLost;
++  std::vector<std::string> Arguments;
++};
++
++/// Call before registering a callback, loading objects, or creating any file.
++Error validateIPOutputPaths(const IPQualityOptions &Options);
++void setIPStage(StringRef Stage);
++bool needsIPQualityCounters();
++bool injectIPFailure(StringRef Point);
++void recordIPWarning(StringRef Code, StringRef Message);
++StringRef getProfgenDWPPath();
++
++class IPQualityReport {
++  IPQualityOptions Options;
++  const IPPerfReader &Reader;
++  const sampleprof::IPGenerationStatistics &Statistics;
++  const sampleprof::IPGenerationOptions &Generation;
++  std::string Stage = "parse", Failure, FailedStage;
++  std::string UsableCheck = "not_evaluated", SampleCheck = "not_evaluated";
++  std::string LostCheck = "not_evaluated";
++  std::map<std::string, std::string> Warnings;
++  std::map<std::string, IPAddressCount> ISACounts, ISASources, OutsideSymbols;
++  uint64_t AlignmentCount = 0, AlignmentPeriod = 0;
++  uint64_t CallbackCount = 0;
++  bool ISAObserved = false, IsA64 = false, ReportIOFailed = false;
++  bool PeriodKnown = false, SemanticsKnown = false;
++  struct Fraction {
++    uint64_t N, D;
++  };
++  std::optional<Fraction> MinUsable, MaxLost;
++  std::optional<uint64_t> MinSamples;
++  json::Value count(const IPAddressCount &C) const;
++  json::Value ratio(uint64_t N, uint64_t D) const;
++  json::Value build();
++  Error writeReport();
++
++public:
++  std::string ProfileTemporary;
++  IPQualityReport(IPQualityOptions Options, const IPPerfReader &Reader,
++                  const sampleprof::IPGenerationStatistics &Statistics,
++                  const sampleprof::IPGenerationOptions &Generation);
++  ~IPQualityReport();
++  bool needsCounters() const {
++    return !Options.Report.empty() || Options.MinUsable || Options.MinSamples ||
++           Options.MaxLost;
++  }
++  void enter(StringRef S) { Stage = S.str(); }
++  bool inject(StringRef Point) const { return Options.Injection == Point; }
++  void warn(StringRef Code, StringRef Message);
++  Error validateOptions();
++  void observeBinary();
++  void setPeriodKnown() { PeriodKnown = true; }
++  void setSemanticsKnown() { SemanticsKnown = true; }
++  Error checkThresholds();
++  Error commitReport();
++  void fail(StringRef Message);
++  void finish();
++};
++} // namespace llvm
++#endif
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+index 2f0b254577a3..df395355bd8f 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ #include "ProfileGenerator.h"
+ #include "ErrorHandling.h"
++#include "IPQualityReport.h"
+ #include "MissingFrameInferrer.h"
+ #include "Options.h"
+ #include "PerfReader.h"
+@@ -256,6 +257,8 @@ void IPGenerationStatistics::print(raw_ostream &OS,
+ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     const AddressCounter &Counts, const IPGenerationOptions &Options,
+     IPGenerationStatistics &Statistics) {
++  Statistics.Started = true;
++  Statistics.FSDiscriminator = Binary->useFSDiscriminator();
+   UseFSDiscriminator = Binary->useFSDiscriminator();
+   FunctionSamples::ProfileIsFS = UseFSDiscriminator;
+   FunctionSamples::ProfileIsCS = false;
+@@ -281,6 +284,8 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+   for (const auto &[Address, C] : Counts) {
+     auto *Range = Binary->findFuncRange(Address);
+     if (!Range) {
++      Statistics.OutsideAddresses[Address] =
++          Binary->classifyOutsideIP(Address).str();
+       if (Error E = Classify("outside_dwarf_func", C))
+         return E;
+       if (Error E = Classify(Binary->classifyOutsideIP(Address), C))
+@@ -289,13 +294,28 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+       if (Error E = Classify("in_func_no_line", C))
+         return E;
+     } else {
+-      SampledFunctions.emplace(Range->Func->FuncName.str(), Range->Func);
++      if (Error E =
++              addIPCount(Statistics.OriginalUsable.SampleCount, C.SampleCount))
++        return E;
++      if (Error E =
++              addIPCount(Statistics.OriginalUsable.PeriodSum, C.PeriodSum))
++        return E;
++      auto Name = Range->Func->FuncName.str();
++      auto &FC = Statistics.Functions[Name];
++      if (Error E = addIPCount(FC.SampleCount, C.SampleCount))
++        return E;
++      if (Error E = addIPCount(FC.PeriodSum, C.PeriodSum))
++        return E;
++      Statistics.FunctionOrigins[Name] = Range->Func->IPOrigins;
++      SampledFunctions.emplace(Name, Range->Func);
+       UsableAddresses.emplace(Address, Range->Func);
+       FunctionAddresses[Range->Func].push_back(Address);
+     }
+   }
++  Statistics.Classified = true;
+   std::map<BinaryFunction *, size_t> BoundaryIndices;
+   if (Options.needsBoundaries() && !SampledFunctions.empty()) {
++    setIPStage("boundary");
+     auto Map =
+         IPBoundaryMap::load(Binary->getPath(), Binary->getDebugBinaryPath());
+     std::string LoadFailure;
+@@ -329,6 +349,7 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+       return ipGenerationError(Message);
+     }
+   }
++  setIPStage("generate");
+   // FunctionSamples nodes identify the entire inline callsite chain. Both
+   // totals and body numerators stay integral until final materialization.
+   std::map<FunctionSamples *, uint64_t> Totals;
+@@ -463,8 +484,10 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     }
+   if (!AllBodyCounts)
+     return ipGenerationError("no positive profile locations");
+-  if (LargeCount)
++  if (LargeCount) {
++    recordIPWarning("W_LARGE_COUNT", "IP body or total exceeds UINT32_MAX");
+     WithColor::warning() << "IP body or total exceeds UINT32_MAX\n";
++  }
+   if (Options.EstimateHead)
+     for (auto &Entry : ProfileMap) {
+       auto Checked = checkIPHead(Entry.second);
+@@ -490,10 +513,20 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+       }))
+     return ipGenerationError(
+         "no positive profile locations after post-processing");
++  auto Positions = [&](auto &Self, const FunctionSamples &FS) -> void {
++    Statistics.WrittenPositions += FS.getBodySamples().size();
++    for (const auto &Call : FS.getCallsiteSamples())
++      for (const auto &Callee : Call.second)
++        Self(Self, Callee.second);
++  };
++  for (const auto &Entry : ProfileMap)
++    Positions(Positions, Entry.second);
++  Statistics.Finished = true;
+   return Error::success();
+ }
+ 
+-Error ProfileGenerator::writeIPProfile() {
++Error ProfileGenerator::writeIPProfile(IPQualityReport &Report) {
++  setIPStage("write");
+   SmallString<256> TemporaryPath;
+   int FD;
+   auto Flags = OutputFormat == SPF_Binary || OutputFormat == SPF_Ext_Binary
+@@ -503,7 +536,11 @@ Error ProfileGenerator::writeIPProfile() {
+           OutputFilename + ".tmp-%%%%%%", FD, TemporaryPath, Flags))
+     return createStringError(
+         EC, "IP sample mode: cannot create profile temporary file");
+-  scope_exit Cleanup([&] { sys::fs::remove(TemporaryPath); });
++  Report.ProfileTemporary = TemporaryPath.str().str();
++  scope_exit Cleanup([&] {
++    sys::fs::remove(TemporaryPath);
++    Report.ProfileTemporary.clear();
++  });
+   std::unique_ptr<raw_ostream> Stream =
+       std::make_unique<raw_fd_ostream>(FD, true);
+   auto *FileStream = static_cast<raw_fd_ostream *>(Stream.get());
+@@ -515,17 +552,23 @@ Error ProfileGenerator::writeIPProfile() {
+     WriteError = Writer.getError();
+   } else {
+     if (UseMD5) {
+-      if (OutputFormat != SPF_Ext_Binary)
++      if (OutputFormat != SPF_Ext_Binary) {
++        recordIPWarning("W_MD5_IGNORED", "use-md5 requires extbinary output");
+         WithColor::warning() << "-use-md5 is ignored. Specify "
+                                 "--format=extbinary to enable it\n";
+-      else
++      } else
+         (*Writer)->setUseMD5();
+     }
+     WriteError = (*Writer)->write(ProfileMap);
++    if (injectIPFailure("profile-write"))
++      WriteError = std::make_error_code(std::errc::io_error);
+   }
+   FileStream->flush();
++  bool FlushFailure = injectIPFailure("profile-flush");
+   FileStream->close();
+   std::error_code CloseError = FileStream->error();
++  if (FlushFailure || injectIPFailure("profile-close"))
++    CloseError = std::make_error_code(std::errc::io_error);
+   if (FileStream->has_error())
+     FileStream->clear_error();
+   // No error may be deferred to raw_fd_ostream's destructor.
+@@ -535,12 +578,24 @@ Error ProfileGenerator::writeIPProfile() {
+   if (CloseError)
+     return createStringError(CloseError,
+                              "IP sample mode: profile flush/close failed");
+-  if (std::error_code EC = sys::fs::rename(TemporaryPath, OutputFilename))
++  if (Error E = Report.commitReport())
++    return E;
++  setIPStage("commit");
++  std::error_code EC = injectIPFailure("profile-rename")
++                           ? std::make_error_code(std::errc::io_error)
++                           : sys::fs::rename(TemporaryPath, OutputFilename);
++  if (EC)
+     return createStringError(EC, "IP sample mode: profile commit failed");
++  Report.finish();
+   return Error::success();
+ }
+ 
+ void ProfileGeneratorBase::showDensitySuggestion(double Density) {
++  if (Density == 0.0)
++    recordIPWarning("W_EMPTY_DENSITY",
++                    "empty profile or density cutoff too low");
++  else if (Density < ProfileDensityThreshold)
++    recordIPWarning("W_LOW_DENSITY", "sample density below advisory threshold");
+   if (Density == 0.0)
+     WithColor::warning() << "The output profile is empty or the "
+                             "--profile-density-cutoff-hot option is "
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.h b/llvm/tools/llvm-profgen/ProfileGenerator.h
+index b4118872edac..6005b49e9d87 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.h
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.h
+@@ -12,6 +12,7 @@
+ #include "ErrorHandling.h"
+ #include "IPBoundary.h"
+ #include "IPPerfReader.h"
++#include "IPQualityReport.h"
+ #include "PerfReader.h"
+ #include "ProfiledBinary.h"
+ #include "llvm/IR/DebugInfoMetadata.h"
+@@ -166,6 +167,14 @@ struct IPGenerationOptions {
+ };
+ 
+ struct IPGenerationStatistics {
++  bool Started = false, Classified = false, Finished = false;
++  bool FSDiscriminator = false;
++  uint64_t WrittenPositions = 0;
++  IPAddressCount OriginalUsable;
++  std::map<std::string, IPAddressCount> Functions;
++  std::map<std::string, std::set<uint64_t>> FunctionOrigins;
++  std::map<uint64_t, std::string> OutsideAddresses;
++
+   std::map<std::string, IPAddressCount> Counts;
+   uint64_t EnumeratedFunctions = 0;
+   std::set<std::string> BoundarySources;
+@@ -186,7 +195,7 @@ public:
+   Error populateBodySamplesFromAddresses(const AddressCounter &Counts,
+                                          const IPGenerationOptions &Options,
+                                          IPGenerationStatistics &Statistics);
+-  Error writeIPProfile();
++  Error writeIPProfile(IPQualityReport &Report);
+   void generateProfile() override;
+ 
+ private:
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.cpp b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+index e63972432486..25c723d5a1c8 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.cpp
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+@@ -8,6 +8,7 @@
+ 
+ #include "ProfiledBinary.h"
+ #include "ErrorHandling.h"
++#include "IPQualityReport.h"
+ #include "MissingFrameInferrer.h"
+ #include "Options.h"
+ #include "ProfileGenerator.h"
+@@ -256,11 +257,17 @@ StringRef ProfiledBinary::classifyOutsideIP(uint64_t Address) const {
+ 
+ void ProfiledBinary::load() {
+   // Attempt to open the binary.
+-  OwningBinary<Binary> OBinary = unwrapOrError(createBinary(Path), Path);
++  auto Runtime =
++      IPMode && injectIPFailure("runtime-open")
++          ? Expected<OwningBinary<Binary>>(createStringError(
++                inconvertibleErrorCode(), "injected runtime open failure"))
++          : createBinary(Path);
++  OwningBinary<Binary> OBinary = unwrapOrError(std::move(Runtime), Path);
+   Binary &ExeBinary = *OBinary.getBinary();
+ 
+   IsCOFF = isa<COFFObjectFile>(&ExeBinary);
+-  if (!isa<ELFObjectFileBase>(&ExeBinary) && !IsCOFF)
++  if ((!isa<ELFObjectFileBase>(&ExeBinary) && !IsCOFF) ||
++      (IPMode && injectIPFailure("invalid-image")))
+     exitWithError("not a valid ELF/COFF image", Path);
+ 
+   auto *Obj = cast<ObjectFile>(&ExeBinary);
+@@ -271,14 +278,28 @@ void ProfiledBinary::load() {
+   if (IPMode) {
+     // Identity has already been checked by IPPerfReader. All IP addresses
+     // are ELF virtual addresses; do not initialize page-masked base addresses.
+-    unwrapOrError(loadIPMetadata(*Obj), Path);
++    auto Metadata = injectIPFailure("runtime-metadata")
++                        ? Expected<bool>(createStringError(
++                              inconvertibleErrorCode(),
++                              "injected runtime metadata failure"))
++                        : loadIPMetadata(*Obj);
++    unwrapOrError(std::move(Metadata), Path);
+     SymbolizerOpts = getSymbolizerOpts();
+     Symbolizer = std::make_unique<symbolize::LLVMSymbolizer>(SymbolizerOpts);
+     if (!DebugBinaryPath.empty()) {
+-      auto Debug =
+-          unwrapOrError(createBinary(DebugBinaryPath), DebugBinaryPath);
++      auto DebugObject =
++          injectIPFailure("debug-open-load")
++              ? Expected<OwningBinary<Binary>>(createStringError(
++                    inconvertibleErrorCode(), "injected debug open failure"))
++              : createBinary(DebugBinaryPath);
++      auto Debug = unwrapOrError(std::move(DebugObject), DebugBinaryPath);
+       auto &DebugObj = *cast<ObjectFile>(Debug.getBinary());
+-      unwrapOrError(loadIPMetadata(DebugObj), DebugBinaryPath);
++      auto DebugMetadata = injectIPFailure("debug-metadata")
++                               ? Expected<bool>(createStringError(
++                                     inconvertibleErrorCode(),
++                                     "injected debug metadata failure"))
++                               : loadIPMetadata(DebugObj);
++      unwrapOrError(std::move(DebugMetadata), DebugBinaryPath);
+       loadSymbolsFromDWARF(DebugObj);
+     } else {
+       loadSymbolsFromDWARF(*Obj);
+@@ -1019,6 +1040,14 @@ void ProfiledBinary::loadSymbolsFromDWARFUnit(DWARFUnit &CompilationUnit) {
+     if (Ret.second)
+       Func.FuncName = Ret.first->first;
+ 
++    if (IPMode) {
++      uint64_t First = UINT64_MAX;
++      for (const auto &Range : Ranges)
++        if (Range.HighPC > Range.LowPC)
++          First = std::min(First, Range.LowPC);
++      if (First != UINT64_MAX)
++        Func.IPOrigins.insert(First);
++    }
+     for (const auto &Range : Ranges) {
+       uint64_t StartAddress = Range.LowPC;
+       uint64_t EndAddress = Range.HighPC;
+@@ -1050,9 +1079,24 @@ void ProfiledBinary::loadSymbolsFromDWARFUnit(DWARFUnit &CompilationUnit) {
+ }
+ 
+ void ProfiledBinary::loadSymbolsFromDWARF(ObjectFile &Obj) {
+-  auto DebugContext = llvm::DWARFContext::create(
+-      Obj, DWARFContext::ProcessDebugRelocations::Process, nullptr, DWPPath);
+-  if (!DebugContext)
++  auto DebugContext =
++      IPMode ? llvm::DWARFContext::create(
++                   Obj, DWARFContext::ProcessDebugRelocations::Process, nullptr,
++                   DWPPath,
++                   [](Error E) {
++                     recordIPWarning("W_DWARF_RECOVERABLE",
++                                     "recoverable DWARF error; see stderr");
++                     WithColor::defaultErrorHandler(std::move(E));
++                   },
++                   [](Error E) {
++                     recordIPWarning("W_DWARF_WARNING",
++                                     "DWARF warning; see stderr");
++                     WithColor::defaultWarningHandler(std::move(E));
++                   })
++             : llvm::DWARFContext::create(
++                   Obj, DWARFContext::ProcessDebugRelocations::Process, nullptr,
++                   DWPPath);
++  if (!DebugContext || (IPMode && injectIPFailure("context-create")))
+     exitWithError("Error creating the debug info context", Path);
+ 
+   for (const auto &CompilationUnit : DebugContext->compile_units())
+@@ -1080,6 +1124,11 @@ void ProfiledBinary::loadSymbolsFromDWARF(ObjectFile &Obj) {
+     }
+   }
+ 
++  if (IPMode && NumOfDWOMissing)
++    recordIPWarning("W_DWO_MISSING", "DWO debug information was not loaded");
++  if (IPMode && BinaryFunctions.empty())
++    recordIPWarning("W_NO_DWARF_FUNCTIONS",
++                    "no binary functions were retrieved from DWARF");
+   if (NumOfDWOMissing)
+     WithColor::warning()
+         << " DWO debug information was not loaded for " << NumOfDWOMissing
+@@ -1095,6 +1144,9 @@ void ProfiledBinary::loadSymbolsFromDWARF(ObjectFile &Obj) {
+   }
+ 
+   if (!AddrsWithMultipleSymbols.empty()) {
++    if (IPMode)
++      recordIPWarning("W_DUPLICATE_FUNCTION_START",
++                      "multiple functions share a start address");
+     WithColor::warning() << "Found " << AddrsWithMultipleSymbols.size()
+                          << " start addresses with multiple symbols\n";
+     AddrsWithMultipleSymbols.clear();
+@@ -1124,10 +1176,16 @@ SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
+                                                    bool UseProbeDiscriminator) {
+   assert(this == IP.Binary &&
+          "Binary should only symbolize its own instruction");
+-  DIInliningInfo InlineStack =
+-      unwrapOrError(Symbolizer->symbolizeInlinedCode(
+-                        SymbolizerPath.str(), getSectionedAddress(IP.Address)),
+-                    SymbolizerPath);
++  // Inject at the shared symbolizer call, preserving its existing unwrap path.
++  auto Query = [&]() -> Expected<DIInliningInfo> {
++    if (IPMode &&
++        (injectIPFailure("symbolize") || injectIPFailure("debug-open")))
++      return createStringError(inconvertibleErrorCode(),
++                               "injected symbolizer open/query failure");
++    return Symbolizer->symbolizeInlinedCode(SymbolizerPath.str(),
++                                            getSectionedAddress(IP.Address));
++  };
++  DIInliningInfo InlineStack = unwrapOrError(Query(), SymbolizerPath);
+ 
+   SampleContextFrameVector CallStack;
+   if (IPMode &&
+@@ -1311,3 +1369,5 @@ void InstructionPointer::update(uint64_t Addr) {
+ 
+ } // end namespace sampleprof
+ } // end namespace llvm
++
++llvm::StringRef llvm::getProfgenDWPPath() { return DWPPath; }
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.h b/llvm/tools/llvm-profgen/ProfiledBinary.h
+index ad2f9be493ad..65dab67f19bc 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.h
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.h
+@@ -87,6 +87,7 @@ struct BinaryFunction {
+   StringRef FuncName;
+   // End of range is an exclusive bound.
+   RangesTy Ranges;
++  std::set<uint64_t> IPOrigins;
+   DwarfNameStatus NameStatus = DwarfNameStatus::Matched;
+ 
+   uint64_t getFuncSize() {
+diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+index 42d19e048b84..e139023b0f68 100644
+--- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
++++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+@@ -12,10 +12,12 @@
+ 
+ #include "ErrorHandling.h"
+ #include "IPPerfReader.h"
++#include "IPQualityReport.h"
+ #include "Options.h"
+ #include "PerfReader.h"
+ #include "ProfileGenerator.h"
+ #include "ProfiledBinary.h"
++#include "llvm/ADT/ScopeExit.h"
+ #include "llvm/ADT/SmallString.h"
+ #include "llvm/ADT/StringSwitch.h"
+ #include "llvm/DebugInfo/Symbolize/SymbolizableModule.h"
+@@ -153,7 +155,30 @@ static cl::opt<std::string> IPSkid("ip-skid", cl::init("none"),
+                                    cl::desc("IP skid: none or prev-inst"),
+                                    cl::cat(ProfGenCategory));
+ 
+-static Error runIPMode() {
++static cl::opt<std::string>
++    QualityReport("quality-report",
++                  cl::desc("Write deterministic IP quality JSON"),
++                  cl::cat(ProfGenCategory));
++static cl::opt<std::string>
++    IPMinUsable("ip-min-usable-ratio",
++                cl::desc("Minimum raw usable weight ratio"),
++                cl::cat(ProfGenCategory));
++static cl::opt<std::string>
++    IPMinSamples("ip-min-target-samples",
++                 cl::desc("Minimum target sample count"),
++                 cl::cat(ProfGenCategory));
++static cl::opt<std::string>
++    IPMaxLost("ip-max-lost-ratio",
++              cl::desc("Maximum visible lost-record ratio"),
++              cl::cat(ProfGenCategory));
++static cl::opt<std::string>
++    IPTestFailure("ip-test-inject-failure", cl::Hidden,
++                  cl::desc("Inject an IP failure at a named call site"),
++                  cl::cat(ProfGenCategory));
++
++static Error runIPModeCore(IPQualityReport &Report, IPPerfReader &Reader,
++                           IPGenerationOptions &Generation,
++                           IPGenerationStatistics &Statistics) {
+   auto Fail = [](const Twine &Message) {
+     return createStringError(inconvertibleErrorCode(), Message);
+   };
+@@ -215,7 +240,8 @@ static Error runIPMode() {
+     return Fail("IP sample mode: invalid --ip-zero-fill");
+   if (IPSkid != "none" && IPSkid != "prev-inst")
+     return Fail("IP sample mode: invalid --ip-skid");
+-  IPGenerationOptions Generation;
++  if (Error E = Report.validateOptions())
++    return E;
+   Generation.SampleWeight = IPWeight == "sample";
+   Generation.MaxAggregation = IPAggregation == "max";
+   Generation.AverageAggregation = IPAggregation == "avg";
+@@ -227,6 +253,7 @@ static Error runIPMode() {
+       (StringRef(IPPeriodUnit).getAsInteger(10, Generation.PeriodUnit) ||
+        !Generation.PeriodUnit))
+     return Fail("IP sample mode: --ip-period-unit must be a positive integer");
++  Report.setSemanticsKnown();
+   IPReaderOptions Options;
+   if (IPEvent.getNumOccurrences())
+     Options.Event = IPEvent;
+@@ -239,7 +266,6 @@ static Error runIPMode() {
+   if (DebugBinPath.getNumOccurrences())
+     Options.DebugBinary = DebugBinPath;
+   Options.AllowMissingBuildID = AllowMissingBuildID;
+-  IPPerfReader Reader;
+   if (Error E = Reader.read(PerfScriptFilename, BinaryPath, Options)) {
+     if (ShowIPAddressCounts)
+       Reader.printIdentity(outs());
+@@ -257,10 +283,12 @@ static Error runIPMode() {
+   } else if (!Generation.ExplicitPeriod) {
+     Generation.PeriodUnit = Reader.getMedianPeriod();
+   }
++  Report.setPeriodKnown();
++  setIPStage("load");
+   ProfiledBinary Binary(BinaryPath, DebugBinPath, /*IPMode=*/true);
++  setIPStage("generate");
+   ProfileGenerator Generator(
+       &Binary, static_cast<const ContextSampleCounterMap *>(nullptr));
+-  IPGenerationStatistics Statistics;
+   Error E = Generator.populateBodySamplesFromAddresses(
+       Reader.getAddressCounts(), Generation, Statistics);
+   if (ShowIPAddressCounts)
+@@ -268,9 +296,59 @@ static Error runIPMode() {
+   if (ShowIPBoundaries)
+     for (const auto &B : Statistics.Boundaries)
+       B.print(outs());
++  Report.observeBinary();
+   if (E)
+     return E;
+-  return Generator.writeIPProfile();
++  if (Error Check = Report.checkThresholds())
++    return Check;
++  return Generator.writeIPProfile(Report);
++}
++
++static Error runIPMode(int Argc, const char *const *Argv,
++                       StringRef ParserErrors) {
++  if (!IPSamples)
++    return createStringError(inconvertibleErrorCode(),
++                             "IP-only options require --ip-samples");
++  IPQualityOptions Options;
++  Options.Output = OutputFilename;
++  Options.Report = QualityReport;
++  Options.Trace = PerfScriptFilename;
++  Options.Binary = BinaryPath;
++  Options.Debug = DebugBinPath;
++  Options.BuildIDList = PerfBuildIDList;
++  Options.DWP = getProfgenDWPPath().str();
++  Options.Injection = IPTestFailure;
++  if (IPMinUsable.getNumOccurrences())
++    Options.MinUsable = IPMinUsable;
++  if (IPMinSamples.getNumOccurrences())
++    Options.MinSamples = IPMinSamples;
++  if (IPMaxLost.getNumOccurrences())
++    Options.MaxLost = IPMaxLost;
++  for (int I = 0; I < Argc; ++I)
++    Options.Arguments.emplace_back(Argv[I]);
++  // The sole no-report failure: aliases can overwrite a protected input or
++  // old profile. This precedes callback registration and all object/file I/O.
++  if (Error E = validateIPOutputPaths(Options))
++    return E;
++  IPPerfReader Reader;
++  IPGenerationStatistics Statistics;
++  IPGenerationOptions Generation;
++  IPQualityReport Report(std::move(Options), Reader, Statistics, Generation);
++  bool OrdinaryParserFailure =
++      !ParserErrors.empty() && !BinaryPath.empty() && !NegativeProcessId;
++  if (OrdinaryParserFailure)
++    Report.enter("parse");
++  if (!ParserErrors.empty() && !OrdinaryParserFailure)
++    errs() << ParserErrors;
++  Error E = OrdinaryParserFailure
++                ? createStringError(inconvertibleErrorCode(), ParserErrors)
++                : runIPModeCore(Report, Reader, Generation, Statistics);
++  if (E) {
++    std::string Message = toString(std::move(E));
++    Report.fail(Message);
++    return createStringError(inconvertibleErrorCode(), Message);
++  }
++  return Error::success();
+ }
+ 
+ // Validate the command line input.
+@@ -357,9 +435,10 @@ int main(int argc, const char *argv[]) {
+   if (!Parsed) {
+     // Even the IP-specific missing-binary/negative-pid diagnoses must not
+     // swallow unrelated parser errors (e.g. an unknown option).
+-    errs() << ParseErrors;
+-    if (!(IPSamples && (BinaryPath.empty() || NegativeProcessId)))
++    if (!IPSamples) {
++      errs() << ParseErrors;
+       return EXIT_FAILURE;
++    }
+   }
+   if (IPSamples || IPEvent.getNumOccurrences() ||
+       BinaryMatchRegex.getNumOccurrences() ||
+@@ -369,8 +448,11 @@ int main(int argc, const char *argv[]) {
+       AllowMissingBuildID.getNumOccurrences() || IPWeight.getNumOccurrences() ||
+       IPPeriodUnit.getNumOccurrences() || IPAggregation.getNumOccurrences() ||
+       IPHeadSamples.getNumOccurrences() || IPZeroFill.getNumOccurrences() ||
+-      IPSkid.getNumOccurrences()) {
+-    if (Error E = runIPMode()) {
++      IPSkid.getNumOccurrences() || QualityReport.getNumOccurrences() ||
++      IPMinUsable.getNumOccurrences() || IPMinSamples.getNumOccurrences() ||
++      IPMaxLost.getNumOccurrences() || IPTestFailure.getNumOccurrences()) {
++    if (Error E =
++            runIPMode(argc, argv, Parsed ? StringRef() : ParseErrors.str())) {
+       logAllUnhandledErrors(std::move(E), errs(), "llvm-profgen: error: ");
+       return EXIT_FAILURE;
+     }
+-- 
+2.43.0
+

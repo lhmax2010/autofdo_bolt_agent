@@ -1,0 +1,56 @@
+{
+  "before": {
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--allow-missing-build-id",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin",
+      "--binary-match-regex=^/target$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/input.perfscript",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/link/../clash",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/real/clash"
+    ],
+    "tool_sha256": "c28b1d436da12eb5d08f6a5e861574617dc092b68ae65970862b2e5d58d46d61",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "warning: Sample PGO is estimated to optimize better with 50.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n",
+    "content_at_report_path": "count_loop:1:0\n 3.2: 1\n",
+    "observation": "Two nonexistent output aliases incorrectly accepted; report replaced by profile. This is a disposable fixture, not an existing user file."
+  },
+  "after": {
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--allow-missing-build-id",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.perfbin",
+      "--binary-match-regex=^/target$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/input.perfscript",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/link/../clash",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/real/clash"
+    ],
+    "exit": 1,
+    "stderr": "llvm-profgen: error: IP sample mode: path conflict: --output='/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/link/../clash' aliases --quality-report='/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/path-alias-proof/real/clash'\n",
+    "created_output": false,
+    "tool_sha256": "4f115a34cf558008bc138c7aaf3d3476717ea7d5fc2e44ea4142ac6fb06cb4f9"
+  }
+}

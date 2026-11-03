@@ -1,0 +1,266 @@
+{
+  "all_tool_file_hits": {
+    "ErrorHandling.h": [
+      {
+        "line": 29,
+        "text": "[[noreturn]] inline void exitWithError(const Twine &Message,"
+      },
+      {
+        "line": 46,
+        "text": "[[noreturn]] inline void exitWithError(std::error_code EC,"
+      },
+      {
+        "line": 48,
+        "text": "  exitWithError(EC.message(), Whence);"
+      },
+      {
+        "line": 51,
+        "text": "[[noreturn]] inline void exitWithError(Error E, StringRef Whence) {"
+      },
+      {
+        "line": 55,
+        "text": "    exitWithError(toString(std::move(E)), Whence);"
+      },
+      {
+        "line": 56,
+        "text": "  exitWithError(errorToErrorCode(std::move(E)), Whence);"
+      },
+      {
+        "line": 60,
+        "text": "T unwrapOrError(Expected<T> EO, Ts &&... Args) {"
+      },
+      {
+        "line": 63,
+        "text": "  exitWithError(EO.takeError(), std::forward<Ts>(Args)...);"
+      }
+    ],
+    "IPPerfReader.cpp": [],
+    "IPIdentity.cpp": [],
+    "IPBoundary.cpp": [],
+    "ProfiledBinary.cpp": [
+      {
+        "line": 91,
+        "text": "    exitWithError(Error, Obj->getFileName());"
+      },
+      {
+        "line": 265,
+        "text": "  OwningBinary<Binary> OBinary = unwrapOrError(std::move(Runtime), Path);"
+      },
+      {
+        "line": 271,
+        "text": "    exitWithError(\"not a valid ELF/COFF image\", Path);"
+      },
+      {
+        "line": 286,
+        "text": "    unwrapOrError(std::move(Metadata), Path);"
+      },
+      {
+        "line": 295,
+        "text": "      auto Debug = unwrapOrError(std::move(DebugObject), DebugBinaryPath);"
+      },
+      {
+        "line": 302,
+        "text": "      unwrapOrError(std::move(DebugMetadata), DebugBinaryPath);"
+      },
+      {
+        "line": 321,
+        "text": "        unwrapOrError(createBinary(DebugBinaryPath), DebugBinaryPath);"
+      },
+      {
+        "line": 407,
+        "text": "  const auto &PhdrRange = unwrapOrError(Obj.program_headers(), FileName);"
+      },
+      {
+        "line": 433,
+        "text": "    exitWithError(\"no executable segment found\", FileName);"
+      },
+      {
+        "line": 470,
+        "text": "    exitWithError(\"Not a COFF image\", FileName);"
+      },
+      {
+        "line": 508,
+        "text": "    StringRef SectionName = unwrapOrError(Section.getName(), FileName);"
+      },
+      {
+        "line": 562,
+        "text": "    StringRef SectionName = unwrapOrError(Section.getName(), FileName);"
+      },
+      {
+        "line": 565,
+        "text": "      StringRef Contents = unwrapOrError(Section.getContents(), FileName);"
+      },
+      {
+        "line": 569,
+        "text": "        exitWithError("
+      },
+      {
+        "line": 572,
+        "text": "      StringRef Contents = unwrapOrError(Section.getContents(), FileName);"
+      },
+      {
+        "line": 576,
+        "text": "        exitWithError(\"Pseudo Probe decoder fail in .pseudo_probe section\");"
+      },
+      {
+        "line": 596,
+        "text": "  OwningBinary<Binary> OBinary = unwrapOrError(createBinary(Path), Path);"
+      },
+      {
+        "line": 758,
+        "text": "    exitWithError(\"no register info for target \" + TheTriple.str(), FileName);"
+      },
+      {
+        "line": 763,
+        "text": "    exitWithError(\"no assembly info for target \" + TheTriple.str(), FileName);"
+      },
+      {
+        "line": 767,
+        "text": "    exitWithError(Features.takeError(), FileName);"
+      },
+      {
+        "line": 771,
+        "text": "    exitWithError(\"no subtarget info for target \" + TheTriple.str(), FileName);"
+      },
+      {
+        "line": 775,
+        "text": "    exitWithError(\"no instruction info for target \" + TheTriple.str(),"
+      },
+      {
+        "line": 784,
+        "text": "    exitWithError(\"no disassembler for target \" + TheTriple.str(), FileName);"
+      },
+      {
+        "line": 803,
+        "text": "    const uint64_t Addr = unwrapOrError(Symbol.getAddress(), FileName);"
+      },
+      {
+        "line": 804,
+        "text": "    const StringRef Name = unwrapOrError(Symbol.getName(), FileName);"
+      },
+      {
+        "line": 805,
+        "text": "    section_iterator SecI = unwrapOrError(Symbol.getSection(), FileName);"
+      },
+      {
+        "line": 837,
+        "text": "    StringRef SectionName = unwrapOrError(Section.getName(), FileName);"
+      },
+      {
+        "line": 851,
+        "text": "        arrayRefFromStringRef(unwrapOrError(Section.getContents(), FileName));"
+      },
+      {
+        "line": 859,
+        "text": "        exitWithError(\"disassembling error\", FileName);"
+      },
+      {
+        "line": 904,
+        "text": "    const uint64_t Addr = unwrapOrError(Symbol.getAddress(), FileName);"
+      },
+      {
+        "line": 905,
+        "text": "    const StringRef Name = unwrapOrError(Symbol.getName(), FileName);"
+      },
+      {
+        "line": 929,
+        "text": "    const SymbolRef::Type Type = unwrapOrError(Symbol.getType(), FileName);"
+      },
+      {
+        "line": 930,
+        "text": "    const uint64_t StartAddr = unwrapOrError(Symbol.getAddress(), FileName);"
+      },
+      {
+        "line": 931,
+        "text": "    const StringRef Name = unwrapOrError(Symbol.getName(), FileName);"
+      },
+      {
+        "line": 1100,
+        "text": "    exitWithError(\"Error creating the debug info context\", Path);"
+      },
+      {
+        "line": 1188,
+        "text": "  DIInliningInfo InlineStack = unwrapOrError(Query(), SymbolizerPath);"
+      },
+      {
+        "line": 1225,
+        "text": "      unwrapOrError(Symbolizer->symbolizeData(SymbolizerPath.str(),"
+      }
+    ],
+    "ProfileGenerator.cpp": [
+      {
+        "line": 177,
+        "text": "    exitWithError(std::move(EC));"
+      },
+      {
+        "line": 183,
+        "text": "    exitWithError(EC, OutputFilename);"
+      }
+    ],
+    "llvm-profgen.cpp": [
+      {
+        "line": 373,
+        "text": "      exitWithError(Msg);"
+      },
+      {
+        "line": 379,
+        "text": "        exitWithError(Msg);"
+      },
+      {
+        "line": 391,
+        "text": "    exitWithError(Msg);"
+      },
+      {
+        "line": 395,
+        "text": "    exitWithError(\"Value of --compress-recursion should >= -1\");"
+      },
+      {
+        "line": 398,
+        "text": "    exitWithError(\"--show-source-locations should work together with \""
+      },
+      {
+        "line": 494,
+        "text": "        exitWithError(\"Symbolizing vtables from data access profiles is not \""
+      },
+      {
+        "line": 504,
+        "text": "          exitWithError(SE.getMessage());"
+      }
+    ]
+  },
+  "IP_own_scopes": [
+    {
+      "file": "llvm-profgen.cpp",
+      "start_line": 179,
+      "end_line": 354,
+      "forbidden_calls": []
+    },
+    {
+      "file": "ProfileGenerator.cpp",
+      "start_line": 257,
+      "end_line": 593,
+      "forbidden_calls": []
+    },
+    {
+      "file": "IPPerfReader.cpp",
+      "scope": "whole file",
+      "forbidden_calls": []
+    },
+    {
+      "file": "IPIdentity.cpp",
+      "scope": "whole file",
+      "forbidden_calls": []
+    },
+    {
+      "file": "IPBoundary.cpp",
+      "scope": "whole file",
+      "forbidden_calls": []
+    },
+    {
+      "file": "IPQualityReport.cpp",
+      "scope": "whole file",
+      "forbidden_calls": []
+    }
+  ],
+  "note": "ProfiledBinary shared exits intentionally remain and are covered by registered single-shot callback; main legacy validation/writer not IP own code"
+}

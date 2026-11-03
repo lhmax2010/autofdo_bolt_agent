@@ -1,0 +1,3279 @@
+[
+  {
+    "label": "05-fixed",
+    "input": "temp/rpi4-prefreeze/fixed_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-fixed.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-fixed.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.06922904099337757,
+        "peak_RSS_KiB": 41376
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.03106165397912264,
+        "peak_RSS_KiB": 41336
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "6b0dacf289903a069834bfeb004898fdb364bf2e564b18686368376d843c921b",
+        "stdout": "f0fd781ad134e5d72256ea4d1acf929cf288c6d70ec7b342c96ca0eb14a60e60",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "6b0dacf289903a069834bfeb004898fdb364bf2e564b18686368376d843c921b",
+        "stdout": "f0fd781ad134e5d72256ea4d1acf929cf288c6d70ec7b342c96ca0eb14a60e60",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        7659,
+        7659022977
+      ],
+      "after_pid": [
+        7659,
+        7659022977
+      ],
+      "kernel": [
+        393,
+        393001179
+      ],
+      "other_dso": [
+        770,
+        770002310
+      ],
+      "target": [
+        6496,
+        6496019488
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        7659,
+        7659022977
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 7659
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 6496019488
+        },
+        "period_sum": 6496019488,
+        "sample_count": 6496
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 6473019419
+        },
+        "period_sum": 6473019419,
+        "sample_count": 6473
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 6496019488
+        },
+        "period_sum": 6496019488,
+        "sample_count": 6496
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 6496019488
+            },
+            "period_sum": 6496019488,
+            "sample_count": 6496
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 6496019488,
+            "numerator": 6496019488
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 23000069
+        },
+        "period_sum": 23000069,
+        "sample_count": 23
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 7659,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 2290
+    }
+  },
+  {
+    "label": "05-multi",
+    "input": "temp/rpi4-prefreeze/multi_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/multi_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-multi.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-multi.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.06047734396997839,
+        "peak_RSS_KiB": 48008
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.051801602938212454,
+        "peak_RSS_KiB": 48028
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "c8a207a997b255d9c5fd65be72824c0f10db05f3a056b11b8058964b2eb8bebb",
+        "stdout": "8460b990d16de875cfc92bc016bba14fae9eba96078ea9c8b6eb09d9201d364e",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "c8a207a997b255d9c5fd65be72824c0f10db05f3a056b11b8058964b2eb8bebb",
+        "stdout": "8460b990d16de875cfc92bc016bba14fae9eba96078ea9c8b6eb09d9201d364e",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        22662,
+        22662067986
+      ],
+      "after_pid": [
+        22662,
+        22662067986
+      ],
+      "other_dso": [
+        6799,
+        6799020397
+      ],
+      "kernel": [
+        2574,
+        2574007722
+      ],
+      "target": [
+        13289,
+        13289039867
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        22662,
+        22662067986
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 22662
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 13289039867
+        },
+        "period_sum": 13289039867,
+        "sample_count": 13289
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 13232039696
+        },
+        "period_sum": 13232039696,
+        "sample_count": 13232
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 13289039867
+        },
+        "period_sum": 13289039867,
+        "sample_count": 13289
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 13289039867
+            },
+            "period_sum": 13289039867,
+            "sample_count": 13289
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 13289039867,
+            "numerator": 13289039867
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 57000171
+        },
+        "period_sum": 57000171,
+        "sample_count": 57
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 22662,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 3286
+    }
+  },
+  {
+    "label": "05-freq",
+    "input": "temp/rpi4-prefreeze/freq_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/freq_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-freq.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-freq.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.025322204106487334,
+        "peak_RSS_KiB": 41020
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.02045325201470405,
+        "peak_RSS_KiB": 40940
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "c531c4b88043854baef6149a4b40192c5326ea2a2863801d8a3766a0eb567ec3",
+        "stdout": "7b50ab2fd217ec444a59ab45c1484d780790df7299aa17b23a0c619940f960ac",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "c531c4b88043854baef6149a4b40192c5326ea2a2863801d8a3766a0eb567ec3",
+        "stdout": "7b50ab2fd217ec444a59ab45c1484d780790df7299aa17b23a0c619940f960ac",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        4886,
+        7377014702
+      ],
+      "after_pid": [
+        4886,
+        7377014702
+      ],
+      "kernel": [
+        305,
+        388632691
+      ],
+      "other_dso": [
+        485,
+        764561549
+      ],
+      "target": [
+        4096,
+        6223820462
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        4886,
+        7377014702
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 4886
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 6223820462
+        },
+        "period_sum": 6223820462,
+        "sample_count": 4096
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 6202061212
+        },
+        "period_sum": 6202061212,
+        "sample_count": 4079
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 6223820462
+        },
+        "period_sum": 6223820462,
+        "sample_count": 4096
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1447260,
+              "numerator": 6223820462
+            },
+            "period_sum": 6223820462,
+            "sample_count": 4096
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 6223820462,
+            "numerator": 6223820462
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 21759250
+        },
+        "period_sum": 21759250,
+        "sample_count": 17
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1447260,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 4886,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 1657
+    }
+  },
+  {
+    "label": "05-buildid",
+    "input": "temp/rpi4-prefreeze/buildid_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/buildid_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-buildid.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-buildid.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.028207688010297716,
+        "peak_RSS_KiB": 41384
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.0285896499408409,
+        "peak_RSS_KiB": 41384
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "f235824d7387a810789bf7c156a9f2985cd33bba566919eb9bc9b53a486fb0e9",
+        "stdout": "97272d7c600b2f757966b62b410e0593e64cf1458030b2d7ad09ac6383f10109",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "f235824d7387a810789bf7c156a9f2985cd33bba566919eb9bc9b53a486fb0e9",
+        "stdout": "97272d7c600b2f757966b62b410e0593e64cf1458030b2d7ad09ac6383f10109",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        7466,
+        7466022398
+      ],
+      "after_pid": [
+        7466,
+        7466022398
+      ],
+      "kernel": [
+        395,
+        395001185
+      ],
+      "other_dso": [
+        749,
+        749002247
+      ],
+      "target": [
+        6322,
+        6322018966
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        7466,
+        7466022398
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 7466
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 6322018966
+        },
+        "period_sum": 6322018966,
+        "sample_count": 6322
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 6298018894
+        },
+        "period_sum": 6298018894,
+        "sample_count": 6298
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 6322018966
+        },
+        "period_sum": 6322018966,
+        "sample_count": 6322
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 6322018966
+            },
+            "period_sum": 6322018966,
+            "sample_count": 6322
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 6322018966,
+            "numerator": 6322018966
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 24000072
+        },
+        "period_sum": 24000072,
+        "sample_count": 24
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 7466,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 2177
+    }
+  },
+  {
+    "label": "05-lost",
+    "input": "temp/rpi4-prefreeze/lost_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/lost_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-lost.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-lost.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 1.6679604969685897,
+        "peak_RSS_KiB": 320236
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 1.669707678956911,
+        "peak_RSS_KiB": 320260
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "f284711471c83493bcf1299bf0cd4df22bd76bffeb8cc0edd792f653871a69db",
+        "stdout": "0a969ce3dcbf4cad22edd99e6351b97d271a8d3312db2dc022a6093c3a4b4eb2",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "f284711471c83493bcf1299bf0cd4df22bd76bffeb8cc0edd792f653871a69db",
+        "stdout": "0a969ce3dcbf4cad22edd99e6351b97d271a8d3312db2dc022a6093c3a4b4eb2",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        1044541,
+        104457233623
+      ],
+      "after_pid": [
+        1044541,
+        104457233623
+      ],
+      "kernel": [
+        19464,
+        1946458392
+      ],
+      "other_dso": [
+        81184,
+        8118643552
+      ],
+      "target": [
+        943893,
+        94392131679
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        1044541,
+        104457233623
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 1044541
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 94392131679
+        },
+        "period_sum": 94392131679,
+        "sample_count": 943893
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 94098922883
+        },
+        "period_sum": 94098922883,
+        "sample_count": 940961
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 94392131679
+        },
+        "period_sum": 94392131679,
+        "sample_count": 943893
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 100003,
+              "numerator": 94392131679
+            },
+            "period_sum": 94392131679,
+            "sample_count": 943893
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 94392131679,
+            "numerator": 94392131679
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 293208796
+        },
+        "period_sum": 293208796,
+        "sample_count": 2932
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 1044541,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 10864
+    }
+  },
+  {
+    "label": "07-fork-cases",
+    "input": "temp/v04/fork.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+      "--binary-match-regex=^/opt/afdo_agent/work/cases$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/fork.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-fork-cases.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-fork-cases.json"
+    ],
+    "runs": [
+      {
+        "exit": 0,
+        "wall_seconds": 0.11916847701650113,
+        "peak_RSS_KiB": 41932
+      },
+      {
+        "exit": 0,
+        "wall_seconds": 0.027858401066623628,
+        "peak_RSS_KiB": 41908
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "d5047deb0bb5cb10962ad616f40408115d5478922f3980803a63679e24da3fb3",
+        "report": "b7f8471d9035c567ce03e42eef818ac3565d481f3256b6c7669757ae6f5360e4",
+        "stdout": "406db268bdd98589665297f6a55077b3b833c5a1e6172bd91b5bdff2697947a8",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "profile": "d5047deb0bb5cb10962ad616f40408115d5478922f3980803a63679e24da3fb3",
+        "report": "b7f8471d9035c567ce03e42eef818ac3565d481f3256b6c7669757ae6f5360e4",
+        "stdout": "406db268bdd98589665297f6a55077b3b833c5a1e6172bd91b5bdff2697947a8",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true
+    },
+    "independent_layers": {
+      "after_event": [
+        9845,
+        9845029535
+      ],
+      "after_pid": [
+        9845,
+        9845029535
+      ],
+      "kernel": [
+        5,
+        5000015
+      ],
+      "target": [
+        9840,
+        9840029520
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "other_dso": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        9845,
+        9845029535
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 9845
+    },
+    "verdict": {
+      "conversion": "ok",
+      "failure_stage": "unknown",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "unknown",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 9840029520
+        },
+        "period_sum": 9840029520,
+        "sample_count": 9840
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 38000114
+        },
+        "period_sum": 38000114,
+        "sample_count": 38
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_symtab_top20": [],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 9802029406
+        },
+        "period_sum": 9802029406,
+        "sample_count": 9802
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 9845,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 4,
+      "top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 6868020604
+            },
+            "period_sum": 6868020604,
+            "sample_count": 6868
+          },
+          "name": "sort_block",
+          "share": {
+            "denominator": 9802029406,
+            "numerator": 6868020604
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1395004185
+            },
+            "period_sum": 1395004185,
+            "sample_count": 1395
+          },
+          "name": "lookup_work",
+          "share": {
+            "denominator": 9802029406,
+            "numerator": 1395004185
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 856002568
+            },
+            "period_sum": 856002568,
+            "sample_count": 856
+          },
+          "name": "hash_mix",
+          "share": {
+            "denominator": 9802029406,
+            "numerator": 856002568
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 683002049
+            },
+            "period_sum": 683002049,
+            "sample_count": 683
+          },
+          "name": "run_workload",
+          "share": {
+            "denominator": 9802029406,
+            "numerator": 683002049
+          }
+        }
+      ],
+      "unique_addresses": 44
+    }
+  },
+  {
+    "label": "07-exec-cases",
+    "input": "temp/v04/exec.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+      "--binary-match-regex=^/opt/afdo_agent/work/cases$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/exec.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-cases.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-cases.json"
+    ],
+    "runs": [
+      {
+        "exit": 0,
+        "wall_seconds": 0.021685011102817953,
+        "peak_RSS_KiB": 41504
+      },
+      {
+        "exit": 0,
+        "wall_seconds": 0.02057102497201413,
+        "peak_RSS_KiB": 41496
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "cadaf6b19826328afaa59ee665dc62f1fe0f14774074604ac3151a16755430fe",
+        "report": "920bbf00e397e2565cfdc88bb875fbda8710aee73123e06c057969c2c1b9cc52",
+        "stdout": "208b4787fe9bbef388df3e84a80387f35529acd735cd1e190c2e3bb8e4a34768",
+        "stderr": "eebc50b359126a957f824b82616edc18d81d9c4df55241c6ebf9f33a57106af6"
+      },
+      {
+        "profile": "cadaf6b19826328afaa59ee665dc62f1fe0f14774074604ac3151a16755430fe",
+        "report": "920bbf00e397e2565cfdc88bb875fbda8710aee73123e06c057969c2c1b9cc52",
+        "stdout": "208b4787fe9bbef388df3e84a80387f35529acd735cd1e190c2e3bb8e4a34768",
+        "stderr": "eebc50b359126a957f824b82616edc18d81d9c4df55241c6ebf9f33a57106af6"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true
+    },
+    "independent_layers": {
+      "after_event": [
+        5925,
+        5925017775
+      ],
+      "after_pid": [
+        5925,
+        5925017775
+      ],
+      "kernel": [
+        10,
+        10000030
+      ],
+      "target": [
+        4833,
+        4833014499
+      ],
+      "other_dso": [
+        1082,
+        1082003246
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        5925,
+        5925017775
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 5925
+    },
+    "verdict": {
+      "conversion": "ok",
+      "failure_stage": "unknown",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "unknown",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 4833014499
+        },
+        "period_sum": 4833014499,
+        "sample_count": 4833
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 4000012
+        },
+        "period_sum": 4000012,
+        "sample_count": 4
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_symtab_top20": [],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 4829014487
+        },
+        "period_sum": 4829014487,
+        "sample_count": 4829
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 5925,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 4,
+      "top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3368010104
+            },
+            "period_sum": 3368010104,
+            "sample_count": 3368
+          },
+          "name": "sort_block",
+          "share": {
+            "denominator": 4829014487,
+            "numerator": 3368010104
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 643001929
+            },
+            "period_sum": 643001929,
+            "sample_count": 643
+          },
+          "name": "lookup_work",
+          "share": {
+            "denominator": 4829014487,
+            "numerator": 643001929
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 442001326
+            },
+            "period_sum": 442001326,
+            "sample_count": 442
+          },
+          "name": "hash_mix",
+          "share": {
+            "denominator": 4829014487,
+            "numerator": 442001326
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 376001128
+            },
+            "period_sum": 376001128,
+            "sample_count": 376
+          },
+          "name": "run_workload",
+          "share": {
+            "denominator": 4829014487,
+            "numerator": 376001128
+          }
+        }
+      ],
+      "unique_addresses": 37
+    }
+  },
+  {
+    "label": "07-exec-after",
+    "input": "temp/v04/exec.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/after",
+      "--binary-match-regex=^/opt/afdo_agent/work/after$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/exec.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-after.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-after.json"
+    ],
+    "runs": [
+      {
+        "exit": 0,
+        "wall_seconds": 0.02057569706812501,
+        "peak_RSS_KiB": 41200
+      },
+      {
+        "exit": 0,
+        "wall_seconds": 0.01649663900025189,
+        "peak_RSS_KiB": 41192
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "9bdff98c7035d4f232642358480c0f2658cefcf178ac375738707970f6d8d691",
+        "report": "61f7317fc01461c7c97752a4fc739c7a9325dc3a922cd20dc2a20b7f600a0995",
+        "stdout": "553a6f926c7761604371dc0fbcb583b9756a7e51f11bb9f477d810b4ca1d1254",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "profile": "9bdff98c7035d4f232642358480c0f2658cefcf178ac375738707970f6d8d691",
+        "report": "61f7317fc01461c7c97752a4fc739c7a9325dc3a922cd20dc2a20b7f600a0995",
+        "stdout": "553a6f926c7761604371dc0fbcb583b9756a7e51f11bb9f477d810b4ca1d1254",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true
+    },
+    "independent_layers": {
+      "after_event": [
+        5925,
+        5925017775
+      ],
+      "after_pid": [
+        5925,
+        5925017775
+      ],
+      "kernel": [
+        10,
+        10000030
+      ],
+      "other_dso": [
+        4834,
+        4834014502
+      ],
+      "target": [
+        1081,
+        1081003243
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        5925,
+        5925017775
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 5925
+    },
+    "verdict": {
+      "conversion": "ok",
+      "failure_stage": "unknown",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "unknown",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 1081003243
+        },
+        "period_sum": 1081003243,
+        "sample_count": 1081
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_symtab_top20": [],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 1081003243
+        },
+        "period_sum": 1081003243,
+        "sample_count": 1081
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 5925,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 1,
+      "top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1081003243
+            },
+            "period_sum": 1081003243,
+            "sample_count": 1081
+          },
+          "name": "after_work",
+          "share": {
+            "denominator": 1081003243,
+            "numerator": 1081003243
+          }
+        }
+      ],
+      "unique_addresses": 1
+    }
+  },
+  {
+    "label": "07-deleted-libdeleted_probe.so",
+    "input": "temp/v04/deleted.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+      "--binary-match-regex=^/opt/afdo_agent/work/libdeleted_probe\\.so\\ \\(deleted\\)$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/deleted.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-deleted-libdeleted_probe.so.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-deleted-libdeleted_probe.so.json"
+    ],
+    "runs": [
+      {
+        "exit": 0,
+        "wall_seconds": 0.012538006994873285,
+        "peak_RSS_KiB": 40900
+      },
+      {
+        "exit": 0,
+        "wall_seconds": 0.012134429067373276,
+        "peak_RSS_KiB": 40876
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "d5f2140a13ae6e2761affb3aeeebbaf7b3684b3229a0709a3e611d2f5f6e80e2",
+        "report": "ba246f4aef478df6ca93219a763b888cd7347b9be45a0bd6bfff93a192ad3df6",
+        "stdout": "024ae498b789c8dc2bff8775cad4e711ac82121d6631d3b8190fb5fefb0710d7",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "profile": "d5f2140a13ae6e2761affb3aeeebbaf7b3684b3229a0709a3e611d2f5f6e80e2",
+        "report": "ba246f4aef478df6ca93219a763b888cd7347b9be45a0bd6bfff93a192ad3df6",
+        "stdout": "024ae498b789c8dc2bff8775cad4e711ac82121d6631d3b8190fb5fefb0710d7",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true
+    },
+    "independent_layers": {
+      "after_event": [
+        151,
+        151000453
+      ],
+      "after_pid": [
+        151,
+        151000453
+      ],
+      "target": [
+        151,
+        151000453
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "kernel": [
+        0,
+        0
+      ],
+      "other_dso": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        151,
+        151000453
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 151
+    },
+    "verdict": {
+      "conversion": "ok",
+      "failure_stage": "unknown",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "unknown",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 151000453
+        },
+        "period_sum": 151000453,
+        "sample_count": 151
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_symtab_top20": [],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 151000453
+        },
+        "period_sum": 151000453,
+        "sample_count": 151
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 151,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 1,
+      "top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 151000453
+            },
+            "period_sum": 151000453,
+            "sample_count": 151
+          },
+          "name": "deleted_work",
+          "share": {
+            "denominator": 151000453,
+            "numerator": 151000453
+          }
+        }
+      ],
+      "unique_addresses": 1
+    }
+  },
+  {
+    "label": "07-module",
+    "input": "temp/v04/module.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libc.so.6",
+      "--binary-match-regex=^/usr/lib/libc\\.so\\.6$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/module.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-module.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-module.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.33687580993864685,
+        "peak_RSS_KiB": 141392
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.2484652689890936,
+        "peak_RSS_KiB": 141576
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "73a7f6e3f655e1923f1f4570a2a617117bc4aff0d086d5ce0b53cf0d34c89072",
+        "stdout": "8f0cbe4856519ead9035001fb547b4e0aece0618b0a893d52e032749756d638a",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "73a7f6e3f655e1923f1f4570a2a617117bc4aff0d086d5ce0b53cf0d34c89072",
+        "stdout": "8f0cbe4856519ead9035001fb547b4e0aece0618b0a893d52e032749756d638a",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true
+    },
+    "independent_layers": {
+      "after_event": [
+        318382,
+        31839155146
+      ],
+      "after_pid": [
+        318382,
+        31839155146
+      ],
+      "target": [
+        51874,
+        5187555622
+      ],
+      "other_dso": [
+        130172,
+        13017590516
+      ],
+      "kernel": [
+        136336,
+        13634009008
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        318382,
+        31839155146
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 318382
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 5187555622
+        },
+        "period_sum": 5187555622,
+        "sample_count": 51874
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 5184055517
+        },
+        "period_sum": 5184055517,
+        "sample_count": 51839
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 5187555622
+        },
+        "period_sum": 5187555622,
+        "sample_count": 51874
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 100003,
+              "numerator": 5187555622
+            },
+            "period_sum": 5187555622,
+            "sample_count": 51874
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 5187555622,
+            "numerator": 5187555622
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 3500105
+        },
+        "period_sum": 3500105,
+        "sample_count": 35
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 100003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 318382,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 2380
+    }
+  },
+  {
+    "label": "09-fixed",
+    "input": "temp/rpi5-prefreeze/fixed_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-fixed.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-fixed.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.09221213799901307,
+        "peak_RSS_KiB": 41388
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.02872567402664572,
+        "peak_RSS_KiB": 41348
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "4a0405bed9df5b9d7eaefd68e8eae81b6d4d86f46c0165d53c71dcf027102716",
+        "stdout": "16b561bec2ce74fd265957c898ea7213cd15da1a0060197840b1beb9341103a1",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "4a0405bed9df5b9d7eaefd68e8eae81b6d4d86f46c0165d53c71dcf027102716",
+        "stdout": "16b561bec2ce74fd265957c898ea7213cd15da1a0060197840b1beb9341103a1",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        7617,
+        7617022851
+      ],
+      "after_pid": [
+        7617,
+        7617022851
+      ],
+      "kernel": [
+        238,
+        238000714
+      ],
+      "other_dso": [
+        1514,
+        1514004542
+      ],
+      "target": [
+        5865,
+        5865017595
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        7617,
+        7617022851
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 7617
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 5865017595
+        },
+        "period_sum": 5865017595,
+        "sample_count": 5865
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 5862017586
+        },
+        "period_sum": 5862017586,
+        "sample_count": 5862
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 5865017595
+        },
+        "period_sum": 5865017595,
+        "sample_count": 5865
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 5865017595
+            },
+            "period_sum": 5865017595,
+            "sample_count": 5865
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 5865017595,
+            "numerator": 5865017595
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 3000009
+        },
+        "period_sum": 3000009,
+        "sample_count": 3
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 7617,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 1712
+    }
+  },
+  {
+    "label": "09-multi",
+    "input": "temp/rpi5-prefreeze/multi_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/multi_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-multi.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-multi.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.06119441194459796,
+        "peak_RSS_KiB": 48260
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.059434483060613275,
+        "peak_RSS_KiB": 48280
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "101958d7d31b83a1ed513dbe472c9b5538a145256a2e48523de8c4beed5b2c12",
+        "stdout": "456f11fd56b6945888b064a2e10f7bcca0e05f46dad5224fc62d9216f0a5c266",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "101958d7d31b83a1ed513dbe472c9b5538a145256a2e48523de8c4beed5b2c12",
+        "stdout": "456f11fd56b6945888b064a2e10f7bcca0e05f46dad5224fc62d9216f0a5c266",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        26778,
+        26778080334
+      ],
+      "after_pid": [
+        26778,
+        26778080334
+      ],
+      "other_dso": [
+        9846,
+        9846029538
+      ],
+      "kernel": [
+        2601,
+        2601007803
+      ],
+      "target": [
+        14331,
+        14331042993
+      ],
+      "pid_unknown": [
+        1,
+        1000003
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        26778,
+        26778080334
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 26778
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 14331042993
+        },
+        "period_sum": 14331042993,
+        "sample_count": 14331
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 14317042951
+        },
+        "period_sum": 14317042951,
+        "sample_count": 14317
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 14331042993
+        },
+        "period_sum": 14331042993,
+        "sample_count": 14331
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 14331042993
+            },
+            "period_sum": 14331042993,
+            "sample_count": 14331
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 14331042993,
+            "numerator": 14331042993
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 14000042
+        },
+        "period_sum": 14000042,
+        "sample_count": 14
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 26778,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 2889
+    }
+  },
+  {
+    "label": "09-freq",
+    "input": "temp/rpi5-prefreeze/freq_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/freq_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-freq.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-freq.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.01923113502562046,
+        "peak_RSS_KiB": 40712
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.014700679923407733,
+        "peak_RSS_KiB": 40632
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "90d89606b739f6e9b2ac1f457119e628ba3925a274aa934f2a7580fe8160330d",
+        "stdout": "e0fc2d2c04cf6996c9b53e71ed37a0b4119dfd4051bf2e9036dc052733b8b9e8",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "90d89606b739f6e9b2ac1f457119e628ba3925a274aa934f2a7580fe8160330d",
+        "stdout": "e0fc2d2c04cf6996c9b53e71ed37a0b4119dfd4051bf2e9036dc052733b8b9e8",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        2581,
+        7521560710
+      ],
+      "after_pid": [
+        2581,
+        7521560710
+      ],
+      "kernel": [
+        123,
+        174482588
+      ],
+      "other_dso": [
+        452,
+        1460448839
+      ],
+      "target": [
+        2006,
+        5886629283
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        2581,
+        7521560710
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 2581
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 5886629283
+        },
+        "period_sum": 5886629283,
+        "sample_count": 2006
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 5883747132
+        },
+        "period_sum": 5883747132,
+        "sample_count": 2005
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 5886629283
+        },
+        "period_sum": 5886629283,
+        "sample_count": 2006
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 2362251,
+              "numerator": 5886629283
+            },
+            "period_sum": 5886629283,
+            "sample_count": 2006
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 5886629283,
+            "numerator": 5886629283
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 2882151
+        },
+        "period_sum": 2882151,
+        "sample_count": 1
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 2362251,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 2581,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 858
+    }
+  },
+  {
+    "label": "09-buildid",
+    "input": "temp/rpi5-prefreeze/buildid_dsoff.txt",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/buildid_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-buildid.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-buildid.json"
+    ],
+    "runs": [
+      {
+        "exit": 1,
+        "wall_seconds": 0.03157160198315978,
+        "peak_RSS_KiB": 41208
+      },
+      {
+        "exit": 1,
+        "wall_seconds": 0.029234172077849507,
+        "peak_RSS_KiB": 41256
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "report": "7cd5b6e0503707653b6fa166c29f5e76fa3f1c6be6fafc419a38495df35bcf01",
+        "stdout": "57c8dba37ab3a401ce448c1622d7fd8043ba75c4c6f928be598c4e9fc0db59c0",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "report": "7cd5b6e0503707653b6fa166c29f5e76fa3f1c6be6fafc419a38495df35bcf01",
+        "stdout": "57c8dba37ab3a401ce448c1622d7fd8043ba75c4c6f928be598c4e9fc0db59c0",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ],
+    "checks": {
+      "two_runs_identical": true,
+      "old_exit": true,
+      "old_stdout": true,
+      "old_stderr": true,
+      "old_profile": true,
+      "input_total": true,
+      "events": true,
+      "after_event": true,
+      "after_pid": true,
+      "pid_unknown": true,
+      "kernel": true,
+      "other_dso": true,
+      "unmapped": true,
+      "target": true,
+      "old_generation_in_cu_no_subprogram": true,
+      "old_generation_in_func_no_line": true,
+      "old_generation_no_cu": true,
+      "old_generation_outside_dwarf_func": true,
+      "old_generation_plt": true,
+      "old_generation_usable": true,
+      "lost": true,
+      "strip_failure": true
+    },
+    "independent_layers": {
+      "after_event": [
+        7226,
+        7226021678
+      ],
+      "after_pid": [
+        7226,
+        7226021678
+      ],
+      "kernel": [
+        231,
+        231000693
+      ],
+      "other_dso": [
+        1384,
+        1384004152
+      ],
+      "target": [
+        5611,
+        5611016833
+      ],
+      "pid_unknown": [
+        0,
+        0
+      ],
+      "unmapped": [
+        0,
+        0
+      ]
+    },
+    "independent_events": {
+      "cycles": [
+        7226,
+        7226021678
+      ]
+    },
+    "independent_LOST": {
+      "records": 0,
+      "L": 0,
+      "S": 7226
+    },
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "generate",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: no usable samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 5611016833
+        },
+        "period_sum": 5611016833,
+        "sample_count": 5611
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 5605016815
+        },
+        "period_sum": 5605016815,
+        "sample_count": 5605
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 5611016833
+        },
+        "period_sum": 5611016833,
+        "sample_count": 5611
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 5611016833
+            },
+            "period_sum": 5611016833,
+            "sample_count": 5611
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 5611016833,
+            "numerator": 5611016833
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 6000018
+        },
+        "period_sum": 6000018,
+        "sample_count": 6
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      }
+    },
+    "lost": {
+      "L": "unknown",
+      "S": 7226,
+      "completeness": "unknown",
+      "count_unit": "records",
+      "exported_lost_ratio": "unknown",
+      "records": 0,
+      "scope": "input",
+      "source": "PERF_RECORD_LOST"
+    },
+    "coverage": {
+      "name_merged_functions": 0,
+      "name_merged_top50": [],
+      "sampled_functions": 0,
+      "top50": [],
+      "unique_addresses": 1721
+    }
+  }
+]

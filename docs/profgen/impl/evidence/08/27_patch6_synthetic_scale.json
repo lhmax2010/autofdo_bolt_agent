@@ -1,0 +1,2367 @@
+[
+  {
+    "label": "largest20",
+    "kind": "\u5408\u6210\u8d1f\u8f7d\u89c4\u6a21\u6d4b\u91cf\uff0c\u4e0d\u662f\u771f\u5b9e\u91c7\u6837\u6216avg\u6b63\u786e\u6027\u8bc1\u636e",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--binary-match-regex=^/target$",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100",
+      "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/largest20.perfscript",
+      "--ip-aggregation=avg",
+      "--ip-zero-fill=sampled-functions",
+      "--show-ip-address-counts",
+      "--show-ip-boundaries",
+      "--format=text",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/scale/largest20.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/scale/largest20.json"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.727722842944786,
+    "peak_RSS_KiB": 96180,
+    "coverage": {
+      "name_merged_functions": 2,
+      "name_merged_top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "decode_frame",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "iadst_iadst_16x16_add_c",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        }
+      ],
+      "sampled_functions": 20,
+      "top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "ac3_decode_frame",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "decode_frame",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "decode_frame_header",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "encode_mb",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "ff_h264_decode_mb_cabac",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "ff_h264_decode_mb_cavlc",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "ff_h264_filter_mb_fast",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "ff_vp9_decode_block",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "hl_decode_mb_444_complex",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "hl_decode_mb_complex",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "iadst_iadst_16x16_add_c",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "inter_pred_16bpp",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "inter_pred_8bpp",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "inter_pred_scaled_16bpp",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "inter_pred_scaled_8bpp",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "mp_decode_frame",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "mpeg4_encode_mb",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "vc1_decode_b_blocks",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "vc1_decode_p_blocks",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "vp8_decode_mb_row_no_filter",
+          "share": {
+            "denominator": 20000060,
+            "numerator": 1000003
+          }
+        }
+      ],
+      "unique_addresses": 20
+    },
+    "boundaries": {
+      "failures": [],
+      "function_count": 20,
+      "requested": true,
+      "sources": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+      ]
+    },
+    "samples": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 20000060
+        },
+        "period_sum": 20000060,
+        "sample_count": 20
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "outside_symtab_top20": [],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 20000060
+        },
+        "period_sum": 20000060,
+        "sample_count": 20
+      }
+    },
+    "profile_sha256": "b05da78a3e16a7d189f81bd7322d2e4cc49b2f3c345af8c85da636120f2be4dd",
+    "same_profile_as_patch5": true,
+    "report_sha256": "d9ac66b4d06b7e0469d184175c60392d056077abb3daff691eccca10fb88ad82"
+  },
+  {
+    "label": "all-executable",
+    "kind": "\u5408\u6210\u8d1f\u8f7d\u89c4\u6a21\u6d4b\u91cf\uff0c\u4e0d\u662f\u771f\u5b9e\u91c7\u6837\u6216avg\u6b63\u786e\u6027\u8bc1\u636e",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--binary-match-regex=^/target$",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/libavcodec.so.62.11.100",
+      "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch5/scale-rusage/all-executable.perfscript",
+      "--ip-aggregation=avg",
+      "--ip-zero-fill=sampled-functions",
+      "--show-ip-address-counts",
+      "--show-ip-boundaries",
+      "--format=text",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/scale/all-executable.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/scale/all-executable.json"
+    ],
+    "exit": 0,
+    "wall_seconds": 2.519620724953711,
+    "peak_RSS_KiB": 319396,
+    "coverage": {
+      "name_merged_functions": 308,
+      "name_merged_top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 6000018
+            },
+            "period_sum": 6000018,
+            "sample_count": 6
+          },
+          "name": "_ZL8snprintfPcU17pass_object_size1jPKcz",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 6000018
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 5000015
+            },
+            "period_sum": 5000015,
+            "sample_count": 5
+          },
+          "name": "get_se_golomb",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 5000015
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 5000015
+            },
+            "period_sum": 5000015,
+            "sample_count": 5
+          },
+          "name": "put_bits",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 5000015
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 4000012
+            },
+            "period_sum": 4000012,
+            "sample_count": 4
+          },
+          "name": "decode012",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 4000012
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 4000012
+            },
+            "period_sum": 4000012,
+            "sample_count": 4
+          },
+          "name": "get_bits_long",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 4000012
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 4000012
+            },
+            "period_sum": 4000012,
+            "sample_count": 4
+          },
+          "name": "vp56_rac_get_prob_armv6",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 4000012
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_1d_h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_1d_v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_2d_hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_16h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_16hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_16v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_32h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_32hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_32v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_4h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_4hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_4v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_64h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_64hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_64v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_8h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_8hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_8v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_16h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_16hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_16v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_32h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_32hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_32v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_4h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_4hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_4v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_64h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_64hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_64v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_8h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_8hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_8v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_16h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_16hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_16v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_32h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_32hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_32v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_4h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_4hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_4v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_64h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_64hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        }
+      ],
+      "sampled_functions": 4090,
+      "top50": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 6000018
+            },
+            "period_sum": 6000018,
+            "sample_count": 6
+          },
+          "name": "_ZL8snprintfPcU17pass_object_size1jPKcz",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 6000018
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 5000015
+            },
+            "period_sum": 5000015,
+            "sample_count": 5
+          },
+          "name": "get_se_golomb",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 5000015
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 5000015
+            },
+            "period_sum": 5000015,
+            "sample_count": 5
+          },
+          "name": "put_bits",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 5000015
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 4000012
+            },
+            "period_sum": 4000012,
+            "sample_count": 4
+          },
+          "name": "decode012",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 4000012
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 4000012
+            },
+            "period_sum": 4000012,
+            "sample_count": 4
+          },
+          "name": "get_bits_long",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 4000012
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 4000012
+            },
+            "period_sum": 4000012,
+            "sample_count": 4
+          },
+          "name": "vp56_rac_get_prob_armv6",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 4000012
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_1d_h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_1d_v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_2d_hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_16h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_16hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_16v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_32h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_32hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_32v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_4h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_4hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_4v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_64h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_64hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_64v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_8h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_8hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_regular_8v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_16h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_16hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_16v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_32h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_32hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_32v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_4h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_4hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_4v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_64h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_64hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_64v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_8h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_8hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_sharp_8v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_16h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_16hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_16v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_32h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_32hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_32v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_4h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_4hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_4v_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_64h_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 3000009
+            },
+            "period_sum": 3000009,
+            "sample_count": 3
+          },
+          "name": "avg_8tap_smooth_64hv_c",
+          "share": {
+            "denominator": 4598013794,
+            "numerator": 3000009
+          }
+        }
+      ],
+      "unique_addresses": 5594
+    },
+    "boundaries": {
+      "failures": [],
+      "function_count": 4090,
+      "requested": true,
+      "sources": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v05/extract/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+      ]
+    },
+    "samples": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 5594016782
+        },
+        "period_sum": 5594016782,
+        "sample_count": 5594
+      },
+      "in_cu_no_subprogram": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 965002895
+        },
+        "period_sum": 965002895,
+        "sample_count": 965
+      },
+      "in_func_no_line": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "no_cu": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 31000093
+        },
+        "period_sum": 31000093,
+        "sample_count": 31
+      },
+      "outside_dwarf_func": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 996002988
+        },
+        "period_sum": 996002988,
+        "sample_count": 996
+      },
+      "outside_symtab_top20": [
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 10000030
+            },
+            "period_sum": 10000030,
+            "sample_count": 10
+          },
+          "name": "unknown",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 10000030
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "__floatundidf",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "__subdf3",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "iadst16",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct16",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct16_half",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct16_quarter",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct16x16_dc_add_neon",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct32_odd",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct32_odd_half",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct32_odd_quarter",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 2000006
+            },
+            "period_sum": 2000006,
+            "sample_count": 2
+          },
+          "name": "idct32x32_dc_add_neon",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 2000006
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_d2ulz",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_f2d",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_f2lz",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_f2ulz",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_fadd",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_frsub",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_idiv0",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        },
+        {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1000003,
+              "numerator": 1000003
+            },
+            "period_sum": 1000003,
+            "sample_count": 1
+          },
+          "name": "__aeabi_idivmod",
+          "share": {
+            "denominator": 5594016782,
+            "numerator": 1000003
+          }
+        }
+      ],
+      "plt": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "unmapped_in_target": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 0
+        },
+        "period_sum": 0,
+        "sample_count": 0
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 4598013794
+        },
+        "period_sum": 4598013794,
+        "sample_count": 4598
+      }
+    },
+    "profile_sha256": "4d4b1f76dcfc0185d6364dd528162c8c5637545fba41c7ff67b16e1afe0d50d4",
+    "same_profile_as_patch5": true,
+    "report_sha256": "efd652ce3fc8f2a761efb835d8cb0c2af7747cf5438d35bec43ac2940d810fc4"
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "names": [
+    "$a",
+    "$d",
+    "$t"
+  ],
+  "readelf_command": [
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+    "--library-path",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/readelf",
+    "-sW",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/thumb-count.perfbin"
+  ],
+  "readelf_exit": 0,
+  "readelf_stdout": "\nSymbol table '.dynsym' contains 4 entries:\n   Num:    Value  Size Type    Bind   Vis      Ndx Name\n     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND \n     1: 00001299   106 FUNC    GLOBAL DEFAULT    9 count_loop\n     2: 00001305    64 FUNC    GLOBAL DEFAULT    9 two_sites\n     3: 00001345    56 FUNC    GLOBAL DEFAULT    9 main\n\nSymbol table '.symtab' contains 17 entries:\n   Num:    Value  Size Type    Bind   Vis      Ndx Name\n     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND \n     1: 00000000     0 FILE    LOCAL  DEFAULT  ABS counting.c\n     2: 00001298     0 NOTYPE  LOCAL  DEFAULT    9 $t\n     3: 00001340     0 NOTYPE  LOCAL  DEFAULT    9 $d\n     4: 0000342c     4 OBJECT  LOCAL  DEFAULT   14 salt\n     5: 00001344     0 NOTYPE  LOCAL  DEFAULT    9 $t\n     6: 00001378     0 NOTYPE  LOCAL  DEFAULT    9 $d\n     7: 00001380     0 NOTYPE  LOCAL  DEFAULT   10 $a\n     8: 00001390     0 NOTYPE  LOCAL  DEFAULT   10 $d\n     9: 000013a0     0 NOTYPE  LOCAL  DEFAULT   10 $a\n    10: 000013ac     0 NOTYPE  LOCAL  DEFAULT   10 $d\n    11: 000013b0     0 NOTYPE  LOCAL  DEFAULT   10 $a\n    12: 000013bc     0 NOTYPE  LOCAL  DEFAULT   10 $d\n    13: 000023c0     0 NOTYPE  LOCAL  HIDDEN    11 _DYNAMIC\n    14: 00001299   106 FUNC    GLOBAL DEFAULT    9 count_loop\n    15: 00001305    64 FUNC    GLOBAL DEFAULT    9 two_sites\n    16: 00001345    56 FUNC    GLOBAL DEFAULT    9 main\n",
+  "objcopy_command": [
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+    "--library-path",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-objcopy",
+    "--strip-symbols=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/mapping-names.txt",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/thumb-count.perfbin",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/thumb-fallback.perfbin"
+  ],
+  "objcopy_exit": 0,
+  "stderr": ""
+}

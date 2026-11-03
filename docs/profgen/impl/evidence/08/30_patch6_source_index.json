@@ -1,0 +1,274 @@
+{
+  "IPQualityReport.cpp": [
+    {
+      "line": 78,
+      "text": "Error llvm::validateIPOutputPaths(const IPQualityOptions &O) {"
+    },
+    {
+      "line": 121,
+      "text": "void llvm::setIPStage(StringRef S) {"
+    },
+    {
+      "line": 125,
+      "text": "bool llvm::injectIPFailure(StringRef P) {"
+    },
+    {
+      "line": 128,
+      "text": "void llvm::recordIPWarning(StringRef C, StringRef M) {"
+    },
+    {
+      "line": 150,
+      "text": "void IPQualityReport::finish() {"
+    },
+    {
+      "line": 158,
+      "text": "void IPQualityReport::warn(StringRef Code, StringRef Message) {"
+    },
+    {
+      "line": 161,
+      "text": "Error IPQualityReport::validateOptions() {"
+    },
+    {
+      "line": 204,
+      "text": "json::Value IPQualityReport::ratio(uint64_t N, uint64_t D) const {"
+    },
+    {
+      "line": 209,
+      "text": "json::Value IPQualityReport::count(const IPAddressCount &C) const {"
+    },
+    {
+      "line": 217,
+      "text": "Error IPQualityReport::checkThresholds() {"
+    },
+    {
+      "line": 259,
+      "text": "void IPQualityReport::observeBinary() {"
+    },
+    {
+      "line": 427,
+      "text": "json::Value IPQualityReport::build() {"
+    },
+    {
+      "line": 429,
+      "text": "  Root[\"schema_version\"] = uint64_t(1);"
+    },
+    {
+      "line": 450,
+      "text": "  StringRef Raw = Generation.SampleWeight ? \"samples\""
+    },
+    {
+      "line": 458,
+      "text": "       Generation.SampleWeight ? \"samples\" : \"normalized-event-count\"},"
+    },
+    {
+      "line": 493,
+      "text": "  Root[\"identity\"] = json::Object{"
+    },
+    {
+      "line": 530,
+      "text": "  Root[\"mapping\"] = json::Object{"
+    },
+    {
+      "line": 610,
+      "text": "  Root[\"samples\"] = std::move(Samples);"
+    },
+    {
+      "line": 628,
+      "text": "  Root[\"boundaries\"] = json::Object{"
+    },
+    {
+      "line": 640,
+      "text": "  Root[\"lost\"] = json::Object{"
+    },
+    {
+      "line": 660,
+      "text": "  Root[\"ratios\"] ="
+    },
+    {
+      "line": 674,
+      "text": "  Root[\"sanity\"] ="
+    },
+    {
+      "line": 686,
+      "text": "  Root[\"coverage\"] = json::Object{"
+    },
+    {
+      "line": 725,
+      "text": "  Root[\"warnings\"] = std::move(WA);"
+    },
+    {
+      "line": 726,
+      "text": "  Root[\"verdict\"] = json::Object{"
+    },
+    {
+      "line": 732,
+      "text": "      {\"identity\", Reader.IdentityGrade},"
+    },
+    {
+      "line": 743,
+      "text": "Error IPQualityReport::writeReport() {"
+    },
+    {
+      "line": 779,
+      "text": "Error IPQualityReport::commitReport() {"
+    },
+    {
+      "line": 783,
+      "text": "void IPQualityReport::fail(StringRef Message) {"
+    }
+  ],
+  "IPIdentity.cpp": [
+    {
+      "line": 125,
+      "text": "Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {"
+    },
+    {
+      "line": 318,
+      "text": "void IPPerfReader::printIdentity(raw_ostream &OS) const {"
+    }
+  ],
+  "IPPerfReader.cpp": [
+    {
+      "line": 98,
+      "text": "Error IPPerfReader::parseLine(StringRef Line) {"
+    },
+    {
+      "line": 108,
+      "text": "    if (word(Rest) != \"lost\" || !number(word(Rest), N, 10) ||"
+    },
+    {
+      "line": 239,
+      "text": "Error IPPerfReader::loadBinary(StringRef Path) {"
+    },
+    {
+      "line": 276,
+      "text": "Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {"
+    },
+    {
+      "line": 394,
+      "text": "Error IPPerfReader::countAddresses() {"
+    },
+    {
+      "line": 428,
+      "text": "Error IPPerfReader::read(StringRef Trace, StringRef Binary,"
+    },
+    {
+      "line": 456,
+      "text": "  setIPStage(\"identity\");"
+    },
+    {
+      "line": 466,
+      "text": "void IPPerfReader::printAddressCounts(raw_ostream &OS) const {"
+    },
+    {
+      "line": 487,
+      "text": "void IPPerfReader::printMmapEvents(raw_ostream &OS) const {"
+    }
+  ],
+  "ProfiledBinary.cpp": [
+    {
+      "line": 261,
+      "text": "      IPMode && injectIPFailure(\"runtime-open\")"
+    },
+    {
+      "line": 270,
+      "text": "      (IPMode && injectIPFailure(\"invalid-image\")))"
+    },
+    {
+      "line": 281,
+      "text": "    auto Metadata = injectIPFailure(\"runtime-metadata\")"
+    },
+    {
+      "line": 291,
+      "text": "          injectIPFailure(\"debug-open-load\")"
+    },
+    {
+      "line": 297,
+      "text": "      auto DebugMetadata = injectIPFailure(\"debug-metadata\")"
+    },
+    {
+      "line": 1087,
+      "text": "                     recordIPWarning(\"W_DWARF_RECOVERABLE\","
+    },
+    {
+      "line": 1092,
+      "text": "                     recordIPWarning(\"W_DWARF_WARNING\","
+    },
+    {
+      "line": 1099,
+      "text": "  if (!DebugContext || (IPMode && injectIPFailure(\"context-create\")))"
+    },
+    {
+      "line": 1128,
+      "text": "    recordIPWarning(\"W_DWO_MISSING\", \"DWO debug information was not loaded\");"
+    },
+    {
+      "line": 1130,
+      "text": "    recordIPWarning(\"W_NO_DWARF_FUNCTIONS\","
+    },
+    {
+      "line": 1148,
+      "text": "      recordIPWarning(\"W_DUPLICATE_FUNCTION_START\","
+    },
+    {
+      "line": 1182,
+      "text": "        (injectIPFailure(\"symbolize\") || injectIPFailure(\"debug-open\")))"
+    }
+  ],
+  "ProfileGenerator.cpp": [
+    {
+      "line": 201,
+      "text": "Error addIPCount(uint64_t &Value, uint64_t Increment) {"
+    },
+    {
+      "line": 235,
+      "text": "void IPGenerationStatistics::print(raw_ostream &OS,"
+    },
+    {
+      "line": 488,
+      "text": "    recordIPWarning(\"W_LARGE_COUNT\", \"IP body or total exceeds UINT32_MAX\");"
+    },
+    {
+      "line": 528,
+      "text": "Error ProfileGenerator::writeIPProfile(IPQualityReport &Report) {"
+    },
+    {
+      "line": 556,
+      "text": "        recordIPWarning(\"W_MD5_IGNORED\", \"use-md5 requires extbinary output\");"
+    },
+    {
+      "line": 563,
+      "text": "    if (injectIPFailure(\"profile-write\"))"
+    },
+    {
+      "line": 567,
+      "text": "  bool FlushFailure = injectIPFailure(\"profile-flush\");"
+    },
+    {
+      "line": 570,
+      "text": "  if (FlushFailure || injectIPFailure(\"profile-close\"))"
+    },
+    {
+      "line": 584,
+      "text": "  std::error_code EC = injectIPFailure(\"profile-rename\")"
+    },
+    {
+      "line": 595,
+      "text": "    recordIPWarning(\"W_EMPTY_DENSITY\","
+    },
+    {
+      "line": 598,
+      "text": "    recordIPWarning(\"W_LOW_DENSITY\", \"sample density below advisory threshold\");"
+    }
+  ],
+  "llvm-profgen.cpp": [
+    {
+      "line": 179,
+      "text": "static Error runIPModeCore(IPQualityReport &Report, IPPerfReader &Reader,"
+    },
+    {
+      "line": 307,
+      "text": "static Error runIPMode(int Argc, const char *const *Argv,"
+    }
+  ]
+}

@@ -26,14 +26,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-03；补丁5完成，补丁6报告覆盖语义待明确）
+## 当前授权与执行状态（2026-11-03；补丁5小修、补丁6完成）
 
-- 补丁5小修已独立验收并amend为 `b843cf07f851985413c926a562f9135a272a3bea`：GBS1590.649秒/106步/退出0；正式lit77 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL；C1两遍636条零差异；14次完整导出逐字节不变；0005反向应用检查通过。[审计](profgen/impl/evidence/08/11_patch5_amend_audit.json)。不重做补丁5。
-- 已生效：路径冲突检查先于任何写入、临时文件、ELF加载、回调；冲突只stderr、两种输出都不写，输入及旧文件不变。覆盖profile/报告别名及输出对所有给定输入的别名。这是此前裁决指定的失败报告义务唯一例外。
-- 已生效：截断DWARF测试拆为真实损坏的普通generate失败＋真实符号化调用点注入Error的回调测试；其他无法自然触发的同批用例照此拆分并登记，无须再停问；冻结规则本身需改变时才停。[报告第10节](profgen/impl/08_patch6_report.md#10-截断dwarf裁决已收到已有质量报告语义待明确)。10种截断证据保留；原第8节停止点已获裁决。
-- 已取得不经注入的真实load退出素材：仅损坏.symtab[1].st_name，通过身份检查后在ProfiledBinary::loadIPMetadata→unwrapOrError退出1，旧profile不变。[证据](profgen/impl/evidence/08/19_natural_load_exit.json)。这仅证明回调调用点可达，未声称补丁6质量JSON或lit通过。
-- 待人工明确：本次裁决“旧报告逐字节不变”与非路径冲突失败必须写新失败JSON，在quality-report已存在时不能同时成立。建议明确允许失败JSON原子替换旧报告，旧profile不变；只有路径冲突或报告写入/提交失败才保留旧报告。[反例](profgen/impl/evidence/08/21_existing_report_contract.txt)。未自行改变覆盖策略；不重复请求DWARF裁决。
-- LLVM工具/测试目录相对补丁5无改动，无补丁6提交/0006/构建。spec原diff不动、不提交，正式非增量构建前必须撤销；冻结文档/golden不改；原挂账保留。未连接板子、未推LLVM/Gerrit、未改认证或索要密码。
+- 补丁5小修已独立验收/amend：LLVM `b843cf07f851985413c926a562f9135a272a3bea`，0005已重新导出；未重做补丁4。[审计](profgen/impl/evidence/08/11_patch5_amend_audit.json)
+- 补丁6 LLVM `1dd4b9acd84045c230e77cc68d85eafca58eae88`，26文件、+1559/-33行、新增6组lit；实现确定性质量JSON、精确可选门槛、ISA/覆盖诊断、原子输出和单次阶段回调。[报告](profgen/impl/08_patch6_report.md)、[0006](../patches/profgen/0006-llvm-profgen-Add-quality-reports-and-failure-contracts.patch)、[提交审计](profgen/impl/evidence/08/36_patch6_commit_audit.json)
+- 已闭合：最终GBS 20:28:22–20:42:46+08，864.668秒、107 Ninja步、GBS_EXIT0/ALL-END OK；正式%check 85项：83 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL。原79逐项不变，原50保持48/0/1/1；C1两遍各636、对基线0差异，35个新IP测试排除。[构建](profgen/impl/evidence/08/22_patch6_builds.json)、[lit](profgen/impl/evidence/08/23_patch6_lit_summary.json)、[C1](profgen/impl/evidence/08/24_patch6_c1_summary.json)
+- 已闭合：14次完整导出各两遍，JSON/profile/诊断确定，样本各层独立重算与旧证据一致；05/09 strip库按预期generate失败、不生成profile。两档08合成负载profile与补丁5相同，报告同名合并函数数2/308。[真实重放](profgen/impl/evidence/08/25_patch6_real_exports.json)、[合成负载](profgen/impl/evidence/08/27_patch6_synthetic_scale.json)
+- 生效裁决（待设计v0.8登记）：路径冲突时两种输出都不写，含输入别名且先于任何副作用；其余失败原子替换完整失败JSON，任何失败均保留旧profile；报告自身写入/提交失败保留旧报告。此前“普通失败也保留旧报告”是PM笔误，作废。真实截断DWARF验证no_cu/usable0；真实符号化调用点注入验证generate回调，真实损坏符号表验证load回调。均已验收，不再挂为阻塞。
+- 收尾修正：父目录符号链接后接`..`的不存在输出别名已拒绝；未计算指标写unknown；ISA可用.dynsym作SF_Thumb后备但排除SHN_ABS，outside_symtab榜单仍只用.symtab。[路径反例与修复](profgen/impl/evidence/08/34_path_alias_before_after.json)
+- 新工具SHA `4f115a34cf558008bc138c7aaf3d3476717ea7d5fc2e44ea4142ac6fb06cb4f9`；冻结设计/golden/C1基线未改，src/llvm工作树干净；spec本地diff原样保留、不提交。未连接板子、未推LLVM/Gerrit、未改认证或索要密码；无新增已观察到的工具越界写入。
+- 下一步等待补丁7授权；Agent设计与开发仍在llvm-profgen增强完成后。06完整LOST、真实avg上板、IP枚举/cl::values、非叶子line0与非增量前撤销spec等挂账继续保留。
 
 ## 前轮授权与执行状态（2026-11-03；输出别名契约停止，已获裁决，历史）
 
@@ -284,7 +286,7 @@
 
 ## 计划
 
-- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；下一步等待补丁4授权，Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；补丁6已完成，等待补丁7授权；Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1至补丁3已授权完成，其余补丁等待新授权。
 
@@ -307,7 +309,7 @@
 
 ## 进度
 
-### llvm-profgen 补丁3（当前，已完成）
+### llvm-profgen 补丁3（历史，已完成）
 
 - 身份分级/链、probe拒绝及generation授权修正已实现；最终GBS936.802秒/105步，lit61/0/1/1，C1零差异，14次完整重放计数不变。[报告](profgen/impl/05_patch3_identity.md)
 - LLVM本地补丁已提交并导出，等待补丁4授权；profile生成仍为过渡错误。
@@ -512,7 +514,7 @@
 
 ## 待人工裁决
 
-- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–5已完成，等待补丁6授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–6已完成，等待补丁7授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 
 
 - 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。

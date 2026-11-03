@@ -1,0 +1,20 @@
+{
+  "command": [
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+    "--library-path",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/readelf",
+    "-SW",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/a64-pie.debug"
+  ],
+  "exit": 0,
+  "stdout": "There are 22 section headers, starting at offset 0x10e0:\n\nSection Headers:\n  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0\n  [ 1] .note.gnu.build-id NOTE            0000000000000238 000238 000024 00   A  0   0  4\n  [ 2] .dynsym           NOBITS          0000000000000260 00025c 000018 18   A  5   1  8\n  [ 3] .gnu.hash         NOBITS          0000000000000278 00025c 00001c 00   A  2   0  8\n  [ 4] .hash             NOBITS          0000000000000294 00025c 000010 04   A  2   0  4\n  [ 5] .dynstr           NOBITS          00000000000002a4 00025c 000001 00   A  0   0  1\n  [ 6] .rodata           NOBITS          00000000000002b0 00025c 000040 00  AM  0   0 16\n  [ 7] .text             NOBITS          00000000000012f0 0002f0 00015c 00  AX  0   0  4\n  [ 8] .dynamic          NOBITS          0000000000002450 000450 000090 10  WA  5   0  8\n  [ 9] .relro_padding    NOBITS          00000000000024e0 000450 000b20 00  WA  0   0  1\n  [10] .bss              NOBITS          00000000000034e0 0004e0 000004 00  WA  0   0  4\n  [11] .debug_loc        PROGBITS        0000000000000000 0004e0 0001ae 00      0   0  1\n  [12] .debug_abbrev     PROGBITS        0000000000000000 00068e 000152 00      0   0  1\n  [13] .debug_info       PROGBITS        0000000000000000 0007e0 0001f5 00      0   0  1\n  [14] .debug_ranges     PROGBITS        0000000000000000 0009d5 000130 00      0   0  1\n  [15] .debug_str        PROGBITS        0000000000000000 000b05 0000fb 01  MS  0   0  1\n  [16] .comment          PROGBITS        0000000000000000 000c00 000029 01  MS  0   0  1\n  [17] .debug_frame      PROGBITS        0000000000000000 000c30 000070 00      0   0  8\n  [18] .debug_line       PROGBITS        0000000000000000 000ca0 000167 00      0   0  1\n  [19] .symtab           SYMTAB          0000000000000000 000e08 0001c8 18     21  16  8\n  [20] .shstrtab         STRTAB          0000000000000000 000fd0 0000d3 00      0   0  1\n  [21] .strtab           STRTAB          0000000000000000 0010a3 00003a 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), p (processor specific)\n",
+  "stderr": "",
+  "modified_offset": 3616,
+  "value": "ffffffff"
+}

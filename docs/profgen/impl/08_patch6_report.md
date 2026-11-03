@@ -1,6 +1,6 @@
-# 补丁5小修完成；补丁6截断DWARF必测项待裁决
+# 补丁5小修与补丁6质量报告、失败契约
 
-2026-11-03。最新状态：补丁5小修已独立验收并amend；路径冲突裁决和截断DWARF拆分裁决均已收到。第10节记录新的验收要求与真实库内退出素材。补丁6尚未改LLVM代码：本次新增“旧报告逐字节不变”与此前“非路径冲突失败写失败报告”在报告已存在时冲突，覆盖语义待明确；没有再次请求截断DWARF的裁决。
+2026-11-03。补丁5小修已独立验收并amend为`b843cf07f851985413c926a562f9135a272a3bea`；补丁6已完成正式GBS、lit、C1、真实导出与合成负载验收，本地提交`1dd4b9acd84045c230e77cc68d85eafca58eae88`。路径冲突、截断DWARF与旧报告覆盖三次裁决均已落实。下文保留停止历史；最终结果见第15–17节。冻结v0.7正文与golden未改。
 
 第1–5节保留上一停止点的原始历史；第6节为该停止点的裁决，第7节以后为本次恢复后的事实。冻结设计和golden均未修改。
 
@@ -173,3 +173,194 @@ llvm-profgen: error: .../invalid-symbol-name.perfbin: Invalid data was encounter
 建议明确：旧profile始终不变；非路径冲突失败时允许新的失败JSON原子替换旧质量报告；路径冲突或报告写入/提交本身失败时保持旧报告。这是询问新措辞是否指同一路径的旧质量报告，不重新询问已闭合的DWARF裁决。另选未授权报告路径、静默放弃失败报告或仅检查另一份无关旧报告均未实施。
 
 截至本次记录，LLVM工作树相对补丁5无工具/测试代码改动，只有原spec本地diff；没有补丁6提交、构建或0006。上一轮补丁5的lit、C1、工具SHA不变。待此语义明确后继续补丁6，其余裁决已生效，不重复请求。
+
+## 11. 已有报告覆盖语义（最终裁决，待v0.8登记）
+
+第10节中“旧报告不变”的歧义已由用户确认是PM笔误，作废。旧profile在任何失败中逐字节不变；非路径冲突失败以新的完整失败JSON原子替换旧质量报告；成功以成功JSON原子替换；路径冲突、报告自身创建/写入/flush/close/rename失败，保留旧报告并清理临时文件。profile提交失败时已提交的成功报告尽力改写为失败报告，改写本身失败只追加stderr说明。不存在两个文件一起原子提交的保证，遵循指定提交顺序。
+
+`ip-quality-exits.test`预置`conversion=ok`旧报告，真实截断、真实坏符号表、符号化/打开注入均要求报告变为可解析的failed JSON、阶段正确，旧profile不变。`ip-quality-output.test`覆盖报告自身失败，`ip-quality-paths.test`覆盖输出别名；这两类要求旧报告不变。每例检查临时文件残留、流析构fatal及递归诊断。
+
+## 12. 补丁6实现与共享代码门控
+
+新增`IPQualityReport.h/.cpp`：`validateIPOutputPaths`、`IPQualityReport`、精确门槛、诊断数据收集与同目录报告提交。该对象在IP路径校验无别名之后创建，维护阶段、警告、profile临时文件与单次退出回调。IP自身用Error返回main；已有共享库的直接退出通过注册回调补报告。没有给报告或门槛时，新增的逐事件/分层period计数不运行，保持既有IP计数错误顺序。
+
+| 文件 | 改动及门控 |
+|---|---|
+| llvm-profgen.cpp | 新增隐藏IP报告、三门槛与失败注入选项；IP入口先路径校验，随后报告对象覆盖加载至最终rename；无IP选项仍走原LBR入口 |
+| ErrorHandling.h | 空回调保持旧打印/退出流程；有回调时move并清空后调用，防重入；Error重载仅注册时用toString，避免inconvertible StringError被errorToErrorCode提前fatal |
+| ProfiledBinary.cpp/.h | IP加载点与真实symbolizeInlinedCode调用点注入；IPMode下收集同名函数来源起点与DWARF警告；原符号化/内联转换不改，LBR没有注入或回调 |
+| ProfileGenerator.cpp/.h | IP保留原始usable计数、函数覆盖与写出位置；新writer仅IP，显式flush/close/clear_error后提交；已有warning调用增加无ActiveReport时无效的记录钩子 |
+| IPPerfReader.cpp/.h | 质量功能启用时按完整事件名与既有筛选层收集uint64计数；保存输入SHA、处理进度、typed身份结果；既有地址计数及诊断格式不变 |
+| IPIdentity.cpp | 保存逐路径/映射证据及最终等级，不更改身份判定逻辑 |
+| CMakeLists.txt | 将IPQualityReport.cpp加入同一工具目标 |
+
+隐藏选项`--ip-test-inject-failure`仅IP有效，16个点名：`runtime-open`、`invalid-image`、`runtime-metadata`、`debug-open-load`、`debug-metadata`、`context-create`、`symbolize`、`debug-open`、`profile-write`、`profile-flush`、`profile-close`、`profile-rename`、`report-write`、`report-flush`、`report-close`、`report-rename`。不删除/改动调试输入。报告新增`verdict.fallback_callback_count`便于核对单次回调；这些是测试接口，待v0.8登记。
+
+## 13. schema、口径与确定性
+
+`schema_version=1`，使用llvm::json::OStream；uint64不经过double。原始权重以`normalized_weight={numerator,denominator}`表达，分母为p_ref（sample模式为1）；未取得或分母0为字符串unknown。所有数组固定排序：事件/候选按完整名称字典序；映射和身份证据保持输入顺序；函数/DSO前N按原始所选权重降序、名字升序打破并列；边界来源/失败按既有稳定顺序；warning按稳定code字典序。没有时间戳。输入完整参数含输出路径，因此两遍确定性验收使用同一组路径。
+
+| 5.6.1字段 | 实现口径与未知值 |
+|---|---|
+| tool/input | LLVM版本、完整argv、输入路径/SHA、ip-only；未读输入SHA未知 |
+| event | 完整事件名含修饰符，筛选前分别sample_count/period_sum；type/config未知，不从名字猜 |
+| semantics | weight、原始单位、输出单位、p_ref/来源、aggregation、dup、zero/head/skid、DWARF与FS状态 |
+| identity/mapping | build-id读取状态、真实路径、原始候选/deleted、typed证据/等级、候选可执行/非执行映射数；不声称样本逐条绑定；completeness始终unknown |
+| samples | input_total只有数量；后续每层数量/period/未取整权重；target分为段外、DWARF外三类、无行、usable；原始usable先于skid/聚合/裁剪；写出位置及skid原因 |
+| isa | 映射符号优先、.symtab/.dynsym的函数SF_Thumb后备（排除SHN_ABS/未定义/非代码节）；未知/冲突只入unknown，不触发边界失败；数量与权重比例分别给出 |
+| boundaries | 沿用补丁5按需函数数、来源、完整失败列表；不为报告触发枚举 |
+| lost/throttle | records、L、S、L/(L+S)，scope=input/source=PERF_RECORD_LOST/count_unit=records/completeness=unknown；没有LOST时L与比例unknown，观察到的LOST记录条数为0；throttle未知 |
+| ratios/sanity | usable/target两种原始口径及判定口径、usable/(usable+无行)；DWARF函数覆盖比例、A64对齐比例，不判断收益 |
+| coverage | usable顶层函数数、唯一目标地址、原始权重top50；多个不同DIE起点按同名合并的有样本函数数与top50，不改合并逻辑 |
+| consumer_hints/warnings/verdict | head=none时提示profi；稳定告警code；独立失败优先，门槛未设not_evaluated/未取得unknown/已知精确比较，充分性只有insufficient或unknown |
+
+比率门槛只接受0、1或`0.`后1–9位数字；整数门槛为uint64十进制。比较用APInt交叉乘法，绝不浮点。所有检查在生成后、writer前，失败阶段generate；早期独立失败使尚未检查的已设门槛保持unknown。LOST比例分母超过uint64时明确溢出失败，不截断或输出浮点数。
+
+## 14. 测试对照与库内退出审计
+
+新增六组lit（Python逐字段/逐字节断言，无网络/板子/perf依赖）：
+
+| lit | 覆盖 |
+|---|---|
+| ip-quality-fields | 全部schema根字段、混合单位隔离、原始usable口径与sum/max/avg/裁剪、ISA映射/.symtab与.dynsym的SF_Thumb/ABS排除/冲突unknown、LOST、双遍确定性 |
+| ip-quality-thresholds | 定点语法和uint64边界；设置/不设置×已知/未知；passed/failed/exceeded/not_exceeded；无门槛但无目标失败；普通CLI错误写parse报告 |
+| ip-quality-exits | 真实截断、真实坏runtime/debug符号表、7个共享退出位置与generate打开错误注入、identity/boundary失败 |
+| ip-quality-output | profile写/flush/close/rename；报告写/flush/close/rename；自然gcc writer不支持；不可创建父目录；旧文件与临时清理 |
+| ip-quality-paths | output=-、相同路径、符号/硬链接、规范化父路径、任一输出覆盖perfscript/binary；不注册回调、不创建临时文件；非IP选项门控 |
+| ip-quality-writer | text use-md5告警、extbinary MD5生效；同一ProfileMap的IP/LBR extbinary逐字节一致 |
+
+IP/LBR writer对照用pure-a64与单一`[0x1000,0x1000]:7`范围；IP补零建立相同body，LBR使用已有`--update-total-samples`把其字节范围total改为body合计，形成相同ProfileMap。没有改IP total规则或共享writer。旧reader/身份/计数/边界矩阵沿用ip-addresses、ip-invalid、ip-real-records、ip-identity-*、ip-counting-*、ip-boundary-*，本轮不重复改golden。
+
+| 原06的7处共享退出 | 当前阶段/验证方式 | 自然触发限制 |
+|---|---|---|
+| createBinary运行文件 | load，runtime-open注入 | 输入ELF已被reader检查，稳定文件无法在第二次打开才突然失败；不制造竞态 |
+| image类型检查 | load，invalid-image注入 | 非ELF已在IP reader拒绝；真实无效输入验证reader实际错误，不假称进入共享回调 |
+| 运行文件IP元数据unwrap | load，invalid-symbol.perfbin自然触发及runtime-metadata注入 | .symtab[1].st_name越过字符串表；PT_LOAD/build-id仍可读 |
+| createBinary debug文件 | load，debug-open-load注入 | 显式debug已通过身份检查，不在测试中删除输入 |
+| debug元数据unwrap | load，invalid-symbol.debug自然触发及debug-metadata注入 | 与runtime同样的真实符号表损坏 |
+| DWARFContext创建检查 | load，context-create注入 | LLVM create通常返回context对象，真实截断只警告并跳CU；不把截断当成null |
+| symbolizeInlinedCode→unwrap | generate，symbolize/debug-open在真实调用点返回Error | 真截断查询返回成功line0，debug-open模拟该打开操作的Error，不改文件；经原unwrap→exitWithError |
+
+真实截断单条样本独立预期：CU被丢弃，没有DWARF函数/行，no_cu=1、usable=0、generate/no usable samples、callback_count=0；原DWARF警告仍在stderr。自然坏符号表callback_count=1。注入也是1，不递归、不发生流析构fatal。全部均预置成功旧报告并检查被完整失败JSON替换，旧profile保持或不存在。10种截断长度、API行为及源码证据见第8–10节，不改历史事实。
+
+### 14.1 warning代码清单
+
+| 稳定代码 | 触发与测试/证据 |
+|---|---|
+| W_LOST_MAY_INCLUDE_SIDEBAND | 至少一条LOST；quality-fields与真实导出独立重算 |
+| W_CONSTANT_PERIOD | 全部输入样本period相同；quality-thresholds/fields基本输入 |
+| W_IDENTITY_UNVERIFIED | 身份门禁允许缺ID；quality-fields、真实旧库导出 |
+| W_USABLE_RATIO_UNKNOWN / W_TARGET_COUNT_UNKNOWN / W_LOST_RATIO_UNKNOWN | 对应门槛已设但失败前未取得可判定指标；quality-thresholds的parse失败与无LOST成功输入 |
+| W_LARGE_COUNT | 生成body/total超过UINT32_MAX；quality-thresholds的UINT64_MAX输入与既有ip-counting-arithmetic |
+| W_MD5_IGNORED | 非extbinary使用use-md5；quality-writer |
+| W_EMPTY_DENSITY / W_LOW_DENSITY | 既有密度建议；quality-fields裁剪失败/小输入及原profile-density；只记录、不改旧stderr |
+| W_DWO_MISSING | 已有DWO加载不完整告警；quality-exits复用原split-dwarf-split.exe但不提供.dwo；foo VA0x400540、文件偏移0x540，实际缺DWO失败报告 |
+| W_NO_DWARF_FUNCTIONS | DWARF加载后无函数；quality-exits真实截断和05/09 strip库 |
+| W_DUPLICATE_FUNCTION_START | 已有同起点函数重叠告警；共享调用点审计，真实合成负载若出现按实记录（不人为制造不同于边界golden的符号表） |
+| W_DWARF_RECOVERABLE / W_DWARF_WARNING | IP DWARFContext已有恢复/告警处理器转发原打印并记录代码；quality-exits真实截断；是否触发哪种由原LLVM诊断类型决定 |
+
+警告按代码去重，完整原始stderr保留在验收日志；JSON不复制无界重复警告文本。代码和触发条件与已经触发的测试分开列出，未触发的警告分支不宣称已有独立运行覆盖。
+
+完整导出清点（不是从新报告反推）：此前保存的14个目标运行输入都没有LOST文本行；名字含lost的05文件也没有该记录。06只有过滤后的942条LOST与L=61,667，缺完整样本导出，不能算独立的S或比例验收。此挂账继续保留，不能因合成quality-fields覆盖了LOST公式而关闭。
+
+### 14.2 收尾静态检查发现并修正的问题
+
+开发检查先发现ErrorHandling的Error重载会把inconvertible StringError交给errorToErrorCode，在IP回调之前fatal；已仅在回调注册时使用toString转到原字符串退出函数，原LBR路径不变。16个注入点和两个真实坏符号表均重新验证，没有fatal或递归退出。
+
+首轮GBS编译发现C++17结构化绑定捕获扩展与旧make_scope_exit弃用告警；改为普通StringRef局部变量和scope_exit构造。ISA后备补读.dynsym函数，排除SHN_ABS、未定义、非代码节；增加strip与ABS负对照。边界枚举仍仅使用.symtab映射符号；outside_symtab_top20也严格只用.symtab，不将动态符号混入该字段。
+
+对不存在输出的规范化，先解析现有父目录（保留符号链接后`..`的实际语义），再对剩余未存在尾部消除点路径。新增`parent-link/../missing2`与`real/missing2`冲突测试，检查递归目录清单不变。否则先做纯词法消点可能漏判，两份新输出互相覆盖；这是实现修正，不是冻结规则变更。选项语法校验阶段明确为parse。
+
+所有中间GBS记录保留。最终验收以最后一次对应源码的GBS `%check`、C1与真实重放为准，不用较早工具的通过结果代替收尾版本。
+
+早期选项/输入失败时，尚未取得的语义、事件列表、候选、映射列表和coverage榜单写unknown，而非以默认值或空榜单冒充已计算结果；新增相应断言。原始观察到的证据与最终身份等级分开保留。
+
+榜单占比的分母：other_dso_top20用other_dso总原始权重；outside_symtab_top20用target总原始权重；coverage的top50与name_merged_top50均用usable总原始权重。ISA只统计已换算成功的目标VA，比例的分母仍为target；段外样本单列unmapped_in_target，所以ISA各项比例不一定合计1。A64对齐比例也是“已证明对齐的目标样本/target”，其余可能是未换算而非已证明不对齐。
+
+写入注入在真实write/flush/close/rename调用点模拟错误返回，用于检查失败路径；不宣称制造了真实磁盘故障。实际坏ELF/截断DWARF/不可创建目录仍使用真实输入和真实错误。所有临时测试文件只在工作目录内。
+
+### 14.3 规则—代码—测试位置
+
+T=`temp/llvm-profgen-enh/llvm/tools/llvm-profgen/`；位置对应补丁6最终工作树，完整调用点审计另存evidence/08/29_patch6_exit_audit.json。
+
+| 规则 | 代码（T下） | 验证 |
+|---|---|---|
+| 5.6.3路径最前校验 | `IPQualityReport.cpp:78` | ip-quality-paths |
+| 5.6.1 schema/未知值/整数 | `IPQualityReport.cpp:427` | ip-quality-fields、thresholds |
+| 5.6.1层级与多事件隔离 | `IPPerfReader.cpp:276` | ip-quality-fields |
+| 5.6.2原始usable不受聚合影响 | `ProfileGenerator.cpp:298` | ip-quality-fields |
+| ISA诊断/映射与函数符号 | `IPQualityReport.cpp:259` | ip-quality-fields |
+| LOST输入级记录/未知 | `IPQualityReport.cpp:640` | ip-quality-fields、thresholds |
+| 精确定点门槛语法 | `IPQualityReport.cpp:161` | ip-quality-thresholds |
+| 生成后门槛检查 | `IPQualityReport.cpp:217` | ip-quality-thresholds |
+| profile序列化、关闭与最后提交 | `ProfileGenerator.cpp:528` | ip-quality-output、writer |
+| 报告原子替换与失败清理 | `IPQualityReport.cpp:743` | ip-quality-output、exits |
+| 整个IP流程失败报告 | `llvm-profgen.cpp:307` | ip-quality-exits、paths |
+| 兜底一次性注册/注销 | `IPQualityReport.cpp:133` | ip-quality-exits |
+| 共享库原退出处回调 | `ErrorHandling.h:39` | ip-quality-exits；C1 |
+| 真实符号化调用点注入 | `ProfiledBinary.cpp:1182` | ip-quality-exits |
+| 同名多DIE来源计数 | `ProfiledBinary.cpp:1049` | 两档08合成负载 |
+
+## 15. 正式构建、lit与C1
+
+| GBS轮次 | 开始 / 结束 | 秒 | Ninja步数 | 真实退出 |
+|---|---|---:|---:|---|
+| build | 2026-11-03T19:39:59+08:00 / 2026-11-03T19:58:58+08:00 | 1139.703 | 108 | 0 / ALL-END OK |
+| build-final | 2026-11-03T20:02:38+08:00 / 2026-11-03T20:23:02+08:00 | 1224.219 | 106 | 0 / ALL-END OK |
+| build-verified | 2026-11-03T20:28:22+08:00 / 2026-11-03T20:42:46+08:00 | 864.668 | 107 | 0 / ALL-END OK |
+
+三轮均完成，没有将较早结果冒充最后版本。收尾修改原因见14.2；源码编译告警已消除，平台原有build-id/项目配置提示保留。资源采样每10分钟；最低available 11745 MiB，最大used 19794 MiB；1/5/15分钟load采样峰值[68.16, 38.89, 18.96]。这些是采样峰值，不是连续监测极值；无available低于2GiB采样点。[构建/资源原文](evidence/08/22_patch6_builds.json)
+
+最终GBS `%check`：85项，83 PASS、0 FAIL、1 UNSUPPORTED（cs-preinline-cost需要asserts，当前No）、1 XFAIL（invalid-perfscript）。原79项逐项保持，原50仍48/0/1/1，新增6组全PASS。[日志](evidence/08/23_patch6_lit.log)、[xunit](evidence/08/23_patch6_lit.xml)、[逐项核对](evidence/08/23_patch6_lit_summary.json)
+
+C1最终两遍各636条（127原RUN＋1纯IP负对照＋508格式变体），两遍逐字节一致、相对已提交基线0差异；35个新增IP测试单列排除。开发阶段曾错误使用另一scratch目录，产生stderr路径差异；正式各轮均使用基线原路径，未归一化字节、未覆盖基线清单。[C1](evidence/08/24_patch6_c1_summary.json)
+
+最终工具SHA-256：`4f115a34cf558008bc138c7aaf3d3476717ea7d5fc2e44ea4142ac6fb06cb4f9`。平台clang-format新文件/改动行及dry-run通过；IP自身的指定作用域无exitWithError/unwrapOrError/report_fatal_error，7处共享退出留在原库路径并覆盖回调。[格式](evidence/08/28_patch6_format.json)、[审计](evidence/08/29_patch6_exit_audit.json)、[行号索引](evidence/08/30_patch6_source_index.json)
+
+## 16. 完整导出、合成负载与开销
+
+14次运行每次各两遍；profile（包括不存在状态）、完整JSON、stdout与stderr两遍相同。地址诊断及旧生成分类与补丁5/此前已验收结果逐字节/逐桶一致；原始文本另行重算筛选层和事件period，未用新报告反抄预期。05/09的strip库解析成功但无usable，按原设计generate失败，不创建profile。
+
+| 输入/目标 | 行数 | 样本总数 | 目标 / usable | 退出 | 身份 |
+|---|---:|---:|---:|---:|---|
+| 05-fixed | 7703 | 7659 | 6496 / 0 | 1 | unverified |
+| 05-multi | 27112 | 22662 | 13289 / 0 | 1 | unverified |
+| 05-freq | 4930 | 4886 | 4096 / 0 | 1 | unverified |
+| 05-buildid | 7510 | 7466 | 6322 / 0 | 1 | unverified |
+| 05-lost | 1044585 | 1044541 | 943893 / 0 | 1 | unverified |
+| 07-fork-cases | 9861 | 9845 | 9840 / 9802 | 0 | unverified |
+| 07-exec-cases | 5946 | 5925 | 4833 / 4829 | 0 | unverified |
+| 07-exec-after | 5946 | 5925 | 1081 / 1081 | 0 | unverified |
+| 07-deleted-libdeleted_probe.so | 169 | 151 | 151 / 151 | 0 | unverified |
+| 07-module | 334304 | 318382 | 51874 / 0 | 1 | unverified |
+| 09-fixed | 7661 | 7617 | 5865 / 0 | 1 | unverified |
+| 09-multi | 31066 | 26778 | 14331 / 0 | 1 | unverified |
+| 09-freq | 2625 | 2581 | 2006 / 0 | 1 | unverified |
+| 09-buildid | 7270 | 7226 | 5611 / 0 | 1 | unverified |
+
+[逐份独立计数、旧输出与确定性比对](evidence/08/25_patch6_real_exports.json)。完整原始输入路径、ELF路径、命令在该证据中；报告及大stdout/profile位于`temp/profgen-patch6/implementation/real/`。最大输入为05-lost，1044585行。
+
+单次热缓存观测（直接子进程wait4 rusage）：补丁5工具不带报告 1.395613秒 / 320084 KiB；补丁6带报告 1.714590秒 / 320260 KiB。不据单次数据推断稳定开销或性能收益。[命令与测量](evidence/08/26_patch6_timing.json)
+
+两档均为**合成负载规模测量**，不是真实采样，不验证avg数值。
+
+| 输入 | usable函数数 | 同名合并函数数 | 墙钟秒 | RSS KiB | profile与补丁5 |
+|---|---:|---:|---:|---:|---|
+| largest20 | 20 | 2 | 0.727723 | 96180 | 相同 |
+| all-executable | 4090 | 308 | 2.519621 | 319396 | 相同 |
+
+20函数档的两项同名合并为decode_frame、iadst_iadst_16x16_add_c，与补丁5证据吻合；全部可执行函数档308项，top50按权重排序，20函数档两名并不必然进入该top50。未改变同名合并逻辑。[覆盖与规模](evidence/08/27_patch6_synthetic_scale.json)。大文件留`temp/profgen-patch6/implementation/scale/`。
+
+## 17. 提交、待v0.8登记与挂账
+
+LLVM补丁6：`1dd4b9acd84045c230e77cc68d85eafca58eae88`；只含工具/测试目录，spec本地diff逐字节不变且未提交。0006为binary format-patch，反向应用检查通过；0005仍为第7节独立验收的amend版本。[提交/范围审计](evidence/08/36_patch6_commit_audit.json)
+
+待设计v0.8登记（不改冻结v0.7）：
+
+1. 补丁5同映射状态段、前驱有行信息的skid约束及原因桶；分组边界校验。
+2. 路径冲突为失败报告唯一例外：包含输入别名，且在任何写入/临时文件/ELF加载/回调前拒绝。此前旧报告笔误作废：非冲突失败原子替换失败JSON，报告自身写入失败保留旧报告；成功原子替换成功报告。旧profile在任何失败中保留。
+3. 截断.debug_info不自然产生Expected Error：真实截断验证no_cu/usable0/no usable samples；真实symbolize调用点注入验证generate回调，另用真实坏符号表验证load回调。其余7处自然/注入边界见14节。
+4. 16个隐藏注入点、fallback_callback_count测试字段；coverage.name_merged_functions与top50披露现有合并行为。
+5. 门槛定点文本语法与APInt比较；阈值失败阶段generate；新增字段和unknown/排序/分母约定见13节。
+
+继续挂账：06缺完整LOST导出；avg真实数据须重新采集08产物；IP枚举选项/cl::values留补丁7；非叶子line0由上板实测决定；正式非增量构建前撤销spec本地测试改动。未开始补丁7或Agent设计开发。未连接开发板、未推LLVM/Gerrit、未改认证或索要密码。除读取用户指定任务附件作为已授权输入外，无新增已观察到的项目文件边界例外。

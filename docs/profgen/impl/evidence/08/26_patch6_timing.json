@@ -1,0 +1,58 @@
+{
+  "case": "05-lost",
+  "lines": 1044585,
+  "method": "single warm-cache direct child wait4; amended patch5 without report vs patch6 with report",
+  "before_command": [
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+    "--library-path",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/patch5-baseline-tool/llvm-profgen",
+    "--ip-samples",
+    "--ip-aggregation=sum",
+    "--format=text",
+    "--allow-missing-build-id",
+    "--show-ip-address-counts",
+    "--show-mmap-events",
+    "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+    "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+    "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/lost_dsoff.txt",
+    "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/timing.profile"
+  ],
+  "after_command": [
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+    "--library-path",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+    "--ip-samples",
+    "--ip-aggregation=sum",
+    "--format=text",
+    "--allow-missing-build-id",
+    "--show-ip-address-counts",
+    "--show-mmap-events",
+    "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+    "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+    "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/lost_dsoff.txt",
+    "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/timing.profile",
+    "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/timing.json"
+  ],
+  "before": {
+    "exit": 1,
+    "wall_seconds": 1.3956134830368683,
+    "peak_RSS_KiB": 320084
+  },
+  "after": {
+    "exit": 1,
+    "wall_seconds": 1.7145903740311041,
+    "peak_RSS_KiB": 320260
+  }
+}
