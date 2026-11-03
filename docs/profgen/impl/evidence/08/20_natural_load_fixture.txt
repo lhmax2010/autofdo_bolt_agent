@@ -1,0 +1,16 @@
+from pathlib import Path
+import subprocess,re,json,hashlib
+W=Path.cwd();L=W/'temp/llvm-profgen-enh';R=W/'temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0';D=W/'temp/profgen-patch6/natural-load-exit';I=L/'llvm/test/tools/llvm-profgen/Inputs/ip-mode';B=L/'build'
+loader=['nice','-n','19','ionice','-c3',str(R/'lib64/ld-linux-x86-64.so.2'),'--library-path',f'{B}/lib64:{R}/lib64:{R}/usr/lib64']
+records=[]
+def run(cmd):
+ r=subprocess.run(cmd,capture_output=True,text=True);records.append({'command':cmd,'exit':r.returncode,'stdout':r.stdout,'stderr':r.stderr});return r
+src=I/'a64-pie.perfbin';x=run(loader+[str(R/'usr/bin/readelf'),'-SW',str(src)]);assert x.returncode==0
+m=re.search(r'\[\s*\d+\]\s+\.symtab\s+SYMTAB\s+\S+\s+([0-9a-f]+)\s+([0-9a-f]+)\s+([0-9a-f]+)',x.stdout);assert m
+start,size,entry=[int(n,16) for n in m.groups()];assert entry==24 and size>entry
+buf=bytearray(src.read_bytes());buf[start+entry:start+entry+4]=b'\xff'*4
+bad=D/'invalid-symbol-name.perfbin';bad.write_bytes(buf)
+run(loader+[str(R/'usr/bin/readelf'),'-h',str(bad)])
+(D/'input.perfscript').write_text('17/17 2 cycles: 1318 (/target+0x318)\n');out=D/'old.profile';out.write_bytes(b'OLD PROFILE\n');before=hashlib.sha256(out.read_bytes()).hexdigest()
+r=run(loader+[str(B/'bin/llvm-profgen'),'--ip-samples','--show-ip-address-counts','--allow-missing-build-id','--binary='+str(bad),'--binary-match-regex=^/target$','--perfscript='+str(D/'input.perfscript'),'--ip-aggregation=sum','--format=text','--output='+str(out)])
+result={'mutation':'Change only ELF64 .symtab[1].st_name to 0xffffffff. Section layout obtained from platform readelf -SW. No injection.','offset':start+entry,'before_sha256':hashlib.sha256(src.read_bytes()).hexdigest(),'mutated_sha256':hashlib.sha256(bad.read_bytes()).hexdigest(),'old_profile_unchanged':before==hashlib.sha256(out.read_bytes()).hexdigest(),'commands':records};(D/'result.json').write_text(json.dumps(result,indent=2)+'\n');print(r.returncode);print(r.stdout[-1200:]);print(r.stderr)

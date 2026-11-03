@@ -1,6 +1,6 @@
 # 补丁5小修完成；补丁6截断DWARF必测项待裁决
 
-2026-11-03。最新状态：路径别名冲突已按用户裁决闭合；补丁5小修已独立验收并amend为 `b843cf07f851985413c926a562f9135a272a3bea`，见第7节。补丁6尚未修改LLVM代码：必测的“仅截断.debug_info、加载成功、首次符号化返回错误并触发退出回调”与当前LLVM API的可恢复处理不符；已以源码和平台工具验证，按任务停止条件等待裁决，见第8节。
+2026-11-03。最新状态：补丁5小修已独立验收并amend；路径冲突裁决和截断DWARF拆分裁决均已收到。第10节记录新的验收要求与真实库内退出素材。补丁6尚未改LLVM代码：本次新增“旧报告逐字节不变”与此前“非路径冲突失败写失败报告”在报告已存在时冲突，覆盖语义待明确；没有再次请求截断DWARF的裁决。
 
 第1–5节保留上一停止点的原始历史；第6节为该停止点的裁决，第7节以后为本次恢复后的事实。冻结设计和golden均未修改。
 
@@ -145,3 +145,31 @@ FIRST_SYMBOLIZATION_VALUE frames=1 line=0
 - 原挂账不关闭：06完整LOST导出缺失；真实数据avg上板核对；选项枚举/cl::values留补丁7；非叶子line0实测后决定；正式非增量构建前撤销spec本地测试diff。
 
 所有实验输出留在WORKDIR/temp。未连接开发板、未推LLVM/Gerrit、未改认证或索要密码，无新增已观察到的项目文件边界例外。
+
+## 10. 截断DWARF裁决已收到；已有质量报告语义待明确
+
+### 10.1 生效裁决（待设计v0.8登记）
+
+用户同意拆分两条测试：真实截断、不注入，验证实际no usable samples、generate失败报告与分类；真实symbolizeInlinedCode调用点注入Error，经原有unwrapOrError→exitWithError验证generate回调。此前10种截断结果、平台生成命令、源码证据继续保留，第8节不再是阻塞。
+
+另需至少一条不经注入的损坏ELF真实库内退出，验证load阶段回调；06列出的7处调用点逐条说明自然用例或注入点。其他不能自然触发的冻结用例，可同样采用“真实输入验证实际行为＋真实调用点注入验证回调”，逐条登记，不再为这类情况单独请求裁决；需要改变冻结规则本身时才停止。
+
+### 10.2 不经注入的load退出素材（已验证可达性）
+
+临时副本 `temp/profgen-patch6/natural-load-exit/invalid-symbol-name.perfbin`，来自补丁1的a64-pie.perfbin。用GBS root readelf -SW取得.symtab偏移与ELF64项宽，只将第1号符号的st_name改为0xffffffff，其余字节不变。ELF头仍可读；build-id、PT_LOAD、输入样本保持原样。无需删除文件、竞态或错误注入。
+
+用当前补丁5工具运行：先输出完整IP地址/身份诊断，最终unverified（已显式allow-missing），随后从 `ProfiledBinary.cpp:230–235` 的Sym.getName返回Error，经`:274`的unwrapOrError及ErrorHandling.h退出1。原文：
+
+```text
+llvm-profgen: error: .../invalid-symbol-name.perfbin: Invalid data was encountered while parsing the file
+```
+
+预置旧profile前后SHA相同。原始命令/真实退出码/输出/哈希：[自然退出证据](evidence/08/19_natural_load_exit.json)；素材生成脚本：[可重现步骤](evidence/08/20_natural_load_fixture.txt)。此轮只验证现有调用点可自然触发，补丁6的回调与failure_stage JSON还未实现，不声称该lit已通过。
+
+### 10.3 当前唯一待明确的报告覆盖语义
+
+本次裁决同时要求“失败报告conversion=failed”与“预置旧报告逐字节不变”。此前裁决又明确：路径冲突是不写失败报告的唯一例外。对非路径冲突、已有report.json含conversion=ok的运行，这两项无法同时成立。[原文与最小反例](evidence/08/21_existing_report_contract.txt)
+
+建议明确：旧profile始终不变；非路径冲突失败时允许新的失败JSON原子替换旧质量报告；路径冲突或报告写入/提交本身失败时保持旧报告。这是询问新措辞是否指同一路径的旧质量报告，不重新询问已闭合的DWARF裁决。另选未授权报告路径、静默放弃失败报告或仅检查另一份无关旧报告均未实施。
+
+截至本次记录，LLVM工作树相对补丁5无工具/测试代码改动，只有原spec本地diff；没有补丁6提交、构建或0006。上一轮补丁5的lit、C1、工具SHA不变。待此语义明确后继续补丁6，其余裁决已生效，不重复请求。

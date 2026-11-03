@@ -26,12 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-03；补丁5小修完成，补丁6必测项待裁决）
+## 当前授权与执行状态（2026-11-03；补丁5完成，补丁6报告覆盖语义待明确）
 
-- 用户已裁决：IP流程最前校验输出路径，在创建临时文件、加载ELF、注册回调之前完成。output为`-`、profile/报告互相别名、任一输出与perfscript/binary/debug-binary/perf-buildid-list/dwp输入别名时，只stderr报冲突，不写任何输出或临时文件，旧文件逐字节不变。这是失败报告义务的唯一例外，待设计v0.8登记；实现待补丁5独立验收后开始。
-- 补丁5小修已独立验收并amend为 `b843cf07f851985413c926a562f9135a272a3bea`：GBS1590.649秒/106步/退出0；正式lit77 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL；C1两遍636条零差异；14次完整导出逐字节不变。0005已重新导出且反向应用检查通过。[审计](profgen/impl/evidence/08/11_patch5_amend_audit.json)。spec原diff不动、不提交；冻结设计/golden不改。补丁6测试可行性检查后暂停，见下一条。
-- 补丁6停止点：仅截短.debug_info的10种副本均为ELF加载成功、符号化返回成功空帧；当前工具因no usable samples正常Error返回，不能触发任务指定的首次符号化exitWithError回调。接口源码与平台API观察程序一致。[结果](profgen/impl/evidence/08/12_truncated_dwarf_results.json)、[源码](profgen/impl/evidence/08/17_truncated_dwarf_source.txt)、[报告第8节](profgen/impl/08_patch6_report.md#8-补丁6必测项的可行性核对与停止原因)。未改LLVM补丁6代码、无0006、未用补丁5结果冒充补丁6验收。
-- 待人工裁决：是否拆为真实截断文件普通generate失败测试＋真实符号化调用点注入Error的回调测试。未自行升级DWARF可恢复诊断、未改冻结规则/golden。此前路径冲突裁决已生效，不重复请求。spec撤销要求与原挂账保留；未连接板子、未推LLVM/Gerrit、未改认证或索要密码。
+- 补丁5小修已独立验收并amend为 `b843cf07f851985413c926a562f9135a272a3bea`：GBS1590.649秒/106步/退出0；正式lit77 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL；C1两遍636条零差异；14次完整导出逐字节不变；0005反向应用检查通过。[审计](profgen/impl/evidence/08/11_patch5_amend_audit.json)。不重做补丁5。
+- 已生效：路径冲突检查先于任何写入、临时文件、ELF加载、回调；冲突只stderr、两种输出都不写，输入及旧文件不变。覆盖profile/报告别名及输出对所有给定输入的别名。这是此前裁决指定的失败报告义务唯一例外。
+- 已生效：截断DWARF测试拆为真实损坏的普通generate失败＋真实符号化调用点注入Error的回调测试；其他无法自然触发的同批用例照此拆分并登记，无须再停问；冻结规则本身需改变时才停。[报告第10节](profgen/impl/08_patch6_report.md#10-截断dwarf裁决已收到已有质量报告语义待明确)。10种截断证据保留；原第8节停止点已获裁决。
+- 已取得不经注入的真实load退出素材：仅损坏.symtab[1].st_name，通过身份检查后在ProfiledBinary::loadIPMetadata→unwrapOrError退出1，旧profile不变。[证据](profgen/impl/evidence/08/19_natural_load_exit.json)。这仅证明回调调用点可达，未声称补丁6质量JSON或lit通过。
+- 待人工明确：本次裁决“旧报告逐字节不变”与非路径冲突失败必须写新失败JSON，在quality-report已存在时不能同时成立。建议明确允许失败JSON原子替换旧报告，旧profile不变；只有路径冲突或报告写入/提交失败才保留旧报告。[反例](profgen/impl/evidence/08/21_existing_report_contract.txt)。未自行改变覆盖策略；不重复请求DWARF裁决。
+- LLVM工具/测试目录相对补丁5无改动，无补丁6提交/0006/构建。spec原diff不动、不提交，正式非增量构建前必须撤销；冻结文档/golden不改；原挂账保留。未连接板子、未推LLVM/Gerrit、未改认证或索要密码。
 
 ## 前轮授权与执行状态（2026-11-03；输出别名契约停止，已获裁决，历史）
 

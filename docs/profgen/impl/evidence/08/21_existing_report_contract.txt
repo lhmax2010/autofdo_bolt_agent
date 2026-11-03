@@ -1,0 +1,20 @@
+本次用户裁决第1项：
+“失败报告 conversion=failed、failure_stage=generate、原因为 no usable samples”
+“--output 未生成、预置旧 profile 与旧报告逐字节不变”
+
+此前路径裁决第4项：
+“这是"失败时也写失败报告"的唯一例外：只限路径冲突，其余所有失败仍按原要求写失败报告。”
+
+原补丁6任务第二部分第3项：
+“只要给了 --quality-report，失败时也写出失败报告（failure_stage 与原因），尚未计算的字段为 unknown。”
+
+反例（仅逻辑分析，不执行覆盖实验）：
+--output=new.prof --quality-report=report.json
+report.json 已存在，内容 {"verdict":{"conversion":"ok"}}；各输入/输出均非别名。
+输入为真实截断.debug_info，生成失败。
+若 report.json 保持逐字节不变，则仍为ok，不能成为本次失败报告。
+若同一路径写入failed JSON，则旧报告的字节必然变化。
+
+待明确：非路径冲突失败时，是否允许新失败JSON原子替换旧质量报告？
+建议：旧profile不变；旧报告允许被失败JSON替换；路径冲突及报告写入/提交本身失败时保持旧报告。
+未实施任何新例外、未另选报告路径。
