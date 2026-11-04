@@ -1,0 +1,114 @@
+[
+  {
+    "reference_not_video": "temp/eval-prep11/ffmpeg/tests/ref/lavf-fate/h264.mp4",
+    "first_line": "fe299ea5205b71a48281f917b1256a5d *tests/data/lavf-fate/lavf.h264.mp4"
+  },
+  {
+    "reference_not_video": "temp/eval-prep11/ffmpeg/tests/ref/lavf-fate/evc.mp4",
+    "first_line": "bebb66fc3e13ece081d1aa96802e3c1f *tests/data/lavf-fate/lavf.evc.mp4"
+  },
+  {
+    "reference_not_video": "temp/eval-prep11/ffmpeg/tests/ref/lavf-fate/vvc.mp4",
+    "first_line": "b5d5939890d3246475f990e5ebd58dc8 *tests/data/lavf-fate/lavf.vvc.mp4"
+  },
+  {
+    "reference_not_video": "temp/eval-prep11/ffmpeg/tests/ref/lavf-fate/apv.mp4",
+    "first_line": "58c85fdeea33804041933f72800e6ad5 *tests/data/lavf-fate/lavf.apv.mp4"
+  },
+  {
+    "reference_not_video": "temp/eval-prep11/ffmpeg/tests/ref/lavf-fate/av1.mp4",
+    "first_line": "194cd796f3d28a890b516b2507f57180 *tests/data/lavf-fate/lavf.av1.mp4"
+  },
+  {
+    "reference_not_video": "temp/eval-prep11/ffmpeg/tests/ref/lavf-fate/hevc.mp4",
+    "first_line": "37b3a3e84df2350380b05b2af4dc97f5 *tests/data/lavf-fate/lavf.hevc.mp4"
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "tools/profgen/eval_build.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "tools/profgen/board/collect.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "tools/profgen/board/measure.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "tools/profgen/board/common.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "bash",
+      "tools/profgen/eval_build.sh",
+      "--dry-run"
+    ],
+    "exit": 0,
+    "stdout": "{\"id\": \"spike-thumb-S\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant S\"]}\n{\"id\": \"spike-thumb-R\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant R\"]}\n{\"id\": \"spike-thumb-C\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant C\"]}\n{\"id\": \"spike-thumb-G5\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant G5\"]}\n{\"id\": \"spike-a32-S\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant S\"]}\n{\"id\": \"spike-a32-R\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant R\"]}\n{\"id\": \"spike-a32-C\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant C\"]}\n{\"id\": \"spike-a32-G5\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_host_check_arm.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant G5\"]}\n{\"id\": \"spike-a64-S\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant S\"]}\n{\"id\": \"spike-a64-R\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant R\"]}\n{\"id\": \"spike-a64-C\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant C\"]}\n{\"id\": \"spike-a64-G5\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/spike\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant G5\"]}\n{\"id\": \"ffmpeg-thumb-S\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant S\"]}\n{\"id\": \"ffmpeg-thumb-R\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant R\"]}\n{\"id\": \"ffmpeg-thumb-C\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant C\"]}\n{\"id\": \"ffmpeg-thumb-G5\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa thumb\", \"--define\", \"eval_variant G5\"]}\n{\"id\": \"ffmpeg-a32-S\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant S\"]}\n{\"id\": \"ffmpeg-a32-R\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant R\"]}\n{\"id\": \"ffmpeg-a32-C\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant C\"]}\n{\"id\": \"ffmpeg-a32-G5\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_v05_ffmpeg.conf\", \"build\", \"--overwrite\", \"-A\", \"armv7l\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a32\", \"--define\", \"eval_variant G5\"]}\n{\"id\": \"ffmpeg-a64-S\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant S\"]}\n{\"id\": \"ffmpeg-a64-R\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant R\"]}\n{\"id\": \"ffmpeg-a64-C\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant C\"]}\n{\"id\": \"ffmpeg-a64-G5\", \"cwd\": \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ffmpeg\", \"command\": [\"setsid\", \"--wait\", \"nice\", \"-n\", \"19\", \"ionice\", \"-c3\", \"gbs\", \"-c\", \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_rpi5_image.conf\", \"build\", \"--overwrite\", \"-A\", \"aarch64\", \"--threads\", \"1\", \"--define\", \"_smp_mflags -j10\", \"--define\", \"eval_isa a64\", \"--define\", \"eval_variant G5\"]}\n",
+    "stderr": ""
+  },
+  {
+    "python_ast_check": "passed",
+    "payloads": [
+      {
+        "payload": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/payload-rpi4",
+        "variants": 16,
+        "arch": "armv7l",
+        "deploy_only": [
+          "variants/",
+          "scripts/",
+          "eval-manifest.tsv"
+        ],
+        "do_not_deploy": [
+          "unpacked/"
+        ],
+        "board_contacted": false
+      },
+      {
+        "payload": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/payload-rpi5",
+        "variants": 8,
+        "arch": "aarch64",
+        "deploy_only": [
+          "variants/",
+          "scripts/",
+          "eval-manifest.tsv"
+        ],
+        "do_not_deploy": [
+          "unpacked/"
+        ],
+        "board_contacted": false
+      }
+    ],
+    "manifest_lines": {
+      "rpi4": 16,
+      "rpi5": 8
+    },
+    "board_scripts_executed": false
+  }
+]

@@ -26,7 +26,17 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-04；评估准备，R 插桩类型冲突处停止）
+## 当前授权与执行状态（2026-11-04；评估准备与全部生成侧构建完成）
+
+- 本轮单会话完成主机准备，不连接板子、不改LLVM/正式profgen/冻结v0.7、不推LLVM/Gerrit。用户裁决：R为IR插桩并关闭preinline，C为前端coverage，G5为正常IR插桩；R/C、R/G5分开。待设计v0.8登记。[报告11](profgen/impl/11_eval_prep.md)
+- 新IR语义匹配器按完整位置+递归操作数等价/后继校验重写，23组手写IR对与14个测试方法（含7个bootstrap测试）通过；46份.ll由GBS llvm-as验证。真实clang消费IR只作读取冒烟，PHI保守unverified，不作为统计质量结论。[测试证据](profgen/impl/evidence/11/04_semantics_and_bootstrap.json)
+- 12项FFmpeg代表性源文件选项核对全部通过后构建。spike/FFmpeg × Thumb/A32/aarch64 × S/R/C/G5共24项最终GBS成功，RPM/debuginfo已留存。spike合计240.03秒；FFmpeg合计2288.20秒，16:17:56–16:56:06，之前等待其他会话约80分钟。最低available10373MiB；未低于2GiB。[构建/失败尝试原文](profgen/impl/evidence/11/07_builds.json)
+- 24个目标的选项、映射符号、成对20字节SHA1 ID通过；FFmpeg全部84对运行ELF/debug ID一致，debug保留对应ISA映射符号，R/C/G5全体运行ELF含插桩节及运行库符号。两个目标平台均有compiler-rt profile运行库，当前无LTO。各变体实际命令、build-id及RPM SHA见[目标清单](profgen/impl/evidence/11/08_artifacts.json)、[全部FFmpeg ELF](profgen/impl/evidence/11/08b_all_ffmpeg_elf_ids.json)。
+- C覆盖文件须用匹配runtime+debug经GBS eu-unstrip合成后交llvm-cov；单独debug缺PROGBITS的profile名字节。三ISAreader已用合成profile核对，真实计数仍待板上训练；不把合成数据当覆盖真值。[证据](profgen/impl/evidence/11/10_coverage_split.json)
+- 板上脚本与[计划](profgen/eval/board_plan.md)仅准备、bash-n检查；本机payload为temp/eval-prep11/payload-rpi4（16项）及payload-rpi5（8项），尚未部署。现有视频同源BBB，缺不同视频的测试输入；独立片源/ε/异常规则/板上权限待用户决定。当前G5为生成侧，优化收益组仍需训练后消费构建。
+- 关闭R插桩类型阻塞、按aarch64证据关闭probe拆分位置；保留ARM probe崩溃为步骤8子方案阻塞，不阻塞DWARF路径。其他板上/默认build-id/非增量前撤销spec挂账不变。下一步等待板上评估授权，Agent设计开发仍在增强完成后。
+
+## 前轮授权与执行状态（2026-11-04；R 插桩类型冲突处停止；历史，已获裁决）
 
 - 已获第一批白天评估准备授权；只做便宜主机检查与小程序构建，不连接板子、不完整构建FFmpeg。按停止条件，在R生成方式与设计指定IR转储流程冲突处停止；未改LLVM/工具/冻结设计/spec或配置。[报告11](profgen/impl/11_eval_prep.md)
 - 已复现：任务指定的`-fprofile-instr-generate`产生Front-end profile，使用时`-print-after=pgo-instr-use`无转储（exit0、stderr0字节）；`-fprofile-generate`诊断对照产生IR profile及1次转储（exit0）。两侧最终IR均有入口计数，不是profile未读入。完整命令、合成输入及原始输出见[证据](profgen/impl/evidence/11/01_reference_instrumentation.json)。没有自行更换R flags；等待裁决后继续匹配脚本、spike各变体、夜间脚本与板上计划。
@@ -311,7 +321,7 @@
 
 ## 计划
 
-- 当前已授权白天评估准备；报告11记录R插桩类型冲突，待裁决后继续。probe节位置已闭合，armv7l probe崩溃不作为第一批DWARF阻塞。
+- 当前评估准备与全部24项生成侧构建已完成；R插桩类型已裁决闭合，等待板上训练/评估授权。probe节位置已闭合，armv7l probe崩溃不作为第一批DWARF阻塞。
 
 - 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；补丁1–7已完成，下一步等待用户授权；Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
@@ -336,7 +346,7 @@
 
 ## 进度
 
-- 2026-11-04：已登记probe裁决，完成R流程冲突的GBS平台工具最小实测；其余评估准备按停止条件未继续。[报告11](profgen/impl/11_eval_prep.md)
+- 2026-11-04（裁决后）：匹配/统计脚本与板上计划完成，24项spike/FFmpeg生成侧构建及产物核对通过；原R冲突停止记录保留于报告1–6节。[报告11](profgen/impl/11_eval_prep.md)
 
 ### llvm-profgen 补丁3（历史，已完成）
 
@@ -545,7 +555,7 @@
 
 ## 待人工裁决
 
-- 评估准备R流程：是否将R生成改为`-fprofile-generate`以保留设计的pgo-instr-use转储（C继续前端插桩并分开构建），或保留前端插桩并另行批准转储点/评估流程调整；G5的插桩种类也需明确。没有自行改动。[实测与候选方案](profgen/impl/11_eval_prep.md#24-候选方案均未实施需用户决定)
+- R/C/G5插桩类型已由用户裁决，不再待决。板上评估仍需提前决定独立测试视频、实际等价区间ε、异常剔除规则，以及是否固定governor/调整perf权限；本轮不执行权限操作。[板上计划](profgen/eval/board_plan.md)
 
 - [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–7已完成，下一步等待用户授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 

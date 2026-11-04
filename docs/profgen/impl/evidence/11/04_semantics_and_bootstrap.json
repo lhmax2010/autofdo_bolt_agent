@@ -1,0 +1,6317 @@
+{
+  "command": "python3 -m unittest discover -s tools/profgen/tests -p test_*.py -v",
+  "output": "test_constant_equal (test_bootstrap.BootstrapTests.test_constant_equal) ... ok\ntest_deterministic_and_crosses (test_bootstrap.BootstrapTests.test_deterministic_and_crosses) ... ok\ntest_invalid_inputs (test_bootstrap.BootstrapTests.test_invalid_inputs) ... ok\ntest_known_difference (test_bootstrap.BootstrapTests.test_known_difference) ... ok\ntest_paired (test_bootstrap.BootstrapTests.test_paired) ... ok\ntest_relative_epsilon (test_bootstrap.BootstrapTests.test_relative_epsilon) ... ok\ntest_zero_reference (test_bootstrap.BootstrapTests.test_zero_reference) ... ok\ntest_discriminator_and_inline_location (test_ir_semantics.SemanticTests.test_discriminator_and_inline_location) ... ok\ntest_fixtures (test_ir_semantics.SemanticTests.test_fixtures) ... ok\ntest_function_exclusion (test_ir_semantics.SemanticTests.test_function_exclusion) ... ok\ntest_normalization_preserves_flags (test_ir_semantics.SemanticTests.test_normalization_preserves_flags) ... ok\ntest_real_diagnostic_summaries (test_ir_semantics.SemanticTests.test_real_diagnostic_summaries) ... ok\ntest_unknown_diagnostic_scope (test_ir_semantics.SemanticTests.test_unknown_diagnostic_scope) ... ok\ntest_unsupported_header_fails_closed (test_ir_semantics.SemanticTests.test_unsupported_header_fails_closed) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 0.964s\n\nOK\n",
+  "fixtures": [
+    {
+      "case": {
+        "name": "equal",
+        "reason": null,
+        "depth": 16,
+        "expect": "strict match, equal probabilities"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "successor_pairing": [
+              0,
+              1
+            ],
+            "reference_weights": [
+              80,
+              20
+            ],
+            "sample_weights": [
+              80,
+              20
+            ],
+            "probability_errors": [
+              0.0,
+              0.0
+            ],
+            "absolute_probability_errors": [
+              0.0,
+              0.0
+            ],
+            "probability_exclusion": null
+          }
+        ],
+        "semantic_unverified": [],
+        "reason_counts": {},
+        "unverified_terminators_by_reason": {
+          "reference": {},
+          "sample": {}
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "probability_denominator": 1,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "and-constant",
+        "reason": "condition_not_equivalent",
+        "depth": 16,
+        "expect": "condition_not_equivalent"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "condition_not_equivalent"
+          }
+        ],
+        "reason_counts": {
+          "condition_not_equivalent": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "condition_not_equivalent": 1
+          },
+          "sample": {
+            "condition_not_equivalent": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "switch-equal",
+        "reason": null,
+        "depth": 16,
+        "expect": "strict match, equal probabilities"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ]
+          }
+        ],
+        "strict_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ],
+            "successor_pairing": [
+              0,
+              1
+            ],
+            "reference_weights": [
+              80,
+              20
+            ],
+            "sample_weights": [
+              80,
+              20
+            ],
+            "probability_errors": [
+              0.0,
+              0.0
+            ],
+            "absolute_probability_errors": [
+              0.0,
+              0.0
+            ],
+            "probability_exclusion": null
+          }
+        ],
+        "semantic_unverified": [],
+        "reason_counts": {},
+        "unverified_terminators_by_reason": {
+          "reference": {},
+          "sample": {}
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "probability_denominator": 1,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "switch-selector",
+        "reason": "selector_not_equivalent",
+        "depth": 16,
+        "expect": "selector_not_equivalent"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ],
+            "reason": "selector_not_equivalent"
+          }
+        ],
+        "reason_counts": {
+          "selector_not_equivalent": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "selector_not_equivalent": 1
+          },
+          "sample": {
+            "selector_not_equivalent": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "inverse",
+        "reason": null,
+        "depth": 16,
+        "expect": "strict, swapped successor pairing [1,0], probability errors zero"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "successor_pairing": [
+              1,
+              0
+            ],
+            "reference_weights": [
+              80,
+              20
+            ],
+            "sample_weights": [
+              20,
+              80
+            ],
+            "probability_errors": [
+              0.0,
+              0.0
+            ],
+            "absolute_probability_errors": [
+              0.0,
+              0.0
+            ],
+            "probability_exclusion": null
+          }
+        ],
+        "semantic_unverified": [],
+        "reason_counts": {},
+        "unverified_terminators_by_reason": {
+          "reference": {},
+          "sample": {}
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "probability_denominator": 1,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "successor-same",
+        "reason": "successor_location_duplicate",
+        "depth": 16,
+        "expect": "successor_location_duplicate"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "successor_location_duplicate"
+          }
+        ],
+        "reason_counts": {
+          "successor_location_duplicate": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "successor_location_duplicate": 1
+          },
+          "sample": {
+            "successor_location_duplicate": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "successor-missing",
+        "reason": "successor_location_missing",
+        "depth": 16,
+        "expect": "successor_location_missing"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "successor_location_missing"
+          }
+        ],
+        "reason_counts": {
+          "successor_location_missing": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "successor_location_missing": 1
+          },
+          "sample": {
+            "successor_location_missing": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "undef",
+        "reason": "undef_or_poison",
+        "depth": 16,
+        "expect": "undef_or_poison"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "undef_or_poison"
+          }
+        ],
+        "reason_counts": {
+          "undef_or_poison": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "undef_or_poison": 1
+          },
+          "sample": {
+            "undef_or_poison": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "poison",
+        "reason": "undef_or_poison",
+        "depth": 16,
+        "expect": "undef_or_poison"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "undef_or_poison"
+          }
+        ],
+        "reason_counts": {
+          "undef_or_poison": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "undef_or_poison": 1
+          },
+          "sample": {
+            "undef_or_poison": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "load",
+        "reason": "unsupported_load",
+        "depth": 16,
+        "expect": "unsupported_load"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "unsupported_load"
+          }
+        ],
+        "reason_counts": {
+          "unsupported_load": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "unsupported_load": 1
+          },
+          "sample": {
+            "unsupported_load": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "call",
+        "reason": "unsupported_call",
+        "depth": 16,
+        "expect": "unsupported_call"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "unsupported_call"
+          }
+        ],
+        "reason_counts": {
+          "unsupported_call": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "unsupported_call": 1
+          },
+          "sample": {
+            "unsupported_call": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "phi",
+        "reason": "unsupported_phi",
+        "depth": 16,
+        "expect": "unsupported_phi"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              8
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              8
+            ],
+            "reason": "unsupported_phi"
+          }
+        ],
+        "reason_counts": {
+          "unsupported_phi": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "unsupported_phi": 1
+          },
+          "sample": {
+            "unsupported_phi": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "depth",
+        "reason": "depth_limit",
+        "depth": 1,
+        "expect": "depth_limit"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              8
+            ],
+            "sample_lines": [
+              8
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              8
+            ],
+            "sample_lines": [
+              8
+            ],
+            "reason": "depth_limit"
+          }
+        ],
+        "reason_counts": {
+          "depth_limit": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "depth_limit": 1
+          },
+          "sample": {
+            "depth_limit": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 1,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "duplicate",
+        "reason": "duplicate_key",
+        "depth": 16,
+        "expect": "duplicate_key"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6,
+              8
+            ],
+            "sample_lines": [
+              6,
+              8
+            ],
+            "reason": "duplicate_key"
+          }
+        ],
+        "reason_counts": {
+          "duplicate_key": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "duplicate_key": 2
+          },
+          "sample": {
+            "duplicate_key": 2
+          }
+        },
+        "conditional_terminators": {
+          "reference": 2,
+          "sample": 2
+        },
+        "eligible_terminators": {
+          "reference": 2,
+          "sample": 2
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "no-weights",
+        "reason": "unknown_weights",
+        "depth": 16,
+        "expect": "unknown_weights"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "unknown_weights"
+          }
+        ],
+        "reason_counts": {
+          "unknown_weights": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "unknown_weights": 1
+          },
+          "sample": {
+            "unknown_weights": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "expect",
+        "reason": "expected_weights",
+        "depth": 16,
+        "expect": "expected_weights"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "expected_weights"
+          }
+        ],
+        "reason_counts": {
+          "expected_weights": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "expected_weights": 1
+          },
+          "sample": {
+            "expected_weights": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "different-shape",
+        "reason": "different_shape",
+        "depth": 16,
+        "expect": "different_shape"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "different_shape"
+          }
+        ],
+        "reason_counts": {
+          "different_shape": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "different_shape": 1
+          },
+          "sample": {
+            "different_shape": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "flags",
+        "reason": "condition_not_equivalent",
+        "depth": 16,
+        "expect": "condition_not_equivalent"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "reason": "condition_not_equivalent"
+          }
+        ],
+        "reason_counts": {
+          "condition_not_equivalent": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "condition_not_equivalent": 1
+          },
+          "sample": {
+            "condition_not_equivalent": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "zero-reference",
+        "reason": null,
+        "depth": 16,
+        "expect": "strict structurally, excluded from probability denominator"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "successor_pairing": [
+              0,
+              1
+            ],
+            "reference_weights": [
+              0,
+              0
+            ],
+            "sample_weights": [
+              80,
+              20
+            ],
+            "probability_errors": null,
+            "absolute_probability_errors": null,
+            "probability_exclusion": "reference_zero_total"
+          }
+        ],
+        "semantic_unverified": [],
+        "reason_counts": {},
+        "unverified_terminators_by_reason": {
+          "reference": {},
+          "sample": {}
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "argument-renaming",
+        "reason": null,
+        "depth": 16,
+        "expect": "strict match, zero errors"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ]
+          }
+        ],
+        "strict_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              6
+            ],
+            "sample_lines": [
+              6
+            ],
+            "successor_pairing": [
+              0,
+              1
+            ],
+            "reference_weights": [
+              80,
+              20
+            ],
+            "sample_weights": [
+              80,
+              20
+            ],
+            "probability_errors": [
+              0.0,
+              0.0
+            ],
+            "absolute_probability_errors": [
+              0.0,
+              0.0
+            ],
+            "probability_exclusion": null
+          }
+        ],
+        "semantic_unverified": [],
+        "reason_counts": {},
+        "unverified_terminators_by_reason": {
+          "reference": {},
+          "sample": {}
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "probability_denominator": 1,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "switch-width",
+        "reason": "selector_width",
+        "depth": 16,
+        "expect": "selector width differs, unverified"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ],
+            "reason": "selector_width"
+          }
+        ],
+        "reason_counts": {
+          "selector_width": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "selector_width": 1
+          },
+          "sample": {
+            "selector_width": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "switch-case",
+        "reason": "case_set",
+        "depth": 16,
+        "expect": "case constants differ, unverified"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ],
+            "reason": "case_set"
+          }
+        ],
+        "reason_counts": {
+          "case_set": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "case_set": 1
+          },
+          "sample": {
+            "case_set": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    },
+    {
+      "case": {
+        "name": "switch-reorder",
+        "reason": null,
+        "depth": 16,
+        "expect": "strict match, zero errors"
+      },
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ]
+          }
+        ],
+        "strict_pairs": [
+          {
+            "function": "f",
+            "location": [
+              [
+                [
+                  "line",
+                  "2"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  null
+                ],
+                [
+                  "atomRank",
+                  null
+                ]
+              ],
+              [
+                "DISubprogram",
+                [
+                  [
+                    "name",
+                    "\"f\""
+                  ],
+                  [
+                    "line",
+                    "1"
+                  ],
+                  [
+                    "scopeLine",
+                    "1"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"fixture.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/fixture\""
+                    ]
+                  ],
+                  null,
+                  null
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              4
+            ],
+            "sample_lines": [
+              4
+            ],
+            "successor_pairing": [
+              0,
+              2,
+              1
+            ],
+            "reference_weights": [
+              30,
+              50,
+              20
+            ],
+            "sample_weights": [
+              30,
+              20,
+              50
+            ],
+            "probability_errors": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "absolute_probability_errors": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probability_exclusion": null
+          }
+        ],
+        "semantic_unverified": [],
+        "reason_counts": {},
+        "unverified_terminators_by_reason": {
+          "reference": {},
+          "sample": {}
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 1.0,
+          "sample": 1.0
+        },
+        "probability_denominator": 1,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      }
+    }
+  ],
+  "llvm_as": [
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/and-constant-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/and-constant-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/and-constant-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/and-constant-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/and-constant-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/and-constant-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/argument-renaming-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/argument-renaming-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/argument-renaming-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/argument-renaming-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/argument-renaming-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/argument-renaming-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/call-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/call-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/call-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/call-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/call-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/call-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/depth-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/depth-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/depth-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/depth-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/depth-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/depth-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/different-shape-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/different-shape-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/different-shape-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/different-shape-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/different-shape-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/different-shape-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/duplicate-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/duplicate-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/duplicate-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/duplicate-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/duplicate-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/duplicate-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/equal-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/equal-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/equal-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/equal-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/equal-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/equal-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/expect-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/expect-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/expect-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/expect-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/expect-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/expect-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/flags-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/flags-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/flags-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/flags-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/flags-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/flags-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/inverse-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/inverse-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/inverse-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/inverse-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/inverse-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/inverse-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/load-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/load-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/load-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/load-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/load-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/load-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/no-weights-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/no-weights-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/no-weights-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/no-weights-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/no-weights-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/no-weights-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/phi-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/phi-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/phi-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/phi-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/phi-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/phi-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/poison-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/poison-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/poison-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/poison-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/poison-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/poison-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-missing-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-missing-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/successor-missing-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-missing-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-missing-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/successor-missing-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-same-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-same-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/successor-same-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-same-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/successor-same-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/successor-same-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-case-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-case-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-case-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-case-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-case-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-case-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-equal-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-equal-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-equal-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-equal-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-equal-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-equal-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-reorder-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-reorder-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-reorder-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-reorder-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-reorder-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-reorder-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-selector-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-selector-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-selector-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-selector-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-selector-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-selector-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-width-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-width-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-width-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-width-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/switch-width-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/switch-width-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/undef-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/undef-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/undef-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/undef-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/undef-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/undef-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/zero-reference-ref.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/zero-reference-ref.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/zero-reference-ref.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/zero-reference-sample.ll",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-as",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/tests/ir/zero-reference-sample.ll",
+        "-o",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/ir-fixture-check/zero-reference-sample.bc"
+      ],
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "smokes": [
+    {
+      "inputs": [
+        "temp/profgen-host-verification/a64-text.dump.ll",
+        "temp/profgen-host-verification/a64-extbinary.dump.ll"
+      ],
+      "sha256": [
+        "8367831f51d32f720a0986e52d30e7afcf1595dc1bb99b07dace42b06f4d6602",
+        "8367831f51d32f720a0986e52d30e7afcf1595dc1bb99b07dace42b06f4d6602"
+      ],
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "count_loop",
+            "location": [
+              [
+                [
+                  "line",
+                  "12"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  "4"
+                ],
+                [
+                  "atomRank",
+                  "1"
+                ]
+              ],
+              [
+                "DILexicalBlockFile",
+                [
+                  [
+                    "discriminator",
+                    "2"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"counting.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/ip-mode\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DILexicalBlock",
+                  [
+                    [
+                      "line",
+                      "12"
+                    ],
+                    [
+                      "column",
+                      "3"
+                    ]
+                  ],
+                  [
+                    "DIFile",
+                    [
+                      [
+                        "filename",
+                        "\"counting.c\""
+                      ],
+                      [
+                        "directory",
+                        "\"/ip-mode\""
+                      ]
+                    ],
+                    null,
+                    null
+                  ],
+                  [
+                    "DISubprogram",
+                    [
+                      [
+                        "name",
+                        "\"count_loop\""
+                      ],
+                      [
+                        "line",
+                        "9"
+                      ],
+                      [
+                        "scopeLine",
+                        "9"
+                      ]
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ]
+                  ]
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              26
+            ],
+            "sample_lines": [
+              26
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "count_loop",
+            "location": [
+              [
+                [
+                  "line",
+                  "12"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  "4"
+                ],
+                [
+                  "atomRank",
+                  "1"
+                ]
+              ],
+              [
+                "DILexicalBlockFile",
+                [
+                  [
+                    "discriminator",
+                    "2"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"counting.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/ip-mode\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DILexicalBlock",
+                  [
+                    [
+                      "line",
+                      "12"
+                    ],
+                    [
+                      "column",
+                      "3"
+                    ]
+                  ],
+                  [
+                    "DIFile",
+                    [
+                      [
+                        "filename",
+                        "\"counting.c\""
+                      ],
+                      [
+                        "directory",
+                        "\"/ip-mode\""
+                      ]
+                    ],
+                    null,
+                    null
+                  ],
+                  [
+                    "DISubprogram",
+                    [
+                      [
+                        "name",
+                        "\"count_loop\""
+                      ],
+                      [
+                        "line",
+                        "9"
+                      ],
+                      [
+                        "scopeLine",
+                        "9"
+                      ]
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ]
+                  ]
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              26
+            ],
+            "sample_lines": [
+              26
+            ],
+            "reason": "unsupported_phi"
+          }
+        ],
+        "reason_counts": {
+          "unsupported_phi": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "unsupported_phi": 1
+          },
+          "sample": {
+            "unsupported_phi": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      },
+      "interpretation": "Only parsing real clang consumer IR, no IR-instrumentation quality conclusion"
+    },
+    {
+      "inputs": [
+        "temp/profgen-host-verification/thumb-text.dump.ll",
+        "temp/profgen-host-verification/thumb-extbinary.dump.ll"
+      ],
+      "sha256": [
+        "6a02cb49151e904dbda967bf4bf28435b3d8f70ca630bf737eaac8b4b1ef916f",
+        "6a02cb49151e904dbda967bf4bf28435b3d8f70ca630bf737eaac8b4b1ef916f"
+      ],
+      "result": {
+        "schema_version": 1,
+        "candidate_pairs": [
+          {
+            "function": "count_loop",
+            "location": [
+              [
+                [
+                  "line",
+                  "12"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  "4"
+                ],
+                [
+                  "atomRank",
+                  "1"
+                ]
+              ],
+              [
+                "DILexicalBlockFile",
+                [
+                  [
+                    "discriminator",
+                    "2"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"counting.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/ip-mode\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DILexicalBlock",
+                  [
+                    [
+                      "line",
+                      "12"
+                    ],
+                    [
+                      "column",
+                      "3"
+                    ]
+                  ],
+                  [
+                    "DIFile",
+                    [
+                      [
+                        "filename",
+                        "\"counting.c\""
+                      ],
+                      [
+                        "directory",
+                        "\"/ip-mode\""
+                      ]
+                    ],
+                    null,
+                    null
+                  ],
+                  [
+                    "DISubprogram",
+                    [
+                      [
+                        "name",
+                        "\"count_loop\""
+                      ],
+                      [
+                        "line",
+                        "9"
+                      ],
+                      [
+                        "scopeLine",
+                        "9"
+                      ]
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ]
+                  ]
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              26
+            ],
+            "sample_lines": [
+              26
+            ]
+          }
+        ],
+        "strict_pairs": [],
+        "semantic_unverified": [
+          {
+            "function": "count_loop",
+            "location": [
+              [
+                [
+                  "line",
+                  "12"
+                ],
+                [
+                  "column",
+                  "3"
+                ],
+                [
+                  "discriminator",
+                  null
+                ],
+                [
+                  "isImplicitCode",
+                  null
+                ],
+                [
+                  "atomGroup",
+                  "4"
+                ],
+                [
+                  "atomRank",
+                  "1"
+                ]
+              ],
+              [
+                "DILexicalBlockFile",
+                [
+                  [
+                    "discriminator",
+                    "2"
+                  ]
+                ],
+                [
+                  "DIFile",
+                  [
+                    [
+                      "filename",
+                      "\"counting.c\""
+                    ],
+                    [
+                      "directory",
+                      "\"/ip-mode\""
+                    ]
+                  ],
+                  null,
+                  null
+                ],
+                [
+                  "DILexicalBlock",
+                  [
+                    [
+                      "line",
+                      "12"
+                    ],
+                    [
+                      "column",
+                      "3"
+                    ]
+                  ],
+                  [
+                    "DIFile",
+                    [
+                      [
+                        "filename",
+                        "\"counting.c\""
+                      ],
+                      [
+                        "directory",
+                        "\"/ip-mode\""
+                      ]
+                    ],
+                    null,
+                    null
+                  ],
+                  [
+                    "DISubprogram",
+                    [
+                      [
+                        "name",
+                        "\"count_loop\""
+                      ],
+                      [
+                        "line",
+                        "9"
+                      ],
+                      [
+                        "scopeLine",
+                        "9"
+                      ]
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ],
+                    [
+                      "DIFile",
+                      [
+                        [
+                          "filename",
+                          "\"counting.c\""
+                        ],
+                        [
+                          "directory",
+                          "\"/ip-mode\""
+                        ]
+                      ],
+                      null,
+                      null
+                    ]
+                  ]
+                ]
+              ],
+              null
+            ],
+            "reference_lines": [
+              26
+            ],
+            "sample_lines": [
+              26
+            ],
+            "reason": "unsupported_phi"
+          }
+        ],
+        "reason_counts": {
+          "unsupported_phi": 1
+        },
+        "unverified_terminators_by_reason": {
+          "reference": {
+            "unsupported_phi": 1
+          },
+          "sample": {
+            "unsupported_phi": 1
+          }
+        },
+        "conditional_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "eligible_terminators": {
+          "reference": 1,
+          "sample": 1
+        },
+        "strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "eligible_strict_ratios": {
+          "reference": 0.0,
+          "sample": 0.0
+        },
+        "probability_denominator": 0,
+        "excluded_functions": {},
+        "depth_limit": 16,
+        "note": "Structural coverage only; branch weight sums are not execution counts."
+      },
+      "interpretation": "Only parsing real clang consumer IR, no IR-instrumentation quality conclusion"
+    }
+  ]
+}
