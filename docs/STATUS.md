@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-03；第一批主机验证，Clang崩溃处停止）
+## 当前授权与执行状态（2026-11-04；评估准备，R 插桩类型冲突处停止）
+
+- 已获第一批白天评估准备授权；只做便宜主机检查与小程序构建，不连接板子、不完整构建FFmpeg。按停止条件，在R生成方式与设计指定IR转储流程冲突处停止；未改LLVM/工具/冻结设计/spec或配置。[报告11](profgen/impl/11_eval_prep.md)
+- 已复现：任务指定的`-fprofile-instr-generate`产生Front-end profile，使用时`-print-after=pgo-instr-use`无转储（exit0、stderr0字节）；`-fprofile-generate`诊断对照产生IR profile及1次转储（exit0）。两侧最终IR均有入口计数，不是profile未读入。完整命令、合成输入及原始输出见[证据](profgen/impl/evidence/11/01_reference_instrumentation.json)。没有自行更换R flags；等待裁决后继续匹配脚本、spike各变体、夜间脚本与板上计划。
+- 用户裁决已登记（待设计v0.8）：pseudo-probe拆分后节的位置按aarch64证据关闭，节名检测与架构无关，两种位置拒绝已验证；armv7l Clang22.1.8 probe崩溃仅阻塞第10节步骤8的probe子方案，**不阻塞第一批DWARF路径**，本轮不定位、不绕过。[原拆分证据](profgen/impl/evidence/10/07_aarch64_split.json)
+- 本轮无GBS构建、无新RPM/build-id、无夜间可运行入口；IR新匹配器/统计测试尚未开始。正式工具与设计SHA保持不变，原有spec测试改动保持不动。[范围审计](profgen/impl/evidence/11/03_scope.json)
+
+## 前轮授权与执行状态（2026-11-03；第一批主机验证，Clang崩溃处停止；以下为历史）
 
 - 本轮授权只做主机验证；正式补丁7工具SHA仍为`334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30`，LLVM HEAD仍`e4642a8ad9e0acb990b45ade3ef7aca755cd80f2`。未改LLVM或设计、未连接板子、未推LLVM/Gerrit。[报告](profgen/impl/10_host_verification.md)
 - 已完成合并验证：max 20/10、受限sum 8/8、0.3及0.6各2/1、cold裁剪100/101；新增tools/profgen/check_merge_inputs.py，20项正反测试通过，输出建议命令不执行。[合并](profgen/impl/evidence/10/01_merge.json)、[门禁](profgen/impl/evidence/10/02_merge_checker.json)
@@ -304,6 +311,8 @@
 
 ## 计划
 
+- 当前已授权白天评估准备；报告11记录R插桩类型冲突，待裁决后继续。probe节位置已闭合，armv7l probe崩溃不作为第一批DWARF阻塞。
+
 - 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；补丁1–7已完成，下一步等待用户授权；Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1至补丁7已授权完成，后续评估与开发等待新授权。
@@ -326,6 +335,8 @@
 - 所有耗时命令 nice -n 19 ionice -c3，不并行大任务。
 
 ## 进度
+
+- 2026-11-04：已登记probe裁决，完成R流程冲突的GBS平台工具最小实测；其余评估准备按停止条件未继续。[报告11](profgen/impl/11_eval_prep.md)
 
 ### llvm-profgen 补丁3（历史，已完成）
 
@@ -470,6 +481,8 @@
 
 ## 已闭合结论（附证据路径）
 
+- pseudo-probe拆分后节位置按用户裁决由aarch64证据闭合：运行文件/调试文件两种位置拒绝均成立，不依赖架构。armv7l probe编译崩溃另归probe子方案。[拆分证据](profgen/impl/evidence/10/07_aarch64_split.json)、[裁决登记](profgen/impl/11_eval_prep.md#1-已生效的裁决)
+
 - 补丁3身份验证已闭合：真实libc分别verified/verified-path，无证据库与deleted默认拒绝、allow后unverified；generation=0修正后14个真实目标地址计数不变，lit无FAIL、C1零差异。[实现与规则修正](profgen/impl/05_patch3_identity.md)、[最终验收](profgen/impl/evidence/05/09_final_real_identity.json)
 
 - 补丁2收尾：完整真实文本全部接受、修改前后计数与输出不变；新CLI/dsoff尾缀负对照通过，原行为C1零差异。8个IP lit全通过，原50项不变。[收尾报告](profgen/impl/04_patch2_followup.md)、[逐地址](profgen/impl/evidence/04/02_independent.json)、[lit](profgen/impl/evidence/04/04_lit_summary.json)
@@ -532,7 +545,7 @@
 
 ## 待人工裁决
 
-- 第一批主机验证按工具缺陷停止：是否授权用保留的armv7l Clang崩溃预处理/脚本独立定位，以及如何补齐probe拆分验证；本轮未改LLVM。08 FFmpeg缺第9节两个选项，正式评估构建留下一任务。
+- 评估准备R流程：是否将R生成改为`-fprofile-generate`以保留设计的pgo-instr-use转储（C继续前端插桩并分开构建），或保留前端插桩并另行批准转储点/评估流程调整；G5的插桩种类也需明确。没有自行改动。[实测与候选方案](profgen/impl/11_eval_prep.md#24-候选方案均未实施需用户决定)
 
 - [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–7已完成，下一步等待用户授权；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 
@@ -549,7 +562,7 @@
 
 ## 挂账
 
-- 新增阻塞：平台Clang22.1.8在armv7l/Thumb的pseudo-probe小包构建中段错误，双架构probe拆分核实尚未完成；保留D/build重现材料，待单独授权定位，不能改flags绕过后宣布完成。[报告10停止节](profgen/impl/10_host_verification.md#44-停止证据与候选方案)
+- probe子方案（设计第10节步骤8）阻塞：平台Clang22.1.8在armv7l/Thumb的pseudo-probe小包构建中段错误；保留temp/profgen-host-verification/build重现材料，待单独授权定位，不绕过。按用户裁决，该项不阻塞第一批DWARF路径；probe拆分后节位置已按aarch64证据关闭。[报告10停止节](profgen/impl/10_host_verification.md#44-停止证据与候选方案)、[裁决登记](profgen/impl/11_eval_prep.md#1-已生效的裁决)
 - [unknown]真实板上样例未取得；已有合成素材仍有效，本轮不上板，真实样例继续保留。
 
 - 已关闭：IP新选项枚举与cl::values由补丁7完成，显式aggregation语义保持。[报告](profgen/impl/09_patch7_report.md)
@@ -562,7 +575,7 @@
 
 - 开发工作树 `temp/llvm-profgen-enh/packaging/llvm.spec` 的LLVM_INCLUDE_TESTS=ON和%check改动只本地保留，**正式非增量构建前必须撤销**，不得进入增强补丁。LLVM site配置与原有lit基线已闭合；assertions专用测试在当前No配置下仍为UNSUPPORTED。[报告](profgen/impl/02_lit_env.md)
 
-- 交付前非★项（v0.7）：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`已由本轮小包闭合；probe拆分aarch64已核实、armv7l因Clang崩溃挂账；新aarch64构建DWARF5拆分与BUILD/RPM ID差异已补证，原08 FFmpeg同次BUILD材料缺失，不外推为已复现。`[unknown]`合成素材已由补丁1闭合；构造的probe组合不替代真实拆分核实。第一阶段已冻结；第二阶段待定事项见设计第12节，IR匹配/BFI不沿用旧百分比。
+- 交付前非★项（v0.7）：新LLVM发布后复核默认build-id；aarch64 Tizen debuginfo的`$x/$d`已由本轮小包闭合；probe拆分后节位置按2026-11-04裁决以aarch64证据关闭，armv7l Clang崩溃只挂probe子方案；新aarch64构建DWARF5拆分与BUILD/RPM ID差异已补证，原08 FFmpeg同次BUILD材料缺失，不外推为已复现。`[unknown]`合成素材已由补丁1闭合；构造的probe组合不替代真实拆分核实。第一阶段已冻结；第二阶段待定事项见设计第12节，IR匹配/BFI不沿用旧百分比。
 - armv7l插桩已通过单程序/单输入闭环；跨训练输入、实际FFmpeg/GStreamer/kernel/Chromium与性能收益仍未验证。Thumb符号区间的状态位处理须保留在核对判据中。
 
 - 本轮补丁2已实测少量源码增量：最终Ninja106步、完整GBS812.070秒（包含安装/拆分/打包），不再只依赖单文件估算；Chromium 两工具内存/耗时对比、Google 跨架构/SPE/模块运行仍未验证。当前 short-circuit RPM 非发布包，SRPM 源归档不完整；基线 profgen 无 GNU build-id，本轮未改 spec。

@@ -1,0 +1,157 @@
+
+FILE: src/llvm/clang/lib/Driver/ToolChains/Clang.cpp
+414:     if (ProfileGenerateArg->getOption().matches(
+415:             options::OPT_fprofile_instr_generate_EQ))
+416:       CmdArgs.push_back(Args.MakeArgString(Twine("-fprofile-instrument-path=") +
+417:                                            ProfileGenerateArg->getValue()));
+418:     // The default is to use Clang Instrumentation.
+419:     CmdArgs.push_back("-fprofile-instrument=clang");
+420:     if (TC.getTriple().isWindowsMSVCEnvironment() &&
+421:         Args.hasFlag(options::OPT_frtlib_defaultlib,
+422:                      options::OPT_fno_rtlib_defaultlib, true)) {
+423:       // Add dependent lib for clang_rt.profile
+424:       CmdArgs.push_back(Args.MakeArgString(
+425:           "--dependent-lib=" + TC.getCompilerRTBasename(Args, "profile")));
+426:     }
+427:   }
+428:
+429:   if (auto *ColdFuncCoverageArg = Args.getLastArg(
+430:           options::OPT_fprofile_generate_cold_function_coverage,
+431:           options::OPT_fprofile_generate_cold_function_coverage_EQ)) {
+432:     SmallString<128> Path(
+477:           "--dependent-lib=" + TC.getCompilerRTBasename(Args, "profile")));
+478:     }
+479:     if (PGOGenArg->getOption().matches(
+480:             PGOGenerateArg ? options::OPT_fprofile_generate_EQ
+481:                            : options::OPT_fcs_profile_generate_EQ)) {
+482:       SmallString<128> Path(PGOGenArg->getValue());
+483:       llvm::sys::path::append(Path, "default_%m.profraw");
+484:       CmdArgs.push_back(
+504:     auto ReaderOrErr =
+505:         llvm::IndexedInstrProfReader::create(UsePath, D.getVFS());
+506:     if (auto E = ReaderOrErr.takeError()) {
+507:       auto DiagID = D.getDiags().getCustomDiagID(
+508:           DiagnosticsEngine::Error, "Error in reading profile %0: %1");
+509:       llvm::handleAllErrors(std::move(E), [&](const llvm::ErrorInfoBase &EI) {
+510:         D.Diag(DiagID) << UsePath.str() << EI.message();
+511:       });
+512:     } else {
+513:       std::unique_ptr<llvm::IndexedInstrProfReader> PGOReader =
+514:           std::move(ReaderOrErr.get());
+515:       StringRef UseKind;
+516:       // Currently memprof profiles are only added at the IR level. Mark the
+517:       // profile type as IR in that case as well and the subsequent matching
+518:       // needs to detect which is available (might be one or both).
+519:       if (PGOReader->isIRLevelProfile() || PGOReader->hasMemoryProfile()) {
+520:         if (PGOReader->hasCSIRLevelProfile())
+521:           UseKind = "csllvm";
+522:         else
+523:           UseKind = "llvm";
+524:       } else
+525:         UseKind = "clang";
+526:
+527:       CmdArgs.push_back(
+528:           Args.MakeArgString("-fprofile-instrument-use=" + UseKind));
+529:       CmdArgs.push_back(
+530:           Args.MakeArgString("-fprofile-instrument-use-path=" + UsePath));
+531:     }
+
+FILE: src/llvm/clang/lib/CodeGen/BackendUtil.cpp
+841: void EmitAssemblyHelper::RunOptimizationPipeline(
+842:     BackendAction Action, std::unique_ptr<raw_pwrite_stream> &OS,
+843:     std::unique_ptr<llvm::ToolOutputFile> &ThinLinkOS, BackendConsumer *BC) {
+844:   std::optional<PGOOptions> PGOOpt;
+845:
+846:   if (CodeGenOpts.hasProfileIRInstr())
+847:     // -fprofile-generate.
+848:     PGOOpt = PGOOptions(getProfileGenName(CodeGenOpts), "", "",
+849:                         CodeGenOpts.MemoryProfileUsePath, PGOOptions::IRInstr,
+850:                         PGOOptions::NoCSAction, ClPGOColdFuncAttr,
+851:                         CodeGenOpts.DebugInfoForProfiling,
+852:                         /*PseudoProbeForProfiling=*/false,
+853:                         CodeGenOpts.AtomicProfileUpdate);
+854:   else if (CodeGenOpts.hasProfileIRUse()) {
+855:     // -fprofile-use.
+856:     auto CSAction = CodeGenOpts.hasProfileCSIRUse() ? PGOOptions::CSIRUse
+857:                                                     : PGOOptions::NoCSAction;
+858:     PGOOpt = PGOOptions(CodeGenOpts.ProfileInstrumentUsePath, "",
+859:                         CodeGenOpts.ProfileRemappingFile,
+860:                         CodeGenOpts.MemoryProfileUsePath, PGOOptions::IRUse,
+861:                         CSAction, ClPGOColdFuncAttr,
+862:                         CodeGenOpts.DebugInfoForProfiling);
+863:   } else if (!CodeGenOpts.SampleProfileFile.empty())
+864:     // -fprofile-sample-use
+865:     PGOOpt = PGOOptions(
+866:         CodeGenOpts.SampleProfileFile, "", CodeGenOpts.ProfileRemappingFile,
+867:         CodeGenOpts.MemoryProfileUsePath, PGOOptions::SampleUse,
+868:         PGOOptions::NoCSAction, ClPGOColdFuncAttr,
+869:         CodeGenOpts.DebugInfoForProfiling, CodeGenOpts.PseudoProbeForProfiling);
+870:   else if (!CodeGenOpts.MemoryProfileUsePath.empty())
+871:     // -fmemory-profile-use (without any of the above options)
+872:     PGOOpt = PGOOptions("", "", "", CodeGenOpts.MemoryProfileUsePath,
+873:                         PGOOptions::NoAction, PGOOptions::NoCSAction,
+874:                         ClPGOColdFuncAttr, CodeGenOpts.DebugInfoForProfiling);
+875:   else if (CodeGenOpts.PseudoProbeForProfiling)
+
+FILE: src/llvm/llvm/lib/Passes/PassBuilderPipelines.cpp
+1216:   const bool IsCtxProfGen =
+1217:       IsPreLink && PGOCtxProfLoweringPass::isCtxIRPGOInstrEnabled();
+1218:   const bool IsPGOPreLink = !IsCtxProfGen && PGOOpt && IsPreLink;
+1219:   const bool IsPGOInstrGen =
+1220:       IsPGOPreLink && PGOOpt->Action == PGOOptions::IRInstr;
+1221:   const bool IsPGOInstrUse =
+1222:       IsPGOPreLink && PGOOpt->Action == PGOOptions::IRUse;
+1223:   const bool IsMemprofUse = IsPGOPreLink && !PGOOpt->MemoryProfile.empty();
+1224:   // We don't want to mix pgo ctx gen and pgo gen; we also don't currently
+1240:   if (IsPGOInstrGen || IsPGOInstrUse || IsMemprofUse || IsCtxProfGen ||
+1241:       IsCtxProfUse || IsColdFuncOnlyInstrGen)
+1242:     addPreInlinerPasses(MPM, Level, Phase);
+1243:
+1244:   // Add all the requested passes for instrumentation PGO, if requested.
+1245:   if (IsPGOInstrGen || IsPGOInstrUse) {
+1246:     addPGOInstrPasses(MPM, Level,
+1247:                       /*RunProfileGen=*/IsPGOInstrGen,
+1248:                       /*IsCS=*/false, PGOOpt->AtomicCounterUpdate,
+1249:                       PGOOpt->ProfileFile, PGOOpt->ProfileRemappingFile);
+1250:   } else if (IsCtxProfGen || IsCtxProfUse) {
+1251:     MPM.addPass(PGOInstrumentationGen(PGOInstrumentationType::CTXPROF));
+
+FILE: docs/profgen/design/02_llvm_profgen_enhance_design_v0.7.md
+482: ### 5.8 质量评估方法（统计质量）
+483:
+484: 评估分三层：A. 转换正确性（golden fixture，见 5.10）；B. 统计质量（本节）；C. 优化收益（5.9）。三层不能互相代替。本节的判据属于第二阶段冻结内容。
+485:
+486: 1. 插桩参考的性质：`.profdata` 本身不是逐块真值表。IR 中的 `branch_weights` 按每条终结指令单独决定缩放因子后写入（`PGOInstrumentation.cpp:2408–2419`）：该终结指令的最大边计数小于 UINT32_MAX 时因子为 1，即写入原始边计数，否则按 `MaxCount / UINT32_MAX + 1` 缩放（`llvm/include/llvm/IR/ProfDataUtils.h:172–176`、`ProfDataUtils.cpp:329–339`）。同一条终结指令内的相对概率总可以比较；被缩放的终结指令无法从 IR 识别出缩放因子，所以跨终结指令的权重之和只作描述性统计，不作执行覆盖率，也不能直接得到全程序归一化的块计数。第二阶段如需执行加权的分支指标，先证明所选分支都未被缩放（例如与 BFI 或 profdata 计数对照）再使用。
+487: 2. IR 层比较（局部分支概率）：
+488:    - 同一源码、同一组 flags（第 9 节），分别用 `-fprofile-use=<插桩 profdata>` 和 `-fprofile-sample-use=<IP profile>` 编译，加 `-mllvm -print-after=pgo-instr-use` 或 `-mllvm -print-after=sample-profile`（`PassRegistry.def:133`、`:161`），以及 `-mllvm -disable-sample-loader-inlining`（`SampleProfile.cpp:195–200`），导出刚完成标注的 IR。
+489:    - 插桩参考构建的生成与使用两侧都加 `-mllvm -disable-preinline`：插桩 PGO 在打计数前会做一次预内联（`PassBuilderPipelines.cpp:1240–1242`，生成与使用两侧都跑），sample 侧没有这一步。关闭预内联只减少差异，不表示两个 pass 边界处的 IR 已经相同（两者之间还有 IPSCCP、GlobalOpt、InstCombine、SimplifyCFG 等，`PassBuilderPipelines.cpp:1149–1153`、`:1188–1209`、`:1240–1249`）。这个参考构建只用于本节；5.9 中的插桩 PGO 对照组仍用正常 flags。
+490:    - 候选改进（第 10 节步骤 1 验证，效果未核实）：两侧都在两个 pass 之后的同一位置转储（例如 `-mllvm -print-before=inline`），使两侧经过相同的清理 pass；若能消除 switch/br 的形态差异，即改用这一转储点。
+491: 3. 匹配与语义校验：
+501:    - 执行加权的参考：用 `-fprofile-instr-generate -fcoverage-mapping` 加 `llvm-cov export` 得到行级真实执行计数，评估行级热点召回与按执行次数加权的行级误差；`.profdata` 的函数级计数作函数级参考（热点函数覆盖、函数级 Spearman，Spearman 只作辅助，因为 IP 总量反映时间、插桩总量是执行次数）。
+502:    - 块计数重叠度、按执行次数加权的分支误差、热块召回：需要经验证的块/边绝对计数恢复方法。候选方法（第 10 节步骤 1 验证）：在插桩参考构建中读取 BFI 的块计数（例如 `-mllvm -print-bfi`），先证明其与 profdata 计数一致。未验证前这三项标为"未核实"，不用于默认值决策。
+503:    - 已知局限：sample 侧加了 `-disable-sample-loader-inlining`，内联体的 profile 被合并或缩放到函数本体，测得的是函数本体的标注质量，不等于生产编译中带内联的效果。
+504: 6. 统计判据：
+505:    - 每种配置至少独立采集 5 次，用 bootstrap 对配置间的差值（或相对收益）求 95% 置信区间；预先给定实际等价区间 ±ε（在第二阶段冻结前与评估计划一起确定）。
+
+FILE: temp/v04/ffmpeg/packaging/ffmpeg.spec
+232: CFLAGS="%{optflags} -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "; export CFLAGS
+233: export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV"
+234:
+235: %ifarch %{arm}
+236: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--extra-cflags=-mfpu=neon"
+237: %endif
+238:
+239: export AR=%{__ar} RANLIB=%{__ranlib}
+240: export CC=%{__cc} CXX=%{__cxx}
+241:
+242: ./configure \
+243:     --prefix=%{_prefix} \
+244:     --libdir=%{_libdir} \
+245:     --shlibdir=%{_libdir} \
+246:     --datadir=%{_datadir}/%{name} \
+247:     --extra-ldflags="-Wl,--build-id=sha1" \
+248:     $CONFIGURE_OPTIONS
+
+FILE: temp/v05/config_after.mak
+51: CFLAGS=-Os -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fno-strict-overflow -fstack-protector-all -fPIE  -mfpu=neon -std=c17 -fomit-frame-pointer -fPIC -mthumb -pthread -g -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -Wno-implicit-const-int-float-conversion -Wno-microsoft-enum-forward-reference -O3 -fno-math-errno -fno-signed-zeros -mstack-alignment=16 -Qunused-arguments -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type
+75: LDFLAGS= -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now  -Wl,--as-needed -Wl,-z,noexecstack -Wl,-rpath-link=:libswresample:libswscale:libavfilter:libavdevice:libavformat:libavcodec:libavutil -Qunused-arguments
