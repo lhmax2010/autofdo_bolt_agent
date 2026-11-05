@@ -26,7 +26,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-04；评估准备与全部生成侧构建完成）
+## 当前授权与执行状态（2026-11-05；RPi4第一轮预注册）
+
+- 已获仅RPi4采集/训练/集成授权，尚未查询或采集本轮板上数据。先提交推送[预注册](profgen/eval/preregistration.md)，commit时间为预注册时间；之后才开始认板。
+- 允许root与performance governor，开始记录、结束及失败恢复；不改perf_event_paranoid/kptr_restrict。仅Blender官方Tears of Steel作独立测试视频。具体异常阈值、70次S/14次训练矩阵、预算及固定seed已预注册；本轮不做质量分析或消费构建。
+- 本轮有明确授权的governor sysfs写入例外，其他板上文件只写/opt/afdo_agent。LLVM/正式工具/冻结设计不改，不推LLVM/Gerrit。
+
+## 前轮授权与执行状态（2026-11-04；评估准备与全部生成侧构建完成）
 
 - 本轮单会话完成主机准备，不连接板子、不改LLVM/正式profgen/冻结v0.7、不推LLVM/Gerrit。用户裁决：R为IR插桩并关闭preinline，C为前端coverage，G5为正常IR插桩；R/C、R/G5分开。待设计v0.8登记。[报告11](profgen/impl/11_eval_prep.md)
 - 新IR语义匹配器按完整位置+递归操作数等价/后继校验重写，23组手写IR对与14个测试方法（含7个bootstrap测试）通过；46份.ll由GBS llvm-as验证。真实clang消费IR只作读取冒烟，PHI保守unverified，不作为统计质量结论。[测试证据](profgen/impl/evidence/11/04_semantics_and_bootstrap.json)
