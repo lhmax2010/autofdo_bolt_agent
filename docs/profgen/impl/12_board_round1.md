@@ -328,3 +328,49 @@ FFmpeg中档前5个受影响顶层函数及样本：ff_h264_filter_mb1650、deco
 - 本轮裁决授权补丁8：仅IP、ELF32小端EM_ARM，奇数DWARF下界在清bit0后映射状态为$t时，两端清bit0；统一影响归类及边界枚举，样本PC不清位。此前9.5的待裁决已获得此明确规则；本阶段尚未修改LLVM。
 - 补丁8须新统计/告警/schema/lit及正式GBS/C1/14导出验收，不以本次line0排查替代。
 - 当前第一项核实通过，原始证据及预注册修订先提交；板上剩余采集、补丁8与后续avg/LOST等还未在本阶段开始。板上恢复前预计另需约4–5小时（依据已有每档耗时及拉回开销估算，样本不足会增加分段）；将继续单板串行，不重采覆盖旧7份。
+
+
+## 11. 修订1后恢复、补丁8符号化阻塞及掉线收尾（2026-11-05）
+
+### 11.1 开始顺序与修订记录
+
+第10节的六份正式 in_func_no_line 排查通过后，先提交并推送预注册修订 **`6629b2e5a1bbc12073748fc01c12a5af04b34352`**，再启动新采集。原 `7d3d9d9` 和文件逐字节不变。没有做配置间质量/性能比较；此前7份原件按修订仍全为 unknown：缺精确cycles及对应CPU时间，不能用采样period总和反推或补造频率边界。
+
+本次身份Pi4/armv7l/rpi4-v7l通过，25项系统依赖（新增getconf）在非root下全部通过；原uid5001。root开启后复验既有部署文件SHA、部署新版3脚本并核SHA、复验三视频SHA、perf --version成功，再把policy0从schedutil设为performance。每RUN前后增加governor/min/max/cur，S采样的同一负载树由内层 `perf stat -x ';' -e cycles,instructions,task-clock` 记录精确周期与CPU时间。外层record参数与目标预算不变。
+
+[依赖、脚本SHA/bash-n和8项拉回回归](evidence/12/29_amendment1_checks.json)、[全部操作原文](evidence/12/27_amendment1_operations.json)。原坏哈希注入证明不删除的证据16保留，本次8项主机回归仍通过。未安装工具、未改sysctl、未重启/remount/装卸RPM。
+
+### 11.2 新增完成数据与空间
+
+| 新RUN | 目标样本/全部样本 | 用途与修订资格 | 拉回/清理 |
+|---|---:|---|---|
+| pilot-effective-frequency | 2238/2329 | 排除校准；有效频率1.497362GHz，最高56.478°C，swapout0，逐秒1.5GHz、边界不变 | 全量SHA后删除 |
+| spike A32 fixed高档 r1 | 431793/432014 | 正式；有效频率1.497442GHz（门槛1.455GHz），最高59.400°C，swapout0；计数100%运行，逐秒1.5GHz且前后边界不变，未观察到节流 | 全量SHA后删除；323.161秒，64,346,455字节 |
+| FFmpeg Thumb BBB fixed高档 r1 | 未取得完整导出，不能报样本数 | 12次解码期间SDB断开；排除、不补入矩阵 | 留板，不删除，见11.3 |
+
+实际空间门禁：pilot可用1,043,836,928字节、要求204,000,000；A32高档可用1,043,767,296、估算93,159,253、要求386,318,506；FFmpeg高档可用1,043,283,968、估算119,445,465、要求438,890,930。均满足2×估算+200MB；不是空间不足停止。未删除变体或工具腾空间。[逐RUN统计/资格](evidence/12/26_amendment1_resume_stop.json)、[已完成RUN全量文件SHA与删除收据](evidence/12/28_amendment1_transfer_receipts.json)。
+
+累计正式完成 **8/70**，目标样本 **1,259,104**：spike Thumb低/中/高各1，spike A32低/中/高各1，FFmpeg Thumb BBB低/中各1。频率、ToS、FFmpeg A32均0；训练0/14，LOST0，集成0/5。旧9份排除原件不变；本轮pilot与不完整FFmpeg另列排除，不覆盖旧文件。旧6份质量报告verified/name_merged_functions=0；旧高档Thumb与新高档A32仅原始数据，补丁8未通过，未新生成质量报告，不冒称新增转换verified。
+
+### 11.3 两项独立停止事实与恢复
+
+1. 主机补丁8最小GNU AS测试发现：规范化函数区间后，首指令0x1000仍在共享符号化器中返回正行号9、无效函数名，被现有空链分类写为in_func_no_line。人工total60，草稿sum/max/avg为50。已触发停止条件，写STOP_REQUESTED，要求当前RUN完成拉回后恢复；没有开始下一RUN。证据与候选方案见[补丁8报告](13_patch8_thumb_dwarf.md)。
+2. 22:33:34主机侧SDB出现 `target offline`。当时FFmpeg没有返回真实RECORD_EXIT；拉回尚在规范路径读取阶段就失败，未执行删除，自动governor/root恢复也失败。约后续重连成功，三项身份与同一uname-v再次断言通过，uptime继续增长，未发现重启证据；未发现残余perf/gst-launch/本轮采集进程。
+
+掉线RUN中 `record.stderr` 原文有 GStreamer `Broken pipe`，`perf-stat.csv` 与decoded.sha256为空，严格导出/evlist/buildid-list均未完成。EXIT trap却记录 `EXIT 0 / ALL-END ... OK`，这一标记不能代替缺失的真实record返回码与必需产物：本轮明确判失败。可能涉及断连信号收尾，未做影响其他进程的实验；**再次恢复前须修正HUP/中断的失败标记门禁**，不得按该伪成功标记纳入矩阵。
+
+仅尝试只读归档不完整目录：uid0下 `sha256sum .../perf.data` 返回 `Permission denied`，清单校验拒绝，因此不拉取、不删除、不改权限绕过。失败原文与ROOT恢复操作在证据27，摘要在证据26。不完整文件留在：
+
+```text
+/opt/afdo_agent/work/eval-20261105T232305-7773
+```
+
+再次恢复governor并回读schedutil，然后root off并回读uid5001；RPM1232不变；最终 `/opt` used **307868KiB**、available **997748KiB**（24%）。没有以清理不完整RUN来掩盖失败。后台worker状态 `ALL-END FAILED elapsed=1033.162`；恢复归档状态也为FAILED（SHA归档失败），但root/governor恢复经最终回读确认成功。本次从首次身份查询到最终恢复操作约 **1695.053秒**（28.25分钟，含预检/部署/安全收尾），不把它全算负载运行时间。主机与板子时钟约差1小时且板子+0900，保留原始时间/uptime，不按墙钟差猜重启。
+
+### 11.4 本阶段结果与下一步输入
+
+大文件仍在 `temp/board-round1-amend1/`（完成的pilot、A32高档和SHA收据）、`temp/board-round1-resume2/`（旧7正式及9排除原件）。原始完整清单和脚本命令均留存。主机stage1排查数据在 `temp/round1-thumb-line0/`。不完整FFmpeg只有板上原件与主机命令/失败清单，**没有主机完整perf.data副本**。
+
+真实avg与LOST挂账均未关闭；GNU bad-file-number的CU定位待真实avg续做。全体正式nonleaf line0/top20未完成，不能把旧排除校准的29/21736（0.133419%）当成正式汇总。5个集成用例未执行，无新结论；R/C/G5训练及profdata合并未做。
+
+待设计v0.8登记：修订1有效频率资格规则；Thumb普通line0证据及不同ISA的target/usable差异；补丁8区间规范化裁决；新发现的“正行号但缺函数名”符号化契约需决定，尚未自行扩充冻结规则。执行流程还需修复SDB中断的trap伪成功；失败清单不得触发删除。本轮无需任何新权限、凭据或安装；正式工具/设计未改，未推LLVM/Gerrit。

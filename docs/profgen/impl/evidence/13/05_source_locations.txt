@@ -1,0 +1,261 @@
+llvm/lib/DebugInfo/DWARF/DWARFUnit.cpp
+739: void DWARFUnit::updateAddressDieMap(DWARFDie Die) {
+740:   if (Die.isSubroutineDIE()) {
+741:     auto DIERangesOrError = Die.getAddressRanges();
+742:     if (DIERangesOrError) {
+743:       for (const auto &R : DIERangesOrError.get()) {
+744:         // Ignore 0-sized ranges.
+745:         if (R.LowPC == R.HighPC)
+746:           continue;
+747:         auto B = AddrDieMap.upper_bound(R.LowPC);
+748:         if (B != AddrDieMap.begin() && R.LowPC < (--B)->second.first) {
+749:           // The range is a sub-range of existing ranges, we need to split the
+750:           // existing range.
+751:           if (R.HighPC < B->second.first)
+752:             AddrDieMap[R.HighPC] = B->second;
+753:           if (R.LowPC > B->first)
+754:             AddrDieMap[B->first].first = R.LowPC;
+755:         }
+756:         AddrDieMap[R.LowPC] = std::make_pair(R.HighPC, Die);
+757:       }
+758:     } else
+759:       llvm::consumeError(DIERangesOrError.takeError());
+760:   }
+761:   // Parent DIEs are added to the AddrDieMap prior to the Children DIEs to
+762:   // simplify the logic to update AddrDieMap. The child's range will always
+
+llvm/lib/DebugInfo/DWARF/DWARFUnit.cpp
+770: DWARFDie DWARFUnit::getSubroutineForAddress(uint64_t Address) {
+771:   extractDIEsIfNeeded(false);
+772:   if (AddrDieMap.empty())
+773:     updateAddressDieMap(getUnitDIE());
+774:   auto R = AddrDieMap.upper_bound(Address);
+775:   if (R == AddrDieMap.begin())
+776:     return DWARFDie();
+777:   // upper_bound's previous item contains Address.
+778:   --R;
+779:   if (Address >= R->second.first)
+780:     return DWARFDie();
+781:   return R->second.second;
+782: }
+783:
+
+llvm/lib/DebugInfo/DWARF/DWARFContext.cpp
+1834: DWARFContext::getInliningInfoForAddress(object::SectionedAddress Address,
+1835:                                         DILineInfoSpecifier Spec) {
+1836:   DIInliningInfo InliningInfo;
+1837:
+1838:   DWARFCompileUnit *CU = getCompileUnitForCodeAddress(Address.Address);
+1839:   if (!CU)
+1840:     return InliningInfo;
+1841:
+1842:   const DWARFLineTable *LineTable = nullptr;
+1843:   SmallVector<DWARFDie, 4> InlinedChain;
+1844:   CU->getInlinedChainForAddress(Address.Address, InlinedChain);
+1845:   if (InlinedChain.size() == 0) {
+1846:     // If there is no DIE for address (e.g. it is in unavailable .dwo file),
+1847:     // try to at least get file/line info from symbol table.
+1848:     if (Spec.FLIKind != FileLineInfoKind::None) {
+1849:       DILineInfo Frame;
+1850:       LineTable = getLineTableForUnit(CU);
+1851:       if (LineTable &&
+1852:           LineTable->getFileLineInfoForAddress(
+1853:               {Address.Address, Address.SectionIndex}, Spec.ApproximateLine,
+1854:               CU->getCompilationDir(), Spec.FLIKind, Frame))
+1855:         InliningInfo.addFrame(Frame);
+1856:     }
+1857:     return InliningInfo;
+1858:   }
+1859:
+1860:   uint32_t CallFile = 0, CallLine = 0, CallColumn = 0, CallDiscriminator = 0;
+1861:   for (uint32_t i = 0, n = InlinedChain.size(); i != n; i++) {
+1862:     DWARFDie &FunctionDIE = InlinedChain[i];
+1863:     DILineInfo Frame;
+1864:     // Get function name if necessary.
+1865:     if (const char *Name = FunctionDIE.getSubroutineName(Spec.FNKind))
+1866:       Frame.FunctionName = Name;
+1867:     if (auto DeclLineResult = FunctionDIE.getDeclLine())
+1868:       Frame.StartLine = DeclLineResult;
+1869:     Frame.StartFileName = FunctionDIE.getDeclFile(Spec.FLIKind);
+1870:     if (auto LowPcAddr = toSectionedAddress(FunctionDIE.find(DW_AT_low_pc)))
+1871:       Frame.StartAddress = LowPcAddr->Address;
+1872:     if (Spec.FLIKind != FileLineInfoKind::None) {
+
+llvm/tools/llvm-profgen/ProfiledBinary.cpp
+1013: void ProfiledBinary::loadSymbolsFromDWARFUnit(DWARFUnit &CompilationUnit) {
+1014:   if (IPMode) {
+1015:     auto Ranges = CompilationUnit.collectAddressRanges();
+1016:     if (Ranges) {
+1017:       for (const auto &Range : *Ranges)
+1018:         IPCURanges.emplace_back(Range.LowPC, Range.HighPC);
+1019:     } else {
+1020:       // CU classification is best-effort, just like missing subprogram ranges.
+1021:       consumeError(Ranges.takeError());
+1022:     }
+1023:   }
+1024:   for (const auto &DieInfo : CompilationUnit.dies()) {
+1025:     llvm::DWARFDie Die(&CompilationUnit, &DieInfo);
+1026:
+1027:     if (!Die.isSubprogramDIE())
+1028:       continue;
+1029:     auto Name = Die.getName(llvm::DINameKind::LinkageName);
+1030:     if (!Name)
+1031:       Name = Die.getName(llvm::DINameKind::ShortName);
+1032:     if (!Name)
+1033:       continue;
+1034:
+1035:     auto RangesOrError = Die.getAddressRanges();
+1036:     if (!RangesOrError)
+1037:       continue;
+1038:     DWARFAddressRangesVector Ranges = std::move(*RangesOrError);
+1039:     if (IPMode && IPDWARFMappings)
+1040:       for (auto &Range : Ranges)
+1041:         if ((Range.LowPC & 1) &&
+1042:             IPDWARFMappings->isThumbAddress(Range.LowPC & ~uint64_t(1))) {
+1043:           uint64_t Begin = Range.LowPC & ~uint64_t(1);
+1044:           uint64_t End = Range.HighPC & ~uint64_t(1);
+1045:           IPNormalizedRanges.push_back(
+1046:               {Name, Range.LowPC, Range.HighPC, Begin, End});
+1047:           Range.LowPC = Begin;
+1048:           Range.HighPC = End;
+1049:         }
+1050:
+1051:     if (Ranges.empty())
+1052:       continue;
+1053:
+1054:     // Different DWARF symbols can have same function name, search or create
+1055:     // BinaryFunction indexed by the name.
+1056:     auto Ret = BinaryFunctions.emplace(Name, BinaryFunction());
+1057:     auto &Func = Ret.first->second;
+1058:     if (Ret.second)
+1059:       Func.FuncName = Ret.first->first;
+1060:
+1061:     if (IPMode) {
+1062:       uint64_t First = UINT64_MAX;
+1063:       for (const auto &Range : Ranges)
+1064:         if (Range.HighPC > Range.LowPC)
+1065:           First = std::min(First, Range.LowPC);
+1066:       if (First != UINT64_MAX)
+1067:         Func.IPOrigins.insert(First);
+1068:     }
+1069:     for (const auto &Range : Ranges) {
+1070:       uint64_t StartAddress = Range.LowPC;
+1071:       uint64_t EndAddress = Range.HighPC;
+1072:
+1073:       if (EndAddress <= StartAddress ||
+1074:           (!IPMode && StartAddress < getPreferredBaseAddress()))
+1075:         continue;
+1076:
+1077:       // We may want to know all ranges for one function. Here group the
+1078:       // ranges and store them into BinaryFunction.
+1079:       Func.Ranges.emplace_back(StartAddress, EndAddress);
+1080:
+1081:       auto R = StartAddrToFuncRangeMap.emplace(StartAddress, FuncRange());
+1082:       if (R.second) {
+1083:         FuncRange &FRange = R.first->second;
+1084:         FRange.Func = &Func;
+1085:         FRange.StartAddress = StartAddress;
+1086:         FRange.EndAddress = EndAddress;
+1087:       } else {
+1088:         AddrsWithMultipleSymbols.insert(StartAddress);
+1089:         if (ShowDetailedWarning)
+1090:           WithColor::warning()
+1091:               << "Duplicated symbol start address at "
+1092:               << format("%8" PRIx64, StartAddress) << " "
+1093:               << R.first->second.getFuncName() << " and " << Name << "\n";
+1094:       }
+1095:     }
+1096:   }
+1097: }
+1098:
+1099: void ProfiledBinary::loadSymbolsFromDWARF(ObjectFile &Obj) {
+
+llvm/tools/llvm-profgen/ProfiledBinary.cpp
+1185:   SymbolizerOpts.DefaultArch = TheTriple.getArchName().str();
+1186:   SymbolizerOpts.UseSymbolTable = false;
+1187:   SymbolizerOpts.RelativeAddresses = false;
+1188:   SymbolizerOpts.DWPName = DWPPath;
+1189:   return SymbolizerOpts;
+1190: }
+1191:
+1192: SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
+1193:                                                    bool UseCanonicalFnName,
+1194:                                                    bool UseProbeDiscriminator) {
+1195:   assert(this == IP.Binary &&
+1196:          "Binary should only symbolize its own instruction");
+1197:   // Inject at the shared symbolizer call, preserving its existing unwrap path.
+1198:   auto Query = [&]() -> Expected<DIInliningInfo> {
+1199:     if (IPMode &&
+1200:         (injectIPFailure("symbolize") || injectIPFailure("debug-open")))
+1201:       return createStringError(inconvertibleErrorCode(),
+1202:                                "injected symbolizer open/query failure");
+1203:     return Symbolizer->symbolizeInlinedCode(SymbolizerPath.str(),
+1204:                                             getSectionedAddress(IP.Address));
+1205:   };
+1206:   DIInliningInfo InlineStack = unwrapOrError(Query(), SymbolizerPath);
+1207:
+1208:   SampleContextFrameVector CallStack;
+1209:   if (IPMode &&
+1210:       (!InlineStack.getNumberOfFrames() || InlineStack.getFrame(0).Line == 0))
+1211:     return CallStack;
+1212:   for (int32_t I = InlineStack.getNumberOfFrames() - 1; I >= 0; I--) {
+1213:     const auto &CallerFrame = InlineStack.getFrame(I);
+1214:     if (CallerFrame.FunctionName.empty() ||
+1215:         (CallerFrame.FunctionName == "<invalid>"))
+1216:       break;
+1217:
+1218:     if (IPMode && I > 0 && CallerFrame.Line == 0)
+1219:       IPNonLeafZeroLineAddresses.insert(IP.Address);
+1220:
+1221:     StringRef FunctionName(CallerFrame.FunctionName);
+1222:     if (UseCanonicalFnName)
+1223:       FunctionName = FunctionSamples::getCanonicalFnName(FunctionName);
+1224:
+1225:     uint32_t Discriminator = CallerFrame.Discriminator;
+1226:     uint32_t LineOffset = (CallerFrame.Line - CallerFrame.StartLine) & 0xffff;
+1227:     if (UseProbeDiscriminator) {
+1228:       LineOffset =
+1229:           PseudoProbeDwarfDiscriminator::extractProbeIndex(Discriminator);
+1230:       Discriminator = 0;
+1231:     }
+1232:
+1233:     LineLocation Line(LineOffset, Discriminator);
+1234:     auto It = NameStrings.insert(FunctionName.str());
+1235:     CallStack.emplace_back(FunctionId(StringRef(*It.first)), Line);
+1236:   }
+1237:
+1238:   return CallStack;
+1239: }
+1240:
+1241: StringRef ProfiledBinary::symbolizeDataAddress(uint64_t Address) {
+1242:   DIGlobal DataDIGlobal =
+1243:       unwrapOrError(Symbolizer->symbolizeData(SymbolizerPath.str(),
+1244:                                               getSectionedAddress(Address)),
+1245:                     SymbolizerPath);
+1246:   decltype(NameStrings)::iterator Iter;
+1247:   std::tie(Iter, std::ignore) = NameStrings.insert(DataDIGlobal.Name);
+1248:   return StringRef(*Iter);
+
+llvm/tools/llvm-profgen/ProfileGenerator.cpp
+280:     return addIPCount(Sum.PeriodSum, C.PeriodSum);
+281:   };
+282:   // First identify eligible functions without enumerating unprofiled code.
+283:   std::map<std::string, BinaryFunction *> SampledFunctions;
+284:   std::map<uint64_t, BinaryFunction *> UsableAddresses;
+285:   std::map<BinaryFunction *, std::vector<uint64_t>> FunctionAddresses;
+286:   for (const auto &[Address, C] : Counts) {
+287:     auto *Range = Binary->findFuncRange(Address);
+288:     if (!Range) {
+289:       Statistics.OutsideAddresses[Address] =
+290:           Binary->classifyOutsideIP(Address).str();
+291:       if (Error E = Classify("outside_dwarf_func", C))
+292:         return E;
+293:       if (Error E = Classify(Binary->classifyOutsideIP(Address), C))
+294:         return E;
+295:     } else if (Binary->getCachedFrameLocationStack(Address).empty()) {
+296:       if (Error E = Classify("in_func_no_line", C))
+297:         return E;
+298:     } else {
+299:       if (Error E =
+300:               addIPCount(Statistics.OriginalUsable.SampleCount, C.SampleCount))
+301:         return E;

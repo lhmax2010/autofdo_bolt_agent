@@ -26,7 +26,18 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-05；恢复前line0核实通过，预注册修订1）
+## 当前授权与执行状态（2026-11-05；补丁8符号化契约停止，板上已恢复）
+
+- 计划/授权：本轮先排查6份正式Thumb line0，再新增并推送预注册修订1，恢复RPi4，同时实现获PM授权的GNU AS Thumb DWARF区间规范化。补丁8未完成，不开始后续设计或Agent开发。
+- 已闭合：6份报告的in_func_no_line均为原始行表显式line0，未见正行号漏查；spike Thumb sort_block集中在编译器.loc 0地址计算指令，A32对应地址加载保留line67。修订1已推送`6629b2e5a1bbc12073748fc01c12a5af04b34352`（完整值以修订提交审计为准），原7d3d9d9不变，旧7份正式缺cycles/task-clock仍unknown。见[报告12第10、11节](profgen/impl/12_board_round1.md)、[修订1](profgen/eval/preregistration_amendment1.md)。
+- 进度：新增完成正式A32 spike高档431793目标样本，累计8/70正式、1259104目标样本；训练0/14、LOST0、集成0/5。新pilot2238仅流程验证。A32高档有效频率1.497442GHz、温度59.400°C、逐秒1.5GHz、换出0，按修订未观察到节流；完整SHA后删除。旧6份quality verified保持；旧高档Thumb与新增A32未转换。[新RUN/资格](profgen/impl/evidence/12/26_amendment1_resume_stop.json)
+- 当前阻塞/待人工裁决：GNU AS原生最小素材子程序DWARF[0x1001,0x1009)，指令[0x1000,0x1008)。草稿规范化自身函数表后，LLVMSymbolizer的独立原始DWARF表仍在0x1000返回line9/function=<invalid>；空帧链被现有逻辑计为in_func_no_line，人工total60但sum/max/avg为50。需决定是否将有约束的规范化扩展到IP符号化函数身份查询，或明确另一分类/补全契约，未自行修改冻结5.4.2。[补丁8停止报告](profgen/impl/13_patch8_thumb_dwarf.md)、[API原文](profgen/impl/evidence/13/02_raw_symbolizer.json)、[前后对照](profgen/impl/evidence/13/03_stop_comparison.json)
+- 补丁8状态：开发草稿/4个GNU AS ELF素材保留worktree与temp/profgen-patch8；新helper首组失败，未运行GBS/正式lit/C1/14重放，未建LLVM提交/0008。正式工具仍334a0929…、LLVM HEAD仍e4642a8…；设计/golden/src/llvm不改，spec原本地diff保持。[范围审计](profgen/impl/evidence/13/06_stop_scope.json)
+- 板上安全收尾：要求当前RUN收尾期间，SDB掉线导致FFmpeg高档无真实RECORD_EXIT/完整导出；trap留下的ALL-END OK不可信，排除该RUN。重连后同一身份/内核、无残余采集进程；uid0下perf.data哈希Permission denied，清单失败、未拉取未删除。不完整目录`/opt/afdo_agent/work/eval-20261105T232305-7773`保留。已恢复schedutil/root off(uid5001)，RPM1232不变，最终/opt used307868KiB/available997748KiB。[操作原文](profgen/impl/evidence/12/27_amendment1_operations.json)
+- 挂账：恢复前需修复HUP/中断trap伪成功与处理不完整RUN；不得据缺失的record返回码或失败SHA清单清理目录。真实avg、06完整LOST、全部正式nonleaf line0/top20、5集成与profraw合并均未关闭。新工具通过后才重做所有正式S；不以旧排除校准nonleaf29/21736冒充正式汇总。
+- 下一步：等待GNU AS首指令符号化契约裁决后续补丁8；保持停止，不恢复剩余板上采集。结果仓库正常认证推送，无LLVM/Gerrit推送、无认证修改或密码请求。
+
+## 前轮阶段记录（2026-11-05；恢复前line0核实通过，预注册修订1）
 
 - 已完成本轮主机第一阶段：6份正式in_func_no_line逐地址全部为原始行表明确line0；spike Thumb中档34113条中33856条集中sort_block地址0x1076a，GBS GNU反汇编及addr2line一致，同flags Clang汇编在地址计算add前明确.loc 1 0 0。A32合并地址加载指令保留line67；无正行号漏查证据。FFmpeg60地址GNU抽查也为leaf未知行，原始行表为0；GNU bad-file-number警告仍保留待avg定位。[报告12第10节](profgen/impl/12_board_round1.md)、[统计](profgen/impl/evidence/12/24_line_zero_diagnosis.json)、[原文](profgen/impl/evidence/12/25_line_zero_raw_excerpts.json)
 - 原预注册7d3d9d9逐字节不变；新增[修订1](profgen/eval/preregistration_amendment1.md)，须本次提交推送成功后才恢复板上采集。有效频率=stat cycles/task-clock，至少固定频率97%，逐秒频率等于固定值且温度低于75°C；每轮前后保存policy governor/min/max/cur。读不到固件节点不单独剔除；缺计数/CPU时间或不可靠计数仍unknown。原ε/预算/次数/bootstrap不变。

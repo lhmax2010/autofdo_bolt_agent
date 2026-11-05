@@ -41,7 +41,7 @@ if [[ $MODE == sample-* || $MODE == lost ]]; then
     [[ $MODE != sample-freq ]] || EVENT=(-e cycles -F 1000)
     [[ $MODE != lost ]] || EVENT=(-e cycles -c 10007 -m 1)
     set +e
-    { time -p "${PERF[@]}" record --buildid-mmap "${EVENT[@]}" -o "$RUN/perf.data" -- "${LAUNCH[@]}"; } >"$RUN/workload.stdout" 2>"$RUN/record.stderr"
+    { time -p LC_ALL=C "${PERF[@]}" record --buildid-mmap "${EVENT[@]}" -o "$RUN/perf.data" -- "${PERF[@]}" stat -x ';' -e cycles,instructions,task-clock -o "$RUN/perf-stat.csv" -- "${LAUNCH[@]}"; } >"$RUN/workload.stdout" 2>"$RUN/record.stderr"
     rc=$?; set -e
     printf 'RECORD_EXIT %s\n' "$rc" >"$RUN/status"
     [[ $rc == 0 ]] || exit "$rc"
@@ -52,7 +52,7 @@ if [[ $MODE == sample-* || $MODE == lost ]]; then
     grep 'PERF_RECORD_LOST' "$RUN/perfscript.txt" >"$RUN/lost-excerpt.txt" || true
 else
     set +e
-    { time -p "${LAUNCH[@]}"; } >"$RUN/workload.stdout" 2>"$RUN/workload.stderr"
+    { time -p LC_ALL=C "${PERF[@]}" stat -x ';' -e cycles,instructions,task-clock -o "$RUN/perf-stat.csv" -- "${LAUNCH[@]}"; } >"$RUN/workload.stdout" 2>"$RUN/workload.stderr"
     rc=$?; set -e
     printf 'WORKLOAD_EXIT %s\n' "$rc" >"$RUN/status"
     [[ $rc == 0 ]] || exit "$rc"

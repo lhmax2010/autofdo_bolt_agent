@@ -1,0 +1,226 @@
+{
+  "preregistration_amendment_commit": "6629b2e5a1bbc12073748fc01c12a5af04b34352",
+  "old_formal_count": 7,
+  "old_formal_target_samples": 827311,
+  "old_formal_amended_eligibility": "unknown: exact cycles and CPU time absent; no records fabricated",
+  "old_excluded_preserved": 9,
+  "new_completed_runs": [
+    {
+      "tag": "pilot-effective-frequency",
+      "variant": "spike-thumb-S",
+      "mode": "sample-fixed",
+      "input": "100000",
+      "repeats": 1,
+      "remote": "/opt/afdo_agent/work/eval-20261105T231728-29890",
+      "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-amend1/runs/pilot-effective-frequency",
+      "seconds": 8.747490314002789,
+      "rc": 0,
+      "bytes": 399179,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "2255117043",
+            "",
+            "cycles",
+            "1506058585",
+            "100.00",
+            "1.497",
+            "GHz"
+          ],
+          "instructions": [
+            "4341596587",
+            "",
+            "instructions",
+            "1506058585",
+            "100.00",
+            "1.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "1506.06",
+            "msec",
+            "task-clock",
+            "1506058585",
+            "100.00",
+            "0.995",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497362019.441456515676666268",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 56478,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      },
+      "target_samples": 2238,
+      "sample_lines": 2329
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-400000-r1-s1",
+      "variant": "spike-a32-S",
+      "mode": "sample-fixed",
+      "input": "17632654",
+      "repeats": 1,
+      "remote": "/opt/afdo_agent/work/eval-20261105T231741-30378",
+      "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-amend1/runs/spike-a32-S-sample-fixed-bbb-400000-r1-s1",
+      "seconds": 323.16080531600164,
+      "rc": 0,
+      "bytes": 64346455,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "431943486817",
+            "",
+            "cycles",
+            "288454288252",
+            "100.00",
+            "1.497",
+            "GHz"
+          ],
+          "instructions": [
+            "766980280374",
+            "",
+            "instructions",
+            "288454288252",
+            "100.00",
+            "1.78",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "288454.29",
+            "msec",
+            "task-clock",
+            "288454288252",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497441715.347689923419062341",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      },
+      "target_samples": 431793,
+      "sample_lines": 432014
+    }
+  ],
+  "new_formal_count": 1,
+  "new_formal_target_samples": 431793,
+  "total_completed_formal_count": 8,
+  "total_formal_target_samples": 1259104,
+  "matrix_completion": {
+    "spike_thumb_fixed": {
+      "low": 1,
+      "medium": 1,
+      "high": 1
+    },
+    "spike_a32_fixed": {
+      "low": 1,
+      "medium": 1,
+      "high": 1
+    },
+    "ffmpeg_thumb_bbb_fixed": {
+      "low": 1,
+      "medium": 1,
+      "high": 0
+    },
+    "frequency": 0,
+    "ffmpeg_thumb_tos": 0,
+    "ffmpeg_a32": 0,
+    "training": 0,
+    "LOST": 0,
+    "integration": 0
+  },
+  "new_excluded": [
+    "pilot-effective-frequency",
+    "incomplete-ffmpeg-high"
+  ],
+  "new_profile_quality_conversion": "not run: patch8 stopped at symbolizer finding",
+  "prior_quality": "6 verified reports retained; old seventh and new eighth raw only",
+  "worker_status": "ALL-END 2026-11-05T22:33:34.456050+08:00 FAILED elapsed=1033.162 reason=CalledProcessError(1, ['sdb', '-s', '192.168.108.26:26101', 'shell', '( readlink -f /opt/afdo_agent/work/eval-20261105T232305-7773 ); r=$?; printf \"\\\\n__RC=%s\\\\n\" \"$r\"'])\n",
+  "recovery_status": "ALL-END 2026-11-05T22:37:25.560246+08:00 FAILED (restored; partial RUN retained)\n",
+  "start_identity": {
+    "model": "Raspberry Pi 4 Model B Rev 1.5",
+    "arch": "armv7l",
+    "release": "6.12.80-arm-rpi4-v7l",
+    "version": "#1 SMP Wed Nov  4 17:05:36 UTC 2026",
+    "uid": "5001",
+    "uptime": "1952.55 7586.69"
+  },
+  "reconnected_identity": {
+    "model": "Raspberry Pi 4 Model B Rev 1.5",
+    "arch": "armv7l",
+    "release": "6.12.80-arm-rpi4-v7l",
+    "version": "#1 SMP Wed Nov  4 17:05:36 UTC 2026",
+    "uid": "0",
+    "uptime": "3565.28 12717.52"
+  },
+  "before": "uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    286192   1019424  22% /opt\n1232\n2\n0\n4096\n",
+  "final": "uid=5001(owner) gid=100(users) groups=29(audio),44(video),100(users),201(display),1901(log),6525(usb_device),10001(priv_externalstorage),10002(priv_externalstorage_appdata),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nschedutil\n1232\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    307868    997748  24% /opt\n3646.46 13029.71\n#1 SMP Wed Nov  4 17:05:36 UTC 2026\n",
+  "initial_restore_failure": [
+    {
+      "path": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor",
+      "error": "('printf \"%s\\\\n\" schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor', 1, '', 'error: target offline\\nerror: target offline\\n')"
+    }
+  ],
+  "incomplete_receipt": {
+    "remote": "/opt/afdo_agent/work/eval-20261105T232305-7773",
+    "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-amend1/incomplete-ffmpeg-high",
+    "deleted": false,
+    "reason": "SDB disconnected before actual RECORD_EXIT; partial RUN excluded, no deletion after failed transfer",
+    "error": "ValueError('Malformed/outside manifest entry: sha256sum: /opt/afdo_agent/work/eval-20261105T232305-7773/perf.data: Permission denied')"
+  },
+  "operation_interval_seconds": 1695.052872,
+  "first_operation_time": "2026-11-05T22:09:10.507023+08:00",
+  "last_operation_time": "2026-11-05T22:37:25.559895+08:00",
+  "partial_nonleaf_prior_only": {
+    "samples": 29,
+    "usable": 21736,
+    "scope": "prior excluded calibration, not formal aggregate"
+  },
+  "retained_board_path": "/opt/afdo_agent/work/eval-20261105T232305-7773",
+  "retained_reason": "no full SHA verification: perf.data Permission denied even uid0, do not delete",
+  "new_temp_root": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-amend1",
+  "LOST_closed": false,
+  "real_avg_closed": false
+}

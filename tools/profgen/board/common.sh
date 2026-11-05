@@ -6,7 +6,7 @@ BASE=/opt/afdo_agent
 # substitutions, pipelines, array commands and the /bin/bash workload launcher.
 # time, kill, read, test, printf, wait, command and source are Bash builtins/keywords.
 BOARD_REQUIRED_COMMANDS=(
-    /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0
+    /bin/bash awk cat cut date df find findmnt getconf grep gst-inspect-1.0
     gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc
 )
 preflight_dependencies() {
@@ -97,6 +97,7 @@ new_run() {
     uname -a >"$RUN/uname"
     uname -v >>"$RUN/uname"
     cat /proc/version >"$RUN/proc-version"
+    getconf PAGESIZE >"$RUN/page-size"
     if [[ -r /proc/config.gz ]]; then
         sha256sum /proc/config.gz >"$RUN/kernel-config.sha256"
     elif [[ -r /boot/config-$(uname -r) ]]; then
@@ -118,7 +119,7 @@ snapshot() {
         date -Ins
         cat /proc/loadavg
         awk '$1=="pswpout" || $1=="pswpin"' /proc/vmstat
-        for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor /sys/class/thermal/thermal_zone*/temp /sys/class/thermal/thermal_zone*/type; do
+        for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor /sys/devices/system/cpu/cpufreq/policy*/scaling_governor /sys/devices/system/cpu/cpufreq/policy*/scaling_min_freq /sys/devices/system/cpu/cpufreq/policy*/scaling_max_freq /sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq /sys/class/thermal/thermal_zone*/temp /sys/class/thermal/thermal_zone*/type; do
             [[ ! -r $f ]] || { printf '%s ' "$f"; cat "$f"; }
         done
         if [[ -n ${THROTTLE_NODE:-} && $THROTTLE_NODE == /sys/* && -r $THROTTLE_NODE ]]; then

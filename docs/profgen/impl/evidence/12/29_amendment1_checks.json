@@ -1,0 +1,54 @@
+{
+  "inventory": [
+    "/bin/bash",
+    "awk",
+    "cat",
+    "cut",
+    "date",
+    "df",
+    "find",
+    "findmnt",
+    "getconf",
+    "grep",
+    "gst-inspect-1.0",
+    "gst-launch-1.0",
+    "ionice",
+    "mkdir",
+    "mkfifo",
+    "nice",
+    "ps",
+    "readlink",
+    "rm",
+    "rpm",
+    "sha256sum",
+    "sleep",
+    "tr",
+    "uname",
+    "wc"
+  ],
+  "method": "Review all board shell scripts: external command positions, pipelines, command substitution, array-based PERF/CMD/LAUNCH; Bash builtins excluded. New getconf PAGESIZE included. Root deployment tools checked separately. Host resource telemetry invokes pre-existing free/uptime; no install.",
+  "preflight": "/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/getconf\nDEPENDENCY_OK getconf\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\n",
+  "scripts": {
+    "tools/profgen/board/collect.sh": {
+      "sha256": "98374826a602775de7344c39983bd8ca7935433964b79d76362ce42186e0d790",
+      "bash_n_exit": 0,
+      "stderr": ""
+    },
+    "tools/profgen/board/measure.sh": {
+      "sha256": "ff0f710b7e9ad17c03913f7e3353151396b4a2ee662baefadae6e7a0fbe6b8eb",
+      "bash_n_exit": 0,
+      "stderr": ""
+    },
+    "tools/profgen/board/common.sh": {
+      "sha256": "d315cec2bc56c1f51cd47e6103a35a15681561ffa8549c909e59b394ac0a41e5",
+      "bash_n_exit": 0,
+      "stderr": ""
+    }
+  },
+  "resources": "{\"time\": \"2026-11-05T22:17:13.133839+08:00\", \"host\": \"               total        used        free      shared  buff/cache   available\\nMem:           31540       12834       10876         789        9077       18706\\nSwap:           4095        4095           0\\n 22:17:13 up 12:52,  1 user,  load average: 6.82, 8.12, 11.23\\n\", \"board\": \"total        used        free      shared  buff/cache   available\\nMem:            1472         179         998           0         314        1292\\nSwap:            589          12         576\\n 23:17:28 up 40 min,  1 user,  load average: 0.32, 0.13, 0.10\\nFilesystem           1K-blocks      Used Available Use% Mounted on\\n/dev/mmcblk0p3         1335696    286244   1019372  22% /opt\"}\n{\"time\": \"2026-11-05T22:27:13.465777+08:00\", \"host\": \"               total        used        free      shared  buff/cache   available\\nMem:           31540       12949        7717         675       12006       18591\\nSwap:           4095        4027          68\\n 22:27:13 up 13:02,  1 user,  load average: 2.88, 5.31, 8.55\\n\", \"board\": \"total        used        free      shared  buff/cache   available\\nMem:            1472         191         949           0         351        1280\\nSwap:            589          12         576\\n 23:27:28 up 50 min,  1 user,  load average: 1.74, 1.27, 0.72\\nFilesystem           1K-blocks      Used Available Use% Mounted on\\n/dev/mmcblk0p3         1335696    295212   1010404  23% /opt\"}\n",
+  "transfer_regression": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.013s\n\nOK\n"
+  }
+}

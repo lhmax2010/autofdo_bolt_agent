@@ -1,0 +1,20 @@
+{
+  "LLVM_HEAD": "e4642a8ad9e0acb990b45ade3ef7aca755cd80f2",
+  "formal_tool_sha256": "334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30",
+  "development_tool_sha256": "813c91fa6b09bffa165dd7e74a47faccf4d8fa417466cfb5fe6ed29f89a74414",
+  "design_sha256": "eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be",
+  "golden_sha256": "3ea33f704b33d36ea0370e67a277cb25039870bd4440d72a10dd5c52f5790971",
+  "draft_diff": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/draft.diff",
+  "draft_diff_sha256": "b2a2ae41f7a2a67a395d635d2136d41aa7450004680a4589944ff566749f057e",
+  "LLVM_commit_created": false,
+  "GBS_run": false,
+  "lit": {
+    "new_helper_failed": 1,
+    "full_suite": "not run after stop"
+  },
+  "C1": "not run after stop",
+  "full_export_replay": "not run after stop",
+  "source_tree_status": "",
+  "LLVM_worktree_status": " M llvm/docs/CommandGuide/llvm-profgen.rst\n M llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py\n M llvm/tools/llvm-profgen/IPBoundary.cpp\n M llvm/tools/llvm-profgen/IPBoundary.h\n M llvm/tools/llvm-profgen/IPQualityReport.cpp\n M llvm/tools/llvm-profgen/ProfileGenerator.cpp\n M llvm/tools/llvm-profgen/ProfileGenerator.h\n M llvm/tools/llvm-profgen/ProfiledBinary.cpp\n M llvm/tools/llvm-profgen/ProfiledBinary.h\n M packaging/llvm.spec\n?? debugfiles.list\n?? debuglinks.list\n?? debugsourcefiles.list\n?? debugsources.list\n?? elfbins.list\n?? llvm-debuginfo.manifest\n?? llvm-debugsource.manifest\n?? llvm.manifest\n?? llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/\n?? llvm/test/tools/llvm-profgen/ip-thumb-dwarf-address.test\n?? mlgo_verify_assets/\n",
+  "spec_diff": "diff --git a/packaging/llvm.spec b/packaging/llvm.spec\nindex c901dc5a2d5d..502fa7b52644 100644\n--- a/packaging/llvm.spec\n+++ b/packaging/llvm.spec\n@@ -243,7 +243,7 @@ cmake \\\n     -DLLVM_BUILD_EXAMPLES=OFF \\\n     -DLLVM_INCLUDE_EXAMPLES=OFF \\\n     -DLLVM_BUILD_TESTS=OFF \\\n-    -DLLVM_INCLUDE_TESTS=OFF \\\n+    -DLLVM_INCLUDE_TESTS=ON \\\n     -DLLVM_ENABLE_DOXYGEN=OFF \\\n     -DLLVM_BUILD_DOCS=OFF \\\n     -DLLVM_INCLUDE_DOCS=OFF \\\n@@ -377,6 +377,10 @@ rm -rf %{buildroot}%{_libdir}/debug/*\n rm -rf %{buildroot}/usr/lib/libear/*\n rm -rf %{buildroot}/usr/lib/libscanbuild/*\n \n+%check\n+build/bin/llvm-lit -sv -j1 --xunit-xml-output=build/profgen-lit.xml build/test/tools/llvm-profgen > build/profgen-lit.log 2>&1 || true\n+cat build/profgen-lit.log\n+\n %post -n clang -p /sbin/ldconfig\n %postun -n clang -p /sbin/ldconfig\n \n"
+}
