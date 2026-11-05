@@ -105,3 +105,10 @@ IP ELF32 little-endian EM_ARM函数加载时，仅遇到奇数low_pc才懒加载
 - 正式新工具SHA-256：`41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413`。导出[0008补丁](../../../patches/profgen/0008-llvm-profgen-Normalize-GNU-AS-Thumb-DWARF-addresses-in-IP-mode.patch)，`git apply --reverse --check`通过；未推LLVM/Gerrit。
 
 补丁8主机实现阶段闭合。全部正式S重转换、真实avg独立核对和板上恢复另记报告12，不以本节开发冒烟代替其结果。边界例外：无新增。
+
+
+## 7. 正式真实数据应用结果（2026-11-06）
+
+[报告12第13节](12_board_round1.md)已完成当前全部54份正式S重转换：target5,911,900/usable4,390,651，全部verified；FFmpeg Thumb/A32各33规范化区间，spike各0，33次别名查询全部通过一致性检查。P7对照24份profile变化，仅__udivsi3、__divsi3、__aeabi_idivmod；15份分类变化、合计28样本移入usable，完整逐函数差异见[证据](evidence/12/43_profile_function_changes.json)。真实avg原3热点715键独立核对通过。工具SHA及本地LLVM提交不变。
+
+板上剩余采集因第二次远端清单缺真实退出码停止，不是llvm-profgen失败：35/70组完成，未核验完的RUN保留，root/governor已恢复；不把未完成的训练/LOST/集成算作补丁8实证。别名查询在这些真实libavcodec上未出现一致性失败。冻结规则修正仍应登记设计v0.8并列入下一轮外部评审。

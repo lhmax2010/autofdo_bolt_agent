@@ -418,3 +418,98 @@ HUP/TERM/早退收尾修复：只有finish_run完成且run_complete=1才能写OK
 ### 待设计v0.8登记（本次执行流程补充）
 
 同指令别名与一致性失败契约见报告13；真实avg独立验收已通过。断线RUN收尾必须以真实退出码和全量核验为准；SHA子命令失败须透传，任何提前退出不得写OK。分段只用于空间/连接稳定性，不改变预注册预算、ε、轮数或异常判据。
+
+
+## 13. 补丁8正式工具恢复采集；第二次远端清单退出码缺失后停止（2026-11-06）
+
+本节覆盖补丁8通过后的实际恢复阶段，保留上述历史停止记录。LLVM工具仍为补丁8 `cd5168c48b5422a50829259fd43e84cc3edd6694`，SHA-256 `41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413`。本节不改LLVM源码、设计v0.7、预注册7d3d9d9或修订1；未推LLVM/Gerrit。本轮板上工作**已停止并恢复权限/频率**，不是仍在后台运行。
+
+### 13.1 实际执行与完整性门禁
+
+开始2026-11-05T23:48:02.716357+08:00，结束2026-11-06T01:34:01.039490+08:00，6358.323秒（105.97分钟），`ALL-END FAILED`。此前处理旧中断RUN的40.406秒另见第12节，不混入矩阵时间。旧8组、9份排除原件及pilot2238原样保留；本次新增27个完整逻辑组、46个物理RUN、4,652,796个目标样本。合计35/70组、54份完整S导出；三档预算是目标样本门槛，逐组实际数量见证据，未宣称精确等于20k/100k/400k。高档采用短RUN分段累计，同一逻辑组的所有分段一起作为一个独立重复，不把分段充当独立次数。
+
+恢复前确认唯一RPi4、armv7l、6.12.80-arm-rpi4-v7l，uname-v仍为`#1 SMP Wed Nov  4 17:05:36 UTC 2026`。非root下25项系统命令预检通过，root下重核已部署目标/工具/视频SHA；perf版本成功后才设置performance并采集。Tears of Steel沿用先前已推送片段，恢复时重新SHA核验，并未换素材。每RUN包含内核指纹、CPU策略边界前后值、每秒环境、真实退出码、完整perf.data/script/buildid-list/evlist/stderr；完整导出不截断。spike只支持rounds/seed，未提供独立热点分布模式，因此不改源码、不构造区分度负对照。[命令及root顺序](evidence/12/46_board_operations.jsonl)、[逐RUN收据、环境与资源](evidence/12/48_runs_receipts_resources.json)、[执行脚本](evidence/12/47_matrix_worker.py)。
+
+每次要求可用空间≥2×依据已观测体积估计的产物+200MB；单次FFmpeg至多3次完整解码、spike分段以约150k样本上限估算，最后以实际目标计数累加。本次46份完整RUN共819,178,797字节，均完成拉回、全量本地SHA、第二次远端SHA复查后删除确切目录。第一次失败注入与14项流程回归仍见第12节，未取消门禁。主机每600秒free/uptime，板上同步free/uptime/df：主机available最低19293MiB、load1最高1.22；板上available最低1292MiB、load1最高1.48；本次完整RUN最高61.348°C、最大换出增量0。[资源原文](evidence/12/45_resources.jsonl)
+
+### 13.2 停止原因及未删除RUN
+
+停止位置：`spike-a32-S-sample-fixed-bbb-100000-r3-s1`，板上目录`/opt/afdo_agent/work/eval-20261106T023250-25276`。该采集本身RECORD_EXIT=0、ALL-END OK；SDB workload传输退出0。但**拉回后的第二次远端清单复查没有返回`__RC=<真实退出码>`**，`SDB.shell`据此抛错，完整流程未通过。不是已证明的哈希不一致，也没有证据确认发生了SDB断连；不得把缺失退出码当成0。
+
+主机只读复核：首次清单99文件，本机99文件全部SHA相同；第二次stdout也含相同99个SHA条目（共100行含末尾空行），但缺少退出码标记。主机副本共15,931,283字节，位于`temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-100000-r3-s1/`；没有完成收据，板上目录**未删除**，该槽位**未计入正式矩阵**。没有重读远端清单、没有重试采集、没有旁路清理。即时进度曾误称“尚未拉回”，随后根据本机落盘证据更正为此处的第二次复查失败。[原始stdout](evidence/12/44_failed_manifest_stdout.json)、[原始采集命令/退出码](evidence/12/44_pending_command.json)、[只读分析](evidence/12/44_transfer_stop.json)、[真实失败状态](evidence/12/45_matrix.status.txt)。
+
+根因目前未知：现有SDB包装器在该分支只把stdout纳入异常，未保存这次调用的stderr，不能据此断言是权限、设备掉线或SDB输出截断。候选后续处理：完整保存该层command/transport_rc/stdout/stderr与退出码包络，再经重新身份断言和两段预检读取保留RUN清单，严格完成全流程才决定删除/重采。不得省略退出码校验或仅凭这99条哈希删除。当前停下等待指示，未自行修复包装器或恢复板上操作。
+
+旧的`eval-20261105T232305-7773`不同于本次保留目录：它已在第12节按root下599文件全量核验完成恢复和删除，并被标为中断排除；对应的Thumb FFmpeg第一轮高档已重新采到436,016目标样本。
+
+### 13.3 采集矩阵与资格（剔除前/后并列）
+
+以下均为已完成逻辑组，要求每行最终5组，目前仍不足；“干净”仅依修订1的环境判据，不代表配置效果。原7份缺精确cycles/task-clock，仍unknown；第8份A32高档按修订为clean。当前35组：13 clean、12 abnormal、10 unknown；完整集目标5,911,900，干净子集目标1,991,272。没有做配置间质量或性能比较，未放宽任何阈值。
+
+|配置 / 事件模式 / 输入 / 预算|完成组/5|目标样本（完整集）|usable|clean / abnormal / unknown|干净子集目标样本|
+|---|---:|---:|---:|---:|---:|
+|ffmpeg-a32-S/sample-fixed/bbb/100000|2/5|220,591|134,009|0 / 2 / 0|0|
+|ffmpeg-thumb-S/sample-fixed/bbb/100000|2/5|216,903|130,687|0 / 1 / 1|0|
+|ffmpeg-thumb-S/sample-fixed/bbb/20000|3/5|108,994|64,957|0 / 2 / 1|0|
+|ffmpeg-thumb-S/sample-fixed/bbb/400000|3/5|1,306,838|783,523|0 / 3 / 0|0|
+|ffmpeg-thumb-S/sample-fixed/tos/100000|2/5|243,729|140,645|0 / 2 / 0|0|
+|ffmpeg-thumb-S/sample-freq/bbb/100000|2/5|216,808|129,854|0 / 2 / 0|0|
+|spike-a32-S/sample-fixed/bbb/100000|2/5|214,160|213,601|1 / 0 / 1|107,593|
+|spike-a32-S/sample-fixed/bbb/20000|3/5|64,211|64,043|2 / 0 / 1|42,864|
+|spike-a32-S/sample-fixed/bbb/400000|3/5|1,244,259|1,241,072|2 / 0 / 1|838,921|
+|spike-a32-S/sample-freq/bbb/100000|2/5|225,280|224,770|2 / 0 / 0|225,280|
+|spike-thumb-S/sample-fixed/bbb/100000|3/5|320,869|218,658|2 / 0 / 1|213,994|
+|spike-thumb-S/sample-fixed/bbb/20000|3/5|64,503|44,257|2 / 0 / 1|42,942|
+|spike-thumb-S/sample-fixed/bbb/400000|3/5|1,238,707|846,447|1 / 0 / 2|406,003|
+|spike-thumb-S/sample-freq/bbb/100000|2/5|226,048|154,128|1 / 0 / 1|113,675|
+
+所有新FFmpeg完整RUN的有效频率低于固定1.5GHz的97%门槛（1.455GHz），即使瞬时频率1.5GHz、温度低于75°C、换出0，也按既定判据列abnormal，不改判干净。3个新物理RUN的逐秒传感记录存在不完整观测，按unknown保留。组内任一异常则组异常，否则任一unknown则组unknown。物理RUN分类为20 clean/23 abnormal/3 unknown，与逻辑组数量不同。原始SHA、环境、判定理由及分段映射见[完整矩阵](evidence/12/40_matrix_summary.json)、[逐RUN收据](evidence/12/48_runs_receipts_resources.json)。
+
+### 13.4 补丁8真实转换、别名及归类变化
+
+54/54正式物理S导出转换成功，全部verified、`coverage.name_merged_functions=0`；target=5,911,900、usable=4,390,651。各层排除、outside_dwarf_func子类、ISA计数、每RUN质量报告位置与SHA均在[矩阵证据](evidence/12/40_matrix_summary.json)。频率模式额外生成period权重profile，显式P_ref=1000003，与sample权重各自保留，未进行配置间评估。
+
+spike Thumb/A32均0规范化区间；FFmpeg Thumb与A32运行文件均有33个规范化DWARF区间（包括libgcc的Thumb子程序，即A32业务构建也不意味着所有依赖都是A32）。完整33项原始/规范化范围按variant登记于证据。实际sum转换共33次别名查询，33次叶子文件/行/discriminator一致，无一致性失败；这些是不同转换中的查询次数，不是33个唯一地址。
+
+|目标|A → A+1|查询次数|修正身份|
+|---|---|---:|---|
+|FFmpeg Thumb|0x341f28 → 0x341f29|14|原无函数身份 → __udivsi3|
+|FFmpeg Thumb|0x342434 → 0x342435|16|原__divsi3 → __aeabi_idivmod|
+|FFmpeg A32|0x4509f0 → 0x4509f1|1|原无函数身份 → __udivsi3|
+|FFmpeg A32|0x450efc → 0x450efd|2|原__divsi3 → __aeabi_idivmod|
+
+全部54份另用存档补丁7工具作同输入对照：24份profile变化；15份分类变化，合计28样本从in_cu_no_subprogram/outside_dwarf_func移入usable；其余为函数归属改变而分类总量不变。将两边extbinary经GBS llvm-profdata规范化为text后逐函数比较，变化**仅**涉及__udivsi3（15份）、__divsi3与__aeabi_idivmod（各18份），与首指令/相邻函数修正一致，未发现其他函数变化。[逐份分类与命令](evidence/12/42_patch7_formal_comparison.json)、[全部函数差异](evidence/12/43_profile_function_changes.json)。这与正式验收的14份历史整份导出profile逐字节不变是不同数据集，不混为一谈。
+
+### 13.5 avg、LOST、非叶子line0与未执行项
+
+真实avg挂账已按第12节关闭：同一中档BBB Thumb采集、原3热点、GNU独立11,525指令/715键，sum/max/avg逐键零差异；GNU的52个bad-file-number告警定位于DWARF5汇编CU，不影响3热点所在DWARF4 C CU。没有为本次停止重做或修改规则。
+
+当前54份S导出未出现LOST记录。不能把无LOST文本中的L当成已证明0；工具报告保持unknown。压力采集未启动，06完整高LOST挂账**未关闭**。
+
+非叶子line0统计已覆盖当前全部54份S（不是完整计划70组）：1,371样本，占target的0.0231905%、占usable的0.0312254%。独立逐地址帧明细与工具诊断计数逐RUN一致；此处辅助符号化只用于定位统计，不冒充avg的GNU独立核对。
+
+|顶层函数|涉及样本数|
+|---|---:|
+|ff_h264_decode_mb_cabac|1282|
+|ff_h264_filter_mb|82|
+|ff_h264_queue_decode_slice|4|
+|ff_h264_decode_ref_pic_list_reordering|2|
+|ff_h264_decode_ref_pic_marking|1|
+
+仅5项，未凑足20。涉及的具体零行帧及原地址在[全量明细](evidence/12/41_nonleaf_final.json)，处理方式仍交PM裁决。本轮未改非叶子line0规则。
+
+R/C/G5训练0/14，暂无本轮stage profdata可合并；未把setup原件算作训练。fork、exec、deleted、模块、系统级-1/-1集成0/5，未把07/09旧内核样例当作本轮验收。热点分布负对照因spike没有独立运行模式未执行。集成/LOST脚本、期望、按实测体积选择压力规模的控制器草稿保留`temp/board-round1-patch8/{extras.sh,extras_worker.py,extras_convert.py,integration-expectations.json}`，未部署/执行；附加依赖草稿为`common-extras-draft.sh`，不能当作已通过的预检。项目已跟踪board脚本保持本轮开始版本；未提交这些未执行草稿。
+
+### 13.6 恢复、待设计v0.8登记与下一步输入清单
+
+finally回读policy0=schedutil，sdb root off后uid5001；RPM1232→1232。结束/opt used304988KiB、available1000628KiB（含未删除失败RUN）；开始used293588KiB、available1012028KiB。后续仅一次非root只读身份/进程核对，同一型号/架构/内核、无/opt/afdo_agent任务进程。三个主机后台worker已退出，后续串行器因matrix FAILED未启动extras。[恢复](evidence/12/45_governor_restore.json)、[最终df/RPM](evidence/12/45_final_board.txt)、[进程原文](evidence/12/45_processes_after_stop.txt)。无本轮新增已知工作目录边界例外；root/governor为已授权状态改动且已恢复。
+
+**待设计v0.8登记（执行流程）**：沿用两段预检与性能状态顺序；任何传输步骤缺真实退出码即停，即使当前可见SHA全匹配也不能跳过完整门禁。没有把此门禁失败解释为llvm-profgen缺陷或放宽身份/地址规则。同指令别名规则及本轮真实修正事实见报告13，需下一轮外部评审。
+
+**下一步质量分析输入清单**：
+
+- 完整逻辑组/分段/资格映射：证据40；新46物理RUN与原8份分开存放，receipt与关键原件SHA见证据48；新原件在`temp/board-round1-patch8/runs/`，原8份位置沿第12节。
+- 正式补丁8profile/quality/完整诊断及频率period变体：`temp/board-round1-patch8/converted/<RUN>/`；每份身份、target/usable、ISA与quality SHA见证据40。P7对照与逐函数变化见证据42/43，不作为配置间性能比较。
+- 每秒原环境、频率前后界、cycles/task-clock、校验和、核验后的完整perf.data/script/buildid-list保留在各RUN。旧7份修订资格仍unknown；不得补造频率记录。
+- 尚缺35个正式逻辑组、14训练、LOST压力、5集成；保留的新失败RUN先按明确授权完成退出码/完整性核验再处置。续跑必须使用新阶段目录并显式排除这35组，**不能原样重跑当前worker覆盖清单或重复槽位**。
+- 独立avg结果与GNU CU诊断见第12节；非叶子line0规则待PM。本轮不进行5.8质量比较或消费构建。因停止条件生效，等待后续指示。

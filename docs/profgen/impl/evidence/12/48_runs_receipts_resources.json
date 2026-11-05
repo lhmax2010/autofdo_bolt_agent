@@ -1,0 +1,4113 @@
+{
+  "matrix_begin": "BEGIN 2026-11-05T23:48:02.716357+08:00",
+  "matrix_end": "ALL-END 2026-11-06T01:34:01.039490+08:00 FAILED elapsed=6358.323",
+  "new_physical_runs": 46,
+  "new_target_samples": 4652796,
+  "new_bytes": 819178797,
+  "run_qualification": {
+    "abnormal": 23,
+    "unknown": 3,
+    "clean": 20
+  },
+  "resources": {
+    "host": {
+      "available_memory_min_MiB": 19293,
+      "load1_max": 1.22
+    },
+    "board": {
+      "available_memory_min_MiB": 1292,
+      "load1_max": 1.48
+    }
+  },
+  "maximum_temperature_mC": 61348,
+  "max_swapout_bytes": 0,
+  "old7": "unknown: exact cycles/task-clock absent; no fabrication",
+  "old8th": "A32 spike high: clean; 1.497442 GHz",
+  "training_complete": 0,
+  "training_required": 14,
+  "lost_pressure_complete": 0,
+  "integration_complete": 0,
+  "integration_required": 5,
+  "extra_phase_status": "ALL-END 2026-11-06T01:34:05.489722+08:00 FAILED AssertionError('Matrix failed; no further board actions')\n",
+  "host_conversion_status": "ALL-END 2026-11-06T01:34:17.766698+08:00 OK None\n",
+  "no_new_llvm_source_changes": true,
+  "receipts": [
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T004833-25663",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s1",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s1.json",
+      "receipt_sha256": "4b1a7e677caf2e864ad87b273f346a1c594dfd81c6abb4e3cdd5272aefd48a15",
+      "initial_manifest_sha256": "bdb2659f709a842fce6f912c417ceed68d87bdd9d4e2b7aceec45de547092708",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "568a73b271eb4b4d832b97f9301658ff2b2f31c5dea98072447f990ac60222a1",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "1aa5354c051236b1e42bf8d41277726d9d608a65d117e710bd3bd3936aede452",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "5f1a69c82064a47ed4ea6d708e84cad299a6eeaa1ef38d430ebf921a7ae44a30",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "52734392e0ac130e1da784cb421784455836531318dc4b82538db8c7ebf59da1",
+        "decoded.sha256": "ac69ee0d0e11ac447e71b938c18e268d98b0ae2a6617cffec9ecef2874e0b6a2",
+        "target.maps.verified": "e30642eaf75b443fd82e46a10ed955b8724acaa344dad545f983c8c5a2804c9b",
+        "record.stderr": "b0fa08fb3da419d4e94e9406d04ec6ae05b12b14a4b7e5d9dc612a5318ce9a31",
+        "target.maps": "d97eacc2375510f0bc5fe7ea8b344134529ecb690faa7d409f153264f3c6157d",
+        "buildid-list.txt": "e5d7cc3b4b1880524b681653fde78e949500f76eaf1f49f4662dd9d57e5b1d0c",
+        "environment.before": "51330bbe4476414f3fa1f8af034fc714a2eb526192858d34532679ca0729e003",
+        "perfscript.txt": "1fc08f7ae82ea7ecb556e834ca554678b7fb9f1d779d15e9f81ea9b2717b72f9"
+      },
+      "seconds": 202.6802920409973,
+      "bytes": 22023200,
+      "target_samples": 109260,
+      "sample_lines": 133642,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142861640526",
+            "",
+            "cycles",
+            "99788678697",
+            "100.00",
+            "1.432",
+            "GHz"
+          ],
+          "instructions": [
+            "135088756878",
+            "",
+            "instructions",
+            "99788678697",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99788.68",
+            "msec",
+            "task-clock",
+            "99788678697",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431641750.607383522860508827",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T005156-31847",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s2",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s2.json",
+      "receipt_sha256": "3ac5c2b38258c4c29907f17c8a57556a8e2fb29be73177d3811dc106235d0010",
+      "initial_manifest_sha256": "f308e0c3f94d751cf0aa9c2675737fad26de229c7c7fa04a931ef560884df4f2",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "34310b1929ebb1edf1d9210cf8e1c6c10716d1b99cbb84c0474f67137cd6130a",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "20f36a0a86c979727b0035d8f20bf43aef214ef78fc809a237bb2b070483bf4a",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "836c0c9dc1015d2c9e3ff0fa3fd36da704fa652cfad64419fa265ea13074672a",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "eda71bdc122f463fec214771a7cf15e7a4b496e367cffd31cdd5ae444664836c",
+        "decoded.sha256": "e2796bf6c50b1a0b475b587eaeb92b044cf6dbb60bc85f7a7083befd5e75dcfc",
+        "target.maps.verified": "ff3580b09e2374caec87aae00b39be492ba2ac7548736e524983198c8ef24894",
+        "record.stderr": "24cf7766dd110f1094c2daf53e7ef36e84571e78db4c56a18d5ab9fc48bcfb49",
+        "target.maps": "a00003abf2ce96e6c6ab824f4c1e96270a10bbb5b4083b5020cf2cd47f0db113",
+        "buildid-list.txt": "f23f64bdfd635eb4c91c45db0c019fcbb10f09d263bfa5adff238dc18022003c",
+        "environment.before": "e5b5da7b01440fbe481295bfd65f2facec2b7979dfa7d5b87bf623df02242d49",
+        "perfscript.txt": "cbf7890517a094f7b82ad1989996e55f8647389177c4e2d7e7e8553097d0dc15"
+      },
+      "seconds": 202.1239161150006,
+      "bytes": 22023198,
+      "target_samples": 108997,
+      "sample_lines": 133719,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142848020295",
+            "",
+            "cycles",
+            "99830687305",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135154354166",
+            "",
+            "instructions",
+            "99830687305",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99830.69",
+            "msec",
+            "task-clock",
+            "99830687305",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430902864.590037392308918229",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s3",
+      "remote": "/opt/afdo_agent/work/eval-20261106T005518-5725",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s3",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s3.json",
+      "receipt_sha256": "124f368ce88f7644e17db89a95076c018ea9a01f12b18a5531646a68d5768cbe",
+      "initial_manifest_sha256": "8b37f8a7d86d9134236febf86a44db467f6aa4ffc894a7a27e6dd4a166c1d240",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "99fd0051e4c8ddc61d913ac4cf3ccbc561fd98be302c79d2a6b1254954e1507d",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "08739f7faf2206dc2bf787f6ca61b75ad3adc443a76602cd1ea86ca29647790f",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "f1f8b5c0bef41947b685d58ecf8f1c6c109a4340d97c2009cca41d0fc18956be",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "18f2c5d212e332869a1639995b0897d85bd262bc8ce558080b541968f8c9db78",
+        "decoded.sha256": "d371d7acfd63e6e5f17aaf5ade5086d02adcb22fd9f9719ef960f4952c9de787",
+        "target.maps.verified": "8ebe86c05ab28d82c7176f96290398bcfe3432f37ad70f20951569f376a1683a",
+        "record.stderr": "faac4abcd7e7162d00fa9a4b6ab0873a3e6e37282290deacb902ef8396c4863a",
+        "target.maps": "cbc970674ade520af51c722c777475b76758eaa7ab5780ff2afcab3bfe03bc54",
+        "buildid-list.txt": "aaad06d29617cc0d86d345b3a562c9f5e85944ce4e704f57479037aab7712107",
+        "environment.before": "bbc2a4434f1597cc3ad19d244f11a136fe7f85f61c4f7fce2276574fd34c2cad",
+        "perfscript.txt": "e578100a3f2c623033ee272304231bb7f0049d4058c26d1f849bc69d962eeecd"
+      },
+      "seconds": 200.99400535599852,
+      "bytes": 21909183,
+      "target_samples": 108371,
+      "sample_lines": 133123,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142216392160",
+            "",
+            "cycles",
+            "99384897945",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135143948333",
+            "",
+            "instructions",
+            "99384897945",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99384.90",
+            "msec",
+            "task-clock",
+            "99384897945",
+            "100.00",
+            "0.548",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430965792.187746830755980033",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s4",
+      "remote": "/opt/afdo_agent/work/eval-20261106T005840-11870",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s4",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s4.json",
+      "receipt_sha256": "01d60f0aabd9694a811cbeded077bd8bf5e316096e24a3e22b55f995814ae010",
+      "initial_manifest_sha256": "f54bb9a14f384e0ec870cf6fda7d895411ee61a1e0b117ddcf71436a4b9c3e0f",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "50e56bbed1c42c0b004084a74cce085dd1f1b8f9b9b6c49953550001aa71c948",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "ce077056a2467aad1e71b57c2e9e69e5134f427df1cd251401876af0b51c8d2f",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "723b3390f50b0c5469a8643ba8ef60a98c8ada2683ef03b959704a39cc9ecde6",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "99f81f7b2f7c6bfd5343b71e994fe8e0936877b916024d07dc92dcedccc4cd29",
+        "decoded.sha256": "f99a860604acfd2b6d53dd1304dcac9218dff2618c7f93bb5d927777349dbb84",
+        "target.maps.verified": "cf5db9842a04a185665e593ac8d216df5c4acc5c57683e03b9de46f062ddf9e2",
+        "record.stderr": "c573891c504dc2402aac98ee6ce58baf59f8934df10c5878ae4dc4f6c4b194f6",
+        "target.maps": "a2eda08dad7f4da573553d77822449591eb37c94886ccf7945c563117d7bccac",
+        "buildid-list.txt": "9da7c38b01c198591afd22732d71634abf69959abddb997f38a701d3a2d54026",
+        "environment.before": "18db40acfaf9151822b4efcbc672dba65e6d755c72a98fe2d2952b776187b28d",
+        "perfscript.txt": "d0163157f20e5e26e4f2486d5f453ae924d160fc335ce9d80bf92d30621aca14"
+      },
+      "seconds": 201.83194442799868,
+      "bytes": 22085846,
+      "target_samples": 109388,
+      "sample_lines": 134097,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "143156505074",
+            "",
+            "cycles",
+            "99993668598",
+            "100.00",
+            "1.432",
+            "GHz"
+          ],
+          "instructions": [
+            "135174447899",
+            "",
+            "instructions",
+            "99993668598",
+            "100.00",
+            "0.94",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99993.67",
+            "msec",
+            "task-clock",
+            "99993668598",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431655674.544198647774404120",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-freq-bbb-100000-r1-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T010201-18029",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-freq-bbb-100000-r1-s1",
+      "files_verified": 137,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-freq-bbb-100000-r1-s1.json",
+      "receipt_sha256": "463eb08598fe9ce7a04be89be514b74287da782d1ac8b3f64ff742655901a8cb",
+      "initial_manifest_sha256": "7b792cb8acf81197adc8b34976e4830df709d331a5ef4efe718a7a8d8170ecae",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "263eed032e3fdd14730fef7f7f66384bbca6ec8e0d2180d94076cd15416d7bc5",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "03f875aff26b27de64b941c4358276ff7e0908e26058c831184f535543adc156",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "8b3a4b9bd9844ae12008e74a4d2ec18a09ea264c01d840f0fce0eafcdcf582cc",
+        "workload.stdout": "e81109fcd2b8a9cd2b637aa083d8931f266afe1a9b329adf2e0faa4c0a5d4b1d",
+        "perf.data": "39f3fb7d08127b8ccc83f71fbab85ede678b05d702b7328366cac00071f61c49",
+        "target.maps.verified": "0d2bdcccde6641a4163ecd43be871d94e38f22bbc9d12f579ec3a7d744dd50c0",
+        "record.stderr": "2d605dc07debd10d88b618c788efa45fd6828f387780caabdbdfb830006f68c9",
+        "target.maps": "05fe42bdb86b34a4463b4f898f946b681d251350ff657829f19b4f8bf2bf7e5b",
+        "buildid-list.txt": "ec03e0aab5be73c0df61b6fbe6731376600d06f63375cf753e8b8a1bc66c22c8",
+        "environment.before": "3d86aef6e6b8fc0489d66c5c8e5ffef9ef29fae87e8aacf489f747649a2ae1bc",
+        "perfscript.txt": "a128377b6fc52a82a20548edc55c281e53f12eb38a587714fc38020eacc2d2c0"
+      },
+      "seconds": 128.33434598000167,
+      "bytes": 18117661,
+      "target_samples": 112373,
+      "sample_lines": 112422,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "168342923535",
+            "",
+            "cycles",
+            "112412713114",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "328680024162",
+            "",
+            "instructions",
+            "112412713114",
+            "100.00",
+            "1.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "112412.71",
+            "msec",
+            "task-clock",
+            "112412713114",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497543503.176820485868546359",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [
+          "missing/invalid sensor observation"
+        ],
+        "abnormal_reasons": [],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-freq-bbb-100000-r1-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T010410-22006",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-freq-bbb-100000-r1-s1",
+      "files_verified": 135,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-freq-bbb-100000-r1-s1.json",
+      "receipt_sha256": "3ddc482918d8563de178b0cd3c1423106408ba135ddf19b9f8c493866dbd078c",
+      "initial_manifest_sha256": "8df7b6309679011feefd1a079c9be0e7b7df50954845ad5beb93f64f0632790c",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "6a0e15151bdf6b89b40c872b1e9a6f4e512882dd8cd42bc65786c5e5aa9feec1",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "0575b529c6b2758997961ca9179276646bc72f5dc3251601b819d626e69e193d",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "9b683a9c91201dd6097c47f2d914f4bcee8f966874972be4ab664e2d9c346ffc",
+        "workload.stdout": "596f285623a0c1699989399c8b0584f47fe49f676f05fa2003d60df45c86f967",
+        "perf.data": "f0365e2c4088c52c851500cca9e261bf85bc947ad6d7da2d20a10d51a081715b",
+        "target.maps.verified": "d9e83485f1c553503147ad55d94cc1fc3f3f005bd0809ac7656b2047c13d1383",
+        "record.stderr": "f350f1be7784b736e3b8b281d8ac2af8ba68c35d55418d2120ddbef434fe10e4",
+        "target.maps": "c0c5d752af22e108b016aacbb54f170c478190b8f6adff3cca62ba8526325fe8",
+        "buildid-list.txt": "70a752f1e16ea3054275b0e44fe9afc2b347fbdbaebbdd0dfec6dff05a88eb58",
+        "environment.before": "da16647629e1dc7abd5004189286d7d46339e3a48e6730f723ddd54f009310b1",
+        "perfscript.txt": "5ebb6a00b4b7792af68231d3614741e2752f355cf77756234cf70cd4c389fd62"
+      },
+      "seconds": 125.97408143900248,
+      "bytes": 17649455,
+      "target_samples": 110845,
+      "sample_lines": 110903,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "166058359906",
+            "",
+            "cycles",
+            "110885589668",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "298413054838",
+            "",
+            "instructions",
+            "110885589668",
+            "100.00",
+            "1.80",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "110885.59",
+            "msec",
+            "task-clock",
+            "110885589668",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497564831.516881499210131812",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T010616-25921",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s1",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s1.json",
+      "receipt_sha256": "e4ad69437535347216167dab1d4790b91bcae21571db47d7ace98b4479eb7935",
+      "initial_manifest_sha256": "46e2a80bdab591f108fc76c1fc07d6704e908cf406b23b6967da8af430310d9a",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "5d3de08f1513c01cdd8cdfcf0a6e4d4993d8a6a709eb18f68ba38321bd69dfd6",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "c7d9aff4df869b299a13494be6d02a306b8e46a0fb79be15b3d8a4f6d629cb15",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "c61613d79687c614e7fdbbf30f36451ad3896752d8fbf9d8695efd8abf2bbba1",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "a69c466ba08778416c787de3591c328b115c7aaaf76358ece37411f839671fc0",
+        "decoded.sha256": "4c28cb386ca030869256634cca044cdb1277f74a03f263feb2a41556791c46f0",
+        "target.maps.verified": "716e2fa85aa76e0ac14a3287d9590dc6cd4198931cc2957ba4e372218f9f5be3",
+        "record.stderr": "8bdeba6827033c56afd7162722ff53f760716276cd4cf78283e981e394196bdc",
+        "target.maps": "1f487f53aa3047aa5690a754feb09ace251bb4aba538fdf607e3dc832644f5a8",
+        "buildid-list.txt": "2d09840de68b5e5ea4b382dcb4248ecc3c3fcca912801ecd45b8b2014d64b857",
+        "environment.before": "7276c77e09f96f69accfb1204570650515a5db40e7489df13e3b80539f80fa0d",
+        "perfscript.txt": "b02f50ce162d90b1591451e4bd69a509da508219d86463031e698a48bbcd20b8"
+      },
+      "seconds": 200.34187284200016,
+      "bytes": 17439006,
+      "target_samples": 81116,
+      "sample_lines": 98435,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "141980837738",
+            "",
+            "cycles",
+            "99283976720",
+            "100.00",
+            "1.430",
+            "GHz"
+          ],
+          "instructions": [
+            "135091553798",
+            "",
+            "instructions",
+            "99283976720",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99283.98",
+            "msec",
+            "task-clock",
+            "99283976720",
+            "100.00",
+            "0.548",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430047805.678217170584821438",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T010936-32064",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s2",
+      "files_verified": 91,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s2.json",
+      "receipt_sha256": "6223a090c53214aa2fc04837efb3c7897fc799e5c5b9ff7ce6deb4b62934d243",
+      "initial_manifest_sha256": "62d076176fe17905c71f5316807c24950930c873a8b4f81a5d8a6ed7d833a5ec",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "30c5707ff2f2c01e87c6299300995f69ec430567c1300d157b6bcbf18d2d31dc",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "749c623b4b910e9fd63f2c137a4276b7481cf9bfcc7d356b1172edca0a2e7c62",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "ca9f9882923d833e2e433e1099d63615cf7905d9f339c2f4d2b65a0a9d684644",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "df0893657b5ecdd2714e52d1cccad75af0c5bc41634a1ca959919349051af9f5",
+        "decoded.sha256": "d8b0c2c1fb894a8c7efd0aaa8d44b903de774af22af47da74e0a3db22e0a2550",
+        "target.maps.verified": "7565da6efd185036415b82685bae5ff6257489620bd0f1c8d2d88324a11cd7d0",
+        "record.stderr": "b65d4fecc4d2bb329926f1ba1118c42690c572c588ac1de3bf25331b8d9aa9b3",
+        "target.maps": "f44b0086dce557efe78e0dc05f54618feb5c78e8e131c230609039c3f8a26b99",
+        "buildid-list.txt": "371a14574624260f7d5275909fa0bb922132fde9d7834ff03f672b44ede63850",
+        "environment.before": "3a17f022d3251562d39212a2ddc1db61f77d2a5b073cc2abe3ba9c953e813262",
+        "perfscript.txt": "e01473be0fd92c77b590782b8c083eb86a895f8b52c325ccf450f0115b9cf8c4"
+      },
+      "seconds": 71.18669248399965,
+      "bytes": 6160858,
+      "target_samples": 27333,
+      "sample_lines": 33141,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "47807463070",
+            "",
+            "cycles",
+            "33409523472",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "45031314031",
+            "",
+            "instructions",
+            "33409523472",
+            "100.00",
+            "0.94",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "33409.52",
+            "msec",
+            "task-clock",
+            "33409523472",
+            "100.00",
+            "0.550",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430953305.225576422528668475",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-tos-100000-r1-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T011048-2062",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-tos-100000-r1-s1",
+      "files_verified": 209,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-tos-100000-r1-s1.json",
+      "receipt_sha256": "651069a5b02b3e27d0b3538aa1fed89d0fa81648eb89ee0103c94645ff9f1e2e",
+      "initial_manifest_sha256": "6103b4c628f1b81f7a8b2ffa482405b4253afe1166d1a94ebc505015d5ca2168",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "c94ecad892811b5d68b71a1615664cdf86d765d48415e4e36047d66f8305e411",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "87e979f9a1011789743bfd55e1e6fa3e834ffc3e38b3751390e7154ee090e3ab",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "21f702d56c2941fb9b7a960fcf519842caba81ba35a01f5964952b143a214902",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "756ef851f45e0f1eaf74060381dfd4ce8fd7fb2e271f19ad57c4d540ff1b9d0e",
+        "decoded.sha256": "ddfc7941d83731443a6c0dcc3a928c4ff545d4a4abc277c8fd0982eae3df9820",
+        "target.maps.verified": "5b4763963222d9482cdca9a34762788192c487d79e8ee47142d0cfa182c3fd03",
+        "record.stderr": "f5b901e9395d9e7e3b3563d499650d189712fe56ba67500ddd1a69e13ec38f87",
+        "target.maps": "0ef62facf78c34e113032ba4ac7073efe6e5eee8e803ca06e6aa7e0780b217d3",
+        "buildid-list.txt": "f79ebf1a612866647bec89d0cbcd3fcf6c091f78cf7dbd51aae63c8f2d2ca2b5",
+        "environment.before": "113bb57e9920844bc7901892b5828a3d0cdf9644ea7e2fb8257cb5ddd8fc92c8",
+        "perfscript.txt": "c2b0e22e08b6470db74c362a740e59d122a13eb11597b3c0d9c9d25105473a6b"
+      },
+      "seconds": 211.98932043600507,
+      "bytes": 24204757,
+      "target_samples": 121641,
+      "sample_lines": 146959,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "155992688904",
+            "",
+            "cycles",
+            "108604735062",
+            "100.00",
+            "1.436",
+            "GHz"
+          ],
+          "instructions": [
+            "149442293210",
+            "",
+            "instructions",
+            "108604735062",
+            "100.00",
+            "0.96",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "108604.74",
+            "msec",
+            "task-clock",
+            "108604735062",
+            "100.00",
+            "0.569",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1436334076.247500799688853359",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-a32-S-sample-fixed-bbb-100000-r1-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T011420-8514",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-a32-S-sample-fixed-bbb-100000-r1-s1",
+      "files_verified": 202,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-a32-S-sample-fixed-bbb-100000-r1-s1.json",
+      "receipt_sha256": "8666aa6f5053136523a72dd6f501147619324b407ca617665cf88737d58fefd6",
+      "initial_manifest_sha256": "d34c700a357ba94280dd345635904e11ebef7f5865bff1e46e95fae40d3f23ff",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "ed9feb92be29f5c11170a7af4604f1881e4a74ebdf13a4dc076fb2c07ec88f9c",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "a9b154ab68e53bec4c245d79869caef88c480b88b68a32e9ff1883a801c6d48a",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "7ac0983ee35c5855d5d75ce701ee2bd1f764f615e73393ccbeb0a2550117342a",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "ca0e7a3d209b4743481c24a414e8eb90b22de804021c7b337cdb918d7debd1ff",
+        "decoded.sha256": "bfd528e5200c09a75f3e4d75f63d8bb85902d0af19a4325fa7f8b1154ad2a547",
+        "target.maps.verified": "5959dca22496ed2e33b49a5d493ca2ff64aff6b24cbdbeddbdebc403451fb549",
+        "record.stderr": "d1451f5d2e4d69d7bdd48f2197d4f3344041ca48ecb3687cbf2011fd89479d6f",
+        "target.maps": "a4bff4ea48d36556a109fe7303a9ad0eb253aae3c7262b7b4392630891f87cf6",
+        "buildid-list.txt": "0c6a6b822c72220aea694b0f39dc6d5bef9078b261ddf140f8657347594837e8",
+        "environment.before": "875e34f0d3b793f291d561e97b25510abcba40e721b9f70d61d48acc4ab48e7b",
+        "perfscript.txt": "fb567cf23bbaaed9da70e3fbbe8c3f80becb682efc41730998bcd0fbb47c9d56"
+      },
+      "seconds": 203.34639640300156,
+      "bytes": 22113349,
+      "target_samples": 110597,
+      "sample_lines": 135259,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "144422058500",
+            "",
+            "cycles",
+            "100892170059",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "133643950274",
+            "",
+            "instructions",
+            "100892170059",
+            "100.00",
+            "0.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "100892.17",
+            "msec",
+            "task-clock",
+            "100892170059",
+            "100.00",
+            "0.552",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431449620.917064228076371040",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 61348,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T011743-14721",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-100000-r2-s1",
+      "files_verified": 100,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-100000-r2-s1.json",
+      "receipt_sha256": "2093295b8723f84c3e7060fad751d0b517b089f80f813c25589bb1ad6d512c9b",
+      "initial_manifest_sha256": "24afa2f04c56242a6c61f9b303229055b2002aed6fe730400d29b83601d448f3",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "8b52968582b495dbfd49f9a97f32166812e6971a6f428785da316a92b73308c7",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "a89559f6658d13cce6e762e03427edecc144c15cc2112b1f3b2f1f668816ff15",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "6b4dac69e9b03d46c8fedf4be0437f667cec96947957e60f782468c3b84ba2c7",
+        "workload.stdout": "660e049ff6518952d6a17902ef20bb0afddf024fc6cdc5b97a240425424ab0bc",
+        "perf.data": "ab1a415a17914a9292231a71e72dd9da2f73c9f5589aa997d0c24978e3c68bbd",
+        "target.maps.verified": "96d0cbecfe8c2d39f61b9c6f238cdb9704aede5c4284f77027c801016776f93b",
+        "record.stderr": "62ea33c6ba8d5f7996429214ce8e73560301a7f658a3816fd583380c015fa2d9",
+        "target.maps": "6ee5eb5b80b8c169abc70d2781a72d1a6704715d4ecccb8de903e29079409546",
+        "buildid-list.txt": "6a5f7d29b512f85bee9d4739b027821d78c61e0001fb94b41c09804d34bac7d2",
+        "environment.before": "9f53319598b2f7f7139fea966d38dff104c33b4d1ef0d28fc2b5bd17d749e2fb",
+        "perfscript.txt": "a06a0cc34cf1d3b1c31c3d887acadaf5614e6708c0597014a82754730b7c49d0"
+      },
+      "seconds": 85.69107550699846,
+      "bytes": 16353845,
+      "target_samples": 107999,
+      "sample_lines": 108118,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "108045187361",
+            "",
+            "cycles",
+            "72144758093",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "208561428663",
+            "",
+            "instructions",
+            "72144758093",
+            "100.00",
+            "1.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "72144.76",
+            "msec",
+            "task-clock",
+            "72144758093",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497616560.939422350285731077",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 58913,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T011909-17440",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-100000-r2-s1",
+      "files_verified": 99,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-100000-r2-s1.json",
+      "receipt_sha256": "a827bfc41ca41de348aab430cced627f62562aee42783e9a1a18320c8d076b3f",
+      "initial_manifest_sha256": "4880734f9e7647d639b98ea3e54a3f0e1c9ce83c5ba5d6b740a33126da0fa1c3",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "2c012b25668e6d4b8f615b8a43b9ac4360ab1cafce35498776475e34c0b08c8e",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "8228ad43e65da98db39b1d836fe01fa631b423f55277d2698f3f1f423324ba4a",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "ebee130bfc396c85e86c9cb67844ecaec10d6cdfa6c195f7ffd08bad9838699b",
+        "workload.stdout": "f00107a3068afd860db329a13daa81f37eb6c85e4ff7d85256c10a16145bdf04",
+        "perf.data": "351652caf43a34b6af65aad005c2f50c4f5c4ccdca167955f63724a6a446ec32",
+        "target.maps.verified": "013328cf33e2cdb33b4ca4e92406717504e3db8b4ee2d2bfd7c75d2198169e54",
+        "record.stderr": "1325d7effb2bc21a4b3016b19f7ffa075b66e0b8471dceca1864dfa023540014",
+        "target.maps": "5e08bafa3a1a50a76db8f6d92c5a78b6ac42549414f1c7c20b2c0494a9cab98a",
+        "buildid-list.txt": "70a752f1e16ea3054275b0e44fe9afc2b347fbdbaebbdd0dfec6dff05a88eb58",
+        "environment.before": "f841785d3f068aeaeed62aa72bce43ab1198be2addacbd3b66d2766570915b2b",
+        "perfscript.txt": "b6df33df7007d25a977c5eb3e5fa18d8a0a9adf9161892109f567833a02a2f78"
+      },
+      "seconds": 84.62989530600316,
+      "bytes": 16073472,
+      "target_samples": 107593,
+      "sample_lines": 107741,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "107673121799",
+            "",
+            "cycles",
+            "71903808392",
+            "100.00",
+            "1.497",
+            "GHz"
+          ],
+          "instructions": [
+            "191752275158",
+            "",
+            "instructions",
+            "71903808392",
+            "100.00",
+            "1.78",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "71903.81",
+            "msec",
+            "task-clock",
+            "71903808392",
+            "100.00",
+            "0.999",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497460590.739211176709551274",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59887,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T012034-20107",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-100000-r2-s1",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-100000-r2-s1.json",
+      "receipt_sha256": "53a7949059e11abacbed94a3152d9e2c97a7d5ec355dcce39a66eb379d9034a5",
+      "initial_manifest_sha256": "b7d9d398b7cb0b4455785cdd7daf372d8d80b4151399fa37632d1253ea9b656b",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "d02bdfc54745ba9bf2f6c2a896ed2f2aef19fbcb9d2289fb628bb2b2c9145142",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "1d518f39cb9d083db6141614fa76b433625e86e984dd0575e33abae4b1014517",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "3bda4ea72f679dfd19ea0e1a140ea940d1d5f86976c67a0cbf914a5a1339dd2b",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "60ee3179a5c3fbe4b1d159182c66fb02ab62c025d30ea457aeefc2ba7b9373de",
+        "decoded.sha256": "2c7f705fb9130a5cef7e75f6816c17047779c019a9128efbad5b13c99b1855b0",
+        "target.maps.verified": "4db2ead469ab525f19bc8f3fa1dd683095a2012df534be8cb2dc1eb8b02c5743",
+        "record.stderr": "633e398531a4f572ba5de7193b48dd24d0914a11520fa9cf8bded95bd6b558e4",
+        "target.maps": "c22733a14309aeaef06a6b6c073a35c608eb7c32daffc316701dd724676c4d4d",
+        "buildid-list.txt": "f79ebf1a612866647bec89d0cbcd3fcf6c091f78cf7dbd51aae63c8f2d2ca2b5",
+        "environment.before": "663d992394f324daa1e4c70eb725f4d6fc699e297e2212296fbddae5e759eb79",
+        "perfscript.txt": "44d135e787acced2f9b587530c7796acef51015578d255cf84e52481619cbfc4"
+      },
+      "seconds": 202.09678288100258,
+      "bytes": 21987956,
+      "target_samples": 108758,
+      "sample_lines": 133520,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142620090716",
+            "",
+            "cycles",
+            "99686753027",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135170563782",
+            "",
+            "instructions",
+            "99686753027",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99686.75",
+            "msec",
+            "task-clock",
+            "99686753027",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430682520.154383606647824310",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-400000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T012356-26281",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r2-s1",
+      "files_verified": 133,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-400000-r2-s1.json",
+      "receipt_sha256": "07ee8ddd3435e7aff7053633dbb7f44e33292e76d865b1ddd727146d1278c697",
+      "initial_manifest_sha256": "7247442771a36c93d034177721c61f9e0721fcb84ffa536ee25150c558dd5969",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "bb0f8229e6ba11188fa693c4a461cad0094e68f58c90bc84ed9b47986c46697d",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "277b5cc4743c90d0494dcb255b6871c3fb9f9c858084bcc47bb37fc177047565",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "46354cf69a41c25ecd3dcd649f32d8e8134d614d02d54939b8f604a5470fd9c0",
+        "workload.stdout": "10570b8afd399ad3e67237aa6e7e05a94a50d664f86f9219328a8fb39e2e6a04",
+        "perf.data": "640903d4400655115f167c23338cb2c60681657b9b6aeede8a3704ee17ebd406",
+        "target.maps.verified": "8ee85d152ad671dc915488bc55bc507a01d14145e58f9175ab2cd4f60078c1f9",
+        "record.stderr": "5f8360f4a2450dbfbeb1719081075aa6db9d5bf1b170be15837c8495132edba5",
+        "target.maps": "37e21f9cbedcad50ebd2a66b423eb9558377a31b1148db4eabb9a80d2ebb6d68",
+        "buildid-list.txt": "3c21ef6bb9918f72974d1756100eaf68f187c9ecd6d004a2ad8c3797da0dfa6e",
+        "environment.before": "5d57d3f86b2430d9aa4f771139af2268f42985b49165c9f5d032c6afd6d993e9",
+        "perfscript.txt": "feac3a53e00da93cd9c684820c72b75acf08041572fb092bec457472d452b908"
+      },
+      "seconds": 125.34960267000133,
+      "bytes": 24712594,
+      "target_samples": 163364,
+      "sample_lines": 163530,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "163465431644",
+            "",
+            "cycles",
+            "109166273212",
+            "100.00",
+            "1.497",
+            "GHz"
+          ],
+          "instructions": [
+            "312854091594",
+            "",
+            "instructions",
+            "109166273212",
+            "100.00",
+            "1.91",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "109166.27",
+            "msec",
+            "task-clock",
+            "109166273212",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497398707.897595108818868685",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59887,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-400000-r2-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T012601-30149",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r2-s2",
+      "files_verified": 130,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-400000-r2-s2.json",
+      "receipt_sha256": "bec6ddb233c2fc8d9e58bb75386664136e67a667641fc5c833520aecb8fec8cf",
+      "initial_manifest_sha256": "e5202d5b3b713a3f9c0c6c7fffd14cc045ea81d3e36567c5a3556ecfc017ab5d",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "f40494c57ca1ef0040286b6f0f4b0d6763e21c07fc1d1ed44a27469298a7a673",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "29b327755a955680b2e969af7f0364560ec68af5ddc00099ddea03d677b3d2da",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "4751825963dbeb76451ce6ad5bc3f51daaa9e92e9d35401c1c99eb0be5bd1626",
+        "workload.stdout": "60b7b89b285c7bf6a2e8971277077cf356fec10f25c6eab2c10df0ff1cef77f5",
+        "perf.data": "5dbadf08ca4a06617b0a957986af4ddd12490d5c5c53013df7d7a734d8edca2b",
+        "target.maps.verified": "ac91424a798bc3ba9b4138ff6307e9a1ee94972a610c7019e25f302a8a41ce33",
+        "record.stderr": "9fbeb23800a0abd8ee23c55fa5f96f47e9bfcda2a8caa2a409578cd17c6b9015",
+        "target.maps": "ad462141bc6aca72fe177195de61751ae5b9d4c5e377e2c810fec03748c3ef46",
+        "buildid-list.txt": "3c21ef6bb9918f72974d1756100eaf68f187c9ecd6d004a2ad8c3797da0dfa6e",
+        "environment.before": "81b106b395e89c4115a674864e559da67c980101d6ed373d2e1e6425541f4272",
+        "perfscript.txt": "36a83d4da527ccfe667f59e744d933fb2b537905a44947a7938f364103ff3f8e"
+      },
+      "seconds": 122.00404733100004,
+      "bytes": 24044933,
+      "target_samples": 159001,
+      "sample_lines": 159134,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "159062971832",
+            "",
+            "cycles",
+            "106212563212",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "310226493741",
+            "",
+            "instructions",
+            "106212563212",
+            "100.00",
+            "1.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "106212.56",
+            "msec",
+            "task-clock",
+            "106212563212",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497590980.125137742654917648",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-400000-r2-s3",
+      "remote": "/opt/afdo_agent/work/eval-20261106T012804-1625",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r2-s3",
+      "files_verified": 85,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-400000-r2-s3.json",
+      "receipt_sha256": "ccb80051811b9dd06ff0b5b92a05f8dc65eecca9c5ec189774b208ae7dfcd7fd",
+      "initial_manifest_sha256": "9e5f5997fc5a7e832412fe069285efb5e5448f46189056f948dc4b38bd6ed9f7",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "9b1a5b198439b507b70e063865e1fcab529000942fad8d95f494a114b32dc47e",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "19d7eed8240cfe06b910bb1dde9058e6806bfda9afb15480424faef5332c728e",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "ed454ff1ee3666bbc6568df508181ae45157c865fb159dcad72dd39f83598282",
+        "workload.stdout": "75268497b5a0e43f7b8e5c323a11bed0c7a9692e667a928155d06cb1293558da",
+        "perf.data": "13ee37f7e1cd3f04a2ede5986fad8b107d91b0b71250b7f08983fb32343bfa1e",
+        "target.maps.verified": "73be96e53dd8a4eb7fde2a0a2768d87f3e46d159e82f2345cdc133593cff2564",
+        "record.stderr": "b8c69d50476c7c23d881abc19a2cd24145a64206ce7e31f77cbe215d771c8630",
+        "target.maps": "95c7b0fbae930f0342751d56a62cede42fac3fcbdea060498f13bea6ee686640",
+        "buildid-list.txt": "dc4368d9769b0aaec1d42bf247f353e106bbd8377b4b39e6d75075dd048e3225",
+        "environment.before": "983b06864a26dc484f8a8736895bc7af6557c20daa18246a196e37f11941394f",
+        "perfscript.txt": "e893a9a44cfd277f22e9c42311508e9162265fbcf4d0accd52314c0355f6cfdc"
+      },
+      "seconds": 67.16113771199889,
+      "bytes": 12679606,
+      "target_samples": 83678,
+      "sample_lines": 83797,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "83729025958",
+            "",
+            "cycles",
+            "55913227114",
+            "100.00",
+            "1.497",
+            "GHz"
+          ],
+          "instructions": [
+            "163595335535",
+            "",
+            "instructions",
+            "55913227114",
+            "100.00",
+            "1.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "55913.23",
+            "msec",
+            "task-clock",
+            "55913227114",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497481471.880626463540024427",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [
+          "missing/invalid sensor observation"
+        ],
+        "abnormal_reasons": [],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-400000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T012911-3783",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r2-s1",
+      "files_verified": 132,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-400000-r2-s1.json",
+      "receipt_sha256": "591cc4af76acd0f9094d3b78d8f0ea7ecdcba1b7fa427ea51d39d77b2d6f8358",
+      "initial_manifest_sha256": "2a951bf9d38db2d676bf8fc600127768ca240c3c1138622338cf61c6488fc5f1",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "63851bb1818015c00112a5895f1b928bb8f94c156f6e5ba7f0b361aeb1c9662f",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "e442c9203da5fc2cf1b09a5400272486f54eb941fde8e3e4449b04270f1c1c99",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "6f5bb8ace52288dd2abf3aaf520d1e684ee17811bc3878e9a7880b1deda7b52b",
+        "workload.stdout": "00f9a8615588ad72dedb194dde3ea759c5035c935f2a73d0a433f0dee707d8f2",
+        "perf.data": "e351682dede13270bd11eb58968cb77fbb0727be058467ca8bc1c2a6b89f4ac3",
+        "target.maps.verified": "32e9e4a77b7eea7f9b6aa01eb5bb1368f0a666d8b5cf5a6e4222c307f3e9ac78",
+        "record.stderr": "c01adda732526813b300af346b543fc67794e5ae33c1a5f4f66d671e637328a7",
+        "target.maps": "7521874249cdbcaad82310d58b6e657c901fbf2b3041ddd0921cb654b0e03d12",
+        "buildid-list.txt": "0068b2b6bda1563af32b3516fcf670da2e18655479f948c3dce9bb5f79da7003",
+        "environment.before": "e8c54c10f5a4791e13b538714fc7c042455eadb8c34c90da62e4aa115a78d669",
+        "perfscript.txt": "d6fb8952e7f4306cbbe633e2b22de4e1724969e5bb4c60d3852ef8635d8775a4"
+      },
+      "seconds": 123.9606927279965,
+      "bytes": 24158653,
+      "target_samples": 161893,
+      "sample_lines": 162053,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "161984552941",
+            "",
+            "cycles",
+            "108163485040",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "287626828636",
+            "",
+            "instructions",
+            "108163485040",
+            "100.00",
+            "1.78",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "108163.49",
+            "msec",
+            "task-clock",
+            "108163485040",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497589925.593192305462776765",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59887,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-400000-r2-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T013115-7622",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r2-s2",
+      "files_verified": 131,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-400000-r2-s2.json",
+      "receipt_sha256": "9b3bd8ad44c069561bc630b8955a58bf83c1b5669baeca0064fc08397b48b1a9",
+      "initial_manifest_sha256": "15db132f4bfb9a7b42ae50dba959c5d51099c74bb9788543d91ecd4d34ae57a1",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "f4abaa716d2d042ebd67ae8641e3ea06055990a215d378f4dd297b44cbd978b7",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "82a6f95d93ea8e6734c6a6302fa15298c85a4664c2ef4de735ba1f48d38cb00a",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "c930666a936fc824c02876b6f534751e8b25df65e04f866b9aa7d73f44461ac7",
+        "workload.stdout": "dff807ac100d3607b6e2a027b547b3bf4f0e2d73893a4739c699aae96ee94018",
+        "perf.data": "69d0f37da6e3a02a84a597cfcf627cd03eae98b03db075aa6664c66f91e2f3db",
+        "target.maps.verified": "abc43d55371e08d0397d1c0e5438d006ba83b031cd1f769a3cc43ed2be138b6a",
+        "record.stderr": "3fcd1fbf8b0e28b0fd042e8b1f073f08cbea62244bb36f846c0b1dc0a1ff5870",
+        "target.maps": "8bde370cd4fa9df0e9379147e3a84b26ea4454c8abe68e59450fa5af3085fd47",
+        "buildid-list.txt": "1fda7fa76e9144e5f543b91dbc89291c9ececd115ca91e889763b6f0554503de",
+        "environment.before": "d9f5d1561c721ac0317aad26fa55e21e3d45ca4dece421d1952b564f7250e39a",
+        "perfscript.txt": "e86617164c765b64b5fb89ed08eb93ee28f9dafc5cfc3c705b7ffdbfb86265b6"
+      },
+      "seconds": 122.97885109500203,
+      "bytes": 23887745,
+      "target_samples": 160045,
+      "sample_lines": 160185,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "160112873504",
+            "",
+            "cycles",
+            "106919965386",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "287803276844",
+            "",
+            "instructions",
+            "106919965386",
+            "100.00",
+            "1.80",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "106919.97",
+            "msec",
+            "task-clock",
+            "106919965386",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497502042.920513352182945805",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-400000-r2-s3",
+      "remote": "/opt/afdo_agent/work/eval-20261106T013318-11424",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r2-s3",
+      "files_verified": 85,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-400000-r2-s3.json",
+      "receipt_sha256": "5ba0752e53ccd4d2c2153ae60e42157b5b13517c452d86f5cb033dd7adc46bfe",
+      "initial_manifest_sha256": "c340df81d41056f9a8030420611c6b249a8db989e5cbb7ca80d5fe3f370c4df1",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "0c81b775ef456d6249c36a04634d82b283ba18f359459ffba7c49bd292aece0b",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "db1ad24265303c8ab5e71b21d4b2f9b37ccbb95a3c13d7ae3bc7520e4658e6ad",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "eb5da03f612b578c7c950e517ef964fbab00b1461d91f48ceac3eabfe90fd3fd",
+        "workload.stdout": "b68414371a1ce1c66f5f3b022d169cbd91d7b513b39f112f767aa5e7349f2325",
+        "perf.data": "9772bd84fee83e75c9e4659b93e4a37645eb7f41f1140040e8554d5d83f38dcf",
+        "target.maps.verified": "8be52df840ef46c0142b3e78295784c4d0c3bc1675ee215328c5f8649e9e7999",
+        "record.stderr": "84906c6159e12b09e0a835e03a9c4bf388e90dea0a36de9dcdd1acbe9b03b5df",
+        "target.maps": "3573c029b0a69af58b09398a4adfaf23aa076616da3a31edcfdda0bf6f0b0dc0",
+        "buildid-list.txt": "60d84c4c65e246e5d84345ecf4427d6daab77a9f0d1a445572799b9d56ea35d8",
+        "environment.before": "411c70e65deb1df3f7a5c57079c1ab2b0eec04a38edb0c2399e2b871ff79aad0",
+        "perfscript.txt": "e0c6dc96c23efa3a5510bbbd5568edf9ef0589e34857bb9eba5cb4844519380b"
+      },
+      "seconds": 68.49016372600454,
+      "bytes": 12738023,
+      "target_samples": 85190,
+      "sample_lines": 85299,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "85226954673",
+            "",
+            "cycles",
+            "56910089359",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "151606833215",
+            "",
+            "instructions",
+            "56910089359",
+            "100.00",
+            "1.78",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "56910.09",
+            "msec",
+            "task-clock",
+            "56910089359",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497571953.813462603907321180",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 58913,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T013426-13604",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s1",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s1.json",
+      "receipt_sha256": "d043aea28dbf1345bc1d99edabf2fcb74b7e6d1c24d3758c209e365b9e82fff2",
+      "initial_manifest_sha256": "664e8679dbe5af812de0e8a6ce6dcca7b6619883d2a621def84c710472f99640",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "fe49e49eabb0f475bcb832183c80368f37e3cdb33a7a62f320f537c5bd39f6fe",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "c6b2d798af8359bfbe5c772ed5d45d2ef0ac14d5a91912d21e0c23d65d7c24b2",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "515aa86de083814c588017935594e7e65b77ffc8c9eace865487fa84ebaf4682",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "21659b5fd90e94688bf3952219cdc2cb89d0dc56fea0d68da60db8c697f22d91",
+        "decoded.sha256": "6890fffc698a510b97584a4f0e439da07e2b0e9cb5faf9159f58414c909bb981",
+        "target.maps.verified": "5a739c2669ba18d7439a07b3f1416cf72b01567c28473cf33240e38d01016842",
+        "record.stderr": "b271c9b8c27caebf117ba6a6cca308bd7ac12e8b151fddf3f46713b4faa0582c",
+        "target.maps": "5d1aac8d9d9fbd4dbba3b11588842f35d4c31eb5d5f5f45c99986bd58afe0d97",
+        "buildid-list.txt": "0f331cabf0b70ad388154406108e8fca1906f9a76d04d0853dff45da837cc098",
+        "environment.before": "045bf518fdd50fdf3c834e3742712eb90d413b83703caf825ff609a2444bed13",
+        "perfscript.txt": "a1cd9c42e18bcd096be809ec003fcb3af9a6fe61b4b3f6819fabd86d57aef108"
+      },
+      "seconds": 200.8065282059979,
+      "bytes": 21931566,
+      "target_samples": 108594,
+      "sample_lines": 133147,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142225040828",
+            "",
+            "cycles",
+            "99384717452",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135136417537",
+            "",
+            "instructions",
+            "99384717452",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99384.72",
+            "msec",
+            "task-clock",
+            "99384717452",
+            "100.00",
+            "0.548",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431055405.981925591781110819",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 61348,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T013747-19738",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s2",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s2.json",
+      "receipt_sha256": "ecced84e5f20d20d16f45b10fa37cd8e8846bc5ec5d6b8c7e1bac52f4760bb19",
+      "initial_manifest_sha256": "7d84abcd18d6ef1c14a704651520ecc76cb2b08ddc327d20c44e16286009b790",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "f4f128707250c9eb6a4ca318092ef4690b69fb80bd470fde366e4cd0dff85b79",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "3860d2fa426cf8dfc617825b8b60b468e3900d1fbca6df1ce96a6c2b69599c85",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "d3798f348bcaa859d2d22bac2f597eee89ab876aa091aab99f9b7abdb9c973c3",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "e1c44f7be38c57b8aa58453ab8850fcbc498ca2a6edbee85797481ada426eed4",
+        "decoded.sha256": "3f24d816714f09fc86418a13d01c3bb3cf6eb4a3d0cc2c7d4783a3aa33bba1af",
+        "target.maps.verified": "c32c7324a25ada7efcd4f264bc1f7d9505f60e2ac0c1cefc7189d7c6a0f55b38",
+        "record.stderr": "8230954739d593e1582f2d65524316586502b9a19cb4d9f3014b3d44aa9d3a02",
+        "target.maps": "bda17a3acf1ce1c62e7430056cd64ec87a96303b7ecaf7e0d298ed5c94d02460",
+        "buildid-list.txt": "45e6c8ea74c560dcd7c6ed3a223d1b639a8a8d8ec5538c4633829b2aee09d3cd",
+        "environment.before": "dc0de029195953d71cfed46e2d299c4aee2b5d29022b3c8226d270edc70a1c66",
+        "perfscript.txt": "b02d961b271370c9dad9d7f72d76c4067fe5eb7678763e3b4359e3347e7220c2"
+      },
+      "seconds": 202.21668432599836,
+      "bytes": 22089461,
+      "target_samples": 109512,
+      "sample_lines": 134062,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "143227902470",
+            "",
+            "cycles",
+            "100075574633",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135132236237",
+            "",
+            "instructions",
+            "100075574633",
+            "100.00",
+            "0.94",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "100075.57",
+            "msec",
+            "task-clock",
+            "100075574633",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431197468.772848358495484962",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 61348,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s3",
+      "remote": "/opt/afdo_agent/work/eval-20261106T014110-25918",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s3",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s3.json",
+      "receipt_sha256": "4734193e53d255ce25778470032e262b03a5b3e9ea89aaf69c95feec94456929",
+      "initial_manifest_sha256": "17be48dd1745f1b2753f98984b44da85aec50cfe20e07ef3819da99caea1c9b7",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "3e820b784deeb4f1e20a600ed5c9b005c22c5ee0ffbfd7275298307816e18118",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "19f4aced36eb2e9d80e5c7e71b2d6086e86c43bd2543a03957b34757d7b6be53",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "9514ef23745bd8f62d85d55d449ff7422f25241e4df56569f0217c8ad4f6f247",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "b9692412fcbe8f7167b50bd6139069bab5be05c3f9f7ace762c3c0a857b8fb8f",
+        "decoded.sha256": "d9ea9c78d0bf6e4b46409031d6746c61aee87fd443a0a87997c4ac0cbbd90ff6",
+        "target.maps.verified": "716e2fa85aa76e0ac14a3287d9590dc6cd4198931cc2957ba4e372218f9f5be3",
+        "record.stderr": "b9a3559d17768c2979d4c348d6845dc2a565feab137dcc217c340fbe3794c43c",
+        "target.maps": "b6a55e9ffa98324f9afd460d1317c3529746da21233a2271649d541c276e13af",
+        "buildid-list.txt": "5a661aef972d13aff2040e1736ab180e86f7ff55f08893e2919856f331fb44ab",
+        "environment.before": "bb028125110e92bf6c5b10f9647bd9aead7706933721557022317bfbb7cdfaca",
+        "perfscript.txt": "04c8ec98f73b1fe5e6024d9025326566f5cf23bbf064539fa1ccecd5ac18526f"
+      },
+      "seconds": 200.74262813100358,
+      "bytes": 21864788,
+      "target_samples": 108039,
+      "sample_lines": 132805,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "141909741150",
+            "",
+            "cycles",
+            "99180880509",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135136845806",
+            "",
+            "instructions",
+            "99180880509",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99180.88",
+            "msec",
+            "task-clock",
+            "99180880509",
+            "100.00",
+            "0.547",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430817524.002610180510598414",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 61348,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s4",
+      "remote": "/opt/afdo_agent/work/eval-20261106T014431-32049",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s4",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s4.json",
+      "receipt_sha256": "f6190dd640685977681d55f42a23c2cb230aa6f76fdf8051f8f3db633c04498a",
+      "initial_manifest_sha256": "f82faa74236fd953aa13c13cf366304ca9fdfcee7073796b797be8fe597adbc4",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "802bfbb06fec7f17da3135ffefe85934b780355c4b9c2adc7c5b64cd857015d3",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "0722923db8b439437a14c982acc8de2f685fabdfec40ecd6407ca6b6e0ffd657",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "d6f1ea164c255128e06d6ce1177af8f5b3fc63bfaa8f544cb7e3426bbef8ace4",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "0a5e1ff120906b096404331f956f500805dac18a7b9ba95a53b6933f1e080d8f",
+        "decoded.sha256": "224338018353d9398154e1957f166c32b7e8478397ae3d6b0fc86eafee67c87c",
+        "target.maps.verified": "9e50eb3120dbfac31fe0b29dd5cd8c7dd4c8221548c3464a3ab86d080b0384ca",
+        "record.stderr": "7916241cde31e8e1398a06ac013d3c61c1b6c7b6cb9f1b3c2e5c9a372409b799",
+        "target.maps": "0a0308af9ae1d009b29b1a2974d4e418d8ffecb34b5c1268bed80c6cd96868f9",
+        "buildid-list.txt": "f79ebf1a612866647bec89d0cbcd3fcf6c091f78cf7dbd51aae63c8f2d2ca2b5",
+        "environment.before": "99a9f91988cf9afd0fb2e5bf664b7292d0315352b3a4d7a7313d6f2622d4ea48",
+        "perfscript.txt": "28c3ca98d5e59f4dea5abac1af4a5945cbca31f59b81fa49d293458e0612f151"
+      },
+      "seconds": 202.0366778270036,
+      "bytes": 21981962,
+      "target_samples": 108798,
+      "sample_lines": 133396,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142654336771",
+            "",
+            "cycles",
+            "99695311368",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135112946530",
+            "",
+            "instructions",
+            "99695311368",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99695.31",
+            "msec",
+            "task-clock",
+            "99695311368",
+            "100.00",
+            "0.548",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430903186.629340938906754992",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-20000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T014753-5926",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-20000-r2-s1",
+      "files_verified": 47,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-20000-r2-s1.json",
+      "receipt_sha256": "e3ded05f4fffa8b2dc56db17b3d9dddec7b29fcca9c677bf0ac1441a420c2a75",
+      "initial_manifest_sha256": "5a7d039b32040e23147d4b2561db9d73da13304608d2d6159244c185de2859f7",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "fbd8e51ace5584ec3f153d82e456ca11d72d070d91d6b382bb6704ee46382e47",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "34f1867b63f8d3593fbd4069aef6f89d8bef9da83a1168b629690de779d1f184",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "e97dfb983a612a9fa2027ef353a22a80c46f32cd30e145862ef2a15453095422",
+        "workload.stdout": "cb76bb1b257c08f9021b2e53e5b8a3eec815c00778150535f5ad16f3a65f38e8",
+        "perf.data": "91cd2ee685a41d84a6844e1b4dfd2503f08730f165e1bb6f616db7c3b21bea59",
+        "target.maps.verified": "0d5767877a4c34774169ea9cdb9fd6329f32e4b64e22b8114c2d639323458bc0",
+        "record.stderr": "c8fc148d996b70e7f057bb8e452c6dd09dd2f98e9c84f444d4d6fb234fac3d8b",
+        "target.maps": "3571af57834a5264a13c86f2e61adc25cfca218dc75dfee70901e9916154bcdc",
+        "buildid-list.txt": "dc4368d9769b0aaec1d42bf247f353e106bbd8377b4b39e6d75075dd048e3225",
+        "environment.before": "aaea0083b7111d44b89f59fafacb7877194a1d1562c33699df84ffbe78d9f256",
+        "perfscript.txt": "1badef6cbff1c8dc97c9b5e2da27a481baeeebc68d70a4533842e87c9425ed5b"
+      },
+      "seconds": 22.197696948001976,
+      "bytes": 3321767,
+      "target_samples": 21604,
+      "sample_lines": 21698,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "21624958249",
+            "",
+            "cycles",
+            "14439736151",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "41715397274",
+            "",
+            "instructions",
+            "14439736151",
+            "100.00",
+            "1.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "14439.74",
+            "msec",
+            "task-clock",
+            "14439736151",
+            "100.00",
+            "0.999",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497600251.043301333680523334",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 58426,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-20000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T014815-6760",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-20000-r2-s1",
+      "files_verified": 47,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-20000-r2-s1.json",
+      "receipt_sha256": "f6fe3c88937e745143f411599eab838975da6e8b12f509cb9176eb499695823a",
+      "initial_manifest_sha256": "3287e87554c7a8b03acd31f1cf8ba0ca6233263bf3994367955297c7dfae920e",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "e95a694bc17a48f98a7518a28c45fac4f92e927d8332fd7b27df20802c693909",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "fa188e32d243115ba6dbbbd376b13c7eabb68882891d0e105eb8981c10f5b877",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "4fd0ff9b03f509d2e8b1532e0fb9bb39a81d28485c55d626fbd1dc6727d9af11",
+        "workload.stdout": "0b097cbefe04203eb7ab0629276d45cbf999a67a482e290e0d1ad2b0c8bdb6d0",
+        "perf.data": "9fc640b0b46f15148cc9306ed3ded911109cd74c10b7076cb532c004e1708fda",
+        "target.maps.verified": "3393aa9481d2278e9765d4528f990ba1e3ceeb809aa415cc9246f3710df56c56",
+        "record.stderr": "a137f65c41d41c9ed26927bb5eada2032c9da48966c8a0eca24356753a4c784b",
+        "target.maps": "51751896bce63d9656826024fddbeb554f0f5b5d2414bdf0b5eeb278e1f7708e",
+        "buildid-list.txt": "70a752f1e16ea3054275b0e44fe9afc2b347fbdbaebbdd0dfec6dff05a88eb58",
+        "environment.before": "40c30fbb3b536dc178c60c272f7b655371fbe6b6a2103b185ebc5cb4ed0d6dde",
+        "perfscript.txt": "42a5152e5b330c71351e7ae2a8bdb96e0907ae3b835df705997227f3feb4c4a9"
+      },
+      "seconds": 22.28175941999507,
+      "bytes": 3239530,
+      "target_samples": 21334,
+      "sample_lines": 21431,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "21358083067",
+            "",
+            "cycles",
+            "14263206027",
+            "100.00",
+            "1.497",
+            "GHz"
+          ],
+          "instructions": [
+            "38350862011",
+            "",
+            "instructions",
+            "14263206027",
+            "100.00",
+            "1.80",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "14263.21",
+            "msec",
+            "task-clock",
+            "14263206027",
+            "100.00",
+            "0.999",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497424707.832248140495722912",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 58913,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-20000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T014837-7604",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-20000-r2-s1",
+      "files_verified": 91,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-20000-r2-s1.json",
+      "receipt_sha256": "e547d0e59399da1811309d9515c6c23735d170a3fce5089dad5710cdf91f8b35",
+      "initial_manifest_sha256": "468657ae6d3fa659fb249f1592a8d2356a38e3a2a069f77db8fdab15576296c2",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "ba9f289ef636359b99f145c1020874d417ad4ddbd35dd6ca646511f3358f6543",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "8a98400853118c3cf2d9cdea72243c5522f9f9f86865f0335eaa8c7f65aae544",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "5eda74db1182566cb8ba101c9a5661fdfa463d2a35b8891b8172b9de51cc79d2",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "7e9a3069d58aac7c508f4735f36677be704ee47e7f04be684ccebddd17f1f573",
+        "decoded.sha256": "3668f369dbaa357996aaf393ffc8c0a2b7d641cb59aeba99ebd6e36add041ff1",
+        "target.maps.verified": "4026664e0c5a284c8b4dc781f8eb6847c32a1c8fe86bb282808be1b85897bd52",
+        "record.stderr": "135bb08feababc1e33d278006db56e0576ab24557131bbe2d529ba4fdbefd622",
+        "target.maps": "173f94c1dd83f4c69571dc987e5d9a1b1ac763e8aa5df13e29962918d2a39cb8",
+        "buildid-list.txt": "f79ebf1a612866647bec89d0cbcd3fcf6c091f78cf7dbd51aae63c8f2d2ca2b5",
+        "environment.before": "46cf8f6fea5c4c18dbf81d7db1904728f1d1e33b912de5a87f0a6a5dcd6d788b",
+        "perfscript.txt": "55f6db765b5bdf781a6391e6a00979f0e6ab2108bcab51b850b4dfa2e28508a8"
+      },
+      "seconds": 72.14721645600366,
+      "bytes": 7625560,
+      "target_samples": 36269,
+      "sample_lines": 44547,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "47527812869",
+            "",
+            "cycles",
+            "33205323277",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "45046304935",
+            "",
+            "instructions",
+            "33205323277",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "33205.32",
+            "msec",
+            "task-clock",
+            "33205323277",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431331270.681926871959071619",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-freq-bbb-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T014950-9912",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-freq-bbb-100000-r2-s1",
+      "files_verified": 137,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-freq-bbb-100000-r2-s1.json",
+      "receipt_sha256": "cd6b72b28c744705eb26a0f05cba310e20c0db309f6dde04a2aa03ed0211800d",
+      "initial_manifest_sha256": "dc993fdf74b045d1c0ca579d52dc9af91aca7c7a2255e10db8a47cb569b6445e",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "ef0a575c727621da761456ce9cb70e46c3e88a59b2724f2584b0949059e8fc60",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "25455d282ed66e86a94ff589dc77e1d911e83f205138d9c5fb7cc81fad34c9e5",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "b8b5b7dfe75d902fac25537d53ebdd1a5c167a55905bbbfe9e3b9a591c10e510",
+        "workload.stdout": "e81109fcd2b8a9cd2b637aa083d8931f266afe1a9b329adf2e0faa4c0a5d4b1d",
+        "perf.data": "e07b3375e804b1d923a658f3b7b4adf0b4049f180779af6ca49e521b9c0a8606",
+        "target.maps.verified": "0f0f929b1a7c06031c159496664a424223c548149c7b2c184c47cc0d14d0bb0c",
+        "record.stderr": "a285f3ed445026b5f8e20956429af8f6200c03439cd29cfa67928462c19c8acf",
+        "target.maps": "1a478c815689855ba2c3f4e7baf19ef0ccdeefa477134590b9d64df1b9fbe1c1",
+        "buildid-list.txt": "dc4368d9769b0aaec1d42bf247f353e106bbd8377b4b39e6d75075dd048e3225",
+        "environment.before": "1a811dea68ce3a1ac978f1c2a49bb62f25e090dc0128c3bece512d8cc6bbd9d9",
+        "perfscript.txt": "9e0a1c4366885fa1c360d1866233ac96c4b60dfd493f5423fa62b2694d6b2baa"
+      },
+      "seconds": 129.0800510889967,
+      "bytes": 18325730,
+      "target_samples": 113675,
+      "sample_lines": 113743,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "170444393159",
+            "",
+            "cycles",
+            "113815426917",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "328679634931",
+            "",
+            "instructions",
+            "113815426917",
+            "100.00",
+            "1.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "113815.43",
+            "msec",
+            "task-clock",
+            "113815426917",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497550843.141391285873980356",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-freq-bbb-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T015159-13916",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-freq-bbb-100000-r2-s1",
+      "files_verified": 138,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-freq-bbb-100000-r2-s1.json",
+      "receipt_sha256": "37cfb9f7a98567cc7cca271255cc9027d92b2bd49e4c424442e07aa46db94368",
+      "initial_manifest_sha256": "eef0af173edb2664f5804a4497121f9adde66efa1d5e8f5ef92dd6e458c3add5",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "4e6fcbed43b7fc1bd75f1c8c18024e251da5a01d4db1160bb7b33bf33ff1505c",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "fd25b56f055410527cb1a3471819766fc7448d7030085d4e3577f6829eee06c2",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "e4af2f0fbc594868e68f279329181513d6b443022c29edfd66823d89ae8e2e23",
+        "workload.stdout": "596f285623a0c1699989399c8b0584f47fe49f676f05fa2003d60df45c86f967",
+        "perf.data": "bf2b7bd7939919f28602c41ad19fc5c75e78829374bff4703a4fe525c7a99d5a",
+        "target.maps.verified": "dc8f77e1f319ad9215e25d04ed0d9a6108d516b3a5f9d351c1d60b3616be78ff",
+        "record.stderr": "1c240524328111f71302b0e6560ca4bb0469dad2e0ba91ffad5c849d28b31830",
+        "target.maps": "49dc6e92f7cc5a27d67e958a3ba72c23505e13a14da83711cafa09c98af2558e",
+        "buildid-list.txt": "d9fc5ec43f8f77587c46606204ed0f5c7fab7bf46879febc4487eb9a37d0d498",
+        "environment.before": "26083b96beb703a826db9ca45c5a312856570655576b7dbbcf51a8d1d50ea9c6",
+        "perfscript.txt": "68897ee751bbf1b2018f90f88465ef9dfed03d9026e4ed2b7da3ae52c106ca63"
+      },
+      "seconds": 129.86790887900133,
+      "bytes": 18215765,
+      "target_samples": 114435,
+      "sample_lines": 114473,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "171366283662",
+            "",
+            "cycles",
+            "114428233596",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "298409960726",
+            "",
+            "instructions",
+            "114428233596",
+            "100.00",
+            "1.74",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "114428.23",
+            "msec",
+            "task-clock",
+            "114428233596",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497587471.745390101725771691",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T015409-17944",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s1",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s1.json",
+      "receipt_sha256": "4b40e4a30c43b548bb0476e0e9db0a5cf3cafc9b392e3e3f861ad1a344eef023",
+      "initial_manifest_sha256": "da3bcefcb6d2c199087697242fceecde36fdada62b1317c001814aad1743ebfd",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "a445bb0d1f7719526f4f31dbc8da04f817654b6ac192065e1fa6679287b1907a",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "2cd8930f5956fd19685a574b54bc50b3cc9853a0d5a161b8a77d0f37b39d962a",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "dee8b995fefeb9a8edd312c57c78c222366b4669db08cf36a6660be25af82fff",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "f873736bc0f67b514484f837ea688f8262dbb10b3df46586be6e1603876c8f3d",
+        "decoded.sha256": "ec640bb50dd67823b51f1f50188b3eea1fa8fce7f155f26693975b6eaaf738c6",
+        "target.maps.verified": "581a258115a9a90c0297398bdb5fbd0b9f8259ec45830f41503001871aa6f44e",
+        "record.stderr": "8f93e8d42e579b6afd8d7fee3fa23b5d0a452a3034594447e755cbb632847b02",
+        "target.maps": "6cd60c3db57550aae287ba08cb47a67e4d4b60056363e771ddb3dd3691a3dc89",
+        "buildid-list.txt": "12c05b08d459fd31ce437abefaa4ed2f9d4ca224eedc7f0f32ddd3bd37ba8126",
+        "environment.before": "a2ffb6062d0ba401640f89766c70f6d179c35142b92422c61db5e2a95fc6676f",
+        "perfscript.txt": "9ca1f8875c1317eef274457faf9cb05baed8483ba0c43092edfc00ca16b3f510"
+      },
+      "seconds": 200.39863209000032,
+      "bytes": 17485796,
+      "target_samples": 81329,
+      "sample_lines": 98755,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142492564749",
+            "",
+            "cycles",
+            "99633381649",
+            "100.00",
+            "1.430",
+            "GHz"
+          ],
+          "instructions": [
+            "135113474281",
+            "",
+            "instructions",
+            "99633381649",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99633.38",
+            "msec",
+            "task-clock",
+            "99633381649",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430168932.831547017676204501",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T015729-24075",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s2",
+      "files_verified": 91,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s2.json",
+      "receipt_sha256": "0e42546126eaeff3547a67bfe58caeca15e0ce33ea9b82e3352cc74ec857d4c6",
+      "initial_manifest_sha256": "fd7a581149b19f6964c90ddeeef240418b76224b62225a58c50a7320a018b0a2",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "934ed50057c59e18a118c93188173f52a60cced13a0466ed570f19aa8fb1c61d",
+        "evlist.txt": "244124d0e93b3e4b31694e957f3dac1b955a88c67b0a5048d818ac4a2793a3f4",
+        "status": "e2ee58b7a0b964c79221a2d7bbcab4b0d85eb7d13a7ac8764d1ef27cab1eca33",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "bdaf0df7aaa4263a7896b062e1ad1eca0cfb2f472e1a335bccb22db673e513c8",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "502142c1a40bbdc0a570d457d5595a718fc25a0ca6289353e222439c90e76ac6",
+        "decoded.sha256": "b867fbcb10b95ab7e52a6f57f68e1a5c092a8c3105c37482ad1c5a4c7d8c08fc",
+        "target.maps.verified": "66a27f54cd92446c477c4a57543cffc4d0efc0f3d2c0f2aa9772481b8f41f612",
+        "record.stderr": "6180750e79e689e0bfa69b6e22de61f7a2046fa26bd8c96e36e89a875edd0366",
+        "target.maps": "f988b12aff588284c10b7615471d9ffedb59088e178bf940cefc41a4d8bd99a2",
+        "buildid-list.txt": "371a14574624260f7d5275909fa0bb922132fde9d7834ff03f672b44ede63850",
+        "environment.before": "8999840197dc38dc2581091d55f2e1383aab97220c680ffee4b747c87064d271",
+        "perfscript.txt": "e62460552ffe9c87092707936338bc17a2097f161e7d0911aaa0b9f00818682c"
+      },
+      "seconds": 71.2333397379989,
+      "bytes": 6106785,
+      "target_samples": 27030,
+      "sample_lines": 32795,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "47341550053",
+            "",
+            "cycles",
+            "33096694423",
+            "100.00",
+            "1.430",
+            "GHz"
+          ],
+          "instructions": [
+            "45016436324",
+            "",
+            "instructions",
+            "33096694423",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "33096.69",
+            "msec",
+            "task-clock",
+            "33096694423",
+            "100.00",
+            "0.547",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430401349.893297486848382723",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-tos-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T015840-26378",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-tos-100000-r2-s1",
+      "files_verified": 209,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-tos-100000-r2-s1.json",
+      "receipt_sha256": "5fa904908c1f84b9cd6da56bb3d591ac9527f293870896da41dc3206dffa5956",
+      "initial_manifest_sha256": "29cba2c992750d1e36d21c9d88bb9fc3a8277ae82cfd7fc9f943418de5887486",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "1e7030c51a9d33af89fee3b9d255fe26bd0074c0acfe90815da6e6187500b747",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "bd4d8ac91b7a833859a6114dc5d2bdfe529b3784becfa941114ae6b76ec823af",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "61c7221c40819d8b37814a753279ff15514bfa5e23299a8f06b013cd17f02dcf",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "a2657c793e1b15cb1072ce42c1d3a62f3e5de5f19281c56ca4f48f8f0a2766e4",
+        "decoded.sha256": "599d53fd45767683e7a092c81bcc5f0b9badcd1107a8c6369577cd0c00bde78e",
+        "target.maps.verified": "efb941aabb85465eaf20e5a1a8304f37eeca59e2da6b26b5b5d00c373ca9a6f0",
+        "record.stderr": "f6b436dfc412a97600adc3eadc202032d894855af1092bacdf911e5b462a5f8b",
+        "target.maps": "2795162d371cab5c6039c6fbff59fc04c10ca1a7f493a764b0f42a6c5cc214b9",
+        "buildid-list.txt": "45e6c8ea74c560dcd7c6ed3a223d1b639a8a8d8ec5538c4633829b2aee09d3cd",
+        "environment.before": "a74d463f82fbe253a81b65fb23db9901388f5aaf279728a16bdeb5e065603c43",
+        "perfscript.txt": "f383c6d150814d4093ae4856af2159429e06f4822632e2bad6e8b3b75140cdf9"
+      },
+      "seconds": 211.75154300499707,
+      "bytes": 24302137,
+      "target_samples": 122088,
+      "sample_lines": 147569,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "156586013342",
+            "",
+            "cycles",
+            "108984142627",
+            "100.00",
+            "1.437",
+            "GHz"
+          ],
+          "instructions": [
+            "149470674085",
+            "",
+            "instructions",
+            "108984142627",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "108984.14",
+            "msec",
+            "task-clock",
+            "108984142627",
+            "100.00",
+            "0.571",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1436777987.531029744327936157",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-a32-S-sample-fixed-bbb-100000-r2-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T020212-375",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-a32-S-sample-fixed-bbb-100000-r2-s1",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-a32-S-sample-fixed-bbb-100000-r2-s1.json",
+      "receipt_sha256": "966d69f73372cec7eb207f7bcb2761e8c89a00dcb6d32abf1c613f3ec49274f4",
+      "initial_manifest_sha256": "ebee999da18e65014b6c178e1ba56416fd71020186112938054d21a0afa82340",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "be989545b2b855876aa26bb1074e7e969ca9ca5a1d76ca946bef9ff5ecbd6f31",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "dcd47fc490ed904aca4544c465e21fb920f92bc8beb4c9223da900394c7f838d",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "d11cb3ac869bf9f462b58a7613b6fbf65c89ba0c5872f56a813708dc344b2bc4",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "f1069b9ed3d8b4b82f83c278d288779b6737ce994cf7461f3a2ed645efca2fd8",
+        "decoded.sha256": "52bd9397747030a78de9b0ea22431ad543df550be237dbf37b74458a04911f62",
+        "target.maps.verified": "365ef8f1cf0f2f2d5c97e8f6605047685bd7acd672132e06f406586c698098b3",
+        "record.stderr": "753452c40d6638d4be420c8dd35032cbf05cf51fb32a6e6200180b8a8647f835",
+        "target.maps": "94b28bdb09469838a761d9ff8f17ceaa05c3df4db59e6e77ac4c0dc65587ac61",
+        "buildid-list.txt": "b76341c1ac65e6664421018a546b0ce05a5144b74af975e4499cca57967ee6b1",
+        "environment.before": "fc7e1751e6b62584f113da2eb8d519da54e319a848de0318370dd5793462153f",
+        "perfscript.txt": "b0c6b8bffd99d7abf397eed6d8015d81a5f0bbaa7dc5787612f2956d99bddc2c"
+      },
+      "seconds": 202.1481032820011,
+      "bytes": 22034473,
+      "target_samples": 109994,
+      "sample_lines": 134821,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "143918117876",
+            "",
+            "cycles",
+            "100561484374",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "133611377535",
+            "",
+            "instructions",
+            "100561484374",
+            "100.00",
+            "0.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "100561.48",
+            "msec",
+            "task-clock",
+            "100561484374",
+            "100.00",
+            "0.552",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431145582.543136795520511432",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-400000-r3-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T020535-6710",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r3-s1",
+      "files_verified": 133,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-400000-r3-s1.json",
+      "receipt_sha256": "ed79b530dd35409b456bb98735adbd7da62c44eccdeb2e830ff685100cc43641",
+      "initial_manifest_sha256": "4db6eada9f21ac45331e6dc7918722fc22734482c9ad4f3b660675a9f4dcb4da",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "28e89d841695f7a46f7c968e24381bfb277123a1fea13c2151965857096c06a3",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "75c2e0c142dbffae3ec45a15add6d92d877e11291f4f319b550a3c307cc8487e",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "aa1a77132f3560afa6c4c9513244ab11580f552f1912410655ad1471f38e2c17",
+        "workload.stdout": "10570b8afd399ad3e67237aa6e7e05a94a50d664f86f9219328a8fb39e2e6a04",
+        "perf.data": "f623794ee9e09402fdf1db7b93409a67653a494fcc35814d99b956b0e898ce78",
+        "target.maps.verified": "312a63d930c8fa56898e74175471db1834a643cdebdcec544ea0150138538fff",
+        "record.stderr": "83ddcc513b005fcbd982fa501a6837f23a57e8e3dca56912b9e2154685803ca7",
+        "target.maps": "c8a73c5cc7870cdc35609ad8e3a4852277406b1a41293b64573f09a544912d4c",
+        "buildid-list.txt": "564ff53c530a1b8e6b440a162d557b1d1c9506e2a0e7b708a07dcee34311f15c",
+        "environment.before": "0040b87fedc55b107ceda987f989d980efa61515f38b7cf8e37e7743c89118df",
+        "perfscript.txt": "c2c4379a8a3b8e97a21557f6c40538ec39c56d6f7d2f8505f2de006aba1d6575"
+      },
+      "seconds": 124.47065866000048,
+      "bytes": 24548096,
+      "target_samples": 162284,
+      "sample_lines": 162456,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "162385219893",
+            "",
+            "cycles",
+            "108437380269",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "312853503557",
+            "",
+            "instructions",
+            "108437380269",
+            "100.00",
+            "1.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "108437.38",
+            "msec",
+            "task-clock",
+            "108437380269",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497502244.087785964581586165",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-400000-r3-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T020739-10571",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r3-s2",
+      "files_verified": 132,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-400000-r3-s2.json",
+      "receipt_sha256": "3e55a45a7c4f2355c2b43e956ad5f40636b979295faef24f3fb91910d0d55935",
+      "initial_manifest_sha256": "13101fa993c512284b0d68a292cc92f21f88bbe173f91023d263cbb72865d76d",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "6c9fec0780698bd7c10713cf26aec2620ff9ded5e0d1c7863344f88a3ec058bc",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "6310ff832616a044ce12535bbd70f13705cb6b4b6c20eb02bc21dfbf585ae8ba",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "6ae8a3094740905bb8ea88de4f5963dd1fc1da0d54784e6c9b2147e6529fe821",
+        "workload.stdout": "04b2641de4939ff550fb187dfb24a8adcb736d827a252f0c7ea86056f5d23f7e",
+        "perf.data": "df8e50187ec1d0096bb4a30f216e2469ad6aabf3f7b4911e031d5936b4eb34a1",
+        "target.maps.verified": "1b34b1b7ddc5cf34de0ea381628dc85a59c7719cfb1b8dac6070bacf923ccde5",
+        "record.stderr": "04152522cd34815521c23b5e7ac89320f3776683d8578d077e64157f82acdae4",
+        "target.maps": "45c7cccd1bece840f55ec3b8c95a28a985dc956109f6a73ac2be1ea0647bad9f",
+        "buildid-list.txt": "dc4368d9769b0aaec1d42bf247f353e106bbd8377b4b39e6d75075dd048e3225",
+        "environment.before": "532d38fc94c4c9eb10d44a24c3e3efce55b49159fa152da01c068521556d09c1",
+        "perfscript.txt": "c3b9bb80a6467dcb5ff35577fb4249812e61acf967536d6910e919e32fbe5d4e"
+      },
+      "seconds": 124.1564910599991,
+      "bytes": 24484340,
+      "target_samples": 161904,
+      "sample_lines": 162072,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "162012260682",
+            "",
+            "cycles",
+            "108185519354",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "312302813407",
+            "",
+            "instructions",
+            "108185519354",
+            "100.00",
+            "1.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "108185.52",
+            "msec",
+            "task-clock",
+            "108185519354",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497541082.041293511368249651",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-400000-r3-s3",
+      "remote": "/opt/afdo_agent/work/eval-20261106T020943-14413",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r3-s3",
+      "files_verified": 84,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-400000-r3-s3.json",
+      "receipt_sha256": "684f0d92e50a92c312b89f6a09dd1676700ec94f79ee888af78f2bc644a8ecb8",
+      "initial_manifest_sha256": "59be67d495df60ed7762db27bbec868d9586f6c0b0be241a6d49ea498917022c",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "d2d6c186c1f5e3c3dcc5d5f75483181fcafa510e365bc59840071bf2c0b93dcb",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "bc893b2a8fec8c9d9c7638725e4474cc5b87f24c460afbe6a1360f7ecb7b60f6",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "b17d85ae24a38611a6929f9a23004bc04ad842a05d5db34145da6b202f59a2ac",
+        "workload.stdout": "f31fb10d513261b0ee6cf08f4aa356aa9f71d1b235475f62f183d4faab2787c0",
+        "perf.data": "a044fe45669d3176894b4cf375f2818798e8da8a6daa7a9bbb0ad1c975d80aa8",
+        "target.maps.verified": "033abd94b855393f3d6a1dd7e5360e00cb04ccf3039e75ecddad0205a20aa4ee",
+        "record.stderr": "e91f3689eac689267d8df43637dbecdcf90e803e582c51310e317dc4dd4273aa",
+        "target.maps": "63c87e4627b3fdca58c6c22ff0d7d2d2941bb49628e03fe25bcaac46a3da0b4d",
+        "buildid-list.txt": "dc4368d9769b0aaec1d42bf247f353e106bbd8377b4b39e6d75075dd048e3225",
+        "environment.before": "a6b1b27f45e863f7af5cb0ffda4cf931f5227d990a0f6c34262d0e90a01ac9f0",
+        "perfscript.txt": "2c25987eb1103a464b28ebeede2394b9e11d0990fa8457064fe9e8391e6e14e0"
+      },
+      "seconds": 66.01162932199804,
+      "bytes": 12403540,
+      "target_samples": 81815,
+      "sample_lines": 81920,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "81847441242",
+            "",
+            "cycles",
+            "54655029881",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "157932201140",
+            "",
+            "instructions",
+            "54655029881",
+            "100.00",
+            "1.93",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "54655.03",
+            "msec",
+            "task-clock",
+            "54655029881",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497528063.601831341049488034",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 58426,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-400000-r3-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T021050-16541",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r3-s1",
+      "files_verified": 132,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-400000-r3-s1.json",
+      "receipt_sha256": "5dcdaa91123c6457eb289a989ea3af0dec9598773da9d0fd5479ddc917574591",
+      "initial_manifest_sha256": "41d578bddb175e536e1efb847086d05ed8ffd93d4e55c7de2ae3d9d835e4351c",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "2ad23680013bc2594c3ce85ca9b8e030a3449c8076504f1048bd00411f2751e4",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "9f11522d9e7807bc7034aa20dc274b66c8587cfce9e2608c9730cedeaa85fc3d",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "1246ed2580cf5d99f39cd3eb399d58d71c4ab31494b587d65b49f29cc203ded2",
+        "workload.stdout": "00f9a8615588ad72dedb194dde3ea759c5035c935f2a73d0a433f0dee707d8f2",
+        "perf.data": "de85e609e5f7c53db4aca39ce15581420c68d27e10bf8556be0e00c743a3486a",
+        "target.maps.verified": "941a1af0081284335f01a37f1ba15ab7c37ab38fe2801119195675fca6f85a73",
+        "record.stderr": "b88fb8af0a5c700f751dac09355a198d0b6e1bc15e0d19d4157962d79ea89347",
+        "target.maps": "3f9edb36e6e55c5f94ea97c11f4dfc4612a442f78e66cb8ca447a0b9526e40da",
+        "buildid-list.txt": "b3e5fe3234b2b6461a261f2c7441e498ee5628c118818e9906ca0c54fb4924c3",
+        "environment.before": "e69b3ddf92548dd323275662c1d7533d67d9c95c19b9b2e6ace205092a3af5ba",
+        "perfscript.txt": "f2146dc19870c638cb15e7c71e8c6a543c61b1adfbc8a04569758abfe6a2db04"
+      },
+      "seconds": 124.14234475000558,
+      "bytes": 24082595,
+      "target_samples": 161389,
+      "sample_lines": 161560,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "161485519033",
+            "",
+            "cycles",
+            "107831483170",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "287623562676",
+            "",
+            "instructions",
+            "107831483170",
+            "100.00",
+            "1.78",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "107831.48",
+            "msec",
+            "task-clock",
+            "107831483170",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497573055.966587864694057802",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-400000-r3-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T021254-20373",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r3-s2",
+      "files_verified": 133,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-400000-r3-s2.json",
+      "receipt_sha256": "7f70353135fd5e1475be0cc056b772d0ecaeb17f81eb011f423f5c3ae174b16a",
+      "initial_manifest_sha256": "f63e7c6b7b5d71b5c83d5f7f9ed9d20e5584929776e65ae2a80130ba5b28da9d",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "d2097b5e1ce8620abd8e5de97dd864938c293589b516bde5055fde8c2cc060f4",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "7cf78b59cfbc9fbf29ca621be5a5455f6f18d8eb87a23620a1ba6f32711ebb44",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "227c14df95a39fedbc775e2d2b7fb41ed1e84516aa3c6fc2af91804509089646",
+        "workload.stdout": "7d4ab03aa1d376c49036722c4736eded5ef79a989d2f53d4bb27675ccec5a1d2",
+        "perf.data": "6414ad362da46d444e14d1c7a251083b71ac01a05e11cc22bdca8b4bdb49b218",
+        "target.maps.verified": "8cd63cb4e4ce93480d27d28f5476ab361acc630fd940e0b2345488445a4a9988",
+        "record.stderr": "5732089ac7fa1a007b728dd4850c9766e838528d2ca793ec693bd2fdfbbf82f5",
+        "target.maps": "0ec69a8e09a3faf183cf87322f3430ce11572cf2d02854bceabec9178aaab079",
+        "buildid-list.txt": "2fe14a2eec52dfe9e086245faf55012f490e41826526bba6d36b0d27b855f4a1",
+        "environment.before": "ae4a3fbf644ef1979d5fc22e348875f17855e7b94ff2cea397d40670c204457c",
+        "perfscript.txt": "4e880d531dbf2e37078e43cac46935407c6b22b21cfae13b2b42802bcacfcfdf"
+      },
+      "seconds": 124.69326558800094,
+      "bytes": 24196654,
+      "target_samples": 162109,
+      "sample_lines": 162276,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "162209247137",
+            "",
+            "cycles",
+            "108318399469",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "288713012918",
+            "",
+            "instructions",
+            "108318399469",
+            "100.00",
+            "1.78",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "108318.40",
+            "msec",
+            "task-clock",
+            "108318399469",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497522555.142985863897546493",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-400000-r3-s3",
+      "remote": "/opt/afdo_agent/work/eval-20261106T021459-24244",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r3-s3",
+      "files_verified": 84,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-400000-r3-s3.json",
+      "receipt_sha256": "9f1290c67969d0b2fdd6852ab3c72fe1980163fef7f92cebd2409216ebe02e3b",
+      "initial_manifest_sha256": "cd57b81ad9839ae68c17f6d9571ef45bcd07b85baded75410b8bd2fa94aa0613",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "02bc49f1e2584c39b116561b5be1f2c591eee9749f34eaf88e59be88e959965d",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "635e135f4cb3fb2de8e4c99e13ca131ae876c01b78ce416b33a5bfee432a40a1",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "fc2b46b0c9f9eb1f7d8d4391ad6baa6dcdd633de05be021890219625c4e25a48",
+        "workload.stdout": "e80bda1fa796905b53c2ebeaa5588e0b2ece2e8bd415c17d5285bae66cffb94f",
+        "perf.data": "4d42f86e85ba5e31475faa442d2d749893451bacd094a48a5272d93c5aed97c5",
+        "target.maps.verified": "576531ae3d138787aac9291de1ebdda18f714e36a8bb9ca9aa6f8d80045a4d09",
+        "record.stderr": "6fc760ff400842c332ab6f67d6de2b564fe588f8fd82330d19f4a6771a674d52",
+        "target.maps": "5b87a418a6fc73b0e967ba11faeb925497be01d2aa8141cd11b0882086e56193",
+        "buildid-list.txt": "b3e5fe3234b2b6461a261f2c7441e498ee5628c118818e9906ca0c54fb4924c3",
+        "environment.before": "170cfdd52a6aaccaed7ff08290660f80fb28280dd8046e045bf18c01ae58530b",
+        "perfscript.txt": "41a76304bddfe7396e311ae2f3ed7935447293ef9ede5ff8dc2ca14826a6f31b"
+      },
+      "seconds": 66.05406754900469,
+      "bytes": 12239871,
+      "target_samples": 81840,
+      "sample_lines": 81953,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "81880362875",
+            "",
+            "cycles",
+            "54676210275",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "147142056206",
+            "",
+            "instructions",
+            "54676210275",
+            "100.00",
+            "1.80",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "54676.21",
+            "msec",
+            "task-clock",
+            "54676210275",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497550083.939614687996845429",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [
+          "missing/invalid sensor observation"
+        ],
+        "abnormal_reasons": [],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 59887,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T021605-26365",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s1",
+      "files_verified": 201,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s1.json",
+      "receipt_sha256": "06eac948051fd066059230253a6dc99263055c342a85336c9a159153161e0660",
+      "initial_manifest_sha256": "f6beb501427a4402c7003074bb44963bf967c3c2a9dd92f2241a72b83ac9bdee",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "7634024c88d8106046ca48116d6a99452cebd078692cd1f63b7597be68e3bb7f",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "9be186a0b44d7d68444576913927e4883c15f80fb1fbf1634ef5df4f84c41aa3",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "8811e17580811d914e4166d2558996b45ef76740faab9731a762cca012add55f",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "e79b277dc7c1f98e2af5c63a09a020d280b701268f61c566985ce1ab374da819",
+        "decoded.sha256": "c860dc1807ca1a3bad36aae0bc1dff78fc764be06ff9deb7115529dc11c63692",
+        "target.maps.verified": "d331f7036682ac08e039484aa352097222100805ef4ef3e34e95b5bd136b3bf3",
+        "record.stderr": "f0e50c1ed06de54fff14ae1fc2ac2a2292092fd17490c66ee6974d2eb08a0261",
+        "target.maps": "09618602c12bd2ede096b92ff76dddedee6c374bfa0f4aa4acaa39f5712ecc12",
+        "buildid-list.txt": "f23f64bdfd635eb4c91c45db0c019fcbb10f09d263bfa5adff238dc18022003c",
+        "environment.before": "b81708beffecae99479668e6dbbb8b88dc59f80997dfd41eb9105f2cecd8fd66",
+        "perfscript.txt": "6ca32ece277c7d0a5c45c4847ccde79e340088f66c7ebb76a29ab76a671bbe80"
+      },
+      "seconds": 202.15693902299972,
+      "bytes": 22134738,
+      "target_samples": 109709,
+      "sample_lines": 134387,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "143460536254",
+            "",
+            "cycles",
+            "100236415710",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135158212433",
+            "",
+            "instructions",
+            "100236415710",
+            "100.00",
+            "0.94",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "100236.42",
+            "msec",
+            "task-clock",
+            "100236415710",
+            "100.00",
+            "0.550",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431221668.271871641066191311",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60861,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s2",
+      "remote": "/opt/afdo_agent/work/eval-20261106T021927-32554",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s2",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s2.json",
+      "receipt_sha256": "0178b3eb964b749cef1dcbd94ec4fa0238f3b1fe254c053973e4c8f6a30897ef",
+      "initial_manifest_sha256": "0e496caa92c8019f7a0901892c11f8e518f6af532e415d0771ab232f427d97a4",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "d8cbd97e6cc8e76c0655579d8672261772d85ffc3c3c32484893b0cf79edf02e",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "cd27984c1fcd6c5f88932b7c6e4289f537bfbe0db7d2f00882bdfb975ab0e55b",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "125aa00d1fec41aa61efd0ecfd040187e7f479240d77957d9eaf7695fb7b5afc",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "01b8b9cea5a089b7cb40e24d9f3f202dfdb69829f0bbbe091f1032cd5feb77c2",
+        "decoded.sha256": "a70f5133a454f55139033f479c61881a1cae909a8e67fee76b167c9fc879eb74",
+        "target.maps.verified": "9502e57d53213f9cf3418a7bbe9ad81de2595d83241d44e1e5f92c60f4c47df7",
+        "record.stderr": "3be8fb638211829b72fcc95db78b543bde9d5a8f03f54b36626da5ff16b3cbd5",
+        "target.maps": "95ca676914456d22e0cc91702e907c28a69b6721e336cd9e18660042862a7263",
+        "buildid-list.txt": "78280de199c0a4aa6e1725caa7839ed90b2f342c59030d024372d975b7ad2bce",
+        "environment.before": "c32f740339d42d455bf8efbd058dece9bfd4f018b7fe7ce629cda6e940c8b9ca",
+        "perfscript.txt": "6122803aa37a27255cbc64e5560693e51296b84ba7c140bcd65a544e8eb574fa"
+      },
+      "seconds": 200.97506985100335,
+      "bytes": 21999071,
+      "target_samples": 108809,
+      "sample_lines": 133612,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142654100255",
+            "",
+            "cycles",
+            "99678884965",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135131151760",
+            "",
+            "instructions",
+            "99678884965",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99678.88",
+            "msec",
+            "task-clock",
+            "99678884965",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431136668.620273422012767399",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s3",
+      "remote": "/opt/afdo_agent/work/eval-20261106T022248-6388",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s3",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s3.json",
+      "receipt_sha256": "45eb45a767dfbfadb3c628cb9c9e2bcbeb1180e876a5d605633631308452a011",
+      "initial_manifest_sha256": "6b48beab9fb7e4bcae55c47d90b9e155679f29e1c5c994e12d709c0d966644be",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "7f559d72b607c0332f6029dd62cc86f62047e70dede443a1d8b5594520ec2cfa",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "f3d6aa334c346bf9d5b5ee15e75102620a5732502221b5536abd304b6b22093d",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "e99f4ecc9b69ca33dc8e328e9c6dfcd550f7155500336c6fcdd965a0b5e9df34",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "90a5f3b583e438c11e113a8a6f52d2d9d9d0bbcb2f41cd58ae958e02ef107bbd",
+        "decoded.sha256": "f21e361114b2a1d4e486240d8c8d615273de349cfe09c8779e74c016b4baf621",
+        "target.maps.verified": "4522630cc3e8b1a11ea9f71e70abbadfad68a2cfa7e3963da90841f456d21a25",
+        "record.stderr": "3515817a17a20ceacb68c504f2300bcfa717e538c3d41b80aca87d87a1d8b771",
+        "target.maps": "6ded25696f407b21ca71274814b8c72daa92df9e6672faa2e6d1e24808c08716",
+        "buildid-list.txt": "45e6c8ea74c560dcd7c6ed3a223d1b639a8a8d8ec5538c4633829b2aee09d3cd",
+        "environment.before": "29681b2ee592b8a2432a7c42c6d74d200c778a645f4647f4e88416e2ef409f2c",
+        "perfscript.txt": "eee266b86e193b0a41ec1d60fffcd80b0d86fd9eb4e9b496e3470d36ffd53085"
+      },
+      "seconds": 201.00462421299744,
+      "bytes": 21990887,
+      "target_samples": 108819,
+      "sample_lines": 133530,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142568957848",
+            "",
+            "cycles",
+            "99624394821",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135095895528",
+            "",
+            "instructions",
+            "99624394821",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99624.39",
+            "msec",
+            "task-clock",
+            "99624394821",
+            "100.00",
+            "0.549",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431064800.978957060615377419",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s4",
+      "remote": "/opt/afdo_agent/work/eval-20261106T022609-12525",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s4",
+      "files_verified": 200,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s4.json",
+      "receipt_sha256": "1eeb56903501473074d72688d561b1560ca3bfc7235fea0fde594e4c8ddea83a",
+      "initial_manifest_sha256": "a8845feafddb23100df38958206104cfeac1d9954701ba53d1b7d2dc181213bd",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "8f19719a3d7a1d02cb7a15ba0b9db217d462e5a76d9e26277a0f8c39346e688f",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "1987ab26d63c3d0e9747465e49577edcb66b8afb59e38d95d8927f87eee8c356",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "ece7eae5c94278cec3082f7bec4c84a6078236ceef000f5ab4c984af2268cd5e",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "439a9b83ad7e05e0e47e5642f1eaa4a490992eccc9d6b63a6c730959f8c741b0",
+        "decoded.sha256": "dac4a79ca896a4a30806642f86557523336bcecf258eeeb2347dcff3230c64c5",
+        "target.maps.verified": "af7d815237da67d634a4fb1f3173013199780eaaaffa785cdbe05fdef642f595",
+        "record.stderr": "ef5c037f905fb4d37969fc4f44c878761da0a313734c6031603384bc245bff69",
+        "target.maps": "e1f14b64e23bddfb093e8efd5a0abc9dbed6b2593c9e8f411ff29ed9ee874cbb",
+        "buildid-list.txt": "b62241460928f7efef9e78938b9d97b715d7135771a545bf6f9da8dd2d6f9f7f",
+        "environment.before": "0cb0748c6d111c35329d73129ecbcf84ceea0b6f24338428bb30d3b730722a08",
+        "perfscript.txt": "710e73be0a8f47847d0fba36b2b3fb116e07410a79ddb461fdfcb6c5077e7fca"
+      },
+      "seconds": 200.8430220959999,
+      "bytes": 21933682,
+      "target_samples": 108542,
+      "sample_lines": 133152,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "142297458810",
+            "",
+            "cycles",
+            "99442937325",
+            "100.00",
+            "1.431",
+            "GHz"
+          ],
+          "instructions": [
+            "135149327391",
+            "",
+            "instructions",
+            "99442937325",
+            "100.00",
+            "0.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "99442.94",
+            "msec",
+            "task-clock",
+            "99442937325",
+            "100.00",
+            "0.548",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1430945814.856238160295743469",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 60374,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-20000-r3-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T022930-18670",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-20000-r3-s1",
+      "files_verified": 47,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-20000-r3-s1.json",
+      "receipt_sha256": "28d949bfe1d9fbe510c14362a8d5e3da68baa8932834ac70ae903c2403689007",
+      "initial_manifest_sha256": "c9fdd81917016be9b6672888ef90f6e2e5a1d512f94706c9a69499d400abb2be",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "af3c217d3743f0c8e75e74d72d9c4d1777b650d19cac31b4a8bc4fcb2a75c588",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "f4883736bfea774f7242907b36b14832b391ff0ea8e82a65298642d3e01e3337",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "c02e0c6b4d2717e3a3280648323923c64269f626843a24df66ea8c10a5a4e11c",
+        "workload.stdout": "cb76bb1b257c08f9021b2e53e5b8a3eec815c00778150535f5ad16f3a65f38e8",
+        "perf.data": "80381e525752fdb2482ff4247c971eae98de84d31c84380909d2a0db581c0be5",
+        "target.maps.verified": "ebcd64d616f79ae3ba17d9c4340f559ccf0a4022b5928c652d1faccee12fc73f",
+        "record.stderr": "706be48b52a5519590ac3c941136f27c72af3f9e04e64bcf80bde554d168c6b6",
+        "target.maps": "96082ac467bf9775023c2aa14c28f87d3b0f5ba78ba9ad663b68d5b162e23d33",
+        "buildid-list.txt": "f8eb5fb829e0241edb4a0d77aa02276ed0ce9260e9f1329586769325e9b29d83",
+        "environment.before": "66970a4d2b36d58199c8f095a795f4f2c0193533f6ae4bf426c1cfd91f0d6524",
+        "perfscript.txt": "91b1b4c910217c553b4f9f7ae66c6847f21a06bf857e1f38aab374c678fb1d2a"
+      },
+      "seconds": 22.095168622996425,
+      "bytes": 3282241,
+      "target_samples": 21338,
+      "sample_lines": 21430,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "21356139783",
+            "",
+            "cycles",
+            "14261100849",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "41713564161",
+            "",
+            "instructions",
+            "14261100849",
+            "100.00",
+            "1.95",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "14261.10",
+            "msec",
+            "task-clock",
+            "14261100849",
+            "100.00",
+            "0.999",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497509994.530576182762900478",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 59400,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-a32-S-sample-fixed-bbb-20000-r3-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T022952-19503",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-20000-r3-s1",
+      "files_verified": 47,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-a32-S-sample-fixed-bbb-20000-r3-s1.json",
+      "receipt_sha256": "624f73de068cd11dbd024e5d8beda5f3fe1e56b127bd3f15e75fdd1c5366de05",
+      "initial_manifest_sha256": "58c73d53f59307d15993b91ba74750550ba7cad39e8e7fa67d572d539b9475b0",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "513322ebeb5fc75e791dfcb6dba9cde1ab5f4f23ed042fd0005de1cb88e7e1d7",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "5037d62779ceb8c872cb69e8732532c419c459035c4c6841207a7ea6ad422712",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "e227f882b940096769ceafed2f2a01bbab4a6cd39728e2dc2b9cf76c80c1af85",
+        "workload.stdout": "0b097cbefe04203eb7ab0629276d45cbf999a67a482e290e0d1ad2b0c8bdb6d0",
+        "perf.data": "a2cb0bd988f197b0dd3534eea3db7e24de9c69cc86f1fc6ba109ae51c13a002b",
+        "target.maps.verified": "151c5b6db51561497647d0a2fb5f1acec7245777be48871439ea864626f6b883",
+        "record.stderr": "813621edf0f99ae3b41e04570a2e6eb80c19ea9e6d519ea9ab23c1dd35ca3f27",
+        "target.maps": "9a7b599c83e16994d3a0816701625f16c5e7d9c0a4fffe3c3a3bab875ec3c60e",
+        "buildid-list.txt": "1fda7fa76e9144e5f543b91dbc89291c9ececd115ca91e889763b6f0554503de",
+        "environment.before": "1bd306fda815127d741c3abc2fba4b3e3535e8b6cdca2fb1b5df063b43efeb0c",
+        "perfscript.txt": "13acf0f343aa70fdc7dc8e28584cf5d197d88c842b32e47e2dbe5eaf8d04bf6d"
+      },
+      "seconds": 22.229020562997903,
+      "bytes": 3268325,
+      "target_samples": 21530,
+      "sample_lines": 21627,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "21554291798",
+            "",
+            "cycles",
+            "14392305809",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "38351675133",
+            "",
+            "instructions",
+            "14392305809",
+            "100.00",
+            "1.78",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "14392.31",
+            "msec",
+            "task-clock",
+            "14392305809",
+            "100.00",
+            "0.999",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497625592.972914007549865171",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 58426,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "ffmpeg-thumb-S-sample-fixed-bbb-20000-r3-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T023015-20337",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-20000-r3-s1",
+      "files_verified": 91,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/ffmpeg-thumb-S-sample-fixed-bbb-20000-r3-s1.json",
+      "receipt_sha256": "2393bd5e00c42e1f66cf2b0680fdc65469374734339e0a8b7ff9737dac321d47",
+      "initial_manifest_sha256": "d346d298cab08ec3eeb7c94882a44bb1b434d63ea4b45db894f10e51c30a6c6f",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "2fbc190db1167673612ca2771f1f6ab378a1855a500bebd4f6e5ad2fdb729207",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "78e977d15a9c633c31b4a9382d114f1f290dbb057f334db5c221f54873f4f22f",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "6c50f130bbc9cd3d968f1c084756f7adf21079aff5ef171c805b9d2086d4128f",
+        "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "perf.data": "158b4c9ca2d70054d19e6edde5814c93531cc5b32e26fb8a0b2b73a24d37bfce",
+        "decoded.sha256": "25c61ddf7849876ce512ed1430de1a18dfc7c9fb3f55a911242db2e6eb31b4fe",
+        "target.maps.verified": "1eb910b4a7745fe615fadb5f749966986971d29496f8ed83bb256cb10b4506ba",
+        "record.stderr": "bd5048ab515e3ea0500cb9d21e4654a983e2a4c8612e4a3ba57d343dce515d93",
+        "target.maps": "ea31b7a29f3b20ac30adb824f7cc8c5faf606f75c16a74ce72c85b0346288e96",
+        "buildid-list.txt": "11dd8bb84c9d83563393497db7f7880ae9f1d29b4e0952b1446c98f2943f78e3",
+        "environment.before": "cb14c10352cc4d8d6e1864f7a6867eee869f038b5eeb277ef76f8a5653329bc9",
+        "perfscript.txt": "1403518e6a0f357ed35c354a2b8692c0353ef463c5c645a5238f48aedccd8500"
+      },
+      "seconds": 72.05604894599674,
+      "bytes": 7674487,
+      "target_samples": 36570,
+      "sample_lines": 44795,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "47810787136",
+            "",
+            "cycles",
+            "33395489394",
+            "100.00",
+            "1.432",
+            "GHz"
+          ],
+          "instructions": [
+            "45030206995",
+            "",
+            "instructions",
+            "33395489394",
+            "100.00",
+            "0.94",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "33395.49",
+            "msec",
+            "task-clock",
+            "33395489394",
+            "100.00",
+            "0.550",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1431654008.849697968198699884",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [
+          "effective_frequency_below_97_percent"
+        ],
+        "observed_no_throttling": false,
+        "max_temperature_mC": 59887,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    },
+    {
+      "tag": "spike-thumb-S-sample-fixed-bbb-100000-r3-s1",
+      "remote": "/opt/afdo_agent/work/eval-20261106T023127-22646",
+      "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-100000-r3-s1",
+      "files_verified": 98,
+      "all_verified_before_delete": true,
+      "deleted": true,
+      "receipt": "temp/board-round1-patch8/receipts/spike-thumb-S-sample-fixed-bbb-100000-r3-s1.json",
+      "receipt_sha256": "e7addee48937a2f375c5460eabeabe857918d04db57f93c60c119c13392a3da0",
+      "initial_manifest_sha256": "b921248b94cccaa7053c8255d9acbd27a55e833729a0548e28c225c940b16fff",
+      "selected_files": {
+        "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+        "perf-stat.csv": "67c68b37db64f8fb7bab4be0cef36459075944bc01b6b4864ee0731c14f573f9",
+        "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+        "status": "13e700fc4430b9cddc09b58fe2fa0480dec31580e725783edea6f62768845c44",
+        "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+        "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+        "environment.after": "f7ea3c3a562f980912118ee3f6161d02424a4d810e64c29a00ca61cc780eae71",
+        "workload.stdout": "660e049ff6518952d6a17902ef20bb0afddf024fc6cdc5b97a240425424ab0bc",
+        "perf.data": "458d52f50c9228f8773c31b649e5244acc0fe1e7ddf6c06f757a40f80841994a",
+        "target.maps.verified": "bb30fb91b171a1f11d9e0aef538d0bc61cca251625773381a65ca8d03c27e0b6",
+        "record.stderr": "702e63f8ea1476989fdff242f537fd949a87bcbfe33e0f45107a9003e70317f6",
+        "target.maps": "f9d36db1f7302284fef057eaaa533fe1591a70f2059daa5322d19ddc7790082f",
+        "buildid-list.txt": "3c21ef6bb9918f72974d1756100eaf68f187c9ecd6d004a2ad8c3797da0dfa6e",
+        "environment.before": "4077bcc0c10e579129c569964d9b183dadb348f54649a11c75b908478c93a595",
+        "perfscript.txt": "55201bec2c72b7692bee353f7d782ddef94e8b9b23dd838c4d58f5940a513e55"
+      },
+      "seconds": 83.49195464600052,
+      "bytes": 16051610,
+      "target_samples": 105995,
+      "sample_lines": 106105,
+      "eligibility": {
+        "events": {
+          "cycles": [
+            "106033611907",
+            "",
+            "cycles",
+            "70804319735",
+            "100.00",
+            "1.498",
+            "GHz"
+          ],
+          "instructions": [
+            "208558319954",
+            "",
+            "instructions",
+            "70804319735",
+            "100.00",
+            "1.97",
+            "insn per cycle"
+          ],
+          "task-clock": [
+            "70804.32",
+            "msec",
+            "task-clock",
+            "70804319735",
+            "100.00",
+            "1.000",
+            "CPUs utilized"
+          ]
+        },
+        "effective_frequency_Hz": "1497558509.240679099806339500",
+        "fixed_frequency_Hz": 1500000000,
+        "unknown_reasons": [],
+        "abnormal_reasons": [],
+        "observed_no_throttling": true,
+        "max_temperature_mC": 58913,
+        "swapout_bytes": 0,
+        "policy_before": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "policy_after": {
+          "/sys/devices/system/cpu/cpufreq/policy0": {
+            "scaling_governor": "performance",
+            "scaling_min_freq": "600000",
+            "scaling_max_freq": "1500000",
+            "scaling_cur_freq": "1500000"
+          }
+        },
+        "firmware_throttling_node": "unknown"
+      }
+    }
+  ]
+}
