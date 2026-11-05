@@ -26,7 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-05；补丁8符号化契约停止，板上已恢复）
+## 当前授权与执行状态（2026-11-05；补丁8主机验收完成，板上尚未恢复）
+
+- 最新PM裁决：IP规范化区间首地址N采用同指令别名N+1查询，原A缓存/计数键不变；两次叶子文件/行/discriminator不一致则generate失败并给出原文。此项修改冻结5.4.2/5.7.2执行细节，待设计v0.8登记及外部评审，v0.7正文不改。[报告13第5节](profgen/impl/13_patch8_thumb_dwarf.md)
+- 补丁8 LLVM本地`cd5168c48b5422a50829259fd43e84cc3edd6694`；21文件+492/-23；0008已导出并反向应用检查通过。GBS退出0、791秒/113步；正式lit84 PASS、1 UNSUPPORTED、1 XFAIL、0 FAIL；C1两遍各636条0差异；14份导出各两遍profile与补丁7逐字节相同。正式工具SHA `41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413`。原spec本地测试改动未提交，src/llvm干净。[正式证据](profgen/impl/evidence/13/12_formal_build.json)、[审计](profgen/impl/evidence/13/17_commit_audit.json)
+- 当前进度：旧8/70正式S及1,259,104目标样本保持；尚未使用正式新工具重转换。开发版真实libavcodec规范化33区间、sum2/avg3别名查询一致性通过，正式数据结果仍待报告12。真实avg、06完整LOST、全量nonleaf line0、训练与集成挂账未关闭。
+- 板上本阶段未连接、未改root/governor；保留不完整RUN `/opt/afdo_agent/work/eval-20261105T232305-7773`。下一步按身份/非root依赖/root清单拉回核验后才能删；清单失败必须停。最近确认状态root off、schedutil、RPM1232。预注册7d3d9d9与修订1不改。
+- 下一步：正式S重转换与真实avg核对；随后处理不完整RUN并恢复剩余采集，预计板上4–5小时。SDB再次掉线按中断处理、最多一次重连；任何真实别名一致性失败停止。Agent开发不开始。
+
+## 前轮授权与执行状态（2026-11-05；补丁8符号化契约停止，板上已恢复）
 
 - 计划/授权：本轮先排查6份正式Thumb line0，再新增并推送预注册修订1，恢复RPi4，同时实现获PM授权的GNU AS Thumb DWARF区间规范化。补丁8未完成，不开始后续设计或Agent开发。
 - 已闭合：6份报告的in_func_no_line均为原始行表显式line0，未见正行号漏查；spike Thumb sort_block集中在编译器.loc 0地址计算指令，A32对应地址加载保留line67。修订1已推送`6629b2e5a1bbc12073748fc01c12a5af04b34352`（完整值以修订提交审计为准），原7d3d9d9不变，旧7份正式缺cycles/task-clock仍unknown。见[报告12第10、11节](profgen/impl/12_board_round1.md)、[修订1](profgen/eval/preregistration_amendment1.md)。

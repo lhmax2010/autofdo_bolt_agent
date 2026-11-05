@@ -1,0 +1,954 @@
+From cd5168c48b5422a50829259fd43e84cc3edd6694 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Thu, 5 Nov 2026 23:42:13 +0800
+Subject: [PATCH] [llvm-profgen] Normalize GNU AS Thumb DWARF addresses in IP
+ mode
+
+Normalize odd Thumb DWARF ranges only with executable mapping-symbol evidence. Query the same instruction alias at normalized range starts, retaining the original PC and checking leaf file, line and discriminator consistency. Report normalization and alias evidence; preserve non-IP behavior.
+
+Add GNU AS fixtures for tagged ranges, adjacent functions and synthetic line inconsistencies. Keep shared symbolizer libraries and sampled PCs unchanged.
+---
+ llvm/docs/CommandGuide/llvm-profgen.rst       | 136 +++++++++++++++++-
+ .../Inputs/ip-mode/gnu-thumb/README.txt       |  29 ++++
+ .../Inputs/ip-mode/gnu-thumb/adjacent.perfbin | Bin 0 -> 5692 bytes
+ .../Inputs/ip-mode/gnu-thumb/adjacent.s       |  18 +++
+ .../ip-mode/gnu-thumb/check-normalization.py  | 117 +++++++++++++++
+ .../ip-mode/gnu-thumb/gnu-thumb.perfbin       | Bin 0 -> 5656 bytes
+ .../Inputs/ip-mode/gnu-thumb/gnu-thumb.s      |  12 ++
+ .../ip-mode/gnu-thumb/line-mismatch.perfbin   | Bin 0 -> 5664 bytes
+ .../Inputs/ip-mode/gnu-thumb/odd-arm.perfbin  | Bin 0 -> 5656 bytes
+ .../Inputs/ip-mode/gnu-thumb/odd-data.perfbin | Bin 0 -> 5656 bytes
+ .../ip-mode/gnu-thumb/odd-middle.perfbin      | Bin 0 -> 5656 bytes
+ .../Inputs/ip-mode/quality/check-quality.py   |   2 +-
+ .../llvm-profgen/ip-thumb-dwarf-address.test  |   4 +
+ llvm/tools/llvm-profgen/IPBoundary.cpp        |  46 ++++--
+ llvm/tools/llvm-profgen/IPBoundary.h          |   8 +-
+ llvm/tools/llvm-profgen/IPQualityReport.cpp   |  49 +++++++
+ llvm/tools/llvm-profgen/IPQualityReport.h     |   6 +
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  |   2 +
+ llvm/tools/llvm-profgen/ProfileGenerator.h    |   1 +
+ llvm/tools/llvm-profgen/ProfiledBinary.cpp    |  71 ++++++++-
+ llvm/tools/llvm-profgen/ProfiledBinary.h      |  14 +-
+ 21 files changed, 492 insertions(+), 23 deletions(-)
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.s
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.s
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/line-mismatch.perfbin
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-arm.perfbin
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-data.perfbin
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-middle.perfbin
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-thumb-dwarf-address.test
+
+diff --git a/llvm/docs/CommandGuide/llvm-profgen.rst b/llvm/docs/CommandGuide/llvm-profgen.rst
+index 222de2d43acb..0eeaf79b2db4 100644
+--- a/llvm/docs/CommandGuide/llvm-profgen.rst
++++ b/llvm/docs/CommandGuide/llvm-profgen.rst
+@@ -1077,18 +1077,78 @@ Field paths
+ ``samples.skid_unadjusted_reasons`` (object)
+   Reason subsets whose counts sum to skid_unadjusted.
+ 
+-``samples.skid_unadjusted_reasons.data_or_state_change`` (string)
++``samples.skid_unadjusted_reasons.data_or_state_change`` (string | object)
+   Predecessor crosses a mapping-state interval or data.
+ 
+-``samples.skid_unadjusted_reasons.first_instruction`` (string)
++``samples.skid_unadjusted_reasons.first_instruction`` (string | object)
+   No preceding instruction in the enumerated function.
+ 
+-``samples.skid_unadjusted_reasons.predecessor_no_line`` (string)
++``samples.skid_unadjusted_reasons.predecessor_no_line`` (string | object)
+   Predecessor has no usable line position.
+ 
+-``samples.skid_unadjusted_reasons.range_gap`` (string)
++``samples.skid_unadjusted_reasons.range_gap`` (string | object)
+   Predecessor crosses a DWARF range or byte gap.
+ 
++``samples.skid_unadjusted_reasons.data_or_state_change.sample_count`` (uint64)
++  Number of unadjusted samples in this reason category, in samples.
++
++``samples.skid_unadjusted_reasons.data_or_state_change.period_sum`` (uint64)
++  Sum of their recorded periods, in selected-event units.
++
++``samples.skid_unadjusted_reasons.data_or_state_change.normalized_weight`` (string | object)
++  Unknown before weight normalization; otherwise exact numerator/denominator.
++
++``samples.skid_unadjusted_reasons.data_or_state_change.normalized_weight.numerator`` (uint64)
++  Sample count for sample weighting, or period sum for period weighting.
++
++``samples.skid_unadjusted_reasons.data_or_state_change.normalized_weight.denominator`` (uint64)
++  One for sample weighting, or P_ref for period weighting.
++
++``samples.skid_unadjusted_reasons.first_instruction.sample_count`` (uint64)
++  Number of unadjusted samples in this reason category, in samples.
++
++``samples.skid_unadjusted_reasons.first_instruction.period_sum`` (uint64)
++  Sum of their recorded periods, in selected-event units.
++
++``samples.skid_unadjusted_reasons.first_instruction.normalized_weight`` (string | object)
++  Unknown before weight normalization; otherwise exact numerator/denominator.
++
++``samples.skid_unadjusted_reasons.first_instruction.normalized_weight.numerator`` (uint64)
++  Sample count for sample weighting, or period sum for period weighting.
++
++``samples.skid_unadjusted_reasons.first_instruction.normalized_weight.denominator`` (uint64)
++  One for sample weighting, or P_ref for period weighting.
++
++``samples.skid_unadjusted_reasons.predecessor_no_line.sample_count`` (uint64)
++  Number of unadjusted samples in this reason category, in samples.
++
++``samples.skid_unadjusted_reasons.predecessor_no_line.period_sum`` (uint64)
++  Sum of their recorded periods, in selected-event units.
++
++``samples.skid_unadjusted_reasons.predecessor_no_line.normalized_weight`` (string | object)
++  Unknown before weight normalization; otherwise exact numerator/denominator.
++
++``samples.skid_unadjusted_reasons.predecessor_no_line.normalized_weight.numerator`` (uint64)
++  Sample count for sample weighting, or period sum for period weighting.
++
++``samples.skid_unadjusted_reasons.predecessor_no_line.normalized_weight.denominator`` (uint64)
++  One for sample weighting, or P_ref for period weighting.
++
++``samples.skid_unadjusted_reasons.range_gap.sample_count`` (uint64)
++  Number of unadjusted samples in this reason category, in samples.
++
++``samples.skid_unadjusted_reasons.range_gap.period_sum`` (uint64)
++  Sum of their recorded periods, in selected-event units.
++
++``samples.skid_unadjusted_reasons.range_gap.normalized_weight`` (string | object)
++  Unknown before weight normalization; otherwise exact numerator/denominator.
++
++``samples.skid_unadjusted_reasons.range_gap.normalized_weight.numerator`` (uint64)
++  Sample count for sample weighting, or period sum for period weighting.
++
++``samples.skid_unadjusted_reasons.range_gap.normalized_weight.denominator`` (uint64)
++  One for sample weighting, or P_ref for period weighting.
++
+ ``samples.target`` (object)
+   Target conversion and DWARF classification.
+ 
+@@ -1356,6 +1416,70 @@ Field paths
+ ``semantics.zero_fill`` (string)
+   none or sampled-functions; these are literal policy names, not absence markers.
+ 
++``thumb_dwarf_normalization.range_count`` (string | uint64)
++  Number of loaded DWARF function ranges normalized, not a sample count.
++  Unknown before function loading/generation. IP ELF32 little-endian ARM only:
++  when an odd lower bound with bit zero cleared is in an executable section's
++  Thumb mapping interval, both range endpoints have bit zero cleared. This
++  affects classification and boundary enumeration, never sampled PCs or LBR.
++
++``thumb_dwarf_normalization`` (object)
++  Evidence for GNU AS Thumb-tagged DWARF addresses.
++
++``thumb_dwarf_normalization.alias_query_count`` (uint64)
++  Number of IP symbolization cache misses that used a normalized start's N+1
++  alias. Samples, counters and cache keys retain N. Zero before any such query.
++
++``thumb_dwarf_normalization.alias_check_passed`` (uint64)
++  Alias queries whose leaf file, line and discriminator exactly match the
++  original address query. A mismatch fails the whole conversion at generate.
++
++``thumb_dwarf_normalization.alias_addresses_top50`` (array)
++  First 50 queried addresses in ascending ELF virtual address order. Empty
++  means no alias query. Raw query results are retained for consistency auditing.
++
++``thumb_dwarf_normalization.alias_addresses_top50[]`` (object)
++  One same-instruction alias query and its consistency check.
++
++``thumb_dwarf_normalization.alias_addresses_top50[].address`` (uint64)
++  Original sample or enumerated instruction address N, in ELF VA bytes.
++
++``thumb_dwarf_normalization.alias_addresses_top50[].alias`` (uint64)
++  Original tagged DWARF lower bound N+1 used only for symbolization.
++
++``thumb_dwarf_normalization.alias_addresses_top50[].consistent`` (bool)
++  Whether both queries yielded a leaf with identical file, line, discriminator.
++
++``thumb_dwarf_normalization.alias_addresses_top50[].original_query`` (string)
++  Raw frame fields from querying N (function, file, line, discriminator,
++  declaration line). No function-name fallback or source-position guessing.
++
++``thumb_dwarf_normalization.alias_addresses_top50[].alias_query`` (string)
++  Raw frame fields from querying N+1. After a successful consistency check,
++  this frame chain supplies the profile identity, including adjacent functions.
++
++``thumb_dwarf_normalization.top50`` (string | array)
++  First 50 normalized ranges sorted by function, original begin, original end.
++  Unknown before loading/generation; an empty array means none were normalized.
++
++``thumb_dwarf_normalization.top50[]`` (object)
++  One normalized function range, with half-open byte addresses in ELF VA space.
++
++``thumb_dwarf_normalization.top50[].function`` (string)
++  DWARF function name.
++
++``thumb_dwarf_normalization.top50[].original_begin`` (uint64)
++  Original DWARF lower bound, in bytes.
++
++``thumb_dwarf_normalization.top50[].original_end`` (uint64)
++  Original DWARF upper bound, in bytes.
++
++``thumb_dwarf_normalization.top50[].begin`` (uint64)
++  Normalized inclusive ELF virtual address, in bytes.
++
++``thumb_dwarf_normalization.top50[].end`` (uint64)
++  Normalized exclusive ELF virtual address, in bytes.
++
+ ``throttle`` (string)
+   Unknown: throttle records are not part of the admitted text grammar.
+ 
+@@ -1422,6 +1546,10 @@ Warning codes
+ ``W_DUPLICATE_FUNCTION_START``
+   Existing DWARF loader encountered duplicate function starts.
+ 
++``W_THUMB_DWARF_ADDRESS_NORMALIZED``
++  At least one Thumb-tagged DWARF function range was normalized using executable
++  section mapping symbols. See ``thumb_dwarf_normalization`` for the evidence.
++
+ ``W_DWARF_RECOVERABLE``
+   Existing recoverable DWARF diagnostic.
+ 
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt
+new file mode 100644
+index 000000000000..75212350a536
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt
+@@ -0,0 +1,29 @@
++GNU AS Thumb DWARF addresses (patch 8)
++GNU AS 2.43, GBS armv7l emul tools; GNU ld 2.43.
++Commands run here with the GBS loader/library path:
++  as -g -o <temp>/gnu-thumb.o gnu-thumb.s
++  ld --build-id=sha1 -e gnu_thumb -Ttext=0x1000 -o gnu-thumb.perfbin <temp>/gnu-thumb.o
++Natural DWARF subprogram [0x1001,0x1009); CU [0x1000,0x1008).
++Known instructions from source: 0x1000 movs (2), 0x1002 add.w (4), 0x1006 bx (2).
++.text file offset=VA=0x1000. Bit-zero normalization yields [0x1000,0x1008).
++Negative derived files (LLVM objcopy 22.1.8):
++  llvm-objcopy --redefine-sym='$t=$a' gnu-thumb.perfbin odd-arm.perfbin
++  llvm-objcopy --redefine-sym='$t=$d' gnu-thumb.perfbin odd-data.perfbin
++  llvm-objcopy --dump-section=.debug_info=<temp>/debug-info.bin gnu-thumb.perfbin
++  Change little-endian uint32 at section offset 0x2c from 0x1001 to 0x1005.
++  llvm-objcopy --update-section=.debug_info=<temp>/middle-debug-info.bin gnu-thumb.perfbin odd-middle.perfbin
++The negative mapping/range edits are intentionally inconsistent metadata, not compiler outputs.
++odd-middle clears to 0x1004, inside add.w; odd-arm/data must not normalize.
++All samples are synthetic; no sampled PC is cleared.
++
++Adjacent GNU AS case: as -g -o <temp>/adjacent.o adjacent.s;
++ld --build-id=sha1 -e first -Ttext=0x1000 -o adjacent.perfbin <temp>/adjacent.o.
++first [0x1001,0x1005), second [0x1005,0x1009); instruction starts 1000,1002,1004,1006.
++The second normalized start 0x1004 is inside the first raw DWARF range.
++line-mismatch.perfbin: SYNTHETIC DWARF2 line metadata; minimum_instruction_length=1,
++set_address 0x1000, advance_line +8, copy (line9); advance_pc 1,
++advance_line +1, copy (line10); advance_pc 7, end_sequence.
++Replace only .debug_line using llvm-objcopy --update-section=.debug_line=<temp>/synthetic-line.bin.
++This intentionally impossible instruction-level line split tests alias consistency failure;
++it is not a compiler-produced line table. Complete generator lives in alias-fixtures.py
++in the project evidence; lit only reads the resulting ELF.
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..5058bdc9fba4666ea263398446750dcb6ae41ebe
+GIT binary patch
+literal 5692
+zcmeHL&ui3B5T2KG+wBk5ZYu~@%c?Diuu0KE1%-BLwJ0k1^Hc~)liiK%CQI^mu_t>F
+zZ(gKlPu@hldK5hM9}xcsPkItO=r>7To302Rdd$FN=9}-^m+ZWk9On6rJ2!<8q)elW
+z#7ImNEhBE7#6_dhGSx^2H${^Puk;+t(6W~pAoB0`5ciO=F95TTz?tXxFFw(*uCSs5
+zMF)xw6dfo!P;{W^K+%Ds14Rdl4ip_II#6`r*g7C;y-f{%YzrR4LOcWDv4alZy!V)1
+zUHbg#<skkLRnGtTc6w#Ky1)OvaR#LA*^W<Q25D)f-k{Nmu|`>pYrsr%%%%>>+@YM{
+z^s<VO@#*jba|xbduuZ~W!^N)lh6B$+N^tEhBhJQIDXL<6v?^wVUYV;bR%S8&&<xTm
+zt5aNrfafO~&GS|Ks!U*^WY8kWcAwhYULcJa9IT}ASmf0Fg?UXtm7~pe*!9egAGGbz
+zd=!SA?Y8X)rt1y7PT1>W4YSi3bS=9t!=@WrPS}x_-Qv3Ry1j&~_oA?gQr!#MNdZ(0
+z9;?Mi1m>-v*O#&B_v+oy^~_e#ugiA7>+mkr8V_rijpZxU^rKi(>}`jEn?C+uSMCl>
+z&n87Y14?n)@dPA1@9?4N>4fN@pr;e193DN$Inils2$!=vrR5R&{(Fkk?0K+dv<O(P
+zagob{P9Wy-Szz8_K7%vh7l!zyA$)xZZvgXoQNO=E#NQvnhi4(A1xc3W#IY4iJCc^A
+znw%EBz(px1K%Ump9kD#umNs#X$cT5k(smGKl*YEor1wmc5ron+u)&7Y_d9Ogcgbix
+zxNF!_M!wU>0U^WnoPNu)BRgmvLO*DR2bAMP-asK7QcvZ$7yjq}+8l&@LXzF(y@Kc8
+zRqiF*IXLe)pQ2>82;Bm5WlG2I9ZptH)jvYV`>HHGjYJzLsGPa4(A7A}Og+Ox;Jof9
+zbn8l#<E&iH^tEdG%$&2SHM+T+>s!!W<s>tu+X3c$DXZ^6_b$shFsD5KX073axCUYZ
+mJb%l$FL-1chv(n8-C3e1s43&M*l?R8x-ZbZNSO4ZbbkP4Ho)Hi
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.s
+new file mode 100644
+index 000000000000..ec9b83ad0b8a
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.s
+@@ -0,0 +1,18 @@
++.syntax unified
++.arch armv7-a
++.text
++.thumb
++.global first
++.type first, %function
++.thumb_func
++first:
++  movs r0, #1
++  bx lr
++.size first, .-first
++.global second
++.type second, %function
++.thumb_func
++second:
++  movs r0, #2
++  bx lr
++.size second, .-second
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py
+new file mode 100644
+index 000000000000..199cb82edbff
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py
+@@ -0,0 +1,117 @@
++#===- check-normalization.py - Thumb DWARF address checks ------------------===#
++# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++# See https://llvm.org/LICENSE.txt for license information.
++# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++#===----------------------------------------------------------------------===#
++import json
++import re
++import subprocess
++import sys
++from pathlib import Path
++
++TOOL, TMP = sys.argv[1:]
++TMP = Path(TMP)
++TMP.mkdir(parents=True, exist_ok=True)
++HERE = Path(__file__).resolve().parent
++sequence = 0
++
++
++def run(name, samples, flags, failure=None, stage="boundary"):
++
++    global sequence
++    sequence += 1
++    stem = TMP / str(sequence)
++    text = stem.with_suffix('.perfscript')
++    text.write_text(''.join(f'17/17 {period} cycles: {address:x} (/target+0x{address:x})\n'
++                            for address, period in samples))
++    output = stem.with_suffix('.prof')
++    report = stem.with_suffix('.json')
++    output.unlink(missing_ok=True)
++    p = subprocess.run([TOOL, '--ip-samples', '--allow-missing-build-id',
++                        '--binary-match-regex=^/target$',
++                        '--binary='+str(HERE/(name+'.perfbin')),
++                        '--perfscript='+str(text), '--output='+str(output),
++                        '--quality-report='+str(report), '--format=text',
++                        '--show-ip-address-counts', '--show-ip-boundaries',
++                        '--ip-period-unit=1', *flags], capture_output=True, text=True)
++    stem.with_suffix('.stdout').write_text(p.stdout)
++    stem.with_suffix('.stderr').write_text(p.stderr)
++    q = json.loads(report.read_text())
++    if failure:
++        assert p.returncode != 0 and failure in p.stderr, (name, p.stderr)
++        assert q['verdict']['failure_stage'] == stage, q
++        assert not output.exists()
++    else:
++        assert p.returncode == 0, p.stderr
++        assert 'IP-GENERATION outside_dwarf_func samples=0' in p.stdout
++    return p, q, output.read_text() if output.exists() else ''
++
++
++expected = {'function': 'gnu_thumb', 'original_begin': 4097,
++            'original_end': 4105, 'begin': 4096, 'end': 4104}
++for aggregation in ['sum', 'max', 'avg']:
++    p, q, profile = run('gnu-thumb', [(0x1000, 10), (0x1002, 20), (0x1006, 30)],
++                        ['--ip-aggregation='+aggregation])
++    n = q['thumb_dwarf_normalization']
++    assert n['range_count'] == 1 and n['top50'] == [expected], q
++    assert n['alias_query_count'] == n['alias_check_passed'] == 1, n
++    assert [x['address'] for x in n['alias_addresses_top50']] == [0x1000], n
++    assert any(w['code'] == 'W_THUMB_DWARF_ADDRESS_NORMALIZED' for w in q['warnings'])
++    assert profile.startswith('gnu_thumb:60:0\n'), profile
++    assert sorted(int(x) for x in re.findall(r'^ \d+: (\d+)$', profile, re.M)) == [10,20,30], profile
++    addresses = [int(x, 16) for x in re.findall(r'^IP-BOUNDARY instruction=(0x[0-9a-f]+)', p.stdout, re.M)]
++    assert addresses == ([0x1000, 0x1002, 0x1006] if aggregation == 'avg' else []), p.stdout
++p, q, profile = run('gnu-thumb', [(0x1006, 30)],
++                    ['--ip-aggregation=sum', '--ip-zero-fill=sampled-functions'])
++assert sorted(int(x) for x in re.findall(r'^ \d+: (\d+)$', profile, re.M)) == [0,0,30], profile
++p, q, profile = run('gnu-thumb', [(0x1006, 30)],
++                    ['--ip-aggregation=sum', '--ip-skid=prev-inst'])
++assert 'IP-GENERATION skid_unadjusted samples=0' in p.stdout
++# GAS auto-generated line table: movs line 9, add.w line 10, bx line 11;
++# no declaration line, so offsets equal source line numbers.
++assert ' 10: 30\n' in profile, profile
++for name, sample, reason, count in [('odd-arm',0x1002,'unaligned A32 range start',0),
++                                   ('odd-data',0x1002,'no runtime code section for DWARF range',0),
++                                   ('odd-middle',0x1006,'range starts inside a Thumb instruction',1)]:
++    p, q, _ = run(name, [(sample, 10)], ['--ip-aggregation=avg'], reason)
++    assert q['thumb_dwarf_normalization']['range_count'] == count, q
++# Sample PC bit zero is never cleared.
++run('gnu-thumb', [(0x1003, 10)], ['--ip-aggregation=avg'],
++    'sample is not an instruction start')
++# Adjacent raw ranges overlap the next function's first instruction by one byte.
++for agg in ['sum', 'max', 'avg']:
++    p, q, profile = run('adjacent', [(0x1000, 10), (0x1004, 20)],
++                        ['--ip-aggregation='+agg])
++    assert 'first:10:0\n 9: 10\n' in profile, profile
++    assert 'second:20:0\n 16: 20\n' in profile, profile
++    assert not any(line.startswith('  ') for line in profile.splitlines()), profile
++    n = q['thumb_dwarf_normalization']
++    assert n['alias_query_count'] == n['alias_check_passed'] == 2, n
++    assert [x['address'] for x in n['alias_addresses_top50']] == [0x1000,0x1004], n
++    second = n['alias_addresses_top50'][1]
++    assert 'function=first' in second['original_query'], second
++    assert 'function=second' in second['alias_query'], second
++p, q, _ = run('line-mismatch', [(0x1000, 10)], ['--ip-aggregation=sum'],
++              'Thumb DWARF alias line mismatch', stage='generate')
++n = q['thumb_dwarf_normalization']
++assert n['alias_query_count'] == 1 and n['alias_check_passed'] == 0, n
++assert not n['alias_addresses_top50'][0]['consistent']
++assert 'line=9' in p.stderr and 'line=10' in p.stderr and 'address=0x1000 alias=0x1001' in p.stderr, p.stderr
++assert q['verdict']['fallback_callback_count'] == 1
++# The same real metadata mismatch must atomically replace the report and retain
++# an existing profile, without leaving same-directory temporary files.
++stem = TMP / str(sequence)
++output = stem.with_suffix('.prof')
++report = stem.with_suffix('.json')
++output.write_text('old profile sentinel\n')
++report.write_text('{"verdict":{"conversion":"ok"}}\n')
++cmd = [TOOL, '--ip-samples', '--allow-missing-build-id',
++       '--binary-match-regex=^/target$', '--binary='+str(HERE/'line-mismatch.perfbin'),
++       '--perfscript='+str(stem.with_suffix('.perfscript')),
++       '--ip-aggregation=sum', '--output='+str(output), '--quality-report='+str(report)]
++p = subprocess.run(cmd, capture_output=True, text=True)
++assert p.returncode != 0 and 'Thumb DWARF alias line mismatch' in p.stderr
++assert output.read_text() == 'old profile sentinel\n'
++assert json.loads(report.read_text())['verdict']['failure_stage'] == 'generate'
++assert not list(TMP.glob('*.tmp-*'))
++print('PASS GNU AS Thumb normalization, classification, boundaries, zero-fill, skid and negatives')
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..20a5a37bd72da1bf4328666bcfdd0e7f5f8d0fc1
+GIT binary patch
+literal 5656
+zcmeHLJ#W)c6ur-G+Vq3a4-f-isnkkH5IdBjb}Jd6LX-|r!~!xlb`zt-j^dXJq)IR#
+z{y@7kGa@nYH(+95=}+i}!~o~oe!&ezV(9p;bba4>=RD`>Jm(Gf_3e#2LI_e}&=q1N
+zriqqOSI^*KP-&T}WP+Qb$&^=mu4QOBOAJtX{XXhGMw|=4oFho)x&Dh!HLTO29ncPF
+z2ebp)0quZxKs%rv&<<z^v;*1!?ZAmSAgXj|P<Q>rUU&j8;vN9E9Zcl<<|A^xer!#Q
+z?;Rvh<`2Gz`tH-x_m##4kZ$05A&FTGODnYojZTa;%3|CAW}0i>bx8XT<rHU+>nJ&&
+zH9ydo;2s9Y6mkzK-Wcz>a4%$>IWZ%qM`y&WFe~RPi<LPvJPeD>%Gwl9LckppgD&$^
+z{H#o1Y1&#5)QtKy+3I&ZD*=fp8Qcjucj=lTpeoXKEA9k#JB(UxY;VPJ`+3U^Bij#l
+zf_B{P1d+7c?VXO}_GP^7$Bq}brQ<evUIv|RO4ho)cpFo-AZn!(pc3$STXIBT-;KI`
+znb={s)`|VV9&Ch-uQnc5m#pO*yn83zeYW?%p1E&k-WlSa4~LmMtn_Ajq6#s8wA*85
+z9i)N4q|w2c2PTaT;WC>zh!Hycb&AnoQcwf1T;)lg7PN#~#J7ep@4U#*1M~Uww=;|N
+z8$<lnA<W-haXmSXmn2Ri-JYZcS@;lQa)QV&c<ThdE8XG($H@_d={T!o`GMDOI<DvS
+zf*rDC@KTc1cyQlxrR;@XABR2A^xUZV2PU$om@wLo)fit}KvopXz`|KuUO#O6wa_Ok
+zX<>zQJ&aU+)nWX<aT-GQG(AZ^m)uLWUVQ<NF~O(H|H-s(2;G7bp(@>3jBzh?74;dq
+ziwdCfZ*eRl)tK=&=&C%(L)`^yz(w5;=x!=efn!ZkSDPW4KSp<NNVf^y>M=ULDfoT$
+zoO=h|hanyFyU6UG%E&q{yE=#oz)2+gf-RFo@_nh|*&NZ90;v2hju*(H?h|xxQzm;T
+F-ERsry<`9Y
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.s b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.s
+new file mode 100644
+index 000000000000..e964167bab17
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.s
+@@ -0,0 +1,12 @@
++.syntax unified
++.arch armv7-a
++.text
++.thumb
++.global gnu_thumb
++.type gnu_thumb, %function
++.thumb_func
++gnu_thumb:
++  movs r0, #1
++  add.w r0, r0, #2
++  bx lr
++.size gnu_thumb, .-gnu_thumb
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/line-mismatch.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/line-mismatch.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..c3ef5ebe1a94eeb77601838015ff895135531946
+GIT binary patch
+literal 5664
+zcmeHLJ#W)c6ur-Gn)EC5113O9Q7a*#*rgPe0jbRZ6{2*2A{LNk*RQcrVn^{yMWsqG
+zFtfBfGb0-Ve*z{3mi~lpNDOeU;}_geB!-T@()Il~=e@e;y?D5<?`_@}LXb9tt`k>c
+znrH=a{URO)l~$-mCa_7GNO8^QSOJ&4#04U+KSDf0#=d}>eFV-p$A94|hk1n+3KR+y
+z3KR+y3KR+y3KR+y3KR+y3KR+y3KR;Qn*yRnCkAyk&TYeU*obEUJa#bQ8(UAw`T8*!
+zA3Howp3fhD5laUzO5ax-R{*-w^+FP}NK32r291uF8x=8Tpk|n3Hg!nn4wba-KW-vq
+zcz^hTxdhKJ*e2nJaPh`?&w*zlV~mLzF+DmXW`$Y3TwScrVc=m{WLDQExe3BuxIx#_
+zML(-kSelMj00~O=BNa#$?pO(MSjpgFh*=SaFoiJ6U^k;)T?M_i2aX-YZE3f{C~#wY
+zJC0jBfg47)FZX0C?zCm3>{e^9?YKP^@A|Rh#VzHyP3|k%?xbM7(~Wo0s>>)y8-Nnv
+z*ey9lupdO7o=WVnQ*Xz<v<EN32T*G~sV!S8w+LM)eZBra@Ygfb&rByk{rL}b%uH#`
+zH`9~V72~I;K4yQCG$5EXI><ROsXSCySjmBn(8;eUt_Dp(4V0A{H@Pin88Kh457m5{
+zd3+u<-vhowvsk}5gx?sd`TphCljC?v;v~xLDq2u1Wp>grIWqEd+B(vAm78DSI9UZ^
+zn)f4FzVv!c$Mw9f+#^fLSBk90<42aOR5$c`IP3wZ>qgB#Wum$o38URu=eTW>tSDB}
+z!V6knFKqes&?hSiutK>WG9CBZT>r0K0FgCKPm<3i(^9Y3H{cl>e7gMGOy`H-Eoc&=
+z=3PRL??XpJpTN7S3q<}~Y>RN6bNvmx8Yh|QZ^9btJnsj1w>2q;F(=Qf&k)U@!FxEw
+z+X8R>3?9!|dB3F$dk5Z!As*ugaMncI9enhb0F0wC0cTzC%B0}@-P9J$5pC-Nk@sSI
+Q3D5IBgZDN?`VY<f4f(*mp8x;=
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-arm.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-arm.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..504b292fc7d2e26cad2f72889187fe4a314d7239
+GIT binary patch
+literal 5656
+zcmeHLJ#W)c6ur-G+Vq3a4-i5?Nu^fmK<rS8+O1@O3Q;;h5evxJ*iDQQJBnW_kSf7|
+z_yg_E%!tIm-++mMr9Yt?5(AuT`vo@$iJ{}W(tY>ioEJTv=e*&*zP)uv2tmpWS|+Z<
+zG|?*J`Z+8Hl~$=rCa@`*OmW5MSO%B9#04VnKSVr4#=eM}eFV-p$A94|hk4qx0$KsB
+zfL1^&pcT*xXa%$aS^=$qRzNGD6*x5oM3s&W>TaIe51zsg@eF{+4kmna`w=-`Kei^u
+z4~~*23rAl>egA3c`&#2NKsRu`ki;y~(ps%SqZ4C|vKTi|Gt4ocI;3-la$0B0b%Y$x
+zh98(q@C<`(3Vr|=Z;baGcos6wn3xgMqcdVwn3YSFrOF%z9)?9`Wn+q)An?S*psT!!
+zpOp!0O-Cz&no++dTm6n_B>-V1gC`*u=C2t7tRif;;!a?<!>HxP_D&qPpSRpFvi)E$
+zXvf`75J|h;-s?DSU&gzB?09ioI&PEuGU#+uu-5IxyJ*#dsFgMVCBX4($q9meH|q9f
+zVu#&YC-wt-a1a*0+IU!9u~u*J>7DfS+1dYEbKT5*GQ=|<HZxaP@y+x`RmJ$pX^)vr
+zkOl;kMh7`3CXEf%Wja&njL`8fo9p~MJc(+cELXY7Z9yxD#roDz%_lG7^Qig$`P-Sr
+z{;eT=d8ocPRFmU)N#Z2Z?a9Jd5R(%`enD6#@LlQBqFdbHIC%wbnrD$LKk)iZ$Mw8k
+zut$~*UP`hW5AIv8l)cdF<FW^wo*Om)l!@#qB#d@rmE&s*$ckbaSh#D;>xXT>7W!l*
+zE$oo4hfKv+9j^b^&VtCArZ>s=l545<t1sX&8hpF_pG@b5;4LZ=qT-!Lj(4G}pwHl4
+zQ3Yc5<q<6va)!TwSLGx(^%iWPR(lxw0p87=!$DyjRnGm|4ABB7xhd=(YLzpz4c>ar
+z;h->nDLAil6ZQ_g4_TV7jIr;-vv(?OQyq_89l!+2NjU3*Ba?*ld#UW%9MO&{5c#**
+QUcigIPvE^xk!(@C-!*={X8-^I
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-data.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-data.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..0ada97ed46f2f57280ce77a4fa75e275d6fb3723
+GIT binary patch
+literal 5656
+zcmeHLzi-n(82!#}+B7YpKR^fpC6!tU31Wv*)NUmMREW|6idaC##%^Nd*in3`K&k`-
+z;vZ;tW=13i{tcKISo$Y)Lt=pU*}mY0A~AIIN#A|<?!CL5-Z?jXuWxVM5kin^8eJhq
+zVv1-PdG!oBjY`W@BOTl%O(eY1b1p;6QDT71>-UlOG2&PN<`_XR&-q_`qG4Up3I_@Y
+z3I_@Y3I_@Y3I_@Y3I_@Y3I_@Y3I_@YPRs#OqeG3l>nFD132ekQ04_V|i1p1!WPSbE
+zu8i*;#82iAzKF)|)6(~q=0%XUXFEQL84OD+^(Kv0#+qd@t^qU6IjcG(b%%0-)9yM_
+z#;3&()Frrv!EF+;hY)YH_nf#EGR~Zs7E`0sVn*oI3)RKyED9c)L3(v<k|!bHiit*-
+zxfegH6)a6kD}q{Kzb@PTj$_0i(MlRuLe9-y(*#s`+H6N1&kX#qZAa!-6a~-QwjY|V
+zx8ns-x8sG<41%4GW%p&Y?M9Xp1=6xxJTJXYHzDiYUbKy=x)-*S2~aV3>=qvpn0Lc&
+zU&f~2t#=~VGY1D@<7>@_wIyTu2A|$aPM@CruRill&niP)^Wmmv4lBK$+^9m#AFcN2
+zX$5H@&}noq=7COQL%2+*ax)`z_-l@Fb{?)oH37>tp5$pkOUQYAYY6kn^ZYz8-#>pl
+zGg!Yd#9tl4=Z7#^mJ`QTEbX4meFYI&Ug*+-oAcK4TwB`t1(uZ|Xp?c8$#6ZV-?D7S
+z>3KV3NbjX2qxs;zVN2Qbojxvmpy}CR>ko`&PceSD9jP(CHjj)jlAeLPHk`g6xOLwp
+zBW`1bv>l98e$`?8zwI=H>}hh7d@q@oYQ6db9%F)Um;aMV-4MD3B|=uZvl!!D=ql<n
+zbe9xB=HKGBh)`q3-=M4UAZzL^SOd=Men59qiE<ok^1Avo(fl#GdqcWS=vI%>@k_z`
+zH8SoUbRULv%<m%7cPb?tc<dS=Du5FR_60{KiQxBAwP&+LTM8iaUff<F^14sZy-k?3
+GQ@Y;`QN3RP
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-middle.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-middle.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..2e51f86e094a83647891e61104acb1917c8b11af
+GIT binary patch
+literal 5656
+zcmeHLJ#W)M7=F)g+Vq3a4-f-isnkkH5IdBjb}Jd6LX-|r!~!xlz9vSA9mSUlq)IR#
+z{y@7kGa@nYH(+95=}+i}!~oB0`+^&a#L&?vy?*bx=ef)2xyudj>)RW5gb<{gL05>8
+zm?m0AUOj`4L8WD?k_m2#CKF!kIhUd3C^10h`TNNG=y5CnbBrLE=lm}|(Xg&)g#(2H
+zg#(2Hg#(2Hg#(2Hg#(2Hg#(2Hg#(2HC+2{t(xE}!^%Gn01Qy~N0GAz1#QNqVa=w0S
+zO^ojy#82iAzKHtn)6(~q#s!eBbiIJYEV`wYT7yO>#u{ZYZU8gQIjcG(b%%0-)6aFJ
+zj8BUns7r7SgWD8h4<X(d?>Ut)KF*w&5!0hHVpf=y^OeQQ910$WMP_AfiU%R!iits&
+z`73@_CJ2=k9v0LL`!&_-cRVWwMk^Uy2|0J^njxUd({?NBNV^?`EjO~aqNx46<p!bc
+z%N^N{x*ZuRyWQUDIBs7>+kWJDQCm4~lgE|pbQ7}H?M2%ds>!gG41kKkW3~8*z`h%H
+z`zp4BZmkpf(jIJtjjuKyR+p^h8@zib*?qeAzrLAoW>Wb{>prY8Gl#X_OiolI=8sl;
+z%(Q|u5STPN=yS)Uu_0V$69;XC4u73uG#C`r04!H|kcR~=A?NX}A<V~>=jVaB7RGmH
+z7V|fT_^U&h?_GXAIgS^{PORLXq6L+^2oX6l^mE=i(sz}cpWrwdf-vc)nJiy={ifr3
+zUQh0jrQ}ORR^!2a%T=luczqo9K+|)><{ucVo@Rn@JJNmJHc3_(DQV%XEw3N6{aWCY
+z6}K=$xgL5tzv?jl-*y^8_B1(3K9|f(Jzw8|#~9$#<^N<-H-v6Mi;%VMEc$pCx|;e7
+z-9-(M`M0<&B6OeeH|VO|$(nu()`0W6AJE;@q8!JXyskDwG=Gfl-jHq+y47QJ{8I3G
+z^^AK5-G?C^^Sg-jol40%9=ke-3BXAN`+_Z#LhyU3+p{^MEe())Ep9ImdEF=I-X=`?
+G(YoIr1HEVf
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+index e17a2fa8abd9..62a803f95102 100644
+--- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
+@@ -87,7 +87,7 @@ if GROUP == 'fields':
+             '17/17 23 cycles: 9999 (/target+0x9999)\n'
+             '17/17 PERF_RECORD_LOST lost 3\n')
+     p,q,d,cmd = run(['--ip-event=cycles'],data)
+-    assert set(q) == set('schema_version tool input event semantics identity mapping samples isa boundaries lost throttle ratios sanity coverage consumer_hints warnings verdict'.split())
++    assert set(q) == set('schema_version tool input event semantics identity mapping samples isa boundaries lost throttle ratios sanity coverage thumb_dwarf_normalization consumer_hints warnings verdict'.split())
+     assert q['input']['projection']=='ip-only' and len(q['input']['sha256'])==64
+     assert q['event']['type']==q['event']['config']=='unknown'
+     assert q['event']['before_filter']==[
+diff --git a/llvm/test/tools/llvm-profgen/ip-thumb-dwarf-address.test b/llvm/test/tools/llvm-profgen/ip-thumb-dwarf-address.test
+new file mode 100644
+index 000000000000..1037ff51ec5c
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-thumb-dwarf-address.test
+@@ -0,0 +1,4 @@
++#===- ip-thumb-dwarf-address.test - GNU AS Thumb DWARF ranges -------------===#
++# REQUIRES: arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/gnu-thumb/check-normalization.py llvm-profgen %t | FileCheck %s
++# CHECK: PASS GNU AS Thumb normalization, classification, boundaries, zero-fill, skid and negatives
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.cpp b/llvm/tools/llvm-profgen/IPBoundary.cpp
+index 713653f9839c..52546a4437e7 100644
+--- a/llvm/tools/llvm-profgen/IPBoundary.cpp
++++ b/llvm/tools/llvm-profgen/IPBoundary.cpp
+@@ -31,7 +31,8 @@ char mappingISA(StringRef Name, bool ARM) {
+ }
+ } // namespace
+ 
+-Error IPBoundaryMap::loadMappings(StringRef Path, bool Runtime) {
++Error IPBoundaryMap::loadMappings(StringRef Path, bool Runtime,
++                                  bool ReadBytes) {
+   auto File = createBinary(Path);
+   if (!File)
+     return File.takeError();
+@@ -51,13 +52,17 @@ Error IPBoundaryMap::loadMappings(StringRef Path, bool Runtime) {
+       auto End = checkedAddUnsigned(S.getAddress(), S.getSize());
+       if (!End)
+         return boundaryError("section address overflow");
+-      auto Bytes = S.getContents();
+-      if (!Bytes)
+-        return Bytes.takeError();
+-      if (S.isBSS() || Bytes->size() != S.getSize())
+-        return boundaryError("runtime executable section has no bytes");
++      std::string Code;
++      if (ReadBytes) {
++        auto Bytes = S.getContents();
++        if (!Bytes)
++          return Bytes.takeError();
++        if (S.isBSS() || Bytes->size() != S.getSize())
++          return boundaryError("runtime executable section has no bytes");
++        Code = Bytes->str();
++      }
+       Sections.push_back(
+-          {Name->str(), Bytes->str(), S.getAddress(), *End, {}, {}});
++          {Name->str(), std::move(Code), S.getAddress(), *End, {}, {}});
+     }
+   }
+   // ELFObjectFileBase::symbols iterates .symtab, not .dynsym.
+@@ -104,19 +109,36 @@ Error IPBoundaryMap::loadMappings(StringRef Path, bool Runtime) {
+   return Error::success();
+ }
+ 
+-Expected<IPBoundaryMap> IPBoundaryMap::load(StringRef Binary,
+-                                            StringRef DebugBinary) {
++Expected<IPBoundaryMap>
++IPBoundaryMap::load(StringRef Binary, StringRef DebugBinary, bool ReadBytes) {
+   IPBoundaryMap Result;
+-  if (Error E = Result.loadMappings(Binary, true))
++  if (Error E = Result.loadMappings(Binary, true, ReadBytes))
+     return std::move(E);
+   if (!DebugBinary.empty() && DebugBinary != Binary)
+-    if (Error E = Result.loadMappings(DebugBinary, false))
++    if (Error E = Result.loadMappings(DebugBinary, false, ReadBytes))
+       return std::move(E);
+-  if (Result.Sources.empty())
++  if (ReadBytes && Result.Sources.empty())
+     return boundaryError("no usable mapping symbols");
+   return Result;
+ }
+ 
++bool IPBoundaryMap::isThumbAddress(uint64_t Address) const {
++  const Section *Match = nullptr;
++  for (const auto &S : Sections)
++    if (Address >= S.Begin && Address < S.End) {
++      if (Match)
++        return false;
++      Match = &S;
++    }
++  if (!Match)
++    return false;
++  auto It = Match->States.upper_bound(Address);
++  if (It == Match->States.begin())
++    return false;
++  --It;
++  return It->second == 't' && !Match->Conflicts.count(It->first);
++}
++
+ Expected<IPFunctionBoundaries>
+ IPBoundaryMap::enumerate(StringRef Name,
+                          ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.h b/llvm/tools/llvm-profgen/IPBoundary.h
+index c46754ecc6f6..e28445820111 100644
+--- a/llvm/tools/llvm-profgen/IPBoundary.h
++++ b/llvm/tools/llvm-profgen/IPBoundary.h
+@@ -51,10 +51,14 @@ class IPBoundaryMap {
+   };
+   std::vector<Section> Sections;
+   std::set<std::string> Sources;
+-  Error loadMappings(StringRef Path, bool Runtime);
++  Error loadMappings(StringRef Path, bool Runtime, bool ReadBytes);
+ 
+ public:
+-  static Expected<IPBoundaryMap> load(StringRef Binary, StringRef DebugBinary);
++  static Expected<IPBoundaryMap> load(StringRef Binary, StringRef DebugBinary,
++                                      bool ReadBytes = true);
++  // Metadata-only lookup; ambiguity or missing evidence never proves Thumb.
++  bool isThumbAddress(uint64_t Address) const;
++
+   const std::set<std::string> &sources() const { return Sources; }
+   Expected<IPFunctionBoundaries>
+   enumerate(StringRef Name, ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
+diff --git a/llvm/tools/llvm-profgen/IPQualityReport.cpp b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+index 5b71b2bba9b9..6958e24cba35 100644
+--- a/llvm/tools/llvm-profgen/IPQualityReport.cpp
++++ b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+@@ -78,6 +78,25 @@ json::Value stringOrNone(StringRef S) {
+ }
+ } // namespace
+ 
++void llvm::recordIPAliasQuery(uint64_t Address, uint64_t Alias, bool Consistent,
++                              StringRef Original, StringRef Aliased) {
++  if (ActiveReport)
++    ActiveReport->observeAlias(Address, Alias, Consistent, Original, Aliased);
++}
++
++void IPQualityReport::observeAlias(uint64_t Address, uint64_t Alias,
++                                   bool Consistent, StringRef Original,
++                                   StringRef Aliased) {
++  ++AliasQueryCount;
++  AliasCheckPassed += Consistent;
++  AliasQueries.insert_or_assign(Address,
++                                json::Object{{"address", Address},
++                                             {"alias", Alias},
++                                             {"consistent", Consistent},
++                                             {"original_query", Original.str()},
++                                             {"alias_query", Aliased.str()}});
++}
++
+ Error llvm::validateIPOutputPaths(const IPQualityOptions &O) {
+   auto Conflict = [](StringRef A, StringRef AP, StringRef B, StringRef BP) {
+     return failure("path conflict: --" + A + "='" + AP + "' aliases --" + B +
+@@ -714,6 +733,36 @@ json::Value IPQualityReport::build() {
+        Statistics.Classified
+            ? json::Value(Top(Merged, 50, weight(U, Generation.SampleWeight)))
+            : json::Value("unknown")}};
++  auto Normalized = Statistics.NormalizedRanges;
++  llvm::sort(Normalized, [](const auto &A, const auto &B) {
++    return std::tie(A.Function, A.OriginalBegin, A.OriginalEnd) <
++           std::tie(B.Function, B.OriginalBegin, B.OriginalEnd);
++  });
++  json::Array NormalizedTop;
++  for (const auto &R : ArrayRef(Normalized).take_front(50))
++    NormalizedTop.push_back(json::Object{{"function", R.Function},
++                                         {"original_begin", R.OriginalBegin},
++                                         {"original_end", R.OriginalEnd},
++                                         {"begin", R.Begin},
++                                         {"end", R.End}});
++  json::Array AliasTop;
++  for (const auto &[Address, Query] : AliasQueries) {
++    if (AliasTop.size() == 50)
++      break;
++    AliasTop.push_back(json::Object(Query));
++  }
++  Root["thumb_dwarf_normalization"] = json::Object{
++      {"alias_query_count", AliasQueryCount},
++      {"alias_check_passed", AliasCheckPassed},
++      {"alias_addresses_top50", std::move(AliasTop)},
++      {"range_count", Statistics.Started
++                          ? json::Value(uint64_t(Normalized.size()))
++                          : json::Value("unknown")},
++      {"top50", Statistics.Started ? json::Value(std::move(NormalizedTop))
++                                   : json::Value("unknown")}};
++  if (!Normalized.empty())
++    warn("W_THUMB_DWARF_ADDRESS_NORMALIZED",
++         "Thumb-tagged DWARF function ranges normalized using mapping symbols");
+   json::Array Hints;
+   if (!Generation.EstimateHead)
+     Hints.push_back("Keep profi enabled during compilation and linking; "
+diff --git a/llvm/tools/llvm-profgen/IPQualityReport.h b/llvm/tools/llvm-profgen/IPQualityReport.h
+index 90940d9b9c4c..d3e945b11eb7 100644
+--- a/llvm/tools/llvm-profgen/IPQualityReport.h
++++ b/llvm/tools/llvm-profgen/IPQualityReport.h
+@@ -29,6 +29,8 @@ bool needsIPQualityCounters();
+ bool injectIPFailure(StringRef Point);
+ void recordIPWarning(StringRef Code, StringRef Message);
+ StringRef getProfgenDWPPath();
++void recordIPAliasQuery(uint64_t Address, uint64_t Alias, bool Consistent,
++                        StringRef Original, StringRef Aliased);
+ 
+ class IPQualityReport {
+   IPQualityOptions Options;
+@@ -42,6 +44,8 @@ class IPQualityReport {
+   std::map<std::string, IPAddressCount> ISACounts, ISASources, OutsideSymbols;
+   uint64_t AlignmentCount = 0, AlignmentPeriod = 0;
+   uint64_t CallbackCount = 0;
++  uint64_t AliasQueryCount = 0, AliasCheckPassed = 0;
++  std::map<uint64_t, json::Object> AliasQueries;
+   bool ISAObserved = false, IsA64 = false, ReportIOFailed = false;
+   bool PeriodKnown = false, SemanticsKnown = false;
+   struct Fraction {
+@@ -69,6 +73,8 @@ public:
+   void warn(StringRef Code, StringRef Message);
+   Error validateOptions();
+   void observeBinary();
++  void observeAlias(uint64_t Address, uint64_t Alias, bool Consistent,
++                    StringRef Original, StringRef Aliased);
+   void setPeriodKnown() { PeriodKnown = true; }
+   void setSemanticsKnown() { SemanticsKnown = true; }
+   Error checkThresholds();
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+index 61b7c725ad26..f183596eef16 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+@@ -258,6 +258,8 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     const AddressCounter &Counts, const IPGenerationOptions &Options,
+     IPGenerationStatistics &Statistics) {
+   Statistics.Started = true;
++  auto Normalized = Binary->getIPNormalizedRanges();
++  Statistics.NormalizedRanges.assign(Normalized.begin(), Normalized.end());
+   Statistics.FSDiscriminator = Binary->useFSDiscriminator();
+   UseFSDiscriminator = Binary->useFSDiscriminator();
+   FunctionSamples::ProfileIsFS = UseFSDiscriminator;
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.h b/llvm/tools/llvm-profgen/ProfileGenerator.h
+index 6005b49e9d87..3555409dba05 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.h
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.h
+@@ -170,6 +170,7 @@ struct IPGenerationStatistics {
+   bool Started = false, Classified = false, Finished = false;
+   bool FSDiscriminator = false;
+   uint64_t WrittenPositions = 0;
++  std::vector<IPNormalizedRange> NormalizedRanges;
+   IPAddressCount OriginalUsable;
+   std::map<std::string, IPAddressCount> Functions;
+   std::map<std::string, std::set<uint64_t>> FunctionOrigins;
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.cpp b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+index 25c723d5a1c8..cf384ca43f9b 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.cpp
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+@@ -284,6 +284,9 @@ void ProfiledBinary::load() {
+                               "injected runtime metadata failure"))
+                         : loadIPMetadata(*Obj);
+     unwrapOrError(std::move(Metadata), Path);
++    if (auto *ELF = dyn_cast<ELFObjectFileBase>(Obj))
++      IPThumbDWARF =
++          isa<ELF32LEObjectFile>(ELF) && ELF->getEMachine() == ELF::EM_ARM;
+     SymbolizerOpts = getSymbolizerOpts();
+     Symbolizer = std::make_unique<symbolize::LLVMSymbolizer>(SymbolizerOpts);
+     if (!DebugBinaryPath.empty()) {
+@@ -1028,7 +1031,26 @@ void ProfiledBinary::loadSymbolsFromDWARFUnit(DWARFUnit &CompilationUnit) {
+     auto RangesOrError = Die.getAddressRanges();
+     if (!RangesOrError)
+       continue;
+-    const DWARFAddressRangesVector &Ranges = RangesOrError.get();
++    DWARFAddressRangesVector Ranges = std::move(*RangesOrError);
++    if (IPThumbDWARF)
++      for (auto &Range : Ranges) {
++        if (!(Range.LowPC & 1))
++          continue;
++        // Even ranges need no mapping evidence. Keep their original loading
++        // and boundary diagnostics, including malformed mapping metadata.
++        if (!IPDWARFMappings)
++          IPDWARFMappings = unwrapOrError(
++              IPBoundaryMap::load(Path, DebugBinaryPath, false), Path);
++        if (IPDWARFMappings->isThumbAddress(Range.LowPC & ~uint64_t(1))) {
++          uint64_t Begin = Range.LowPC & ~uint64_t(1);
++          uint64_t End = Range.HighPC & ~uint64_t(1);
++          IPNormalizedRanges.push_back(
++              {Name, Range.LowPC, Range.HighPC, Begin, End});
++          IPDWARFAliases.emplace(Begin, Range.LowPC);
++          Range.LowPC = Begin;
++          Range.HighPC = End;
++        }
++      }
+ 
+     if (Ranges.empty())
+       continue;
+@@ -1182,8 +1204,51 @@ SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
+         (injectIPFailure("symbolize") || injectIPFailure("debug-open")))
+       return createStringError(inconvertibleErrorCode(),
+                                "injected symbolizer open/query failure");
+-    return Symbolizer->symbolizeInlinedCode(SymbolizerPath.str(),
+-                                            getSectionedAddress(IP.Address));
++    auto Original = Symbolizer->symbolizeInlinedCode(
++        SymbolizerPath.str(), getSectionedAddress(IP.Address));
++    if (!Original || !IPMode)
++      return Original;
++    auto Alias = IPDWARFAliases.find(IP.Address);
++    if (Alias == IPDWARFAliases.end())
++      return Original;
++    auto Aliased = Symbolizer->symbolizeInlinedCode(
++        SymbolizerPath.str(), getSectionedAddress(Alias->second));
++    if (!Aliased)
++      return Aliased.takeError();
++    bool Consistent =
++        Original->getNumberOfFrames() && Aliased->getNumberOfFrames();
++    if (Consistent) {
++      const auto &A = Original->getFrame(0);
++      const auto &B = Aliased->getFrame(0);
++      Consistent = A.FileName == B.FileName && A.Line == B.Line &&
++                   A.Discriminator == B.Discriminator;
++    }
++    auto Describe = [](const DIInliningInfo &Info) {
++      std::string Text;
++      raw_string_ostream OS(Text);
++      OS << "frames=" << Info.getNumberOfFrames();
++      for (unsigned I = 0; I < Info.getNumberOfFrames(); ++I) {
++        const auto &F = Info.getFrame(I);
++        OS << "\n  frame=" << I << " function=" << F.FunctionName
++           << " file=" << F.FileName << " line=" << F.Line
++           << " discriminator=" << F.Discriminator
++           << " start_line=" << F.StartLine;
++      }
++      return Text;
++    };
++    std::string Raw = Describe(*Original), AliasRaw = Describe(*Aliased);
++    recordIPAliasQuery(IP.Address, Alias->second, Consistent, Raw, AliasRaw);
++    if (!Consistent) {
++      setIPStage("generate");
++      return createStringError(inconvertibleErrorCode(),
++                               "Thumb DWARF alias line mismatch at address=0x" +
++                                   utohexstr(IP.Address, true) + " alias=0x" +
++                                   utohexstr(Alias->second, true) +
++                                   "\noriginal: " + Raw +
++                                   "\nalias: " + AliasRaw);
++    }
++    // Only the symbolizer query uses the alias. The PC and cache key remain A.
++    return std::move(*Aliased);
+   };
+   DIInliningInfo InlineStack = unwrapOrError(Query(), SymbolizerPath);
+ 
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.h b/llvm/tools/llvm-profgen/ProfiledBinary.h
+index 65dab67f19bc..7addcc8d6310 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.h
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.h
+@@ -11,6 +11,7 @@
+ 
+ #include "CallContext.h"
+ #include "ErrorHandling.h"
++#include "IPBoundary.h"
+ #include "llvm/ADT/DenseMap.h"
+ #include "llvm/ADT/StringRef.h"
+ #include "llvm/ADT/StringSet.h"
+@@ -199,13 +200,21 @@ struct MMapEvent {
+   StringRef BinaryPath;
+ };
+ 
++struct IPNormalizedRange {
++  std::string Function;
++  uint64_t OriginalBegin, OriginalEnd, Begin, End;
++};
++
+ class ProfiledBinary {
+   // Absolute path of the executable binary.
+   std::string Path;
+   // Path of the debug info binary.
+   std::string DebugBinaryPath;
+   // IP loading never constructs the disassembler or uses a runtime base.
+-  bool IPMode = false;
++  bool IPMode = false, IPThumbDWARF = false;
++  std::optional<IPBoundaryMap> IPDWARFMappings;
++  std::vector<IPNormalizedRange> IPNormalizedRanges;
++  std::map<uint64_t, uint64_t> IPDWARFAliases;
+   std::unordered_set<uint64_t> IPNonLeafZeroLineAddresses;
+   std::vector<std::pair<uint64_t, uint64_t>> IPCURanges, IPPLTRanges;
+   Expected<bool> loadIPMetadata(object::ObjectFile &Obj);
+@@ -417,6 +426,9 @@ public:
+   ProfiledBinary(const StringRef ExeBinPath, const StringRef DebugBinPath,
+                  bool IPMode = false);
+   StringRef classifyOutsideIP(uint64_t Address) const;
++  ArrayRef<IPNormalizedRange> getIPNormalizedRanges() const {
++    return IPNormalizedRanges;
++  }
+   ~ProfiledBinary();
+ 
+   /// Symbolize an address and return the symbol name. The returned StringRef is
+-- 
+2.43.0
+

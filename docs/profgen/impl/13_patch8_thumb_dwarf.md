@@ -1,4 +1,4 @@
-# 补丁 8：GNU AS Thumb 子程序的 DWARF 地址（符号化契约处停止）
+# 补丁 8：GNU AS Thumb 子程序的 DWARF 地址与同指令别名查询
 
 本轮依据 PM 2026-11-05 裁决实现，不修改冻结设计 v0.7 正文、不清样本 PC、不连接 LLVM/Gerrit 远端。LLVM 基线为补丁 7 `e4642a8ad9e0acb990b45ade3ef7aca755cd80f2`；原正式工具 SHA-256 `334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30` 已核对并另存 `temp/profgen-patch8/baseline-llvm-profgen`。
 
@@ -70,3 +70,38 @@ GBS armv7l root 的 GNU AS 2.43 `as -g`，GNU ld `--build-id=sha1 -Ttext=0x1000`
 尚未选择上述方案。开发草稿保留在 worktree；`temp/profgen-patch8/draft.diff` 与素材生成记录留存。正式工具 SHA、LLVM HEAD、设计/golden SHA、src/llvm 干净状态及原 spec diff见[范围审计](evidence/13/06_stop_scope.json)。开发工具 SHA 为 `813c91fa6b09bffa165dd7e74a47faccf4d8fa417466cfb5fe6ed29f89a74414`，仅用于复现，不用于正式数据转换。
 
 新建 GNU AS 素材共4个 ELF；正例源码/负例生成命令、映射符号与 DWARF 原文见[生成证据](evidence/13/01_gnu_as_fixture.json)。新增 lit 入口1个，但其 helper 第一组失败；其余正负例没有完成验收。首次开发编译的基类访问错误已修正，随后开发链接成功；原始日志 `temp/profgen-patch8/devbuild{,2}.log` 保留。没有运行正式 GBS 或以放宽期望绕过停止条件。
+
+
+## 5. 最新裁决后的恢复：同一指令别名查询
+
+以上第4节为上一次停止记录，保留不改。PM已授权扩展冻结5.4.2/5.7.2的执行细节，采用同一指令别名查询；不改共享LLVM符号化库，也不从DIE另补函数名。
+
+IP ELF32 little-endian EM_ARM函数加载时，仅遇到奇数low_pc才懒加载映射元数据。在已证明的Thumb区间中规范化两端，同时记N→N+1。符号化缓存仍按原A寻址，只有A恰等于规范化下界N才查询N+1；原查询的叶子文件、行号、discriminator逐项比较，任何一项不同以generate失败，经现有Error/unwrap出口生成失败JSON，旧profile不变。普通PC、计数键、非IP和共享库保持原逻辑。
+
+新报告字段为alias_query_count（实际查询次数，不是样本数）、alias_check_passed、alias_addresses_top50（按原地址排序，含别名地址、比较结果与两次完整帧查询原文）。最多50项，计数不截断；尚未查询为0/空数组。schema_version仍1，文档列出字段和单位。该裁决与区间规范化一并列入下一轮外部评审，冻结v0.7正文不改。
+
+### 素材与开发验收
+
+新增GNU AS相邻函数：原first=[0x1001,0x1005)、second=[0x1005,0x1009)，second首指令0x1004原查询误归first，别名0x1005返回second，叶子line16一致。正例sum/max/avg计数分别为first10、second20，没有伪造内联关系。另造明确标为合成的DWARF2行表，在同一16位指令内0x1000/0x1001分别标line9/10，验证整次generate失败、回调一次、完整失败JSON原子替换、旧profile不变且无临时文件。GNU三指令原例sum/max/avg=60，10/20/30；补零、prev-inst及三个原负例保持要求。[生成命令与原文](evidence/13/08_alias_fixtures.json)、[生成脚本](evidence/13/08_alias_fixtures.py)。
+
+开发全套lit为86项：84 PASS、1 UNSUPPORTED、1 XFAIL、0 FAIL；新增入口1个。已有clang素材生成的153份profile逐字节相同。开发C1两遍各636条，0差异。[开发原文](evidence/13/10_development_lit.txt)、[摘要](evidence/13/10_development_checks.json)。首次开发全套因临时增量驱动未跟踪头文件导致陈旧对象ABI不一致，重编全部profgen翻译单元后消除；随后将映射读取限制为遇到奇数low_pc才触发，保留原错误阶段。首次C1换了scratch目录产生141条stderr路径差异，profile/退出码未变；恢复基线目录后两遍0差异，未覆盖已提交基线。
+
+真实BBB中档libavcodec开发冒烟：33个规范化区间，sum两次别名查询、avg三次，一致性均通过；包括__udivsi3首地址及原误归__divsi3的下一函数__aeabi_idivmod首地址。这是开发检查，不替代正式GBS验收。[原始命令/查询](evidence/13/11_development_real_smoke.json)。
+
+### 待设计 v0.8 登记补充
+
+同指令别名查询仅用于已规范化区间的首地址；叶子位置不一致为generate失败，不得按任一查询继续。缓存/计数键始终为原地址。报告登记范围与查询证据。实现保留先前加载/边界失败阶段，不为偶数DWARF区间提前读取边界元数据。
+
+
+## 6. 正式验收与提交
+
+- LLVM本地补丁8：`cd5168c48b5422a50829259fd43e84cc3edd6694`；21文件，+492/-23行，6个小型ELF素材，新lit入口1个。只含profgen工具/测试与schema文档；spec本地测试diff与原来完全一致，未进入提交。冻结设计、boundary golden、src/llvm不改。[审计](evidence/13/17_commit_audit.json)
+- GBS正式增量：2026-11-05T23:26:34+08:00至2026-11-05T23:39:45+08:00，791秒；113 Ninja步，GBS_EXIT=0、ALL-END OK。此前按资源约束等待其他会话600秒，包装进程总1390.995秒。资源600秒采样原文、日志尾与完整temp位置见[构建证据](evidence/13/12_formal_build.json)。
+- 正式%check：86项，84 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，原85项逐项与补丁7相同；新测试通过。[日志](evidence/13/13_formal_lit.txt)、[xunit](evidence/13/13_formal_lit.xml)
+- C1两遍各636条，0差异、两遍逐字节一致；新测试列为未纳入C1。[清单摘要](evidence/13/14_formal_c1.json)
+- 14份完整导出各两遍，profile与补丁7逐字节一致，退出码/诊断两遍确定。每份JSON仅新增thumb_dwarf_normalization，以及本轮独立输出目录造成的两项tool.arguments路径变化；没有现有质量统计变化。[逐份差异与SHA](evidence/13/15_full_replay.json)
+- 123份报告共383字段路径，与schema文档双向差集0、空字符串值0。扩大采集到新测试的非report.json文件后，发现旧schema未列出四类skid原因计数对象的20个子字段，本补丁只补文档类型/字段，不改变这些字段的输出。[字段检查](evidence/13/16_schema.json)
+- GBS clang-format改动行处理和dry-run通过。[原文](evidence/13/09_format.json)
+- 正式新工具SHA-256：`41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413`。导出[0008补丁](../../../patches/profgen/0008-llvm-profgen-Normalize-GNU-AS-Thumb-DWARF-addresses-in-IP-mode.patch)，`git apply --reverse --check`通过；未推LLVM/Gerrit。
+
+补丁8主机实现阶段闭合。全部正式S重转换、真实avg独立核对和板上恢复另记报告12，不以本节开发冒烟代替其结果。边界例外：无新增。

@@ -1,0 +1,607 @@
+{
+  "dev-real-smoke": {
+    "run": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/dev/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/libavcodec.so.62.11.100",
+        "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+        "--binary-match-regex=^/opt/afdo_agent/variants/ffmpeg\\-thumb\\-S/lib/libavcodec\\.so\\.62\\.11\\.100$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/dev-real-smoke/sum.text",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/dev-real-smoke/sum.json"
+      ],
+      "exit": 0,
+      "seconds": 1.9254874139951426,
+      "maxrss_kib": 101544
+    },
+    "verdict": {
+      "conversion": "ok",
+      "failure_stage": null,
+      "fallback_callback_count": 0,
+      "identity": "verified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": null,
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "normalization": {
+      "alias_addresses_top50": [
+        {
+          "address": 3415848,
+          "alias": 3415849,
+          "alias_query": "frames=1\n  frame=0 function=__udivsi3 file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1104 discriminator=0 start_line=0",
+          "consistent": true,
+          "original_query": "frames=1\n  frame=0 function=<invalid> file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1104 discriminator=0 start_line=0"
+        },
+        {
+          "address": 3417140,
+          "alias": 3417141,
+          "alias_query": "frames=1\n  frame=0 function=__aeabi_idivmod file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1373 discriminator=0 start_line=0",
+          "consistent": true,
+          "original_query": "frames=1\n  frame=0 function=__divsi3 file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1373 discriminator=0 start_line=0"
+        }
+      ],
+      "alias_check_passed": 2,
+      "alias_query_count": 2,
+      "range_count": 33,
+      "top50": [
+        {
+          "begin": 3417180,
+          "end": 3417810,
+          "function": "__adddf3",
+          "original_begin": 3417181,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3418068,
+          "end": 3418420,
+          "function": "__addsf3",
+          "original_begin": 3418069,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3417180,
+          "end": 3417810,
+          "function": "__aeabi_dadd",
+          "original_begin": 3417181,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3417176,
+          "end": 3417810,
+          "function": "__aeabi_dsub",
+          "original_begin": 3417177,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3417880,
+          "end": 3417946,
+          "function": "__aeabi_f2d",
+          "original_begin": 3417881,
+          "original_end": 3417947
+        },
+        {
+          "begin": 3418068,
+          "end": 3418420,
+          "function": "__aeabi_fadd",
+          "original_begin": 3418069,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3418056,
+          "end": 3418420,
+          "function": "__aeabi_frsub",
+          "original_begin": 3418057,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3418064,
+          "end": 3418420,
+          "function": "__aeabi_fsub",
+          "original_begin": 3418065,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3417844,
+          "end": 3417878,
+          "function": "__aeabi_i2d",
+          "original_begin": 3417845,
+          "original_end": 3417879
+        },
+        {
+          "begin": 3418428,
+          "end": 3418456,
+          "function": "__aeabi_i2f",
+          "original_begin": 3418429,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3418804,
+          "end": 3418816,
+          "function": "__aeabi_idiv0",
+          "original_begin": 3418805,
+          "original_end": 3418817
+        },
+        {
+          "begin": 3417140,
+          "end": 3417166,
+          "function": "__aeabi_idivmod",
+          "original_begin": 3417141,
+          "original_end": 3417167
+        },
+        {
+          "begin": 3417964,
+          "end": 3418054,
+          "function": "__aeabi_l2d",
+          "original_begin": 3417965,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418472,
+          "end": 3418596,
+          "function": "__aeabi_l2f",
+          "original_begin": 3418473,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3418804,
+          "end": 3418816,
+          "function": "__aeabi_ldiv0",
+          "original_begin": 3418805,
+          "original_end": 3418817
+        },
+        {
+          "begin": 3417812,
+          "end": 3417842,
+          "function": "__aeabi_ui2d",
+          "original_begin": 3417813,
+          "original_end": 3417843
+        },
+        {
+          "begin": 3418420,
+          "end": 3418456,
+          "function": "__aeabi_ui2f",
+          "original_begin": 3418421,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3416452,
+          "end": 3416478,
+          "function": "__aeabi_uidivmod",
+          "original_begin": 3416453,
+          "original_end": 3416479
+        },
+        {
+          "begin": 3417948,
+          "end": 3418054,
+          "function": "__aeabi_ul2d",
+          "original_begin": 3417949,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418456,
+          "end": 3418596,
+          "function": "__aeabi_ul2f",
+          "original_begin": 3418457,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3416480,
+          "end": 3417140,
+          "function": "__divsi3",
+          "original_begin": 3416481,
+          "original_end": 3417141
+        },
+        {
+          "begin": 3417880,
+          "end": 3417946,
+          "function": "__extendsfdf2",
+          "original_begin": 3417881,
+          "original_end": 3417947
+        },
+        {
+          "begin": 3417964,
+          "end": 3418054,
+          "function": "__floatdidf",
+          "original_begin": 3417965,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418472,
+          "end": 3418596,
+          "function": "__floatdisf",
+          "original_begin": 3418473,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3417844,
+          "end": 3417878,
+          "function": "__floatsidf",
+          "original_begin": 3417845,
+          "original_end": 3417879
+        },
+        {
+          "begin": 3418428,
+          "end": 3418456,
+          "function": "__floatsisf",
+          "original_begin": 3418429,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3417948,
+          "end": 3418054,
+          "function": "__floatundidf",
+          "original_begin": 3417949,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418456,
+          "end": 3418596,
+          "function": "__floatundisf",
+          "original_begin": 3418457,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3417812,
+          "end": 3417842,
+          "function": "__floatunsidf",
+          "original_begin": 3417813,
+          "original_end": 3417843
+        },
+        {
+          "begin": 3418420,
+          "end": 3418456,
+          "function": "__floatunsisf",
+          "original_begin": 3418421,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3417176,
+          "end": 3417810,
+          "function": "__subdf3",
+          "original_begin": 3417177,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3418064,
+          "end": 3418420,
+          "function": "__subsf3",
+          "original_begin": 3418065,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3415848,
+          "end": 3416452,
+          "function": "__udivsi3",
+          "original_begin": 3415849,
+          "original_end": 3416453
+        }
+      ]
+    },
+    "stderr": "warning: Found 14 start addresses with multiple symbols\nwarning: Sample PGO is estimated to optimize better with 17.2x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n",
+    "note": "development smoke only; formal verification pending"
+  },
+  "dev-real-avg": {
+    "run": {
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/dev/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/libavcodec.so.62.11.100",
+        "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+        "--binary-match-regex=^/opt/afdo_agent/variants/ffmpeg\\-thumb\\-S/lib/libavcodec\\.so\\.62\\.11\\.100$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=avg",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/dev-real-avg/avg.text",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/dev-real-avg/avg.json"
+      ],
+      "exit": 0,
+      "seconds": 1.2192888959980337,
+      "maxrss_kib": 107140
+    },
+    "verdict": {
+      "conversion": "ok",
+      "failure_stage": null,
+      "fallback_callback_count": 0,
+      "identity": "verified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": null,
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "normalization": {
+      "alias_addresses_top50": [
+        {
+          "address": 3415848,
+          "alias": 3415849,
+          "alias_query": "frames=1\n  frame=0 function=__udivsi3 file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1104 discriminator=0 start_line=0",
+          "consistent": true,
+          "original_query": "frames=1\n  frame=0 function=<invalid> file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1104 discriminator=0 start_line=0"
+        },
+        {
+          "address": 3416480,
+          "alias": 3416481,
+          "alias_query": "frames=1\n  frame=0 function=__divsi3 file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1297 discriminator=0 start_line=0",
+          "consistent": true,
+          "original_query": "frames=1\n  frame=0 function=<invalid> file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1297 discriminator=0 start_line=0"
+        },
+        {
+          "address": 3417140,
+          "alias": 3417141,
+          "alias_query": "frames=1\n  frame=0 function=__aeabi_idivmod file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1373 discriminator=0 start_line=0",
+          "consistent": true,
+          "original_query": "frames=1\n  frame=0 function=__divsi3 file=/home/abuild/rpmbuild/BUILD/gcc-14.2.0/obj/armv7l-tizen-linux-gnueabi/libgcc/../../../libgcc/config/arm/lib1funcs.S line=1373 discriminator=0 start_line=0"
+        }
+      ],
+      "alias_check_passed": 3,
+      "alias_query_count": 3,
+      "range_count": 33,
+      "top50": [
+        {
+          "begin": 3417180,
+          "end": 3417810,
+          "function": "__adddf3",
+          "original_begin": 3417181,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3418068,
+          "end": 3418420,
+          "function": "__addsf3",
+          "original_begin": 3418069,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3417180,
+          "end": 3417810,
+          "function": "__aeabi_dadd",
+          "original_begin": 3417181,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3417176,
+          "end": 3417810,
+          "function": "__aeabi_dsub",
+          "original_begin": 3417177,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3417880,
+          "end": 3417946,
+          "function": "__aeabi_f2d",
+          "original_begin": 3417881,
+          "original_end": 3417947
+        },
+        {
+          "begin": 3418068,
+          "end": 3418420,
+          "function": "__aeabi_fadd",
+          "original_begin": 3418069,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3418056,
+          "end": 3418420,
+          "function": "__aeabi_frsub",
+          "original_begin": 3418057,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3418064,
+          "end": 3418420,
+          "function": "__aeabi_fsub",
+          "original_begin": 3418065,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3417844,
+          "end": 3417878,
+          "function": "__aeabi_i2d",
+          "original_begin": 3417845,
+          "original_end": 3417879
+        },
+        {
+          "begin": 3418428,
+          "end": 3418456,
+          "function": "__aeabi_i2f",
+          "original_begin": 3418429,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3418804,
+          "end": 3418816,
+          "function": "__aeabi_idiv0",
+          "original_begin": 3418805,
+          "original_end": 3418817
+        },
+        {
+          "begin": 3417140,
+          "end": 3417166,
+          "function": "__aeabi_idivmod",
+          "original_begin": 3417141,
+          "original_end": 3417167
+        },
+        {
+          "begin": 3417964,
+          "end": 3418054,
+          "function": "__aeabi_l2d",
+          "original_begin": 3417965,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418472,
+          "end": 3418596,
+          "function": "__aeabi_l2f",
+          "original_begin": 3418473,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3418804,
+          "end": 3418816,
+          "function": "__aeabi_ldiv0",
+          "original_begin": 3418805,
+          "original_end": 3418817
+        },
+        {
+          "begin": 3417812,
+          "end": 3417842,
+          "function": "__aeabi_ui2d",
+          "original_begin": 3417813,
+          "original_end": 3417843
+        },
+        {
+          "begin": 3418420,
+          "end": 3418456,
+          "function": "__aeabi_ui2f",
+          "original_begin": 3418421,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3416452,
+          "end": 3416478,
+          "function": "__aeabi_uidivmod",
+          "original_begin": 3416453,
+          "original_end": 3416479
+        },
+        {
+          "begin": 3417948,
+          "end": 3418054,
+          "function": "__aeabi_ul2d",
+          "original_begin": 3417949,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418456,
+          "end": 3418596,
+          "function": "__aeabi_ul2f",
+          "original_begin": 3418457,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3416480,
+          "end": 3417140,
+          "function": "__divsi3",
+          "original_begin": 3416481,
+          "original_end": 3417141
+        },
+        {
+          "begin": 3417880,
+          "end": 3417946,
+          "function": "__extendsfdf2",
+          "original_begin": 3417881,
+          "original_end": 3417947
+        },
+        {
+          "begin": 3417964,
+          "end": 3418054,
+          "function": "__floatdidf",
+          "original_begin": 3417965,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418472,
+          "end": 3418596,
+          "function": "__floatdisf",
+          "original_begin": 3418473,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3417844,
+          "end": 3417878,
+          "function": "__floatsidf",
+          "original_begin": 3417845,
+          "original_end": 3417879
+        },
+        {
+          "begin": 3418428,
+          "end": 3418456,
+          "function": "__floatsisf",
+          "original_begin": 3418429,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3417948,
+          "end": 3418054,
+          "function": "__floatundidf",
+          "original_begin": 3417949,
+          "original_end": 3418055
+        },
+        {
+          "begin": 3418456,
+          "end": 3418596,
+          "function": "__floatundisf",
+          "original_begin": 3418457,
+          "original_end": 3418597
+        },
+        {
+          "begin": 3417812,
+          "end": 3417842,
+          "function": "__floatunsidf",
+          "original_begin": 3417813,
+          "original_end": 3417843
+        },
+        {
+          "begin": 3418420,
+          "end": 3418456,
+          "function": "__floatunsisf",
+          "original_begin": 3418421,
+          "original_end": 3418457
+        },
+        {
+          "begin": 3417176,
+          "end": 3417810,
+          "function": "__subdf3",
+          "original_begin": 3417177,
+          "original_end": 3417811
+        },
+        {
+          "begin": 3418064,
+          "end": 3418420,
+          "function": "__subsf3",
+          "original_begin": 3418065,
+          "original_end": 3418421
+        },
+        {
+          "begin": 3415848,
+          "end": 3416452,
+          "function": "__udivsi3",
+          "original_begin": 3415849,
+          "original_end": 3416453
+        }
+      ]
+    },
+    "stderr": "warning: Found 14 start addresses with multiple symbols\nwarning: Sample PGO is estimated to optimize better with 50.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n",
+    "note": "development smoke only; formal verification pending"
+  }
+}

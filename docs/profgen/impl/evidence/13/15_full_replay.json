@@ -1,0 +1,1038 @@
+[
+  {
+    "label": "05-fixed",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-fixed.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-fixed.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.16068116999667836
+      },
+      {
+        "exit": 1,
+        "seconds": 0.02664210199873196
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-fixed.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-fixed.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-fixed.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-fixed.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "32733a16c00b53f56673aa72aa60520807fe3403918e7c404fc951d36e35a963",
+        "stdout": "f0fd781ad134e5d72256ea4d1acf929cf288c6d70ec7b342c96ca0eb14a60e60",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "32733a16c00b53f56673aa72aa60520807fe3403918e7c404fc951d36e35a963",
+        "stdout": "f0fd781ad134e5d72256ea4d1acf929cf288c6d70ec7b342c96ca0eb14a60e60",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "05-multi",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/multi_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-multi.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-multi.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.15167015900078695
+      },
+      {
+        "exit": 1,
+        "seconds": 0.05252429000393022
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-multi.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-multi.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-multi.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-multi.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "65a6be557ff62857ef816195e59e7d42ad914a35c9513be054c4dae0572c5b8c",
+        "stdout": "8460b990d16de875cfc92bc016bba14fae9eba96078ea9c8b6eb09d9201d364e",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "65a6be557ff62857ef816195e59e7d42ad914a35c9513be054c4dae0572c5b8c",
+        "stdout": "8460b990d16de875cfc92bc016bba14fae9eba96078ea9c8b6eb09d9201d364e",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "05-freq",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/freq_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-freq.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-freq.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.0629382299957797
+      },
+      {
+        "exit": 1,
+        "seconds": 0.02343574000406079
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-freq.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-freq.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-freq.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-freq.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "070e28f970d608011d9fc0a7b577c0fac5c89425f2c0e5aaff67b750817d7106",
+        "stdout": "7b50ab2fd217ec444a59ab45c1484d780790df7299aa17b23a0c619940f960ac",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "070e28f970d608011d9fc0a7b577c0fac5c89425f2c0e5aaff67b750817d7106",
+        "stdout": "7b50ab2fd217ec444a59ab45c1484d780790df7299aa17b23a0c619940f960ac",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "05-buildid",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/buildid_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-buildid.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-buildid.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.08028592199843843
+      },
+      {
+        "exit": 1,
+        "seconds": 0.028646912003750913
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-buildid.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-buildid.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-buildid.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-buildid.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "9692d9b0c8743e4e416ab73067fd59de360efeb5f9c17e8200a37a39b1f75b63",
+        "stdout": "97272d7c600b2f757966b62b410e0593e64cf1458030b2d7ad09ac6383f10109",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "9692d9b0c8743e4e416ab73067fd59de360efeb5f9c17e8200a37a39b1f75b63",
+        "stdout": "97272d7c600b2f757966b62b410e0593e64cf1458030b2d7ad09ac6383f10109",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "05-lost",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/libavcodec.so.62.11.100",
+      "--binary-match-regex=^/usr/lib/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-prefreeze/lost_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-lost.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-lost.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 2.2538914140022825
+      },
+      {
+        "exit": 1,
+        "seconds": 1.6817706579968217
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-lost.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-lost.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/05-lost.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/05-lost.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "99d05dd4ffb95c41001227b9049d237a95c1733bcc9fc874e9f9ec59b6645c6a",
+        "stdout": "0a969ce3dcbf4cad22edd99e6351b97d271a8d3312db2dc022a6093c3a4b4eb2",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "99d05dd4ffb95c41001227b9049d237a95c1733bcc9fc874e9f9ec59b6645c6a",
+        "stdout": "0a969ce3dcbf4cad22edd99e6351b97d271a8d3312db2dc022a6093c3a4b4eb2",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "07-fork-cases",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+      "--binary-match-regex=^/opt/afdo_agent/work/cases$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/fork.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-fork-cases.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-fork-cases.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 0.25965073699626373
+      },
+      {
+        "exit": 0,
+        "seconds": 0.029761274003249127
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-fork-cases.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-fork-cases.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-fork-cases.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-fork-cases.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "d5047deb0bb5cb10962ad616f40408115d5478922f3980803a63679e24da3fb3",
+        "json": "55a9014526f8d0698c7e4c662ad03b721386d0c8ee176b8fe95b73dd96ff9e56",
+        "stdout": "406db268bdd98589665297f6a55077b3b833c5a1e6172bd91b5bdff2697947a8",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "profile": "d5047deb0bb5cb10962ad616f40408115d5478922f3980803a63679e24da3fb3",
+        "json": "55a9014526f8d0698c7e4c662ad03b721386d0c8ee176b8fe95b73dd96ff9e56",
+        "stdout": "406db268bdd98589665297f6a55077b3b833c5a1e6172bd91b5bdff2697947a8",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  {
+    "label": "07-exec-cases",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+      "--binary-match-regex=^/opt/afdo_agent/work/cases$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/exec.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-cases.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-cases.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 0.08899929600011092
+      },
+      {
+        "exit": 0,
+        "seconds": 0.024468839998007752
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-cases.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-cases.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-cases.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-cases.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "cadaf6b19826328afaa59ee665dc62f1fe0f14774074604ac3151a16755430fe",
+        "json": "49121c1e0794b3a3ed4adb0781220a7c63b32626da78b88cb04d56e4cf4ce82b",
+        "stdout": "208b4787fe9bbef388df3e84a80387f35529acd735cd1e190c2e3bb8e4a34768",
+        "stderr": "eebc50b359126a957f824b82616edc18d81d9c4df55241c6ebf9f33a57106af6"
+      },
+      {
+        "profile": "cadaf6b19826328afaa59ee665dc62f1fe0f14774074604ac3151a16755430fe",
+        "json": "49121c1e0794b3a3ed4adb0781220a7c63b32626da78b88cb04d56e4cf4ce82b",
+        "stdout": "208b4787fe9bbef388df3e84a80387f35529acd735cd1e190c2e3bb8e4a34768",
+        "stderr": "eebc50b359126a957f824b82616edc18d81d9c4df55241c6ebf9f33a57106af6"
+      }
+    ]
+  },
+  {
+    "label": "07-exec-after",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/after",
+      "--binary-match-regex=^/opt/afdo_agent/work/after$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/exec.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-after.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-after.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 0.06397010799992131
+      },
+      {
+        "exit": 0,
+        "seconds": 0.016039308997278567
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-after.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-after.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-exec-after.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-exec-after.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "9bdff98c7035d4f232642358480c0f2658cefcf178ac375738707970f6d8d691",
+        "json": "47f1cf2f8d63634b3e738933469e395e37bfb9dd0e50f63e3d18fdadb11c75b1",
+        "stdout": "553a6f926c7761604371dc0fbcb583b9756a7e51f11bb9f477d810b4ca1d1254",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "profile": "9bdff98c7035d4f232642358480c0f2658cefcf178ac375738707970f6d8d691",
+        "json": "47f1cf2f8d63634b3e738933469e395e37bfb9dd0e50f63e3d18fdadb11c75b1",
+        "stdout": "553a6f926c7761604371dc0fbcb583b9756a7e51f11bb9f477d810b4ca1d1254",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  {
+    "label": "07-deleted-libdeleted_probe.so",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+      "--binary-match-regex=^/opt/afdo_agent/work/libdeleted_probe\\.so\\ \\(deleted\\)$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/deleted.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-deleted-libdeleted_probe.so.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-deleted-libdeleted_probe.so.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 0.0388806460032356
+      },
+      {
+        "exit": 0,
+        "seconds": 0.011953345005167648
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-deleted-libdeleted_probe.so.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-deleted-libdeleted_probe.so.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-deleted-libdeleted_probe.so.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-deleted-libdeleted_probe.so.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": "d5f2140a13ae6e2761affb3aeeebbaf7b3684b3229a0709a3e611d2f5f6e80e2",
+        "json": "d63b514a63ec5e408d6b59a062f15c5db44e57369b1fa946cc7cf89a64b3c886",
+        "stdout": "024ae498b789c8dc2bff8775cad4e711ac82121d6631d3b8190fb5fefb0710d7",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "profile": "d5f2140a13ae6e2761affb3aeeebbaf7b3684b3229a0709a3e611d2f5f6e80e2",
+        "json": "d63b514a63ec5e408d6b59a062f15c5db44e57369b1fa946cc7cf89a64b3c886",
+        "stdout": "024ae498b789c8dc2bff8775cad4e711ac82121d6631d3b8190fb5fefb0710d7",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  {
+    "label": "07-module",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi4-followup/libs/usr_lib_libc.so.6",
+      "--binary-match-regex=^/usr/lib/libc\\.so\\.6$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/module.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-module.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-module.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.5766106680021039
+      },
+      {
+        "exit": 1,
+        "seconds": 0.27778510299685877
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-module.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-module.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/07-module.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/07-module.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "14deba7e2f49b1542aff117c18291b5c4d743a078a22ce6eb5d926684e2068e1",
+        "stdout": "8f0cbe4856519ead9035001fb547b4e0aece0618b0a893d52e032749756d638a",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "14deba7e2f49b1542aff117c18291b5c4d743a078a22ce6eb5d926684e2068e1",
+        "stdout": "8f0cbe4856519ead9035001fb547b4e0aece0618b0a893d52e032749756d638a",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "09-fixed",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/fixed_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-fixed.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-fixed.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.1679846710030688
+      },
+      {
+        "exit": 1,
+        "seconds": 0.030434369000431616
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-fixed.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-fixed.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-fixed.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-fixed.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "e452665c0f601a1b7434f253863daec63b10b4c2df67172a2153c56337e523e5",
+        "stdout": "16b561bec2ce74fd265957c898ea7213cd15da1a0060197840b1beb9341103a1",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "e452665c0f601a1b7434f253863daec63b10b4c2df67172a2153c56337e523e5",
+        "stdout": "16b561bec2ce74fd265957c898ea7213cd15da1a0060197840b1beb9341103a1",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "09-multi",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/multi_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-multi.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-multi.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.1030446770018898
+      },
+      {
+        "exit": 1,
+        "seconds": 0.06072136700095143
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-multi.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-multi.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-multi.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-multi.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "180f278e416b0bec0dfe043a4139407f0167c6bdd8cc6002ca5869872dfb5c37",
+        "stdout": "456f11fd56b6945888b064a2e10f7bcca0e05f46dad5224fc62d9216f0a5c266",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "180f278e416b0bec0dfe043a4139407f0167c6bdd8cc6002ca5869872dfb5c37",
+        "stdout": "456f11fd56b6945888b064a2e10f7bcca0e05f46dad5224fc62d9216f0a5c266",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "09-freq",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/freq_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-freq.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-freq.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.06545443600043654
+      },
+      {
+        "exit": 1,
+        "seconds": 0.01825200299936114
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-freq.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-freq.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-freq.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-freq.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "5aae634313e7834ab4708615fe6319e5b33efae5b8d7f24a45545e991cd5720f",
+        "stdout": "e0fc2d2c04cf6996c9b53e71ed37a0b4119dfd4051bf2e9036dc052733b8b9e8",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "5aae634313e7834ab4708615fe6319e5b33efae5b8d7f24a45545e991cd5720f",
+        "stdout": "e0fc2d2c04cf6996c9b53e71ed37a0b4119dfd4051bf2e9036dc052733b8b9e8",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  },
+  {
+    "label": "09-buildid",
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--ip-aggregation=sum",
+      "--format=text",
+      "--allow-missing-build-id",
+      "--show-ip-address-counts",
+      "--show-mmap-events",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/libavcodec",
+      "--binary-match-regex=^/usr/lib64/libavcodec\\.so\\.62\\.11\\.100$",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpi5-prefreeze/buildid_dsoff.txt",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-buildid.profile",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-buildid.json"
+    ],
+    "profile_matches_patch7": true,
+    "runs": [
+      {
+        "exit": 1,
+        "seconds": 0.06696903400006704
+      },
+      {
+        "exit": 1,
+        "seconds": 0.027891214995179325
+      }
+    ],
+    "two_runs_identical": true,
+    "JSON_differences": [
+      {
+        "path": ".thumb_dwarf_normalization",
+        "before": "ABSENT",
+        "after": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": []
+        }
+      },
+      {
+        "path": ".tool.arguments[10]",
+        "before": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-buildid.profile",
+        "after": "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-buildid.profile"
+      },
+      {
+        "path": ".tool.arguments[11]",
+        "before": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch6/implementation/real/09-buildid.json",
+        "after": "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/real/09-buildid.json"
+      }
+    ],
+    "hashes": [
+      {
+        "profile": null,
+        "json": "8bb497dd0339e846bdc7222480545fc2af0dd71cf8da476ee8b174ebb2854a5d",
+        "stdout": "57c8dba37ab3a401ce448c1622d7fd8043ba75c4c6f928be598c4e9fc0db59c0",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      },
+      {
+        "profile": null,
+        "json": "8bb497dd0339e846bdc7222480545fc2af0dd71cf8da476ee8b174ebb2854a5d",
+        "stdout": "57c8dba37ab3a401ce448c1622d7fd8043ba75c4c6f928be598c4e9fc0db59c0",
+        "stderr": "8c68b399ca7e6f8f0368bec8070b8d95fc8c2fdeccebcdb07991d0fda6f15f79"
+      }
+    ]
+  }
+]

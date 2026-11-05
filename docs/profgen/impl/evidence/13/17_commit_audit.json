@@ -1,0 +1,14 @@
+{
+  "LLVM_commit": "cd5168c48b5422a50829259fd43e84cc3edd6694",
+  "author": "Hao Lin <hao.lin@samsung.com> / Hao Lin <hao.lin@samsung.com>",
+  "stat": "cd5168c48b54 [llvm-profgen] Normalize GNU AS Thumb DWARF addresses in IP mode\n llvm/docs/CommandGuide/llvm-profgen.rst            | 136 ++++++++++++++++++++-\n .../Inputs/ip-mode/gnu-thumb/README.txt            |  29 +++++\n .../Inputs/ip-mode/gnu-thumb/adjacent.perfbin      | Bin 0 -> 5692 bytes\n .../Inputs/ip-mode/gnu-thumb/adjacent.s            |  18 +++\n .../ip-mode/gnu-thumb/check-normalization.py       | 117 ++++++++++++++++++\n .../Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin     | Bin 0 -> 5656 bytes\n .../Inputs/ip-mode/gnu-thumb/gnu-thumb.s           |  12 ++\n .../Inputs/ip-mode/gnu-thumb/line-mismatch.perfbin | Bin 0 -> 5664 bytes\n .../Inputs/ip-mode/gnu-thumb/odd-arm.perfbin       | Bin 0 -> 5656 bytes\n .../Inputs/ip-mode/gnu-thumb/odd-data.perfbin      | Bin 0 -> 5656 bytes\n .../Inputs/ip-mode/gnu-thumb/odd-middle.perfbin    | Bin 0 -> 5656 bytes\n .../Inputs/ip-mode/quality/check-quality.py        |   2 +-\n .../tools/llvm-profgen/ip-thumb-dwarf-address.test |   4 +\n llvm/tools/llvm-profgen/IPBoundary.cpp             |  46 +++++--\n llvm/tools/llvm-profgen/IPBoundary.h               |   8 +-\n llvm/tools/llvm-profgen/IPQualityReport.cpp        |  49 ++++++++\n llvm/tools/llvm-profgen/IPQualityReport.h          |   6 +\n llvm/tools/llvm-profgen/ProfileGenerator.cpp       |   2 +\n llvm/tools/llvm-profgen/ProfileGenerator.h         |   1 +\n llvm/tools/llvm-profgen/ProfiledBinary.cpp         |  71 ++++++++++-\n llvm/tools/llvm-profgen/ProfiledBinary.h           |  14 ++-\n 21 files changed, 492 insertions(+), 23 deletions(-)\n",
+  "patch": "patches/profgen/0008-llvm-profgen-Normalize-GNU-AS-Thumb-DWARF-addresses-in-IP-mode.patch",
+  "patch_sha256": "7029d875866db425c70ce9cb01dde74b12ecb84d511b9bc569eb78932e5a5b43",
+  "patch_bytes": 47821,
+  "reverse_apply_check": "PASS",
+  "spec_uncommitted_and_unchanged": true,
+  "design_sha256": "eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be",
+  "golden_sha256": "3ea33f704b33d36ea0370e67a277cb25039870bd4440d72a10dd5c52f5790971",
+  "source_status": "",
+  "tool_sha256": "41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413"
+}

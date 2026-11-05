@@ -1,0 +1,140 @@
+[
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/as",
+      "-g",
+      "-o",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/adjacent.o",
+      "adjacent.s"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/ld",
+      "--build-id=sha1",
+      "-e",
+      "first",
+      "-Ttext=0x1000",
+      "-o",
+      "adjacent.perfbin",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/adjacent.o"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-objcopy",
+      "--update-section=.debug_line=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/synthetic-line.bin",
+      "gnu-thumb.perfbin",
+      "line-mismatch.perfbin"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+      "--debug-dump=info",
+      "--debug-dump=decodedline",
+      "adjacent.perfbin"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "Contents of the .debug_info section:\n\n  Compilation Unit @ offset 0:\n   Length:        0x3f (32-bit)\n   Version:       2\n   Abbrev Offset: 0\n   Pointer Size:  4\n <0><b>: Abbrev Number: 1 (DW_TAG_compile_unit)\n    <c>   DW_AT_stmt_list   : 0\n    <10>   DW_AT_low_pc      : 0x1000\n    <14>   DW_AT_high_pc     : 0x1008\n    <18>   DW_AT_name        : (indirect string, offset: 0): adjacent.s\n    <1c>   DW_AT_comp_dir    : (indirect string, offset: 0xb): /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb\n    <20>   DW_AT_producer    : (indirect string, offset: 0x92): GNU AS 2.43\n    <24>   DW_AT_language    : 32769\t(MIPS assembler)\n <1><26>: Abbrev Number: 2 (DW_TAG_subprogram)\n    <27>   DW_AT_name        : (indirect string, offset: 0x9e): first\n    <2b>   DW_AT_external    : 1\n    <2c>   DW_AT_low_pc      : 0x1001\n    <30>   DW_AT_high_pc     : 0x1005\n <1><34>: Abbrev Number: 2 (DW_TAG_subprogram)\n    <35>   DW_AT_name        : (indirect string, offset: 0xa4): second\n    <39>   DW_AT_external    : 1\n    <3a>   DW_AT_low_pc      : 0x1005\n    <3e>   DW_AT_high_pc     : 0x1009\n <1><42>: Abbrev Number: 0\n\nContents of the .debug_line section:\n\nCU: adjacent.s:\nFile name                        Line number    Starting address    View    Stmt\nadjacent.s                                 9              0x1000               x\nadjacent.s                                10              0x1002               x\nadjacent.s                                16              0x1004               x\nadjacent.s                                17              0x1006               x\nadjacent.s                                 -              0x1008\n\n\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-dwarfdump",
+      "--debug-info",
+      "--debug-line",
+      "adjacent.perfbin"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "adjacent.perfbin:\tfile format elf32-littlearm\n\n.debug_info contents:\n0x00000000: Compile Unit: length = 0x0000003f, format = DWARF32, version = 0x0002, abbr_offset = 0x0000, addr_size = 0x04 (next unit at 0x00000043)\n\n0x0000000b: DW_TAG_compile_unit\n              DW_AT_stmt_list\t(0x00000000)\n              DW_AT_low_pc\t(0x00001000)\n              DW_AT_high_pc\t(0x00001008)\n              DW_AT_name\t(\"adjacent.s\")\n              DW_AT_comp_dir\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb\")\n              DW_AT_producer\t(\"GNU AS 2.43\")\n              DW_AT_language\t(DW_LANG_Mips_Assembler)\n\n0x00000026:   DW_TAG_subprogram\n                DW_AT_name\t(\"first\")\n                DW_AT_external\t(0x01)\n                DW_AT_low_pc\t(0x00001001)\n                DW_AT_high_pc\t(0x00001005)\n\n0x00000034:   DW_TAG_subprogram\n                DW_AT_name\t(\"second\")\n                DW_AT_external\t(0x01)\n                DW_AT_low_pc\t(0x00001005)\n                DW_AT_high_pc\t(0x00001009)\n\n0x00000042:   NULL\n\n.debug_line contents:\ndebug_line[0x00000000]\nLine table prologue:\n    total_length: 0x00000034\n          format: DWARF32\n         version: 2\n prologue_length: 0x0000001e\n min_inst_length: 2\n default_is_stmt: 1\n       line_base: -5\n      line_range: 14\n     opcode_base: 10\nstandard_opcode_lengths[DW_LNS_copy] = 0\nstandard_opcode_lengths[DW_LNS_advance_pc] = 1\nstandard_opcode_lengths[DW_LNS_advance_line] = 1\nstandard_opcode_lengths[DW_LNS_set_file] = 1\nstandard_opcode_lengths[DW_LNS_set_column] = 1\nstandard_opcode_lengths[DW_LNS_negate_stmt] = 0\nstandard_opcode_lengths[DW_LNS_set_basic_block] = 0\nstandard_opcode_lengths[DW_LNS_const_add_pc] = 0\nstandard_opcode_lengths[DW_LNS_fixed_advance_pc] = 1\nfile_names[  1]:\n           name: \"adjacent.s\"\n      dir_index: 0\n       mod_time: 0x00000000\n         length: 0x00000000\n\nAddress            Line   Column File   ISA Discriminator OpIndex Flags\n------------------ ------ ------ ------ --- ------------- ------- -------------\n0x0000000000001000      9      0      1   0             0       0  is_stmt\n0x0000000000001002     10      0      1   0             0       0  is_stmt\n0x0000000000001004     16      0      1   0             0       0  is_stmt\n0x0000000000001006     17      0      1   0             0       0  is_stmt\n0x0000000000001008     17      0      1   0             0       0  is_stmt end_sequence\n\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/objdump",
+      "-d",
+      "adjacent.perfbin"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "\nadjacent.perfbin:     file format elf32-littlearm\n\n\nDisassembly of section .text:\n\n00001000 <first>:\n    1000:\t2001      \tmovs\tr0, #1\n    1002:\t4770      \tbx\tlr\n\n00001004 <second>:\n    1004:\t2002      \tmovs\tr0, #2\n    1006:\t4770      \tbx\tlr\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+      "--debug-dump=info",
+      "--debug-dump=decodedline",
+      "line-mismatch.perfbin"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "Contents of the .debug_info section:\n\n  Compilation Unit @ offset 0:\n   Length:        0x31 (32-bit)\n   Version:       2\n   Abbrev Offset: 0\n   Pointer Size:  4\n <0><b>: Abbrev Number: 1 (DW_TAG_compile_unit)\n    <c>   DW_AT_stmt_list   : 0\n    <10>   DW_AT_low_pc      : 0x1000\n    <14>   DW_AT_high_pc     : 0x1008\n    <18>   DW_AT_name        : (indirect string, offset: 0): gnu-thumb.s\n    <1c>   DW_AT_comp_dir    : (indirect string, offset: 0xc): /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb\n    <20>   DW_AT_producer    : (indirect string, offset: 0x93): GNU AS 2.43\n    <24>   DW_AT_language    : 32769\t(MIPS assembler)\n <1><26>: Abbrev Number: 2 (DW_TAG_subprogram)\n    <27>   DW_AT_name        : (indirect string, offset: 0x9f): gnu_thumb\n    <2b>   DW_AT_external    : 1\n    <2c>   DW_AT_low_pc      : 0x1001\n    <30>   DW_AT_high_pc     : 0x1009\n <1><34>: Abbrev Number: 0\n\nContents of the .debug_line section:\n\nCU: synthetic.s:\nFile name                        Line number    Starting address    View    Stmt\nsynthetic.s                                9              0x1000               x\nsynthetic.s                               10              0x1001               x\nsynthetic.s                                -              0x1008\n\n\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-dwarfdump",
+      "--debug-info",
+      "--debug-line",
+      "line-mismatch.perfbin"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "line-mismatch.perfbin:\tfile format elf32-littlearm\n\n.debug_info contents:\n0x00000000: Compile Unit: length = 0x00000031, format = DWARF32, version = 0x0002, abbr_offset = 0x0000, addr_size = 0x04 (next unit at 0x00000035)\n\n0x0000000b: DW_TAG_compile_unit\n              DW_AT_stmt_list\t(0x00000000)\n              DW_AT_low_pc\t(0x00001000)\n              DW_AT_high_pc\t(0x00001008)\n              DW_AT_name\t(\"gnu-thumb.s\")\n              DW_AT_comp_dir\t(\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb\")\n              DW_AT_producer\t(\"GNU AS 2.43\")\n              DW_AT_language\t(DW_LANG_Mips_Assembler)\n\n0x00000026:   DW_TAG_subprogram\n                DW_AT_name\t(\"gnu_thumb\")\n                DW_AT_external\t(0x01)\n                DW_AT_low_pc\t(0x00001001)\n                DW_AT_high_pc\t(0x00001009)\n\n0x00000034:   NULL\n\n.debug_line contents:\ndebug_line[0x00000000]\nLine table prologue:\n    total_length: 0x0000003c\n          format: DWARF32\n         version: 2\n prologue_length: 0x00000022\n min_inst_length: 1\n default_is_stmt: 1\n       line_base: -5\n      line_range: 14\n     opcode_base: 13\nstandard_opcode_lengths[DW_LNS_copy] = 0\nstandard_opcode_lengths[DW_LNS_advance_pc] = 1\nstandard_opcode_lengths[DW_LNS_advance_line] = 1\nstandard_opcode_lengths[DW_LNS_set_file] = 1\nstandard_opcode_lengths[DW_LNS_set_column] = 1\nstandard_opcode_lengths[DW_LNS_negate_stmt] = 0\nstandard_opcode_lengths[DW_LNS_set_basic_block] = 0\nstandard_opcode_lengths[DW_LNS_const_add_pc] = 0\nstandard_opcode_lengths[DW_LNS_fixed_advance_pc] = 1\nstandard_opcode_lengths[DW_LNS_set_prologue_end] = 0\nstandard_opcode_lengths[DW_LNS_set_epilogue_begin] = 0\nstandard_opcode_lengths[DW_LNS_set_isa] = 1\nfile_names[  1]:\n           name: \"synthetic.s\"\n      dir_index: 0\n       mod_time: 0x00000000\n         length: 0x00000000\n\nAddress            Line   Column File   ISA Discriminator OpIndex Flags\n------------------ ------ ------ ------ --- ------------- ------- -------------\n0x0000000000001000      9      0      1   0             0       0  is_stmt\n0x0000000000001001     10      0      1   0             0       0  is_stmt\n0x0000000000001008     10      0      1   0             0       0  is_stmt end_sequence\n\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/objdump",
+      "-d",
+      "line-mismatch.perfbin"
+    ],
+    "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb",
+    "exit": 0,
+    "stdout": "\nline-mismatch.perfbin:     file format elf32-littlearm\n\n\nDisassembly of section .text:\n\n00001000 <gnu_thumb>:\n    1000:\t2001      \tmovs\tr0, #1\n    1002:\tf100 0002 \tadd.w\tr0, r0, #2\n    1006:\t4770      \tbx\tlr\n",
+    "stderr": ""
+  }
+]
