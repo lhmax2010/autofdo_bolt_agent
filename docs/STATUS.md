@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-05；RPi4第一轮校准收尾缺工具处停止）
+## 当前授权与执行状态（2026-11-05；恢复轮在root前依赖预检处停止）
+
+- 预注册7d3d9d9逐字节不变；最新7项执行流程裁决登记在[报告12第8节](profgen/impl/12_board_round1.md)。本地common.sh移除cmp、增加完整依赖与performance门禁、sysfs节流读取；7项RPM比较测试和全部bash-n通过，尚未部署。
+- 三项RPi4身份通过，23项依赖中22通过；/opt/afdo_agent/tools/perf的command-v失败，远端退出1。只读诊断显示当前uid5001(owner)，perf/libLLVM的ls与sha256sum均Permission denied，不能判为文件丢失。按“root前全部依赖通过，否则停止”未开root、未改governor、未执行perf。[预检](profgen/impl/evidence/12/13_resume_preflight.json)、[权限原文](profgen/impl/evidence/12/14_resume_stop.json)
+- 需用户决定：是否允许只对“非root权限拒绝的部署文件”在记录原因后暂开root复核，仍在governor和perf之前；或由用户先使非root身份可查询。没有自行绕过、chmod或安装。root保持off、governor=schedutil，RPM1232，可用1145188KiB；本轮板上只读51.44秒，无需恢复。
+- 待办：拉回/路径/全量SHA/确切RUN删除的单一失败即停流程及主机哈希失败注入尚未实施；2倍估算+200MB空间门禁尚未运行。ToS推送、部署复验、正式70次S/14次训练及集成全部待做。旧226目标样本仅失败校准证据。LOST/真实avg/nonleaf line0挂账不变。
+
+## 前轮授权与执行状态（2026-11-05；RPi4第一轮校准收尾缺工具处停止）
 
 - 已推送预注册 `7d3d9d9f9184bc2e0e2b94a479916a2d65f13463`（20:04:33+08），早于设备查询；阈值/预算/70次S与14次训练矩阵见[预注册](profgen/eval/preregistration.md)。仅RPi4授权、root/performance保存恢复、sysctl不改、官方ToS等裁决待v0.8登记。[报告12](profgen/impl/12_board_round1.md)
 - 三项身份通过，新内核6.12.80-arm-rpi4-v7l（Nov4构建）；16项payload SHA全通过。Thumb spike校准cycles硬件type0/config0、235样本（目标226）、运行ID正确；收尾common.sh调用板上不存在的cmp，真实退出127/ALL-END FAILED。按最高原则“缺工具就停下”停止，没有安装或绕过。正式70次S、14次训练及集成尚未开始；profgen未运行，无verified质量等级、非叶子line0与profdata结果。

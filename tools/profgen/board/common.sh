@@ -2,6 +2,45 @@
 # Sourced only by board entry points. No device state changes.
 set -Eeuo pipefail
 BASE=/opt/afdo_agent
+# External-command inventory: review all scripts in this directory, including
+# substitutions, pipelines, array commands and the /bin/bash workload launcher.
+# time, kill, read, test, printf, wait, command and source are Bash builtins/keywords.
+BOARD_REQUIRED_COMMANDS=(
+    /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0
+    gst-launch-1.0 mkdir mkfifo ps readlink rm rpm sha256sum sleep tr uname wc
+    /opt/afdo_agent/tools/perf
+)
+preflight_dependencies() {
+    local cmd missing=0
+    for cmd in "${BOARD_REQUIRED_COMMANDS[@]}"; do
+        if command -v "$cmd"; then
+            printf 'DEPENDENCY_OK %s\n' "$cmd"
+        else
+            printf 'DEPENDENCY_MISSING %s\n' "$cmd" >&2
+            missing=1
+        fi
+    done
+    (( missing == 0 ))
+}
+assert_performance() {
+    local p found=0 value
+    for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
+        [[ -r $p ]] || continue
+        found=1
+        value=$(<"$p")
+        [[ $value == performance ]] || { echo "Governor is not performance: $p=$value" >&2; return 2; }
+    done
+    (( found == 1 )) || { echo 'No readable governor' >&2; return 2; }
+}
+compare_rpm_counts() {
+    local before=$1 after=$2
+    # Bound the integer before Bash arithmetic so malformed/overflowing input
+    # cannot compare equal accidentally. Normal RPM counts are many orders lower.
+    [[ $before =~ ^[0-9]+$ && $after =~ ^[0-9]+$ && ${#before} -le 18 && ${#after} -le 18 ]] || {
+        echo 'RPM counts must be nonempty decimal integers (at most 18 digits)' >&2; return 2;
+    }
+    (( 10#$before == 10#$after )) || { echo "RPM count changed: $before -> $after" >&2; return 3; }
+}
 assert_board() {
     local expected=${1:?board required} model arch release
     model=$(tr -d '\000' </proc/device-tree/model)
@@ -24,6 +63,8 @@ inside() {
 }
 new_run() {
     local stamp opts
+    preflight_dependencies
+    assert_performance
     if command -v findmnt >/dev/null; then
         opts=$(findmnt -n -o OPTIONS -T "$BASE")
         [[ -n $opts ]] || { echo 'Mount options unknown' >&2; exit 2; }
@@ -72,7 +113,11 @@ snapshot() {
         for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor /sys/class/thermal/thermal_zone*/temp /sys/class/thermal/thermal_zone*/type; do
             [[ ! -r $f ]] || { printf '%s ' "$f"; cat "$f"; }
         done
-        if command -v vcgencmd >/dev/null; then vcgencmd get_throttled; else echo 'throttling=unknown (vcgencmd unavailable)'; fi
+        if [[ -n ${THROTTLE_NODE:-} && $THROTTLE_NODE == /sys/* && -r $THROTTLE_NODE ]]; then
+            printf 'throttling_node=%s value=' "$THROTTLE_NODE"; cat "$THROTTLE_NODE"
+        else
+            echo 'throttling=unknown (no readable firmware sysfs node)'
+        fi
         ps -eo pid,comm,pcpu
     } >"$1" 2>&1
 }
@@ -140,7 +185,7 @@ finish_run() {
     snapshot "$RUN/environment.after"
     df -h "$BASE" >"$RUN/df.after"
     rpm -qa | wc -l >"$RUN/rpm-count.after"
-    cmp "$RUN/rpm-count.before" "$RUN/rpm-count.after"
+    compare_rpm_counts "$(<"$RUN/rpm-count.before")" "$(<"$RUN/rpm-count.after")"
     printf 'RESULTS %s\n' "$RUN"
 }
 

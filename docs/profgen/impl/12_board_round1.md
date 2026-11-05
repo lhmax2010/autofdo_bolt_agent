@@ -92,3 +92,72 @@ ALL-END 2026-11-05T21:10:30,994303712+0900 FAILED
 目前只有失败校准原件及已归档测试视频；**不足以开始质量分析**。后续仍需全部70份S预算采集（或其完整分段）、14次stage分离训练、LOST压力与五项集成、每RUN完整环境/maps/ID/退出码，以及正式工具逐份质量报告。R/C/G5的profdata尚不存在。恢复执行前需解决cmp依赖、收尾删除门禁、确认逐秒节流可观测性；预注册版本保留，不覆盖历史记录。
 
 正式工具 SHA `334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30`、v0.7 SHA `eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be` 未变化。[范围证据](evidence/12/10_scope.json)
+
+## 8. 恢复轮：root 前依赖预检因部署文件不可访问而停止
+
+本节续写于2026-11-05，保留上面第一次停止和偏差记录。预注册 `7d3d9d9` 的文件逐字节不变（SHA `dfc5b429c5007ed701cb01c746349ed7544a0556b0591e530da690e52e4d7d70`）。本轮未连接其他板子、未执行任何 perf 命令、未推送或修改板上文件，也未执行 root/governor 状态变更。
+
+### 8.1 本地主机改动及检查
+
+`common.sh` 去掉 cmp 依赖：读取前后RPM数量，必须非空且全部为十进制数字；再用 Bash `10#` 整数比较，避免前导零被解释为八进制。额外拒绝超过18位的异常输入，避免算术溢出把异常值误判为相等。7项检查全部通过：相等、不同、空、负数、表达式字符串、前导零、超长溢出。三个板上脚本 `bash -n` 通过。[本地测试](evidence/12/15_resume_local_checks.json)
+
+依赖清单写入 common.sh，扫描方法为逐一静态审阅 `common.sh`、`collect.sh`、`measure.sh`，覆盖命令替换、管道、数组中的程序与内嵌 Bash launcher；证据列出每个字面命令的文件和行号。字面检索只是人工审阅索引，不声称是完备的Bash语法分析器。Bash内建/关键字（time、kill、read、printf、test、wait、source等）不要求独立可执行文件；动态spike程序仍由load_variant检查可执行与SHA。节流改读明确指定的只读sysfs节点，没有节点即unknown，不再调用可选vcgencmd。[扫描清单](evidence/12/12_dependency_scan.json)
+
+全部23项：
+
+```text
+/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0
+ gst-launch-1.0 mkdir mkfifo ps readlink rm rpm sha256sum sleep tr uname wc
+ /opt/afdo_agent/tools/perf
+```
+
+`new_run` 在创建RUN/启动perf前再次执行依赖预检与performance断言；本轮host先在root/governor变更之前执行同一完整清单的command-v门禁。**新版common.sh仅保存在主机，尚未部署到板上**；不能把本地修正称为板上验收通过。
+
+### 8.2 实际身份、预检与权限证据
+
+[预检原文](evidence/12/13_resume_preflight.json)、[停止只读诊断](evidence/12/14_resume_stop.json)。唯一设备仍是 `192.168.108.26:26101`，三项分别查询均退出0：model Raspberry Pi 4 Model B Rev 1.5、armv7l、6.12.80-arm-rpi4-v7l。最初合并查询缺少model后的换行，导致主机解析断言失败；改为分别查询确认实际身份正确，并未放宽身份规则。发送整个common.sh作内联查询超过SDB service-name长度限制；保留原报错后改为仅发送相同完整依赖数组的简短command-v循环，未执行或写入脚本文件。
+
+最终依赖预检 **22项通过、1项未通过，远端退出1**：
+
+```text
+DEPENDENCY_MISSING /opt/afdo_agent/tools/perf
+__REMOTE_RC=1
+```
+
+这里的MISSING是command-v门禁标签，**不是文件已不存在的事实断言**。停止前只读补证：
+
+```text
+id: uid=5001(owner) gid=100(users) ... context="User::Shell"
+ls: cannot access /opt/afdo_agent/tools/perf: Permission denied
+ls: cannot access /opt/afdo_agent/lib/libLLVM.so.22.1: Permission denied
+__REMOTE_RC=2
+sha256sum: /opt/afdo_agent/tools/perf: Permission denied
+sha256sum: /opt/afdo_agent/lib/libLLVM.so.22.1: Permission denied
+__REMOTE_RC=1
+```
+
+本次SDB原状态为非root，与第一次停止时原状态不同；不推测是谁或什么改变了状态。不调用root on来使检查通过，不chmod、不改安全标签、不重部署、不安装。错误只证明当前身份不能访问这两个路径，不能据此区分DAC/安全标签等具体根因。按本轮“root前依赖检查，任一缺失即停止”裁决停在此处。
+
+候选需要用户决定的流程调整：系统命令保持root前完整预检；对部署文件仅因权限拒绝而不可检查的情况，是否允许记录该事实后暂开已授权root、在governor变更与任何perf运行前再检查部署工具/SHA，失败即恢复原root状态。或者由用户先使当前非root SDB shell可查询部署工具，再原样重跑门禁。**本轮均未执行。**
+
+### 8.3 失败注入、空间与采集完成情况
+
+拉回/全量SHA验证/确切RUN路径删除的单一失败即停止流程、故意哈希不符的主机演练，**尚未实现/运行**：本次在依赖门禁触发停止，不能声称演练通过，也没有正式数据使用未经演练的新清理流程。
+
+只读sysfs查找 `find /sys/devices/platform /sys/firmware -iname '*throttl*' -print` 返回0、无输出；仅说明上述范围未找到节点，节流保持unknown，不能证明整个固件没有接口。没有逐秒采集，不更改异常阈值。
+
+本轮板上查询从20:33:35.836到20:34:27.279+08，约 **51.44秒**，实际采集耗时0。状态始终未改：root保持off（uid5001）、policy0保持schedutil，无需恢复；RPM只读查询退出0、数量1232，与上轮记录相同。最后 `/opt` used **160,428 KiB**、available **1,145,188 KiB**、13%；本轮没有部署、清理或分批空间消耗。两次会话之间的磁盘变化不归因于本轮操作。
+
+Tears of Steel片段仍只在主机；SHA复核和视频推送因门禁停止未执行。16变体本轮未能重新校验；不沿用旧SHA来宣称本轮恢复已通过。正式S仍 **0/70**，R/C/G5仍 **0/14**，五类集成0；旧失败校准226目标样本仅环境/流程证据。verified等级、nonleaf line0、profdata均未取得；LOST和真实avg挂账保持未关闭。
+
+### 8.4 待设计 v0.8 登记：本轮执行流程裁决
+
+1. 去掉cmp，非空十进制格式校验后Bash整数比较，失败门禁保留（本地实现和测试完成）。
+2. 身份通过后、root/governor变更之前逐项command-v检查，列出全部失败项（本轮触发上述权限阻塞）。
+3. performance之后才运行任何perf，包括权限探测（本地增加门禁，本轮无perf）。
+4. 单一失败即停的拉回→实际路径检查→全量SHA→确切RUN删除流程，先哈希失败注入证明不会删除（待完成，不能使用上次有顺序缺陷的流程）。
+5. 每次采集空间必须≥2×已观测产物估算+200MB；不够先拉回/核对/清理上一批，再不足即停止；不得删除部署库腾空间。LOST先小规模体积试采再独立估算（待执行）。
+6. 只读查sysfs节流节点，未找到维持unknown；频率/温度阈值及原预注册不改。
+7. 上次226条目标样本不计入正式矩阵。
+
+以上是执行流程裁决登记，没有修改v0.7正文或预注册。缺失的失败注入、空间门禁编排和全部采集/训练仍是恢复前待办；不把本次本地脚本改动当成整轮完成。边界例外：本恢复轮无板上写入或状态修改；没有读取WORKDIR外的项目输入，未扫描SDB自身可能使用的外部状态文件。

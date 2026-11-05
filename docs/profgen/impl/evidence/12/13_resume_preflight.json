@@ -1,0 +1,100 @@
+[
+  {
+    "time": "2026-11-05T20:33:35.836212+08:00",
+    "command": [
+      "sdb",
+      "devices"
+    ],
+    "rc": 0,
+    "stdout": "List of devices attached \n192.168.108.26:26101\tdevice    \trpi4\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:33:35.974998+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "cat /proc/device-tree/model; uname -m; uname -r"
+    ],
+    "rc": 0,
+    "stdout": "Raspberry Pi 4 Model B Rev 1.5\u0000armv7l\n6.12.80-arm-rpi4-v7l\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:33:49.367007+08:00",
+    "command": [
+      "sdb",
+      "devices"
+    ],
+    "rc": 0,
+    "stdout": "List of devices attached \n192.168.108.26:26101\tdevice    \trpi4\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:33:49.492762+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "cat /proc/device-tree/model; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "Raspberry Pi 4 Model B Rev 1.5\u0000\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:33:49.621216+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "uname -m; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "armv7l\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:33:49.745584+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "uname -r; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "6.12.80-arm-rpi4-v7l\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:33:49.796157+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "/bin/bash -c '#!/bin/bash\n# Sourced only by board entry points. No device state changes.\nset -Eeuo pipefail\nBASE=/opt/afdo_agent\n# External-command inventory: review all scripts in this directory, including\n# substitutions, pipelines, array commands and the /bin/bash workload launcher.\n# time, kill, read, test, printf, wait, command and source are Bash builtins/keywords.\nBOARD_REQUIRED_COMMANDS=(\n    /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0\n    gst-launch-1.0 mkdir mkfifo ps readlink rm rpm sha256sum sleep tr uname wc\n    /opt/afdo_agent/tools/perf\n)\npreflight_dependencies() {\n    local cmd missing=0\n    for cmd in \"${BOARD_REQUIRED_COMMANDS[@]}\"; do\n        if command -v \"$cmd\"; then\n            printf '\"'\"'DEPENDENCY_OK %s\\n'\"'\"' \"$cmd\"\n        else\n            printf '\"'\"'DEPENDENCY_MISSING %s\\n'\"'\"' \"$cmd\" >&2\n            missing=1\n        fi\n    done\n    (( missing == 0 ))\n}\nassert_performance() {\n    local p found=0 value\n    for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do\n        [[ -r $p ]] || continue\n        found=1\n        value=$(<\"$p\")\n        [[ $value == performance ]] || { echo \"Governor is not performance: $p=$value\" >&2; return 2; }\n    done\n    (( found == 1 )) || { echo '\"'\"'No readable governor'\"'\"' >&2; return 2; }\n}\ncompare_rpm_counts() {\n    local before=$1 after=$2\n    # Bound the integer before Bash arithmetic so malformed/overflowing input\n    # cannot compare equal accidentally. Normal RPM counts are many orders lower.\n    [[ $before =~ ^[0-9]+$ && $after =~ ^[0-9]+$ && ${#before} -le 18 && ${#after} -le 18 ]] || {\n        echo '\"'\"'RPM counts must be nonempty decimal integers (at most 18 digits)'\"'\"' >&2; return 2;\n    }\n    (( 10#$before == 10#$after )) || { echo \"RPM count changed: $before -> $after\" >&2; return 3; }\n}\nassert_board() {\n    local expected=${1:?board required} model arch release\n    model=$(tr -d '\"'\"'\\000'\"'\"' </proc/device-tree/model)\n    arch=$(uname -m)\n    release=$(uname -r)\n    [[ -n $model && -n $arch && -n $release ]] || { echo '\"'\"'Identity unavailable'\"'\"' >&2; exit 2; }\n    case \"$expected:$model:$arch:$release\" in\n      rpi4:Raspberry\\ Pi\\ 4*:armv7l:*rpi4*|rpi4:Raspberry\\ Pi\\ 4*:armv7l:*v7l*) ;;\n      rpi5:Raspberry\\ Pi\\ 5*:aarch64:*arm64-rpi4-v8*) ;;\n      *) printf '\"'\"'Identity mismatch: %s / %s / %s\\n'\"'\"' \"$model\" \"$arch\" \"$release\" >&2; exit 2 ;;\n    esac\n    printf '\"'\"'IDENTITY %s / %s / %s\\n'\"'\"' \"$model\" \"$arch\" \"$release\"\n    [[ $(readlink -f \"$BASE\") == \"$BASE\" ]] || { echo '\"'\"'Deployment base alias refused'\"'\"' >&2; exit 2; }\n}\ninside() {\n    local path\n    path=$(readlink -f -- \"$1\")\n    [[ -n $path && $path == \"$BASE/\"* ]] || { echo \"Outside deployment base: $1\" >&2; exit 2; }\n    printf '\"'\"'%s\\n'\"'\"' \"$path\"\n}\nnew_run() {\n    local stamp opts\n    preflight_dependencies\n    assert_performance\n    if command -v findmnt >/dev/null; then\n        opts=$(findmnt -n -o OPTIONS -T \"$BASE\")\n        [[ -n $opts ]] || { echo '\"'\"'Mount options unknown'\"'\"' >&2; exit 2; }\n        case \",$opts,\" in *,ro,*|*,noexec,*) echo \"Unsuitable mount: $opts\" >&2; exit 2 ;; esac\n    else\n        echo '\"'\"'findmnt required for prepared evaluation scripts; stop without writing'\"'\"' >&2; exit 2\n    fi\n    stamp=$(date +%Y%m%dT%H%M%S)\n    [[ -n $stamp ]] || exit 2\n    mkdir -p \"$BASE/work\"\n    inside \"$BASE/work\" >/dev/null\n    RUN=\"$BASE/work/eval-$stamp-$$\"\n    mkdir \"$RUN\"\n    export HOME=\"$RUN/home\" TMPDIR=\"$RUN/tmp\" XDG_CACHE_HOME=\"$RUN/cache\"\n    export GST_REGISTRY=\"$RUN/registry.bin\" PERF_CONFIG=\"$RUN/perf.conf\"\n    # Plugin inspection/scanning may load an instrumented DSO before collection.\n    export LLVM_PROFILE_FILE=\"$RUN/setup-%m-%p.profraw\"\n    mkdir \"$HOME\" \"$TMPDIR\" \"$XDG_CACHE_HOME\" \"$RUN/buildid\"\n    : >\"$PERF_CONFIG\"\n    PERF=(\"$BASE/tools/perf\" --buildid-dir \"$RUN/buildid\")\n    df -h \"$BASE\" >\"$RUN/df.before\"\n    uname -a >\"$RUN/uname\"\n    uname -v >>\"$RUN/uname\"\n    cat /proc/version >\"$RUN/proc-version\"\n    if [[ -r /proc/config.gz ]]; then\n        sha256sum /proc/config.gz >\"$RUN/kernel-config.sha256\"\n    elif [[ -r /boot/config-$(uname -r) ]]; then\n        sha256sum \"/boot/config-$(uname -r)\" >\"$RUN/kernel-config.sha256\"\n    else\n        echo '\"'\"'unknown: no readable kernel configuration'\"'\"' >\"$RUN/kernel-config.sha256\"\n    fi\n    cat /proc/swaps >\"$RUN/swaps.before\"\n    for z in /sys/block/zram*/mm_stat /sys/block/zram*/stat; do\n        [[ ! -r $z ]] || { printf '\"'\"'%s '\"'\"' \"$z\"; cat \"$z\"; }\n    done >\"$RUN/zram.before\"\n    cat /etc/os-release >\"$RUN/os-release\"\n    [[ ! -r /etc/tizen-build.conf ]] || cat /etc/tizen-build.conf >\"$RUN/tizen-build.conf\"\n    rpm -qa | wc -l >\"$RUN/rpm-count.before\"\n    snapshot \"$RUN/environment.before\"\n}\nsnapshot() {\n    {\n        date -Ins\n        cat /proc/loadavg\n        awk '\"'\"'$1==\"pswpout\" || $1==\"pswpin\"'\"'\"' /proc/vmstat\n        for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor /sys/class/thermal/thermal_zone*/temp /sys/class/thermal/thermal_zone*/type; do\n            [[ ! -r $f ]] || { printf '\"'\"'%s '\"'\"' \"$f\"; cat \"$f\"; }\n        done\n        if [[ -n ${THROTTLE_NODE:-} && $THROTTLE_NODE == /sys/* && -r $THROTTLE_NODE ]]; then\n            printf '\"'\"'throttling_node=%s value='\"'\"' \"$THROTTLE_NODE\"; cat \"$THROTTLE_NODE\"\n        else\n            echo '\"'\"'throttling=unknown (no readable firmware sysfs node)'\"'\"'\n        fi\n        ps -eo pid,comm,pcpu\n    } >\"$1\" 2>&1\n}\nload_variant() {\n    local manifest=$1 wanted=$2 row count\n    manifest=$(inside \"$manifest\")\n    count=$(awk -F '\"'\"'\\t'\"'\"' -v id=\"$wanted\" '\"'\"'$1==id {n++} END {print n+0}'\"'\"' \"$manifest\")\n    [[ $count == 1 ]] || { echo \"Expected one manifest entry: $wanted\" >&2; exit 2; }\n    row=$(awk -F '\"'\"'\\t'\"'\"' -v id=\"$wanted\" '\"'\"'$1==id'\"'\"' \"$manifest\")\n    [[ -n $row ]] || exit 2\n    IFS=$'\"'\"'\\t'\"'\"' read -r VARIANT ARCH OBJECT STAGE PROGRAM LIBDIR TARGET TARGET_SHA TARGET_ID <<<\"$row\"\n    [[ $ARCH == \"$(uname -m)\" ]] || { echo '\"'\"'Manifest architecture mismatch'\"'\"' >&2; exit 2; }\n    LIBDIR=$(inside \"$LIBDIR\"); TARGET=$(inside \"$TARGET\")\n    [[ -f $TARGET ]] || exit 2\n    local actual\n    actual=$(sha256sum \"$TARGET\"); actual=${actual%% *}\n    [[ -n $actual && $actual == \"$TARGET_SHA\" ]] || { echo '\"'\"'Target SHA mismatch'\"'\"' >&2; exit 2; }\n    [[ $TARGET_ID =~ ^[0-9a-f]{40}$ ]] || { echo '\"'\"'Expected SHA1 build-id required'\"'\"' >&2; exit 2; }\n    export LD_LIBRARY_PATH=\"$LIBDIR:$BASE/lib\"\n    if [[ $OBJECT == spike ]]; then\n        PROGRAM=$(inside \"$PROGRAM\")\n        [[ -x $PROGRAM ]] || exit 2\n    elif [[ $OBJECT == ffmpeg ]]; then\n        command -v gst-launch-1.0 >/dev/null\n        gst-inspect-1.0 avdec_h264 >\"$RUN/gst-inspect-$VARIANT.txt\" 2>&1\n        grep -q max-threads \"$RUN/gst-inspect-$VARIANT.txt\" || { echo '\"'\"'Decoder thread property unavailable'\"'\"' >&2; exit 2; }\n    else\n        echo '\"'\"'Unknown object'\"'\"' >&2; exit 2\n    fi\n    export LD_LIBRARY_PATH=\"$LIBDIR:$BASE/lib\"\n}\ncommand_for() {\n    local input=$1 checksum_fifo=$2\n    if [[ $OBJECT == spike ]]; then\n        [[ $input =~ ^[1-9][0-9]*$ ]] || { echo '\"'\"'Positive spike rounds required'\"'\"' >&2; exit 2; }\n        CMD=(\"$PROGRAM\" \"$input\")\n    else\n        input=$(inside \"$input\")\n        [[ -f $input ]] || exit 2\n        CMD=(gst-launch-1.0 -q filesrc \"location=$input\" '\"'\"'!'\"'\"' qtdemux '\"'\"'!'\"'\"' h264parse '\"'\"'!'\"'\"' avdec_h264 max-threads=1 '\"'\"'!'\"'\"' video/x-raw,format=I420 '\"'\"'!'\"'\"' filesink \"location=$checksum_fifo\" sync=false)\n    fi\n}\nwatch_maps() {\n    local pidfile=$1 output=$2 target=$3 pid actual\n    for ((i=0;i<500;i++)); do\n        if [[ -s $pidfile ]]; then\n            read -r pid <\"$pidfile\"\n            [[ $pid =~ ^[0-9]+$ ]] || return 2\n            if [[ -r /proc/$pid/maps ]]; then\n                cat \"/proc/$pid/maps\" >\"$output\"\n                if awk -v path=\"$target\" '\"'\"'$6==path && NF==6 {found=1} END {exit !found}'\"'\"' \"$output\"; then\n                    actual=$(sha256sum \"$target\"); actual=${actual%% *}\n                    [[ $actual == \"$TARGET_SHA\" ]] || return 3\n                    printf '\"'\"'PID %s TARGET %s SHA %s EXPECTED_BUILD_ID %s\\n'\"'\"' \"$pid\" \"$target\" \"$actual\" \"$TARGET_ID\" >\"$output.verified\"\n                    return 0\n                fi\n            fi\n        fi\n        sleep .02\n    done\n    echo '\"'\"'Target mapping not observed'\"'\"' >\"$output.failure\"\n    return 4\n}\nfinish_run() {\n    snapshot \"$RUN/environment.after\"\n    df -h \"$BASE\" >\"$RUN/df.after\"\n    rpm -qa | wc -l >\"$RUN/rpm-count.after\"\n    compare_rpm_counts \"$(<\"$RUN/rpm-count.before\")\" \"$(<\"$RUN/rpm-count.after\")\"\n    printf '\"'\"'RESULTS %s\\n'\"'\"' \"$RUN\"\n}\n\ntelemetry_loop() {\n    local seq=0\n    mkdir \"$RUN/telemetry\"\n    while :; do\n        snapshot \"$RUN/telemetry/$seq.txt\"\n        seq=$((seq+1))\n        sleep 1\n    done\n}\n\nassert_board rpi4\npreflight_dependencies\n'; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": "error: service name too long\n"
+  },
+  {
+    "time": "2026-11-05T20:34:00.670318+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "missing=0; for cmd in /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0 gst-launch-1.0 mkdir mkfifo ps readlink rm rpm sha256sum sleep tr uname wc /opt/afdo_agent/tools/perf; do if command -v \"$cmd\"; then printf \"DEPENDENCY_OK %s\\n\" \"$cmd\"; else printf \"DEPENDENCY_MISSING %s\\n\" \"$cmd\"; missing=1; fi; done; test \"$missing\" -eq 0; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nDEPENDENCY_MISSING /opt/afdo_agent/tools/perf\n\n__REMOTE_RC=1\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,73 @@
+{
+  "time": "2026-11-05T20:35:14.324186+08:00",
+  "rpm_compare_cases": [
+    {
+      "name": "equal",
+      "before": "1232",
+      "after": "1232",
+      "expected_rc": 0,
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "different",
+      "before": "1232",
+      "after": "1233",
+      "expected_rc": 3,
+      "rc": 3,
+      "stdout": "",
+      "stderr": "RPM count changed: 1232 -> 1233\n"
+    },
+    {
+      "name": "empty",
+      "before": "",
+      "after": "1232",
+      "expected_rc": 2,
+      "rc": 2,
+      "stdout": "",
+      "stderr": "RPM counts must be nonempty decimal integers (at most 18 digits)\n"
+    },
+    {
+      "name": "negative",
+      "before": "-1",
+      "after": "1",
+      "expected_rc": 2,
+      "rc": 2,
+      "stdout": "",
+      "stderr": "RPM counts must be nonempty decimal integers (at most 18 digits)\n"
+    },
+    {
+      "name": "expression",
+      "before": "1+1",
+      "after": "2",
+      "expected_rc": 2,
+      "rc": 2,
+      "stdout": "",
+      "stderr": "RPM counts must be nonempty decimal integers (at most 18 digits)\n"
+    },
+    {
+      "name": "decimal-leading-zero",
+      "before": "0010",
+      "after": "10",
+      "expected_rc": 0,
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "overflow",
+      "before": "9999999999999999999",
+      "after": "9999999999999999999",
+      "expected_rc": 2,
+      "rc": 2,
+      "stdout": "",
+      "stderr": "RPM counts must be nonempty decimal integers (at most 18 digits)\n"
+    }
+  ],
+  "bash_n": "all three scripts passed",
+  "preregistration_byte_identical": true,
+  "preregistration_sha256": "dfc5b429c5007ed701cb01c746349ed7544a0556b0591e530da690e52e4d7d70",
+  "cleanup_injection": "not executed: dependency stop before pull/cleanup implementation",
+  "board_writes_this_resume": 0
+}
