@@ -26,7 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-05；RPi4恢复采集，真实avg在Thumb DWARF边界处停止）
+## 当前授权与执行状态（2026-11-05；恢复前line0核实通过，预注册修订1）
+
+- 已完成本轮主机第一阶段：6份正式in_func_no_line逐地址全部为原始行表明确line0；spike Thumb中档34113条中33856条集中sort_block地址0x1076a，GBS GNU反汇编及addr2line一致，同flags Clang汇编在地址计算add前明确.loc 1 0 0。A32合并地址加载指令保留line67；无正行号漏查证据。FFmpeg60地址GNU抽查也为leaf未知行，原始行表为0；GNU bad-file-number警告仍保留待avg定位。[报告12第10节](profgen/impl/12_board_round1.md)、[统计](profgen/impl/evidence/12/24_line_zero_diagnosis.json)、[原文](profgen/impl/evidence/12/25_line_zero_raw_excerpts.json)
+- 原预注册7d3d9d9逐字节不变；新增[修订1](profgen/eval/preregistration_amendment1.md)，须本次提交推送成功后才恢复板上采集。有效频率=stat cycles/task-clock，至少固定频率97%，逐秒频率等于固定值且温度低于75°C；每轮前后保存policy governor/min/max/cur。读不到固件节点不单独剔除；缺计数/CPU时间或不可靠计数仍unknown。原ε/预算/次数/bootstrap不变。
+- 旧7份正式数据缺精确cycles/task-clock，按修订仍unknown，未补造记录、未做配置质量/性能比较；9份排除原件仍排除。line0是编译器明确位置，不改冻结排除规则；不同ISA须并报target/usable，不能按相同target预算假定相同可用信息。
+- 已获补丁8裁决：IP的ELF32小端EM_ARM中奇数DWARF下界清bit0后处于$t时，范围两端清bit0，统一作用归类/边界，不清样本PC；增加报告/告警并完成GBS/lit/C1/重放。该授权替代下列历史“待裁决”，实现尚未开始。
+- 下一步：推送修订后恢复剩余63份S、14训练及LOST/5集成，预计板上约4–5小时；并在本机实现/验收补丁8。当前阶段未连接板子、未变更root/governor，最近实证状态仍root off/schedutil。原avg/LOST/全量nonleaf等挂账待后续闭合。
+
+## 前轮授权与执行状态（2026-11-05；RPi4恢复采集，真实avg在Thumb DWARF边界处停止，历史）
 
 - 计划/裁决：预注册`7d3d9d9`与冻结v0.7逐字节不变。两段依赖预检按最新裁决登记：身份→非root系统命令→root→部署/SHA及perf版本→performance→采集。最终24项系统依赖通过，62文件/16目标SHA复验、新脚本/三视频SHA通过。首次nice/ionice补查发生在root后、governor前，随后24项完整非root检查通过；该时序偏差未隐去。[报告12第9节](profgen/impl/12_board_round1.md#9-两段预检后恢复真实-avg-在-gnu-as-的-thumb-dwarf-区间处停止)、[操作](profgen/impl/evidence/12/17_resume2_operations.json)、[依赖](profgen/impl/evidence/12/22_dependency_inventory.json)
 - 进度：7/70正式S已完整采集/拉回，目标样本合计827311；前6份正式工具sum转换verified、name_merged_functions=0，第7份高档Thumb spike仅原件留存、未转换。9份校准/流程原件另存，不入矩阵；训练0/14、LOST压力0、集成0/5。[逐RUN与SHA](profgen/impl/evidence/12/19_resume2_runs.json)

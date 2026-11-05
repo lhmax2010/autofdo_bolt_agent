@@ -294,3 +294,37 @@ ALL-END 2026-11-05T21:17:16.417545+08:00 FAILED elapsed=1254.158
 `/opt`最初used161,020 / available1,144,596 KiB；结束used **282,072** / available **1,023,544 KiB**，22%。保留16变体、perf/libLLVM、脚本、三份视频及小型state文件供恢复；没有删除部署物腾空间，没有保留本轮RUN大数据。perf_event_paranoid/kptr_restrict未写。
 
 待v0.8登记除9.1流程外：GNU AS Thumb子程序DWARF地址兼容性待裁决；未知节流/缺采集前policy边界仍按原预注册排除干净子集；nonleaf处理仍待完整数据。边界例外仍限用户授权root会话与governor sysfs设置/恢复，其他板上写入在opt；未读取其他主机项目输入、未扫描外部SDB状态，不声称不存在任何未观察的守护进程写入。未推LLVM/Gerrit，未改认证或索要密码，未开始Agent实现。
+
+## 10. 恢复前主机核实：Thumb in_func_no_line 与预注册修订1
+
+### 10.1 逐地址核对结论
+
+本阶段未连接开发板。对前6份正式完整导出，用GNU readelf的可执行PT_LOAD独立换算全部目标地址，再查询平台LLVM symbolizer的原始内联栈，并对leaf line=0地址逐一检查 `llvm-dwarfdump --debug-line` 的原始相邻行区间（不跨end_sequence猜测最近行）。6份报告中的in_func_no_line **全部命中明确line=0**；没有“有正行号但符号化未查到”或“行表无覆盖行”的in_func_no_line样本。额外无覆盖的FFmpeg87/17条是PLT，属于原报告outside_dwarf_func，不混入本分类。各函数前20、占本分类/目标比例、热点地址、原始行表行号和命令见[24](evidence/12/24_line_zero_diagnosis.json)，GNU原文和汇编见[25](evidence/12/25_line_zero_raw_excerpts.json)。原始全量分析在`temp/round1-thumb-line0/`。
+
+| 正式对象 | 低档line0/target | 中档line0/target | 判定 |
+|---|---|---|---|
+| spike Thumb | 6715/21561 | 34113/106875 | 全部明确line0 |
+| spike A32 | 56/21347 | 280/106567 | 全部明确line0 |
+| FFmpeg Thumb | 3720/36155 | 11074/108145 | 全部明确line0 |
+
+spike Thumb中档的34,113条中，sort_block34,078（99.8974%）、run_workload31、hash_mix4。**单一地址0x1076a占33,856条**，GNU反汇编是`add.w r5,r0,r2,lsl #2`（内循环的地址计算）；原始行表在0x1076a–0x1076e写line0。GNU addr2line也返回该函数及`spike.c:?`，相邻指令行号67/68可解析。
+
+A32同源sort_block的无行样本仅240条，中档总无行280；A32使用`ldr r5,[r4,r2,lsl #2]!`合并地址更新/加载，其0x10778起的行表为67，而Thumb独立add的编译器位置为0。不同机器指令与PC采样分布共同造成明显比例差异；不把它解释为Thumb源文件缺少32%的源码行。
+
+为排除strip/debug拆分导致，使用原S构建完整flags（含-Os、profiling两项和对应ISA）与同一GBS Clang22.1.8，只额外改为输出汇编：Thumb在该add之前明确输出`.loc 1 0 0`，A32地址加载使用line67。未改源码/flags或重建替换评估RPM。构建命令与汇编行号留24/25。GNU探查7个Thumb地址、6个A32地址，leaf均无源码行，与原始line0一致，无GNU警告。
+
+FFmpeg中档前5个受影响顶层函数及样本：ff_h264_filter_mb1650、decode_cabac_residual_nondc_internal1635、ff_h264_decode_mb_cabac1485、hl_decode_mb_simple_8 1254、fill_decode_caches869（完整唯一链接名与前20见24）。60个抽查地址GNU addr2line均返回leaf未知行，原始行表为0；有些祖先调用点仍有正行号，冻结规则仍按**叶子**line0排除，不提升成祖先可用样本。A32 FFmpeg没有正式数据，本轮只用既有排除的校准作诊断性同函数对照：3807/36553也全为明确line0，不能把它当正式配置质量比较。GNU在FFmpeg查询仍有bad-file-number警告；原文保留，未将GNU警告隐去，后续avg须定位其CU和影响。
+
+**原因与质量影响：**本次高比例来自编译器当前优化/指令选择明确生成的line0，加上热点PC分布；不是缺行表或profgen漏查正行号，第一阶段停止条件未触发。规则保持：这些样本不进入body/total，不能补一个邻近行来提高usable。相同target预算不代表Thumb/A32有同量usable信息；后续须并列展示target、usable、各层剔除与函数集中程度，可能需要更多采集，但本轮不改预算、阈值或行0处理。这里只排查调试信息，不作统计质量/性能收益比较。
+
+### 10.2 预注册修订与旧数据判定
+
+新增[preregistration_amendment1.md](../eval/preregistration_amendment1.md)，原7d3d9d9文件逐字节不变。依据用户裁决：恢复采集前单独提交推送；用同负载树perf stat的cycles/task-clock计算有效频率，≥固定频率97%、逐秒频率等于固定值且温度低于原阈值，才写“未观察到节流”。开始/结束均保存每policy四项频率/调速字段。读不到固件节流节点单独保留unknown，不单凭此剔除满足新判据的轮次。无效/缺计数、multiplex或缺CPU时间保持unknown。
+
+修订前7份正式数据均没有匹配的精确cycles总计数/task-clock，不能把采样period和当作counter；按同一修订仍全为unknown，原件不改，干净子集0。修订写明发生于任何配置间结果比较前，列出全部7份名称与样本数。ε、预算、次数、bootstrap等其余条款不变。恢复前将补录policy边界并加入同负载stat。
+
+### 10.3 待设计v0.8登记与阶段状态
+
+- 本轮裁决授权补丁8：仅IP、ELF32小端EM_ARM，奇数DWARF下界在清bit0后映射状态为$t时，两端清bit0；统一影响归类及边界枚举，样本PC不清位。此前9.5的待裁决已获得此明确规则；本阶段尚未修改LLVM。
+- 补丁8须新统计/告警/schema/lit及正式GBS/C1/14导出验收，不以本次line0排查替代。
+- 当前第一项核实通过，原始证据及预注册修订先提交；板上剩余采集、补丁8与后续avg/LOST等还未在本阶段开始。板上恢复前预计另需约4–5小时（依据已有每档耗时及拉回开销估算，样本不足会增加分段）；将继续单板串行，不重采覆盖旧7份。

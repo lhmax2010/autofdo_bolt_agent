@@ -1,0 +1,1441 @@
+{
+  "probes": {
+    "spike-thumb-S": {
+      "gnu_addr2line": "0x0001076a\nsort_block\n/usr/src/debug/eval-spike-1.0-1.thumbS.arm/spike.c:?\n0x00010776\nsort_block\n/usr/src/debug/eval-spike-1.0-1.thumbS.arm/spike.c:?\n0x0001078c\nsort_block\n/usr/src/debug/eval-spike-1.0-1.thumbS.arm/spike.c:?\n0x00010954\nrun_workload\n/usr/src/debug/eval-spike-1.0-1.thumbS.arm/spike.c:?\n0x000108b2\nrun_workload\n/usr/src/debug/eval-spike-1.0-1.thumbS.arm/spike.c:?\n0x000108f2\nrun_workload\n/usr/src/debug/eval-spike-1.0-1.thumbS.arm/spike.c:?\n0x000106fe\nhash_mix\n/usr/src/debug/eval-spike-1.0-1.thumbS.arm/spike.c:?\n",
+      "gnu_stderr": "",
+      "gnu_sort_disasm": "\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/round1-thumb-line0/spike-thumb-S.combined:     file format elf32-littlearm\n\n\nDisassembly of section .text:\n\n0001074c <sort_block>:\n   1074c:\t2902      \tcmp\tr1, #2\n   1074e:\tbf38      \tit\tcc\n   10750:\t4770      \tbxcc\tlr\n   10752:\tb5b0      \tpush\t{r4, r5, r7, lr}\n   10754:\tf04f 0e01 \tmov.w\tlr, #1\n   10758:\tf04f 0c00 \tmov.w\tip, #0\n   1075c:\tf850 302e \tldr.w\tr3, [r0, lr, lsl #2]\n   10760:\t4662      \tmov\tr2, ip\n   10762:\tf850 4022 \tldr.w\tr4, [r0, r2, lsl #2]\n   10766:\t429c      \tcmp\tr4, r3\n   10768:\td907      \tbls.n\t1077a <sort_block+0x2e>\n   1076a:\teb00 0582 \tadd.w\tr5, r0, r2, lsl #2\n   1076e:\t3a01      \tsubs\tr2, #1\n   10770:\t606c      \tstr\tr4, [r5, #4]\n   10772:\t1c54      \tadds\tr4, r2, #1\n   10774:\td1f5      \tbne.n\t10762 <sort_block+0x16>\n   10776:\t2200      \tmovs\tr2, #0\n   10778:\te000      \tb.n\t1077c <sort_block+0x30>\n   1077a:\t3201      \tadds\tr2, #1\n   1077c:\tf10e 0e01 \tadd.w\tlr, lr, #1\n   10780:\tf10c 0c01 \tadd.w\tip, ip, #1\n   10784:\t458e      \tcmp\tlr, r1\n   10786:\tf840 3022 \tstr.w\tr3, [r0, r2, lsl #2]\n   1078a:\td1e7      \tbne.n\t1075c <sort_block+0x10>\n   1078c:\te8bd 40b0 \tldmia.w\tsp!, {r4, r5, r7, lr}\n   10790:\t4770      \tbx\tlr\n\nDisassembly of section .init:\n\nDisassembly of section .fini:\n\nDisassembly of section .plt:\n",
+      "clang_sort_assembly": [
+        {
+          "line": 110,
+          "text": "\t.p2align\t1"
+        },
+        {
+          "line": 111,
+          "text": "\t.type\tsort_block,%function"
+        },
+        {
+          "line": 112,
+          "text": "\t.code\t16"
+        },
+        {
+          "line": 113,
+          "text": "\t.thumb_func"
+        },
+        {
+          "line": 114,
+          "text": "sort_block:                             @ @sort_block"
+        },
+        {
+          "line": 115,
+          "text": ".Lfunc_begin1:"
+        },
+        {
+          "line": 116,
+          "text": "\t.fnstart"
+        },
+        {
+          "line": 117,
+          "text": "\t.cfi_startproc"
+        },
+        {
+          "line": 118,
+          "text": "@ %bb.0:"
+        },
+        {
+          "line": 119,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 120,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 121,
+          "text": "\t@DEBUG_VALUE: i <- 1"
+        },
+        {
+          "line": 122,
+          "text": "\t.loc\t1 64 5 prologue_end is_stmt 1 discriminator 2 @ spike.c:64:5"
+        },
+        {
+          "line": 123,
+          "text": "\tcmp\tr1, #2"
+        },
+        {
+          "line": 124,
+          "text": ".Ltmp11:"
+        },
+        {
+          "line": 125,
+          "text": "\t.loc\t1 73 1                          @ spike.c:73:1"
+        },
+        {
+          "line": 126,
+          "text": "\tit\tlo"
+        },
+        {
+          "line": 127,
+          "text": "\tbxlo\tlr"
+        },
+        {
+          "line": 128,
+          "text": ".Ltmp12:"
+        },
+        {
+          "line": 129,
+          "text": ".LBB1_1:"
+        },
+        {
+          "line": 130,
+          "text": "\t@DEBUG_VALUE: i <- 1"
+        },
+        {
+          "line": 131,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 132,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 133,
+          "text": "\t.loc\t1 0 1 is_stmt 0                 @ spike.c:0:1"
+        },
+        {
+          "line": 134,
+          "text": "\t.save\t{r4, r5, r7, lr}"
+        },
+        {
+          "line": 135,
+          "text": "\tpush\t{r4, r5, r7, lr}"
+        },
+        {
+          "line": 136,
+          "text": "\t.cfi_def_cfa_offset 16"
+        },
+        {
+          "line": 137,
+          "text": "\t.cfi_offset lr, -4"
+        },
+        {
+          "line": 138,
+          "text": "\t.cfi_offset r7, -8"
+        },
+        {
+          "line": 139,
+          "text": "\t.cfi_offset r5, -12"
+        },
+        {
+          "line": 140,
+          "text": "\t.cfi_offset r4, -16"
+        },
+        {
+          "line": 141,
+          "text": "\tmov.w\tlr, #1"
+        },
+        {
+          "line": 142,
+          "text": "\tmov.w\tr12, #0"
+        },
+        {
+          "line": 143,
+          "text": ".Ltmp13:"
+        },
+        {
+          "line": 144,
+          "text": ".LBB1_2:                                @ =>This Loop Header: Depth=1"
+        },
+        {
+          "line": 145,
+          "text": "                                        @     Child Loop BB1_3 Depth 2"
+        },
+        {
+          "line": 146,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 147,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 148,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 149,
+          "text": "\t.loc\t1 65 26 is_stmt 1               @ spike.c:65:26"
+        },
+        {
+          "line": 150,
+          "text": "\tldr.w\tr3, [r0, lr, lsl #2]"
+        },
+        {
+          "line": 151,
+          "text": ".Ltmp14:"
+        },
+        {
+          "line": 152,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 153,
+          "text": "\t@DEBUG_VALUE: j <- $lr"
+        },
+        {
+          "line": 154,
+          "text": "\t.loc\t1 0 26 is_stmt 0                @ spike.c:0:26"
+        },
+        {
+          "line": 155,
+          "text": "\tmov\tr2, r12"
+        },
+        {
+          "line": 156,
+          "text": ".Ltmp15:"
+        },
+        {
+          "line": 157,
+          "text": ".LBB1_3:                                @   Parent Loop BB1_2 Depth=1"
+        },
+        {
+          "line": 158,
+          "text": "                                        @ =>  This Inner Loop Header: Depth=2"
+        },
+        {
+          "line": 159,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 160,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 161,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 162,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 163,
+          "text": "\t@DEBUG_VALUE: j <- undef"
+        },
+        {
+          "line": 164,
+          "text": "\t.loc\t1 67 26 is_stmt 1 discriminator 4 @ spike.c:67:26"
+        },
+        {
+          "line": 165,
+          "text": "\tldr.w\tr4, [r0, r2, lsl #2]"
+        },
+        {
+          "line": 166,
+          "text": "\t.loc\t1 67 9 is_stmt 0 discriminator 6 @ spike.c:67:9"
+        },
+        {
+          "line": 167,
+          "text": "\tcmp\tr4, r3"
+        },
+        {
+          "line": 168,
+          "text": "\tbls\t.LBB1_6"
+        },
+        {
+          "line": 169,
+          "text": ".Ltmp16:"
+        },
+        {
+          "line": 170,
+          "text": "@ %bb.4:                                @   in Loop: Header=BB1_3 Depth=2"
+        },
+        {
+          "line": 171,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 172,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 173,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 174,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 175,
+          "text": "\t.loc\t1 0 0                           @ spike.c:0"
+        },
+        {
+          "line": 176,
+          "text": "\tadd.w\tr5, r0, r2, lsl #2"
+        },
+        {
+          "line": 177,
+          "text": "\t.loc\t1 67 18 discriminator 2         @ spike.c:67:18"
+        },
+        {
+          "line": 178,
+          "text": "\tsubs\tr2, #1"
+        },
+        {
+          "line": 179,
+          "text": ".Ltmp17:"
+        },
+        {
+          "line": 180,
+          "text": "\t.loc\t1 68 23 is_stmt 1               @ spike.c:68:23"
+        },
+        {
+          "line": 181,
+          "text": "\tstr\tr4, [r5, #4]"
+        },
+        {
+          "line": 182,
+          "text": ".Ltmp18:"
+        },
+        {
+          "line": 183,
+          "text": "\t@DEBUG_VALUE: j <- undef"
+        },
+        {
+          "line": 184,
+          "text": "\t.loc\t1 67 23 discriminator 2         @ spike.c:67:23"
+        },
+        {
+          "line": 185,
+          "text": "\tadds\tr4, r2, #1"
+        },
+        {
+          "line": 186,
+          "text": "\tbne\t.LBB1_3"
+        },
+        {
+          "line": 187,
+          "text": ".Ltmp19:"
+        },
+        {
+          "line": 188,
+          "text": "@ %bb.5:                                @   in Loop: Header=BB1_2 Depth=1"
+        },
+        {
+          "line": 189,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 190,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 191,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 192,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 193,
+          "text": "\t.loc\t1 0 23 is_stmt 0                @ spike.c:0:23"
+        },
+        {
+          "line": 194,
+          "text": "\tmovs\tr2, #0"
+        },
+        {
+          "line": 195,
+          "text": "\t.loc\t1 67 23 is_stmt 1 discriminator 2 @ spike.c:67:23"
+        },
+        {
+          "line": 196,
+          "text": "\tb\t.LBB1_7"
+        },
+        {
+          "line": 197,
+          "text": ".Ltmp20:"
+        },
+        {
+          "line": 198,
+          "text": ".LBB1_6:                                @   in Loop: Header=BB1_2 Depth=1"
+        },
+        {
+          "line": 199,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 200,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 201,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 202,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 203,
+          "text": "\t.loc\t1 67 9 discriminator 6          @ spike.c:67:9"
+        },
+        {
+          "line": 204,
+          "text": "\tadds\tr2, #1"
+        },
+        {
+          "line": 205,
+          "text": ".Ltmp21:"
+        },
+        {
+          "line": 206,
+          "text": ".LBB1_7:                                @   in Loop: Header=BB1_2 Depth=1"
+        },
+        {
+          "line": 207,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 208,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 209,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 210,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 211,
+          "text": "\t.loc\t1 64 41 discriminator 4         @ spike.c:64:41"
+        },
+        {
+          "line": 212,
+          "text": "\tadd.w\tlr, lr, #1"
+        },
+        {
+          "line": 213,
+          "text": ".Ltmp22:"
+        },
+        {
+          "line": 214,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 215,
+          "text": "\t.loc\t1 64 5 discriminator 2          @ spike.c:64:5"
+        },
+        {
+          "line": 216,
+          "text": "\tadd.w\tr12, r12, #1"
+        },
+        {
+          "line": 217,
+          "text": "\tcmp\tlr, r1"
+        },
+        {
+          "line": 218,
+          "text": ".Ltmp23:"
+        },
+        {
+          "line": 219,
+          "text": "\t.loc\t1 71 19                         @ spike.c:71:19"
+        },
+        {
+          "line": 220,
+          "text": "\tstr.w\tr3, [r0, r2, lsl #2]"
+        },
+        {
+          "line": 221,
+          "text": ".Ltmp24:"
+        },
+        {
+          "line": 222,
+          "text": "\t.loc\t1 64 5 discriminator 2          @ spike.c:64:5"
+        },
+        {
+          "line": 223,
+          "text": "\tbne\t.LBB1_2"
+        },
+        {
+          "line": 224,
+          "text": ".Ltmp25:"
+        },
+        {
+          "line": 225,
+          "text": "@ %bb.8:"
+        },
+        {
+          "line": 226,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 227,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 228,
+          "text": "\t.loc\t1 0 5 is_stmt 0                 @ spike.c:0:5"
+        },
+        {
+          "line": 229,
+          "text": "\tpop.w\t{r4, r5, r7, lr}"
+        },
+        {
+          "line": 230,
+          "text": "\t.loc\t1 73 1 is_stmt 1                @ spike.c:73:1"
+        },
+        {
+          "line": 231,
+          "text": "\tbx\tlr"
+        },
+        {
+          "line": 232,
+          "text": ".Ltmp26:"
+        },
+        {
+          "line": 233,
+          "text": ".Lfunc_end1:"
+        },
+        {
+          "line": 234,
+          "text": "\t.size\tsort_block, .Lfunc_end1-sort_block"
+        },
+        {
+          "line": 235,
+          "text": "\t.cfi_endproc"
+        },
+        {
+          "line": 236,
+          "text": "\t.cantunwind"
+        },
+        {
+          "line": 237,
+          "text": "\t.fnend"
+        },
+        {
+          "line": 238,
+          "text": "                                        @ -- End function"
+        },
+        {
+          "line": 239,
+          "text": "\t.section\t.text.lookup_work,\"ax\",%progbits"
+        },
+        {
+          "line": 240,
+          "text": "\t.globl\tlookup_work                     @ -- Begin function lookup_work"
+        },
+        {
+          "line": 241,
+          "text": "\t.p2align\t2"
+        },
+        {
+          "line": 242,
+          "text": "\t.type\tlookup_work,%function"
+        },
+        {
+          "line": 243,
+          "text": "\t.code\t16"
+        },
+        {
+          "line": 244,
+          "text": "\t.thumb_func"
+        },
+        {
+          "line": 245,
+          "text": "lookup_work:                            @ @lookup_work"
+        }
+      ]
+    },
+    "spike-a32-S": {
+      "gnu_addr2line": "0x00010798\nsort_block\n/usr/src/debug/eval-spike-1.0-1.a32S.arm/spike.c:?\n0x000107b8\nsort_block\n/usr/src/debug/eval-spike-1.0-1.a32S.arm/spike.c:?\n0x00010764\nsort_block\n/usr/src/debug/eval-spike-1.0-1.a32S.arm/spike.c:?\n0x00010998\nrun_workload\n/usr/src/debug/eval-spike-1.0-1.a32S.arm/spike.c:?\n0x00010940\nrun_workload\n/usr/src/debug/eval-spike-1.0-1.a32S.arm/spike.c:?\n0x00010a10\nrun_workload\n/usr/src/debug/eval-spike-1.0-1.a32S.arm/spike.c:?\n",
+      "gnu_stderr": "",
+      "gnu_sort_disasm": "\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/round1-thumb-line0/spike-a32-S.combined:     file format elf32-littlearm\n\n\nDisassembly of section .text:\n\n0001075c <sort_block>:\n   1075c:\te3510002 \tcmp\tr1, #2\n   10760:\t312fff1e \tbxcc\tlr\n   10764:\te92d4830 \tpush\t{r4, r5, fp, lr}\n   10768:\te3a0e001 \tmov\tlr, #1\n   1076c:\te3a0c000 \tmov\tip, #0\n   10770:\te790310e \tldr\tr3, [r0, lr, lsl #2]\n   10774:\te1a0200c \tmov\tr2, ip\n   10778:\te1a04000 \tmov\tr4, r0\n   1077c:\te7b45102 \tldr\tr5, [r4, r2, lsl #2]!\n   10780:\te1550003 \tcmp\tr5, r3\n   10784:\t9a000005 \tbls\t107a0 <sort_block+0x44>\n   10788:\te2422001 \tsub\tr2, r2, #1\n   1078c:\te5845004 \tstr\tr5, [r4, #4]\n   10790:\te3720001 \tcmn\tr2, #1\n   10794:\t1afffff7 \tbne\t10778 <sort_block+0x1c>\n   10798:\te3a02000 \tmov\tr2, #0\n   1079c:\tea000000 \tb\t107a4 <sort_block+0x48>\n   107a0:\te2822001 \tadd\tr2, r2, #1\n   107a4:\te28ee001 \tadd\tlr, lr, #1\n   107a8:\te28cc001 \tadd\tip, ip, #1\n   107ac:\te15e0001 \tcmp\tlr, r1\n   107b0:\te7803102 \tstr\tr3, [r0, r2, lsl #2]\n   107b4:\t1affffed \tbne\t10770 <sort_block+0x14>\n   107b8:\te8bd4830 \tpop\t{r4, r5, fp, lr}\n   107bc:\te12fff1e \tbx\tlr\n\nDisassembly of section .init:\n\nDisassembly of section .fini:\n\nDisassembly of section .plt:\n",
+      "clang_sort_assembly": [
+        {
+          "line": 110,
+          "text": "\t.type\tsort_block,%function"
+        },
+        {
+          "line": 111,
+          "text": "\t.code\t32"
+        },
+        {
+          "line": 112,
+          "text": "sort_block:                             @ @sort_block"
+        },
+        {
+          "line": 113,
+          "text": ".Lfunc_begin1:"
+        },
+        {
+          "line": 114,
+          "text": "\t.fnstart"
+        },
+        {
+          "line": 115,
+          "text": "\t.cfi_startproc"
+        },
+        {
+          "line": 116,
+          "text": "@ %bb.0:"
+        },
+        {
+          "line": 117,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 118,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 119,
+          "text": "\t@DEBUG_VALUE: i <- 1"
+        },
+        {
+          "line": 120,
+          "text": "\t.loc\t1 64 5 prologue_end is_stmt 1 discriminator 2 @ spike.c:64:5"
+        },
+        {
+          "line": 121,
+          "text": "\tcmp\tr1, #2"
+        },
+        {
+          "line": 122,
+          "text": ".Ltmp11:"
+        },
+        {
+          "line": 123,
+          "text": "\t.loc\t1 73 1                          @ spike.c:73:1"
+        },
+        {
+          "line": 124,
+          "text": "\tbxlo\tlr"
+        },
+        {
+          "line": 125,
+          "text": ".Ltmp12:"
+        },
+        {
+          "line": 126,
+          "text": ".LBB1_1:"
+        },
+        {
+          "line": 127,
+          "text": "\t@DEBUG_VALUE: i <- 1"
+        },
+        {
+          "line": 128,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 129,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 130,
+          "text": "\t.loc\t1 0 1 is_stmt 0                 @ spike.c:0:1"
+        },
+        {
+          "line": 131,
+          "text": "\t.save\t{r4, r5, r11, lr}"
+        },
+        {
+          "line": 132,
+          "text": "\tpush\t{r4, r5, r11, lr}"
+        },
+        {
+          "line": 133,
+          "text": "\t.cfi_def_cfa_offset 16"
+        },
+        {
+          "line": 134,
+          "text": "\t.cfi_offset lr, -4"
+        },
+        {
+          "line": 135,
+          "text": "\t.cfi_offset r11, -8"
+        },
+        {
+          "line": 136,
+          "text": "\t.cfi_offset r5, -12"
+        },
+        {
+          "line": 137,
+          "text": "\t.cfi_offset r4, -16"
+        },
+        {
+          "line": 138,
+          "text": "\tmov\tlr, #1"
+        },
+        {
+          "line": 139,
+          "text": "\tmov\tr12, #0"
+        },
+        {
+          "line": 140,
+          "text": ".Ltmp13:"
+        },
+        {
+          "line": 141,
+          "text": ".LBB1_2:                                @ =>This Loop Header: Depth=1"
+        },
+        {
+          "line": 142,
+          "text": "                                        @     Child Loop BB1_3 Depth 2"
+        },
+        {
+          "line": 143,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 144,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 145,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 146,
+          "text": "\t.loc\t1 65 26 is_stmt 1               @ spike.c:65:26"
+        },
+        {
+          "line": 147,
+          "text": "\tldr\tr3, [r0, lr, lsl #2]"
+        },
+        {
+          "line": 148,
+          "text": ".Ltmp14:"
+        },
+        {
+          "line": 149,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 150,
+          "text": "\t@DEBUG_VALUE: j <- $lr"
+        },
+        {
+          "line": 151,
+          "text": "\t.loc\t1 0 26 is_stmt 0                @ spike.c:0:26"
+        },
+        {
+          "line": 152,
+          "text": "\tmov\tr2, r12"
+        },
+        {
+          "line": 153,
+          "text": ".Ltmp15:"
+        },
+        {
+          "line": 154,
+          "text": ".LBB1_3:                                @   Parent Loop BB1_2 Depth=1"
+        },
+        {
+          "line": 155,
+          "text": "                                        @ =>  This Inner Loop Header: Depth=2"
+        },
+        {
+          "line": 156,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 157,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 158,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 159,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 160,
+          "text": "\t@DEBUG_VALUE: j <- undef"
+        },
+        {
+          "line": 161,
+          "text": "\t.loc\t1 67 26 is_stmt 1 discriminator 4 @ spike.c:67:26"
+        },
+        {
+          "line": 162,
+          "text": "\tmov\tr4, r0"
+        },
+        {
+          "line": 163,
+          "text": "\tldr\tr5, [r4, r2, lsl #2]!"
+        },
+        {
+          "line": 164,
+          "text": "\t.loc\t1 67 9 is_stmt 0 discriminator 6 @ spike.c:67:9"
+        },
+        {
+          "line": 165,
+          "text": "\tcmp\tr5, r3"
+        },
+        {
+          "line": 166,
+          "text": "\tbls\t.LBB1_6"
+        },
+        {
+          "line": 167,
+          "text": ".Ltmp16:"
+        },
+        {
+          "line": 168,
+          "text": "@ %bb.4:                                @   in Loop: Header=BB1_3 Depth=2"
+        },
+        {
+          "line": 169,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 170,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 171,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 172,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 173,
+          "text": "\t.loc\t1 67 18 discriminator 2         @ spike.c:67:18"
+        },
+        {
+          "line": 174,
+          "text": "\tsub\tr2, r2, #1"
+        },
+        {
+          "line": 175,
+          "text": ".Ltmp17:"
+        },
+        {
+          "line": 176,
+          "text": "\t.loc\t1 68 23 is_stmt 1               @ spike.c:68:23"
+        },
+        {
+          "line": 177,
+          "text": "\tstr\tr5, [r4, #4]"
+        },
+        {
+          "line": 178,
+          "text": ".Ltmp18:"
+        },
+        {
+          "line": 179,
+          "text": "\t@DEBUG_VALUE: j <- undef"
+        },
+        {
+          "line": 180,
+          "text": "\t.loc\t1 67 23 discriminator 2         @ spike.c:67:23"
+        },
+        {
+          "line": 181,
+          "text": "\tcmn\tr2, #1"
+        },
+        {
+          "line": 182,
+          "text": "\tbne\t.LBB1_3"
+        },
+        {
+          "line": 183,
+          "text": ".Ltmp19:"
+        },
+        {
+          "line": 184,
+          "text": "@ %bb.5:                                @   in Loop: Header=BB1_2 Depth=1"
+        },
+        {
+          "line": 185,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 186,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 187,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 188,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 189,
+          "text": "\t.loc\t1 0 23 is_stmt 0                @ spike.c:0:23"
+        },
+        {
+          "line": 190,
+          "text": "\tmov\tr2, #0"
+        },
+        {
+          "line": 191,
+          "text": "\t.loc\t1 67 23 is_stmt 1 discriminator 2 @ spike.c:67:23"
+        },
+        {
+          "line": 192,
+          "text": "\tb\t.LBB1_7"
+        },
+        {
+          "line": 193,
+          "text": ".Ltmp20:"
+        },
+        {
+          "line": 194,
+          "text": ".LBB1_6:                                @   in Loop: Header=BB1_2 Depth=1"
+        },
+        {
+          "line": 195,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 196,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 197,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 198,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 199,
+          "text": "\t.loc\t1 67 9 discriminator 6          @ spike.c:67:9"
+        },
+        {
+          "line": 200,
+          "text": "\tadd\tr2, r2, #1"
+        },
+        {
+          "line": 201,
+          "text": ".Ltmp21:"
+        },
+        {
+          "line": 202,
+          "text": ".LBB1_7:                                @   in Loop: Header=BB1_2 Depth=1"
+        },
+        {
+          "line": 203,
+          "text": "\t@DEBUG_VALUE: value <- $r3"
+        },
+        {
+          "line": 204,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 205,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 206,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 207,
+          "text": "\t.loc\t1 64 41 discriminator 4         @ spike.c:64:41"
+        },
+        {
+          "line": 208,
+          "text": "\tadd\tlr, lr, #1"
+        },
+        {
+          "line": 209,
+          "text": ".Ltmp22:"
+        },
+        {
+          "line": 210,
+          "text": "\t@DEBUG_VALUE: i <- $lr"
+        },
+        {
+          "line": 211,
+          "text": "\t.loc\t1 64 5 discriminator 2          @ spike.c:64:5"
+        },
+        {
+          "line": 212,
+          "text": "\tadd\tr12, r12, #1"
+        },
+        {
+          "line": 213,
+          "text": "\tcmp\tlr, r1"
+        },
+        {
+          "line": 214,
+          "text": ".Ltmp23:"
+        },
+        {
+          "line": 215,
+          "text": "\t.loc\t1 71 19                         @ spike.c:71:19"
+        },
+        {
+          "line": 216,
+          "text": "\tstr\tr3, [r0, r2, lsl #2]"
+        },
+        {
+          "line": 217,
+          "text": ".Ltmp24:"
+        },
+        {
+          "line": 218,
+          "text": "\t.loc\t1 64 5 discriminator 2          @ spike.c:64:5"
+        },
+        {
+          "line": 219,
+          "text": "\tbne\t.LBB1_2"
+        },
+        {
+          "line": 220,
+          "text": ".Ltmp25:"
+        },
+        {
+          "line": 221,
+          "text": "@ %bb.8:"
+        },
+        {
+          "line": 222,
+          "text": "\t@DEBUG_VALUE: sort_block:count <- $r1"
+        },
+        {
+          "line": 223,
+          "text": "\t@DEBUG_VALUE: sort_block:values <- $r0"
+        },
+        {
+          "line": 224,
+          "text": "\t.loc\t1 0 5 is_stmt 0                 @ spike.c:0:5"
+        },
+        {
+          "line": 225,
+          "text": "\tpop\t{r4, r5, r11, lr}"
+        },
+        {
+          "line": 226,
+          "text": "\t.loc\t1 73 1 is_stmt 1                @ spike.c:73:1"
+        },
+        {
+          "line": 227,
+          "text": "\tbx\tlr"
+        },
+        {
+          "line": 228,
+          "text": ".Ltmp26:"
+        },
+        {
+          "line": 229,
+          "text": ".Lfunc_end1:"
+        },
+        {
+          "line": 230,
+          "text": "\t.size\tsort_block, .Lfunc_end1-sort_block"
+        },
+        {
+          "line": 231,
+          "text": "\t.cfi_endproc"
+        },
+        {
+          "line": 232,
+          "text": "\t.cantunwind"
+        },
+        {
+          "line": 233,
+          "text": "\t.fnend"
+        },
+        {
+          "line": 234,
+          "text": "                                        @ -- End function"
+        },
+        {
+          "line": 235,
+          "text": "\t.section\t.text.lookup_work,\"ax\",%progbits"
+        },
+        {
+          "line": 236,
+          "text": "\t.globl\tlookup_work                     @ -- Begin function lookup_work"
+        },
+        {
+          "line": 237,
+          "text": "\t.p2align\t2"
+        },
+        {
+          "line": 238,
+          "text": "\t.type\tlookup_work,%function"
+        },
+        {
+          "line": 239,
+          "text": "\t.code\t32"
+        },
+        {
+          "line": 240,
+          "text": "lookup_work:                            @ @lookup_work"
+        },
+        {
+          "line": 241,
+          "text": ".Lfunc_begin2:"
+        },
+        {
+          "line": 242,
+          "text": "\t.loc\t1 77 0                          @ spike.c:77:0"
+        },
+        {
+          "line": 243,
+          "text": "\t.fnstart"
+        },
+        {
+          "line": 244,
+          "text": "\t.cfi_startproc"
+        },
+        {
+          "line": 245,
+          "text": "@ %bb.0:"
+        }
+      ]
+    },
+    "ffmpeg-thumb-S": {
+      "gnu_addr2line": "0x000dcd5c\n_ZL13filter_mb_dirPK11H264ContextP16H264SliceContextiiPhS4_S4_jjiiiiiiii.__uniq.275345673349404074195048302594725744325\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:?\nff_h264_filter_mb\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:845\n0x000dc0c2\nff_h264_filter_mb\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:?\n0x000dc272\n_ZL15filter_mb_edgevPhiPKsjiiPK11H264Contexti.__uniq.275345673349404074195048302594725744325\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:?\n_ZL13filter_mb_dirPK11H264ContextP16H264SliceContextiiPhS4_S4_jjiiiiiiii.__uniq.275345673349404074195048302594725744325\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:599\nff_h264_filter_mb\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:844\n0x000cd926\n_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n_ZL36decode_cabac_residual_nondc_internalPK11H264ContextP16H264SliceContextPsiiPKhPKji.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1806\n0x000cd9be\n_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h:?\n_ZL36decode_cabac_residual_nondc_internalPK11H264ContextP16H264SliceContextPsiiPKhPKji.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1806\n0x000cd88c\n_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h:?\n_ZL36decode_cabac_residual_nondc_internalPK11H264ContextP16H264SliceContextPsiiPKhPKji.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1806\n0x000c9806\nff_h264_decode_mb_cabac\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n0x000c6c5e\nff_h264_decode_mb_cabac\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/rectangle.h:?\n0x000c6610\n_ZL26decode_cabac_luma_residualPK11H264ContextP16H264SliceContextPKhS5_iiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\nff_h264_decode_mb_cabac\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:2436\n0x000e6936\n_ZL21hl_decode_mb_simple_8PK11H264ContextP16H264SliceContext.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb_template.c:?\n0x000e5646\n_ZL21hl_decode_mb_simple_8PK11H264ContextP16H264SliceContext.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb_template.c:?\n0x000e693a\n_ZL21hl_decode_mb_simple_8PK11H264ContextP16H264SliceContext.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb_template.c:?\n0x000cac8e\n_ZL18fill_decode_cachesPK11H264ContextP16H264SliceContexti.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mvpred.h:?\n0x000cac96\n_ZL18fill_decode_cachesPK11H264ContextP16H264SliceContexti.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mvpred.h:?\n0x000ca716\n_ZL18fill_decode_cachesPK11H264ContextP16H264SliceContexti.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mvpred.h:?\n0x000ee958\n_ZL11mc_part_stdPK11H264ContextP16H264SliceContextiiiiPhS4_S4_iiPKPFvS4_PKhiEPFvS4_S6_iiiiESA_SC_iiii.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb.c:?\n_ZL20mc_part_420_simple_8PK11H264ContextP16H264SliceContextiiiiPhS4_S4_iiPKPFvS4_PKhiEPFvS4_S6_iiiiESA_SC_PKPFvS4_iiiiiEPKPFvS4_S4_iiiiiiEii.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mc_template.c:59\n0x000ee3e0\n_ZL11mc_part_stdPK11H264ContextP16H264SliceContextiiiiPhS4_S4_iiPKPFvS4_PKhiEPFvS4_S6_iiiiESA_SC_iiii.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb.c:?\n_ZL20mc_part_420_simple_8PK11H264ContextP16H264SliceContextiiiiPhS4_S4_iiPKPFvS4_PKhiEPFvS4_S6_iiiiESA_SC_PKPFvS4_iiiiiEPKPFvS4_S4_iiiiiiEii.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mc_template.c:59\n0x000eeebe\n_ZL20mc_part_420_simple_8PK11H264ContextP16H264SliceContextiiiiPhS4_S4_iiPKPFvS4_PKhiEPFvS4_S6_iiiiESA_SC_PKPFvS4_iiiiiEPKPFvS4_S4_iiiiiiEii.__uniq.237198308776883668208751996125870213978\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mc_template.c:?\n0x000dd674\n_ZL8check_mvP16H264SliceContextlli.__uniq.275345673349404074195048302594725744325\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:?\n0x000dd672\n_ZL8check_mvP16H264SliceContextlli.__uniq.275345673349404074195048302594725744325\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:?\n0x000dd66c\n_ZL8check_mvP16H264SliceContextlli.__uniq.275345673349404074195048302594725744325\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_loopfilter.c:?\n0x000d61c0\nff_h264_pred_direct_motion\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_direct.c:?\n0x000d7766\nff_h264_pred_direct_motion\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/rectangle.h:?\n0x000d63cc\n_ZL26pred_spatial_direct_motionPK11H264ContextP16H264SliceContextPi.__uniq.296751724182731167774237165245098469956\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_direct.c:?\nff_h264_pred_direct_motion\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_direct.c:724\n0x000fb69a\n_ZL18fill_filter_cachesPK11H264ContextP16H264SliceContexti.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:?\n_ZL11loop_filterPK11H264ContextP16H264SliceContextii.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:2481\n0x000fb24a\n_ZL11loop_filterPK11H264ContextP16H264SliceContextii.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:?\n0x000fb296\n_ZL11loop_filterPK11H264ContextP16H264SliceContextii.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:?\n0x000ca59a\n_ZL20get_cabac_inline_armP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h:?\n_ZL18get_cabac_noinlineP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:141\n0x000ca594\n_ZL20get_cabac_inline_armP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h:?\n_ZL18get_cabac_noinlineP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:141\n0x000ca598\n_ZL20get_cabac_inline_armP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h:?\n_ZL18get_cabac_noinlineP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:141\n0x000fad00\n_ZL25renorm_cabac_decoder_onceP12CABACContext.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:?\n_ZL19get_cabac_terminateP12CABACContext.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:190\n_ZL12decode_sliceP14AVCodecContextPv.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:2631\n0x000facdc\n_ZL12decode_sliceP14AVCodecContextPv.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:?\n0x000fad5a\n_ZL12decode_sliceP14AVCodecContextPv.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:?\n0x000cbb30\n_ZL19decode_cabac_mb_mvdP16H264SliceContextiiPi.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n0x000cbb82\n_ZL19decode_cabac_mb_mvdP16H264SliceContextiiPi.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:?\n0x000cbb84\n_ZL19decode_cabac_mb_mvdP16H264SliceContextiiPi.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:?\n0x000dd760\nff_h264_hl_decode_mb\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb.c:?\n0x000dd764\nff_h264_hl_decode_mb\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb.c:?\n0x000dd766\nff_h264_hl_decode_mb\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mb.c:?\n0x0010b320\n_ZL31h264_loop_filter_luma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL33h264_v_loop_filter_luma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:220\n0x0010b334\n_ZL31h264_loop_filter_luma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL33h264_v_loop_filter_luma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:220\n0x0010b34c\n_ZL31h264_loop_filter_luma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL33h264_v_loop_filter_luma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:220\n0x0010b47a\n_ZL31h264_loop_filter_luma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL33h264_h_loop_filter_luma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:224\n0x0010b48a\n_ZL31h264_loop_filter_luma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL33h264_h_loop_filter_luma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:224\n0x0010b54e\n_ZL33h264_h_loop_filter_luma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n0x000d0176\n_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n_ZL33decode_cabac_residual_dc_internalPK11H264ContextP16H264SliceContextPsiiPKhi.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1785\n0x000cecc2\n_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n_ZL33decode_cabac_residual_dc_internalPK11H264ContextP16H264SliceContextPsiiPKhi.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1785\n0x000d000a\n_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n_ZL33decode_cabac_residual_dc_internalPK11H264ContextP16H264SliceContextPsiiPKhi.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1785\n0x000ca37c\n_ZL20decode_cabac_mb_skipPK11H264ContextP16H264SliceContextii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n0x000ca370\n_ZL20decode_cabac_mb_skipPK11H264ContextP16H264SliceContextii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n0x000ca372\n_ZL20decode_cabac_mb_skipPK11H264ContextP16H264SliceContextii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:?\n0x0010c0e0\n_ZL35h264_v_loop_filter_chroma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n0x0010c00c\n_ZL33h264_loop_filter_chroma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL35h264_v_loop_filter_chroma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:311\n0x0010c05a\n_ZL33h264_loop_filter_chroma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL35h264_v_loop_filter_chroma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:311\n0x0010c38e\n_ZL35h264_h_loop_filter_chroma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n0x0010c38c\n_ZL35h264_h_loop_filter_chroma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n0x0010c25e\n_ZL33h264_loop_filter_chroma_intra_8_cPhiiiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:?\n_ZL35h264_h_loop_filter_chroma_intra_8_cPhiii.__uniq.162552825384835373556903741771413466237\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264dsp_template.c:315\n0x000ca458\n_ZL21fill_decode_neighborsPK11H264ContextP16H264SliceContexti.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mvpred.h:?\n0x000ca3ca\n_ZL21fill_decode_neighborsPK11H264ContextP16H264SliceContexti.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mvpred.h:?\n0x000ca3e4\n_ZL21fill_decode_neighborsPK11H264ContextP16H264SliceContexti.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_mvpred.h:?\n",
+      "gnu_stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n"
+    }
+  },
+  "spike_thumb_line_rows": [
+    {
+      "line": 240,
+      "text": "           name: \"FILE.h\""
+    },
+    {
+      "line": 241,
+      "text": "      dir_index: 3"
+    },
+    {
+      "line": 242,
+      "text": "       mod_time: 0x00000000"
+    },
+    {
+      "line": 243,
+      "text": "         length: 0x00000000"
+    },
+    {
+      "line": 244,
+      "text": ""
+    },
+    {
+      "line": 245,
+      "text": "Address            Line   Column File   ISA Discriminator OpIndex Flags"
+    },
+    {
+      "line": 246,
+      "text": "------------------ ------ ------ ------ --- ------------- ------- -------------"
+    },
+    {
+      "line": 247,
+      "text": "0x00000000000106ec     44      0      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 248,
+      "text": "0x00000000000106ee     45     12      1   0             0       0  is_stmt prologue_end"
+    },
+    {
+      "line": 249,
+      "text": "0x00000000000106fc     45      7      1   0             0       0 "
+    },
+    {
+      "line": 250,
+      "text": "0x00000000000106fe      0      7      1   0             0       0 "
+    },
+    {
+      "line": 251,
+      "text": "0x0000000000010706     45      7      1   0             0       0 "
+    },
+    {
+      "line": 252,
+      "text": "0x000000000001070a     46      7      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 253,
+      "text": "0x000000000001071e     47     12      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 254,
+      "text": "0x000000000001072c     47      7      1   0             0       0 "
+    },
+    {
+      "line": 255,
+      "text": "0x0000000000010732     48      7      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 256,
+      "text": "0x000000000001073e     49     19      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 257,
+      "text": "0x0000000000010744     49     14      1   0             0       0 "
+    },
+    {
+      "line": 258,
+      "text": "0x000000000001074a     49      5      1   0             0       0  epilogue_begin"
+    },
+    {
+      "line": 259,
+      "text": "0x000000000001074c     49      5      1   0             0       0  end_sequence"
+    },
+    {
+      "line": 260,
+      "text": "0x000000000001074c     64      5      1   0             2       0  is_stmt prologue_end"
+    },
+    {
+      "line": 261,
+      "text": "0x000000000001074e     73      1      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 262,
+      "text": "0x0000000000010752      0      1      1   0             0       0 "
+    },
+    {
+      "line": 263,
+      "text": "0x000000000001075c     65     26      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 264,
+      "text": "0x0000000000010760      0     26      1   0             0       0 "
+    },
+    {
+      "line": 265,
+      "text": "0x0000000000010762     67     26      1   0             4       0  is_stmt"
+    },
+    {
+      "line": 266,
+      "text": "0x0000000000010766     67      9      1   0             6       0 "
+    },
+    {
+      "line": 267,
+      "text": "0x000000000001076a      0      0      1   0             0       0 "
+    },
+    {
+      "line": 268,
+      "text": "0x000000000001076e     67     18      1   0             2       0 "
+    },
+    {
+      "line": 269,
+      "text": "0x0000000000010770     68     23      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 270,
+      "text": "0x0000000000010772     67     23      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 271,
+      "text": "0x0000000000010776      0     23      1   0             0       0 "
+    },
+    {
+      "line": 272,
+      "text": "0x0000000000010778     67     23      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 273,
+      "text": "0x000000000001077a     67      9      1   0             6       0  is_stmt"
+    },
+    {
+      "line": 274,
+      "text": "0x000000000001077c     64     41      1   0             4       0  is_stmt"
+    },
+    {
+      "line": 275,
+      "text": "0x0000000000010780     64      5      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 276,
+      "text": "0x0000000000010786     71     19      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 277,
+      "text": "0x000000000001078a     64      5      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 278,
+      "text": "0x000000000001078c      0      5      1   0             0       0 "
+    },
+    {
+      "line": 279,
+      "text": "0x0000000000010790     73      1      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 280,
+      "text": "0x0000000000010792     73      1      1   0             0       0  is_stmt end_sequence"
+    },
+    {
+      "line": 281,
+      "text": "0x0000000000010794     77      0      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 282,
+      "text": "0x00000000000107ac     80     24      1   0             0       0  is_stmt prologue_end"
+    },
+    {
+      "line": 283,
+      "text": "0x00000000000107b0     81     31      1   0             0       0 "
+    },
+    {
+      "line": 284,
+      "text": "0x00000000000107b4     84     25      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 285,
+      "text": "0x00000000000107b6     81     46      1   0             0       0  is_stmt"
+    }
+  ],
+  "spike_a32_line_rows": [
+    {
+      "line": 265,
+      "text": "0x0000000000010734     47      7      1   0             0       0 "
+    },
+    {
+      "line": 266,
+      "text": "0x000000000001073c     48      7      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 267,
+      "text": "0x0000000000010748     49     19      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 268,
+      "text": "0x0000000000010750     49     14      1   0             0       0 "
+    },
+    {
+      "line": 269,
+      "text": "0x0000000000010758     49      5      1   0             0       0  epilogue_begin"
+    },
+    {
+      "line": 270,
+      "text": "0x000000000001075c     49      5      1   0             0       0  end_sequence"
+    },
+    {
+      "line": 271,
+      "text": "0x000000000001075c     64      5      1   0             2       0  is_stmt prologue_end"
+    },
+    {
+      "line": 272,
+      "text": "0x0000000000010760     73      1      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 273,
+      "text": "0x0000000000010764      0      1      1   0             0       0 "
+    },
+    {
+      "line": 274,
+      "text": "0x0000000000010770     65     26      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 275,
+      "text": "0x0000000000010774      0     26      1   0             0       0 "
+    },
+    {
+      "line": 276,
+      "text": "0x0000000000010778     67     26      1   0             4       0  is_stmt"
+    },
+    {
+      "line": 277,
+      "text": "0x0000000000010780     67      9      1   0             6       0 "
+    },
+    {
+      "line": 278,
+      "text": "0x0000000000010788     67     18      1   0             2       0 "
+    },
+    {
+      "line": 279,
+      "text": "0x000000000001078c     68     23      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 280,
+      "text": "0x0000000000010790     67     23      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 281,
+      "text": "0x0000000000010798      0     23      1   0             0       0 "
+    },
+    {
+      "line": 282,
+      "text": "0x000000000001079c     67     23      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 283,
+      "text": "0x00000000000107a0     67      9      1   0             6       0  is_stmt"
+    },
+    {
+      "line": 284,
+      "text": "0x00000000000107a4     64     41      1   0             4       0  is_stmt"
+    },
+    {
+      "line": 285,
+      "text": "0x00000000000107a8     64      5      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 286,
+      "text": "0x00000000000107b0     71     19      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 287,
+      "text": "0x00000000000107b4     64      5      1   0             2       0  is_stmt"
+    },
+    {
+      "line": 288,
+      "text": "0x00000000000107b8      0      5      1   0             0       0 "
+    },
+    {
+      "line": 289,
+      "text": "0x00000000000107bc     73      1      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 290,
+      "text": "0x00000000000107c0     73      1      1   0             0       0  is_stmt end_sequence"
+    },
+    {
+      "line": 291,
+      "text": "0x00000000000107c0     77      0      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 292,
+      "text": "0x00000000000107e4     80     24      1   0             0       0  is_stmt prologue_end"
+    },
+    {
+      "line": 293,
+      "text": "0x00000000000107e8     83     27      1   0             0       0 "
+    },
+    {
+      "line": 294,
+      "text": "0x00000000000107ec     84     25      1   0             0       0  is_stmt"
+    },
+    {
+      "line": 295,
+      "text": "0x00000000000107f0     81     31      1   0             0       0  is_stmt"
+    }
+  ],
+  "ffmpeg_plt_sections": {
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/readelf",
+      "-SW",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/libavcodec.so.62.11.100"
+    ],
+    "rc": 0,
+    "stdout": "There are 27 section headers, starting at offset 0x3d1890:\n\nSection Headers:\n  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            00000000 000000 000000 00      0   0  0\n  [ 1] .note.gnu.build-id NOTE            00000114 000114 000024 00   A  0   0  4\n  [ 2] .gnu.hash         GNU_HASH        00000138 000138 0004e4 04   A  3   0  4\n  [ 3] .dynsym           DYNSYM          0000061c 00061c 001b50 10   A  4   3  4\n  [ 4] .dynstr           STRTAB          0000216c 00216c 0020d5 00   A  0   0  1\n  [ 5] .gnu.version      VERSYM          00004242 004242 00036a 02   A  3   0  2\n  [ 6] .gnu.version_d    VERDEF          000045ac 0045ac 000038 00   A  4   2  4\n  [ 7] .gnu.version_r    VERNEED         000045e4 0045e4 000100 00   A  4   5  4\n  [ 8] .rel.dyn          REL             000046e4 0046e4 00fff0 08   A  3   0  4\n  [ 9] .rel.plt          REL             000146d4 0146d4 0008c0 08  AI  3  22  4\n  [10] .init             PROGBITS        00014f94 014f94 00000c 00  AX  0   0  4\n  [11] .plt              PROGBITS        00014fa0 014fa0 000d88 04  AX  0   0  4\n  [12] .text             PROGBITS        00015d40 015d40 32cf60 00  AX  0   0 64\n  [13] .fini             PROGBITS        00342ca0 342ca0 000008 00  AX  0   0  4\n  [14] .rodata           PROGBITS        00342cb0 342cb0 07462c 00   A  0   0 16\n  [15] .ARM.extab        PROGBITS        003b72dc 3b72dc 0005fc 00   A  0   0  4\n  [16] .ARM.exidx        ARM_EXIDX       003b78d8 3b78d8 002c48 00  AL 12   0  4\n  [17] .eh_frame         PROGBITS        003ba520 3ba520 000004 00   A  0   0  4\n  [18] .init_array       INIT_ARRAY      003bb000 3bb000 000004 04  WA  0   0  4\n  [19] .fini_array       FINI_ARRAY      003bb004 3bb004 000004 04  WA  0   0  4\n  [20] .data.rel.ro      PROGBITS        003bb008 3bb008 01403c 00  WA  0   0  8\n  [21] .dynamic          DYNAMIC         003cf044 3cf044 000138 08  WA  4   0  4\n  [22] .got              PROGBITS        003cf17c 3cf17c 001668 04  WA  0   0  4\n  [23] .data             PROGBITS        003d1000 3d1000 000770 00  WA  0   0  4\n  [24] .bss              NOBITS          003d1770 3d1770 271e50 00  WA  0   0 16\n  [25] .gnu_debuglink    PROGBITS        00000000 3d1770 000024 00      0   0  4\n  [26] .shstrtab         STRTAB          00000000 3d1794 0000fc 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), y (purecode), p (processor specific)\n",
+    "stderr": ""
+  },
+  "note": "GNU FFmpeg bad-file-number warnings retained; every sampled zero-line probe still reports leaf ?: raw line table confirms explicit line=0. Warning CU localization remains required for independent avg verification."
+}
