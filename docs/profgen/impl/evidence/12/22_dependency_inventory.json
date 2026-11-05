@@ -1,0 +1,590 @@
+{
+  "method": "Static manual review of all three board scripts, including pipelines, substitutions, command arrays and Bash -c launchers. Literal occurrence table is an audit index, not a complete Bash parser. Bash builtins excluded. Dynamic perf/spike and deployment libraries checked under root separately. nice/ionice run by host launcher included in final system inventory.",
+  "system_commands": [
+    "/bin/bash",
+    "awk",
+    "cat",
+    "cut",
+    "date",
+    "df",
+    "find",
+    "findmnt",
+    "grep",
+    "gst-inspect-1.0",
+    "gst-launch-1.0",
+    "ionice",
+    "mkdir",
+    "mkfifo",
+    "nice",
+    "ps",
+    "readlink",
+    "rm",
+    "rpm",
+    "sha256sum",
+    "sleep",
+    "tr",
+    "uname",
+    "wc"
+  ],
+  "count": 24,
+  "references": {
+    "/bin/bash": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 34,
+        "text": "LAUNCH=(/bin/bash -c 'printf \"%s\\n\" \"$$\" >\"$1\"; shift; exec \"$@\"' _ \"$RUN/target.pid\" \"${CMD[@]}\")"
+      },
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 36,
+        "text": "LAUNCH=(/bin/bash -c 'set -e; n=$1; shift; for ((i=0;i<n;i++)); do \"$@\"; done' _ \"$REPEATS\" \"${LAUNCH[@]}\")"
+      },
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 37,
+        "text": "{ time -p \"${PERF[@]}\" stat -e cycles,instructions -o \"$tag.stat\" -- /bin/bash -c 'echo \"$$\" >\"$1\"; shift; exec \"$@\"' _ \"$tag.pid\" \"${CMD[@]}\"; } >\"$tag.stdout\" 2>\"$tag.stderr\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      }
+    ],
+    "awk": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 51,
+        "text": "awk -v id=\"$TARGET_ID\" -v path=\"$TARGET\" '$1==id && $2==path {found=1} END {exit !found}' \"$RUN/buildid-list.txt\" || { echo 'Recorded build-id/path did not match target' >&2; exit 3; }"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 70,
+        "text": "available=$(df -Pk \"$BASE\" | awk 'END {print $4}')"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 120,
+        "text": "awk '$1==\"pswpout\" || $1==\"pswpin\"' /proc/vmstat"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 135,
+        "text": "count=$(awk -F '\\t' -v id=\"$wanted\" '$1==id {n++} END {print n+0}' \"$manifest\")"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 137,
+        "text": "row=$(awk -F '\\t' -v id=\"$wanted\" '$1==id' \"$manifest\")"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 179,
+        "text": "if awk -v path=\"$target\" '$6==path && NF==6 {found=1} END {exit !found}' \"$output\"; then"
+      }
+    ],
+    "cat": [
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 48,
+        "text": "[[ $digest == \"$(cat \"$RUN/expected-decoded.sha256\")\" ]] || { echo 'Decoded output mismatch' >&2; exit 3; }"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 99,
+        "text": "cat /proc/version >\"$RUN/proc-version\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 107,
+        "text": "cat /proc/swaps >\"$RUN/swaps.before\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 109,
+        "text": "[[ ! -r $z ]] || { printf '%s ' \"$z\"; cat \"$z\"; }"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 111,
+        "text": "cat /etc/os-release >\"$RUN/os-release\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 112,
+        "text": "[[ ! -r /etc/tizen-build.conf ]] || cat /etc/tizen-build.conf >\"$RUN/tizen-build.conf\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 119,
+        "text": "cat /proc/loadavg"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 122,
+        "text": "[[ ! -r $f ]] || { printf '%s ' \"$f\"; cat \"$f\"; }"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 125,
+        "text": "printf 'throttling_node=%s value=' \"$THROTTLE_NODE\"; cat \"$THROTTLE_NODE\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 178,
+        "text": "cat \"/proc/$pid/maps\" >\"$output\""
+      }
+    ],
+    "cut": [
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 45,
+        "text": "digest=$(cut -d' ' -f1 \"$tag.decoded.sha256\")"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      }
+    ],
+    "date": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 22,
+        "text": "printf 'EXIT %s\\nALL-END %s %s\\n' \"$rc\" \"$(date -Ins)\" \"$([[ $rc == 0 ]] && echo OK || echo FAILED)\" >>\"$RUN/status\""
+      },
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 20,
+        "text": "printf 'ALL-END %s %s EXIT=%s\\n' \"$(date -Ins)\" \"$([[ $rc == 0 ]] && echo OK || echo FAILED)\" \"$rc\" >>\"$RUN/status\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 82,
+        "text": "stamp=$(date +%Y%m%dT%H%M%S)"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 118,
+        "text": "date -Ins"
+      }
+    ],
+    "df": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 70,
+        "text": "available=$(df -Pk \"$BASE\" | awk 'END {print $4}')"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 96,
+        "text": "df -h \"$BASE\" >\"$RUN/df.before\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 194,
+        "text": "df -h \"$BASE\" >\"$RUN/df.after\""
+      }
+    ],
+    "find": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 59,
+        "text": "count=$(find \"$RUN\" -maxdepth 1 -name \"$MODE-*.profraw\" -type f | wc -l)"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      }
+    ],
+    "findmnt": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 75,
+        "text": "if command -v findmnt >/dev/null; then"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 76,
+        "text": "opts=$(findmnt -n -o OPTIONS -T \"$BASE\")"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 80,
+        "text": "echo 'findmnt required for prepared evaluation scripts; stop without writing' >&2; exit 2"
+      }
+    ],
+    "grep": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 52,
+        "text": "grep 'PERF_RECORD_LOST' \"$RUN/perfscript.txt\" >\"$RUN/lost-excerpt.txt\" || true"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 154,
+        "text": "grep -q max-threads \"$RUN/gst-inspect-$VARIANT.txt\" || { echo 'Decoder thread property unavailable' >&2; exit 2; }"
+      }
+    ],
+    "gst-inspect-1.0": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 9,
+        "text": "/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 153,
+        "text": "gst-inspect-1.0 avdec_h264 >\"$RUN/gst-inspect-$VARIANT.txt\" 2>&1"
+      }
+    ],
+    "gst-launch-1.0": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 152,
+        "text": "command -v gst-launch-1.0 >/dev/null"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 168,
+        "text": "CMD=(gst-launch-1.0 -q filesrc \"location=$input\" '!' qtdemux '!' h264parse '!' avdec_h264 max-threads=1 '!' video/x-raw,format=I420 '!' filesink \"location=$checksum_fifo\" sync=false)"
+      }
+    ],
+    "ionice": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      }
+    ],
+    "mkdir": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 84,
+        "text": "mkdir -p \"$BASE/work\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 87,
+        "text": "mkdir \"$RUN\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 93,
+        "text": "mkdir \"$HOME\" \"$TMPDIR\" \"$XDG_CACHE_HOME\" \"$RUN/buildid\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 202,
+        "text": "mkdir \"$RUN/telemetry\""
+      }
+    ],
+    "mkfifo": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 27,
+        "text": "mkfifo \"$RUN/frames.pipe\""
+      },
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 32,
+        "text": "mkfifo \"$tag.pipe\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      }
+    ],
+    "nice": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      }
+    ],
+    "ps": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 129,
+        "text": "ps -eo pid,comm,pcpu"
+      }
+    ],
+    "readlink": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 55,
+        "text": "[[ $(readlink -f \"$BASE\") == \"$BASE\" ]] || { echo 'Deployment base alias refused' >&2; exit 2; }"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 59,
+        "text": "path=$(readlink -f -- \"$1\")"
+      }
+    ],
+    "rm": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 21,
+        "text": "[[ ! -p $RUN/frames.pipe ]] || rm \"$RUN/frames.pipe\""
+      },
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 43,
+        "text": "rm \"$tag.pipe\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      }
+    ],
+    "rpm": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 113,
+        "text": "rpm -qa | wc -l >\"$RUN/rpm-count.before\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 195,
+        "text": "rpm -qa | wc -l >\"$RUN/rpm-count.after\""
+      }
+    ],
+    "sha256sum": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 28,
+        "text": "sha256sum \"$RUN/frames.pipe\" >\"$RUN/decoded.sha256\" & hash_pid=$!"
+      },
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 13,
+        "text": "sha256sum \"$VIDEO\" >\"$RUN/input.sha256\""
+      },
+      {
+        "file": "tools/profgen/board/measure.sh",
+        "line": 33,
+        "text": "sha256sum \"$tag.pipe\" >\"$tag.decoded.sha256\" & hash_pid=$!"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 101,
+        "text": "sha256sum /proc/config.gz >\"$RUN/kernel-config.sha256\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 103,
+        "text": "sha256sum \"/boot/config-$(uname -r)\" >\"$RUN/kernel-config.sha256\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 144,
+        "text": "actual=$(sha256sum \"$TARGET\"); actual=${actual%% *}"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 180,
+        "text": "actual=$(sha256sum \"$target\"); actual=${actual%% *}"
+      }
+    ],
+    "sleep": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 187,
+        "text": "sleep .02"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 206,
+        "text": "sleep 1"
+      }
+    ],
+    "tr": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 45,
+        "text": "model=$(tr -d '\\000' </proc/device-tree/model)"
+      }
+    ],
+    "uname": [
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 46,
+        "text": "arch=$(uname -m)"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 47,
+        "text": "release=$(uname -r)"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 97,
+        "text": "uname -a >\"$RUN/uname\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 98,
+        "text": "uname -v >>\"$RUN/uname\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 102,
+        "text": "elif [[ -r /boot/config-$(uname -r) ]]; then"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 103,
+        "text": "sha256sum \"/boot/config-$(uname -r)\" >\"$RUN/kernel-config.sha256\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 140,
+        "text": "[[ $ARCH == \"$(uname -m)\" ]] || { echo 'Manifest architecture mismatch' >&2; exit 2; }"
+      }
+    ],
+    "wc": [
+      {
+        "file": "tools/profgen/board/collect.sh",
+        "line": 59,
+        "text": "count=$(find \"$RUN\" -maxdepth 1 -name \"$MODE-*.profraw\" -type f | wc -l)"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 10,
+        "text": "gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc"
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 113,
+        "text": "rpm -qa | wc -l >\"$RUN/rpm-count.before\""
+      },
+      {
+        "file": "tools/profgen/board/common.sh",
+        "line": 195,
+        "text": "rpm -qa | wc -l >\"$RUN/rpm-count.after\""
+      }
+    ]
+  },
+  "nonroot_full_precheck_operation": {
+    "time": "2026-11-05T20:54:57.370911+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( missing=0; for c in /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0 gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc; do command -v \"$c\" || missing=1; done; test \"$missing\" = 0 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/bin/bash\n/usr/bin/awk\n/usr/bin/cat\n/usr/bin/cut\n/usr/bin/date\n/usr/bin/df\n/usr/bin/find\n/usr/bin/findmnt\n/usr/bin/grep\n/usr/bin/gst-inspect-1.0\n/usr/bin/gst-launch-1.0\n/usr/bin/ionice\n/usr/bin/mkdir\n/usr/bin/mkfifo\n/usr/bin/nice\n/usr/bin/ps\n/usr/bin/readlink\n/usr/bin/rm\n/usr/bin/rpm\n/usr/bin/sha256sum\n/usr/bin/sleep\n/usr/bin/tr\n/usr/bin/uname\n/usr/bin/wc\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  "initial_precheck_operation": {
+    "time": "2026-11-05T20:44:53.342119+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( missing=0; for c in /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0 gst-launch-1.0 mkdir mkfifo ps readlink rm rpm sha256sum sleep tr uname wc; do if command -v \"$c\"; then echo OK \"$c\"; else echo MISSING \"$c\"; missing=1; fi; done; test \"$missing\" = 0 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/bin/bash\nOK /bin/bash\n/usr/bin/awk\nOK awk\n/usr/bin/cat\nOK cat\n/usr/bin/cut\nOK cut\n/usr/bin/date\nOK date\n/usr/bin/df\nOK df\n/usr/bin/find\nOK find\n/usr/bin/findmnt\nOK findmnt\n/usr/bin/grep\nOK grep\n/usr/bin/gst-inspect-1.0\nOK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nOK gst-launch-1.0\n/usr/bin/mkdir\nOK mkdir\n/usr/bin/mkfifo\nOK mkfifo\n/usr/bin/ps\nOK ps\n/usr/bin/readlink\nOK readlink\n/usr/bin/rm\nOK rm\n/usr/bin/rpm\nOK rpm\n/usr/bin/sha256sum\nOK sha256sum\n/usr/bin/sleep\nOK sleep\n/usr/bin/tr\nOK tr\n/usr/bin/uname\nOK uname\n/usr/bin/wc\nOK wc\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  "initial_additional_nice_ionice_check": {
+    "time": "2026-11-05T20:48:09.640283+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( command -v nice; command -v ionice ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/usr/bin/nice\n/usr/bin/ionice\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  "order_caveat": "The initial 22-item nonroot check preceded root on; nice and ionice were added and checked while root before first governor/collection. The subsequent complete 24-item precheck ran nonroot at 20:54:57. This timing deviation is retained; no missing command was bypassed.",
+  "board_script_sha256": {
+    "tools/profgen/board/collect.sh": "f3ca68cfd98dadc2f995832477accc14f7bfc05a688a45fb54f5b8bf157a9cf6",
+    "tools/profgen/board/measure.sh": "ff0f710b7e9ad17c03913f7e3353151396b4a2ee662baefadae6e7a0fbe6b8eb",
+    "tools/profgen/board/common.sh": "082a2f0e8738dec5a70966b9a1af37195d35c1e011865a85a9a6d683af18c4c4"
+  }
+}

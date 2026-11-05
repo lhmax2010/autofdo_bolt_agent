@@ -1,6 +1,8 @@
-# RPi4 第一轮板上评估：校准收尾缺工具处停止
+# RPi4 第一轮板上评估：采集进展与停止记录
 
-本轮**未完成正式评估**。16 项目标部署 SHA 通过，硬件 cycles 实际采到非零样本；第一次 Thumb spike 校准在收尾 RPM 数量比较处因板上没有 `cmp` 失败。依据 STATUS 最高原则第 3 条“缺工具就停下，在报告里说明”，停止后续采集、训练和主机 profile 生成，没有安装工具或现场绕过。此次不是 llvm-profgen 缺陷，正式工具未运行、未修改。
+**当前结果见第9节：7份正式采集已拉回，真实avg在GNU AS的Thumb DWARF边界处停止，governor/root已恢复；预注册未改。第1–8节为保留的历史记录。**
+
+以下为首次停止记录：本轮**未完成正式评估**。16 项目标部署 SHA 通过，硬件 cycles 实际采到非零样本；第一次 Thumb spike 校准在收尾 RPM 数量比较处因板上没有 `cmp` 失败。依据 STATUS 最高原则第 3 条“缺工具就停下，在报告里说明”，停止后续采集、训练和主机 profile 生成，没有安装工具或现场绕过。此次不是 llvm-profgen 缺陷，正式工具未运行、未修改。
 
 ## 1. 预注册与时间
 
@@ -161,3 +163,134 @@ Tears of Steel片段仍只在主机；SHA复核和视频推送因门禁停止未
 7. 上次226条目标样本不计入正式矩阵。
 
 以上是执行流程裁决登记，没有修改v0.7正文或预注册。缺失的失败注入、空间门禁编排和全部采集/训练仍是恢复前待办；不把本次本地脚本改动当成整轮完成。边界例外：本恢复轮无板上写入或状态修改；没有读取WORKDIR外的项目输入，未扫描SDB自身可能使用的外部状态文件。
+
+## 9. 两段预检后恢复：真实 avg 在 GNU AS 的 Thumb DWARF 区间处停止
+
+### 9.1 当前结论与执行流程裁决（待设计 v0.8 登记）
+
+本节是当前状态；第1–8节保留为历史。预注册 `7d3d9d9` 未改。完成 **7/70** 次正式 S 录制与完整拉回（均只有第1个独立重复），其中6次完成正式工具 sum 转换、身份均 **verified**；第7次在停止时收尾，原件完整保留，尚未转换。R/C/G5 **0/14**、LOST压力和5类集成均未开始。**本轮没有完成评估，不作配置优劣或等价结论。**
+
+最新授权顺序登记如下：三项认板 → 非root系统PATH依赖 → 记录原root并root on → root下部署文件/权限/SHA及唯一例外`perf --version` → performance governor → 其他perf。root是会话权限；部署预检失败时尚未改governor，恢复root后停止。旧“所有perf必须在governor之后”由本次明确允许version预检的裁决细化；不把它扩展到record/list/stat。
+
+[完整操作与真实远端RC](evidence/12/17_resume2_operations.json)、[静态依赖清单与源码行](evidence/12/22_dependency_inventory.json)。最终系统命令清单24项：
+
+```text
+/bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0
+gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum
+sleep tr uname wc
+```
+
+静态审阅覆盖全部3个board脚本的管道、替换、数组与Bash launcher，字面出现位置作为审阅索引；不是声称正则能完整解析Bash。内建time/kill/read/printf/wait等不作外部依赖。部署的perf、spike及库另在root下检查。24项均存在，未安装或绕过缺失命令。
+
+**预检时序偏差保留：**第一次非root检查22项；后来给launcher增加nice/ionice时，这两项在root下、第一次governor改变之前检查。20:54:57再次恢复执行时，完整24项已在非root下通过。不能把第一次22+2检查改写为“24项全在首次root前”。后续应始终按最终完整清单一次检查。
+
+授权的cmp替代已部署：非空十进制、长度限制后Bash整数比较；不满足仍失败。采集脚本支持重复完整解码，保持同一FIFO写端直到所有重复结束，记录合并输出字节流的SHA，不把不同重复数的流SHA直接比较。三份脚本bash-n通过。
+
+### 9.2 身份、root变化与部署复验
+
+本次20:44:52+08重新查设备并三项断言，唯一RPi4：`Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l`。`uname -v`仍为`#1 SMP Wed Nov  4 17:05:36 UTC 2026`，与第一次一致；各已回收RUN保存uname、/proc/version、os-release、tizen-build.conf及zram/swaps。配置文件不可读时明确记录unknown，没有挂载boot。
+
+开始uid5001（root off），uptime **997.67秒**；第一次20:07开始时uid0。当前uptime反推约20:28启动，晚于第一次查询，故**支持中间重启过、内核仍相同的判断**；这是时间推断，未取得上次boot-id或uptime可作逐值比较，不能断言重启原因或单独归因于SDB重置。当前boot-id `4e5c71ff-0cf8-4e7e-9f61-16602d3c3b57`，没有执行重启。
+
+root预检核对62个已部署普通文件（含16项目标及其依赖、旧脚本、manifest、perf/libLLVM）SHA全部一致；动态可执行目标另由load_variant/test-x验证，新版脚本部署后再次按主机SHA核对。旧脚本的62项预检SHA与新脚本部署SHA是两个时间点，不混为一份清单。[部署清单](evidence/12/18_resume2_deployment.json)。perf version 6.12.80、退出0；其余record均在performance后，硬件cycles type0/config0，未回退软件事件。
+
+ToS先推送并核对`280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1`，再推BBB720/1080并核对各自原SHA；均位于`/opt/afdo_agent/media/`。官方来源、许可与转码参数仍见第3节和09_media.json，没有重新选择测试片段。ToS只完成校准（40,652目标样本），没有把它计作正式中档重复。
+
+### 9.3 失败即停的拉回/删除与空间
+
+新增`tools/profgen/pull_verified_run.py`：只接受确切的`/opt/afdo_agent/work/eval-*`目录；校验规范路径/无符号链接，取得全量板上SHA；pull到不存在的空目标目录；按SDB实际平铺路径核对文件集合及每个SHA；再确认远端清单未变；全部成功才删除**该清单对应的唯一RUN路径**并确认不存在。路径、传输、文件或哈希错误均在删除回调之前抛错。
+
+正式使用前的主机小RUN演练：故意改坏一个文件，报`SHA/file-set mismatch; deletion forbidden: ['data.txt']`，删除回调次数0；正确对照删除回调仅收到确切模拟路径。没有用真实板上目录做破坏演练。[初次演练](evidence/12/16_transfer_injection.json)。随后8项主机回归全通过（坏SHA、缺文件、多文件、传输失败、符号链接、远端清单改变、成功、清单路径越界），见[测试和恢复](evidence/12/21_resume2_restore_and_checks.json)。
+
+每次RUN先检查`available_bytes >= 2*RUN_ESTIMATE_BYTES+200000000`。先以小规模校准量体积，再按目标样本比例或完整解码次数估算，加30%和1MB余量；所有RUN逐批拉回/校验/删除，不并存大批原件。已观测最大估算95,268,541字节（高档Thumb spike），所需390,537,082字节，当时可用约1GB，门禁通过。该估算只用于已执行负载，**LOST未试采，不能复用正常采样估算宣称LOST空间足够**。
+
+本轮16个RUN（9校准/流程、7正式）共 **1,394个板上文件** 全量验证后删除；原始perf.data合计33,754,308字节，完整文本/逐秒文件另存。主机完整原件、SHA receipts及manifest留`temp/board-round1-resume2/{runs,receipts}/`，关键文件SHA与路径见[逐RUN清单](evidence/12/19_resume2_runs.json)。没有仅保留抽样或过滤版导出。最后一个高档RUN的主机编排暂停后，板上仍正常完成，使用同一安全流程收回后才恢复状态；它没有被丢弃或冒充失败校准。
+
+### 9.4 已完成数据、身份与环境（剔除前/后均列出）
+
+| 正式对象/预算（第1次） | 目标样本 | 总样本行 | usable | profile身份 | perf/workload real秒 |
+|---|---:|---:|---:|---|---:|
+| spike Thumb低 | 21,561 | 21,581 | 14,846 | verified | 15.35 |
+| spike A32低 | 21,347 | 21,363 | 21,291 | verified | 15.36 |
+| libavcodec Thumb低/BBB | 36,155 | 44,194 | 21,532 | verified | 61.56 |
+| spike Thumb中 | 106,875 | 106,948 | 72,762 | verified | 72.64 |
+| spike A32中 | 106,567 | 106,605 | 106,287 | verified | 72.64 |
+| libavcodec Thumb中/BBB（三次完整解码） | 108,145 | 132,654 | 64,928 | verified | 182.23 |
+| spike Thumb高 | 426,661 | 426,784 | 未转换 | 未取得 | 286.56 |
+
+共827,311条目标样本。低档libavcodec因一次完整解码超出2万，原件完整保留，不截取到预算。spike Thumb完成3/20、A32完成2/20，FFmpeg Thumb BBB完成2/20、ToS0/5、A32 BBB0/5；**正式频率中档0**（仅有频率校准），训练0/14，集成0/5。不是完成了每档5次。spike无明确冷热分布运行模式，原源码未改，区分度负对照未做。
+
+6份正式质量报告均conversion=ok、verified；`coverage.name_merged_functions=0`，没有名单可列。Thumb spike ISA全Thumb，A32 spike全A32；FFmpeg低档Thumb36,138/A3217，中档Thumb108,058/A3287（主要PLT），未知ISA0。各层分解如下，完整period/normalized weight及top50留19证据：
+
+| 正式对象/预算 | outside_dwarf_func | 其中in_cu_no_subprogram / plt / no_cu | in_func_no_line | unmapped_in_target |
+|---|---:|---|---:|---:|
+| spike Thumb低 / 中 | 0 / 0 | 全0 | 6,715 / 34,113 | 0 |
+| spike A32低 / 中 | 0 / 0 | 全0 | 56 / 280 | 0 |
+| FFmpeg Thumb低 | 10,903 | 10,886 / 17 / 0 | 3,720 | 0 |
+| FFmpeg Thumb中 | 32,143 | 32,056 / 87 / 0 | 11,074 | 0 |
+
+所有已转换S（包括校准）的raw目标计数与工具报告一致；采集保存maps及buildid-list并核对目标路径/ID。没有把工具JSON中的event.type=unknown（文本本身无type）误当作硬件事件失败：type0/config0证据来自每份evlist。
+
+逐秒原始观测：16个RUN最大温度63.296°C，全部pswpout增量0，观测频率均1,500,000kHz，未发现可读sysfs节流节点，throttling=unknown。**遗漏：脚本没有在每RUN开始前保存scaling_max_freq；停止时读得1,500,000不能补作采集前依据，因此频率合格性也记unknown。** 未改变预注册阈值。剔除前为上述7份；按预注册剔除异常及unknown后干净子集 **0份**，证据不足。保留全部数据，不作选择性丢弃。恢复前需补齐采集前policy边界记录。
+
+本次设备操作20:44:52.452–21:17:16.417+08，**1,943.965秒（32分24秒）**，含预检/部署/主机分析/拉回/恢复；16次实际perf/workload real合计967.27秒，正式7次合计706.34秒。资源按600秒后台记录；最终停止/恢复也有记录，原始时点见21证据，不将这些耗时视为优化性能测量。host控制进程一次因读取JSON字段路径写错（sample_count实际在counts下）失败，已finally恢复；修正的是临时编排，不是LLVM；该轮仅校准，另起formal2，没有覆盖原失败日志。
+
+### 9.5 阻塞证据：真实 avg 无法通过，不清位、不过滤
+
+按预注册选第一份成功中档Thumb/BBB原始完整导出：
+
+```text
+temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1/perfscript.txt
+SHA256 5732dce25be037de92dd08f00e1e6adfabd6c1577532a0db545e476554d52405
+```
+
+正式工具SHA仍`334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30`，匹配runtime/debug的build-id `e7de4d8c9560442994341d9bfc5dfd06ae641a17`。使用原始输入分别生成text的sum/max/avg，仅aggregation及输出路径变化；完整命令、RC、stderr、失败JSON与GNU证据见[20_real_avg_boundary_stop.json](evidence/12/20_real_avg_boundary_stop.json)。sum=0、max=0、avg=1；avg.text未创建，失败报告conversion=failed、failure_stage=boundary，身份仍verified：
+
+```text
+llvm-profgen: error: IP sample mode: failure_stage=boundary
+  range starts inside a Thumb instruction (function=__divsi3 address=0x3421a1 DWARF=[0x3421a1,0x342435))
+  range starts inside a Thumb instruction (function=__udivsi3 address=0x341f29 DWARF=[0x341f29,0x342185))
+```
+
+不是部署错ID，也不是perf样本带bit0。GBS GNU readelf原文显示：
+
+| 函数 | DWARF low_pc / high_pc长度 | GNU objdump首条指令 | 原导出落在该DWARF范围的样本 |
+|---|---|---|---:|
+| __udivsi3 | 0x341f29 / 604字节 | 0x341f28: `1e4a subs r2,r1,#1` | 1 |
+| __divsi3 | 0x3421a1 / 660字节 | 0x3421a0: `2900 cmp r1,#0` | 5 |
+
+两CU的low_pc本身分别为偶数0x341f28、0x3421a0；子程序low_pc却为奇数。来源`../../../libgcc/config/arm/lib1funcs.S`，producer **GNU AS 2.43**，comp_dir指向平台gcc-14.2.0/libgcc构建。该绝对comp_dir只是ELF内字符串，没有读取工作目录之外文件。GNU原文文件`temp/board-round1-resume2/gnu/debug-info.stdout:2228042–2228087`，符号表与反汇编同目录，证据20附原文和行号。
+
+实现 `ProfiledBinary.cpp:1028–1061`原样接收DWARF ranges；`IPBoundary.cpp:169–192`从Thumb映射锚点按编码长度步进，不能恰好到达奇数起点，故按冻结5.7.2失败。冻结5.7.2第7条明确样本PC不清位、符号表Thumb地址规则，并说DWARF表示由lit核对；**此前素材未覆盖这类GNU AS子程序的带位地址**。[源码与设计原文](evidence/12/23_stop_scope_and_nonleaf.json)
+
+这是本轮发现的**真实输入兼容性阻塞**：当前严格拒绝符合既定边界规则，但平台真实DWARF表示尚无获准的规范化规则。不能未经裁决就把所有奇数DWARF起点清零（会掩盖合法负对照），也不能忽略有样本的运行库函数、只输出容易通过的热点子集。按停止条件暂停后续采集与主机验收，未改LLVM、未改设计、未过滤原始输入。
+
+候选后续处理，**均未实施**：
+
+1. 明确设计/实现对GNU AS Thumb DWARF地址的处理：用目标架构、对应Thumb函数符号、映射状态及原始DWARF形式共同证明后规范化函数区间；低地址及high_pc长度/绝对地址须区分，增加实际样例和原bad-thumb-start负对照。先裁决规则，再授权修补和重验，不能直接无条件`&~1`。
+2. 从平台libgcc的调试信息生产端修正，重建匹配运行/调试产物并重新采样；本轮不构建或替换平台库，不篡改同ID的debug来假装原件。
+3. 若决定继续保留严格拒绝，则明确本构建avg/补零/prev-inst不可用，调整后续评估范围须由用户决定；不能宣称真实avg挂账已关闭。
+
+前三个热点仍是decode_cabac_residual_nondc_internal、ff_h264_decode_mb_cabac、loop_filter的唯一内部链接名，没有换函数。但全输入avg失败，故**逐键GNU n(k)/avg验收未完成**。GNU addr2line读取合成runtime+debug时另有`DWARF error: mangled line number section (bad file number)`原警告，留证23，尚未判明影响；不能拿共享LLVM symbolizer冒充独立GNU证明。独立核对脚本草稿留temp、不作为已验收工具提交。
+
+### 9.6 非叶子line0、未完成项与下一步输入
+
+停止前只做过固定间隔FFmpeg Thumb**校准**的隐藏诊断：`usable_nonleaf_line_zero samples=29 period_sum=29000087`，usable21,736，比例0.133419%。不是正式矩阵汇总，不能据此决定处理规则；全部正式S总数/比例和涉及函数top20尚未统计，保持挂账。[原文与范围](evidence/12/23_stop_scope_and_nonleaf.json)
+
+LOST压力/完整高丢样导出尚未采集，06挂账未关闭；真实avg未关闭。fork/exec/deleted/module/-1/-1集成未执行，不能沿用07/09旧结论冒充本轮验收。R/C/G5均未运行，无新profraw/profdata，不进行5.8质量分析、消费构建或收益比较。
+
+下一步质量分析输入已具备：7份完整正式S原件、6份verified sum extbinary/JSON、每RUNmaps/ID/环境/输出SHA、9份明确排除的校准/流程原件；缺少余下63次正式采集、训练14次、LOST和5集成、全量nonleaf统计、avg独立核对。第7份高档原件未转换，正式repeat数远不足5，全部当前轮次的干净子集为空。恢复时不能覆盖这些原件或把校准并入正式重复。
+
+### 9.7 停止与恢复
+
+发现边界失败后，只暂停本任务host编排PID831123防止启动新RUN；正在录制的高档spike正常结束（板上record=0、ALL-END OK），未中断其负载。按全量SHA流程拉回并删除确切RUN后，向该host进程发送SIGINT/CONT，让其finally恢复；host标记：
+
+```text
+ALL-END 2026-11-05T21:17:16.417545+08:00 FAILED elapsed=1254.158
+```
+
+这里FAILED是整轮停止，不改写已成功录制的板上RUN状态。policy0逐值恢复`schedutil`并回读；root恢复off，uid5001；RPM **1232→1232**。全部16个本轮RUN有删除后不存在断言；停止前进程清单无本任务板上perf/负载，host编排随后已退出。[恢复/资源/测试](evidence/12/21_resume2_restore_and_checks.json)
+
+`/opt`最初used161,020 / available1,144,596 KiB；结束used **282,072** / available **1,023,544 KiB**，22%。保留16变体、perf/libLLVM、脚本、三份视频及小型state文件供恢复；没有删除部署物腾空间，没有保留本轮RUN大数据。perf_event_paranoid/kptr_restrict未写。
+
+待v0.8登记除9.1流程外：GNU AS Thumb子程序DWARF地址兼容性待裁决；未知节流/缺采集前policy边界仍按原预注册排除干净子集；nonleaf处理仍待完整数据。边界例外仍限用户授权root会话与governor sysfs设置/恢复，其他板上写入在opt；未读取其他主机项目输入、未扫描外部SDB状态，不声称不存在任何未观察的守护进程写入。未推LLVM/Gerrit，未改认证或索要密码，未开始Agent实现。

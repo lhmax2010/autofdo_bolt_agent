@@ -7,8 +7,7 @@ BASE=/opt/afdo_agent
 # time, kill, read, test, printf, wait, command and source are Bash builtins/keywords.
 BOARD_REQUIRED_COMMANDS=(
     /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0
-    gst-launch-1.0 mkdir mkfifo ps readlink rm rpm sha256sum sleep tr uname wc
-    /opt/afdo_agent/tools/perf
+    gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc
 )
 preflight_dependencies() {
     local cmd missing=0
@@ -65,6 +64,14 @@ new_run() {
     local stamp opts
     preflight_dependencies
     assert_performance
+    [[ -x $BASE/tools/perf && -r $BASE/lib/libLLVM.so.22.1 ]] || { echo 'Deployed tools inaccessible' >&2; return 2; }
+    local estimate=${RUN_ESTIMATE_BYTES:?observed RUN size estimate required} available required
+    [[ $estimate =~ ^[0-9]+$ && ${#estimate} -le 12 ]] || return 2
+    available=$(df -Pk "$BASE" | awk 'END {print $4}')
+    [[ $available =~ ^[0-9]+$ ]] || return 2
+    required=$((2*10#$estimate + 200000000))
+    printf 'SPACE available_bytes=%s estimate_bytes=%s required_bytes=%s\n' "$((10#$available*1024))" "$estimate" "$required"
+    (( 10#$available*1024 >= required )) || { echo 'Insufficient RUN space' >&2; return 3; }
     if command -v findmnt >/dev/null; then
         opts=$(findmnt -n -o OPTIONS -T "$BASE")
         [[ -n $opts ]] || { echo 'Mount options unknown' >&2; exit 2; }
@@ -78,6 +85,7 @@ new_run() {
     inside "$BASE/work" >/dev/null
     RUN="$BASE/work/eval-$stamp-$$"
     mkdir "$RUN"
+    printf 'RUNPATH %s\n' "$RUN"
     export HOME="$RUN/home" TMPDIR="$RUN/tmp" XDG_CACHE_HOME="$RUN/cache"
     export GST_REGISTRY="$RUN/registry.bin" PERF_CONFIG="$RUN/perf.conf"
     # Plugin inspection/scanning may load an instrumented DSO before collection.

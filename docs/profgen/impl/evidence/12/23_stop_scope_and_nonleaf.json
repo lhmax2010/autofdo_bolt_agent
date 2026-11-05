@@ -1,0 +1,365 @@
+{
+  "nonleaf_partial_only": {
+    "source_run": "temp/board-round1-resume2/runs/cal-ffmpeg-thumb",
+    "calibration_excluded_from_formal": true,
+    "diagnostic_lines": [
+      "IP-GENERATION usable_nonleaf_line_zero samples=29 period_sum=29000087"
+    ],
+    "usable_samples": 21736,
+    "ratio": 0.001334192123665808,
+    "formal_matrix_aggregate": "not computed after stop",
+    "top20_functions": "not computed after stop"
+  },
+  "source_excerpts": {
+    "temp/llvm-profgen-enh/llvm/tools/llvm-profgen/ProfiledBinary.cpp": [
+      {
+        "line": 1028,
+        "text": "    auto RangesOrError = Die.getAddressRanges();"
+      },
+      {
+        "line": 1029,
+        "text": "    if (!RangesOrError)"
+      },
+      {
+        "line": 1030,
+        "text": "      continue;"
+      },
+      {
+        "line": 1031,
+        "text": "    const DWARFAddressRangesVector &Ranges = RangesOrError.get();"
+      },
+      {
+        "line": 1032,
+        "text": ""
+      },
+      {
+        "line": 1033,
+        "text": "    if (Ranges.empty())"
+      },
+      {
+        "line": 1034,
+        "text": "      continue;"
+      },
+      {
+        "line": 1035,
+        "text": ""
+      },
+      {
+        "line": 1036,
+        "text": "    // Different DWARF symbols can have same function name, search or create"
+      },
+      {
+        "line": 1037,
+        "text": "    // BinaryFunction indexed by the name."
+      },
+      {
+        "line": 1038,
+        "text": "    auto Ret = BinaryFunctions.emplace(Name, BinaryFunction());"
+      },
+      {
+        "line": 1039,
+        "text": "    auto &Func = Ret.first->second;"
+      },
+      {
+        "line": 1040,
+        "text": "    if (Ret.second)"
+      },
+      {
+        "line": 1041,
+        "text": "      Func.FuncName = Ret.first->first;"
+      },
+      {
+        "line": 1042,
+        "text": ""
+      },
+      {
+        "line": 1043,
+        "text": "    if (IPMode) {"
+      },
+      {
+        "line": 1044,
+        "text": "      uint64_t First = UINT64_MAX;"
+      },
+      {
+        "line": 1045,
+        "text": "      for (const auto &Range : Ranges)"
+      },
+      {
+        "line": 1046,
+        "text": "        if (Range.HighPC > Range.LowPC)"
+      },
+      {
+        "line": 1047,
+        "text": "          First = std::min(First, Range.LowPC);"
+      },
+      {
+        "line": 1048,
+        "text": "      if (First != UINT64_MAX)"
+      },
+      {
+        "line": 1049,
+        "text": "        Func.IPOrigins.insert(First);"
+      },
+      {
+        "line": 1050,
+        "text": "    }"
+      },
+      {
+        "line": 1051,
+        "text": "    for (const auto &Range : Ranges) {"
+      },
+      {
+        "line": 1052,
+        "text": "      uint64_t StartAddress = Range.LowPC;"
+      },
+      {
+        "line": 1053,
+        "text": "      uint64_t EndAddress = Range.HighPC;"
+      },
+      {
+        "line": 1054,
+        "text": ""
+      },
+      {
+        "line": 1055,
+        "text": "      if (EndAddress <= StartAddress ||"
+      },
+      {
+        "line": 1056,
+        "text": "          (!IPMode && StartAddress < getPreferredBaseAddress()))"
+      },
+      {
+        "line": 1057,
+        "text": "        continue;"
+      },
+      {
+        "line": 1058,
+        "text": ""
+      },
+      {
+        "line": 1059,
+        "text": "      // We may want to know all ranges for one function. Here group the"
+      },
+      {
+        "line": 1060,
+        "text": "      // ranges and store them into BinaryFunction."
+      },
+      {
+        "line": 1061,
+        "text": "      Func.Ranges.emplace_back(StartAddress, EndAddress);"
+      },
+      {
+        "line": 1062,
+        "text": ""
+      }
+    ],
+    "temp/llvm-profgen-enh/llvm/tools/llvm-profgen/IPBoundary.cpp": [
+      {
+        "line": 169,
+        "text": "        return At(ISA == 'a' ? \"unaligned A32 range start\""
+      },
+      {
+        "line": 170,
+        "text": "                             : \"unaligned A64 range start\","
+      },
+      {
+        "line": 171,
+        "text": "                  Cursor);"
+      },
+      {
+        "line": 172,
+        "text": "      if (ISA == 't' && Anchor % 2)"
+      },
+      {
+        "line": 173,
+        "text": "        return At(\"unaligned Thumb mapping anchor\", Cursor);"
+      },
+      {
+        "line": 174,
+        "text": "      // Prove a Thumb start from this mapping interval's anchor, never from"
+      },
+      {
+        "line": 175,
+        "text": "      // an earlier ISA or data interval. Prefix instructions are not emitted."
+      },
+      {
+        "line": 176,
+        "text": "      uint64_t PC = ISA == 't' ? Anchor : Cursor;"
+      },
+      {
+        "line": 177,
+        "text": "      while (PC < Stop) {"
+      },
+      {
+        "line": 178,
+        "text": "        uint64_t Size = 4;"
+      },
+      {
+        "line": 179,
+        "text": "        if (ISA == 't') {"
+      },
+      {
+        "line": 180,
+        "text": "          if (S->End - PC < 2)"
+      },
+      {
+        "line": 181,
+        "text": "            return At(\"truncated Thumb halfword\", PC);"
+      },
+      {
+        "line": 182,
+        "text": "          Size = support::endian::read16le(S->Bytes.data() + PC - S->Begin) >="
+      },
+      {
+        "line": 183,
+        "text": "                         0xe800"
+      },
+      {
+        "line": 184,
+        "text": "                     ? 4"
+      },
+      {
+        "line": 185,
+        "text": "                     : 2;"
+      },
+      {
+        "line": 186,
+        "text": "        }"
+      },
+      {
+        "line": 187,
+        "text": "        if (PC < Cursor && Size > Cursor - PC)"
+      },
+      {
+        "line": 188,
+        "text": "          return At(\"range starts inside a Thumb instruction\", Cursor);"
+      },
+      {
+        "line": 189,
+        "text": "        if (Size > Stop - PC)"
+      },
+      {
+        "line": 190,
+        "text": "          return At(ISA == 't'   ? \"truncated Thumb instruction\""
+      },
+      {
+        "line": 191,
+        "text": "                    : ISA == 'a' ? \"truncated A32 instruction\""
+      },
+      {
+        "line": 192,
+        "text": "                                 : \"truncated A64 instruction\","
+      }
+    ],
+    "docs/profgen/design/02_llvm_profgen_enhance_design_v0.7.md": [
+      {
+        "line": 464,
+        "text": "4. 边界规则（不依赖子目标）："
+      },
+      {
+        "line": 465,
+        "text": "   - 映射区间：先按映射符号把每个节划分为半开区间 `[m_i, m_{i+1})`，每个区间只有一种状态（`$a`、`$t`、`$x` 或 `$d`），区间的起点 m 是该映射符号的地址。再把每个 DWARF 函数区间与这些映射区间求交，按交集逐段处理。"
+      },
+      {
+        "line": 466,
+        "text": "   - `$d` 交集：作为数据排除，不枚举、不计入 `n(k)`，也不作为 skid 回退目标。"
+      },
+      {
+        "line": 467,
+        "text": "   - `$a`、`$x` 交集（A32、A64）：交集起点必须 4 字节对齐，且与锚点 m 的距离为 4 的倍数；之后按 4 字节步进。否则按第 6 条失败。"
+      },
+      {
+        "line": 468,
+        "text": "   - `$t` 交集（Thumb）：以覆盖该交集的当前 `$t` 映射区间起点 m 为锚点，从 m 按长度规则顺序步进，恰好到达交集起点才成立；步进越过交集起点（起点落在 32 位指令中间）按第 6 条失败。不得从更早的映射区间跨过 `$d` 或另一种 ISA 连续步进。指令长度按架构编码规则确定：第一个半字的 bits[15:11] 为 `0b11101`、`0b11110` 或 `0b11111` 时为 32 位（即第一个半字不小于 `0xE800`），否则为 16 位（Arm 架构参考手册的 Thumb 编码规则；LLVM 的 `ARMDisassembler::suggestBytesToSkip()` 用同样的判断，`ARMDisassembler.cpp:6138–6163`）。IT 块不改变指令长度。第一批 armv7l 限定 ELF32 小端，半字按目标的指令字节序读取。"
+      },
+      {
+        "line": 469,
+        "text": "   - 交集末端不得截断一条指令：最后一条指令必须恰好结束在交集末端，否则按第 6 条失败。"
+      },
+      {
+        "line": 470,
+        "text": "   - 为证明起点而从锚点 m 读取的、DWARF 区间之外的前缀，只用于证明，不计入 `n(k)`、补零位置或 profile。为避免长距离步进，实现可以缓存每个 `$t` 映射区间内已验证的边界。"
+      },
+      {
+        "line": 471,
+        "text": "   - DWARF 区间的起点（包括函数的第二段及以后的不连续区间）因此不能直接当作已知指令起点，任意偶地址也不能代替证明。"
+      },
+      {
+        "line": 472,
+        "text": "   - 指令字节一律从 `--binary` 读取（调试文件中代码节为 NOBITS）。"
+      },
+      {
+        "line": 473,
+        "text": "5. MCDisassembler 只作交叉核对（可选，测试与诊断用）：子目标按\"`--debug-binary` 的 `.ARM.attributes` → `--binary` 的 `.ARM.attributes` → 固定的 `thumbv7a` + `neon` + `vfp3`\"的顺序取得，所用来源写入报告；不得使用不带版本的 `arm`/`thumb`（4.1 第 4 条）。"
+      },
+      {
+        "line": 474,
+        "text": "6. 失败处理：任一被枚举函数的边界无法确定（缺映射符号、同一节内没有起始状态、同址映射状态冲突、节在两份文件间对应不上、DWARF 区间起点不是已知指令起点、A32/A64 起点不对齐、长度规则步进越过交集末端等），整次运行失败（`failure_stage=boundary`），报告列出全部失败函数及原因；不跳过该函数，也不改用其他聚合方式写出。调用方可以显式改用不需要边界的 `sum`/`max` 并关闭补零与 skid 重新运行。"
+      },
+      {
+        "line": 475,
+        "text": "7. 采样 IP 与符号地址："
+      },
+      {
+        "line": 476,
+        "text": "   - 采样 IP 本身不带 bit0：内核的 `perf_instruction_pointer` 直接返回 `ARM_pc`，Thumb 状态在 CPSR 的 T 位。不得对样本地址做 Thumb 位处理。"
+      },
+      {
+        "line": 477,
+        "text": "   - 带 bit0 的是符号表中 Thumb STT_FUNC 的 `st_value`。经 LLVM API 读到的地址已清除 bit0（`ELFObjectFile.h:615–618`），不得用读取到的地址反推 ISA；函数入口的 ISA 用 `getSymbolFlags()` 给出的 `SF_Thumb` 标志判定（`ELFObjectFile.h:803–815`；`SHN_ABS` 符号不清位，:611–612，排除在判定之外）。该标志只用于报告中的 `isa` 统计，不能用来确定函数内部的指令边界；没有符号条目的函数（例如 `.dynsym` 之外的内部函数）计入\"无法判定\"。"
+      },
+      {
+        "line": 478,
+        "text": "   - 直接读取原始 `st_value` 的核对脚本必须自行清除 Thumb 位（05 报告 B.3：清除前 3/7、103/219 命中，清除后全部命中）。"
+      },
+      {
+        "line": 479,
+        "text": "   - DWARF 中 Thumb 函数低地址的表示方式由 lit 用例核对。"
+      }
+    ]
+  },
+  "gnu_addr2line_smoke": {
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line",
+      "-a",
+      "-f",
+      "-i",
+      "-e",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/gnu/libavcodec.combined"
+    ],
+    "rc": 0,
+    "stdout": "0x000cd684\n_ZL36decode_cabac_residual_nondc_internalPK11H264ContextP16H264SliceContextPsiiPKhPKji.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1805\n0x000cd800\n_ZL20get_cabac_inline_armP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h:36\n_ZL9get_cabacP12CABACContextPh.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h:145\n_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1696\n_ZL36decode_cabac_residual_nondc_internalPK11H264ContextP16H264SliceContextPsiiPKhPKji.__uniq.27894887720519182085624620829320312160\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:1806\n0x000c4500\nff_h264_decode_mb_cabac\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c:2033\n0x000fb200\n_ZL11loop_filterPK11H264ContextP16H264SliceContextii.__uniq.248544299231367077551893488431358088102\n/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_slice.c:?\n",
+    "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS/scratch.armv7l.0/emul/usr/bin/addr2line: DWARF error: mangled line number section (bad file number)\n"
+  },
+  "llvm_symbolizer_smoke": {
+    "command": [
+      "nice",
+      "-n",
+      "19",
+      "ionice",
+      "-c3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-symbolizer",
+      "--obj=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+      "--inlines",
+      "--no-demangle",
+      "--output-style=JSON"
+    ],
+    "rc": 0,
+    "stdout": "{\"Address\":\"0xcd800\",\"ModuleName\":\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug\",\"Symbol\":[{\"Column\":5,\"Discriminator\":0,\"FileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h\",\"FunctionName\":\"_ZL20get_cabac_inline_armP12CABACContextPh.__uniq.27894887720519182085624620829320312160\",\"Line\":36,\"StartAddress\":\"0xcd7d6\",\"StartFileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/arm/cabac.h\",\"StartLine\":30},{\"Column\":12,\"Discriminator\":0,\"FileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h\",\"FunctionName\":\"_ZL9get_cabacP12CABACContextPh.__uniq.27894887720519182085624620829320312160\",\"Line\":145,\"StartAddress\":\"0xcd7d6\",\"StartFileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/cabac_functions.h\",\"StartLine\":144},{\"Column\":9,\"Discriminator\":6,\"FileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c\",\"FunctionName\":\"_ZL30decode_cabac_residual_internalPK11H264ContextP16H264SliceContextPsiiPKhPKjiii.__uniq.27894887720519182085624620829320312160\",\"Line\":1696,\"StartAddress\":\"0xcd68c\",\"StartFileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c\",\"StartLine\":1591},{\"Column\":5,\"Discriminator\":0,\"FileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c\",\"FunctionName\":\"_ZL36decode_cabac_residual_nondc_internalPK11H264ContextP16H264SliceContextPsiiPKhPKji.__uniq.27894887720519182085624620829320312160\",\"Line\":1806,\"StartAddress\":\"0xcd684\",\"StartFileName\":\"/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c\",\"StartLine\":1798}]}\n",
+    "stderr": ""
+  },
+  "LLVM_head": "e4642a8ad9e0acb990b45ade3ef7aca755cd80f2",
+  "LLVM_status": " M packaging/llvm.spec\n?? debugfiles.list\n?? debuglinks.list\n?? debugsourcefiles.list\n?? debugsources.list\n?? elfbins.list\n?? llvm-debuginfo.manifest\n?? llvm-debugsource.manifest\n?? llvm.manifest\n?? mlgo_verify_assets/\n",
+  "preregistration_diff": ""
+}

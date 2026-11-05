@@ -1,0 +1,60 @@
+"""Host-only failure injection: no board or real deletion is involved."""
+import hashlib
+import importlib.util
+from pathlib import Path
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[3]
+spec = importlib.util.spec_from_file_location('transfer', ROOT / 'tools/profgen/pull_verified_run.py')
+transfer = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(transfer)
+
+
+class VerifiedTransfer(unittest.TestCase):
+    def exercise(self, case):
+        remote = '/opt/afdo_agent/work/eval-injection'
+        good = b'original data\n'
+        manifest = hashlib.sha256(good).hexdigest() + '  ' + remote + '/data.txt\n'
+        deleted = []
+        with tempfile.TemporaryDirectory(prefix='transfer-test-', dir=ROOT / 'temp/tmp') as directory:
+            local = Path(directory) / 'pulled'
+
+            def pull(_remote, destination):
+                if case == 'transport':
+                    raise OSError('injected transport failure')
+                if case != 'missing':
+                    (destination / 'data.txt').write_bytes(b'changed' if case == 'bad-hash' else good)
+                if case == 'extra':
+                    (destination / 'extra.txt').write_bytes(good)
+                if case == 'symlink':
+                    (destination / 'alias').symlink_to('data.txt')
+
+            changed = manifest.replace(hashlib.sha256(good).hexdigest(), '0' * 64)
+            invoke = lambda: transfer.pull_verify_delete(
+                remote, local, manifest, pull,
+                lambda: changed if case == 'remote-changed' else manifest,
+                deleted.append)
+            if case == 'success':
+                result = invoke()
+                self.assertTrue(result['all_verified_before_delete'])
+                self.assertEqual(deleted, [remote])
+            else:
+                with self.assertRaises((ValueError, OSError)):
+                    invoke()
+                self.assertEqual(deleted, [])
+
+    def test_hash_mismatch_prevents_deletion(self): self.exercise('bad-hash')
+    def test_missing_file_prevents_deletion(self): self.exercise('missing')
+    def test_extra_file_prevents_deletion(self): self.exercise('extra')
+    def test_transport_failure_prevents_deletion(self): self.exercise('transport')
+    def test_symlink_prevents_deletion(self): self.exercise('symlink')
+    def test_remote_change_prevents_deletion(self): self.exercise('remote-changed')
+    def test_success_deletes_exact_run(self): self.exercise('success')
+    def test_manifest_path_escape_is_rejected(self):
+        with self.assertRaises(ValueError):
+            transfer.parse_manifest('0' * 64 + '  /opt/afdo_agent/work/eval-x/../outside\n', '/opt/afdo_agent/work/eval-x')
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

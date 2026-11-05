@@ -1,0 +1,1761 @@
+[
+  {
+    "time": "2026-11-05T20:44:52.451843+08:00",
+    "command": [
+      "sdb",
+      "devices"
+    ],
+    "rc": 0,
+    "stdout": "List of devices attached \n192.168.108.26:26101\tdevice    \trpi4\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:44:52.575684+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /proc/device-tree/model ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "Raspberry Pi 4 Model B Rev 1.5\u0000\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:44:52.703113+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -m ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "armv7l\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:44:52.832918+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -r ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "6.12.80-arm-rpi4-v7l\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:44:52.957963+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -v ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "#1 SMP Wed Nov  4 17:05:36 UTC 2026\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:44:53.087640+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /proc/uptime ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "997.67 3862.92\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:44:53.210802+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "5001\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:44:53.342119+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( missing=0; for c in /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0 gst-launch-1.0 mkdir mkfifo ps readlink rm rpm sha256sum sleep tr uname wc; do if command -v \"$c\"; then echo OK \"$c\"; else echo MISSING \"$c\"; missing=1; fi; done; test \"$missing\" = 0 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/bin/bash\nOK /bin/bash\n/usr/bin/awk\nOK awk\n/usr/bin/cat\nOK cat\n/usr/bin/cut\nOK cut\n/usr/bin/date\nOK date\n/usr/bin/df\nOK df\n/usr/bin/find\nOK find\n/usr/bin/findmnt\nOK findmnt\n/usr/bin/grep\nOK grep\n/usr/bin/gst-inspect-1.0\nOK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nOK gst-launch-1.0\n/usr/bin/mkdir\nOK mkdir\n/usr/bin/mkfifo\nOK mkfifo\n/usr/bin/ps\nOK ps\n/usr/bin/readlink\nOK readlink\n/usr/bin/rm\nOK rm\n/usr/bin/rpm\nOK rpm\n/usr/bin/sha256sum\nOK sha256sum\n/usr/bin/sleep\nOK sleep\n/usr/bin/tr\nOK tr\n/usr/bin/uname\nOK uname\n/usr/bin/wc\nOK wc\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:21.197581+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "rc": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:21.842806+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id; uptime; uname -v; cat /proc/sys/kernel/random/boot_id; date -Ins; df -k /opt; for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$p\"; cat \"$p\"; done ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\n 21:45:36 up 17 min,  0 users,  load average: 0.18, 0.13, 0.09\n#1 SMP Wed Nov  4 17:05:36 UTC 2026\n4e5c71ff-0cf8-4e7e-9f61-16602d3c3b57\n2026-11-05T21:45:36,291471177+0900\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    161020   1144596  13% /opt\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:22.890292+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-a32-R/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-R/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "d1618ea8eaec52420965a50cb5e5705af7d1e29c19a5e5c4bc351a7c3e79d447  /opt/afdo_agent/variants/spike-a32-R/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:23.040850+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "c008a000f1b901539cfccc4038d2ad104d4765b727e49434c9cd3ee797b65133  /opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:23.164139+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-a32-C/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-C/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "7365b8d598319330e07336a6d3451a21e5dae0b7675e0964d2e4fdbab2602aba  /opt/afdo_agent/variants/spike-a32-C/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:23.309275+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-thumb-G5/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-G5/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "b75d4d350d46cfcf2dba018182ea03d560ace049665399953e9a9bf3726b2c18  /opt/afdo_agent/variants/spike-thumb-G5/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:23.700295+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "de62d9b1bcd14ee89443dcacf828c4d9a55578bae92e49477a0f1db081c0098d  /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:23.870487+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "9d55c944c8bcc5c8c5fdf13ed6bf2980fbf5c3dd3800f8cf9daeb8e3db5aa431  /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:24.036376+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "61e3ab74538cf220420abcd8f1cc80aef61351013a062fb8f55ac26e102b7ce3  /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:24.194677+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "05ed93f92e9c067ad5e47ab7eb2cf98b49a2bd9b52ac767f533223c7eb0e1dd8  /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:24.517721+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "2eec5f0a9201299658caaef8659ffda4bcbd89793c46b0cb52d37c19d64aff09  /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:24.708487+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "46f6ccfa3ba5c165ddd704fdc86c82ff2ade72ecd0938ca33a43cbb7135c4f7e  /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:25.185044+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "85db2b5377c2a6bd9f13af5287f49f77e3ab1bde6d0042c54e238ad43779ab6f  /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:25.386198+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "373c96a5c69da990d36699668e7ef45ca931b98c64688d486e67d2c90425c833  /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:25.553638+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "5668b643f24a8a0134a9b0d1f1e48d90e16d197625a55087b90898ba11827a9e  /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:25.739426+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "ff4bef25dfee0d45d414317a514e86c97322dcbc010924294d63f84883e0a67e  /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:26.054224+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "290b07bca56a1b183e6256e37148de289d9530f235cf3fc1d8e759de15da8ca1  /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:27.410549+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "6fee79ca51f5a1d54a881fa03aee31737bd397bae8dd3aabd058fbff1b294d0b  /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:28.002985+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-a32-G5/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-G5/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "ffa4f6b7fe83d97ea9bf89cba7cc70f91c874e3396c06a2d4fbd5e657e530fbc  /opt/afdo_agent/variants/spike-a32-G5/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:28.483144+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "87dd60ec86500ab07880771515e97218a7217f8960245cebc3d924bfbbd4835d  /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:28.717914+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "cb6a911796111b474aa26feb9343360b465425ec450ce5ee7cbdef6ef567c1fb  /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:28.883650+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "c21f52c97dcd2b923c5de8a775073694936cc68e2600d254553fa4ad8b2610b9  /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:29.186529+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "6c6bff45243320c84953bc4814f240535ff4182526df1d1d973c6a01632c4a53  /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:29.595660+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "9d7391364e6630d183aef6e47df53cb31e4e893fc9892b9aafd06cf64a16005c  /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:29.855235+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "6d315e05dae946c5dbac0e9b3868cf007fbf9b3be2342c31bbce8e8922daa6d3  /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:30.023301+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-thumb-C/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-C/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "78114d812bcd3c17a3db75d49a04c4cb7978af827f0ec3dcecb8a71523f98b3c  /opt/afdo_agent/variants/spike-thumb-C/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:30.637732+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "9ce4c3cd687350b748e1d5e4cb1dec288f6af866fd6c037e717a9576cb80ce41  /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:30.989664+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "f9172d273c4fe7e31124fb05b1254f907e811c5d59cdc2aa96015563007f11a6  /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:31.170737+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "bcd78f1448309641ff634e14f4966f3b78caed81e6762c0dbdafec3bde90dc3c  /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:31.442714+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "0a855c2cf17524d53b1e7bd2e8dde38e4f022167bc5d0eef548a7e951ceffc2e  /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:32.900071+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "f1c3ef7adf9a04d2e984cfd331e58406d00b91b344d09db8a1ff03d555f7a0db  /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:33.091438+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "7608b28f89b21d26af8bceb74a8126d40580a7ae045b893e3bbca4b24beb85a9  /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:33.221456+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-a32-S/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-S/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "c5086c0258f7b66ecbf244c680c3cb6807bf35549ffbe9dec7d3d8732b4fab7f  /opt/afdo_agent/variants/spike-a32-S/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:33.362221+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/spike-thumb-R/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-R/bin/eval-spike ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "86decee700f4fe75dc2effbee4db1d510c72f992c83bb493d36d4b9e972d836a  /opt/afdo_agent/variants/spike-thumb-R/bin/eval-spike\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:33.867654+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "0193f077f19979590dba4ecc9dbb8a5ab45b577166b15a69f3cc794ebb639a95  /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:34.387790+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "e47ab0f7e594dce6b789dbca5116388ae0cd663e494ceda3a0691622ff3a3352  /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:34.888439+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "76b815395b3cd2a4f3989c4494c5ad689a985deac2de1c71373753f6936189ee  /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:35.196533+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "2a5fe92e88062936158bef1d5e8a244a196788f7174eea4405cf11db9048c59d  /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:35.387533+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "b233b13772d4e3fa8667555443b28affdffb86ea3173f045c951b287754f92e7  /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:35.567830+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "8fa36d37cc3482728aa456f1c8ecfc7a54f12197eeb2735bdb94e00cd1d0da86  /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:35.842838+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "bdceece7160cd687bea08694e250828235335865dd0f87bf4f7322754434fa4e  /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:36.008011+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "6962345b53e3feeb5df44e044fb1af8a8c09f5f66b59f926c60249a676783209  /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:36.178696+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "729d9577e959aaa01bcc2eba956f1adcb9d8d172bf8edb2d555db9f6c24d65ef  /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:36.338469+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "7b2f8d74547190b7875af8485e8a0fb5a84ae6221a9412793940dc46dc3103ca  /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:36.602595+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "888ae115f0a69d49d57d8ae731dc54041783faaafcb0379b4ed13f8ee024beae  /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:36.804187+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "8f6b3bb97687ad94f0fdbbfdcc4ce10cf0d216a6c59252c97235c5bb2479ca26  /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:37.205026+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "bb4a129161c7dcf3cd040fcc9ba27e1818ccab4a36e91042eef3b46a77c2222c  /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:37.393401+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "de80c85786d77b34865b091b352bb60e139d37685b6a33e68b700f434f8543ae  /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:37.538313+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "2d07e2341a5ee57ed479844c4c2897bf302efc448995af2d4ffc85b638a3ea7e  /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:37.714439+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "f8bb572bb79bfed0b264bde5949c62fb37f7402d8d78facb2c992afce2189da2  /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:38.055805+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "67c836e0277450eb7e73c12d53a85d384585c1373ecf7cb06557c549aef70f1c  /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:38.238056+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "3b5f1ff2e312cf7c33805cfd057256f88cfeec473f212987bce6b2a0580002e3  /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:38.917818+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavcodec.so.62.11.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "faebfe024d46de175c571b0c1f657415b7d2bd0baaac923abe8933703098345f  /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavcodec.so.62.11.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:39.104117+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswscale.so.9.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "40cb2184694cdd6c27e05d8aa0111240e747e98faefddbd963bae25a62c4891b  /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswscale.so.9.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:39.403811+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswresample.so.6.1.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "3c44bb83faf51463c2488c20d476d05ff86e48c9877b112b9667cbb932124546  /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswresample.so.6.1.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:39.758368+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavfilter.so.11.4.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "fc4e16a435d18f5775a10423f1732d104ec1d0f6f22e395c819db42a6d348635  /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavfilter.so.11.4.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:40.002298+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavformat.so.62.3.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "dc2b718d40826bcbbc09959b2709dfafe936db3c61427c81b0ca4045608e042d  /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavformat.so.62.3.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:41.681766+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavutil.so.60.8.100 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "9a7f4d69aa2830cdfbbc577ec5819487b85e87a1242dd530df5bac06fdad3b12  /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavutil.so.60.8.100\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:42.017104+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/scripts/collect.sh && sha256sum /opt/afdo_agent/scripts/collect.sh ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "5efb6dade2c5a98e68df8a4e61cb9bf7d9b29412d2828b5497a49a76d9ef3cd2  /opt/afdo_agent/scripts/collect.sh\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:42.236163+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/scripts/measure.sh && sha256sum /opt/afdo_agent/scripts/measure.sh ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "ff0f710b7e9ad17c03913f7e3353151396b4a2ee662baefadae6e7a0fbe6b8eb  /opt/afdo_agent/scripts/measure.sh\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:42.399722+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/scripts/common.sh && sha256sum /opt/afdo_agent/scripts/common.sh ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "e8d8f3a699f767a716b7002bdc64d92c21e05da81772c35970e2b581eeb6b9d3  /opt/afdo_agent/scripts/common.sh\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:42.660968+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/eval-manifest.tsv && sha256sum /opt/afdo_agent/eval-manifest.tsv ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "ce5677a92d8822e12c6e21a41a24533a31dbd25da824805a6f9c7bc6b6f0935b  /opt/afdo_agent/eval-manifest.tsv\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:43.253357+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/tools/perf && sha256sum /opt/afdo_agent/tools/perf ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:47.927522+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -r /opt/afdo_agent/lib/libLLVM.so.22.1 && sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:45:48.120200+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -x /opt/afdo_agent/tools/perf && test -r /opt/afdo_agent/lib/libLLVM.so.22.1 && LD_LIBRARY_PATH=/opt/afdo_agent/lib HOME=/opt/afdo_agent/work TMPDIR=/opt/afdo_agent/work PERF_CONFIG=/opt/afdo_agent/work/perf.conf /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "perf version 6.12.80\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:32.756626+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/collect.sh",
+      "/opt/afdo_agent/scripts/collect.sh"
+    ],
+    "rc": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                     collect.sh\t  0%\t      0 B\t    0KB/s\npushed                     collect.sh\t100%\t   3612 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/collect.sh   16KB/s (3612 bytes in 0.213s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:32.936042+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/scripts/collect.sh ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "f3ca68cfd98dadc2f995832477accc14f7bfc05a688a45fb54f5b8bf157a9cf6  /opt/afdo_agent/scripts/collect.sh\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:33.159261+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/measure.sh",
+      "/opt/afdo_agent/scripts/measure.sh"
+    ],
+    "rc": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                     measure.sh\t  0%\t      0 B\t    0KB/s\npushed                     measure.sh\t100%\t   2790 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/measure.sh   12KB/s (2790 bytes in 0.218s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:33.286947+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/scripts/measure.sh ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "ff0f710b7e9ad17c03913f7e3353151396b4a2ee662baefadae6e7a0fbe6b8eb  /opt/afdo_agent/scripts/measure.sh\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:33.477684+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/common.sh",
+      "/opt/afdo_agent/scripts/common.sh"
+    ],
+    "rc": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                      common.sh\t  0%\t      0 B\t    0KB/s\npushed                      common.sh\t100%\t   9177 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/common.sh   47KB/s (9177 bytes in 0.187s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:33.622160+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/scripts/common.sh ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "d84a889d5c6820ea9c5ed1f26c368a4146c2a32bca55ce6c8e35068198d50718  /opt/afdo_agent/scripts/common.sh\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:33.821226+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( mkdir -p /opt/afdo_agent/media; df -k /opt; find /sys/devices/platform /sys/firmware -iname \"*throttl*\" -print ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "Filesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    161344   1144272  13% /opt\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:38.167542+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1/tos_720p_h264_60s.mp4",
+      "/opt/afdo_agent/media/tos_720p_h264_60s.mp4"
+    ],
+    "rc": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed          tos_720p_h264_60s.mp4\t  0%\t      0MB\t    0KB/s\npushed          tos_720p_h264_60s.mp4\t 37%\t     10MB\t10879KB/s\npushed          tos_720p_h264_60s.mp4\t 63%\t     18MB\t 7259KB/s\npushed          tos_720p_h264_60s.mp4\t 98%\t     28MB\t 9081KB/s\npushed          tos_720p_h264_60s.mp4\t100%\t     28MB\t 9081KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1/tos_720p_h264_60s.mp4   6738KB/s (29964461 bytes in 4.342s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:38.973464+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/media/tos_720p_h264_60s.mp4 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1  /opt/afdo_agent/media/tos_720p_h264_60s.mp4\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:43.792862+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4",
+      "/opt/afdo_agent/media/bbb_720p_h264_60s.mp4"
+    ],
+    "rc": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed          bbb_720p_h264_60s.mp4\t  0%\t      0MB\t    0KB/s\npushed          bbb_720p_h264_60s.mp4\t 16%\t      4MB\t 4737KB/s\npushed          bbb_720p_h264_60s.mp4\t 45%\t     13MB\t 8251KB/s\npushed          bbb_720p_h264_60s.mp4\t 80%\t     23MB\t 8878KB/s\npushed          bbb_720p_h264_60s.mp4\t100%\t     28MB\t 8878KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4   6114KB/s (30023879 bytes in 4.795s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:44.959630+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4  /opt/afdo_agent/media/bbb_720p_h264_60s.mp4\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:53.426737+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_1080p_h264_60s.mp4",
+      "/opt/afdo_agent/media/bbb_1080p_h264_60s.mp4"
+    ],
+    "rc": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed         bbb_1080p_h264_60s.mp4\t  0%\t      0MB\t    0KB/s\npushed         bbb_1080p_h264_60s.mp4\t 14%\t      8MB\t 7624KB/s\npushed         bbb_1080p_h264_60s.mp4\t 30%\t     17MB\t 8913KB/s\npushed         bbb_1080p_h264_60s.mp4\t 45%\t     26MB\t 7640KB/s\npushed         bbb_1080p_h264_60s.mp4\t 61%\t     35MB\t 8732KB/s\npushed         bbb_1080p_h264_60s.mp4\t 80%\t     46MB\t11502KB/s\npushed         bbb_1080p_h264_60s.mp4\t 92%\t     53MB\t 6655KB/s\npushed         bbb_1080p_h264_60s.mp4\t100%\t     57MB\t 6189KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_1080p_h264_60s.mp4   6983KB/s (60382636 bytes in 8.443s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:47:54.913455+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/media/bbb_1080p_h264_60s.mp4 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "31f72f11eb0566e0265358a14294e5dbddf13fce4ce1507d8872b04c2596a6da  /opt/afdo_agent/media/bbb_1080p_h264_60s.mp4\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:48:09.640283+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( command -v nice; command -v ionice ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/usr/bin/nice\n/usr/bin/ionice\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:49:35.826779+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/common.sh",
+      "/opt/afdo_agent/scripts/common.sh"
+    ],
+    "rc": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                      common.sh\t  0%\t      0 B\t    0KB/s\npushed                      common.sh\t100%\t   9222 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen/board/common.sh   46KB/s (9222 bytes in 0.194s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:49:36.009320+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/scripts/common.sh ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "082a2f0e8738dec5a70966b9a1af37195d35c1e011865a85a9a6d683af18c4c4  /opt/afdo_agent/scripts/common.sh\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:49:44.329356+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s %s\\n\" \"$p\" \"$(cat \"$p\")\"; done ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:49:44.495184+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( free -m; uptime; df -k /opt ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "               total        used        free      shared  buff/cache   available\nMem:            1472         139        1043           0         310        1332\nSwap:            589          10         578\n 21:49:58 up 21 min,  0 users,  load average: 0.17, 0.19, 0.12\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    279084   1026532  22% /opt\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:49:44.508990+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf \"performance\\n\" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "performance\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:49:48.895934+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=2000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed spike-thumb-S /opt/afdo_agent/eval-manifest.tsv 100000 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1051168768 estimate_bytes=2000000 required_bytes=204000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T214959-17050\nRESULTS /opt/afdo_agent/work/eval-20261105T214959-17050\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:50:34.605057+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=2000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed spike-a32-S /opt/afdo_agent/eval-manifest.tsv 100000 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1051066368 estimate_bytes=2000000 required_bytes=204000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215044-17860\nRESULTS /opt/afdo_agent/work/eval-20261105T215044-17860\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:51:03.637841+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for f in /opt/afdo_agent/work/eval-*/record.stderr /opt/afdo_agent/work/eval-*/status; do [ ! -f \"$f\" ] || { echo \"$f\"; cat \"$f\"; }; done; ps -eo pid,ppid,comm,pcpu,args | grep -E \"[g]st-launch|[p]erf.*record|[s]ha256sum.*frames\" ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/work/eval-20261105T215054-18250/record.stderr\n18341 18250 sha256sum       57.3 sha256sum /opt/afdo_agent/work/eval-20261105T215054-18250/frames.pipe\n18350 18250 perf             1.9 /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/eval-20261105T215054-18250/buildid record --buildid-mmap -e cycles -c 1000003 -o /opt/afdo_agent/work/eval-20261105T215054-18250/perf.data -- /bin/bash -c printf \"%s\\n\" \"$$\" >\"$1\"; shift; exec \"$@\" _ /opt/afdo_agent/work/eval-20261105T215054-18250/target.pid gst-launch-1.0 -q filesrc location=/opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 max-threads=1 ! video/x-raw,format=I420 ! filesink location=/opt/afdo_agent/work/eval-20261105T215054-18250/frames.pipe sync=false\n18373 18350 gst-launch-1.0  53.6 gst-launch-1.0 -q filesrc location=/opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ! qtdemux ! h264parse ! avdec_h264 max-threads=1 ! video/x-raw,format=I420 ! filesink location=/opt/afdo_agent/work/eval-20261105T215054-18250/frames.pipe sync=false\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:51:45.547231+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=10000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed ffmpeg-thumb-S /opt/afdo_agent/eval-manifest.tsv /opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1051045888 estimate_bytes=10000000 required_bytes=220000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215054-18250\nRESULTS /opt/afdo_agent/work/eval-20261105T215054-18250\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:53:02.715880+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=10000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed ffmpeg-a32-S /opt/afdo_agent/eval-manifest.tsv /opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1050824704 estimate_bytes=10000000 required_bytes=220000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215212-20403\nRESULTS /opt/afdo_agent/work/eval-20261105T215212-20403\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:53:49.985892+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf \"%s\\n\" schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:53:50.224307+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "rc": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:53:52.034570+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id; df -k /opt; for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$p\"; cat \"$p\"; done; rpm -qa | wc -l ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "uid=5001(owner) gid=100(users) groups=29(audio),44(video),100(users),201(display),1901(log),6525(usb_device),10001(priv_externalstorage),10002(priv_externalstorage_appdata),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    279612   1026004  22% /opt\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n1232\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:54:55.287252+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /proc/device-tree/model; uname -m; uname -r; uname -v; id -u; cat /proc/uptime ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "Raspberry Pi 4 Model B Rev 1.5\u0000armv7l\n6.12.80-arm-rpi4-v7l\n#1 SMP Wed Nov  4 17:05:36 UTC 2026\n5001\n1599.89 6022.16\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:54:56.266864+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -v ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "#1 SMP Wed Nov  4 17:05:36 UTC 2026\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:54:57.370911+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( missing=0; for c in /bin/bash awk cat cut date df find findmnt grep gst-inspect-1.0 gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc; do command -v \"$c\" || missing=1; done; test \"$missing\" = 0 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/bin/bash\n/usr/bin/awk\n/usr/bin/cat\n/usr/bin/cut\n/usr/bin/date\n/usr/bin/df\n/usr/bin/find\n/usr/bin/findmnt\n/usr/bin/grep\n/usr/bin/gst-inspect-1.0\n/usr/bin/gst-launch-1.0\n/usr/bin/ionice\n/usr/bin/mkdir\n/usr/bin/mkfifo\n/usr/bin/nice\n/usr/bin/ps\n/usr/bin/readlink\n/usr/bin/rm\n/usr/bin/rpm\n/usr/bin/sha256sum\n/usr/bin/sleep\n/usr/bin/tr\n/usr/bin/uname\n/usr/bin/wc\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:54:57.418891+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "rc": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:54:58.051080+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -x /opt/afdo_agent/tools/perf && test -r /opt/afdo_agent/lib/libLLVM.so.22.1 && sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1 ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf\n49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:54:59.194223+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( while IFS=\"$(printf \"\\t\")\" read -r variant arch object stage program libdir target sha id; do echo \"$sha  $target\" | sha256sum -c - || exit 3; done < /opt/afdo_agent/eval-manifest.tsv ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-thumb-R/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-thumb-C/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-thumb-G5/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-S/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-R/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-C/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-G5/bin/eval-spike: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavcodec.so.62.11.100: OK\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:55:01.470898+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s %s\\n\" \"$p\" \"$(cat \"$p\")\"; done ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:55:01.643902+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( free -m; uptime; df -k /opt ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "               total        used        free      shared  buff/cache   available\nMem:            1472         139        1014           0         340        1333\nSwap:            589          10         578\n 21:55:16 up 26 min,  0 users,  load average: 0.42, 0.48, 0.28\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    279696   1025920  22% /opt\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:55:01.671502+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf \"performance\\n\" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "performance\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:55:05.986492+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=12000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-freq spike-thumb-S /opt/afdo_agent/eval-manifest.tsv 100000 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1050542080 estimate_bytes=12000000 required_bytes=224000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215516-23914\nRESULTS /opt/afdo_agent/work/eval-20261105T215516-23914\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:55:17.948987+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf \"%s\\n\" schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:55:17.999016+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "rc": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:55:18.493339+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id; df -k /opt; for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$p\"; cat \"$p\"; done; rpm -qa | wc -l ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "uid=5001(owner) gid=100(users) groups=29(audio),44(video),100(users),201(display),1901(log),6525(usb_device),10001(priv_externalstorage),10002(priv_externalstorage_appdata),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    279740   1025876  22% /opt\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n1232\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:20.944005+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u; uname -v; command -v nice; command -v ionice ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "5001\n#1 SMP Wed Nov  4 17:05:36 UTC 2026\n/usr/bin/nice\n/usr/bin/ionice\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:21.242579+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -v ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "#1 SMP Wed Nov  4 17:05:36 UTC 2026\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:21.291934+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "rc": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:25.075370+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s %s\\n\" \"$p\" \"$(cat \"$p\")\"; done ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:25.236181+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( free -m; uptime; df -k /opt ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "               total        used        free      shared  buff/cache   available\nMem:            1472         138        1014           0         340        1333\nSwap:            589          10         578\n 21:56:39 up 28 min,  0 users,  load average: 0.14, 0.39, 0.26\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    279820   1025796  22% /opt\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:25.245139+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf \"performance\\n\" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "performance\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:29.870590+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=12000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-freq spike-thumb-S /opt/afdo_agent/eval-manifest.tsv 100000 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1050415104 estimate_bytes=12000000 required_bytes=224000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215640-25216\nRESULTS /opt/afdo_agent/work/eval-20261105T215640-25216\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:56:53.463480+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=12000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-freq spike-a32-S /opt/afdo_agent/eval-manifest.tsv 100000 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1050316800 estimate_bytes=12000000 required_bytes=224000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215703-25763\nRESULTS /opt/afdo_agent/work/eval-20261105T215703-25763\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:58:08.889679+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=12000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-freq ffmpeg-thumb-S /opt/afdo_agent/eval-manifest.tsv /opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1050251264 estimate_bytes=12000000 required_bytes=224000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215719-26216\nRESULTS /opt/afdo_agent/work/eval-20261105T215719-26216\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:59:42.868455+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=12000000 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed ffmpeg-thumb-S /opt/afdo_agent/eval-manifest.tsv /opt/afdo_agent/media/tos_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1050066944 estimate_bytes=12000000 required_bytes=224000000\nRUNPATH /opt/afdo_agent/work/eval-20261105T215849-28521\nRESULTS /opt/afdo_agent/work/eval-20261105T215849-28521\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:01:01.905327+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=5713429 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed spike-thumb-S /opt/afdo_agent/eval-manifest.tsv 961710 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1049845760 estimate_bytes=5713429 required_bytes=211426858\nRUNPATH /opt/afdo_agent/work/eval-20261105T220059-31307\nRESULTS /opt/afdo_agent/work/eval-20261105T220059-31307\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:01:57.040731+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=5607965 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed spike-a32-S /opt/afdo_agent/eval-manifest.tsv 881633 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1049731072 estimate_bytes=5607965 required_bytes=211215930\nRUNPATH /opt/afdo_agent/work/eval-20261105T220154-32451\nRESULTS /opt/afdo_agent/work/eval-20261105T220154-32451\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:03:26.745787+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=10870456 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed ffmpeg-thumb-S /opt/afdo_agent/eval-manifest.tsv /opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1049632768 estimate_bytes=10870456 required_bytes=221740912\nRUNPATH /opt/afdo_agent/work/eval-20261105T220236-1143\nRESULTS /opt/afdo_agent/work/eval-20261105T220236-1143\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:05:12.919911+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=24567137 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed spike-thumb-S /opt/afdo_agent/eval-manifest.tsv 4808549 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1049440256 estimate_bytes=24567137 required_bytes=249134274\nRUNPATH /opt/afdo_agent/work/eval-20261105T220412-3499\nRESULTS /opt/afdo_agent/work/eval-20261105T220412-3499\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:06:25.531306+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( free -m; uptime; df -k /opt ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "               total        used        free      shared  buff/cache   available\nMem:            1472         146        1001           0         345        1325\nSwap:            589          10         578\n 22:06:39 up 38 min,  0 users,  load average: 1.29, 0.83, 0.53\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    283776   1021840  22% /opt\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:06:49.532810+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=24039816 COLLECT_REPEATS=1 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed spike-a32-S /opt/afdo_agent/eval-manifest.tsv 4408164 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1049255936 estimate_bytes=24039816 required_bytes=248079632\nRUNPATH /opt/afdo_agent/work/eval-20261105T220548-6045\nRESULTS /opt/afdo_agent/work/eval-20261105T220548-6045\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:10:05.138647+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( RUN_ESTIMATE_BYTES=30611367 COLLECT_REPEATS=3 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed ffmpeg-thumb-S /opt/afdo_agent/eval-manifest.tsv /opt/afdo_agent/media/bbb_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1049108480 estimate_bytes=30611367 required_bytes=261222734\nRUNPATH /opt/afdo_agent/work/eval-20261105T220713-8449\nRESULTS /opt/afdo_agent/work/eval-20261105T220713-8449\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:15:21.784842+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /opt/afdo_agent/work/eval-*/status; do printf \"%s\\n\" \"$p\"; cat \"$p\"; done; ps -eo pid,ppid,comm,args; df -k /opt; cat /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq; getconf PAGESIZE ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/work/eval-20261105T221037-13965/status\nRECORD_EXIT 0\nEXIT 0\nALL-END 2026-11-05T22:15:28,677319923+0900 OK\n  PID  PPID COMMAND         COMMAND\n    1     0 systemd         /sbin/init\n    2     0 kthreadd        [kthreadd]\n    3     2 pool_workqueue_ [pool_workqueue_release]\n    4     2 kworker/R-kvfre [kworker/R-kvfree_rcu_reclaim]\n    5     2 kworker/R-rcu_g [kworker/R-rcu_gp]\n    6     2 kworker/R-sync_ [kworker/R-sync_wq]\n    7     2 kworker/R-slub_ [kworker/R-slub_flushwq]\n    8     2 kworker/R-netns [kworker/R-netns]\n   12     2 kworker/u16:0-i [kworker/u16:0-ipv6_addrconf]\n   13     2 kworker/R-mm_pe [kworker/R-mm_percpu_wq]\n   14     2 rcu_tasks_rude_ [rcu_tasks_rude_kthread]\n   15     2 rcu_tasks_trace [rcu_tasks_trace_kthread]\n   16     2 ksoftirqd/0     [ksoftirqd/0]\n   17     2 rcu_sched       [rcu_sched]\n   18     2 rcu_exp_par_gp_ [rcu_exp_par_gp_kthread_worker/0]\n   19     2 rcu_exp_gp_kthr [rcu_exp_gp_kthread_worker]\n   20     2 migration/0     [migration/0]\n   21     2 cpuhp/0         [cpuhp/0]\n   22     2 cpuhp/1         [cpuhp/1]\n   23     2 migration/1     [migration/1]\n   24     2 ksoftirqd/1     [ksoftirqd/1]\n   27     2 cpuhp/2         [cpuhp/2]\n   28     2 migration/2     [migration/2]\n   29     2 ksoftirqd/2     [ksoftirqd/2]\n   32     2 cpuhp/3         [cpuhp/3]\n   33     2 migration/3     [migration/3]\n   34     2 ksoftirqd/3     [ksoftirqd/3]\n   37     2 kworker/u17:0-e [kworker/u17:0-ext4-rsv-conversion]\n   38     2 kworker/u18:0-e [kworker/u18:0-events_unbound]\n   39     2 kworker/u19:0-e [kworker/u19:0-events_unbound]\n   40     2 kworker/u20:0-e [kworker/u20:0-ext4-rsv-conversion]\n   41     2 kdevtmpfs       [kdevtmpfs]\n   42     2 kworker/R-inet_ [kworker/R-inet_frag_wq]\n   43     2 kauditd         [kauditd]\n   44     2 khungtaskd      [khungtaskd]\n   45     2 oom_reaper      [oom_reaper]\n   46     2 kworker/u20:1-a [kworker/u20:1-async]\n   47     2 kworker/R-write [kworker/R-writeback]\n   48     2 kcompactd0      [kcompactd0]\n   49     2 kworker/R-crypt [kworker/R-cryptd]\n   50     2 kworker/R-kbloc [kworker/R-kblockd]\n   51     2 kworker/R-blkcg [kworker/R-blkcg_punt_bio]\n   52     2 kworker/u17:1-a [kworker/u17:1-async]\n   53     2 kworker/u17:2-e [kworker/u17:2-ext4-rsv-conversion]\n   54     2 watchdogd       [watchdogd]\n   56     2 kworker/2:1H-kb [kworker/2:1H-kblockd]\n   57     2 kworker/R-rpcio [kworker/R-rpciod]\n   58     2 kworker/R-xprti [kworker/R-xprtiod]\n   59     2 kworker/R-cfg80 [kworker/R-cfg80211]\n   60     2 kworker/u19:1-e [kworker/u19:1-events_unbound]\n   61     2 kswapd0         [kswapd0]\n   62     2 kworker/R-nfsio [kworker/R-nfsiod]\n   63     2 kworker/u21:0-h [kworker/u21:0-hci0]\n   64     2 kworker/u22:0   [kworker/u22:0]\n   65     2 kworker/u23:0   [kworker/u23:0]\n   66     2 kworker/u24:0   [kworker/u24:0]\n   67     2 kworker/u25:0   [kworker/u25:0]\n   68     2 kworker/R-kthro [kworker/R-kthrotld]\n   73     2 kworker/u18:1-e [kworker/u18:1-events_unbound]\n   77     2 hwrng           [hwrng]\n   78     2 kworker/R-iscsi [kworker/R-iscsi_conn_cleanup]\n   80     2 kworker/R-uas   [kworker/R-uas]\n   82     2 kworker/R-dm_bu [kworker/R-dm_bufio_cache]\n   84     2 vchiq-slot/0    [vchiq-slot/0]\n   85     2 vchiq-recy/0    [vchiq-recy/0]\n   86     2 vchiq-sync/0    [vchiq-sync/0]\n   87     2 vchiq-keep/0    [vchiq-keep/0]\n   89     2 kworker/1:1H-kb [kworker/1:1H-kblockd]\n   90     2 kworker/0:1H-kb [kworker/0:1H-kblockd]\n   91     2 SMIO            [SMIO]\n   92     2 kworker/R-mmal- [kworker/R-mmal-vchiq]\n   93     2 kworker/R-mmal- [kworker/R-mmal-vchiq]\n   94     2 kworker/R-mmal- [kworker/R-mmal-vchiq]\n   95     2 kworker/R-mmal- [kworker/R-mmal-vchiq]\n   96     2 kworker/R-mmal- [kworker/R-mmal-vchiq]\n   97     2 kworker/R-mmal- [kworker/R-mmal-vchiq]\n   98     2 kworker/R-mmal- [kworker/R-mmal-vchiq]\n   99     2 kworker/R-mld   [kworker/R-mld]\n  100     2 kworker/R-ipv6_ [kworker/R-ipv6_addrconf]\n  101     2 kworker/u16:1   [kworker/u16:1]\n  102     2 krfcommd        [krfcommd]\n  103     2 kworker/u18:3-e [kworker/u18:3-ext4-rsv-conversion]\n  105     2 irq/58-vc4 hdmi [irq/58-vc4 hdmi hpd connected]\n  106     2 irq/59-vc4 hdmi [irq/59-vc4 hdmi hpd disconnected]\n  107     2 cec-vc4-hdmi-0  [cec-vc4-hdmi-0]\n  108     2 irq/60-vc4 hdmi [irq/60-vc4 hdmi cec rx]\n  109     2 irq/61-vc4 hdmi [irq/61-vc4 hdmi cec tx]\n  110     2 irq/62-vc4 hdmi [irq/62-vc4 hdmi hpd connected]\n  111     2 irq/63-vc4 hdmi [irq/63-vc4 hdmi hpd disconnected]\n  112     2 cec-vc4-hdmi-1  [cec-vc4-hdmi-1]\n  113     2 irq/64-vc4 hdmi [irq/64-vc4 hdmi cec rx]\n  114     2 irq/65-vc4 hdmi [irq/65-vc4 hdmi cec tx]\n  115     2 card0-crtc0     [card0-crtc0]\n  116     2 card0-crtc1     [card0-crtc1]\n  117     2 card0-crtc2     [card0-crtc2]\n  118     2 card0-crtc3     [card0-crtc3]\n  119     2 card0-crtc4     [card0-crtc4]\n  120     2 card0-crtc5     [card0-crtc5]\n  121     2 kworker/R-sdhci [kworker/R-sdhci]\n  122     2 irq/72-mmc0     [irq/72-mmc0]\n  123     2 kworker/R-v3d_b [kworker/R-v3d_bin]\n  124     2 kworker/R-v3d_r [kworker/R-v3d_render]\n  125     2 kworker/R-v3d_t [kworker/R-v3d_tfu]\n  127     2 kworker/R-v3d_c [kworker/R-v3d_csd]\n  128     2 kworker/R-v3d_c [kworker/R-v3d_cache_clean]\n  129     2 kworker/R-v3d_c [kworker/R-v3d_cpu]\n  162     2 kworker/R-mmc_c [kworker/R-mmc_complete]\n  164     2 kworker/3:1H-kb [kworker/3:1H-kblockd]\n  180     2 jbd2/mmcblk0p6- [jbd2/mmcblk0p6-8]\n  181     2 kworker/R-ext4- [kworker/R-ext4-rsv-conversion]\n  212     2 jbd2/mmcblk0p2- [jbd2/mmcblk0p2-8]\n  213     2 kworker/R-ext4- [kworker/R-ext4-rsv-conversion]\n  217     2 jbd2/mmcblk0p3- [jbd2/mmcblk0p3-8]\n  218     2 kworker/R-ext4- [kworker/R-ext4-rsv-conversion]\n  220     2 jbd2/mmcblk0p10 [jbd2/mmcblk0p10-8]\n  221     2 kworker/R-ext4- [kworker/R-ext4-rsv-conversion]\n  267     2 jbd2/mmcblk0p9- [jbd2/mmcblk0p9-8]\n  268     2 kworker/R-ext4- [kworker/R-ext4-rsv-conversion]\n  271     1 systemd-journal /usr/lib/systemd/systemd-journald\n  276     2 f2fs_ckpt-179:5 [f2fs_ckpt-179:5]\n  277     2 f2fs_flush-179: [f2fs_flush-179:5]\n  278     2 f2fs_discard-17 [f2fs_discard-179:5]\n  296     2 f2fs_gc-179:5   [f2fs_gc-179:5]\n  301     2 kworker/3:2-eve [kworker/3:2-events]\n  303     2 kworker/u20:2-e [kworker/u20:2-events_unbound]\n  318     1 systemd-udevd   /usr/lib/systemd/systemd-udevd --resolve-names=late\n  355     2 kworker/u19:2   [kworker/u19:2]\n  361     2 kworker/u21:1-h [kworker/u21:1-hci0]\n  374     1 hal-backend-ser /usr/bin/hal/hal-backend-service --stub-proc-name d:\n  378     1 dlog_logger     /usr/bin/dlog_logger\n  395     1 amd             /usr/bin/amd\n  397     1 buxton2d        /usr/sbin/buxton2d -f\n  398     1 key-manager     /usr/bin/key-manager\n  399     1 esd             /usr/bin/esd\n  400     1 pkginfo-server  /usr/bin/pkginfo-server\n  401     1 resourced       /usr/bin/resourced\n  416     1 sensord         /usr/bin/sensord\n  423     1 contextd        /usr/bin/contextd\n  425     1 cynara          /usr/bin/cynara\n  426     2 kworker/R-ext4- [kworker/R-ext4-rsv-conversion]\n  427     1 deviced         /usr/bin/deviced\n  430     1 license-manager /usr/bin/license-manager-agent\n  436     1 media-server    /usr/bin/media-server\n  447     2 psimon          [psimon]\n  454     1 pipewire        /usr/bin/pipewire\n  456     1 pushd           /usr/bin/pushd\n  476     2 kworker/R-ext4- [kworker/R-ext4-rsv-conversion]\n  487     1 agetty          /sbin/agetty -o -p -- \\u --keep-baud 115200 ttyS0 vt\n  494     1 stability-monit /usr/sbin/stability-monitor\n  507     1 net-config      /usr/bin/net-config\n  550     1 connmand        /usr/bin/connmand -n --nobacktrace --noplugin vpn\n  555     1 bash            bash /usr/bin/enlightenment_mon.sh\n  564     1 rscmgr-service  /usr/bin/rscmgr-service\n  574     1 update-manager  /usr/bin/update-manager\n  617     1 security-manage /usr/bin/security-manager\n  624     1 storaged        /usr/bin/storaged\n  648     1 focus_server    /usr/bin/focus_server -S\n  654     1 systemd         /usr/lib/systemd/systemd --user\n  684   654 sh              /usr/bin/sh -c while [ ! -f /run/.wm_ready ] ; do /u\n  712   654 launchpad-proce /usr/bin/launchpad-process-pool\n  725   712 org.tizen.multi /usr/apps/org.tizen.multi-assistant-service/bin/org.\n  747     2 kworker/3:0H    [kworker/3:0H]\n  789   654 efl_config      /usr/bin/efl_config\n  811     1 lbs-server      /usr/bin/lbs-server\n  817     1 pass            /usr/bin/pass\n  958     1 sdbd            /usr/sbin/sdbd\n 1941     2 kworker/2:2-cgr [kworker/2:2-cgroup_pidlist_destroy]\n 5551     2 kworker/0:2H-kb [kworker/0:2H-kblockd]\n 5570     2 kworker/0:3-cgr [kworker/0:3-cgroup_pidlist_destroy]\n 5631     2 kworker/1:1-eve [kworker/1:1-events]\n 6998     2 kworker/0:0-eve [kworker/0:0-events_freezable_pwr_efficient]\n 9235     2 kworker/3:3-eve [kworker/3:3-events]\n10519     2 kworker/3:1-cgr [kworker/3:1-cgroup_pidlist_destroy]\n10553     2 kworker/2:1-eve [kworker/2:1-events_power_efficient]\n11393     2 kworker/2:2H-kb [kworker/2:2H-kblockd]\n11959     2 kworker/1:2-cgr [kworker/1:2-cgroup_free]\n13610     2 kworker/1:0H-kb [kworker/1:0H-kblockd]\n14529     2 kworker/0:2-cgr [kworker/0:2-cgroup_pidlist_destroy]\n15548     2 kworker/1:3-cgr [kworker/1:3-cgroup_pidlist_destroy]\n16228     2 kworker/0:0H-kb [kworker/0:0H-kblockd]\n19001     2 kworker/2:0-rcu [kworker/2:0-rcu_gp]\n19971     2 kworker/2:3-cgr [kworker/2:3-cgroup_pidlist_destroy]\n21595     2 kworker/1:0     [kworker/1:0]\n21611   555 sleep           sleep 3\n21640     1 sh              /bin/sh -c ( for p in /opt/afdo_agent/work/eval-*/st\n21642 21640 sh              /bin/sh -c ( for p in /opt/afdo_agent/work/eval-*/st\n21644 21642 ps              ps -eo pid,ppid,comm,args\n28145     2 kworker/0:1-rcu [kworker/0:1-rcu_gp]\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    345336    960280  27% /opt\n1500000\n4096\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:17:14.527898+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( free -m; uptime; df -k /opt ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "               total        used        free      shared  buff/cache   available\nMem:            1472         138        1009           0         345        1333\nSwap:            589          10         578\n 22:17:29 up 48 min,  0 users,  load average: 0.21, 0.78, 0.74\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    282072   1023544  22% /opt\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:17:15.873221+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf \"%s\\n\" schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:17:15.924194+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "rc": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T21:17:16.417223+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id; df -k /opt; for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$p\"; cat \"$p\"; done; rpm -qa | wc -l ); r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "rc": 0,
+    "stdout": "uid=5001(owner) gid=100(users) groups=29(audio),44(video),100(users),201(display),1901(log),6525(usb_device),10001(priv_externalstorage),10002(priv_externalstorage_appdata),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    282072   1023544  22% /opt\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n1232\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+]

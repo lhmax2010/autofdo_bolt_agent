@@ -1,0 +1,26 @@
+[
+  {
+    "case": "bad-hash",
+    "injected_bad_hash": true,
+    "error": "SHA/file-set mismatch; deletion forbidden: ['data.txt']",
+    "deletion_calls": [],
+    "result": null
+  },
+  {
+    "case": "good-hash",
+    "injected_bad_hash": false,
+    "error": null,
+    "deletion_calls": [
+      "/opt/afdo_agent/work/eval-injection"
+    ],
+    "result": {
+      "remote": "/opt/afdo_agent/work/eval-injection",
+      "host": "temp/board-round1-resume2/transfer-test/good-hash",
+      "files": {
+        "data.txt": "8b558b912e0558b37e871c78f8d520ae6f57fdf0bb49a1458a50a714062a1e60"
+      },
+      "all_verified_before_delete": true,
+      "deleted": true
+    }
+  }
+]

@@ -26,7 +26,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-05；恢复轮在root前依赖预检处停止）
+## 当前授权与执行状态（2026-11-05；RPi4恢复采集，真实avg在Thumb DWARF边界处停止）
+
+- 计划/裁决：预注册`7d3d9d9`与冻结v0.7逐字节不变。两段依赖预检按最新裁决登记：身份→非root系统命令→root→部署/SHA及perf版本→performance→采集。最终24项系统依赖通过，62文件/16目标SHA复验、新脚本/三视频SHA通过。首次nice/ionice补查发生在root后、governor前，随后24项完整非root检查通过；该时序偏差未隐去。[报告12第9节](profgen/impl/12_board_round1.md#9-两段预检后恢复真实-avg-在-gnu-as-的-thumb-dwarf-区间处停止)、[操作](profgen/impl/evidence/12/17_resume2_operations.json)、[依赖](profgen/impl/evidence/12/22_dependency_inventory.json)
+- 进度：7/70正式S已完整采集/拉回，目标样本合计827311；前6份正式工具sum转换verified、name_merged_functions=0，第7份高档Thumb spike仅原件留存、未转换。9份校准/流程原件另存，不入矩阵；训练0/14、LOST压力0、集成0/5。[逐RUN与SHA](profgen/impl/evidence/12/19_resume2_runs.json)
+- 已闭合流程：去cmp保留非空十进制整数失败门禁；安全拉回工具先全量文件集合/SHA、复查远端清单，再删确切RUN。坏哈希注入删除次数0、正确对照仅删确切模拟路径，8项主机回归通过。16RUN共1394板上文件验证后删除，完整原件和清单在temp/board-round1-resume2。[演练](profgen/impl/evidence/12/16_transfer_injection.json)、[测试/恢复](profgen/impl/evidence/12/21_resume2_restore_and_checks.json)
+- 当前阻塞/待人工裁决：首份中档Thumb FFmpeg完整导出sum/max成功，avg退出1/failure_stage=boundary：GNU AS2.43的libgcc __udivsi3/__divsi3子程序DWARF low_pc为0x341f29/0x3421a1，而指令起点为0x341f28/0x3421a0。正式工具原样取DWARF范围，冻结规则要求无法证明边界即整次失败；未授权对这种DWARF表示清位。保留GNU原文、实际样本及失败JSON，未改LLVM、未过滤函数/样本。候选为有证据约束的地址规范化并补设计/lit，或修正平台DWARF生产端；均须裁决，未实施。[原始证据](profgen/impl/evidence/12/20_real_avg_boundary_stop.json)、[代码/设计位置](profgen/impl/evidence/12/23_stop_scope_and_nonleaf.json)
+- 恢复：本次原uid5001/root off、policy0=schedutil，结束已恢复并回读；RPM1232→1232，/opt used282072KiB/available1023544KiB。uname-v与首次相同，uptime997.67秒支持中间同内核重启推断。板上总过程1943.965秒；host ALL-END FAILED表示按边界阻塞停止，不改写已成功RUN。[恢复证据](profgen/impl/evidence/12/21_resume2_restore_and_checks.json)
+- 挂账：LOST完整高丢样/真实avg均未关闭；nonleaf line0只有校准29/21736=0.133419%，全矩阵与top20未做。采集脚本漏存每RUN开始前scaling_max_freq，频率资格unknown；节流也unknown，按原预注册干净子集0，不能用事后1.5GHz替代。恢复前需补齐policy边界记录并保持完整非root依赖顺序。工具正式SHA334a0929…未改，无新profile消费构建/质量结论；等待上述边界裁决后再恢复剩余63采集与14训练、集成和主机分析。
+
+## 前轮授权与执行状态（2026-11-05；恢复轮在root前依赖预检处停止，历史）
 
 - 预注册7d3d9d9逐字节不变；最新7项执行流程裁决登记在[报告12第8节](profgen/impl/12_board_round1.md)。本地common.sh移除cmp、增加完整依赖与performance门禁、sysfs节流读取；7项RPM比较测试和全部bash-n通过，尚未部署。
 - 三项RPi4身份通过，23项依赖中22通过；/opt/afdo_agent/tools/perf的command-v失败，远端退出1。只读诊断显示当前uid5001(owner)，perf/libLLVM的ls与sha256sum均Permission denied，不能判为文件丢失。按“root前全部依赖通过，否则停止”未开root、未改governor、未执行perf。[预检](profgen/impl/evidence/12/13_resume_preflight.json)、[权限原文](profgen/impl/evidence/12/14_resume_stop.json)

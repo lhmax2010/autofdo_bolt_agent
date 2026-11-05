@@ -6,6 +6,8 @@ source "$HERE/common.sh"
 assert_board "${1:?board}"
 MODE=${2:?mode}; ID=${3:?variant}; MANIFEST=${4:?manifest}; INPUT=${5:?video or spike rounds}
 case "$MODE" in sample-fixed|sample-freq|lost|R|C|G5) ;; *) echo 'Unknown collection mode' >&2; exit 2 ;; esac
+REPEATS=${COLLECT_REPEATS:-1}
+[[ $REPEATS =~ ^[1-9][0-9]*$ && ${#REPEATS} -le 4 ]] || exit 2
 new_run
 load_variant "$MANIFEST" "$ID"
 case "$MODE:$STAGE" in sample-*:S|lost:S|R:R|C:C|G5:G5) ;; *) echo 'Wrong variant stage' >&2; exit 2 ;; esac
@@ -24,11 +26,15 @@ telemetry_loop & telemetry_pid=$!
 if [[ $OBJECT == ffmpeg ]]; then
     mkfifo "$RUN/frames.pipe"
     sha256sum "$RUN/frames.pipe" >"$RUN/decoded.sha256" & hash_pid=$!
+    exec 8>"$RUN/frames.pipe"
 fi
 command_for "$INPUT" "$RUN/frames.pipe"
 export LLVM_PROFILE_FILE="$RUN/$MODE-%m-%p.profraw"
 watch_maps "$RUN/target.pid" "$RUN/target.maps" "$TARGET" & maps_pid=$!
 LAUNCH=(/bin/bash -c 'printf "%s\n" "$$" >"$1"; shift; exec "$@"' _ "$RUN/target.pid" "${CMD[@]}")
+if (( REPEATS > 1 )); then
+    LAUNCH=(/bin/bash -c 'set -e; n=$1; shift; for ((i=0;i<n;i++)); do "$@"; done' _ "$REPEATS" "${LAUNCH[@]}")
+fi
 printf '%q ' "${LAUNCH[@]}" >"$RUN/command"; printf '\n' >>"$RUN/command"
 if [[ $MODE == sample-* || $MODE == lost ]]; then
     EVENT=(-e cycles -c 1000003)
@@ -53,6 +59,7 @@ else
     count=$(find "$RUN" -maxdepth 1 -name "$MODE-*.profraw" -type f | wc -l)
     [[ -n $count && $count -gt 0 ]] || { echo 'No profraw produced' >&2; exit 3; }
 fi
+exec 8>&-
 wait "$maps_pid"; maps_pid=
 if [[ -n $hash_pid ]]; then wait "$hash_pid"; hash_pid=; fi
 kill -TERM "$telemetry_pid"; wait "$telemetry_pid" 2>/dev/null || true
