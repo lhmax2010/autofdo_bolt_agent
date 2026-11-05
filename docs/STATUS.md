@@ -26,13 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-05；补丁8主机验收完成，板上尚未恢复）
+## 当前授权与执行状态（2026-11-05；补丁8主机验收完成，主机闭合并恢复剩余板上矩阵）
 
 - 最新PM裁决：IP规范化区间首地址N采用同指令别名N+1查询，原A缓存/计数键不变；两次叶子文件/行/discriminator不一致则generate失败并给出原文。此项修改冻结5.4.2/5.7.2执行细节，待设计v0.8登记及外部评审，v0.7正文不改。[报告13第5节](profgen/impl/13_patch8_thumb_dwarf.md)
 - 补丁8 LLVM本地`cd5168c48b5422a50829259fd43e84cc3edd6694`；21文件+492/-23；0008已导出并反向应用检查通过。GBS退出0、791秒/113步；正式lit84 PASS、1 UNSUPPORTED、1 XFAIL、0 FAIL；C1两遍各636条0差异；14份导出各两遍profile与补丁7逐字节相同。正式工具SHA `41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413`。原spec本地测试改动未提交，src/llvm干净。[正式证据](profgen/impl/evidence/13/12_formal_build.json)、[审计](profgen/impl/evidence/13/17_commit_audit.json)
-- 当前进度：旧8/70正式S及1,259,104目标样本保持；尚未使用正式新工具重转换。开发版真实libavcodec规范化33区间、sum2/avg3别名查询一致性通过，正式数据结果仍待报告12。真实avg、06完整LOST、全量nonleaf line0、训练与集成挂账未关闭。
-- 板上本阶段未连接、未改root/governor；保留不完整RUN `/opt/afdo_agent/work/eval-20261105T232305-7773`。下一步按身份/非root依赖/root清单拉回核验后才能删；清单失败必须停。最近确认状态root off、schedutil、RPM1232。预注册7d3d9d9与修订1不改。
-- 下一步：正式S重转换与真实avg核对；随后处理不完整RUN并恢复剩余采集，预计板上4–5小时。SDB再次掉线按中断处理、最多一次重连；任何真实别名一致性失败停止。Agent开发不开始。
+- 已闭合主机验收：全部8份正式S以新工具转换verified、name_merged_functions=0，target1,259,104/usable1,023,185；FFmpeg每份33规范化区间，sum别名共3次一致，中档usable+1。真实avg保持原3热点、11,525指令/715键，GNU独立sum/max/avg零差异，关闭真实avg挂账。52个GNU告警定位DWARF5汇编CU，不影响热点C CU。[报告12第12节](profgen/impl/12_board_round1.md)、[独立证据](profgen/impl/evidence/12/31_real_avg_independent.json)
+- 已有正式数据nonleaf line0=88，target占0.0069891%、usable占0.0086006%，涉及3个顶层函数；只覆盖当前8份，处理规则仍待裁决。06完整LOST、剩余矩阵、训练与5集成尚未完成。
+- 原中断RUN已root下成功核验599文件、拉回复核后删确切目录，排除正式矩阵。预检结束root off、schedutil、RPM1232、/opt used293332KiB/available1012284KiB。HUP伪成功及SHA子命令失败传播门禁已修，主机5项trap+9项传输回归通过。[收据](profgen/impl/evidence/12/35_partial_run_receipt.json)
+- **当前板上矩阵正在后台运行**：temp/board-round1-patch8/worker.py；已重新开root并固定performance，结束/失败必须恢复原uid5001/schedutil，不能把上面的预检恢复当成最终恢复。原8组保留，其余按短RUN分段累计，不改预算/预注册；预计4–5小时。每600秒资源记录，真实内核必须不变。SDB再掉线当前RUN排除，最多一次重连后停下。
+- 下一步：监测剩余矩阵、训练；完成LOST压力与5集成、全量nonleaf统计/profraw合并，逐阶段更新报告12与本状态。Agent开发不开始。
 
 ## 前轮授权与执行状态（2026-11-05；补丁8符号化契约停止，板上已恢复）
 

@@ -78,7 +78,11 @@ class SDB:
         links = self.shell('find ' + q + ' -type l -print')
         if links:
             raise ValueError('Remote symlink refused: ' + links)
-        return self.shell('find ' + q + ' -type f -exec sha256sum {} \\;')
+        # Batched -exec propagates a failed SHA child to find's exit status;
+        # the semicolon form can return success despite unreadable files.
+        script = 'for f; do sha256sum -- "$f" || exit; done'
+        return self.shell('find ' + q + ' -type f -exec /bin/bash -c ' +
+                          shlex.quote(script) + ' _ {} +')
 
 
 def main():

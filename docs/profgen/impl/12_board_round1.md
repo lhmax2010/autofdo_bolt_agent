@@ -374,3 +374,47 @@ FFmpeg中档前5个受影响顶层函数及样本：ff_h264_filter_mb1650、deco
 真实avg与LOST挂账均未关闭；GNU bad-file-number的CU定位待真实avg续做。全体正式nonleaf line0/top20未完成，不能把旧排除校准的29/21736（0.133419%）当成正式汇总。5个集成用例未执行，无新结论；R/C/G5训练及profdata合并未做。
 
 待设计v0.8登记：修订1有效频率资格规则；Thumb普通line0证据及不同ISA的target/usable差异；补丁8区间规范化裁决；新发现的“正行号但缺函数名”符号化契约需决定，尚未自行扩充冻结规则。执行流程还需修复SDB中断的trap伪成功；失败清单不得触发删除。本轮无需任何新权限、凭据或安装；正式工具/设计未改，未推LLVM/Gerrit。
+
+
+## 12. 补丁8完成后的主机验收与中断RUN恢复
+
+补丁8已正式验收并由结果仓库提交41e0be8归档；LLVM提交、新工具SHA、正式GBS/lit/C1与14份旧导出重放见[报告13第6节](13_patch8_thumb_dwarf.md)。本节不覆盖旧7份/9份排除原件；第8份A32高档也保留原件，新产物另存temp/board-round1-patch8/converted。
+
+### 12.1 八份已完成正式S的重转换
+
+正式新工具SHA `41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413`。8份全部conversion=ok、identity=verified、name_merged_functions=0；目标样本仍合计1,259,104，usable合计1,023,185。[逐RUN命令、身份、各层计数、ISA、区间/别名与SHA](evidence/12/30_patch8_reconversion.json)。
+
+| RUN | target | usable | in_func_no_line | outside_dwarf_func | 规范化区间/别名查询 |
+|---|---:|---:|---:|---:|---:|
+| formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1 | 108145 | 64929 | 11074 | 32142 | 33 / 2 |
+| formal2-ffmpeg-thumb-S-sample-fixed-bbb-20000-r1-s1 | 36155 | 21532 | 3720 | 10903 | 33 / 1 |
+| formal2-spike-a32-S-sample-fixed-bbb-100000-r1-s1 | 106567 | 106287 | 280 | 0 | 0 / 0 |
+| formal2-spike-a32-S-sample-fixed-bbb-20000-r1-s1 | 21347 | 21291 | 56 | 0 | 0 / 0 |
+| formal2-spike-thumb-S-sample-fixed-bbb-100000-r1-s1 | 106875 | 72762 | 34113 | 0 | 0 / 0 |
+| formal2-spike-thumb-S-sample-fixed-bbb-20000-r1-s1 | 21561 | 14846 | 6715 | 0 | 0 / 0 |
+| formal2-spike-thumb-S-sample-fixed-bbb-400000-r1-s1 | 426661 | 290816 | 135845 | 0 | 0 / 0 |
+| spike-a32-S-sample-fixed-bbb-400000-r1-s1 | 431793 | 430722 | 1071 | 0 | 0 / 0 |
+
+FFmpeg两份各有33个GNU AS规范化区间（含别名DIE，不是33个互不相交的函数）；spike六份均为0。中档别名地址0x341f28→0x341f29（__udivsi3）与0x342434→0x342435（原查询误归__divsi3，正确为__aeabi_idivmod），低档只触发后者；三次叶子文件/行/discriminator全部一致。中档usable较补丁7增加1、outside减少1；低档分类总数不变，但相邻函数首地址归属纠正。范围名单含__divsi3，即使该份sum未采到其首地址也记录规范化事实。旧高档Thumb与新高档A32此前未转换，没有伪造旧值对比。
+
+### 12.2 真实avg独立核对闭合
+
+保持原选中的中档BBB Thumb RUN和前三热点：decode_cabac_residual_nondc_internal、ff_h264_decode_mb_cabac、loop_filter（完整唯一链接名见证据）。GNU objdump提取1892、8457、1176个起点，合计11,525；715个有样本聚合键（51/495/169）。GNU addr2line负责叶子行表，GNU readelf负责DIE范围、声明行与内联调用点的call_line/GNU_discriminator，独立计算n(k)、duplication和分子，再按设计取整。sum/max/avg每种715键，键集合双向相等、数值差异0。**关闭真实avg上板核对挂账**，不把本次输入外的函数或无样本键纳入这项结论。[逐键手算数据、原始工具命令位置、耗时/RSS](evidence/12/31_real_avg_independent.json)，[独立计算脚本](evidence/12/36_inline_keys_formal.py)。
+
+GNU bad-file-number警告并非三个热点CU损坏：原ELF377个CU中52个为DWARF5汇编CU；临时诊断副本逐一只保留一个原始CU（清除过期debug_aranges），52个各复现一次告警，均为文件表从0编号的汇编CU。热点所属h264_cabac.c/h264_slice.c（DWARF4）单独查询无警告，原文件不修改。GNU rawline及LLVM原始行表均可列出这些汇编条目；本次715键计算没有借用LLVM symbolizer或dwarfdump补值。逐CU原文留temp/profgen-patch8/independent-avg/cu-isolation.json，CU清单和原文摘录见证据。诊断中还发现GNU addr2line把叶子discriminator重复打印到祖先帧，不能直接当调用点discriminator；以GNU readelf的原始DIE调用点属性独立构造键后才进行验收，未按profgen输出反抄。
+
+### 12.3 非叶子line0（当前八份，不代替未完成矩阵）
+
+usable_nonleaf_line_zero合计88：中档FFmpeg67、低档FFmpeg21，其余6份spike为0；占target 0.0069891%，占usable 0.0086006%。按顶层函数汇总：ff_h264_decode_mb_cabac 82、ff_h264_filter_mb 5、ff_h264_queue_decode_slice 1（不足20项则全部列出）。另存实际line0帧函数与地址，使用同配置DWARF-only查询对照正式工具诊断，计数一致。这里只报告观测，处理规则仍待PM决定。[分解](evidence/12/32_formal_nonleaf.json)、[诊断源码](evidence/12/36_nonleaf.cpp)。
+
+### 12.4 中断目录安全收尾与继续采集
+
+新一轮身份/内核断言通过，非root依赖全部通过后开root。重新读取原不完整目录`/opt/afdo_agent/work/eval-20261105T232305-7773`：本次SHA可读，599文件拉回、主机全量SHA与文件集合一致、再读板上清单一致后，才删除该确切目录。标为“中断，不计入正式矩阵”；旧ALL-END OK仍不作为成功证据。[收尾结果](evidence/12/33_partial_run_recovery.json)、[原始操作](evidence/12/34_partial_run_operations.jsonl)、[599文件SHA收据](evidence/12/35_partial_run_receipt.json)。此预检阶段40.406秒，未改governor；root恢复uid5001，schedutil、RPM1232；/opt used293332KiB、available1012284KiB。
+
+HUP/TERM/早退收尾修复：只有finish_run完成且run_complete=1才能写OK，提前exit0也变为退出1/FAILED；5项信号/退出模拟全部通过。SHA清单改为find批量-exec，使子进程sha256sum失败传播为非0，避免分号形式的find掩盖读失败；9项主机拉回门禁回归通过（含坏哈希不删除与清单SHA命令失败）。[门禁证据](evidence/12/37_recovery_gates.json)。
+
+恢复剩余矩阵前再次核对已部署文件/脚本/三视频SHA，性能采集仍在performance设置后执行；长高档预算按每段最多约15万目标样本、FFmpeg最多3次解码分段累计，逻辑预算和5次独立采集不变。预计剩余板上4–5小时；运行于temp/board-round1-patch8/worker.py，600秒资源记录，原8份逻辑组不重采。当前正在恢复，最终结果/恢复状态在下一节续记；不把当前运行状态写成最终完成。
+
+### 待设计v0.8登记（本次执行流程补充）
+
+同指令别名与一致性失败契约见报告13；真实avg独立验收已通过。断线RUN收尾必须以真实退出码和全量核验为准；SHA子命令失败须透传，任何提前退出不得写OK。分段只用于空间/连接稳定性，不改变预注册预算、ε、轮数或异常判据。

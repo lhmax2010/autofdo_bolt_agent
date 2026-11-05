@@ -1,0 +1,72 @@
+{
+  "traps": [
+    {
+      "case": "complete",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "set -Eeuo pipefail\nRUN=$1\nhash_pid=; maps_pid=; telemetry_pid=; run_complete=0\ncleanup() {\n    rc=$?\n    trap - EXIT HUP INT TERM\n    # A disconnected shell may arrive at EXIT with rc=0 before record returns.\n    # Only the completed, verified finish path may publish success.\n    (( rc != 0 || run_complete == 1 )) || rc=1\n    [[ -z $telemetry_pid ]] || { kill -TERM \"$telemetry_pid\" 2>/dev/null || true; wait \"$telemetry_pid\" 2>/dev/null || true; }\n    [[ -z $hash_pid ]] || { kill -TERM \"$hash_pid\" 2>/dev/null || true; wait \"$hash_pid\" 2>/dev/null || true; }\n    [[ -z $maps_pid ]] || { kill -TERM \"$maps_pid\" 2>/dev/null || true; wait \"$maps_pid\" 2>/dev/null || true; }\n    [[ ! -p $RUN/frames.pipe ]] || rm \"$RUN/frames.pipe\"\n    printf 'EXIT %s\\nALL-END %s %s\\n' \"$rc\" \"$(date -Ins)\" \"$([[ $rc == 0 ]] && echo OK || echo FAILED)\" >>\"$RUN/status\"\n    exit \"$rc\"\n}\ntrap cleanup EXIT\ntrap 'exit 129' HUP\ntrap 'exit 130' INT\ntrap 'exit 143' TERM\n\nrun_complete=1",
+        "_",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/board-trap-test/complete"
+      ],
+      "exit": 0,
+      "status": "EXIT 0\nALL-END 2026-11-05T23:28:02,960807981+08:00 OK\n",
+      "stderr": ""
+    },
+    {
+      "case": "early-exit",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "set -Eeuo pipefail\nRUN=$1\nhash_pid=; maps_pid=; telemetry_pid=; run_complete=0\ncleanup() {\n    rc=$?\n    trap - EXIT HUP INT TERM\n    # A disconnected shell may arrive at EXIT with rc=0 before record returns.\n    # Only the completed, verified finish path may publish success.\n    (( rc != 0 || run_complete == 1 )) || rc=1\n    [[ -z $telemetry_pid ]] || { kill -TERM \"$telemetry_pid\" 2>/dev/null || true; wait \"$telemetry_pid\" 2>/dev/null || true; }\n    [[ -z $hash_pid ]] || { kill -TERM \"$hash_pid\" 2>/dev/null || true; wait \"$hash_pid\" 2>/dev/null || true; }\n    [[ -z $maps_pid ]] || { kill -TERM \"$maps_pid\" 2>/dev/null || true; wait \"$maps_pid\" 2>/dev/null || true; }\n    [[ ! -p $RUN/frames.pipe ]] || rm \"$RUN/frames.pipe\"\n    printf 'EXIT %s\\nALL-END %s %s\\n' \"$rc\" \"$(date -Ins)\" \"$([[ $rc == 0 ]] && echo OK || echo FAILED)\" >>\"$RUN/status\"\n    exit \"$rc\"\n}\ntrap cleanup EXIT\ntrap 'exit 129' HUP\ntrap 'exit 130' INT\ntrap 'exit 143' TERM\n\nexit 0",
+        "_",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/board-trap-test/early-exit"
+      ],
+      "exit": 1,
+      "status": "EXIT 1\nALL-END 2026-11-05T23:28:02,965926010+08:00 FAILED\n",
+      "stderr": ""
+    },
+    {
+      "case": "failure",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "set -Eeuo pipefail\nRUN=$1\nhash_pid=; maps_pid=; telemetry_pid=; run_complete=0\ncleanup() {\n    rc=$?\n    trap - EXIT HUP INT TERM\n    # A disconnected shell may arrive at EXIT with rc=0 before record returns.\n    # Only the completed, verified finish path may publish success.\n    (( rc != 0 || run_complete == 1 )) || rc=1\n    [[ -z $telemetry_pid ]] || { kill -TERM \"$telemetry_pid\" 2>/dev/null || true; wait \"$telemetry_pid\" 2>/dev/null || true; }\n    [[ -z $hash_pid ]] || { kill -TERM \"$hash_pid\" 2>/dev/null || true; wait \"$hash_pid\" 2>/dev/null || true; }\n    [[ -z $maps_pid ]] || { kill -TERM \"$maps_pid\" 2>/dev/null || true; wait \"$maps_pid\" 2>/dev/null || true; }\n    [[ ! -p $RUN/frames.pipe ]] || rm \"$RUN/frames.pipe\"\n    printf 'EXIT %s\\nALL-END %s %s\\n' \"$rc\" \"$(date -Ins)\" \"$([[ $rc == 0 ]] && echo OK || echo FAILED)\" >>\"$RUN/status\"\n    exit \"$rc\"\n}\ntrap cleanup EXIT\ntrap 'exit 129' HUP\ntrap 'exit 130' INT\ntrap 'exit 143' TERM\n\nexit 7",
+        "_",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/board-trap-test/failure"
+      ],
+      "exit": 7,
+      "status": "EXIT 7\nALL-END 2026-11-05T23:28:02,969631667+08:00 FAILED\n",
+      "stderr": ""
+    },
+    {
+      "case": "hup",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "set -Eeuo pipefail\nRUN=$1\nhash_pid=; maps_pid=; telemetry_pid=; run_complete=0\ncleanup() {\n    rc=$?\n    trap - EXIT HUP INT TERM\n    # A disconnected shell may arrive at EXIT with rc=0 before record returns.\n    # Only the completed, verified finish path may publish success.\n    (( rc != 0 || run_complete == 1 )) || rc=1\n    [[ -z $telemetry_pid ]] || { kill -TERM \"$telemetry_pid\" 2>/dev/null || true; wait \"$telemetry_pid\" 2>/dev/null || true; }\n    [[ -z $hash_pid ]] || { kill -TERM \"$hash_pid\" 2>/dev/null || true; wait \"$hash_pid\" 2>/dev/null || true; }\n    [[ -z $maps_pid ]] || { kill -TERM \"$maps_pid\" 2>/dev/null || true; wait \"$maps_pid\" 2>/dev/null || true; }\n    [[ ! -p $RUN/frames.pipe ]] || rm \"$RUN/frames.pipe\"\n    printf 'EXIT %s\\nALL-END %s %s\\n' \"$rc\" \"$(date -Ins)\" \"$([[ $rc == 0 ]] && echo OK || echo FAILED)\" >>\"$RUN/status\"\n    exit \"$rc\"\n}\ntrap cleanup EXIT\ntrap 'exit 129' HUP\ntrap 'exit 130' INT\ntrap 'exit 143' TERM\n\nkill -HUP $$",
+        "_",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/board-trap-test/hup"
+      ],
+      "exit": 129,
+      "status": "EXIT 129\nALL-END 2026-11-05T23:28:02,972346108+08:00 FAILED\n",
+      "stderr": ""
+    },
+    {
+      "case": "term",
+      "command": [
+        "/bin/bash",
+        "-c",
+        "set -Eeuo pipefail\nRUN=$1\nhash_pid=; maps_pid=; telemetry_pid=; run_complete=0\ncleanup() {\n    rc=$?\n    trap - EXIT HUP INT TERM\n    # A disconnected shell may arrive at EXIT with rc=0 before record returns.\n    # Only the completed, verified finish path may publish success.\n    (( rc != 0 || run_complete == 1 )) || rc=1\n    [[ -z $telemetry_pid ]] || { kill -TERM \"$telemetry_pid\" 2>/dev/null || true; wait \"$telemetry_pid\" 2>/dev/null || true; }\n    [[ -z $hash_pid ]] || { kill -TERM \"$hash_pid\" 2>/dev/null || true; wait \"$hash_pid\" 2>/dev/null || true; }\n    [[ -z $maps_pid ]] || { kill -TERM \"$maps_pid\" 2>/dev/null || true; wait \"$maps_pid\" 2>/dev/null || true; }\n    [[ ! -p $RUN/frames.pipe ]] || rm \"$RUN/frames.pipe\"\n    printf 'EXIT %s\\nALL-END %s %s\\n' \"$rc\" \"$(date -Ins)\" \"$([[ $rc == 0 ]] && echo OK || echo FAILED)\" >>\"$RUN/status\"\n    exit \"$rc\"\n}\ntrap cleanup EXIT\ntrap 'exit 129' HUP\ntrap 'exit 130' INT\ntrap 'exit 143' TERM\n\nkill -TERM $$",
+        "_",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/board-trap-test/term"
+      ],
+      "exit": 143,
+      "status": "EXIT 143\nALL-END 2026-11-05T23:28:02,976967979+08:00 FAILED\n",
+      "stderr": ""
+    }
+  ],
+  "transfer_tests": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.010s\n\nOK\n",
+  "incomplete_classification": "interrupted, excluded; verified 599 files before exact deletion",
+  "scope": "No governor change during partial-RUN recovery; root restored off before matrix resume"
+}

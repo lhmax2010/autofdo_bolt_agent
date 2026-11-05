@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 from pathlib import Path
 import tempfile
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -54,6 +55,27 @@ class VerifiedTransfer(unittest.TestCase):
     def test_manifest_path_escape_is_rejected(self):
         with self.assertRaises(ValueError):
             transfer.parse_manifest('0' * 64 + '  /opt/afdo_agent/work/eval-x/../outside\n', '/opt/afdo_agent/work/eval-x')
+
+    def test_manifest_sha_failure_propagates(self):
+        # Run the actual manifest shell command locally with one failing SHA
+        # command. No board connection or deletion is performed.
+        class LocalSDB(transfer.SDB):
+            def shell(self, command):
+                if command.startswith('readlink -f '):
+                    return str(directory)
+                if command.endswith('-type l -print'):
+                    return ''
+                setup = 'sha256sum() { return 17; }; export -f sha256sum; '
+                p = subprocess.run(['/bin/bash', '-c', setup + command],
+                                   text=True, capture_output=True)
+                if p.returncode:
+                    raise RuntimeError('SHA failed: ' + str(p.returncode))
+                return p.stdout.strip()
+        with tempfile.TemporaryDirectory(prefix='manifest-test-', dir=ROOT/'temp/tmp') as name:
+            directory = Path(name)
+            (directory/'data').write_text('test')
+            with self.assertRaisesRegex(RuntimeError, 'SHA failed'):
+                LocalSDB('host-only').manifest(str(directory))
 
 
 if __name__ == '__main__':

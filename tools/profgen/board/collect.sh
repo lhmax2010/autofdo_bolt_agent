@@ -11,17 +11,24 @@ REPEATS=${COLLECT_REPEATS:-1}
 new_run
 load_variant "$MANIFEST" "$ID"
 case "$MODE:$STAGE" in sample-*:S|lost:S|R:R|C:C|G5:G5) ;; *) echo 'Wrong variant stage' >&2; exit 2 ;; esac
-hash_pid=; maps_pid=; telemetry_pid=
+hash_pid=; maps_pid=; telemetry_pid=; run_complete=0
 cleanup() {
     rc=$?
-    trap - EXIT
+    trap - EXIT HUP INT TERM
+    # A disconnected shell may arrive at EXIT with rc=0 before record returns.
+    # Only the completed, verified finish path may publish success.
+    (( rc != 0 || run_complete == 1 )) || rc=1
     [[ -z $telemetry_pid ]] || { kill -TERM "$telemetry_pid" 2>/dev/null || true; wait "$telemetry_pid" 2>/dev/null || true; }
     [[ -z $hash_pid ]] || { kill -TERM "$hash_pid" 2>/dev/null || true; wait "$hash_pid" 2>/dev/null || true; }
     [[ -z $maps_pid ]] || { kill -TERM "$maps_pid" 2>/dev/null || true; wait "$maps_pid" 2>/dev/null || true; }
     [[ ! -p $RUN/frames.pipe ]] || rm "$RUN/frames.pipe"
     printf 'EXIT %s\nALL-END %s %s\n' "$rc" "$(date -Ins)" "$([[ $rc == 0 ]] && echo OK || echo FAILED)" >>"$RUN/status"
+    exit "$rc"
 }
 trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
 telemetry_loop & telemetry_pid=$!
 if [[ $OBJECT == ffmpeg ]]; then
     mkfifo "$RUN/frames.pipe"
@@ -65,3 +72,4 @@ if [[ -n $hash_pid ]]; then wait "$hash_pid"; hash_pid=; fi
 kill -TERM "$telemetry_pid"; wait "$telemetry_pid" 2>/dev/null || true
 telemetry_pid=
 finish_run
+run_complete=1
