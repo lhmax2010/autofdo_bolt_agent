@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "cat /proc/device-tree/model; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "time": "2026-11-05T20:07:42.130871+08:00",
+    "transport_rc": 0,
+    "stdout": "Raspberry Pi 4 Model B Rev 1.5\u0000\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "uname -m; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "time": "2026-11-05T20:07:42.253353+08:00",
+    "transport_rc": 0,
+    "stdout": "armv7l\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "uname -r; r=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$r\""
+    ],
+    "time": "2026-11-05T20:07:42.379246+08:00",
+    "transport_rc": 0,
+    "stdout": "6.12.80-arm-rpi4-v7l\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+]

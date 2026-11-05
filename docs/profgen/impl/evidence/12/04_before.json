@@ -1,0 +1,44 @@
+[
+  {
+    "command": "id",
+    "transport_rc": 0,
+    "stdout": "uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": "df -h /opt; df -k /opt",
+    "transport_rc": 0,
+    "stdout": "Filesystem            Size  Used Avail Use% Mounted on\n/dev/mmcblk0p3        1.3G   33M  1.3G   3% /opt\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696     33376   1272240   3% /opt\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": "rpm -qa | wc -l",
+    "transport_rc": 0,
+    "stdout": "1232\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": "findmnt -T /opt",
+    "transport_rc": 0,
+    "stdout": "TARGET SOURCE         FSTYPE OPTIONS\n/opt   /dev/mmcblk0p3 ext4   rw,relatime\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": "uname -a; cat /proc/version; cat /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict",
+    "transport_rc": 0,
+    "stdout": "Linux localhost 6.12.80-arm-rpi4-v7l #1 SMP Wed Nov  4 17:05:36 UTC 2026 armv7l GNU/Linux\nLinux version 6.12.80-arm-rpi4-v7l (abuild@ip-192-168-56-171) (clang version 22.1.8, LLD 22.1.8) #1 SMP Wed Nov  4 17:05:36 UTC 2026\n2\n0\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": "for f in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$f\"; cat \"$f\"; done",
+    "transport_rc": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "command": "ls -l /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1; sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1",
+    "transport_rc": 0,
+    "stdout": "ls: cannot access /opt/afdo_agent/tools/perf: No such file or directory\nls: cannot access /opt/afdo_agent/lib/libLLVM.so.22.1: No such file or directory\nsha256sum: /opt/afdo_agent/tools/perf: No such file or directory\nsha256sum: /opt/afdo_agent/lib/libLLVM.so.22.1: No such file or directory\n\n__REMOTE_RC=1\n",
+    "stderr": ""
+  }
+]

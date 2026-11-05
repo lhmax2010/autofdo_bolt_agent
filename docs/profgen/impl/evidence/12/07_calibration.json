@@ -1,0 +1,31 @@
+{
+  "sample_lines": 235,
+  "classification": {
+    "kernel": 8,
+    "other": 1,
+    "target": 226
+  },
+  "LOST_records": 0,
+  "source": "temp/board-round1/pulled/perfscript.txt",
+  "record_stderr": "[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.011 MB /opt/afdo_agent/work/eval-20261105T211027-3986/perf.data ]\nreal 1.29\nuser 0.33\nsys 0.34\n",
+  "status": "RECORD_EXIT 0\nEXIT 127\nALL-END 2026-11-05T21:10:30,994303712+0900 FAILED\n",
+  "evlist": "cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1\n",
+  "buildids": "322b4f1082e030032b3a85eb599e2bdfbe37797d /opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike\nc79c2b16c629ca821627425d9de5fca871a3d64c /usr/lib/libc.so.6\n395733b9c917cb98309b39cc3ec379c03ac36b3f [kernel.kallsyms]\n",
+  "mapping": "PID 4077 TARGET /opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike SHA c008a000f1b901539cfccc4038d2ad104d4765b727e49434c9cd3ee797b65133 EXPECTED_BUILD_ID 322b4f1082e030032b3a85eb599e2bdfbe37797d\n",
+  "workload": "rounds=10000 seed=0123456789abcdef checksum=cb93552eab3a7dfe\n",
+  "kernel_config": "unknown: no readable kernel configuration\n",
+  "target_sample_excerpt": [
+    "   4077/4077       1000003 cycles:            47073e (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x73e)",
+    "   4077/4077       1000003 cycles:            4708e0 (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x8e0)",
+    "   4077/4077       1000003 cycles:            4707ba (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x7ba)",
+    "   4077/4077       1000003 cycles:            47073e (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x73e)",
+    "   4077/4077       1000003 cycles:            47076a (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x76a)",
+    "   4077/4077       1000003 cycles:            4708ce (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x8ce)",
+    "   4077/4077       1000003 cycles:            47076a (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x76a)",
+    "   4077/4077       1000003 cycles:            47073e (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x73e)",
+    "   4077/4077       1000003 cycles:            47077a (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x77a)",
+    "   4077/4077       1000003 cycles:            4708ce (/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike+0x8ce)"
+  ],
+  "sample_pattern": "^\\s*-?\\d+/-?\\d+\\s+\\d+\\s+cycles:\\s+[0-9a-fA-F]+\\s+\\(",
+  "total_text_lines": 259
+}

@@ -26,11 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-05；RPi4第一轮预注册）
+## 当前授权与执行状态（2026-11-05；RPi4第一轮校准收尾缺工具处停止）
 
-- 已获仅RPi4采集/训练/集成授权，尚未查询或采集本轮板上数据。先提交推送[预注册](profgen/eval/preregistration.md)，commit时间为预注册时间；之后才开始认板。
-- 允许root与performance governor，开始记录、结束及失败恢复；不改perf_event_paranoid/kptr_restrict。仅Blender官方Tears of Steel作独立测试视频。具体异常阈值、70次S/14次训练矩阵、预算及固定seed已预注册；本轮不做质量分析或消费构建。
-- 本轮有明确授权的governor sysfs写入例外，其他板上文件只写/opt/afdo_agent。LLVM/正式工具/冻结设计不改，不推LLVM/Gerrit。
+- 已推送预注册 `7d3d9d9f9184bc2e0e2b94a479916a2d65f13463`（20:04:33+08），早于设备查询；阈值/预算/70次S与14次训练矩阵见[预注册](profgen/eval/preregistration.md)。仅RPi4授权、root/performance保存恢复、sysctl不改、官方ToS等裁决待v0.8登记。[报告12](profgen/impl/12_board_round1.md)
+- 三项身份通过，新内核6.12.80-arm-rpi4-v7l（Nov4构建）；16项payload SHA全通过。Thumb spike校准cycles硬件type0/config0、235样本（目标226）、运行ID正确；收尾common.sh调用板上不存在的cmp，真实退出127/ALL-END FAILED。按最高原则“缺工具就停下”停止，没有安装或绕过。正式70次S、14次训练及集成尚未开始；profgen未运行，无verified质量等级、非叶子line0与profdata结果。
+- 官方ToS下载与同参数60秒720p转码完成，SHA `280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1`，留temp/board-round1，未推视频。[输入证据](profgen/impl/evidence/12/09_media.json)
+- 已恢复governor=schedutil、root=原开启状态；RPM1232→1232，/opt最终used158064KiB、available1147552KiB，work为空，工具/变体/脚本保留。[操作原文](profgen/impl/evidence/12/08_operations.json)
+- 执行偏差如实保留：初始3秒权限探测在原governor下（排除正式数据）；SDB平铺目录导致首次哈希检查路径错误，外层shell未fail-closed仍删除了板上RUN，随后33/33主机文件与事先板上SHA一致，但违反“先验哈希后删除”顺序。[哈希证据](profgen/impl/evidence/12/06_pull_hashes.json)。不可用事后一致掩盖流程错误。
+- 待人工决定恢复执行：cmp依赖可改为带非空/数字校验的Bash计数比较（本轮未改），拉回/验证/删除必须合为显式fail-closed流程。节流工具缺失仍unknown，不事后放宽预注册。LOST完整导出、真实avg、非叶子line0等原挂账不关闭。LLVM/正式工具/冻结设计未改，Agent未开始。
 
 ## 前轮授权与执行状态（2026-11-04；评估准备与全部生成侧构建完成）
 

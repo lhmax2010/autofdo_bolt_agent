@@ -47,6 +47,18 @@ new_run() {
     df -h "$BASE" >"$RUN/df.before"
     uname -a >"$RUN/uname"
     uname -v >>"$RUN/uname"
+    cat /proc/version >"$RUN/proc-version"
+    if [[ -r /proc/config.gz ]]; then
+        sha256sum /proc/config.gz >"$RUN/kernel-config.sha256"
+    elif [[ -r /boot/config-$(uname -r) ]]; then
+        sha256sum "/boot/config-$(uname -r)" >"$RUN/kernel-config.sha256"
+    else
+        echo 'unknown: no readable kernel configuration' >"$RUN/kernel-config.sha256"
+    fi
+    cat /proc/swaps >"$RUN/swaps.before"
+    for z in /sys/block/zram*/mm_stat /sys/block/zram*/stat; do
+        [[ ! -r $z ]] || { printf '%s ' "$z"; cat "$z"; }
+    done >"$RUN/zram.before"
     cat /etc/os-release >"$RUN/os-release"
     [[ ! -r /etc/tizen-build.conf ]] || cat /etc/tizen-build.conf >"$RUN/tizen-build.conf"
     rpm -qa | wc -l >"$RUN/rpm-count.before"

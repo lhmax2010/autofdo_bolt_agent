@@ -1,0 +1,126 @@
+{
+  "tears_of_steel_720p.mov": {
+    "path": "temp/board-round1/tears_of_steel_720p.mov",
+    "size": 372178639,
+    "sha256": "efa9062d9cdb7a338e40ad530dfdf234806743f29ae6a1a136b97ece4e588e8f"
+  },
+  "tos_720p_h264_60s.mp4": {
+    "path": "temp/board-round1/tos_720p_h264_60s.mp4",
+    "size": 29964461,
+    "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1"
+  },
+  "source_url": "https://download.blender.org/demo/movies/ToS/tears_of_steel_720p.mov",
+  "license_url": "https://mango.blender.org/sharing/",
+  "license": "Creative Commons Attribution 3.0; film by Blender Foundation / Mango Open Movie Project",
+  "license_original_excerpt": "The proceedings and results of the Mango Open Movie project are being licensed under the Creative Commons Attribution 3.0 license.",
+  "soundtrack_copyright_note": "ToS/copyright.txt explicitly applies to Original Soundtrack files (BY-ND), not used as film license.",
+  "command": "nice -n 19 ionice -c3 ffmpeg -nostdin -hide_banner -loglevel warning -y -ss 300 -i temp/board-round1/tears_of_steel_720p.mov -t 60 -an -vf scale=1280:720,setsar=1,fps=30 -c:v libx264 -preset veryfast -profile:v high -pix_fmt yuv420p -b:v 4M -maxrate 4M -bufsize 8M -threads 2 -filter_threads 1 -movflags +faststart temp/board-round1/tos_720p_h264_60s.mp4",
+  "download_status": "DOWNLOAD_RC=0 END=2026-11-05T20:09:02,507602869+08:00\n",
+  "transcode_status": "TRANSCODE_RC=0 ALL-END 2026-11-05T20:09:35,621688977+08:00\n",
+  "transcode_stderr": "",
+  "ffprobe": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        "profile": "High",
+        "codec_type": "video",
+        "codec_tag_string": "avc1",
+        "codec_tag": "0x31637661",
+        "width": 1280,
+        "height": 720,
+        "coded_width": 1280,
+        "coded_height": 720,
+        "closed_captions": 0,
+        "film_grain": 0,
+        "has_b_frames": 2,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "16:9",
+        "pix_fmt": "yuv420p",
+        "level": 31,
+        "chroma_location": "left",
+        "field_order": "progressive",
+        "refs": 1,
+        "is_avc": "true",
+        "nal_length_size": "4",
+        "id": "0x1",
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "30/1",
+        "time_base": "1/15360",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 921600,
+        "duration": "60.000000",
+        "bit_rate": "3992258",
+        "bits_per_raw_sample": "8",
+        "nb_frames": "1800",
+        "extradata_size": 45,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0
+        },
+        "tags": {
+          "language": "eng",
+          "handler_name": "VideoHandler",
+          "vendor_id": "[0][0][0][0]",
+          "encoder": "Lavc60.31.102 libx264"
+        }
+      }
+    ],
+    "format": {
+      "filename": "temp/board-round1/tos_720p_h264_60s.mp4",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "60.000000",
+      "size": "29964461",
+      "bit_rate": "3995261",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2avc1mp41",
+        "encoder": "Lavf60.16.100"
+      }
+    }
+  },
+  "bbb_reference": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "profile": "High",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuv420p",
+        "level": 31,
+        "r_frame_rate": "30/1",
+        "bit_rate": "4000178"
+      }
+    ],
+    "format": {
+      "duration": "60.000000",
+      "size": "30023879",
+      "bit_rate": "4003183"
+    }
+  }
+}

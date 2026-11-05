@@ -1,0 +1,309 @@
+[
+  {
+    "time": "2026-11-05T20:09:02.700727+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "ls /sys/bus/event_source/devices/; for f in /proc/config.gz /boot/config-$(uname -r); do if [ -r \"$f\" ]; then sha256sum \"$f\"; fi; done; cat /proc/swaps; grep -E \"pswpin|pswpout\" /proc/vmstat; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "armv8_cortex_a72  breakpoint  kprobe  software\ttracepoint  uprobe\nFilename\t\t\t\tType\t\tSize\t\tUsed\t\tPriority\n/dev/zram0                              partition\t603196\t\t13980\t\t0\npswpin 423\npswpout 2878\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:09:03.183861+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:09:03.340681+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "mkdir -p /opt/afdo_agent/tools /opt/afdo_agent/lib /opt/afdo_agent/work /opt/afdo_agent/state; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:09:03.973040+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "temp/rpms/perf-extract/usr/bin/perf",
+      "/opt/afdo_agent/tools/perf"
+    ],
+    "rc": 0,
+    "stdout": "temp/rpms/perf-extract/usr/bin/perf   4873KB/s (2992296 bytes in 0.599s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:09:08.311490+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1",
+      "/opt/afdo_agent/lib/libLLVM.so.22.1"
+    ],
+    "rc": 0,
+    "stdout": "temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1   7627KB/s (33641876 bytes in 4.306s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:09:09.359350+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "sha256sum /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1; LD_LIBRARY_PATH=/opt/afdo_agent/lib HOME=/opt/afdo_agent/work TMPDIR=/opt/afdo_agent/work PERF_CONFIG=/opt/afdo_agent/work/perf.conf /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf\n49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1\nperf version 6.12.80\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:09:32.494242+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "mkdir -p /opt/afdo_agent/work/round1-preflight; export HOME=/opt/afdo_agent/work/round1-preflight TMPDIR=/opt/afdo_agent/work/round1-preflight PERF_CONFIG=/opt/afdo_agent/work/round1-preflight/perf.conf LD_LIBRARY_PATH=/opt/afdo_agent/lib; /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/round1-preflight/buildid record --buildid-mmap -e cycles -c 1000003 -a -o /opt/afdo_agent/work/round1-preflight/cycles.data -- sleep 3; r=$?; echo RECORD_RC=$r; if [ \"$r\" -eq 0 ]; then /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/round1-preflight/buildid evlist -v -i /opt/afdo_agent/work/round1-preflight/cycles.data; /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/round1-preflight/buildid report --stdio --header-only -i /opt/afdo_agent/work/round1-preflight/cycles.data; fi; test \"$r\" -eq 0; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.414 MB /opt/afdo_agent/work/round1-preflight/cycles.data ]\nRECORD_RC=0\ncycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, disabled: 1, inherit: 1, sample_id_all: 1, exclude_guest: 1\ndummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1\n# ========\n# captured on    : Thu Nov  5 21:09:46 2026\n# header version : 1\n# data offset    : 472\n# data size      : 433712\n# feat offset    : 434184\n# hostname : localhost\n# os release : 6.12.80-arm-rpi4-v7l\n# perf version : 6.12.80\n# arch : armv7l\n# nrcpus online : 4\n# nrcpus avail : 4\n# cpudesc : ARMv7 Processor rev 3 (v7l)\n# total memory : 1507996 kB\n# cmdline : /opt/afdo_agent/tools/perf record --buildid-mmap -e cycles -c 1000003 -a -o /opt/afdo_agent/work/round1-preflight/cycles.data -- sleep 3 \n# event : name = cycles, , id = { 6, 7, 8, 9 }, type = 0 (PERF_TYPE_HARDWARE), size = 136, config = 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq } = 1000003, sample_type = IP|TID|TIME|ID|CPU, read_format = ID|LOST, disabled = 1, inherit = 1, sample_id_all = 1, exclude_guest = 1\n# event : name = dummy:u, , id = { 10, 11, 12, 13 }, type = 1 (software), size = 136, config = 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq } = 1000003, sample_type = IP|TID|TIME|ID|CPU, read_format = ID|LOST, inherit = 1, exclude_kernel = 1, exclude_hv = 1, mmap = 1, comm = 1, task = 1, sample_id_all = 1, exclude_guest = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1, build_id = 1\n# CPU_TOPOLOGY info available, use -I to display\n# pmu mappings: armv8_cortex_a72 = 10, breakpoint = 5, kprobe = 8, software = 1, tracepoint = 2, uprobe = 9\n# CACHE info available, use -I to display\n# time of first sample : 0.000000\n# time of last sample : 0.000000\n# sample duration :      0.000 ms\n# armv8_cortex_a72 pmu capabilities: slots=0x00000000, threshold_max=0x00000000, bus_slots=0x00000000, bus_width=0x00000000\n# missing features: (null) BUILD_ID CPUID NUMA_TOPOLOGY BRANCH_STACK GROUP_DESC AUXTRACE STAT MEM_TOPOLOGY CLOCKID DIR_FORMAT COMPRESSED CPU_PMU_CAPS CLOCK_DATA HYBRID_TOPOLOGY \n# ========\n#\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:07.415479+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "temp/board-round1/payload.tar",
+      "/opt/afdo_agent/payload-round1.tar"
+    ],
+    "rc": 0,
+    "stdout": "temp/board-round1/payload.tar    8309KB/s (90511360 bytes in 10.637s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:12.534944+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "tar -xf /opt/afdo_agent/payload-round1.tar -C /opt/afdo_agent && rm /opt/afdo_agent/payload-round1.tar && while IFS=\"$(printf \"\\t\")\" read -r variant arch object stage program libdir target sha id; do echo \"$sha  $target\" | sha256sum -c - || exit 3; done < /opt/afdo_agent/eval-manifest.tsv; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-thumb-R/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-thumb-C/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-thumb-G5/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-S/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-R/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-C/bin/eval-spike: OK\n/opt/afdo_agent/variants/spike-a32-G5/bin/eval-spike: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavcodec.so.62.11.100: OK\n/opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavcodec.so.62.11.100: OK\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:12.631297+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "temp/board-round1/governor-start.sh",
+      "/opt/afdo_agent/state/round1-governor-start.sh"
+    ],
+    "rc": 0,
+    "stdout": "temp/board-round1/governor-start.sh   1KB/s (368 bytes in 0.199s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:12.892526+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "sh /opt/afdo_agent/state/round1-governor-start.sh; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor\tschedutil\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor\tperformance\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:13.052940+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/state/round1-governors.tsv",
+      "temp/board-round1/governors.before.tsv"
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/state/round1-governors.tsv   0KB/s (67 bytes in 0.133s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:16.596999+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "/bin/bash /opt/afdo_agent/scripts/collect.sh rpi4 sample-fixed spike-thumb-S /opt/afdo_agent/eval-manifest.tsv 10000; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/opt/afdo_agent/scripts/common.sh: line 143: cmp: command not found\n\n__REMOTE_RC=127\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:21.122612+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "ls -ld /opt/afdo_agent/work/eval-*; df -k /opt; cat /opt/afdo_agent/work/eval-*/status; tail -n 8 /opt/afdo_agent/work/eval-*/record.stderr; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "drwxrwxrwx 7 root root 4096 Nov  5 21:10 /opt/afdo_agent/work/eval-20261105T211027-3986\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    158576   1147040  13% /opt\nRECORD_EXIT 0\nEXIT 127\nALL-END 2026-11-05T21:10:30,994303712+0900 FAILED\n[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.011 MB /opt/afdo_agent/work/eval-20261105T211027-3986/perf.data ]\nreal 1.29\nuser 0.33\nsys 0.34\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:47.664740+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "while IFS=\"$(printf \"\\t\")\" read -r p old; do printf \"%s\\n\" \"$old\" >\"$p\" || exit 4; actual=$(cat \"$p\"); printf \"%s original=%s actual=%s\\n\" \"$p\" \"$old\" \"$actual\"; [ \"$actual\" = \"$old\" ] || exit 5; done < /opt/afdo_agent/state/round1-governors.tsv; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor original=schedutil actual=schedutil\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:47.740341+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:47.937720+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "id; command -v cmp; r=$?; echo CMP_LOOKUP_RC=$r; ps -eo pid,ppid,comm,args | grep -E \"[c]ollect.sh|[e]val-spike|[p]erf record|[t]elemetry\"; true; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nCMP_LOOKUP_RC=1\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:48.254721+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "cd /opt/afdo_agent/work && find round1-preflight eval-20261105T211027-3986 -type f -exec sha256sum {} \\; > /opt/afdo_agent/state/round1-files.sha256 && cat /opt/afdo_agent/state/round1-files.sha256; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "70962bf2c110a4fd559befac6cb86d31cbb0bad9e7824d48e36217a8bb1425e4  round1-preflight/cycles.data\n0aef68cc8ffe338d4314382644b3c7a2d9aa34cdf58998314cafc39a3f666214  eval-20261105T211027-3986/df.before\n3830ce403d6f7f93776df43198ebf1695c028bea4462c0510a6099d325d6780a  eval-20261105T211027-3986/target.pid\n70bc33a10294203b7ebd5d17d5ca242552f876f3826249e92be7b69fd7db4f15  eval-20261105T211027-3986/record.stderr\n4d16211c0198068a03945488f49509574256d838f1cb8a5c446d9f8ae92c6a40  eval-20261105T211027-3986/target.maps\n340d4955c8a5d94025a2a5841528ef77752944ad80cffb1e10192dd9c64ab520  eval-20261105T211027-3986/perfscript.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  eval-20261105T211027-3986/buildid-list.stderr\n09b1c87706a4a980916808861a812cc986f40031ac1454d729826cfc93fe19b0  eval-20261105T211027-3986/perf.data\nb34f18f0f410292d01ab5d5c21efe51ce9384d2e37b3603f91d6627a83d73a08  eval-20261105T211027-3986/workload.stdout\n9d135535870b2358153499213be650a92aa06bef7bdfeef4fdf01fdf2fdc1c5e  eval-20261105T211027-3986/rpm-count.before\n8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60  eval-20261105T211027-3986/uname\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  eval-20261105T211027-3986/evlist.stderr\n06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab  eval-20261105T211027-3986/proc-version\n9d135535870b2358153499213be650a92aa06bef7bdfeef4fdf01fdf2fdc1c5e  eval-20261105T211027-3986/rpm-count.after\n0aef68cc8ffe338d4314382644b3c7a2d9aa34cdf58998314cafc39a3f666214  eval-20261105T211027-3986/df.after\n174e655d58ee848b8b935a20fa16c0bf8777959cca0f46234cd182acdd23bb7c  eval-20261105T211027-3986/command\nb9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0  eval-20261105T211027-3986/kernel-config.sha256\n7f691f7ec74a1009d4a336c9da6481174b4ea12911b7fe3e271dc7884fe7aca6  eval-20261105T211027-3986/environment.after\nee393988d2825f47a756a5d88b9307a93947b3c7043401f9a71c91cba4a320ee  eval-20261105T211027-3986/buildid-list.txt\nd56e5c48cafb58516a3e93a50d12bd996e3c111eb4caba2046f10b16a298eb63  eval-20261105T211027-3986/environment.before\nc28ef95c308c8ff3583ee36432e236a163ec365adf40ec940dfb1d916ad24b25  eval-20261105T211027-3986/telemetry/0.txt\nb00ed66125deecd92e5db0f125d26b3aa1788d83a4813df4fb71b8aa49bef924  eval-20261105T211027-3986/telemetry/2.txt\nf142b976d12aceb72e7bae05c02bfd9476a9e4817ff2d6d54e16d59df5fe1944  eval-20261105T211027-3986/telemetry/1.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  eval-20261105T211027-3986/lost-excerpt.txt\nc856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372  eval-20261105T211027-3986/evlist.txt\n726ebe52cad62bba1db5286722d9257154e0b6abf671c94574dbd04f637a28fe  eval-20261105T211027-3986/os-release\n945748097fe5f625c4d612190d126ca3402d872695414809f5e245899bff78ec  eval-20261105T211027-3986/zram.before\n48160f69f012ec41d147d9c5a203cac39e932895fa3275e16c3392494fe12e51  eval-20261105T211027-3986/status\n2858cf29e10a32824df4fab0487259525fe20b1205ed3f537187440624b10a6b  eval-20261105T211027-3986/target.maps.verified\nc7c8fff35e0aa13c4fca2e5889de3c247724f51e16790ce936b0480aa33db26d  eval-20261105T211027-3986/tizen-build.conf\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  eval-20261105T211027-3986/perfscript.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  eval-20261105T211027-3986/perf.conf\n6b28928395fe812ae348fa0a9b6bda315635309f839bfc8fd3ffb3f4c9583e29  eval-20261105T211027-3986/swaps.before\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:48.518299+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/round1-preflight",
+      "temp/board-round1/pulled/"
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/work/round1-preflight   1844KB/s (437736 bytes in 0.231s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:50.394650+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/eval-20261105T211027-3986",
+      "temp/board-round1/pulled/"
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/work/eval-20261105T211027-3986   42KB/s (80866 bytes in 1.846s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:10:50.569192+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/state/round1-files.sha256",
+      "temp/board-round1/round1-files.sha256"
+    ],
+    "rc": 0,
+    "stdout": "/opt/afdo_agent/state/round1-files.sha256   23KB/s (3490 bytes in 0.142s)\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:11:08.680613+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "rm -rf /opt/afdo_agent/work/round1-preflight /opt/afdo_agent/work/eval-20261105T211027-3986 && test ! -e /opt/afdo_agent/work/round1-preflight && test ! -e /opt/afdo_agent/work/eval-20261105T211027-3986 && find /opt/afdo_agent/work -mindepth 1 -maxdepth 1 -print; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "\n__REMOTE_RC=0\n",
+    "stderr": ""
+  },
+  {
+    "time": "2026-11-05T20:11:09.231649+08:00",
+    "command": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "df -h /opt; df -k /opt; list=$(rpm -qa); r=$?; printf \"RPM_QUERY_RC=%s\\n\" \"$r\"; [ \"$r\" -eq 0 ] || exit \"$r\"; printf \"%s\\n\" \"$list\" | wc -l; id; for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$p\"; cat \"$p\"; done; cat /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict; grep -E \"pswpin|pswpout\" /proc/vmstat; date -Ins; rc=$?; printf \"\\n__REMOTE_RC=%s\\n\" \"$rc\""
+    ],
+    "rc": 0,
+    "stdout": "Filesystem            Size  Used Avail Use% Mounted on\n/dev/mmcblk0p3        1.3G  155M  1.1G  13% /opt\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    158064   1147552  13% /opt\nRPM_QUERY_RC=0\n1232\nuid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n2\n0\npswpin 442\npswpout 2878\n2026-11-05T21:11:23,633788847+0900\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+]
