@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前恢复任务（2026-11-06；分级资源门禁）
+## 当前阶段（2026-11-06；诊断首RUN按预注册停止，主机核实待续）
+
+- 判定规则原文已单独推送5219d15。首个FFmpeg a类用户态频率1.404018286GHz<1.455GHz，按规则“疑似真实降频”停止，不生成修订2，不重判原31/28/11资格；不能据此声称证明硬件降频。
+- 校准外层墙钟含perf启动/收尾，原比值1.400–1.447GHz不作为纯循环频率证据，cycles/task-clock约1.500GHz；其余诊断重复未做。CPU user+sys与task-clock也有计时口径差。原始证据保留，[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)。
+- 镜像/内核/已知内存及swap容量与第一轮相符；total_mem=1600、resourced运行、zram配置0.4/lzo-rle；历史config/vm等缺证据，无法证明完全相同。无改配置。root off/schedutil恢复，RPM1232不变，确切RUN已全量SHA核验后删除。
+- 轻任务3G/200%scope成功、无资源暂停/终止；重构建条件不满足，未启动。继续仅主机非叶子line0核实及不依赖FFmpeg资格的分析；补丁9尚未实现，不使用未验收工具。
+
+## 本轮恢复入口（历史，2026-11-06；分级资源门禁）
 
 - 新规则替代上一轮8GiB统一门禁：轻任务≥4GiB，3G/200% scope，串行；重任务须≥10GiB且SwapFree≥1GiB，16G/600%、-j6，不满足则留待构建而不整体停止。运行中每60秒保存meminfo，连续两次<2.5GiB暂停，任一次<1.5GiB终止本任务进程并停止。
 - 主机初查MemAvailable约5.55GiB、SwapFree约38.6MiB，允许轻任务，不允许重构建。3G/200% user scope实际启动成功。资源基线在temp/frequency-diag-resume/baseline.txt。

@@ -1,0 +1,857 @@
+{
+  "path": "temp/frequency-diag-resume/sdb-audit.jsonl",
+  "sha256": "8f2295ca24598ae30368110e6a391da2d927d5c537aadf23b1fd19f7395fa248",
+  "attempts": 212,
+  "retries": 0,
+  "commands": [
+    {
+      "kind": "shell_result",
+      "command": "cat /proc/device-tree/model; printf \"\\n\"; uname -m; uname -r; uname -v; id -u",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:21:35.462087+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "missing=0; for c in /bin/bash awk cat chmod cut date dbus-send df find findmnt getconf grep gst-inspect-1.0 gst-launch-1.0 ionice lsmod mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc taskset; do if command -v \"$c\"; then :; else printf \"MISSING %s\\n\" \"$c\"; missing=1; fi; done; test \"$missing\" -eq 0",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:21:59.787288+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "for f in /etc/tizen-build.conf /etc/os-release /proc/cmdline /proc/version /proc/meminfo /proc/swaps /proc/mounts /proc/sys/vm/swappiness /proc/sys/vm/page-cluster /proc/sys/vm/min_free_kbytes /proc/sys/vm/watermark_scale_factor /proc/sys/vm/vfs_cache_pressure /sys/kernel/mm/lru_gen/enabled /sys/kernel/mm/ksm/run /boot/config.txt /sys/block/zram*/comp_algorithm /sys/block/zram*/disksize /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf '\\nFILE %s\\n' \"$f\"; cat \"$f\"; r=$?; printf 'FILE_RC %s\\n' \"$r\"; done; printf '\\nPROCESSES\\n'; ps -eo pid,comm,args; r=$?; printf 'PS_RC %s\\n' \"$r\"; printf '\\nUPTIME\\n'; cat /proc/uptime; printf '\\nDF\\n'; df -k /opt; printf '\\nRPM_COUNT\\n'; rpm -qa | wc -l",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:22:00.406837+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:23:15.493623+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:23:15.672945+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "printf 'PROCESSES\n'; ps -eo pid,comm,args; printf '\nSERVICES\n'; if command -v systemctl; then systemctl show resourced.service reclaimd.service -p LoadState -p ActiveState -p SubState -p ExecStart; printf 'SYSTEMCTL_RC %s\n' \"$?\"; fi; printf '\nPARTITIONS\n'; cat /proc/partitions; printf '\nBOOT\n'; ls -la /boot; printf 'LS_RC %s\n' \"$?\"; printf '\nKCONFIG\n'; if test -r /proc/config.gz; then sha256sum /proc/config.gz; if command -v zcat; then zcat /proc/config.gz | grep -E 'CONFIG_(HZ|PREEMPT|IKCONFIG)'; fi; fi; printf '\nRESOURCE_CONFIG_PATHS\n'; find /etc -maxdepth 3 -iname '*resource*' -print; printf '\nIDENTITY\n'; uname -a; cat /proc/version; printf '\nTIME\n'; date -Is; cat /proc/uptime",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:23:15.984415+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u; cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; rpm -qa | wc -l; df -k /opt",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:23:16.516404+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "command -v od",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:03.438260+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:03.565855+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:03.741897+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "od -An -v -tx1 -j 0 -N 512 /dev/mmcblk0p1",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:03.867793+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "od -An -v -tx1 -j 133120 -N 16384 /dev/mmcblk0p1",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:04.033989+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "od -An -v -tx1 -j 28102656 -N 2048 /dev/mmcblk0p1",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:04.810354+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "od -An -v -tx1 -j 29350 -N 2 /dev/mmcblk0p1",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:04.945295+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "find /etc/resourced -maxdepth 2 -type f -print; printf '\\nSWAP_SETTINGS\\n'; grep -R -n -i -E 'swap|zram|reclaim' /etc/resourced; printf 'GREP_RC %s\\n' \"$?\"; printf '\\nCMDLINE\\n'; cat /proc/cmdline",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:05.085363+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u; cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; rpm -qa | wc -l; df -k /opt",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:24:05.615148+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "uname -v",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:19.166434+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:19.292283+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "missing=0; for c in /bin/bash awk cat chmod cut date dbus-send df find findmnt getconf grep gst-inspect-1.0 gst-launch-1.0 ionice lsmod mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc taskset; do command -v \"$c\" || missing=1; done; test \"$missing\" -eq 0",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:19.421465+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:19.593861+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-a32-R/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-R/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:19.754027+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-S/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:19.883642+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-a32-C/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-C/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:20.008478+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-thumb-G5/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-G5/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:20.136642+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:20.366026+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:20.508008+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:20.637095+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:20.774270+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:20.929629+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-R/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:21.064652+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:21.319690+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:21.465344+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:21.591594+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:21.729842+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:21.890674+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-C/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:22.040417+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-a32-G5/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-G5/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:22.171014+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:22.431471+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:22.582567+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:22.711792+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:22.847154+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:23.002012+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-G5/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:23.151805+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-thumb-C/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-C/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:23.278606+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:23.538253+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:23.685286+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:23.821961+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:23.958593+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:24.115282+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-R/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:24.264652+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-a32-S/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-a32-S/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:24.397960+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/spike-thumb-R/bin/eval-spike && sha256sum /opt/afdo_agent/variants/spike-thumb-R/bin/eval-spike",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:24.527580+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:24.752116+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:24.894424+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:25.033103+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:25.165034+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:25.313785+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-G5/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:25.455918+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:25.633192+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:25.772024+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:25.899766+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:26.038087+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:26.178233+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:26.320780+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:26.519531+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:26.653980+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:26.783815+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:26.918694+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:27.060574+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-a32-S/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:27.197374+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavcodec.so.62.11.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavcodec.so.62.11.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:27.417329+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswscale.so.9.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswscale.so.9.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:27.569163+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswresample.so.6.1.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libswresample.so.6.1.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:27.697390+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavfilter.so.11.4.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavfilter.so.11.4.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:27.842084+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavformat.so.62.3.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavformat.so.62.3.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:27.995458+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavutil.so.60.8.100 && sha256sum /opt/afdo_agent/variants/ffmpeg-thumb-C/lib/libavutil.so.60.8.100",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:28.138960+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/eval-manifest.tsv && sha256sum /opt/afdo_agent/eval-manifest.tsv",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:28.268645+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/tools/perf && sha256sum /opt/afdo_agent/tools/perf",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:28.451484+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "test -r /opt/afdo_agent/lib/libLLVM.so.22.1 && sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:29.044318+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "sha256sum /opt/afdo_agent/scripts/integration.sh",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:29.171335+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "sha256sum /opt/afdo_agent/scripts/collect.sh",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:29.328353+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "sha256sum /opt/afdo_agent/scripts/measure.sh",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:29.457107+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "sha256sum /opt/afdo_agent/scripts/common.sh",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:29.602625+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "sha256sum /opt/afdo_agent/scripts/frequency_diag.sh",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:29.912203+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "/bin/bash -n /opt/afdo_agent/scripts/frequency_diag.sh",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:30.039236+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "LD_LIBRARY_PATH=/opt/afdo_agent/lib /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:30.208537+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "sha256sum /opt/afdo_agent/media/bbb_720p_h264_60s.mp4",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:30.746028+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "for f in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$f\"; cat \"$f\"; done",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:30.880302+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "printf performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor",
+      "read_only": false,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:28:31.074153+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "RUN_ESTIMATE_BYTES=80000000 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/frequency_diag.sh ff-a",
+      "read_only": false,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:48.375436+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "readlink -f /opt/afdo_agent/work/eval-20261106T192847-3795",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:48.489593+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "find /opt/afdo_agent/work/eval-20261106T192847-3795 -type l -print",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:48.606786+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "find /opt/afdo_agent/work/eval-20261106T192847-3795 -type f -exec /bin/bash -c 'for f; do sha256sum -- \"$f\" || exit; done' _ {} +",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:49.360084+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "readlink -f /opt/afdo_agent/work/eval-20261106T192847-3795",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:57.553366+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "find /opt/afdo_agent/work/eval-20261106T192847-3795 -type l -print",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:57.673058+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "find /opt/afdo_agent/work/eval-20261106T192847-3795 -type f -exec /bin/bash -c 'for f; do sha256sum -- \"$f\" || exit; done' _ {} +",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:58.494277+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "rm -rf -- /opt/afdo_agent/work/eval-20261106T192847-3795 && test ! -e /opt/afdo_agent/work/eval-20261106T192847-3795",
+      "read_only": false,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:58.624191+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "printf %s schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor",
+      "read_only": false,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:58.738305+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:58.864184+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u; cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; rpm -qa | wc -l; df -k /opt",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:29:59.396933+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "for f in /etc/tizen-build.conf /etc/os-release /proc/cmdline /proc/version /proc/meminfo /proc/swaps /proc/mounts /proc/sys/vm/swappiness /proc/sys/vm/page-cluster /proc/sys/vm/min_free_kbytes /proc/sys/vm/watermark_scale_factor /proc/sys/vm/vfs_cache_pressure /sys/kernel/mm/lru_gen/enabled /sys/kernel/mm/ksm/run /boot/config.txt /sys/block/zram*/comp_algorithm /sys/block/zram*/disksize /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf '\\nFILE %s\\n' \"$f\"; cat \"$f\"; r=$?; printf 'FILE_RC %s\\n' \"$r\"; done; printf '\\nPROCESSES\\n'; ps -eo pid,comm,args; r=$?; printf 'PS_RC %s\\n' \"$r\"; printf '\\nUPTIME\\n'; cat /proc/uptime; printf '\\nDF\\n'; df -k /opt; printf '\\nRPM_COUNT\\n'; rpm -qa | wc -l",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:31:27.338756+08:00"
+    },
+    {
+      "kind": "shell_result",
+      "command": "id -u; cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor",
+      "read_only": true,
+      "attempt": 0,
+      "remote_rc": 0,
+      "time": "2026-11-06T18:31:27.472327+08:00"
+    }
+  ],
+  "devices": {
+    "time": "2026-11-06T18:20:58.766657+08:00",
+    "command": [
+      "sdb",
+      "devices"
+    ],
+    "rc": 0,
+    "stdout": "List of devices attached \n",
+    "stderr": ""
+  },
+  "connect": [
+    {
+      "time": "2026-11-06T18:21:17.542276+08:00",
+      "command": [
+        "sdb",
+        "connect",
+        "192.168.108.26"
+      ],
+      "rc": 0,
+      "stdout": "connecting to 192.168.108.26:26101 ...\nconnected to 192.168.108.26:26101\n",
+      "stderr": ""
+    },
+    {
+      "time": "2026-11-06T18:21:17.546600+08:00",
+      "command": [
+        "sdb",
+        "devices"
+      ],
+      "rc": 0,
+      "stdout": "List of devices attached \n192.168.108.26:26101\tdevice    \trpi4\n",
+      "stderr": ""
+    }
+  ]
+}
