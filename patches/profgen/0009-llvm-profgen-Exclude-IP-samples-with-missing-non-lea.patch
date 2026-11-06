@@ -1,0 +1,216 @@
+From 15a5ec3f46283ad2eccaecf97b2eac2a0e43d65c Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Fri, 6 Nov 2026 22:23:14 +0800
+Subject: [PATCH] [llvm-profgen] Exclude IP samples with missing non-leaf
+ callsite lines
+
+Reject an IP inline context with a zero non-leaf source line before deriving
+callsite offsets. Account for the whole sample under in_func_no_line and
+expose a nonleaf_line_zero subcounter in the quality report. Do not invent
+a wrapped line offset or retain a partial inline tree.
+
+Cover mixed and wholly excluded inputs, the unaffected positive-line
+control, and sum/max behavior. Document the schema addition. Leave the
+LBR path unchanged.
+---
+ llvm/docs/CommandGuide/llvm-profgen.rst       | 21 ++++++
+ .../tools/llvm-profgen/ip-nonleaf-zero.test   | 65 +++++++++++++++----
+ llvm/tools/llvm-profgen/IPQualityReport.cpp   |  5 +-
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  | 10 ++-
+ llvm/tools/llvm-profgen/ProfiledBinary.cpp    | 12 +++-
+ 5 files changed, 92 insertions(+), 21 deletions(-)
+
+diff --git a/llvm/docs/CommandGuide/llvm-profgen.rst b/llvm/docs/CommandGuide/llvm-profgen.rst
+index e28841f9927c..78ade5c0a4a6 100644
+--- a/llvm/docs/CommandGuide/llvm-profgen.rst
++++ b/llvm/docs/CommandGuide/llvm-profgen.rst
+@@ -1191,6 +1191,27 @@ Field paths
+ ``samples.target.in_func_no_line`` (object | string)
+   In a function but without a usable leaf source position.
+ 
++``samples.target.in_func_no_line.nonleaf_line_zero`` (object | string)
++    Subset of in_func_no_line excluded because a positive leaf line has a
++    non-leaf frame with raw line zero. The entire inline context is excluded;
++    no callsite is synthesized by subtracting its start line. Unknown before
++    classification. This IP-only subset does not change LBR handling.
++
++``samples.target.in_func_no_line.nonleaf_line_zero.sample_count`` (uint64)
++    Number of excluded original IP samples; unit: samples.
++
++``samples.target.in_func_no_line.nonleaf_line_zero.period_sum`` (uint64)
++    Sum of their periods; unit: event counts.
++
++``samples.target.in_func_no_line.nonleaf_line_zero.normalized_weight`` (object)
++    Exact weight ratio, with the same semantics as the parent count object.
++
++``samples.target.in_func_no_line.nonleaf_line_zero.normalized_weight.numerator`` (uint64)
++    Sample count in sample mode, or period sum in period mode.
++
++``samples.target.in_func_no_line.nonleaf_line_zero.normalized_weight.denominator`` (uint64)
++    One in sample mode, or P_ref in period mode.
++
+ ``samples.target.in_func_no_line.normalized_weight`` (object)
+   Exact selected raw weight divided by P_ref; unknown until P_ref is known.
+ 
+diff --git a/llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test b/llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test
+index a0ca20925339..d55ef3ddb852 100644
+--- a/llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test
++++ b/llvm/test/tools/llvm-profgen/ip-nonleaf-zero.test
+@@ -1,23 +1,60 @@
+-#===- ip-nonleaf-zero.test - Diagnose zero non-leaf lines -----------------===#
++#===- ip-nonleaf-zero.test - Reject missing IP callsite lines --------------===#
+ # REQUIRES: aarch64-registered-target
+ # RUN: split-file %s %t
+-# The two inline samples have raw caller line zero, but positive leaf lines.
+-# Count each usable sample once: 2 samples, 3+7=10 periods; top-only sample
+-# remains usable and does not contribute to the diagnostic subset.
+-# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin --binary-match-regex=^/target$ --perfscript=%t/input --format=text --output=%t/profile --ip-aggregation=sum --ip-period-unit=1 --show-ip-address-counts > %t/log
++# Two positive leaf lines have raw caller line zero. Exclude both whole
++# contexts, leaving only the top-level sample (100 periods), not a partial tree.
++# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin --binary-match-regex=^/target$ --perfscript=%t/input --format=text --output=%t/profile --quality-report=%t/report.json --ip-aggregation=sum --ip-period-unit=1 --show-ip-address-counts > %t/log
+ # RUN: FileCheck %s --check-prefix=ZERO --input-file=%t/log
+-# ZERO: IP-GENERATION usable samples=3 period_sum=110
+-# ZERO-NEXT: IP-GENERATION usable_nonleaf_line_zero samples=2 period_sum=10
++# ZERO-DAG: IP-GENERATION in_func_no_line samples=2 period_sum=10
++# ZERO-DAG: IP-GENERATION nonleaf_line_zero samples=2 period_sum=10
++# ZERO-DAG: IP-GENERATION usable samples=1 period_sum=100
++# ZERO-DAG: IP-GENERATION usable_nonleaf_line_zero samples=0 period_sum=0
+ # RUN: FileCheck %s --check-prefix=TOTAL --input-file=%t/profile
+-# TOTAL: both:110:0
+-# Unmodified fixture is a negative control; the extra diagnostic must not
+-# classify the usual positive caller line as zero just because offsets differ.
+-# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/head.perfbin --binary-match-regex=^/target$ --perfscript=%t/input --format=text --output=%t/control --ip-aggregation=sum --ip-period-unit=1 --show-ip-address-counts > %t/control.log
++# TOTAL: both:100:0
++# TOTAL-NEXT:  2: 100
++# TOTAL-NOT: 65525
++# TOTAL-NOT: left
++# TOTAL-NOT: right
++# RUN: %python %t/check.py %t/report.json %t/profile
++# Max must apply the same exclusion and keep the unaffected top-only count.
++# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin --binary-match-regex=^/target$ --perfscript=%t/input --format=text --output=%t/max --quality-report=%t/max.json --ip-aggregation=max --ip-period-unit=1
++# RUN: %python %t/check.py %t/max.json %t/max
++# Unmodified fixture retains positive callsite lines and the complete tree.
++# RUN: llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/head.perfbin --binary-match-regex=^/target$ --perfscript=%t/input --format=text --output=%t/control --quality-report=%t/control.json --ip-aggregation=sum --ip-period-unit=1 --show-ip-address-counts > %t/control.log
+ # RUN: FileCheck %s --check-prefix=CONTROL --input-file=%t/control.log
+-# CONTROL: IP-GENERATION usable samples=3 period_sum=110
+-# CONTROL-NEXT: IP-GENERATION usable_nonleaf_line_zero samples=0 period_sum=0
+-# RUN: FileCheck %s --check-prefix=TOTAL --input-file=%t/control
++# CONTROL-DAG: IP-GENERATION in_func_no_line samples=0 period_sum=0
++# CONTROL-DAG: IP-GENERATION nonleaf_line_zero samples=0 period_sum=0
++# CONTROL-DAG: IP-GENERATION usable samples=3 period_sum=110
++# RUN: FileCheck %s --check-prefix=CONTROL-PROFILE --input-file=%t/control
++# CONTROL-PROFILE: both:110:0
++# CONTROL-PROFILE: 1: {{.*}}left
++# CONTROL-PROFILE: 1: {{.*}}right
++# All samples excluded: fail generation and preserve an existing profile.
++# RUN: echo old-profile > %t/old
++# RUN: not llvm-profgen --ip-samples --allow-missing-build-id --binary=%S/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin --binary-match-regex=^/target$ --perfscript=%t/zero-only --format=text --output=%t/old --quality-report=%t/failed.json --ip-aggregation=sum --ip-period-unit=1 2>&1 | FileCheck %s --check-prefix=FAIL
++# FAIL: no usable samples
++# RUN: %python %t/failure.py %t/failed.json %t/old
+ #--- input
+ 17/17 3 cycles: 12f0 (/target+0x2f0)
+ 17/17 7 cycles: 12d8 (/target+0x2d8)
+ 17/17 100 cycles: 1300 (/target+0x300)
++#--- zero-only
++17/17 3 cycles: 12f0 (/target+0x2f0)
++17/17 7 cycles: 12d8 (/target+0x2d8)
++#--- check.py
++import json, pathlib, sys
++r = json.loads(pathlib.Path(sys.argv[1]).read_text())
++t = r['samples']['target']
++assert t['in_func_no_line']['sample_count'] == 2
++assert t['in_func_no_line']['period_sum'] == 10
++assert t['in_func_no_line']['nonleaf_line_zero']['sample_count'] == 2
++assert t['in_func_no_line']['nonleaf_line_zero']['period_sum'] == 10
++assert t['usable']['sample_count'] == 1
++assert pathlib.Path(sys.argv[2]).read_text() == 'both:100:0\n 2: 100\n'
++#--- failure.py
++import json, pathlib, sys
++r = json.loads(pathlib.Path(sys.argv[1]).read_text())
++assert r['verdict']['conversion'] == 'failed'
++assert r['verdict']['failure_stage'] == 'generate'
++assert r['samples']['target']['in_func_no_line']['nonleaf_line_zero']['sample_count'] == 2
++assert pathlib.Path(sys.argv[2]).read_text() == 'old-profile\n'
+diff --git a/llvm/tools/llvm-profgen/IPQualityReport.cpp b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+index aad2c1e4ae8b..1887652be9a7 100644
+--- a/llvm/tools/llvm-profgen/IPQualityReport.cpp
++++ b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+@@ -611,6 +611,9 @@ json::Value IPQualityReport::build() {
+   Samples["other_dso_top20"] =
+       Reader.Selected ? json::Value(Top(Reader.OtherDSOs, 20, OtherWeight))
+                       : json::Value("unknown");
++  auto NoLine = Gen("in_func_no_line");
++  if (auto *Object = NoLine.getAsObject())
++    (*Object)["nonleaf_line_zero"] = Gen("nonleaf_line_zero");
+   Samples["target"] = json::Object{
+       {"counts", Layer("target")},
+       {"unmapped_in_target",
+@@ -622,7 +625,7 @@ json::Value IPQualityReport::build() {
+       {"outside_symtab_top20",
+        ISAObserved ? json::Value(Top(OutsideSymbols, 20, TargetWeight))
+                    : json::Value("unknown")},
+-      {"in_func_no_line", Gen("in_func_no_line")},
++      {"in_func_no_line", std::move(NoLine)},
+       {"usable", Statistics.Classified ? count(Statistics.OriginalUsable)
+                                        : json::Value("unknown")}};
+   Samples["written_positions"] = Statistics.Finished
+diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+index f9e13a742156..e527ddecceee 100644
+--- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
++++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
+@@ -268,9 +268,10 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+   FunctionSamples::ProfileIsFS = UseFSDiscriminator;
+   FunctionSamples::ProfileIsCS = false;
+   FunctionSamples::ProfileIsProbeBased = false;
+-  for (StringRef Name : {"usable", "in_func_no_line", "outside_dwarf_func",
+-                         "plt", "in_cu_no_subprogram", "no_cu",
+-                         "usable_nonleaf_line_zero", "skid_unadjusted"})
++  for (StringRef Name :
++       {"usable", "in_func_no_line", "outside_dwarf_func", "plt",
++        "in_cu_no_subprogram", "no_cu", "usable_nonleaf_line_zero",
++        "nonleaf_line_zero", "skid_unadjusted"})
+     Statistics.Counts[Name.str()] = {};
+   if (Options.PrevInst)
+     for (StringRef Reason : {"first_instruction", "range_gap",
+@@ -298,6 +299,9 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+     } else if (Binary->getCachedFrameLocationStack(Address).empty()) {
+       if (Error E = Classify("in_func_no_line", C))
+         return E;
++      if (Binary->hasIPNonLeafZeroLine(Address))
++        if (Error E = Classify("nonleaf_line_zero", C))
++          return E;
+     } else {
+       if (Error E =
+               addIPCount(Statistics.OriginalUsable.SampleCount, C.SampleCount))
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.cpp b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+index f800e8bf43f8..6da27398d486 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.cpp
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+@@ -1278,15 +1278,21 @@ SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
+   if (IPMode &&
+       (!InlineStack.getNumberOfFrames() || InlineStack.getFrame(0).Line == 0))
+     return CallStack;
++  if (IPMode)
++    for (uint32_t I = 1; I < InlineStack.getNumberOfFrames(); ++I)
++      if (InlineStack.getFrame(I).Line == 0) {
++        IPNonLeafZeroLineAddresses.insert(IP.Address);
++        // A missing callsite line cannot form a source offset. Subtracting
++        // StartLine would wrap into a spurious positive callsite. Reject the
++        // entire context before constructing even a partial inline tree.
++        return {};
++      }
+   for (int32_t I = InlineStack.getNumberOfFrames() - 1; I >= 0; I--) {
+     const auto &CallerFrame = InlineStack.getFrame(I);
+     if (CallerFrame.FunctionName.empty() ||
+         (CallerFrame.FunctionName == "<invalid>"))
+       break;
+ 
+-    if (IPMode && I > 0 && CallerFrame.Line == 0)
+-      IPNonLeafZeroLineAddresses.insert(IP.Address);
+-
+     StringRef FunctionName(CallerFrame.FunctionName);
+     if (UseCanonicalFnName)
+       FunctionName = FunctionSamples::getCanonicalFnName(FunctionName);
+-- 
+2.43.0
+

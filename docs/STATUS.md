@@ -26,6 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 当前完成状态（2026-11-06；频率区分、覆盖分片与补丁9）
+
+- 判定规则原文预提交7546425；单核60区间约1.500GHz，四核38区间最低0.793GHz、仅连续2区间低于1.455GHz，80.341°C停止。欠压sticky全0，完整固件时钟/标志不可用；按规则unknown，不运行后续FFmpeg、不生成修订。两RUN已SHA核验后删除；root off/schedutil、RPM1232恢复。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)
+- 覆盖：Thumb spike整体与逐源文件合并119行/11函数完全一致（1源文件）；libavcodec h264_cabac.c单文件仍3GiB scope OOM，停止且未重试、未提高限额。[质量报告](profgen/eval/quality_round1.md)
+- 补丁9完成：LLVM本地15a5ec3f46283ad2eccaecf97b2eac2a0e43d65c，新工具SHA 2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5；0009已导出并反向检查通过，spec本地diff不变/未提交，未推LLVM或Gerrit。非叶子line0整样本排除至in_func_no_line及nonleaf_line_zero子项，正式测试通过。[报告15](profgen/impl/15_patch9_nonleaf_line0.md)
+- 22:00门禁21.8709GiB通过；GBS10G/400%、-j4，退出0/1079.586秒/107步。正式lit84 PASS/1 UNSUPPORTED/1 XFAIL/0 FAIL；C1两遍636、0差异；14历史输入各两遍一致（4成功profile不变，10既有失败不写profile）；schema140报告396字段差集空。
+- 本轮资源最低MemAvailable9.162472GiB，构建最低19.217651GiB；无全局内存暂停/终止、无重构建阈值终止。覆盖scope OOM一次，观测RSS峰值3168464KiB；构建scope峰值9.532642GiB含缓存。
+- 按本轮范围：没有重转正式S，没有最终质量矩阵/性能测量。原31 clean/28 abnormal/11 unknown不变；下一步等待用户决定散热/判据、覆盖导出办法与正式S重转。Agent开发不开始。
+
 ## 本轮阶段状态（2026-11-06；诊断与覆盖结束，补丁9等待窗口）
 
 - 频率区分规则原文预提交7546425；单核60区间约1.500GHz，四核38区间中仅连续2次低于1.455GHz，最高80.341°C触发停止；rpi_volt欠压sticky全部0，其他固件频率/标志来源不可用。按原规则unknown，不运行FFmpeg、不生成修订、不改资格。两RUN完整SHA后删除，root off/schedutil、RPM1232恢复。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)
@@ -681,7 +690,7 @@
 
 ## 待人工裁决
 
-- R/C/G5类型、ToS输入、ε、预注册/修订1、root/performance及只读缺码重试均已裁决执行；保留RUN恢复已闭合，不再重复索要。当前待PM的是非叶子line0处理及下一步质量分析/消费构建授权；v0.8登记包含GNU AS规范化、别名一致性和映射不可用降级规则。
+- R/C/G5类型、ToS输入、ε、预注册/修订1、root/performance及只读缺码重试均已裁决执行；保留RUN恢复已闭合，不再重复索要。非叶子line0规则已裁决且补丁9通过；当前待PM的是下一步数据重转、覆盖与质量/消费构建授权；v0.8登记包含GNU AS规范化、别名一致性和映射不可用降级规则。
 
 - [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–8与RPi4第一轮已完成，下一步质量分析/消费构建等待指示；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 
@@ -702,7 +711,7 @@
 - 已关闭[unknown]真实样例：本轮系统级双解码压力取得335条([unknown])及16条-1/-1，原始文本/行号与工具分类核对已保留。[证据](profgen/impl/evidence/12/69_special_samples.json)
 
 - 已关闭：IP新选项枚举与cl::values由补丁7完成，显式aggregation语义保持。[报告](profgen/impl/09_patch7_report.md)
-- 非叶子帧行号为0规则待PM：本轮106份正式S共2736样本，target占0.0245787%、usable占0.0332227%，涉及5顶层函数；未改处理方式，另列零行号帧函数统计。[统计](profgen/impl/evidence/12/57_nonleaf_summary.json)
+- 非叶子line0处理已由补丁9闭合：整样本排除至in_func_no_line并列子计数，正式验收通过。原补丁8统计106份S共2736样本（target0.0245787%、usable0.0332227%、5顶层函数）保留；本轮未重转正式S，重转及影响统计留待下一任务。[报告15](profgen/impl/15_patch9_nonleaf_line0.md)、[旧统计](profgen/impl/evidence/12/57_nonleaf_summary.json)
 - 已关闭真实avg：按最新裁决使用本轮同次评估构建和中档BBB真实采集，原3热点11,525指令/715键GNU独立sum/max/avg均一致；未套用旧镜像地址。head零估计挂账仍保持已关闭。[证据](profgen/impl/evidence/12/31_real_avg_independent.json)
 
 - 本轮授权generation=0为未知；inode被复用且一条记录generation为0时，替换可能无法发现。不能将allow-missing后的unverified提升为verified；源码与限制见[补丁3规则修正登记](profgen/impl/05_patch3_identity.md)。
