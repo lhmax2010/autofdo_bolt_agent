@@ -26,7 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前阶段（2026-11-06；补丁9已实现待构建）
+## 当前收尾状态（2026-11-06；诊断停止、补丁9待构建、质量参考已准备）
+
+- 判定规则预提交5219d15；首个FFmpeg a类用户态有效频率1.404GHz<1.455GHz，按规则停止，未生成修订2。校准外层墙钟包含perf开销，不能当作纯循环实际频率；物理降频未被证明。root off/schedutil恢复，RPM1232不变。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)
+- 非叶子line0已正式复现写入65525伪调用点；补丁9草稿5文件+92/-21已完成、测试/schema已写、clang-format通过，但重任务门禁不足10GiB/1GiB，未构建、不重试；LLVM HEAD仍660a46f，正式工具仍9f63c692，未导出0009、未重转S。[报告15](profgen/impl/15_patch9_nonleaf_line0.md)
+- 主机独立准备完成：Thumb/A32真实R参考IR，保守自比各3/22（13.64%，非sample质量结论）；spike C覆盖导出各11/11函数执行。FFmpeg C export触发3GiB scope OOM（一次），输出空，不提高限制、不原样重试。最终配置矩阵/CI/泛化/扰动/候选均待最终工具及覆盖资源条件，不伪造结论。[质量报告](profgen/eval/quality_round1.md)
+- 资源：最低已记录MemAvailable5.289GiB，成功测得RSS峰值500516KiB；OOM精确峰值未知。全局暂停/终止阈值未触发。未运行本任务重构建，scope内OOM未影响他人进程。
+- 下一步等待资源及用户指示：补丁9正式验收后完成全量转换/统计；频率测量等待处理，不调阈值；FFmpeg覆盖须验证限额内方案或用户另定资源。Agent开发不开始。
+
+## 本轮补丁9阶段（历史，2026-11-06；已实现待构建）
 
 - 正式补丁8最小复现确认非叶子line0会写入调用点65525（正常对照为1），total110含两个错误上下文。按授权完成IP专属排除草稿，归in_func_no_line并新增nonleaf_line_zero子项，测试与schema草稿已写；平台clang-format/dry-run通过。[报告15](profgen/impl/15_patch9_nonleaf_line0.md)
 - 重任务门禁一次检查：MemAvailable5.580803GiB、SwapFree0.000290GiB，不满足10GiB/1GiB，不启动不重试GBS/lit。LLVM HEAD仍660a46f，未提交补丁9/导出0009；正式工具未改，C1/重放/正式S重转待验收。不要使用草稿作质量结论。

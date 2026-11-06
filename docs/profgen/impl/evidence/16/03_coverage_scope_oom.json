@@ -1,0 +1,47 @@
+{
+  "time": "2026-11-06T18:43:27.097549+08:00",
+  "commands": [
+    {
+      "command": [
+        "systemctl",
+        "--user",
+        "show",
+        "run-rb197db76e725455fa0429b40a22170d4.scope",
+        "-p",
+        "Result",
+        "-p",
+        "MemoryPeak",
+        "-p",
+        "MemoryMax",
+        "-p",
+        "CPUUsageNSec",
+        "-p",
+        "ActiveState",
+        "-p",
+        "TasksCurrent"
+      ],
+      "rc": 0,
+      "stdout": "Result=oom-kill\nMemoryPeak=[not set]\nCPUUsageNSec=8663553000\nTasksCurrent=[not set]\nMemoryMax=3221225472\nActiveState=failed\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "journalctl",
+        "--user",
+        "-u",
+        "run-rb197db76e725455fa0429b40a22170d4.scope",
+        "--no-pager",
+        "-n",
+        "15"
+      ],
+      "rc": 0,
+      "stdout": "Nov 06 18:42:13 linhao-linux systemd[2500]: Started run-rb197db76e725455fa0429b40a22170d4.scope - /usr/bin/python3 -.\nNov 06 18:42:19 linhao-linux systemd[2500]: run-rb197db76e725455fa0429b40a22170d4.scope: A process of this unit has been killed by the OOM killer.\nNov 06 18:42:19 linhao-linux systemd[2500]: run-rb197db76e725455fa0429b40a22170d4.scope: Failed with result 'oom-kill'.\nNov 06 18:42:19 linhao-linux systemd[2500]: run-rb197db76e725455fa0429b40a22170d4.scope: Consumed 8.663s CPU time.\n",
+      "stderr": ""
+    }
+  ],
+  "meminfo": "MemTotal:       32297780 kB\nMemFree:         5502160 kB\nMemAvailable:   10212316 kB\nBuffers:          323012 kB\nCached:          3706716 kB\nSwapCached:        41376 kB\nActive:          9652020 kB\nInactive:       13334408 kB\nActive(anon):    9240496 kB\nInactive(anon): 10898364 kB\nActive(file):     411524 kB\nInactive(file):  2436044 kB\nUnevictable:      110056 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:            424 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:             20936 kB\nWriteback:             0 kB\nAnonPages:      19027912 kB\nMapped:          1158664 kB\nShmem:           1181608 kB\nKReclaimable:    2339348 kB\nSlab:            3062272 kB\nSReclaimable:    2339348 kB\nSUnreclaim:       722924 kB\nKernelStack:       53440 kB\nPageTables:       294640 kB\nSecPageTables:     12564 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   97515540 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       95632 kB\nVmallocChunk:          0 kB\nPercpu:            35440 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   243712 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     57344 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+  "scope_exit": 143,
+  "FFmpeg_output_bytes": 0,
+  "FFmpeg_retried": false,
+  "global_pause_or_terminate_threshold_observed": false
+}

@@ -90,3 +90,16 @@ vm：swappiness60、page-cluster3、min_free_kbytes3388、watermark_scale_factor
 ### 待设计 v0.8 登记（恢复轮）
 
 按用户预注册规则记录疑似真实降频，不将固定scaling_cur_freq当作实际频率证据，也不把有开销的校准比值当作纯循环频率。记录缺失历史状态及计时窗口局限。分级资源规则已生效；板上停止后仅继续不依赖FFmpeg资格的主机核实。非叶子line0及统计分析进展在后续阶段记录，冻结正文不改。
+
+
+## 本轮最终分项状态
+
+|部分|状态|证据/限制|
+|---|---|---|
+|频率诊断|首个a类运行后按预注册停止|已恢复root/governor；用户态1.404GHz，校准外层计时局限已披露；不生成修订2|
+|非叶子line0|已核实、补丁9已实现待构建|正式工具复现伪调用点65525；重任务门禁不满足，未构建/验收/导出0009；见[报告15](15_patch9_nonleaf_line0.md)|
+|统计质量分析|参考准备完成，最终矩阵未完成|R参考IR及spike C导出通过；等待补丁9，FFmpeg C export被3GiB scope OOM终止；见[质量报告](../eval/quality_round1.md)|
+
+资源总汇：最低已保存MemAvailable5.289GiB；成功测得峰值RSS500,516KiB；scope OOM一次，精确OOM峰值未知。全局低内存暂停/终止阈值均未触发，不原样重试FFmpeg export，不提高限额。重任务一次门禁不满足且未重试。[完整资源证据](evidence/16/06_resource_summary.json)
+
+运行时例外说明：按用户明确要求使用systemd user scope，其临时unit/cgroup及系统日志由systemd管理，本轮只查询了本任务scope的状态和OOM日志；项目材料未写到WORKDIR之外。没有改认证，没有LLVM/Gerrit推送。
