@@ -1,0 +1,45 @@
+{
+  "commands": [
+    "/bin/bash",
+    "awk",
+    "cat",
+    "chmod",
+    "cut",
+    "date",
+    "dbus-send",
+    "df",
+    "find",
+    "findmnt",
+    "getconf",
+    "grep",
+    "gst-inspect-1.0",
+    "gst-launch-1.0",
+    "ionice",
+    "lsmod",
+    "mkdir",
+    "mkfifo",
+    "nice",
+    "ps",
+    "readlink",
+    "rm",
+    "rpm",
+    "sha256sum",
+    "sleep",
+    "tr",
+    "uname",
+    "wc"
+  ],
+  "count": 28,
+  "method": "Read all tools/profgen/board/*.sh and identify external command invocations, including array commands and bash -c bodies. Exclude bash builtins/keywords, separately verify deployed perf and target executables in root preflight. Prior 25-command inventory retained; integration adds chmod, lsmod, dbus-send.",
+  "sources": [
+    "tools/profgen/board/collect.sh",
+    "tools/profgen/board/common.sh",
+    "tools/profgen/board/integration.sh",
+    "tools/profgen/board/measure.sh"
+  ],
+  "additions": [
+    "chmod",
+    "lsmod",
+    "dbus-send"
+  ]
+}

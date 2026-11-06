@@ -6,8 +6,8 @@ BASE=/opt/afdo_agent
 # substitutions, pipelines, array commands and the /bin/bash workload launcher.
 # time, kill, read, test, printf, wait, command and source are Bash builtins/keywords.
 BOARD_REQUIRED_COMMANDS=(
-    /bin/bash awk cat cut date df find findmnt getconf grep gst-inspect-1.0
-    gst-launch-1.0 ionice mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc
+    /bin/bash awk cat chmod cut date dbus-send df find findmnt getconf grep gst-inspect-1.0
+    gst-launch-1.0 ionice lsmod mkdir mkfifo nice ps readlink rm rpm sha256sum sleep tr uname wc
 )
 preflight_dependencies() {
     local cmd missing=0

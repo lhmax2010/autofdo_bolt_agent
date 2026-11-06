@@ -1,5 +1,7 @@
 # 补丁 8：GNU AS Thumb 子程序的 DWARF 地址与同指令别名查询
 
+**最新验收见第8–9节：补丁8已amend为660a46f036a47ecc940e02b153d3e76e6eb39e79，正式工具SHA 9f63c692…；映射不可用时保留原区间并告警，按需边界仍严格失败。正式lit/C1、14历史重放及106份本轮S字节比对全部通过。前文停止记录保留。**
+
 本轮依据 PM 2026-11-05 裁决实现，不修改冻结设计 v0.7 正文、不清样本 PC、不连接 LLVM/Gerrit 远端。LLVM 基线为补丁 7 `e4642a8ad9e0acb990b45ade3ef7aca755cd80f2`；原正式工具 SHA-256 `334a09290f53eb4c793ae91759f2b6344a36e63317820eb9151771b262dc3f30` 已核对并另存 `temp/profgen-patch8/baseline-llvm-profgen`。
 
 ## 1. 授权规则与实现范围
@@ -137,3 +139,12 @@ IP ELF32 little-endian EM_ARM函数加载时，仅遇到奇数low_pc才懒加载
 旧LLVM提交`cd5168c48b5422a50829259fd43e84cc3edd6694` → amend后`660a46f036a47ecc940e02b153d3e76e6eb39e79`；补丁整体24文件+627/-23，局部小修13个文件。作者/提交者均Hao Lin，spec未提交且本地diff保持。0008重新导出并通过反向应用检查，未推LLVM/Gerrit。[审计](evidence/13/25_amend_commit.json)
 
 正式工具SHA：`9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`。旧41440292工具与实际libLLVM已存档`temp/profgen-patch8-amend/`；小修前转换均用该存档。小修通过后，全部正式S以新工具重转并逐字节比对，进行中的板上工作及最终全量统计另记报告12，不提前宣称70组完成。边界例外：无新增。
+
+
+## 9. 小修后本轮全部正式S的应用验收（2026-11-06）
+
+最终工具`9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`已重新处理70逻辑组对应的106份完整正式S。全部106份sample profile与旧补丁8工具41440292逐字节相同；频率模式15逻辑组/20物理RUN的period profile也全部相同。target11,131,603、usable8,235,324，身份全部verified，name_merged_functions全部0。报告仅新增unavailable_range_count=0/unavailable_top50=[]及工具/输出路径差异，没有计数、身份或边界语义差异。
+
+FFmpeg Thumb/A32各33个规范化区间，spike两种ISA均0；别名查询共72次，一致性校验72次全部通过。全部真实输入均无映射加载失败，因此小修没有改变这些输入的profile。逐份JSON差异、区间名单和地址见[报告12第15节](12_board_round1.md)、[字节比对](evidence/12/55_literal_profile_comparison.json)、[矩阵与规范化](evidence/12/56_matrix_summary.json)、[完整性断言](evidence/12/65_completeness.json)。这些路径在报告12的evidence/12下；本报告自身的正式GBS/C1/14历史重放证据仍在evidence/13。
+
+真实avg挂账保持关闭（同次评估产物、原3热点11,525指令/715键GNU独立核对）；新LOST完整导出与五集成已在报告12闭合。非叶子line0共2,736条，仅提供数据，处理规则仍待PM。设计v0.7正文与golden不变，映射不可用的裁决继续列入待v0.8登记及外部评审。

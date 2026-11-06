@@ -1,0 +1,671 @@
+{
+  "tag": "exec",
+  "mode": "exec",
+  "remote": "/opt/afdo_agent/work/eval-20261106T140238-24926",
+  "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec",
+  "seconds": 15.777834541004268,
+  "rc": 0,
+  "bytes": 956554,
+  "receipt_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec-receipt.json",
+  "receipt_sha256": "d1e0031475ea7656cbc5f594c76886e1fdc00b4f0fcfb4b60d0b32e1df8e9c0b",
+  "verified_files": 107,
+  "deleted": true,
+  "original_sha256": {
+    "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+    "status": "d674eff09d351910fd19e80d98bcc609feb2914ebab37a07f285010fba65a4fc",
+    "perf.data": "629c88007c10c1d49d9408a29a0a391488a0baa2cd36b89a2ad37de5dd66ea37",
+    "record.stderr": "eb7022af65d743aef345a34cb9147da0baca28b38cf917738546b99d069ed543",
+    "buildid-list.txt": "4e4f9bd07dff833302cdc35caab6dd3a586f61f9f2b8ca12c78efc9aa41e4dcd",
+    "perfscript.txt": "7a02824b23867a7d441c973aa42a9d3830efaf87889e005686eeb8a7b42f852a"
+  },
+  "conversions": [
+    {
+      "label": "cases",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "--binary-match-regex=^/opt/afdo_agent/tools/integration/cases$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--show-ip-address-counts",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/host-conversion/cases.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/host-conversion/cases.json"
+      ],
+      "exit": 0,
+      "verdict": {
+        "conversion": "ok",
+        "failure_stage": null,
+        "fallback_callback_count": 0,
+        "identity": "verified",
+        "lost_ratio_check": "not_evaluated",
+        "reason": null,
+        "sample_threshold_check": "not_evaluated",
+        "sampling_adequacy": "unknown",
+        "usable_ratio_check": "not_evaluated"
+      },
+      "identity": {
+        "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "binary_build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+        "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "candidates": [
+          {
+            "deleted": false,
+            "path": "/opt/afdo_agent/tools/integration/cases"
+          }
+        ],
+        "debug_binary": null,
+        "debug_build_id": null,
+        "evidence": [
+          {
+            "build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "consistent",
+            "source": "buildid-list"
+          },
+          {
+            "build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+            "mapping_index": 39,
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "verified",
+            "source": "mmap2"
+          },
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "verified",
+            "source": "path-summary"
+          }
+        ],
+        "grade": "verified",
+        "observed_mmap_build_id": true,
+        "selection": "regex"
+      },
+      "samples": {
+        "after_event": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 6111
+          },
+          "period_sum": 6111018333,
+          "sample_count": 6111
+        },
+        "after_pid": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 6111
+          },
+          "period_sum": 6111018333,
+          "sample_count": 6111
+        },
+        "input_total": {
+          "sample_count": 6111
+        },
+        "kernel": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 48
+          },
+          "period_sum": 48000144,
+          "sample_count": 48
+        },
+        "other_dso": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 1124
+          },
+          "period_sum": 1124003372,
+          "sample_count": 1124
+        },
+        "other_dso_top20": [
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1085
+              },
+              "period_sum": 1085003255,
+              "sample_count": 1085
+            },
+            "name": "/opt/afdo_agent/work/after",
+            "share": {
+              "denominator": 1124,
+              "numerator": 1085
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 30
+              },
+              "period_sum": 30000090,
+              "sample_count": 30
+            },
+            "name": "/usr/lib/ld-linux.so.3",
+            "share": {
+              "denominator": 1124,
+              "numerator": 30
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 5
+              },
+              "period_sum": 5000015,
+              "sample_count": 5
+            },
+            "name": "/usr/lib/libc.so.6",
+            "share": {
+              "denominator": 1124,
+              "numerator": 5
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 4
+              },
+              "period_sum": 4000012,
+              "sample_count": 4
+            },
+            "name": "/opt/afdo_agent/lib/libLLVM.so.22.1",
+            "share": {
+              "denominator": 1124,
+              "numerator": 4
+            }
+          }
+        ],
+        "pid_unknown": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted_reasons": {
+          "data_or_state_change": "unknown",
+          "first_instruction": "unknown",
+          "predecessor_no_line": "unknown",
+          "range_gap": "unknown"
+        },
+        "target": {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 4939
+            },
+            "period_sum": 4939014817,
+            "sample_count": 4939
+          },
+          "in_cu_no_subprogram": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "in_func_no_line": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 12
+            },
+            "period_sum": 12000036,
+            "sample_count": 12
+          },
+          "no_cu": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_dwarf_func": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_symtab_top20": [],
+          "plt": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "unmapped_in_target": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "usable": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 4927
+            },
+            "period_sum": 4927014781,
+            "sample_count": 4927
+          }
+        },
+        "unmapped": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "written_positions": 28
+      },
+      "lost": {
+        "L": "unknown",
+        "S": 6111,
+        "completeness": "unknown",
+        "count_unit": "records",
+        "exported_lost_ratio": "unknown",
+        "records": 0,
+        "scope": "input",
+        "source": "PERF_RECORD_LOST"
+      },
+      "quality_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/host-conversion/cases.json",
+      "quality_sha256": "b7e1c845ef307cdf7988b00a9a090254211b8935eaa77ed4d1752e55b3afd8f1",
+      "profile_sha256": "f41c771f50058f29d6ca8f235bc085ece12d5100e0dcc90ae5a8e020b5f79e08",
+      "stderr": "warning: Sample PGO is estimated to optimize better with 1.2x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n"
+    },
+    {
+      "label": "after",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/after",
+        "--binary-match-regex=^/opt/afdo_agent/work/after$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--show-ip-address-counts",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/host-conversion/after.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/host-conversion/after.json"
+      ],
+      "exit": 0,
+      "verdict": {
+        "conversion": "ok",
+        "failure_stage": null,
+        "fallback_callback_count": 0,
+        "identity": "verified",
+        "lost_ratio_check": "not_evaluated",
+        "reason": null,
+        "sample_threshold_check": "not_evaluated",
+        "sampling_adequacy": "unknown",
+        "usable_ratio_check": "not_evaluated"
+      },
+      "identity": {
+        "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/after",
+        "binary_build_id": "40e5ef329b035f1c91eb80be2aa521a91f3e178a",
+        "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/after",
+        "candidates": [
+          {
+            "deleted": false,
+            "path": "/opt/afdo_agent/work/after"
+          }
+        ],
+        "debug_binary": null,
+        "debug_build_id": null,
+        "evidence": [
+          {
+            "build_id": "40e5ef329b035f1c91eb80be2aa521a91f3e178a",
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/work/after",
+            "result": "consistent",
+            "source": "buildid-list"
+          },
+          {
+            "build_id": "40e5ef329b035f1c91eb80be2aa521a91f3e178a",
+            "mapping_index": 44,
+            "path": "/opt/afdo_agent/work/after",
+            "result": "verified",
+            "source": "mmap2"
+          },
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/work/after",
+            "result": "verified",
+            "source": "path-summary"
+          }
+        ],
+        "grade": "verified",
+        "observed_mmap_build_id": true,
+        "selection": "regex"
+      },
+      "samples": {
+        "after_event": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 6111
+          },
+          "period_sum": 6111018333,
+          "sample_count": 6111
+        },
+        "after_pid": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 6111
+          },
+          "period_sum": 6111018333,
+          "sample_count": 6111
+        },
+        "input_total": {
+          "sample_count": 6111
+        },
+        "kernel": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 48
+          },
+          "period_sum": 48000144,
+          "sample_count": 48
+        },
+        "other_dso": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 4978
+          },
+          "period_sum": 4978014934,
+          "sample_count": 4978
+        },
+        "other_dso_top20": [
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 4939
+              },
+              "period_sum": 4939014817,
+              "sample_count": 4939
+            },
+            "name": "/opt/afdo_agent/tools/integration/cases",
+            "share": {
+              "denominator": 4978,
+              "numerator": 4939
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 30
+              },
+              "period_sum": 30000090,
+              "sample_count": 30
+            },
+            "name": "/usr/lib/ld-linux.so.3",
+            "share": {
+              "denominator": 4978,
+              "numerator": 30
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 5
+              },
+              "period_sum": 5000015,
+              "sample_count": 5
+            },
+            "name": "/usr/lib/libc.so.6",
+            "share": {
+              "denominator": 4978,
+              "numerator": 5
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 4
+              },
+              "period_sum": 4000012,
+              "sample_count": 4
+            },
+            "name": "/opt/afdo_agent/lib/libLLVM.so.22.1",
+            "share": {
+              "denominator": 4978,
+              "numerator": 4
+            }
+          }
+        ],
+        "pid_unknown": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted_reasons": {
+          "data_or_state_change": "unknown",
+          "first_instruction": "unknown",
+          "predecessor_no_line": "unknown",
+          "range_gap": "unknown"
+        },
+        "target": {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 1085
+            },
+            "period_sum": 1085003255,
+            "sample_count": 1085
+          },
+          "in_cu_no_subprogram": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "in_func_no_line": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "no_cu": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_dwarf_func": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_symtab_top20": [],
+          "plt": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "unmapped_in_target": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "usable": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 1085
+            },
+            "period_sum": 1085003255,
+            "sample_count": 1085
+          }
+        },
+        "unmapped": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "written_positions": 2
+      },
+      "lost": {
+        "L": "unknown",
+        "S": 6111,
+        "completeness": "unknown",
+        "count_unit": "records",
+        "exported_lost_ratio": "unknown",
+        "records": 0,
+        "scope": "input",
+        "source": "PERF_RECORD_LOST"
+      },
+      "quality_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/host-conversion/after.json",
+      "quality_sha256": "e81f2c17be2d565f283801ebdc28581969e3fe1486344ef9ff80d82982285397",
+      "profile_sha256": "f6804761ca6fc5a07da755e4a332f921089d34ace50677aaa15efd45fe7d954e",
+      "stderr": ""
+    }
+  ],
+  "independent_counts": {
+    "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/perfscript.txt",
+    "sha256": "7a02824b23867a7d441c973aa42a9d3830efaf87889e005686eeb8a7b42f852a",
+    "lines": 6160,
+    "LOST_records": 0,
+    "observed_L": 0,
+    "S": 6111,
+    "exported_lost_ratio": "unknown",
+    "sample_events": {
+      "cycles": 6111
+    },
+    "mappings": 49,
+    "unknown_lines": [],
+    "LOST_examples": [],
+    "record_printed_samples": [],
+    "record_sample_count_equals_S": "unknown"
+  },
+  "raw": {
+    "status": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/status",
+      "sha256": "d674eff09d351910fd19e80d98bcc609feb2914ebab37a07f285010fba65a4fc",
+      "text": "RECORD_EXIT 0\nEXIT 0\nALL-END 2026-11-06T14:02:46,809863699+0900 OK\n"
+    },
+    "record.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/record.stderr",
+      "sha256": "eb7022af65d743aef345a34cb9147da0baca28b38cf917738546b99d069ed543",
+      "text": "[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.193 MB /opt/afdo_agent/work/eval-20261106T140238-24926/perf.data ]\nreal 5.32\nuser 4.28\nsys 0.23\n"
+    },
+    "evlist.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/evlist.txt",
+      "sha256": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+      "text": "cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1\n"
+    },
+    "buildid-list.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/buildid-list.txt",
+      "sha256": "4e4f9bd07dff833302cdc35caab6dd3a586f61f9f2b8ca12c78efc9aa41e4dcd",
+      "text": "                                         /opt/afdo_agent/lib/libLLVM.so.22.1\nf6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5 /opt/afdo_agent/tools/integration/cases\n40e5ef329b035f1c91eb80be2aa521a91f3e178a /opt/afdo_agent/work/after\n3e855c7b550b9929b41f5dce7326835f50553afc /usr/lib/ld-linux.so.3\nc79c2b16c629ca821627425d9de5fca871a3d64c /usr/lib/libc.so.6\n395733b9c917cb98309b39cc3ec379c03ac36b3f [kernel.kallsyms]\n"
+    },
+    "perfscript.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/perfscript.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "report.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/report.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "workload.stdout": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/workload.stdout",
+      "sha256": "55ccf60a6000e5599407bfda9f90995661c854ca3bb0ab62621e9a84b20fd754",
+      "text": "BEFORE PID=25019\nEXEC PID=25019 CHECKSUM=ff818b861cb93a67\nAFTER PID=25019\nAFTER_DONE 583b2e51\n"
+    },
+    "perf-stat.csv": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/exec/perf-stat.csv",
+      "sha256": "c8f701ee98d8b6d8981b564964635c6b67029bfe4e6e1a6afe2e024a99039a1e",
+      "text": "# started on Fri Nov  6 14:02:39 2026\n\n6037724493;;cycles;4033374999;100.00;1.497;GHz\n9607032267;;instructions;4033374999;100.00;1.59;insn per cycle\n4033.37;msec;task-clock;4033374999;100.00;0.998;CPUs utilized\n"
+    },
+    "report_lost_lines": [
+      "# Total Lost Samples: 0"
+    ]
+  },
+  "remote_command": {
+    "command": "RUN_ESTIMATE_BYTES=20000000 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/integration.sh exec",
+    "transport_rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/chmod\nDEPENDENCY_OK chmod\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/dbus-send\nDEPENDENCY_OK dbus-send\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/getconf\nDEPENDENCY_OK getconf\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/sbin/lsmod\nDEPENDENCY_OK lsmod\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1036496896 estimate_bytes=20000000 required_bytes=240000000\nRUNPATH /opt/afdo_agent/work/eval-20261106T140238-24926\nRESULTS /opt/afdo_agent/work/eval-20261106T140238-24926\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+}

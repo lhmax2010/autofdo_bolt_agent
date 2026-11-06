@@ -26,13 +26,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-06；只读重试裁决，保留RUN恢复完成）
+## 当前授权与执行状态（2026-11-06；补丁8小修与RPi4第一轮闭合）
 
-- 新授权：只读命令缺退出码最多重试2次、结果须一致、原stdout/stderr/时间全留；状态命令不重试。15主机测试通过。预注册/修订1不变。[报告12第14节](profgen/impl/12_board_round1.md)
-- 停住的A32 spike中档r3已核验99项、完成收据并删除，target106593；本阶段重试0次。累计36/70组、55物理S；root已恢复off(uid5001)，schedutil未改，RPM1232，/opt available1013128KiB。[收据](profgen/impl/evidence/12/50_recovered_receipt.json)
-- 本轮剩余矩阵已于10:45:38后台启动（temp/board-round1-retry/worker.py，PID1015752）；当前root已开启、policy0=performance，结束/失败必须恢复原uid5001/schedutil。上条“已恢复”仅指保留RUN恢复阶段，不是当前状态。剩余34组、14训练、LOST及5集成预计2.5–3小时；不覆盖原件。状态命令缺退出码或SDB断连即停。
-- 补丁8小修完成：LLVM amend `660a46f036a47ecc940e02b153d3e76e6eb39e79`，新工具SHA `9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`。GBS1157.977秒/111步，lit84 PASS/1 UNSUPPORTED/1 XFAIL/0 FAIL，C1两遍636条0差异，14重放及153个Clang profile不变，schema390字段差集0；0008反向检查通过，spec不提交。映射不可用保留原区间并告警，按需boundary仍失败，待v0.8登记。[报告13第8节](profgen/impl/13_patch8_thumb_dwarf.md)
-- 真实avg挂账保持关闭，LOST/集成/训练未完成；非叶子line0规则待PM。下一步恢复矩阵并在主机小修/GBS验收，每阶段更新状态，不开始Agent。
+- 保留RUN恢复完成：99项SHA与首次清单/本机完全一致，target106593计入矩阵，确切目录已删除。实际缺码重试0次；只读最多2次重试裁决已落实、15项主机门禁测试通过。预注册7d3d9d9与修订1不变。[恢复](profgen/impl/12_board_round1.md)、[审计](profgen/impl/evidence/12/51_retry_audit.json)
+- 补丁8小修完成：LLVM `660a46f036a47ecc940e02b153d3e76e6eb39e79`，正式工具SHA `9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`。GBS1157.977秒/111步，lit84 PASS/1 UNSUPPORTED/1 XFAIL/0 FAIL，C1两遍各636条0差异，14历史重放与153个Clang profile不变，0008反向检查通过；spec未提交。[报告13](profgen/impl/13_patch8_thumb_dwarf.md)
+- 正式S完成70/70逻辑组（14配置各5组）、106物理RUN，target11,131,603/usable8,235,324；106份sample与20份频率period profile均与旧补丁8逐字节一致，身份全部verified、name_merged_functions=0。FFmpeg两ISA各33规范化区间，别名72次全部一致，映射不可用0。[完整性](profgen/impl/evidence/12/65_completeness.json)、[矩阵](profgen/impl/evidence/12/56_matrix_summary.json)
+- 按修订1：31 clean/28 abnormal/11 unknown；clean target4,807,883/usable4,109,735，旧7份仍unknown。14/14 R/C/G5训练及测试参考已按stage合并profdata，setup排除。没有做配置质量分析、消费构建或性能结论。[报告12第15节](profgen/impl/12_board_round1.md)、[profdata](profgen/impl/evidence/12/58_profdata_summary.json)
+- LOST完整导出闭合：主压力423条LOST、L58343、S1190755；系统压力626条、L71965、S1720866，独立L/(L+S)与工具一致。fork/exec/deleted/模块/系统级五项通过；取得16条真实-1/-1和335条([unknown])，PID筛选与分类正确，关闭unknown实测挂账。[报告12第16节](profgen/impl/12_board_round1.md)、[特殊样本](profgen/impl/evidence/12/69_special_samples.json)
+- 流程修正如实保留：首次LOST试采因Bash3.2空数组nounset在perf启动前退出1，恢复后修正并新试采一次；不是缺码重试。主机JSON工具路径/继承映射核对器的两次误报已保留原文并修正，未改数据/LLVM规则。[Bash证据](profgen/impl/evidence/12/66_bash_compatibility_fix.json)、[继承核对](profgen/impl/evidence/12/67_independent_checker_correction.json)
+- 最终已恢复root off(uid5001)、policy0=schedutil，RPM1232不变；/opt used294728KiB/available1010888KiB。所有本轮RUN已SHA核验后删除，工具/变体/视频保留；无活动采集任务。执行阶段累计8228.477秒（含传输/核验），首条恢复至末次恢复墙钟9133.291秒。[恢复](profgen/impl/evidence/12/70_completion_and_restoration.json)
+- 真实avg保持已关闭。全量非叶子line0=2736，target占0.0245787%、usable占0.0332227%，涉及5个顶层函数；处理规则仍待PM。下一步等待质量分析/消费构建授权及v0.8登记评审，Agent开发不开始。
 
 ## 上轮阶段状态（历史）（2026-11-06；补丁8完成，板上在第二次清单退出码门禁停止）
 
@@ -389,13 +392,13 @@
 
 # 项目状态
 
-更新：2026-11-03（Asia/Shanghai）。当前设计v0.7第一阶段已冻结；llvm-profgen补丁1–7已完成，正式验收与待设计v0.8登记见上方当前状态。下一步等待用户授权；Agent设计开发尚未开始。各轮探测、spike、构建与历史停止记录保留。**旧提交 e90492e 的探测结论全部作废；后续各轮采用独立证据。** 每个新会话开场先读本文件，收尾时与报告在同一个commit更新。
+更新：2026-11-06（Asia/Shanghai）。当前设计v0.7第一阶段已冻结；llvm-profgen补丁1–8及RPi4第一轮采集/训练/集成已完成，正式验收与待设计v0.8登记见上方当前状态。下一步等待质量分析/消费构建授权；Agent设计开发尚未开始。各轮探测、spike、构建与历史停止记录保留。**旧提交 e90492e 的探测结论全部作废；后续各轮采用独立证据。** 每个新会话开场先读本文件，收尾时与报告在同一个commit更新。
 
 ## 计划
 
-- 24项生成侧构建已完成，RPi4第一轮已获授权并完成35/70组，因第二次清单退出码缺失停止且恢复；剩余矩阵/训练/集成等待指示。补丁8与真实avg已验收；不开展后续消费构建/配置质量比较。probe子方案独立挂账。
+- 24项生成侧构建已完成；RPi4第一轮70组S、14次训练与5集成已闭合，补丁8小修、真实avg、高LOST完整导出已验收。下一步消费构建/配置质量分析等待授权；probe子方案独立挂账。
 
-- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；补丁1–8已完成，板上流程按当前停止记录等待指示；Agent设计与开发仍在llvm-profgen增强完成后才开始。
+- 当前设计v0.7，第一阶段（正确性规则与契约，第10节步骤2范围）已冻结；v0.6限定范围复核（Codex、Claude Code）处理见附录F。冻结范围内规则的修改须单独提出并在设计文档中记录。交付前非★项见“挂账”，第二阶段待定事项见设计第12节；补丁1–8与RPi4第一轮已完成，下一步质量分析/消费构建等待指示；Agent设计与开发仍在llvm-profgen增强完成后才开始。
 
 - v0.2 已确定分批范围：原生 perf.data 解析和 SPE 放第三批；内核模块、Chromium 规模放第二批。保留增量 buildroot/worktree；第一阶段已冻结、补丁1至补丁8已授权完成，后续评估与开发等待新授权。
 
@@ -418,7 +421,7 @@
 
 ## 进度
 
-- 2026-11-06：补丁8与真实avg闭合；35/70正式组、54份verified转换，板上传输门禁停止，root/governor已恢复。训练/LOST/集成未执行，详见本文件开头及报告12第13节。
+- 2026-11-06：补丁8小修通过；70/70正式组、106份verified转换与14份profdata完成，LOST/五集成/unknown实测闭合，root/governor恢复。原停止记录保留报告12第13节，恢复与最终结果见14–16节。
 
 - 2026-11-04（裁决后）：匹配/统计脚本与板上计划完成，24项spike/FFmpeg生成侧构建及产物核对通过；原R冲突停止记录保留于报告1–6节。[报告11](profgen/impl/11_eval_prep.md)
 
@@ -565,7 +568,7 @@
 
 ## 已闭合结论（附证据路径）
 
-- 补丁8同指令别名规则与正式GBS/lit/C1验收通过；本轮54份真实转换33次别名校验全通过。真实avg按本轮裁决用匹配评估产物与BBB样本完成GNU独立715键零差异，挂账关闭。[报告13](profgen/impl/13_patch8_thumb_dwarf.md)、[avg证据](profgen/impl/evidence/12/31_real_avg_independent.json)
+- 补丁8同指令别名及映射不可用小修通过正式GBS/lit/C1；106份正式转换72次别名校验全通过，profile与旧补丁8一致。真实avg用匹配评估产物与BBB样本完成GNU独立715键零差异，挂账关闭。[报告13](profgen/impl/13_patch8_thumb_dwarf.md)、[avg证据](profgen/impl/evidence/12/31_real_avg_independent.json)
 
 - pseudo-probe拆分后节位置按用户裁决由aarch64证据闭合：运行文件/调试文件两种位置拒绝均成立，不依赖架构。armv7l probe编译崩溃另归probe子方案。[拆分证据](profgen/impl/evidence/10/07_aarch64_split.json)、[裁决登记](profgen/impl/11_eval_prep.md#1-已生效的裁决)
 
@@ -631,12 +634,12 @@
 
 ## 待人工裁决
 
-- R/C/G5类型、Tears of Steel测试输入、ε、预注册/修订1、root与performance权限均已裁决并执行；不再重复索要。当前待处理的是第二次远端SHA清单缺退出码标记的取证/恢复方式，不能据可见SHA绕过门禁。[停止证据](profgen/impl/evidence/12/44_transfer_stop.json)
+- R/C/G5类型、ToS输入、ε、预注册/修订1、root/performance及只读缺码重试均已裁决执行；保留RUN恢复已闭合，不再重复索要。当前待PM的是非叶子line0处理及下一步质量分析/消费构建授权；v0.8登记包含GNU AS规范化、别名一致性和映射不可用降级规则。
 
-- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–8已完成，板上流程按当前停止记录等待指示；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
+- [设计v0.7](profgen/design/02_llvm_profgen_enhance_design_v0.7.md)第一阶段已冻结，补丁1–8与RPi4第一轮已完成，下一步质量分析/消费构建等待指示；第二阶段待定事项见第12节。主机perf构建与`--perfdata`准入仍待决定，IP模式仍拒绝perfdata；文本输入已可生成profile。
 
 
-- 实际 FFmpeg/GStreamer/Chromium/kernel 包如何接入插桩训练、选择代表性输入及保留匹配二进制；本轮只验证小 C 程序，未实现 Agent。是否授权后续构建/验证 Google 无 LBR 工具、真实包插桩与 RPi5 BOLT -ba；RPi4小程序插桩已由05/06验证。
+- 本轮已完成spike及FFmpeg生成侧变体/训练输入采集；后续消费构建、质量与性能效果等待授权。Chromium/kernel/跨板集成及Agent仍未实现；Google无LBR和BOLT候选验证另行授权。
 
 - 新镜像已由用户交付并通过05的PMUv3验收；Agent不向Gerrit推送，不恢复已取消的手工安装方案。后续镜像交付由用户决定。
 
@@ -649,15 +652,15 @@
 ## 挂账
 
 - probe子方案（设计第10节步骤8）阻塞：平台Clang22.1.8在armv7l/Thumb的pseudo-probe小包构建中段错误；保留temp/profgen-host-verification/build重现材料，待单独授权定位，不绕过。按用户裁决，该项不阻塞第一批DWARF路径；probe拆分后节位置已按aarch64证据关闭。[报告10停止节](profgen/impl/10_host_verification.md#44-停止证据与候选方案)、[裁决登记](profgen/impl/11_eval_prep.md#1-已生效的裁决)
-- [unknown]真实板上样例挂账继续保留；已有合成素材有效，本轮计划的系统级集成因传输门禁未执行。
+- 已关闭[unknown]真实样例：本轮系统级双解码压力取得335条([unknown])及16条-1/-1，原始文本/行号与工具分类核对已保留。[证据](profgen/impl/evidence/12/69_special_samples.json)
 
 - 已关闭：IP新选项枚举与cl::values由补丁7完成，显式aggregation语义保持。[报告](profgen/impl/09_patch7_report.md)
-- 非叶子帧行号为0规则待PM：本轮54份正式S共1371样本，target占0.0231905%，涉及5顶层函数；未改处理方式。[统计](profgen/impl/evidence/12/41_nonleaf_final.json)
+- 非叶子帧行号为0规则待PM：本轮106份正式S共2736样本，target占0.0245787%、usable占0.0332227%，涉及5顶层函数；未改处理方式，另列零行号帧函数统计。[统计](profgen/impl/evidence/12/57_nonleaf_summary.json)
 - 已关闭真实avg：按最新裁决使用本轮同次评估构建和中档BBB真实采集，原3热点11,525指令/715键GNU独立sum/max/avg均一致；未套用旧镜像地址。head零估计挂账仍保持已关闭。[证据](profgen/impl/evidence/12/31_real_avg_independent.json)
 
 - 本轮授权generation=0为未知；inode被复用且一条记录generation为0时，替换可能无法发现。不能将allow-missing后的unverified提升为verified；源码与限制见[补丁3规则修正登记](profgen/impl/05_patch3_identity.md)。
 
-- 06的完整loss1 perf-script文本未保留；703,821条样本与完整导出行数是否相等尚不可核对。本轮仅确认过滤后942条LOST及L=61,667，未重采或重导。[收尾报告](profgen/impl/04_patch2_followup.md)
+- 已关闭06高LOST完整导出验收挂账：新主压力423条LOST、L58343、S1190755，独立重算与工具一致；系统级补充626条/L71965/S1720866。旧06遗失文本和703821仍不可追溯，不宣称恢复旧材料。[新完整实测](profgen/impl/evidence/12/60_lost-bounded.json)
 
 - 开发工作树 `temp/llvm-profgen-enh/packaging/llvm.spec` 的LLVM_INCLUDE_TESTS=ON和%check改动只本地保留，**正式非增量构建前必须撤销**，不得进入增强补丁。LLVM site配置与原有lit基线已闭合；assertions专用测试在当前No配置下仍为UNSUPPORTED。[报告](profgen/impl/02_lit_env.md)
 

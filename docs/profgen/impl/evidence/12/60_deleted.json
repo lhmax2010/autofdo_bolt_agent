@@ -1,0 +1,483 @@
+{
+  "tag": "deleted",
+  "mode": "deleted",
+  "remote": "/opt/afdo_agent/work/eval-20261106T140254-25808",
+  "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted",
+  "seconds": 5.8898486210091505,
+  "rc": 0,
+  "bytes": 55664,
+  "receipt_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted-receipt.json",
+  "receipt_sha256": "e0b31541806a3864ddfa6be40f34ce0dc93ad33b1be9a6fa447b459a26b733dc",
+  "verified_files": 36,
+  "deleted": true,
+  "original_sha256": {
+    "evlist.txt": "090bd13df1dc4bdebb0654b147188eb84710e23601fbe8e890e6d9ba82cdc42b",
+    "status": "1215543d0be8af46433228f071b017223bf8470c697bf4dbfacf584f92882157",
+    "perf.data": "a8b1a29edca171d259aea1231599d4faa94d9c0c4c01ffcae531fb34695de753",
+    "record.stderr": "86d7db90b39cf89289232648bdfbec76075fd47ee15cf4d395c20ba049040f2f",
+    "buildid-list.txt": "b8fb88962d6da68850b21a4c8c2040b6fb88107ae8e5a9a2572d67aa050784c4",
+    "perfscript.txt": "b888558c819fce6018d33ce869d01baaf536de830996bb0878ab920c9d07d900"
+  },
+  "conversions": [
+    {
+      "label": "deleted-library",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+        "--binary-match-regex=^/opt/afdo_agent/work/libdeleted_probe\\.so\\ \\(deleted\\)$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--show-ip-address-counts",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/host-conversion/deleted-library.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/host-conversion/deleted-library.json"
+      ],
+      "exit": 1,
+      "verdict": {
+        "conversion": "failed",
+        "failure_stage": "identity",
+        "fallback_callback_count": 0,
+        "identity": "unverified",
+        "lost_ratio_check": "not_evaluated",
+        "reason": "IP sample mode: missing build-id evidence; use --allow-missing-build-id only for unverified identity",
+        "sample_threshold_check": "not_evaluated",
+        "sampling_adequacy": "unknown",
+        "usable_ratio_check": "not_evaluated"
+      },
+      "identity": {
+        "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+        "binary_build_id": "390adaa690f0167d6f59403cc8d7deb4a04a7d86",
+        "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+        "candidates": [
+          {
+            "deleted": true,
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)"
+          }
+        ],
+        "debug_binary": null,
+        "debug_build_id": null,
+        "evidence": [
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)",
+            "result": "missing",
+            "source": "buildid-list"
+          },
+          {
+            "build_id": null,
+            "mapping_index": 13,
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)",
+            "result": "unverified",
+            "source": "missing"
+          },
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)",
+            "result": "unverified",
+            "source": "path-summary"
+          }
+        ],
+        "grade": "unverified",
+        "observed_mmap_build_id": true,
+        "selection": "regex"
+      },
+      "samples": {
+        "after_event": {
+          "normalized_weight": "unknown",
+          "period_sum": 95000285,
+          "sample_count": 95
+        },
+        "after_pid": {
+          "normalized_weight": "unknown",
+          "period_sum": 95000285,
+          "sample_count": 95
+        },
+        "input_total": {
+          "sample_count": 95
+        },
+        "kernel": {
+          "normalized_weight": "unknown",
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "other_dso": {
+          "normalized_weight": "unknown",
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "other_dso_top20": [],
+        "pid_unknown": {
+          "normalized_weight": "unknown",
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted": "unknown",
+        "skid_unadjusted_reasons": {
+          "data_or_state_change": "unknown",
+          "first_instruction": "unknown",
+          "predecessor_no_line": "unknown",
+          "range_gap": "unknown"
+        },
+        "target": {
+          "counts": {
+            "normalized_weight": "unknown",
+            "period_sum": 95000285,
+            "sample_count": 95
+          },
+          "in_cu_no_subprogram": "unknown",
+          "in_func_no_line": "unknown",
+          "no_cu": "unknown",
+          "outside_dwarf_func": "unknown",
+          "outside_symtab_top20": "unknown",
+          "plt": "unknown",
+          "unmapped_in_target": "unknown",
+          "usable": "unknown"
+        },
+        "unmapped": {
+          "normalized_weight": "unknown",
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "written_positions": "unknown"
+      },
+      "lost": {
+        "L": "unknown",
+        "S": 95,
+        "completeness": "unknown",
+        "count_unit": "records",
+        "exported_lost_ratio": "unknown",
+        "records": 0,
+        "scope": "input",
+        "source": "PERF_RECORD_LOST"
+      },
+      "quality_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/host-conversion/deleted-library.json",
+      "quality_sha256": "9bfd252ac2c0378160541baecd206207e6d0f21583904fb41fbf2da7be198a5a",
+      "profile_sha256": null,
+      "stderr": "llvm-profgen: error: IP sample mode: missing build-id evidence; use --allow-missing-build-id only for unverified identity\n"
+    },
+    {
+      "label": "deleted-library-allow",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+        "--binary-match-regex=^/opt/afdo_agent/work/libdeleted_probe\\.so\\ \\(deleted\\)$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--show-ip-address-counts",
+        "--allow-missing-build-id",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/host-conversion/deleted-library-allow.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/host-conversion/deleted-library-allow.json"
+      ],
+      "exit": 0,
+      "verdict": {
+        "conversion": "ok",
+        "failure_stage": null,
+        "fallback_callback_count": 0,
+        "identity": "unverified",
+        "lost_ratio_check": "not_evaluated",
+        "reason": null,
+        "sample_threshold_check": "not_evaluated",
+        "sampling_adequacy": "unknown",
+        "usable_ratio_check": "not_evaluated"
+      },
+      "identity": {
+        "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+        "binary_build_id": "390adaa690f0167d6f59403cc8d7deb4a04a7d86",
+        "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/libdeleted_probe.so",
+        "candidates": [
+          {
+            "deleted": true,
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)"
+          }
+        ],
+        "debug_binary": null,
+        "debug_build_id": null,
+        "evidence": [
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)",
+            "result": "missing",
+            "source": "buildid-list"
+          },
+          {
+            "build_id": null,
+            "mapping_index": 13,
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)",
+            "result": "unverified",
+            "source": "missing"
+          },
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/work/libdeleted_probe.so (deleted)",
+            "result": "unverified",
+            "source": "path-summary"
+          }
+        ],
+        "grade": "unverified",
+        "observed_mmap_build_id": true,
+        "selection": "regex"
+      },
+      "samples": {
+        "after_event": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 95
+          },
+          "period_sum": 95000285,
+          "sample_count": 95
+        },
+        "after_pid": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 95
+          },
+          "period_sum": 95000285,
+          "sample_count": 95
+        },
+        "input_total": {
+          "sample_count": 95
+        },
+        "kernel": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "other_dso": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "other_dso_top20": [],
+        "pid_unknown": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted_reasons": {
+          "data_or_state_change": "unknown",
+          "first_instruction": "unknown",
+          "predecessor_no_line": "unknown",
+          "range_gap": "unknown"
+        },
+        "target": {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 95
+            },
+            "period_sum": 95000285,
+            "sample_count": 95
+          },
+          "in_cu_no_subprogram": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "in_func_no_line": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "no_cu": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_dwarf_func": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_symtab_top20": [],
+          "plt": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "unmapped_in_target": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "usable": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 95
+            },
+            "period_sum": 95000285,
+            "sample_count": 95
+          }
+        },
+        "unmapped": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "written_positions": 1
+      },
+      "lost": {
+        "L": "unknown",
+        "S": 95,
+        "completeness": "unknown",
+        "count_unit": "records",
+        "exported_lost_ratio": "unknown",
+        "records": 0,
+        "scope": "input",
+        "source": "PERF_RECORD_LOST"
+      },
+      "quality_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/host-conversion/deleted-library-allow.json",
+      "quality_sha256": "038787c7cb645286d5a63c5653c155fc9341f51017341acc5b8c8bcaee55e668",
+      "profile_sha256": "08d88dd68f53eaa594308f0791c7eef3406254d6b4bbe6dec4cb55cdc8c07391",
+      "stderr": ""
+    }
+  ],
+  "independent_counts": {
+    "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/perfscript.txt",
+    "sha256": "b888558c819fce6018d33ce869d01baaf536de830996bb0878ab920c9d07d900",
+    "lines": 113,
+    "LOST_records": 0,
+    "observed_L": 0,
+    "S": 95,
+    "exported_lost_ratio": "unknown",
+    "sample_events": {
+      "cycles": 95
+    },
+    "mappings": 18,
+    "unknown_lines": [],
+    "LOST_examples": [],
+    "record_printed_samples": [],
+    "record_sample_count_equals_S": "unknown"
+  },
+  "raw": {
+    "status": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/status",
+      "sha256": "1215543d0be8af46433228f071b017223bf8470c697bf4dbfacf584f92882157",
+      "text": "RECORD_EXIT 0\nEXIT 0\nALL-END 2026-11-06T14:02:57,076822285+0900 OK\n"
+    },
+    "record.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/record.stderr",
+      "sha256": "86d7db90b39cf89289232648bdfbec76075fd47ee15cf4d395c20ba049040f2f",
+      "text": "[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.006 MB /opt/afdo_agent/work/eval-20261106T140254-25808/perf.data ]\nreal 1.30\nuser 0.25\nsys 0.24\n"
+    },
+    "evlist.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/evlist.txt",
+      "sha256": "090bd13df1dc4bdebb0654b147188eb84710e23601fbe8e890e6d9ba82cdc42b",
+      "text": "cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1\n"
+    },
+    "buildid-list.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/buildid-list.txt",
+      "sha256": "b8fb88962d6da68850b21a4c8c2040b6fb88107ae8e5a9a2572d67aa050784c4",
+      "text": "                                         /opt/afdo_agent/work/libdeleted_probe.so (deleted)\n"
+    },
+    "perfscript.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/perfscript.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "report.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/report.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "workload.stdout": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/workload.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "deleted.stdout": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/deleted.stdout",
+      "sha256": "2710c580f1c42cb393f087f75a2d0a108a71115a8684998421a34ace0be5fcb3",
+      "text": "DELETED PID=25864 CHECKSUM=20dfff6f\n"
+    },
+    "deleted.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/deleted.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "perf-stat.csv": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/deleted/perf-stat.csv",
+      "sha256": "2b7755fa466de05dfd2d4a43f76665118ab07ad75a90fcafa18490afb686296d",
+      "text": "# started on Fri Nov  6 14:02:55 2026\n\n18821308;;cycles;12574351;100.00;1.497;GHz\n7222878;;instructions;12574351;100.00;0.38;insn per cycle\n12.57;msec;task-clock;12574351;100.00;0.110;CPUs utilized\n"
+    },
+    "report_lost_lines": [
+      "# Total Lost Samples: 0"
+    ]
+  },
+  "remote_command": {
+    "command": "RUN_ESTIMATE_BYTES=20000000 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/integration.sh deleted",
+    "transport_rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/chmod\nDEPENDENCY_OK chmod\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/dbus-send\nDEPENDENCY_OK dbus-send\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/getconf\nDEPENDENCY_OK getconf\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/sbin/lsmod\nDEPENDENCY_OK lsmod\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1036439552 estimate_bytes=20000000 required_bytes=240000000\nRUNPATH /opt/afdo_agent/work/eval-20261106T140254-25808\nRESULTS /opt/afdo_agent/work/eval-20261106T140254-25808\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+}

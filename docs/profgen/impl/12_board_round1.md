@@ -1,6 +1,6 @@
 # RPi4 第一轮板上评估：采集进展与停止记录
 
-**当前结果见第9节：7份正式采集已拉回，真实avg在GNU AS的Thumb DWARF边界处停止，governor/root已恢复；预注册未改。第1–8节为保留的历史记录。**
+**最新结果（2026-11-06）见第14–16节：70/70组正式S、14份stage profdata、五项集成完成；106份正式profile身份verified且新旧字节一致。高LOST完整导出、真实avg及unknown实测挂账闭合。root/governor已恢复，预注册及修订1不变。第1–13节为保留的历史进展与停止记录。**
 
 以下为首次停止记录：本轮**未完成正式评估**。16 项目标部署 SHA 通过，硬件 cycles 实际采到非零样本；第一次 Thumb spike 校准在收尾 RPM 数量比较处因板上没有 `cmp` 失败。依据 STATUS 最高原则第 3 条“缺工具就停下，在报告里说明”，停止后续采集、训练和主机 profile 生成，没有安装工具或现场绕过。此次不是 llvm-profgen 缺陷，正式工具未运行、未修改。
 
@@ -524,3 +524,159 @@ finally回读policy0=schedutil，sdb root off后uid5001；RPM1232→1232。结�
 第2条RUN已恢复：身份/同内核断言与非root25项预检通过，原uid5001；root下首次重新读取清单即成功，**重试0次**。99项与原首次清单及本机副本完全一致，删除确切目录后写完成收据，退出0。root恢复关闭、governor未改仍schedutil、RPM1232；/opt used292488KiB/available1013128KiB，耗时3.095秒。[全部原文](evidence/12/50_recovery_transport.jsonl)、[收据](evidence/12/50_recovered_receipt.json)、[恢复](evidence/12/50_recovery_result.json)。
 
 该RUN target106593、总样本106709，按修订1未观察到节流；现在纳入A32 spike中档r3，合计36/70组、55完整物理S，原历史停止记录不覆盖。后续使用新阶段目录temp/board-round1-retry，显式跳过已完成36组。剩余预计2.5–3小时板上时间；本阶段恢复后尚未恢复采集。补丁8小修验收前只用存档41440292…工具转换，不能使用开发工具。
+
+
+## 15. 本轮恢复采集与补丁8小修后的全量转换（2026-11-06）
+
+### 执行与门禁
+
+本轮先按第14节恢复保留RUN（99项一致、target106593、0重试），再进入独立的`temp/board-round1-retry/`阶段。28项非root依赖、root下已部署文件/三视频SHA和perf版本预检通过后固定performance；未改sysctl、RPM或预注册。新增integration脚本通过bash语法检查，额外系统依赖为chmod、lsmod、dbus-send。[清单](evidence/12/53_dependencies.json)、[语法](evidence/12/53_board_syntax.json)
+
+完整传输仍为拉回→实际落盘文件集/SHA→远端清单复核→删确切RUN。缺退出码仅只读命令可最多重试两次，并须与此前结果一致；状态命令不重试。每个真实尝试的stdout/stderr/时间在temp的JSONL，仓库保留SHA及全部异常/重试原文。[重试审计](evidence/12/51_retry_audit.json)、[RUN完整性、空间门禁、600秒资源与恢复](evidence/12/52_run_integrity.json)。未删工具、变体腾空间。主机哈希失败注入及只读重试门禁的15项测试均通过，坏哈希情形删除调用为0；对应本轮第14节的主机回归证据，正式采集前已完成。
+
+主机校验曾因未将“存档工具argv[0]→正式工具argv[0]”路径变化列入预期而误报。独立复核当时55份profile与其他JSON字段一致后修正校验器，保留失败原文；未重试远端命令、未重采RUN，采集进程尚未结束时已清除误报标记。[主机校验修正](evidence/12/54_host_harness_correction.json)。这不是llvm-profgen缺陷，不改变比较规则中的任何数值或质量字段。
+
+### 已完成矩阵与干净子集
+
+完成70/70个逻辑组、106份已核验的物理S RUN；target合计11,131,603，usable合计8,235,324。逻辑组的资格：clean 31、abnormal 28、unknown 11。原7份数据仍按修订1保留unknown，不补造起始频率边界与精确cycles/task-clock。下表并列剔除前后数据；没有做配置间质量比较或消费构建。 spike仅有rounds/seed参数，没有独立热点分布模式，仍不改源码、不构造区分度负对照。
+
+|变体 / 模式 / 输入 / 预算|完成组数|全量target|全量usable|clean组数|clean target|clean usable|abnormal / unknown|
+|---|---:|---:|---:|---:|---:|---:|---:|
+|ffmpeg-a32-S/sample-fixed/bbb/100000|5|550,478|333,905|0|0|0|5 / 0|
+|ffmpeg-thumb-S/sample-fixed/bbb/100000|5|543,293|326,284|0|0|0|4 / 1|
+|ffmpeg-thumb-S/sample-fixed/bbb/20000|5|181,480|108,013|0|0|0|4 / 1|
+|ffmpeg-thumb-S/sample-fixed/bbb/400000|5|2,176,273|1,305,104|0|0|0|5 / 0|
+|ffmpeg-thumb-S/sample-fixed/tos/100000|5|611,455|352,198|0|0|0|5 / 0|
+|ffmpeg-thumb-S/sample-freq/bbb/100000|5|542,200|324,608|0|0|0|5 / 0|
+|spike-a32-S/sample-fixed/bbb/100000|5|537,334|535,960|4|430,767|429,673|0 / 1|
+|spike-a32-S/sample-fixed/bbb/20000|5|107,045|106,779|4|85,698|85,488|0 / 1|
+|spike-a32-S/sample-fixed/bbb/400000|5|2,057,734|2,052,578|4|1,652,396|1,648,312|0 / 1|
+|spike-a32-S/sample-freq/bbb/100000|5|559,833|558,489|4|448,057|446,983|0 / 1|
+|spike-thumb-S/sample-fixed/bbb/100000|5|537,761|367,139|4|430,886|294,377|0 / 1|
+|spike-thumb-S/sample-fixed/bbb/20000|5|107,652|73,953|4|86,091|59,107|0 / 1|
+|spike-thumb-S/sample-fixed/bbb/400000|5|2,050,942|1,401,486|3|1,218,238|833,055|0 / 2|
+|spike-thumb-S/sample-freq/bbb/100000|5|568,123|388,828|4|455,750|312,740|0 / 1|
+
+逐组来源、实际样本数、各层排除、ISA、身份、别名查询及每份质量报告路径见[全量摘要](evidence/12/56_matrix_summary.json)。共享视频保留以供下一轮；每份perf.data、严格字段完整导出、buildid-list、evlist、stderr、退出码与逐秒环境原件存于摘要的source目录，未过滤导出。
+
+### 最终工具与非叶子line0
+
+最终工具SHA `9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`，LLVM提交`660a46f036a47ecc940e02b153d3e76e6eb39e79`。全部106份sample profile与旧41440292工具逐字节相同；频率模式period输出另见[逐份比较](evidence/12/55_period_comparison.json)。报告的统计/身份/计数不变，仅新增unavailable_range_count=0、unavailable_top50=[]，以及明确记录的工具/输出路径变化；完整差异按20份一档保存在`evidence/12/59_final_profile_comparison_*.json`，原始JSON在temp/final-converted。
+
+所有正式S身份均verified，coverage.name_merged_functions均0（以逐份摘要为准）；每种变体的规范化区间数为{'ffmpeg-thumb-S': 33, 'spike-a32-S': 0, 'spike-thumb-S': 0, 'ffmpeg-a32-S': 33}。别名查询合计72次，一致性通过72次；没有真实映射加载失败，也没有别名行表一致性失败。
+
+非叶子line0共2,736样本，占target的0.0245787%，占usable的0.0332227%。逐地址帧查询与正式诊断计数逐RUN相符；辅助LLVM查询只用于定位此项统计，不冒充avg独立核对。[完整明细](evidence/12/57_nonleaf_summary.json)
+
+|顶层函数|nonleaf line0样本|
+|---|---:|
+|ff_h264_decode_mb_cabac|2,577|
+|ff_h264_filter_mb|148|
+|ff_h264_queue_decode_slice|6|
+|ff_h264_decode_ref_pic_list_reordering|3|
+|ff_h264_decode_ref_pic_marking|2|
+
+零行号非叶子帧本身的函数统计如下；同一样本可涉及多个帧函数，因此此表不能求和作为不同样本总数。
+
+|零行号帧函数|涉及样本数|
+|---|---:|
+|ff_h264_decode_mb_cabac|2,576|
+|_ZL13filter_mb_dirPK11H264ContextP16H264SliceContextiiPhS4_S4_jjiiiiiiii.__uniq.275345673349404074195048302594725744325|148|
+|_ZL13get_bits_longP13GetBitContexti.__uniq.248544299231367077551893488431358088102|6|
+|_ZL13get_bits_longP13GetBitContexti.__uniq.289719813497377065643056867246459224287|5|
+|_ZL26decode_cabac_luma_residualPK11H264ContextP16H264SliceContextPKhS5_iiii.__uniq.27894887720519182085624620829320312160|1|
+
+仅提交数据供PM裁决，未改变非叶子line0规则。真实avg挂账保持已闭合：第12节原3热点、11,525指令、715键GNU独立核对；本次小修不改变有效映射的profile，不重复该验收。
+
+### 分阶段profdata
+
+已完成14/14次训练/参考运行，按stage、ISA、对象、输入分别合并；setup-*.profraw全部排除。下表的计数总量是llvm-profdata show打印的Function count与Block counts之和，不能解释为程序执行次数。每份输入SHA、平台工具命令、函数数、分类计数与输出SHA见[合并摘要](evidence/12/58_profdata_summary.json)。
+
+|RUN|函数数|打印计数总量|训练profraw数|
+|---|---:|---:|---:|
+|train-spike-thumb-R|13|9,149,862,866|1|
+|train-ffmpeg-thumb-R|13,253|2,513,188,804|6|
+|train-spike-thumb-C|11|13,333,474,864|1|
+|train-ffmpeg-thumb-C|12,846|2,910,257,060|6|
+|train-spike-thumb-G5|9|8,883,829,615|1|
+|train-ffmpeg-thumb-G5|8,303|1,300,463,665|6|
+|train-spike-a32-R|13|9,149,862,866|1|
+|train-ffmpeg-a32-R|13,253|2,513,188,804|6|
+|train-spike-a32-C|11|13,333,474,864|1|
+|train-ffmpeg-a32-C|12,846|2,910,257,060|6|
+|train-spike-a32-G5|9|8,883,829,615|1|
+|train-ffmpeg-a32-G5|8,306|1,300,463,665|6|
+|test-ffmpeg-thumb-R|13,253|2,690,063,755|6|
+|test-ffmpeg-thumb-C|12,846|3,189,640,476|6|
+
+### 待设计 v0.8 登记与下一步输入
+
+执行流程采用本轮只读两次重试裁决，预注册7d3d9d9和修订1不变。补丁8映射元数据不可用的处理见报告13第8节。尚不进行5.8质量分析或消费构建；下一步输入为本节逐组完整perf.data/导出/buildid-list、最终profile/quality、按stage的profdata、训练BBB与测试ToS，以及剔除前后资格清单。逻辑组到物理RUN的分段对应保存在全量摘要中；本轮没有合并sample profiles，下一步须按设计5.12处理合并语义，不能把分段profile相加视为原始采样合并的替代。LOST和5集成另见下一节，不将矩阵完成当作集成完成。
+
+
+## 16. LOST、五项集成与最终恢复（2026-11-06）
+
+### 16.1 预期、执行范围与一次脚本兼容性修正
+
+采集前已写下期望，见[原始期望与运行生命周期](evidence/12/61_extras_lifecycle.json)。本节额外RUN不计入70组S矩阵，不进入非叶子line0的正式分母。复用07的最小程序源与对应ELF，库/程序只部署到`/opt/afdo_agent`，按其真实build-id校验；未使用旧内核的采样地址或数值作为本轮结果。
+
+首次LOST试采在执行perf之前失败，原文：`integration.sh: line 85: SCOPE[@]: unbound variable`，真实远端退出1。板上Bash为3.2.57；空数组在`set -u`下展开触发此问题。该RUN没有perf.data，单独保留为失败原件，SHA核验后删其确切目录，已恢复root/governor。不是缺退出码或SDB断连，没有不确定状态命令重试。
+
+用GBS中的Bash3.2.57复现相同退出1后，将录制前缀改为始终非空的RECORD数组，按需追加`-a`/`-p`；无范围、系统级、附加PID三种形式均退出0，平台及主机`bash -n`通过。保留原脚本SHA和完整diff；修正后重新进行两段预检，在新RUN中试采一次，不覆盖旧文件。[失败原文、收据、恢复与四项兼容性测试](evidence/12/66_bash_compatibility_fix.json)
+
+所有录制使用cycles，evlist确认硬件type0/config0；所有perf调用的环境与buildid-dir仍在专用目录。映射观察器的有限轮询及FIFO收尾会增加墙钟耗时，表中RUN耗时包括导出、拉回和核验；实际perf录制的real/user/sys保留在record.stderr，不混为采样时长。
+
+### 16.2 完整高LOST导出：06挂账关闭
+
+独立脚本为[`tools/profgen/count_exported_lost.py`](../../../tools/profgen/count_exported_lost.py)，不导入llvm-profgen读取器；逐行统计完整文本中的所有样本S（不是target）、LOST条数和N之和L。手算验证为两条LOST的5+7、三条样本，比例12/15；再逐项对照正式工具JSON。
+
+|RUN|采集范围/负载|LOST条数|L|完整样本S|exported_lost_ratio|结论|
+|---|---|---:|---:|---:|---|---|
+|lost-pilot|1080p，60帧，单解码|50|7,122|124,161|7122/131283|独立计数与工具完全一致|
+|lost-bounded|1080p，600帧，单解码|423|58,343|1,190,755|58343/1249098（约4.67081%）|完整高LOST主证据，verified|
+|system-pressure|1080p，双解码各120帧，`-a`|626|71,965|1,720,866|71965/1792831（约4.01404%）|系统级补充，verified|
+
+命令为`record --buildid-mmap -e cycles -c 10007 -m 1`（系统级另加`-a`），严格字段完整导出不经筛选。主压力导出共1,191,250行=1,190,755样本+423 LOST+72映射，SHA-256为`c95baff492d91ff9b410bf39dd9c4cc4e6fc9702933c65a071bc8ceb785e9e5e`。原件在`temp/board-round1-retry/extras-fixed/lost-bounded/`，新增系统级原件在`temp/board-round1-retry/extras-system/system-pressure/`。[试采](evidence/12/60_lost-pilot.json)、[主压力](evidence/12/60_lost-bounded.json)、[系统压力](evidence/12/60_system-pressure.json)
+
+perf report/script的丢样提示、原始LOST行、退出码、perf.data与完整文本SHA均保留上述证据；没有把丢失记录等同于纯样本丢失，质量报告仍将completeness标为unknown。本次perf record只打印捕获字节数，未打印可对照的样本总数；以完整导出与独立计数为准。旧06的703,821条样本与遗失文本不能追溯核对；本轮用新采集的完整数据闭合“高LOST完整导出验收”，不声称恢复了旧文本。
+
+### 16.3 集成：先列期望，再列本轮实际
+
+|用例|采集前期望|本轮实际与结论|
+|---|---|---|
+|不exec的fork|两PID落在同一ELF；子进程可无自有MMAP2；dsoff/PT_LOAD正确|父PID24270有4,994条、子24271有5,013条，合计10,007；子自有MMAP2为0。按stdout明确的父子关系继承映射后，偏移与唯一可执行PT_LOAD全部一致；正式工具verified。|
+|exec到不同映像|同PID切换两ELF；切换后不能归旧映像|PID25019：cases 4,939、after 1,085；合计6,024条换算100%一致，跨切换错误归属0；两目标分别生成verified profile。|
+|运行中删除测试库|原路径保留(deleted)；缺输入ID时默认unverified拒绝，显式放行仍unverified|95条全部位于删除后的测试库，偏移95/95一致。默认identity失败；`--allow-missing-build-id`后exit0且仍unverified。只删除专用测试库副本。|
+|内核模块|真实.ko样本归kernel，不混入用户目标|普通DBus调用触发kdbus.ko 1,517条、logger.ko 55条、proc-tsm.ko 5条；全输入kernel=151,691，与独立按DSO名字分类一致。cases用户目标102,705条，换算全一致。|
+|系统级与-1/-1|保留全部`-a`文本；未知PID不匹配指定PID|首份系统级11,617样本中无-1。随后受空间门禁限制的双解码系统级压力取得16条真实-1/-1内核样本；正式报告pid_unknown=16。指定PID32426后after_pid=198,054、target=111,796，与独立筛选完全一致，16条未知PID未入选。|
+
+逐PID映射/地址证据见[独立换算](evidence/12/62_independent-addresses.json)，原始MMAP2、样本行见[原文](evidence/12/62_raw-examples.json)。父子关系来自工作负载stdout，不是按相同地址猜测。首次独立核对脚本只对fork标签启用了继承逻辑，遗漏同样调用fork的module/system负载，导致子PID26276的51,273条被误报无映射；补齐标签范围后全部一致。原失败列表、修正diff和最终脚本全文保留在[核对器修正](evidence/12/67_independent_checker_correction.json)，工具和数据均未改。
+
+系统级压力同时取得335条`([unknown])`真实样本，正式报告unmapped=335；保存前20条及全部16条-1/-1原文、源行号，见[特殊样本与PID筛选](evidence/12/69_special_samples.json)。这是本轮新增实测，可关闭`[unknown]`真实样例挂账，不能把它们反推出已丢失的映射身份。
+
+与07对照：fork继承映射、exec切换、deleted保守身份和模块完整.ko路径的结论一致，样本量不同且不作跨内核数值比较。与09对照：-1/-1分类一致，本轮有16条；09/07未观察到的`([unknown])`本轮压力下已取得。上述内容是本轮正式工具端到端验收，07/09只提供格式与机制参照。
+
+### 16.4 空间、重试、时间与恢复
+
+首次成功试采18,992,505B，用它估算600帧产物294,887,575B，要求至少789,775,150B，实际产物180,478,699B。为取得未知PID追加系统级双解码时，估计118,287,220B、门禁436,574,440B，实际232,385,723B；系统级会录入其他CPU/进程，旧单进程估算偏低，后续应以系统级试采单独校准。该次可用空间仍超过按实际体积计算的664,771,446B安全门槛，未删已部署工具/变体腾空间。[主压力规模与生命周期](evidence/12/61_extras_lifecycle.json)、[系统级生命周期](evidence/12/68_system_pressure_lifecycle.json)
+
+缺退出码重试**0次**，没有SDB断连或状态命令缺标记。另有明确退出1的脚本兼容性失败，修正后新试采1次，已单列，不混称为只读重试。所有真实尝试原stdout/stderr/时间、74次直接RUN命令及唯一非零退出见[完整审计摘要](evidence/12/51_retry_audit.json)；新增双解码是补充系统级用例，不是缺码重试。
+
+执行阶段累计8228.477秒（约2小时17分8秒，含传输/核验）：保留RUN恢复3.095秒、矩阵/训练7716.268秒、失败试采及恢复17.928秒、LOST/五集成339.197秒、补充系统级151.989秒。首条恢复记录至最终结束墙钟9133.291秒（约2小时32分13秒），额外包含主机准备/诊断间隙。所有阶段状态原文保留，未把早先FAILED改写成OK。
+
+最终root恢复off（uid5001）、policy0恢复schedutil，RPM1232→1232；/opt used294728KiB、available1010888KiB（23%）。所有本轮RUN包括失败试采均在全量核验后删除确切路径；原始数据留本机temp。129个RUN（含失败流程证据）uname-v均为`#1 SMP Wed Nov  4 17:05:36 UTC 2026`，不与旧探测内核作数字比较。[内核指纹一致性](evidence/12/64_kernel_consistency.json)、[完整性闭合](evidence/12/65_completeness.json)、[最终恢复与时间](evidence/12/70_completion_and_restoration.json)
+
+保留/opt下原有16项变体、perf/libLLVM、脚本和训练/测试视频；另保留`tools/integration/cases`、`tools/integration/deleted`及`work/after`测试程序供后续使用。测试库`work/libdeleted_probe.so`已在deleted用例中删除，ready/go标记已清理。来源/版本/哈希在部署清单；未改系统库、RPM、启动文件、sysctl，未remount或重启。
+
+### 待设计 v0.8 登记（执行流程）
+
+只读缺码最多2次重试、每次保留原文并核对一致性；状态命令缺码不重试并恢复。本轮没有实际触发缺码重试。Bash3.2空数组兼容性修正不改变采集参数或预注册，保留真实失败及新RUN；主机核对器必须对每种实际fork负载使用有来源的继承关系。系统级压力体积应独立校准，不直接假定为两倍单进程。预注册7d3d9d9与修订1均未修改。
+
+### 下一步质量分析需要的输入清单（最终）
+
+- 70组到106物理S的映射、14配置各5组及全量/clean并列表：56矩阵摘要；sample profile字节对照55/59，频率模式20物理RUN的period profile对照55。
+- 14份按stage合并的profdata及原profraw、setup排除清单：58；BBB训练与ToS测试保持不同视频，BBB1080仅压力使用。
+- 31 clean、28 abnormal、11 unknown及逐秒/前后边界原件，旧7份仍unknown；禁止补造或调整阈值。未来分析需保留全量与clean两套结果。
+- 全量非叶子line0 2,736条及两种函数归因：57，处理规则仍交PM，不在本轮决定。
+- LOST完整原件与独立计数、五集成正式工具输出及特殊DSO原文：60–70。06完整LOST与真实avg均已闭合；新取得的unknown素材一并保留。
+
+本轮没有执行5.8配置间质量分析、消费构建、性能等价结论或Agent开发。

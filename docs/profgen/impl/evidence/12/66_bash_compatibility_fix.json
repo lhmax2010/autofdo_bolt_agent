@@ -1,0 +1,132 @@
+{
+  "reason": "Bash 3.2 nounset expansion of empty SCOPE array failed before any perf invocation; not a missing exit marker, connection loss or llvm-profgen failure.",
+  "original_script_sha256": "91f2490eab0357c8bb1ba7d8bb056d5f9719c3bf328dbe9115502cdd1aa08440",
+  "current_script_sha256": "64ab4036ff8f9c64c22d8b0cc0692f101ad0b2db4bfe89781a5c28fdbb06ce51",
+  "diff": "--- integration.sh (failed pilot)\n+++ integration.sh (fixed)\n@@ -25,7 +25,7 @@\n telemetry_loop & telemetry_pid=$!\n export LLVM_PROFILE_FILE=\"$RUN/setup-%m-%p.profraw\"\n EVENT=(-e cycles -c 1000003)\n-SCOPE=()\n+RECORD=(\"${PERF[@]}\" record --buildid-mmap)\n if [[ $MODE == lost ]]; then\n     load_variant \"$BASE/eval-manifest.tsv\" ffmpeg-thumb-S\n     FRAMES=${2:?frame bound}; COPIES=${3:-1}\n@@ -39,7 +39,7 @@\n     CMD=(gst-launch-1.0 -q filesrc \"location=$BASE/media/bbb_1080p_h264_60s.mp4\" '!' qtdemux '!' h264parse '!' avdec_h264 max-threads=1 '!' video/x-raw,format=I420 '!' identity \"eos-after=$FRAMES\" '!' filesink \"location=$RUN/frames.pipe\" sync=false)\n     EVENT=(-e cycles -c 10007 -m 1)\n     if [[ $COPIES == 2 ]]; then\n-        SCOPE=(-a)\n+        RECORD+=(-a)\n         CMD=(/bin/bash -c 'set -e; \"$@\" & p=$!; \"$@\"; wait \"$p\"' _ \"${CMD[@]}\")\n     fi\n else\n@@ -54,9 +54,9 @@\n             CMD=(\"$BASE/tools/integration/cases\" fork)\n             printf 'kdbus unavailable; no module loading or synthetic module claim\\n' >\"$RUN/module-choice\"\n         fi\n-        SCOPE=(-a); EVENT=(-e cycles -c 100003)\n+        RECORD+=(-a); EVENT=(-e cycles -c 100003)\n     elif [[ $MODE == system ]]; then\n-        CMD=(\"$BASE/tools/integration/cases\" fork);SCOPE=(-a)\n+        CMD=(\"$BASE/tools/integration/cases\" fork);RECORD+=(-a)\n     elif [[ $MODE == deleted ]]; then\n         # Host has freshly pushed and SHA-checked only this test library copy.\n         rm -f \"$BASE/work/deleted.ready\" \"$BASE/work/deleted.go\"\n@@ -64,7 +64,7 @@\n         for ((i=0;i<100;i++)); do [[ ! -s $BASE/work/deleted.ready ]] || break; sleep .1; done\n         [[ -s $BASE/work/deleted.ready ]] || exit 3\n         cat \"/proc/$child_pid/maps\" >\"$RUN/deleted.maps\"\n-        SCOPE=(-p \"$child_pid\")\n+        RECORD+=(-p \"$child_pid\")\n         CMD=(/bin/bash -c ': > /opt/afdo_agent/work/deleted.go; sleep .1')\n     fi\n fi\n@@ -82,7 +82,7 @@\n     done\n ) & maps_pid=$!\n set +e\n-{ time -p LC_ALL=C \"${PERF[@]}\" record --buildid-mmap \"${SCOPE[@]}\" \"${EVENT[@]}\" -o \"$RUN/perf.data\" -- \"${PERF[@]}\" stat -x ';' -e cycles,instructions,task-clock -o \"$RUN/perf-stat.csv\" -- \"${LAUNCH[@]}\"; } >\"$RUN/workload.stdout\" 2>\"$RUN/record.stderr\"\n+{ time -p LC_ALL=C \"${RECORD[@]}\" \"${EVENT[@]}\" -o \"$RUN/perf.data\" -- \"${PERF[@]}\" stat -x ';' -e cycles,instructions,task-clock -o \"$RUN/perf-stat.csv\" -- \"${LAUNCH[@]}\"; } >\"$RUN/workload.stdout\" 2>\"$RUN/record.stderr\"\n rc=$?;set -e\n printf 'RECORD_EXIT %s\\n' \"$rc\" >\"$RUN/status\"\n [[ $rc == 0 ]] || exit \"$rc\"\n",
+  "remote_command": {
+    "command": "RUN_ESTIMATE_BYTES=40000000 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/integration.sh lost 60 1",
+    "transport_rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/chmod\nDEPENDENCY_OK chmod\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/dbus-send\nDEPENDENCY_OK dbus-send\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/getconf\nDEPENDENCY_OK getconf\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/sbin/lsmod\nDEPENDENCY_OK lsmod\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1038008320 estimate_bytes=40000000 required_bytes=280000000\nRUNPATH /opt/afdo_agent/work/eval-20261106T135516-10708\n\n__REMOTE_RC=1\n",
+    "stderr": ""
+  },
+  "run": {
+    "tag": "lost-pilot",
+    "mode": "lost",
+    "remote": "/opt/afdo_agent/work/eval-20261106T135516-10708",
+    "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras/lost-pilot",
+    "seconds": 3.6204610830027377,
+    "rc": 1,
+    "bytes": 408636
+  },
+  "receipt": {
+    "remote": "/opt/afdo_agent/work/eval-20261106T135516-10708",
+    "host": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras/lost-pilot",
+    "files": {
+      "kernel-config.sha256": "b9e805e81d338e9b95c3ccda2f4f5ae43218e4b0d9511346d4c17debcbd163e0",
+      "gst-inspect-ffmpeg-thumb-S.txt": "b5eac6f0861d2c5a099b3ad8dd5fe3d90a311261931238cb636ed81b9291c516",
+      "tizen-build.conf": "c7c8fff35e0aa13c4fca2e5889de3c247724f51e16790ce936b0480aa33db26d",
+      "status": "145cf30b06058d05a2d1c1044897da40cfe74c38ff7b3f02aabb00400c3a0c6a",
+      "uname": "8122bd744aa1f5b33742ada720b07f9e34c18ed69cf6c88cf69bd87091f15c60",
+      "proc-version": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab",
+      "page-size": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+      "df.before": "955fb2cf8767d7808317d37d4c32b03dabc375ca7fac7cc226db19bf3af53165",
+      "workload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identity-plugin.txt": "6423ab1e6eaaca115dff1fa15578c54cf9e56440377fc9c61bf1553180048b1d",
+      "os-release": "726ebe52cad62bba1db5286722d9257154e0b6abf671c94574dbd04f637a28fe",
+      "decoded.sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "registry.bin": "eb4abda820ba5d312b10f91961ee8bee17249090418b04aea15504701f730e4d",
+      "record.stderr": "8cff6edece2c18433987bcd5fe8e03da5fb34328caaae5c553227ccb89491b26",
+      "rpm-count.before": "9d135535870b2358153499213be650a92aa06bef7bdfeef4fdf01fdf2fdc1c5e",
+      "perf.conf": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": "620db659dc8c7361cb3dd941394dcc5acf2b86c53d868e1de4b9281d1e09f23f",
+      "swaps.before": "a33f3cb16598ed762a3a47cc66de8b023b1d1b09ba112f9f266097ef9593d066",
+      "zram.before": "31741360e570ad1ed53f118aabf3f02c4b2dea40c6b13da56a7e69614aeb631d",
+      "environment.before": "b5fb7cf2d9db445c9630268206eaedcbe244fcbb7282deaad59ad3a83b503527",
+      "telemetry/0.txt": "6e7ce41dd994d963c2833a425f52443dc877599886aa41b7c654f4f40b6808c9"
+    },
+    "all_verified_before_delete": true,
+    "deleted": true
+  },
+  "record_stderr": "/opt/afdo_agent/scripts/integration.sh: line 85: SCOPE[@]: unbound variable\n",
+  "status": "EXIT 1\nALL-END 2026-11-06T13:55:17,968750355+0900 FAILED\n",
+  "restore": [
+    {
+      "path": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor",
+      "expected": "schedutil",
+      "actual": "schedutil"
+    }
+  ],
+  "final": "uid=5001(owner) gid=100(users) groups=29(audio),44(video),100(users),201(display),1901(log),6525(usb_device),10001(priv_externalstorage),10002(priv_externalstorage_appdata),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nFilesystem           1K-blocks      Used Available Use% Mounted on\n/dev/mmcblk0p3         1335696    291936   1013680  23% /opt\n1232\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n",
+  "original_worker_status": "ALL-END 2026-11-06T12:55:05.341264+08:00 FAILED elapsed=17.928 reason=AssertionError(('lost-pilot', 'IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\\n/bin/bash\\nDEPENDENCY_OK /bin/bash\\n/usr/bin/awk\\nDEPENDENCY_OK awk\\n/usr/bin/cat\\nDEPENDENCY_OK cat\\n/usr/bin/chmod\\nDEPENDENCY_OK chmod\\n/usr/bin/cut\\nDEPENDENCY_OK cut\\n/usr/bin/date\\nDEPENDENCY_OK date\\n/usr/bin/dbus-send\\nDEPENDENCY_OK dbus-send\\n/usr/bin/df\\nDEPENDENCY_OK df\\n/usr/bin/find\\nDEPENDENCY_OK find\\n/usr/bin/findmnt\\nDEPENDENCY_OK findmnt\\n/usr/bin/getconf\\nDEPENDENCY_OK getconf\\n/usr/bin/grep\\nDEPENDENCY_OK grep\\n/usr/bin/gst-inspect-1.0\\nDEPENDENCY_OK gst-inspect-1.0\\n/usr/bin/gst-launch-1.0\\nDEPENDENCY_OK gst-launch-1.0\\n/usr/bin/ionice\\nDEPENDENCY_OK ionice\\n/usr/sbin/lsmod\\nDEPENDENCY_OK lsmod\\n/usr/bin/mkdir\\nDEPENDENCY_OK mkdir\\n/usr/bin/mkfifo\\nDEPENDENCY_OK mkfifo\\n/usr/bin/nice\\nDEPENDENCY_OK nice\\n/usr/bin/ps\\nDEPENDENCY_OK ps\\n/usr/bin/readlink\\nDEPENDENCY_OK readlink\\n/usr/bin/rm\\nDEPENDENCY_OK rm\\n/usr/bin/rpm\\nDEPENDENCY_OK rpm\\n/usr/bin/sha256sum\\nDEPENDENCY_OK sha256sum\\n/usr/bin/sleep\\nDEPENDENCY_OK sleep\\n/usr/bin/tr\\nDEPENDENCY_OK tr\\n/usr/bin/uname\\nDEPENDENCY_OK uname\\n/usr/bin/wc\\nDEPENDENCY_OK wc\\nSPACE available_bytes=1038008320 estimate_bytes=40000000 required_bytes=280000000\\nRUNPATH /opt/afdo_agent/work/eval-20261106T135516-10708\\n\\n__REMOTE_RC=1\\n', ''))\n",
+  "host_compatibility": {
+    "platform_bash_version": "GNU bash, version 3.2.57(1)-release (x86_64-tizen-linux-gnu)\nCopyright (C) 2007 Free Software Foundation, Inc.\n",
+    "tests": [
+      {
+        "name": "old-empty",
+        "source": "set -u; SCOPE=(); printf \"%s\\n\" \"${SCOPE[@]}\"",
+        "command": [
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+          "--library-path",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/bin/bash",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/old-empty.sh"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/old-empty.sh: line 1: SCOPE[@]: unbound variable\n",
+        "expected_success": false
+      },
+      {
+        "name": "new-empty",
+        "source": "set -u; PERF=(/perf --buildid-dir /work/buildid); RECORD=(\"${PERF[@]}\" record --buildid-mmap); printf \"%s\\n\" \"${RECORD[@]}\"",
+        "command": [
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+          "--library-path",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/bin/bash",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/new-empty.sh"
+        ],
+        "exit": 0,
+        "stdout": "/perf\n--buildid-dir\n/work/buildid\nrecord\n--buildid-mmap\n",
+        "stderr": "",
+        "expected_success": true
+      },
+      {
+        "name": "new-system",
+        "source": "set -u; PERF=(/perf); RECORD=(\"${PERF[@]}\" record --buildid-mmap); RECORD+=(-a); printf \"%s\\n\" \"${RECORD[@]}\"",
+        "command": [
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+          "--library-path",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/bin/bash",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/new-system.sh"
+        ],
+        "exit": 0,
+        "stdout": "/perf\nrecord\n--buildid-mmap\n-a\n",
+        "stderr": "",
+        "expected_success": true
+      },
+      {
+        "name": "new-attach",
+        "source": "set -u; PERF=(/perf); RECORD=(\"${PERF[@]}\" record --buildid-mmap); RECORD+=(-p 123); printf \"%s\\n\" \"${RECORD[@]}\"",
+        "command": [
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+          "--library-path",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/bin/bash",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/new-attach.sh"
+        ],
+        "exit": 0,
+        "stdout": "/perf\nrecord\n--buildid-mmap\n-p\n123\n",
+        "stderr": "",
+        "expected_success": true
+      }
+    ],
+    "syntax_exit": 0,
+    "new_script_sha256": "64ab4036ff8f9c64c22d8b0cc0692f101ad0b2db4bfe89781a5c28fdbb06ce51",
+    "reason": "Empty array expansion under nounset fails before perf is invoked; commands now start with a nonempty RECORD array."
+  },
+  "read_only_retries_for_this_error": 0,
+  "new_pilot_after_script_correction": 1,
+  "original_data_kept": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras/lost-pilot"
+}

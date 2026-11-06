@@ -1,0 +1,366 @@
+{
+  "tag": "fork",
+  "mode": "fork",
+  "remote": "/opt/afdo_agent/work/eval-20261106T140224-24168",
+  "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork",
+  "seconds": 13.032406404003268,
+  "rc": 0,
+  "bytes": 1480013,
+  "receipt_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork-receipt.json",
+  "receipt_sha256": "afa897412ef774a190095e5033688bd0b006203a3ffdfad7f0e7f4d7459e8d14",
+  "verified_files": 94,
+  "deleted": true,
+  "original_sha256": {
+    "evlist.txt": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+    "status": "ec44008c0f8ed34bb76f0ef24d612c74d42ef3e6ad062cbb06d523fbd1511db7",
+    "perf.data": "551aad6614050498a04015d3cb6e0db8cf5e25b51ec94f64b3aad9bc9b5d9651",
+    "record.stderr": "35203556d955cf273761514256c299c4365e9e11bda6be033eac3b51f6964c8c",
+    "buildid-list.txt": "4cfee55b786f6c50a81f0e2579b09c58cdc4de2cf7d23df20e21671c8c8638e7",
+    "perfscript.txt": "082cacb8965a9b128e931587fcb452b7bc9db768308ed629fb9ab13b4dfa0048"
+  },
+  "conversions": [
+    {
+      "label": "cases",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "--binary-match-regex=^/opt/afdo_agent/tools/integration/cases$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--show-ip-address-counts",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/host-conversion/cases.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/host-conversion/cases.json"
+      ],
+      "exit": 0,
+      "verdict": {
+        "conversion": "ok",
+        "failure_stage": null,
+        "fallback_callback_count": 0,
+        "identity": "verified",
+        "lost_ratio_check": "not_evaluated",
+        "reason": null,
+        "sample_threshold_check": "not_evaluated",
+        "sampling_adequacy": "unknown",
+        "usable_ratio_check": "not_evaluated"
+      },
+      "identity": {
+        "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "binary_build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+        "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "candidates": [
+          {
+            "deleted": false,
+            "path": "/opt/afdo_agent/tools/integration/cases"
+          }
+        ],
+        "debug_binary": null,
+        "debug_build_id": null,
+        "evidence": [
+          {
+            "build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "consistent",
+            "source": "buildid-list"
+          },
+          {
+            "build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+            "mapping_index": 39,
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "verified",
+            "source": "mmap2"
+          },
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "verified",
+            "source": "path-summary"
+          }
+        ],
+        "grade": "verified",
+        "observed_mmap_build_id": true,
+        "selection": "regex"
+      },
+      "samples": {
+        "after_event": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 10094
+          },
+          "period_sum": 10094030282,
+          "sample_count": 10094
+        },
+        "after_pid": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 10094
+          },
+          "period_sum": 10094030282,
+          "sample_count": 10094
+        },
+        "input_total": {
+          "sample_count": 10094
+        },
+        "kernel": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 50
+          },
+          "period_sum": 50000150,
+          "sample_count": 50
+        },
+        "other_dso": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 37
+          },
+          "period_sum": 37000111,
+          "sample_count": 37
+        },
+        "other_dso_top20": [
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 30
+              },
+              "period_sum": 30000090,
+              "sample_count": 30
+            },
+            "name": "/usr/lib/ld-linux.so.3",
+            "share": {
+              "denominator": 37,
+              "numerator": 30
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 6
+              },
+              "period_sum": 6000018,
+              "sample_count": 6
+            },
+            "name": "/usr/lib/libc.so.6",
+            "share": {
+              "denominator": 37,
+              "numerator": 6
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1
+              },
+              "period_sum": 1000003,
+              "sample_count": 1
+            },
+            "name": "/usr/bin/bash",
+            "share": {
+              "denominator": 37,
+              "numerator": 1
+            }
+          }
+        ],
+        "pid_unknown": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted_reasons": {
+          "data_or_state_change": "unknown",
+          "first_instruction": "unknown",
+          "predecessor_no_line": "unknown",
+          "range_gap": "unknown"
+        },
+        "target": {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 10007
+            },
+            "period_sum": 10007030021,
+            "sample_count": 10007
+          },
+          "in_cu_no_subprogram": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "in_func_no_line": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 26
+            },
+            "period_sum": 26000078,
+            "sample_count": 26
+          },
+          "no_cu": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_dwarf_func": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_symtab_top20": [],
+          "plt": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "unmapped_in_target": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "usable": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 9981
+            },
+            "period_sum": 9981029943,
+            "sample_count": 9981
+          }
+        },
+        "unmapped": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "written_positions": 33
+      },
+      "lost": {
+        "L": "unknown",
+        "S": 10094,
+        "completeness": "unknown",
+        "count_unit": "records",
+        "exported_lost_ratio": "unknown",
+        "records": 0,
+        "scope": "input",
+        "source": "PERF_RECORD_LOST"
+      },
+      "quality_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/host-conversion/cases.json",
+      "quality_sha256": "7e53c77587051d50d9698bdfeb0e4386bd30b0dafad49bca4ee4fa44d16d2532",
+      "profile_sha256": "6481c0bfff5aaeaec03a8bdab414c0870c984e8a01fe7c28f7e8b782abca564c",
+      "stderr": ""
+    }
+  ],
+  "independent_counts": {
+    "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/perfscript.txt",
+    "sha256": "082cacb8965a9b128e931587fcb452b7bc9db768308ed629fb9ab13b4dfa0048",
+    "lines": 10138,
+    "LOST_records": 0,
+    "observed_L": 0,
+    "S": 10094,
+    "exported_lost_ratio": "unknown",
+    "sample_events": {
+      "cycles": 10094
+    },
+    "mappings": 44,
+    "unknown_lines": [],
+    "LOST_examples": [],
+    "record_printed_samples": [],
+    "record_sample_count_equals_S": "unknown"
+  },
+  "raw": {
+    "status": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/status",
+      "sha256": "ec44008c0f8ed34bb76f0ef24d612c74d42ef3e6ad062cbb06d523fbd1511db7",
+      "text": "RECORD_EXIT 0\nEXIT 0\nALL-END 2026-11-06T14:02:31,684361578+0900 OK\n"
+    },
+    "record.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/record.stderr",
+      "sha256": "35203556d955cf273761514256c299c4365e9e11bda6be033eac3b51f6964c8c",
+      "text": "[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.314 MB /opt/afdo_agent/work/eval-20261106T140224-24168/perf.data ]\nreal 4.32\nuser 6.87\nsys 0.30\n"
+    },
+    "evlist.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/evlist.txt",
+      "sha256": "c856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372",
+      "text": "cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1\n"
+    },
+    "buildid-list.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/buildid-list.txt",
+      "sha256": "4cfee55b786f6c50a81f0e2579b09c58cdc4de2cf7d23df20e21671c8c8638e7",
+      "text": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5 /opt/afdo_agent/tools/integration/cases\n                                         /usr/bin/bash\n3e855c7b550b9929b41f5dce7326835f50553afc /usr/lib/ld-linux.so.3\nc79c2b16c629ca821627425d9de5fca871a3d64c /usr/lib/libc.so.6\n395733b9c917cb98309b39cc3ec379c03ac36b3f [kernel.kallsyms]\n"
+    },
+    "perfscript.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/perfscript.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "report.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/report.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "workload.stdout": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/workload.stdout",
+      "sha256": "8146a28b89b8a8edaae5a535903fa1f39898b7def4448c39a408c730e8ab01dd",
+      "text": "ROLE=parent PID=24270 PARENT=24270 CHILD=24271\nROLE=child PID=24271 PARENT=24270 CHILD=0\nDONE PID=24270 CHECKSUM=ff818b861cb93a67\nDONE PID=24271 CHECKSUM=ff818b861cb93a67\n"
+    },
+    "perf-stat.csv": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/fork/perf-stat.csv",
+      "sha256": "fdae2a7e6d735dee606729fe947469f36ab25a1708762279c7334edb3b505492",
+      "text": "# started on Fri Nov  6 14:02:26 2026\n\n10022754494;;cycles;6693824250;100.00;1.497;GHz\n17404730094;;instructions;6693824250;100.00;1.74;insn per cycle\n6693.82;msec;task-clock;6693824250;100.00;1.989;CPUs utilized\n"
+    },
+    "report_lost_lines": [
+      "# Total Lost Samples: 0"
+    ]
+  },
+  "remote_command": {
+    "command": "RUN_ESTIMATE_BYTES=20000000 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/integration.sh fork",
+    "transport_rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/chmod\nDEPENDENCY_OK chmod\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/dbus-send\nDEPENDENCY_OK dbus-send\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/getconf\nDEPENDENCY_OK getconf\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/sbin/lsmod\nDEPENDENCY_OK lsmod\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1036570624 estimate_bytes=20000000 required_bytes=240000000\nRUNPATH /opt/afdo_agent/work/eval-20261106T140224-24168\nRESULTS /opt/afdo_agent/work/eval-20261106T140224-24168\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,977 @@
+{
+  "tag": "lost-bounded",
+  "mode": "lost",
+  "remote": "/opt/afdo_agent/work/eval-20261106T135947-17238",
+  "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded",
+  "seconds": 149.75922714000626,
+  "rc": 0,
+  "bytes": 180478699,
+  "receipt_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded-receipt.json",
+  "receipt_sha256": "af8ebe7aed57a1db86f720a4b7af09ba558d44430fc410d744b988170562dfa1",
+  "verified_files": 904,
+  "deleted": true,
+  "original_sha256": {
+    "evlist.txt": "f913ae5190c7f4a3ccc306196f911946929d144780e43824cf710afe7bac8fdd",
+    "status": "6058b257f0eebfc4f883c11475b2b4173a3c46b1e7753586531f91ef57df8d8a",
+    "perf.data": "b962de830c7cd75c2ffe350b936052e59a1d87b41794772a2b60524b122624a0",
+    "record.stderr": "a21768e5580007b3fbeea396bfaa8b828aaece872a179cd9f043d10def882c9c",
+    "buildid-list.txt": "cefa1018e74feda8bc3d1d8022fa7840228169c88518cee1904f98a7d9fbc796",
+    "perfscript.txt": "c95baff492d91ff9b410bf39dd9c4cc4e6fc9702933c65a071bc8ceb785e9e5e"
+  },
+  "conversions": [
+    {
+      "label": "libavcodec",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/libavcodec.so.62.11.100",
+        "--binary-match-regex=^/opt/afdo_agent/variants/ffmpeg\\-thumb\\-S/lib/libavcodec\\.so\\.62\\.11\\.100$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--show-ip-address-counts",
+        "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/host-conversion/libavcodec.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/host-conversion/libavcodec.json"
+      ],
+      "exit": 0,
+      "verdict": {
+        "conversion": "ok",
+        "failure_stage": null,
+        "fallback_callback_count": 0,
+        "identity": "verified",
+        "lost_ratio_check": "not_evaluated",
+        "reason": null,
+        "sample_threshold_check": "not_evaluated",
+        "sampling_adequacy": "unknown",
+        "usable_ratio_check": "not_evaluated"
+      },
+      "identity": {
+        "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/libavcodec.so.62.11.100",
+        "binary_build_id": "e7de4d8c9560442994341d9bfc5dfd06ae641a17",
+        "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/libavcodec.so.62.11.100",
+        "candidates": [
+          {
+            "deleted": false,
+            "path": "/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100"
+          }
+        ],
+        "debug_binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+        "debug_build_id": "e7de4d8c9560442994341d9bfc5dfd06ae641a17",
+        "evidence": [
+          {
+            "build_id": "e7de4d8c9560442994341d9bfc5dfd06ae641a17",
+            "mapping_index": "unknown",
+            "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+            "result": "consistent",
+            "source": "debug-binary"
+          },
+          {
+            "build_id": "e7de4d8c9560442994341d9bfc5dfd06ae641a17",
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100",
+            "result": "consistent",
+            "source": "buildid-list"
+          },
+          {
+            "build_id": "e7de4d8c9560442994341d9bfc5dfd06ae641a17",
+            "mapping_index": 68,
+            "path": "/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100",
+            "result": "verified",
+            "source": "mmap2"
+          },
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100",
+            "result": "verified",
+            "source": "path-summary"
+          }
+        ],
+        "grade": "verified",
+        "observed_mmap_build_id": true,
+        "selection": "regex"
+      },
+      "samples": {
+        "after_event": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 1190755
+          },
+          "period_sum": 11915885285,
+          "sample_count": 1190755
+        },
+        "after_pid": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 1190755
+          },
+          "period_sum": 11915885285,
+          "sample_count": 1190755
+        },
+        "input_total": {
+          "sample_count": 1190755
+        },
+        "kernel": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 404530
+          },
+          "period_sum": 4048131710,
+          "sample_count": 404530
+        },
+        "other_dso": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 76373
+          },
+          "period_sum": 764264611,
+          "sample_count": 76373
+        },
+        "other_dso_top20": [
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 52600
+              },
+              "period_sum": 526368200,
+              "sample_count": 52600
+            },
+            "name": "/usr/lib/libc.so.6",
+            "share": {
+              "denominator": 76373,
+              "numerator": 52600
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 6179
+              },
+              "period_sum": 61833253,
+              "sample_count": 6179
+            },
+            "name": "/usr/lib/libgstreamer-1.0.so.0.2411.0",
+            "share": {
+              "denominator": 76373,
+              "numerator": 6179
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 2671
+              },
+              "period_sum": 26728697,
+              "sample_count": 2671
+            },
+            "name": "/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavutil.so.60.8.100",
+            "share": {
+              "denominator": 76373,
+              "numerator": 2671
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 2504
+              },
+              "period_sum": 25057528,
+              "sample_count": 2504
+            },
+            "name": "/usr/lib/libgstbase-1.0.so.0.2411.0",
+            "share": {
+              "denominator": 76373,
+              "numerator": 2504
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 2447
+              },
+              "period_sum": 24487129,
+              "sample_count": 2447
+            },
+            "name": "/usr/lib/libglib-2.0.so.0.8000.5",
+            "share": {
+              "denominator": 76373,
+              "numerator": 2447
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1724
+              },
+              "period_sum": 17252068,
+              "sample_count": 1724
+            },
+            "name": "/usr/lib/libgobject-2.0.so.0.8000.5",
+            "share": {
+              "denominator": 76373,
+              "numerator": 1724
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1679
+              },
+              "period_sum": 16801753,
+              "sample_count": 1679
+            },
+            "name": "/usr/lib/libgstvideo-1.0.so.0.2411.0",
+            "share": {
+              "denominator": 76373,
+              "numerator": 1679
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1384
+              },
+              "period_sum": 13849688,
+              "sample_count": 1384
+            },
+            "name": "/usr/lib/gstreamer-1.0/libgstisomp4.so",
+            "share": {
+              "denominator": 76373,
+              "numerator": 1384
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1253
+              },
+              "period_sum": 12538771,
+              "sample_count": 1253
+            },
+            "name": "/usr/lib/gstreamer-1.0/libgstlibav.so",
+            "share": {
+              "denominator": 76373,
+              "numerator": 1253
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1194
+              },
+              "period_sum": 11948358,
+              "sample_count": 1194
+            },
+            "name": "/usr/lib/gstreamer-1.0/libgstvideoparsersbad.so",
+            "share": {
+              "denominator": 76373,
+              "numerator": 1194
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 947
+              },
+              "period_sum": 9476629,
+              "sample_count": 947
+            },
+            "name": "/usr/lib/ld-linux.so.3",
+            "share": {
+              "denominator": 76373,
+              "numerator": 947
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 944
+              },
+              "period_sum": 9446608,
+              "sample_count": 944
+            },
+            "name": "/usr/lib/libgstcodecparsers-1.0.so.0.2411.0",
+            "share": {
+              "denominator": 76373,
+              "numerator": 944
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 737
+              },
+              "period_sum": 7375159,
+              "sample_count": 737
+            },
+            "name": "/usr/lib/gstreamer-1.0/libgstcoreelements.so",
+            "share": {
+              "denominator": 76373,
+              "numerator": 737
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 68
+              },
+              "period_sum": 680476,
+              "sample_count": 68
+            },
+            "name": "/opt/afdo_agent/lib/libLLVM.so.22.1",
+            "share": {
+              "denominator": 76373,
+              "numerator": 68
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 22
+              },
+              "period_sum": 220154,
+              "sample_count": 22
+            },
+            "name": "/opt/afdo_agent/tools/perf",
+            "share": {
+              "denominator": 76373,
+              "numerator": 22
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 8
+              },
+              "period_sum": 80056,
+              "sample_count": 8
+            },
+            "name": "/usr/bin/gst-launch-1.0",
+            "share": {
+              "denominator": 76373,
+              "numerator": 8
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 4
+              },
+              "period_sum": 40028,
+              "sample_count": 4
+            },
+            "name": "/usr/lib/libffi.so.8.1.4",
+            "share": {
+              "denominator": 76373,
+              "numerator": 4
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 2
+              },
+              "period_sum": 20014,
+              "sample_count": 2
+            },
+            "name": "/usr/lib/libgstpbutils-1.0.so.0.2411.0",
+            "share": {
+              "denominator": 76373,
+              "numerator": 2
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1
+              },
+              "period_sum": 10007,
+              "sample_count": 1
+            },
+            "name": "/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavfilter.so.11.4.100",
+            "share": {
+              "denominator": 76373,
+              "numerator": 1
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1
+              },
+              "period_sum": 10007,
+              "sample_count": 1
+            },
+            "name": "/opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavformat.so.62.3.100",
+            "share": {
+              "denominator": 76373,
+              "numerator": 1
+            }
+          }
+        ],
+        "pid_unknown": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted_reasons": {
+          "data_or_state_change": "unknown",
+          "first_instruction": "unknown",
+          "predecessor_no_line": "unknown",
+          "range_gap": "unknown"
+        },
+        "target": {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 709852
+            },
+            "period_sum": 7103488964,
+            "sample_count": 709852
+          },
+          "in_cu_no_subprogram": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 204184
+            },
+            "period_sum": 2043269288,
+            "sample_count": 204184
+          },
+          "in_func_no_line": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 73211
+            },
+            "period_sum": 732622477,
+            "sample_count": 73211
+          },
+          "no_cu": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_dwarf_func": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 204618
+            },
+            "period_sum": 2047612326,
+            "sample_count": 204618
+          },
+          "outside_symtab_top20": [
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 36483
+                },
+                "period_sum": 365085381,
+                "sample_count": 36483
+              },
+              "name": "ff_prefetch_arm",
+              "share": {
+                "denominator": 709852,
+                "numerator": 36483
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 23916
+                },
+                "period_sum": 239327412,
+                "sample_count": 23916
+              },
+              "name": "ff_put_h264_chroma_mc8_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 23916
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 17528
+                },
+                "period_sum": 175402696,
+                "sample_count": 17528
+              },
+              "name": "ff_put_pixels16_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 17528
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 11261
+                },
+                "period_sum": 112688827,
+                "sample_count": 11261
+              },
+              "name": "ff_h264_h_loop_filter_luma_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 11261
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 11103
+                },
+                "period_sum": 111107721,
+                "sample_count": 11103
+              },
+              "name": "ff_avg_pixels16_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 11103
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 11084
+                },
+                "period_sum": 110917588,
+                "sample_count": 11084
+              },
+              "name": "ff_avg_h264_chroma_mc8_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 11084
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 8472
+                },
+                "period_sum": 84779304,
+                "sample_count": 8472
+              },
+              "name": "put_h264_qpel8_v_lowpass_l2_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 8472
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 8405
+                },
+                "period_sum": 84108835,
+                "sample_count": 8405
+              },
+              "name": "ff_h264_idct_add_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 8405
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 7900
+                },
+                "period_sum": 79055300,
+                "sample_count": 7900
+              },
+              "name": "put_h264_qpel8_hv_lowpass_neon_top",
+              "share": {
+                "denominator": 709852,
+                "numerator": 7900
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 7719
+                },
+                "period_sum": 77244033,
+                "sample_count": 7719
+              },
+              "name": "ff_h264_h_loop_filter_chroma_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 7719
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 7430
+                },
+                "period_sum": 74352010,
+                "sample_count": 7430
+              },
+              "name": "ff_h264_idct_add16_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 7430
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 6325
+                },
+                "period_sum": 63294275,
+                "sample_count": 6325
+              },
+              "name": "ff_h264_v_loop_filter_luma_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 6325
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 5041
+                },
+                "period_sum": 50445287,
+                "sample_count": 5041
+              },
+              "name": "ff_h264_idct8_add_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 5041
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 4548
+                },
+                "period_sum": 45511836,
+                "sample_count": 4548
+              },
+              "name": "ff_put_h264_chroma_mc4_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 4548
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 4402
+                },
+                "period_sum": 44050814,
+                "sample_count": 4402
+              },
+              "name": "ff_h264_idct_add8_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 4402
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 4174
+                },
+                "period_sum": 41769218,
+                "sample_count": 4174
+              },
+              "name": "ff_h264_v_loop_filter_chroma_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 4174
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 3682
+                },
+                "period_sum": 36845774,
+                "sample_count": 3682
+              },
+              "name": "put_h264_qpel8_h_lowpass_l2_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 3682
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 3519
+                },
+                "period_sum": 35214633,
+                "sample_count": 3519
+              },
+              "name": "put_h264_qpel8_h_lowpass_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 3519
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 3258
+                },
+                "period_sum": 32602806,
+                "sample_count": 3258
+              },
+              "name": "put_h264_qpel8_v_lowpass_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 3258
+              }
+            },
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 2249
+                },
+                "period_sum": 22505743,
+                "sample_count": 2249
+              },
+              "name": "ff_h264_idct_dc_add_neon",
+              "share": {
+                "denominator": 709852,
+                "numerator": 2249
+              }
+            }
+          ],
+          "plt": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 434
+            },
+            "period_sum": 4343038,
+            "sample_count": 434
+          },
+          "unmapped_in_target": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "usable": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 432023
+            },
+            "period_sum": 4323254161,
+            "sample_count": 432023
+          }
+        },
+        "unmapped": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "written_positions": 2975
+      },
+      "lost": {
+        "L": 58343,
+        "S": 1190755,
+        "completeness": "unknown",
+        "count_unit": "records",
+        "exported_lost_ratio": {
+          "denominator": 1249098,
+          "numerator": 58343
+        },
+        "records": 423,
+        "scope": "input",
+        "source": "PERF_RECORD_LOST"
+      },
+      "quality_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/host-conversion/libavcodec.json",
+      "quality_sha256": "5d0752519d4c1faef4575b48e294efdac1846c253eb88c3405395b74c7dba623",
+      "profile_sha256": "6cbc2a4ebb0cc16fa2e5861c1c9d24bc7512527dcf081b80d96be9e91554b264",
+      "stderr": "warning: Found 14 start addresses with multiple symbols\nwarning: Sample PGO is estimated to optimize better with 4.3x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n"
+    }
+  ],
+  "independent_counts": {
+    "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/perfscript.txt",
+    "sha256": "c95baff492d91ff9b410bf39dd9c4cc4e6fc9702933c65a071bc8ceb785e9e5e",
+    "lines": 1191250,
+    "LOST_records": 423,
+    "observed_L": 58343,
+    "S": 1190755,
+    "exported_lost_ratio": {
+      "numerator": 58343,
+      "denominator": 1249098
+    },
+    "sample_events": {
+      "cycles": 1190755
+    },
+    "mappings": 72,
+    "unknown_lines": [],
+    "LOST_examples": [
+      {
+        "line": 9354,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 179"
+      },
+      {
+        "line": 11105,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 71"
+      },
+      {
+        "line": 16828,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 172"
+      },
+      {
+        "line": 21179,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 135"
+      },
+      {
+        "line": 22236,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 113"
+      },
+      {
+        "line": 23575,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 166"
+      },
+      {
+        "line": 24912,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 260"
+      },
+      {
+        "line": 28160,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 119"
+      },
+      {
+        "line": 30202,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 194"
+      },
+      {
+        "line": 32871,
+        "raw": "  17377/17382   PERF_RECORD_LOST lost 261"
+      }
+    ],
+    "record_printed_samples": [],
+    "record_sample_count_equals_S": "unknown"
+  },
+  "raw": {
+    "status": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/status",
+      "sha256": "6058b257f0eebfc4f883c11475b2b4173a3c46b1e7753586531f91ef57df8d8a",
+      "text": "RECORD_EXIT 0\nEXIT 0\nALL-END 2026-11-06T14:01:04,209849149+0900 OK\n"
+    },
+    "record.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/record.stderr",
+      "sha256": "a21768e5580007b3fbeea396bfaa8b828aaece872a179cd9f043d10def882c9c",
+      "text": "[ perf record: Woken up 11831 times to write data ]\n[ perf record: Captured and wrote 40.598 MB /opt/afdo_agent/work/eval-20261106T135947-17238/perf.data ]\nreal 49.50\nuser 22.76\nsys 11.03\n"
+    },
+    "evlist.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/evlist.txt",
+      "sha256": "f913ae5190c7f4a3ccc306196f911946929d144780e43824cf710afe7bac8fdd",
+      "text": "cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 10007, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1\n"
+    },
+    "buildid-list.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/buildid-list.txt",
+      "sha256": "cefa1018e74feda8bc3d1d8022fa7840228169c88518cee1904f98a7d9fbc796",
+      "text": "                                         /opt/afdo_agent/lib/libLLVM.so.22.1\n                                         /opt/afdo_agent/tools/perf\ne7de4d8c9560442994341d9bfc5dfd06ae641a17 /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavcodec.so.62.11.100\n96d6f7d13acc6c0d3f6507dee8613272f14fb59a /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavfilter.so.11.4.100\n9495fbff5e68e663c0d6e61c3c8324b221133c75 /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavformat.so.62.3.100\ned5f45420c793b1a70ffe09853e568b465891102 /opt/afdo_agent/variants/ffmpeg-thumb-S/lib/libavutil.so.60.8.100\n                                         /usr/bin/gst-launch-1.0\n                                         /usr/lib/gstreamer-1.0/libgstcoreelements.so\n                                         /usr/lib/gstreamer-1.0/libgstisomp4.so\n                                         /usr/lib/gstreamer-1.0/libgstlibav.so\n                                         /usr/lib/gstreamer-1.0/libgstvideoparsersbad.so\n3e855c7b550b9929b41f5dce7326835f50553afc /usr/lib/ld-linux.so.3\nc79c2b16c629ca821627425d9de5fca871a3d64c /usr/lib/libc.so.6\n                                         /usr/lib/libdlog.so.0.0.0\n0b8d739599bf54890f35ca0a8bf6f040c687a2b3 /usr/lib/libdw-0.189.so\n                                         /usr/lib/libffi.so.8.1.4\n                                         /usr/lib/libglib-2.0.so.0.8000.5\n                                         /usr/lib/libgobject-2.0.so.0.8000.5\n                                         /usr/lib/libgstbase-1.0.so.0.2411.0\n                                         /usr/lib/libgstcodecparsers-1.0.so.0.2411.0\n                                         /usr/lib/libgstpbutils-1.0.so.0.2411.0\n                                         /usr/lib/libgstreamer-1.0.so.0.2411.0\n                                         /usr/lib/libgsttag-1.0.so.0.2411.0\n                                         /usr/lib/libgstvideo-1.0.so.0.2411.0\n7c706d17ec0ffcd11bb3f162df93a0f409948301 /usr/lib/libstdc++.so.6.0.33\n395733b9c917cb98309b39cc3ec379c03ac36b3f [kernel.kallsyms]\n"
+    },
+    "perfscript.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/perfscript.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "report.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/report.stderr",
+      "sha256": "e0531b17a7518f84f0902f05533bd0c3334557d394d1428e5a9ddd450b8473ae",
+      "text": "Warning:\nProcessed 1721015 events and lost 423 chunks!\n\nCheck IO/CPU overload!\n\n"
+    },
+    "workload.stdout": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/workload.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "perf-stat.csv": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/lost-bounded/perf-stat.csv",
+      "sha256": "1abfe8548c218d2a988c0ee65cfac1654e2885c3a0a61ba37a5a87dbf9daa489",
+      "text": "# started on Fri Nov  6 13:59:48 2026\n\n36908997014;;cycles;27177662456;100.00;1.358;GHz\n31932175304;;instructions;27177662456;100.00;0.87;insn per cycle\n27177.66;msec;task-clock;27177662456;100.00;0.566;CPUs utilized\n"
+    },
+    "report_lost_lines": [
+      "# Total Lost Samples: 58436"
+    ]
+  },
+  "remote_command": {
+    "command": "RUN_ESTIMATE_BYTES=294887575 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/integration.sh lost 600 1",
+    "transport_rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/chmod\nDEPENDENCY_OK chmod\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/dbus-send\nDEPENDENCY_OK dbus-send\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/getconf\nDEPENDENCY_OK getconf\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/sbin/lsmod\nDEPENDENCY_OK lsmod\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1037299712 estimate_bytes=294887575 required_bytes=789775150\nRUNPATH /opt/afdo_agent/work/eval-20261106T135947-17238\n/opt/afdo_agent/scripts/integration.sh: line 99: kill: (17340) - No such process\nRESULTS /opt/afdo_agent/work/eval-20261106T135947-17238\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+}

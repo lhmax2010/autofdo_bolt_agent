@@ -1,0 +1,631 @@
+{
+  "tag": "module",
+  "mode": "module",
+  "remote": "/opt/afdo_agent/work/eval-20261106T140300-26158",
+  "local": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module",
+  "seconds": 40.310618547999184,
+  "rc": 0,
+  "bytes": 48412282,
+  "receipt_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module-receipt.json",
+  "receipt_sha256": "bae61de0881a9eae943b24d4c157ae0350cce09136303b55f31edeb3af112c02",
+  "verified_files": 222,
+  "deleted": true,
+  "original_sha256": {
+    "evlist.txt": "dc038768ac152568840fcd52877b296c13584e4b79f5f6d7bd336557c271b8bc",
+    "status": "e9def66beca6b04a4814b807766fa5304ceafcb3b00f70c00a4b5173599ee6f8",
+    "perf.data": "11dab792648db3ead7fa41e1f792b2e11393392a2f75dba3f719459a5d98eb77",
+    "record.stderr": "996e0bc04ccdc7f107a64f40eb18448192007c5972bd18fc9974ed99aa2b199b",
+    "buildid-list.txt": "030ee24f16ece7b94d3089cbd164a5988c58157f9d1f4a98698687421b323da2",
+    "perfscript.txt": "52c0329cd044264bfd6a8b46064d37f6428ea293bfd66d277fab03cf63447abd"
+  },
+  "conversions": [
+    {
+      "label": "cases",
+      "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "--binary-match-regex=^/opt/afdo_agent/tools/integration/cases$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/perfscript.txt",
+        "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/buildid-list.txt",
+        "--ip-weight=sample",
+        "--ip-aggregation=sum",
+        "--ip-head-samples=none",
+        "--ip-zero-fill=none",
+        "--ip-skid=none",
+        "--format=text",
+        "--show-ip-address-counts",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/host-conversion/cases.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/host-conversion/cases.json"
+      ],
+      "exit": 0,
+      "verdict": {
+        "conversion": "ok",
+        "failure_stage": null,
+        "fallback_callback_count": 0,
+        "identity": "verified",
+        "lost_ratio_check": "not_evaluated",
+        "reason": null,
+        "sample_threshold_check": "not_evaluated",
+        "sampling_adequacy": "unknown",
+        "usable_ratio_check": "not_evaluated"
+      },
+      "identity": {
+        "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "binary_build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+        "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/v04/samples-extract/usr/bin/cases",
+        "candidates": [
+          {
+            "deleted": false,
+            "path": "/opt/afdo_agent/tools/integration/cases"
+          }
+        ],
+        "debug_binary": null,
+        "debug_build_id": null,
+        "evidence": [
+          {
+            "build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "consistent",
+            "source": "buildid-list"
+          },
+          {
+            "build_id": "f6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5",
+            "mapping_index": 2555,
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "verified",
+            "source": "mmap2"
+          },
+          {
+            "build_id": null,
+            "mapping_index": "unknown",
+            "path": "/opt/afdo_agent/tools/integration/cases",
+            "result": "verified",
+            "source": "path-summary"
+          }
+        ],
+        "grade": "verified",
+        "observed_mmap_build_id": true,
+        "selection": "regex"
+      },
+      "samples": {
+        "after_event": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 321449
+          },
+          "period_sum": 32145864347,
+          "sample_count": 321449
+        },
+        "after_pid": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 321449
+          },
+          "period_sum": 32145864347,
+          "sample_count": 321449
+        },
+        "input_total": {
+          "sample_count": 321449
+        },
+        "kernel": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 151691
+          },
+          "period_sum": 15169555073,
+          "sample_count": 151691
+        },
+        "other_dso": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 67053
+          },
+          "period_sum": 6705501159,
+          "sample_count": 67053
+        },
+        "other_dso_top20": [
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 44420
+              },
+              "period_sum": 4442133260,
+              "sample_count": 44420
+            },
+            "name": "/usr/lib/ld-linux.so.3",
+            "share": {
+              "denominator": 67053,
+              "numerator": 44420
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 11952
+              },
+              "period_sum": 1195235856,
+              "sample_count": 11952
+            },
+            "name": "/usr/lib/libc.so.6",
+            "share": {
+              "denominator": 67053,
+              "numerator": 11952
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 2363
+              },
+              "period_sum": 236307089,
+              "sample_count": 2363
+            },
+            "name": "/usr/lib/libglib-2.0.so.0.8000.5",
+            "share": {
+              "denominator": 67053,
+              "numerator": 2363
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1987
+              },
+              "period_sum": 198705961,
+              "sample_count": 1987
+            },
+            "name": "/usr/lib/libdbus-1.so.3.19.13",
+            "share": {
+              "denominator": 67053,
+              "numerator": 1987
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1634
+              },
+              "period_sum": 163404902,
+              "sample_count": 1634
+            },
+            "name": "/usr/bin/bash",
+            "share": {
+              "denominator": 67053,
+              "numerator": 1634
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 1130
+              },
+              "period_sum": 113003390,
+              "sample_count": 1130
+            },
+            "name": "/usr/lib/libstdc++.so.6.0.33",
+            "share": {
+              "denominator": 67053,
+              "numerator": 1130
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 999
+              },
+              "period_sum": 99902997,
+              "sample_count": 999
+            },
+            "name": "/usr/lib/libdlog.so.0.0.0",
+            "share": {
+              "denominator": 67053,
+              "numerator": 999
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 446
+              },
+              "period_sum": 44601338,
+              "sample_count": 446
+            },
+            "name": "/usr/lib/libgio-2.0.so.0.8000.5",
+            "share": {
+              "denominator": 67053,
+              "numerator": 446
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 362
+              },
+              "period_sum": 36201086,
+              "sample_count": 362
+            },
+            "name": "/usr/lib/libproc2.so.1.0.0",
+            "share": {
+              "denominator": 67053,
+              "numerator": 362
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 264
+              },
+              "period_sum": 26400792,
+              "sample_count": 264
+            },
+            "name": "/usr/lib/libgobject-2.0.so.0.8000.5",
+            "share": {
+              "denominator": 67053,
+              "numerator": 264
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 232
+              },
+              "period_sum": 23200696,
+              "sample_count": 232
+            },
+            "name": "/usr/lib/libnss_compat.so.2",
+            "share": {
+              "denominator": 67053,
+              "numerator": 232
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 182
+              },
+              "period_sum": 18200546,
+              "sample_count": 182
+            },
+            "name": "/usr/lib/libdbuspolicy1.so.1.1.0",
+            "share": {
+              "denominator": 67053,
+              "numerator": 182
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 148
+              },
+              "period_sum": 14800444,
+              "sample_count": 148
+            },
+            "name": "/usr/lib/libnss_securitymanager.so.2.0.0",
+            "share": {
+              "denominator": 67053,
+              "numerator": 148
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 142
+              },
+              "period_sum": 14200426,
+              "sample_count": 142
+            },
+            "name": "/usr/bin/dlog_logger",
+            "share": {
+              "denominator": 67053,
+              "numerator": 142
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 88
+              },
+              "period_sum": 8800264,
+              "sample_count": 88
+            },
+            "name": "/usr/bin/dbus-send",
+            "share": {
+              "denominator": 67053,
+              "numerator": 88
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 80
+              },
+              "period_sum": 8000240,
+              "sample_count": 80
+            },
+            "name": "/usr/lib/libcynara-client-helpers.so.0.27.0",
+            "share": {
+              "denominator": 67053,
+              "numerator": 80
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 68
+              },
+              "period_sum": 6800204,
+              "sample_count": 68
+            },
+            "name": "/usr/lib/libtizen-core.so.0.4.2",
+            "share": {
+              "denominator": 67053,
+              "numerator": 68
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 66
+              },
+              "period_sum": 6600198,
+              "sample_count": 66
+            },
+            "name": "/usr/lib/systemd/libsystemd-shared-244.so",
+            "share": {
+              "denominator": 67053,
+              "numerator": 66
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 51
+              },
+              "period_sum": 5100153,
+              "sample_count": 51
+            },
+            "name": "/usr/lib/libgcc_s.so.1",
+            "share": {
+              "denominator": 67053,
+              "numerator": 51
+            }
+          },
+          {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 47
+              },
+              "period_sum": 4700141,
+              "sample_count": 47
+            },
+            "name": "/usr/lib/libcynara-commons.so.0.27.0",
+            "share": {
+              "denominator": 67053,
+              "numerator": 47
+            }
+          }
+        ],
+        "pid_unknown": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "skid_unadjusted_reasons": {
+          "data_or_state_change": "unknown",
+          "first_instruction": "unknown",
+          "predecessor_no_line": "unknown",
+          "range_gap": "unknown"
+        },
+        "target": {
+          "counts": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 102705
+            },
+            "period_sum": 10270808115,
+            "sample_count": 102705
+          },
+          "in_cu_no_subprogram": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "in_func_no_line": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 288
+            },
+            "period_sum": 28800864,
+            "sample_count": 288
+          },
+          "no_cu": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_dwarf_func": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "outside_symtab_top20": [],
+          "plt": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "unmapped_in_target": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "usable": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 102417
+            },
+            "period_sum": 10242007251,
+            "sample_count": 102417
+          }
+        },
+        "unmapped": {
+          "normalized_weight": {
+            "denominator": 1,
+            "numerator": 0
+          },
+          "period_sum": 0,
+          "sample_count": 0
+        },
+        "written_positions": 36
+      },
+      "lost": {
+        "L": "unknown",
+        "S": 321449,
+        "completeness": "unknown",
+        "count_unit": "records",
+        "exported_lost_ratio": "unknown",
+        "records": 0,
+        "scope": "input",
+        "source": "PERF_RECORD_LOST"
+      },
+      "quality_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/host-conversion/cases.json",
+      "quality_sha256": "4df50fe39bfba4284fe8c83a172d561d6eefaaf3144f515fbc98cc718edee510",
+      "profile_sha256": "ab7dd04d625d2fa4c6ceb0aa27ed7e9f1e6b28b3706255eea30bb6acf7db5c5c",
+      "stderr": ""
+    }
+  ],
+  "independent_counts": {
+    "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/perfscript.txt",
+    "sha256": "52c0329cd044264bfd6a8b46064d37f6428ea293bfd66d277fab03cf63447abd",
+    "lines": 339471,
+    "LOST_records": 0,
+    "observed_L": 0,
+    "S": 321449,
+    "exported_lost_ratio": "unknown",
+    "sample_events": {
+      "cycles": 321449
+    },
+    "mappings": 18022,
+    "unknown_lines": [],
+    "LOST_examples": [],
+    "record_printed_samples": [],
+    "record_sample_count_equals_S": "unknown"
+  },
+  "raw": {
+    "status": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/status",
+      "sha256": "e9def66beca6b04a4814b807766fa5304ceafcb3b00f70c00a4b5173599ee6f8",
+      "text": "RECORD_EXIT 0\nEXIT 0\nALL-END 2026-11-06T14:03:21,200827215+0900 OK\n"
+    },
+    "record.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/record.stderr",
+      "sha256": "996e0bc04ccdc7f107a64f40eb18448192007c5972bd18fc9974ed99aa2b199b",
+      "text": "[ perf record: Woken up 66 times to write data ]\n[ perf record: Captured and wrote 17.265 MB /opt/afdo_agent/work/eval-20261106T140300-26158/perf.data ]\nreal 12.30\nuser 10.90\nsys 7.08\n"
+    },
+    "evlist.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/evlist.txt",
+      "sha256": "dc038768ac152568840fcd52877b296c13584e4b79f5f6d7bd336557c271b8bc",
+      "text": "cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 100003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, disabled: 1, inherit: 1, sample_id_all: 1, exclude_guest: 1\ndummy:u: type: 1 (software), size: 136, config: 0x9 (PERF_COUNT_SW_DUMMY), { sample_period, sample_freq }: 100003, sample_type: IP|TID|TIME|ID|CPU, read_format: ID|LOST, inherit: 1, exclude_kernel: 1, exclude_hv: 1, mmap: 1, comm: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1, build_id: 1\n"
+    },
+    "buildid-list.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/buildid-list.txt",
+      "sha256": "030ee24f16ece7b94d3089cbd164a5988c58157f9d1f4a98698687421b323da2",
+      "text": "b85657c98fa68ebf43a90520861cd8f461c0abad /lib/modules/6.12.80-arm-rpi4-v7l/extra/kdbus/kdbus.ko\ncdda1f7a8894f3e7b09e2eb5b22d824a9da44fdc /lib/modules/6.12.80-arm-rpi4-v7l/extra/logger.ko\ncc541f53dc230cfb50e57244fd850d3c7f811c95 /lib/modules/6.12.80-arm-rpi4-v7l/extra/proc-tsm.ko\n                                         /opt/afdo_agent/lib/libLLVM.so.22.1\nf6b7f3983e82f34cfd1b18fdae7a7096fe5b5ee5 /opt/afdo_agent/tools/integration/cases\n                                         /opt/afdo_agent/tools/perf\n                                         /tmp/perf-vdso.so-3TbqfA\n                                         /usr/bin/bash\n                                         /usr/bin/cat\n                                         /usr/bin/date\n                                         /usr/bin/dbus-send\n                                         /usr/bin/deviced\n                                         /usr/bin/dlog_logger\n                                         /usr/bin/gawk\n                                         /usr/bin/pass\n                                         /usr/bin/ps\n                                         /usr/bin/sleep\n3e855c7b550b9929b41f5dce7326835f50553afc /usr/lib/ld-linux.so.3\n                                         /usr/lib/libamd.so.1.82.15\n                                         /usr/lib/libaul.so.0.85.10\n                                         /usr/lib/libbundle.so.0.18.15\nc79c2b16c629ca821627425d9de5fca871a3d64c /usr/lib/libc.so.6\n                                         /usr/lib/libcap.so.2.73\n                                         /usr/lib/libcapi-system-resource-plugin.so.1.0.0\n                                         /usr/lib/libcapi-system-resource.so.1.0.0\n                                         /usr/lib/libcynara-client-helpers.so.0.27.0\n                                         /usr/lib/libcynara-client.so.0.27.0\n                                         /usr/lib/libcynara-commons.so.0.27.0\n                                         /usr/lib/libdbus-1.so.3.19.13\n                                         /usr/lib/libdbuspolicy1.so.1.1.0\n                                         /usr/lib/libdlog.so.0.0.0\n                                         /usr/lib/libdlog_redirect_stdout.so.0.0.0\n                                         /usr/lib/libexpat.so.1.11.1\ne2afd4a2c1e45e402d9cb48b922f08b9ed95d3cd /usr/lib/libgcc_s.so.1\n                                         /usr/lib/libgio-2.0.so.0.8000.5\n                                         /usr/lib/libglib-2.0.so.0.8000.5\n                                         /usr/lib/libgobject-2.0.so.0.8000.5\n                                         /usr/lib/libjson-c.so.5.4.0\n                                         /usr/lib/libkmod.so.2.5.1\n                                         /usr/lib/liblbs-dbus-server.so.0.1.0\n                                         /usr/lib/liblzma.so.5.8.1\n1789d487948dabaca2dc2ef970cd862080467abd /usr/lib/libm.so.6\n8470ef06bf4d4e718721d83ec7dcc257a28edd53 /usr/lib/libnss_compat.so.2\n                                         /usr/lib/libnss_securitymanager.so.2.0.0\n                                         /usr/lib/libparcel.so.0.18.15\n                                         /usr/lib/libpkgmgr-info.so.0.37.5\n                                         /usr/lib/libproc2.so.1.0.0\n6501853905799ccb303b60a680737f4af6b49443 /usr/lib/libpthread.so.0\n7c706d17ec0ffcd11bb3f162df93a0f409948301 /usr/lib/libstdc++.so.6.0.33\n                                         /usr/lib/libsystemd.so.0.27.1\n                                         /usr/lib/libtizen-core.so.0.4.2\n                                         /usr/lib/libtzplatform-config-2.0.so.2.0.0\n                                         /usr/lib/systemd/libsystemd-shared-244.so\n                                         /usr/lib/systemd/systemd\n                                         /usr/lib/systemd/systemd-journald\n                                         /usr/sbin/stability-monitor\n                                         /usr/share/united-service/esd/mod/libalarm-server.so\n395733b9c917cb98309b39cc3ec379c03ac36b3f [kernel.kallsyms]\n"
+    },
+    "perfscript.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/perfscript.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "report.stderr": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/report.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text": ""
+    },
+    "module-choice": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/module-choice",
+      "sha256": "2ca5409bc96f2303cdd988aacb728296599ca373f6bd2343218ddc407d479906",
+      "text": "loaded kdbus; ordinary DBus ListNames calls\n"
+    },
+    "modules.txt": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/modules.txt",
+      "sha256": "d712ac45e48cd9fd25f68c00f69f0e36c202b6777e86ea2e455ea10cf21b8663",
+      "text": "Module                  Size  Used by\nproc_tsm               12288  0\nbrcmfmac              352256  0\nbrcmutil               16384  1 brcmfmac\nhci_uart               32768  0\nbtbcm                  20480  1 hci_uart\nkdbus                  98304  84\ndm_bow                 20480  0\nlogger                 16384  177\ninform_reboot          12288  0\nextcon_usb_fixed       12288  0\n"
+    },
+    "workload.stdout": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/workload.stdout",
+      "sha256": "178c24d4b605c94d1181824583b65f7216188bffaa1b4c97ee415bd0d4ad495c",
+      "text": "ROLE=child PID=26276 PARENT=26274 CHILD=0\nROLE=parent PID=26274 PARENT=26274 CHILD=26276\nDONE PID=26276 CHECKSUM=ff818b861cb93a67\nDONE PID=26274 CHECKSUM=ff818b861cb93a67\n"
+    },
+    "perf-stat.csv": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/extras-fixed/module/perf-stat.csv",
+      "sha256": "d1eb01c12fa26fce10b3f764137d675ab67afc55602f3a261478052a24dd4d4c",
+      "text": "# started on Fri Nov  6 14:03:01 2026\n\n24003919855;;cycles;16470684530;100.00;1.457;GHz\n25112992661;;instructions;16470684530;100.00;1.05;insn per cycle\n16470.68;msec;task-clock;16470684530;100.00;1.579;CPUs utilized\n"
+    },
+    "report_lost_lines": [
+      "# Total Lost Samples: 0"
+    ]
+  },
+  "remote_command": {
+    "command": "RUN_ESTIMATE_BYTES=80000000 nice -n 19 ionice -c3 /bin/bash /opt/afdo_agent/scripts/integration.sh module",
+    "transport_rc": 0,
+    "stdout": "IDENTITY Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l\n/bin/bash\nDEPENDENCY_OK /bin/bash\n/usr/bin/awk\nDEPENDENCY_OK awk\n/usr/bin/cat\nDEPENDENCY_OK cat\n/usr/bin/chmod\nDEPENDENCY_OK chmod\n/usr/bin/cut\nDEPENDENCY_OK cut\n/usr/bin/date\nDEPENDENCY_OK date\n/usr/bin/dbus-send\nDEPENDENCY_OK dbus-send\n/usr/bin/df\nDEPENDENCY_OK df\n/usr/bin/find\nDEPENDENCY_OK find\n/usr/bin/findmnt\nDEPENDENCY_OK findmnt\n/usr/bin/getconf\nDEPENDENCY_OK getconf\n/usr/bin/grep\nDEPENDENCY_OK grep\n/usr/bin/gst-inspect-1.0\nDEPENDENCY_OK gst-inspect-1.0\n/usr/bin/gst-launch-1.0\nDEPENDENCY_OK gst-launch-1.0\n/usr/bin/ionice\nDEPENDENCY_OK ionice\n/usr/sbin/lsmod\nDEPENDENCY_OK lsmod\n/usr/bin/mkdir\nDEPENDENCY_OK mkdir\n/usr/bin/mkfifo\nDEPENDENCY_OK mkfifo\n/usr/bin/nice\nDEPENDENCY_OK nice\n/usr/bin/ps\nDEPENDENCY_OK ps\n/usr/bin/readlink\nDEPENDENCY_OK readlink\n/usr/bin/rm\nDEPENDENCY_OK rm\n/usr/bin/rpm\nDEPENDENCY_OK rpm\n/usr/bin/sha256sum\nDEPENDENCY_OK sha256sum\n/usr/bin/sleep\nDEPENDENCY_OK sleep\n/usr/bin/tr\nDEPENDENCY_OK tr\n/usr/bin/uname\nDEPENDENCY_OK uname\n/usr/bin/wc\nDEPENDENCY_OK wc\nSPACE available_bytes=1036337152 estimate_bytes=80000000 required_bytes=360000000\nRUNPATH /opt/afdo_agent/work/eval-20261106T140300-26158\nRESULTS /opt/afdo_agent/work/eval-20261106T140300-26158\n\n__REMOTE_RC=0\n",
+    "stderr": ""
+  }
+}
