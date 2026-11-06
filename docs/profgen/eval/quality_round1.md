@@ -57,3 +57,13 @@ libavcodec Thumb C对象合成后，`llvm-cov export`在3GiB/200%scope内被OOM�
 本轮轻任务使用user scope 3GiB/200%，nice19/ionice3，串行。最低已保存MemAvailable=5,546,088KiB（5.289GiB）；没有触发全局连续<2.5GiB暂停或<1.5GiB终止。记录成功取得的最大RSS为500,516KiB；OOM任务精确峰值无法取得（scope回收后MemoryPeak=[not set]），不能用成功任务峰值代表OOM任务。发生一次scope内OOM，未触碰他人进程。重任务门禁只检查一次，不满足，未重试。[资源摘要与原文](../impl/evidence/16/06_resource_summary.json)
 
 待v0.8登记：非叶子line0排除规则仍是待验收实现；记录频率判据的操作性停止与计时窗口局限，记录严格匹配器对本工作负载的结构覆盖风险，以及FFmpeg C覆盖导出的3GiB资源障碍。v0.7正文不改，不调整ε或语义校验。
+
+## 本轮补充：按源文件导出（2026-11-06；已结束）
+
+按用户新方案先验证Thumb spike：重新执行整体export，再按整体JSON列出的全部源文件逐一export，合并以filename及(function name, filenames)为键去重且要求重复对象相同。完整file对象（segments/regions/branches等）逐项相同，函数对象和计数相同，因此逐行执行计数及函数计数零差异。该spike实际只有一个源文件，11函数，119可执行行、109已覆盖行；不能将这个单文件结果冒充多源header去重的普遍证明。[命令、比对、资源及OOM原文](../impl/evidence/16/07_source_filtered_coverage.json)
+
+随后对Thumb libavcodec C指定首个源文件/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c进行独立3G/200%scope export。仍发生OOM：scope Result=oom-kill，外层返回-15，输出为空。运行中观察到cgroup memory.peak=3221225472B、进程RSS=3168464KiB；结束后systemd显示的小MemoryPeak与运行中实读不符，二者原样留证，以运行中达到3GiB及oom-kill事实为准。不提高限额，不原样重试，不继续其他文件；没有生成可用的FFmpeg合并覆盖JSON。
+
+spike两次成功任务子进程峰值RSS分别38928/38968KiB。候选解释为源文件过滤并未限制前置覆盖映射/计数加载内存，但本轮未定位实现，不把该解释当成已证实原因。大文件与执行脚本在temp/coverage-split-check/，对象仍在temp/quality-round1/。
+
+本轮不开始最终质量矩阵、正式S重转或性能测量。待设计v0.8登记：源文件过滤方案在3GiB限额下不能导出这份libavcodec，后续需用户决定其他方案。

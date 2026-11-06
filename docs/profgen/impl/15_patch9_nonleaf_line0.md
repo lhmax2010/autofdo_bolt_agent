@@ -35,3 +35,9 @@ both:110:0
 ## 待设计 v0.8 登记
 
 按PM授权，把“正叶子行但非叶子line0”整样本排除到in_func_no_line，新增明确子项；不允许无效调用点偏移污染profile。此修改应与原非叶子line0挂账一起登记，当前仅实现草稿，挂账不能标为验收关闭。冻结v0.7正文未改。
+
+## 新重构建窗口（2026-11-06；等待中）
+
+用户替换重任务门禁：北京时间2026-11-06 22:00至11-07 08:00每10分钟检查MemAvailable≥14GiB，不查SwapFree；满足即一次启动GBS增量，scope MemoryMax=10G、CPUQuota=400%，_smp_mflags -j4及实际Ninja使用的mlgo_build_jobs 4。构建每60秒保存meminfo，连续两次<3GiB立即终止本任务scope，不碰其他进程。等待与构建均写“已结束”、时间、状态及ALL-END。当前仅等待，未构建。
+
+worker与日志：temp/profgen-patch9/window/{wait_worker.py,build_child.py,wait.log,status.txt,resources.jsonl}；查看：tail -n 10 temp/profgen-patch9/window/wait.log、cat temp/profgen-patch9/window/status.txt。成功后还须正式%check lit、C1两遍636、14份历史重放逐项解释，全部通过才提交LLVM/导出0009；本轮明确不重转正式S、不做矩阵。

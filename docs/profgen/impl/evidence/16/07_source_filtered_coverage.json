@@ -1,0 +1,149 @@
+{
+  "spike-whole.summary.json": {
+    "tag": "spike-whole",
+    "scope_rc": 0,
+    "scope": "afdo-cov-spike-whole",
+    "memory_peak_observed_bytes": 7442432,
+    "process_rss_observed_kib": 12472,
+    "cgroup_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "emergency": false,
+    "ended": "2026-11-06T19:44:29.743306+08:00",
+    "rc": 0,
+    "seconds": 0.3104511910059955,
+    "peak_rss_kib": 38928
+  },
+  "spike-file-0.summary.json": {
+    "tag": "spike-file-0",
+    "scope_rc": 0,
+    "scope": "afdo-cov-spike-file-0",
+    "memory_peak_observed_bytes": 0,
+    "process_rss_observed_kib": 0,
+    "cgroup_events": "",
+    "emergency": false,
+    "ended": "2026-11-06T19:44:29.956305+08:00",
+    "rc": 0,
+    "seconds": 0.009199459993396886,
+    "peak_rss_kib": 38968
+  },
+  "ffmpeg-h264-cabac.summary.json": {
+    "tag": "ffmpeg-h264-cabac",
+    "scope_rc": -15,
+    "scope": "afdo-cov-ffmpeg-h264-cabac",
+    "memory_peak_observed_bytes": 3221225472,
+    "process_rss_observed_kib": 3168464,
+    "cgroup_events": "low 0\nhigh 0\nmax 39\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "emergency": false,
+    "ended": "2026-11-06T19:44:34.994733+08:00"
+  },
+  "spike_comparison": {
+    "files": 1,
+    "functions": 11,
+    "full_file_objects_equal": true,
+    "all_segments_regions_branches_equal": true,
+    "function_objects_counts_equal": true,
+    "executable_lines": 119,
+    "covered_lines": 109
+  },
+  "source_schedule": {
+    "first_source": "/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c",
+    "method": "positional source filter; stop at first OOM; source path from original GBS build"
+  },
+  "commands": {
+    "ffmpeg-h264-cabac.command.json": {
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-cov",
+        "export",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/quality-round1/ffmpeg-thumb-C.unstripped",
+        "-instr-profile=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-ffmpeg-thumb-C.profdata",
+        "/home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c"
+      ],
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/ffmpeg-h264-cabac.json",
+      "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/ffmpeg-h264-cabac.stderr",
+      "result": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/ffmpeg-h264-cabac.result.json"
+    },
+    "spike-file-0.command.json": {
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-cov",
+        "export",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/quality-round1/spike-thumb-C.unstripped",
+        "-instr-profile=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-spike-thumb-C.profdata",
+        "/home/abuild/rpmbuild/BUILD/eval-spike-1.0/spike.c"
+      ],
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/spike-file-0.json",
+      "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/spike-file-0.stderr",
+      "result": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/spike-file-0.result.json"
+    },
+    "spike-whole.command.json": {
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-cov",
+        "export",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/quality-round1/spike-thumb-C.unstripped",
+        "-instr-profile=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-spike-thumb-C.profdata"
+      ],
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/spike-whole.json",
+      "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/spike-whole.stderr",
+      "result": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/spike-whole.result.json"
+    }
+  },
+  "stderr": {
+    "ffmpeg-h264-cabac.stderr": "warning: /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/libavcodec/h264_cabac.c: Source file doesn't exist, proceeded by ignoring it.\nwarning: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/quality-round1/ffmpeg-thumb-C.unstripped: profile data may be out of date - object is newer\n",
+    "spike-whole.stderr": "warning: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/quality-round1/spike-thumb-C.unstripped: profile data may be out of date - object is newer\n",
+    "spike-file-0.stderr": "warning: /home/abuild/rpmbuild/BUILD/eval-spike-1.0/spike.c: Source file doesn't exist, proceeded by ignoring it.\nwarning: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/quality-round1/spike-thumb-C.unstripped: profile data may be out of date - object is newer\n"
+  },
+  "scope_final": "Result=oom-kill\nMemoryPeak=20443136\nMemoryMax=3221225472\n",
+  "journal": "Nov 06 19:44:29 linhao-linux systemd[2500]: Started afdo-cov-ffmpeg-h264-cabac.scope - /usr/bin/python3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/child.py /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-split-check/ffmpeg-h264-cabac.command.json.\nNov 06 19:44:34 linhao-linux systemd[2500]: afdo-cov-ffmpeg-h264-cabac.scope: A process of this unit has been killed by the OOM killer.\nNov 06 19:44:34 linhao-linux systemd[2500]: afdo-cov-ffmpeg-h264-cabac.scope: Failed with result 'oom-kill'.\nNov 06 19:44:34 linhao-linux systemd[2500]: afdo-cov-ffmpeg-h264-cabac.scope: Consumed 9.359s CPU time, 19.4M memory peak, 0B memory swap peak.\n",
+  "resources": [
+    {
+      "time": "2026-11-06T19:44:29.286339+08:00",
+      "tag": "start spike-whole",
+      "meminfo": "MemTotal:       32297780 kB\nMemFree:         2185000 kB\nMemAvailable:   10642472 kB\nBuffers:         4393752 kB\nCached:          3420228 kB\nSwapCached:        39716 kB\nActive:         11870704 kB\nInactive:       14169416 kB\nActive(anon):   11213324 kB\nInactive(anon):  8130276 kB\nActive(file):     657380 kB\nInactive(file):  6039140 kB\nUnevictable:      356012 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:           6516 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              5552 kB\nWriteback:             8 kB\nAnonPages:      18544920 kB\nMapped:          1119632 kB\nShmem:           1117376 kB\nKReclaimable:    2348304 kB\nSlab:            3049480 kB\nSReclaimable:    2348304 kB\nSUnreclaim:       701176 kB\nKernelStack:       51888 kB\nPageTables:       287696 kB\nSecPageTables:     13192 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   96250836 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       94168 kB\nVmallocChunk:          0 kB\nPercpu:            35920 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   235520 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     32768 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "0.92 1.04 1.12 2/3225 1386864\n",
+      "available_kib": 10642472
+    },
+    {
+      "time": "2026-11-06T19:44:29.744046+08:00",
+      "tag": "end spike-whole",
+      "meminfo": "MemTotal:       32297780 kB\nMemFree:         2175200 kB\nMemAvailable:   10635384 kB\nBuffers:         4393772 kB\nCached:          3424900 kB\nSwapCached:        39716 kB\nActive:         11876580 kB\nInactive:       14169548 kB\nActive(anon):   11216624 kB\nInactive(anon):  8130272 kB\nActive(file):     659956 kB\nInactive(file):  6039276 kB\nUnevictable:      358060 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:           6516 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              5620 kB\nWriteback:             8 kB\nAnonPages:      18548044 kB\nMapped:          1120064 kB\nShmem:           1119424 kB\nKReclaimable:    2348304 kB\nSlab:            3049488 kB\nSReclaimable:    2348304 kB\nSUnreclaim:       701184 kB\nKernelStack:       51840 kB\nPageTables:       287700 kB\nSecPageTables:     13192 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   96253444 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       94184 kB\nVmallocChunk:          0 kB\nPercpu:            36160 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   237568 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     32768 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "0.92 1.04 1.12 2/3224 1386870\n",
+      "available_kib": 10635384
+    },
+    {
+      "time": "2026-11-06T19:44:29.745091+08:00",
+      "tag": "start spike-file-0",
+      "meminfo": "MemTotal:       32297780 kB\nMemFree:         2175200 kB\nMemAvailable:   10635384 kB\nBuffers:         4393772 kB\nCached:          3424900 kB\nSwapCached:        39716 kB\nActive:         11876580 kB\nInactive:       14169548 kB\nActive(anon):   11216624 kB\nInactive(anon):  8130272 kB\nActive(file):     659956 kB\nInactive(file):  6039276 kB\nUnevictable:      358060 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:           6516 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              5620 kB\nWriteback:             8 kB\nAnonPages:      18548044 kB\nMapped:          1120064 kB\nShmem:           1119424 kB\nKReclaimable:    2348304 kB\nSlab:            3049488 kB\nSReclaimable:    2348304 kB\nSUnreclaim:       701184 kB\nKernelStack:       51840 kB\nPageTables:       287700 kB\nSecPageTables:     13192 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   96254468 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       94184 kB\nVmallocChunk:          0 kB\nPercpu:            36160 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   237568 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     32768 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "0.92 1.04 1.12 1/3224 1386870\n",
+      "available_kib": 10635384
+    },
+    {
+      "time": "2026-11-06T19:44:29.957055+08:00",
+      "tag": "end spike-file-0",
+      "meminfo": "MemTotal:       32297780 kB\nMemFree:         2175576 kB\nMemAvailable:   10635820 kB\nBuffers:         4393772 kB\nCached:          3425032 kB\nSwapCached:        39716 kB\nActive:         11875588 kB\nInactive:       14169604 kB\nActive(anon):   11215632 kB\nInactive(anon):  8130268 kB\nActive(file):     659956 kB\nInactive(file):  6039336 kB\nUnevictable:      357868 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:           6516 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              5724 kB\nWriteback:             0 kB\nAnonPages:      18547044 kB\nMapped:          1120176 kB\nShmem:           1119488 kB\nKReclaimable:    2348304 kB\nSlab:            3049504 kB\nSReclaimable:    2348304 kB\nSUnreclaim:       701200 kB\nKernelStack:       51888 kB\nPageTables:       287844 kB\nSecPageTables:     13188 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   96254468 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       94168 kB\nVmallocChunk:          0 kB\nPercpu:            36160 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   237568 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     32768 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "0.92 1.04 1.12 2/3224 1386875\n",
+      "available_kib": 10635820
+    },
+    {
+      "time": "2026-11-06T19:44:29.958363+08:00",
+      "tag": "start ffmpeg-h264-cabac",
+      "meminfo": "MemTotal:       32297780 kB\nMemFree:         2175576 kB\nMemAvailable:   10635820 kB\nBuffers:         4393772 kB\nCached:          3425032 kB\nSwapCached:        39716 kB\nActive:         11875588 kB\nInactive:       14169604 kB\nActive(anon):   11215632 kB\nInactive(anon):  8130268 kB\nActive(file):     659956 kB\nInactive(file):  6039336 kB\nUnevictable:      357868 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:           6516 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              5724 kB\nWriteback:             0 kB\nAnonPages:      18547044 kB\nMapped:          1120176 kB\nShmem:           1119488 kB\nKReclaimable:    2348304 kB\nSlab:            3049504 kB\nSReclaimable:    2348304 kB\nSUnreclaim:       701200 kB\nKernelStack:       51888 kB\nPageTables:       287844 kB\nSecPageTables:     13188 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   96254468 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       94168 kB\nVmallocChunk:          0 kB\nPercpu:            36160 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   237568 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     32768 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "0.92 1.04 1.12 3/3224 1386875\n",
+      "available_kib": 10635820
+    },
+    {
+      "time": "2026-11-06T19:44:34.995444+08:00",
+      "tag": "end ffmpeg-h264-cabac",
+      "meminfo": "MemTotal:       32297780 kB\nMemFree:         3456168 kB\nMemAvailable:   10672248 kB\nBuffers:         3320124 kB\nCached:          3184616 kB\nSwapCached:        39640 kB\nActive:         11568240 kB\nInactive:       13162472 kB\nActive(anon):   10796144 kB\nInactive(anon):  8548184 kB\nActive(file):     772096 kB\nInactive(file):  4614288 kB\nUnevictable:      357348 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:              8 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              1856 kB\nWriteback:             0 kB\nAnonPages:      18545684 kB\nMapped:          1089816 kB\nShmem:           1118304 kB\nKReclaimable:    2298264 kB\nSlab:            2997300 kB\nSReclaimable:    2298264 kB\nSUnreclaim:       699036 kB\nKernelStack:       52112 kB\nPageTables:       294292 kB\nSecPageTables:     13180 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   96272120 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       94520 kB\nVmallocChunk:          0 kB\nPercpu:            36160 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   237568 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     30720 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "1.81 1.22 1.18 3/3237 1386935\n",
+      "available_kib": 10672248
+    }
+  ],
+  "limitation": "spike has one coverage source file; equality validates filter/export/merge mechanics for this fixture, not multi-source dedup. FFmpeg first source OOM; no full merge claimed."
+}

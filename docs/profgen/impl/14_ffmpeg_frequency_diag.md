@@ -103,3 +103,43 @@ vm：swappiness60、page-cluster3、min_free_kbytes3388、watermark_scale_factor
 资源总汇：最低已保存MemAvailable5.289GiB；成功测得峰值RSS500,516KiB；scope OOM一次，精确OOM峰值未知。全局低内存暂停/终止阈值均未触发，不原样重试FFmpeg export，不提高限额。重任务一次门禁不满足且未重试。[完整资源证据](evidence/16/06_resource_summary.json)
 
 运行时例外说明：按用户明确要求使用systemd user scope，其临时unit/cgroup及系统日志由systemd管理，本轮只查询了本任务scope的状态和OOM日志；项目材料未写到WORKDIR之外。没有改认证，没有LLVM/Gerrit推送。
+
+## 固件区分诊断（2026-11-06；本轮已结束，unknown）
+
+采集前将用户判定原文单独提交并推送7546425：[frequency_disambiguation_rule.md](../eval/frequency_disambiguation_rule.md)。未改旧预注册、修订1或修订2规则，不作配置比较。[身份、固件、逐秒计算、收据](evidence/14/08_frequency_disambiguation.json)、[CSV与遥测原文](evidence/14/09_interval_raw.json)、[资源及退出码审计](evidence/14/10_disambiguation_resources.json)。
+
+身份与上一轮一致：RPi4 Rev1.5 / armv7l / 6.12.80-arm-rpi4-v7l / #1 SMP Wed Nov 4 17:05:36 UTC 2026；镜像、resourced PID399、zram lzo-rle/617676800B及六项vm参数相同。未挂载/改内核配置，未操作其他工作线设置。本轮主机封装在正式运行前有两次静态引号/换行语法失败，均未执行板上命令；修正后启动，原始失败日志保留temp，不把它们当成状态命令重试。
+
+### 固件来源与执行
+
+|来源|结果/限制|
+|---|---|
+|vcgencmd get_throttled / measure_clock arm|命令不存在，unavailable|
+|指定soc:firmware/get_throttled|节点不存在，unavailable|
+|hwmon0/name + in0_lcrit_alarm|rpi_volt，可读，全部0；源码raspberrypi-hwmon.c:19,36,44,80表明只公开欠压sticky bit16，不能代替完整throttle位图|
+|hwmon1/name|cpu_thermal，无in0_lcrit_alarm|
+|root只读dmesg voltage/throttl|运行前后均无匹配行；原文与grep退出1保留|
+
+两段依赖预检、部署/媒体SHA通过后才设performance。每CPU直接使用同一perf区间的cycles/task-clock，不使用外层墙钟。单核CPU0和四核各运行同一spike纯计算4000000轮，预期约60秒；stat为-I 1000 -e cycles,task-clock -x ';'。telemetry每秒读取全部可用固件来源、温度、scaling_cur_freq。四核温度门禁达到80°C后终止自己的负载；不重试。FFmpeg没有启动。
+
+|对照|区间数|逐秒频率范围 GHz|连续低于1.455GHz最大长度|最高温度|
+|---|---:|---:|---:|---:|
+|单核CPU0|60|1.499895–1.499972|0|64.757°C|
+|四核CPU0|38|0.793172–1.499849|2|80.341°C|
+|四核CPU1|38|0.800301–1.499891|2|80.341°C|
+|四核CPU2|38|0.806179–1.499865|2|80.341°C|
+|四核CPU3|38|0.808710–1.499914|2|80.341°C|
+
+四核约第35、36秒出现低值；CPU0为1.312/0.793GHz，其后恢复约1.500GHz。遥测scaling_cur_freq出现600000及1500000kHz，欠压sticky告警始终0。80.341°C触发用户明确的立即停止要求，脚本保存TEMPERATURE_80C、退出1。原始逐秒数据不剔除、不补齐60秒。
+
+**判定为unknown**：第一条要求完整固件标志/实际时钟或连续≥3秒低cycles/task-clock；本轮只取得欠压子标志0，没有ARM固件时钟，低值连续2个区间，不达3。第二条也不满足（四核不是全部≥1.455GHz，且未运行FFmpeg）。即使观察到600MHz sysfs值，也不擅自把它替代规则中的固件measure_clock或放宽连续秒数。用户可据此处理散热并另行裁决；本轮不生成修订，不改变原31/28/11资格，不开始性能测量。
+
+### 清理和资源
+
+单核成功RUN与四核停止RUN均完整拉回，重读清单、全部SHA相同后才删除确切目录；四核停止后仅为读取原件再次开root，收尾恢复off(uid5001)、schedutil。RPM1232不变，最终/opt used291048KiB、available1014568KiB；进程表未见本次负载残留。只读缺码重试0、状态命令重试0。worker119.636秒，含预检、两次对照、单核传输及恢复；四核后续拉回时间另在审计，不将其计作负载。全部原始数据在temp/frequency-disambiguation/runs/。
+
+本轮轻任务3G/200%scope、nice19/ionice3；板上阶段无内存门禁暂停/终止。重构建尚未开始，等待22:00–08:00授权窗口，进展见报告15。质量矩阵/性能测量均未开始。
+
+### 待设计 v0.8 登记（本轮）
+
+只登记执行事实：固件监测能力只覆盖欠压sticky子标志；温度门禁优先结束对照，缺少判定必需数据时保持unknown。原判定规则与冻结设计正文均未改。

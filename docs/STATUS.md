@@ -26,6 +26,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 本轮阶段状态（2026-11-06；诊断与覆盖结束，补丁9等待窗口）
+
+- 频率区分规则原文预提交7546425；单核60区间约1.500GHz，四核38区间中仅连续2次低于1.455GHz，最高80.341°C触发停止；rpi_volt欠压sticky全部0，其他固件频率/标志来源不可用。按原规则unknown，不运行FFmpeg、不生成修订、不改资格。两RUN完整SHA后删除，root off/schedutil、RPM1232恢复。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)
+- 覆盖分片：Thumb spike整体/单文件合并119行、11函数完全一致（实际1源文件）；libavcodec首文件h264_cabac.c仍3GiB scope OOM，未重试/提高限额/继续其他文件。[质量报告](profgen/eval/quality_round1.md)
+- 补丁9草稿未变、未构建。已启动22:00–08:00窗口等待程序，≥14GiB即10G/400%scope、GBS/Ninja-j4；连续两次<3GiB停自己的scope。当前无重构建运行，不开始最终质量矩阵/性能测量。[报告15](profgen/impl/15_patch9_nonleaf_line0.md)
+
 ## 本轮入口（2026-11-06；频率区分、覆盖分片、补丁9窗口）
 
 - 按用户原文登记 [frequency_disambiguation_rule.md](profgen/eval/frequency_disambiguation_rule.md)，本提交推送后才采集诊断。原预注册/修订文件不变，不开始最终质量矩阵或性能测量。
