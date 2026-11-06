@@ -1,0 +1,909 @@
+{
+  "tool_sha": "9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7",
+  "rows": [
+    {
+      "name": "nonleaf-zero",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--allow-missing-build-id",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin",
+        "--binary-match-regex=^/target$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/input.txt",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/nonleaf-zero.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/nonleaf-zero.json",
+        "--ip-aggregation=sum",
+        "--ip-period-unit=1",
+        "--show-ip-address-counts"
+      ],
+      "rc": 0,
+      "stdout": "IP-ADDRESS 0x12d8 sample_count=1 period_sum=7\nIP-ADDRESS 0x12f0 sample_count=1 period_sum=3\nIP-ADDRESS 0x1300 sample_count=1 period_sum=100\nIP-STATS input=3\nIP-EVENT cycles samples=3\nIP-STATS after_event=3\nIP-STATS after_pid=3\nIP-STATS pid_unknown=0\nIP-STATS kernel=0\nIP-STATS other_dso=0\nIP-STATS unmapped=0\nIP-STATS target=3\nIP-STATS unmapped_in_target=0\nIP-STATS lost_records=0\nIP-STATS lost_L=0\nIP-STATS mappings=0\nIP-IDENTITY observed_mmap_build_id=false\nIP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin\" build_id=5d67041c1c84a45a3e2dd0058f191919037f23f3\nIP-IDENTITY debug_binary=none build_id=none\nIP-IDENTITY selection=regex\nIP-IDENTITY candidate=\"/target\" deleted=false\nIP-IDENTITY path=\"/target\" source=buildid-list build_id=none result=missing\nIP-IDENTITY path=\"/target\" executable_mappings=0 result=unverified\nIP-IDENTITY final=unverified\nIP-GENERATION p_ref=1 source=explicit weight=period aggregation=sum fs_discriminator=false\nIP-GENERATION in_cu_no_subprogram samples=0 period_sum=0\nIP-GENERATION in_func_no_line samples=0 period_sum=0\nIP-GENERATION no_cu samples=0 period_sum=0\nIP-GENERATION outside_dwarf_func samples=0 period_sum=0\nIP-GENERATION plt samples=0 period_sum=0\nIP-GENERATION skid_unadjusted samples=0 period_sum=0\nIP-GENERATION usable samples=3 period_sum=110\nIP-GENERATION usable_nonleaf_line_zero samples=2 period_sum=10\nIP-GENERATION enumerated_functions=0\n",
+      "stderr": "warning: Sample PGO is estimated to optimize better with 1.4x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n",
+      "profile": "both:110:0\n 2: 100\n 65525: _ZL4leftj.__uniq.326972730918826971593076268821660195379:3\n  1: 3\n 65525: _ZL5rightj.__uniq.326972730918826971593076268821660195379:7\n  1: 7\n",
+      "quality": {
+        "boundaries": {
+          "failures": [],
+          "function_count": 0,
+          "requested": false,
+          "sources": []
+        },
+        "consumer_hints": [
+          "Keep profi enabled during compilation and linking; explicitly enable it at the LTO link step."
+        ],
+        "coverage": {
+          "name_merged_functions": 0,
+          "name_merged_top50": [],
+          "sampled_functions": 1,
+          "top50": [
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 110
+                },
+                "period_sum": 110,
+                "sample_count": 3
+              },
+              "name": "both",
+              "share": {
+                "denominator": 110,
+                "numerator": 110
+              }
+            }
+          ],
+          "unique_addresses": 3
+        },
+        "event": {
+          "before_filter": [
+            {
+              "name": "cycles",
+              "period_sum": 110,
+              "sample_count": 3
+            }
+          ],
+          "config": "unknown",
+          "selected": "cycles",
+          "type": "unknown"
+        },
+        "identity": {
+          "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin",
+          "binary_build_id": "5d67041c1c84a45a3e2dd0058f191919037f23f3",
+          "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin",
+          "candidates": [
+            {
+              "deleted": false,
+              "path": "/target"
+            }
+          ],
+          "debug_binary": null,
+          "debug_build_id": null,
+          "evidence": [
+            {
+              "build_id": null,
+              "mapping_index": "unknown",
+              "path": "/target",
+              "result": "missing",
+              "source": "buildid-list"
+            },
+            {
+              "build_id": null,
+              "mapping_index": "unknown",
+              "path": "/target",
+              "result": "unverified",
+              "source": "path-summary"
+            }
+          ],
+          "grade": "unverified",
+          "observed_mmap_build_id": false,
+          "selection": "regex"
+        },
+        "input": {
+          "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/input.txt",
+          "projection": "ip-only",
+          "sha256": "dcc4d3dbf9316fb7e58259c1cbae2559f9dc409e5cb5eee739bd2e4586be99e1"
+        },
+        "isa": {
+          "a32": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 0
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 0
+            }
+          },
+          "a64": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 3
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 110
+            }
+          },
+          "sources": {
+            "SF_Thumb": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "mapping-symbols": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            },
+            "unknown": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            }
+          },
+          "thumb": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 0
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 0
+            }
+          },
+          "unknown": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 0
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 0
+            }
+          }
+        },
+        "lost": {
+          "L": "unknown",
+          "S": 3,
+          "completeness": "unknown",
+          "count_unit": "records",
+          "exported_lost_ratio": "unknown",
+          "records": 0,
+          "scope": "input",
+          "source": "PERF_RECORD_LOST"
+        },
+        "mapping": {
+          "candidate_executable_records": 0,
+          "candidate_nonexecutable_records": 0,
+          "completeness": "unknown",
+          "pid_count": 1,
+          "records": []
+        },
+        "ratios": {
+          "line_resolution_ratio": {
+            "denominator": 110,
+            "numerator": 110
+          },
+          "target_usable_period_ratio": {
+            "denominator": 110,
+            "numerator": 110
+          },
+          "target_usable_ratio": {
+            "denominator": 110,
+            "numerator": 110
+          },
+          "target_usable_sample_ratio": {
+            "denominator": 3,
+            "numerator": 3
+          }
+        },
+        "samples": {
+          "after_event": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 110
+            },
+            "period_sum": 110,
+            "sample_count": 3
+          },
+          "after_pid": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 110
+            },
+            "period_sum": 110,
+            "sample_count": 3
+          },
+          "input_total": {
+            "sample_count": 3
+          },
+          "kernel": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "other_dso": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "other_dso_top20": [],
+          "pid_unknown": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "skid_unadjusted": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "skid_unadjusted_reasons": {
+            "data_or_state_change": "unknown",
+            "first_instruction": "unknown",
+            "predecessor_no_line": "unknown",
+            "range_gap": "unknown"
+          },
+          "target": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            },
+            "in_cu_no_subprogram": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "in_func_no_line": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "no_cu": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "outside_dwarf_func": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "outside_symtab_top20": [],
+            "plt": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "unmapped_in_target": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "usable": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            }
+          },
+          "unmapped": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "written_positions": 3
+        },
+        "sanity": {
+          "aarch64_alignment_ratio": {
+            "denominator": 3,
+            "numerator": 3
+          },
+          "dwarf_function_ratio": {
+            "denominator": 3,
+            "numerator": 3
+          }
+        },
+        "schema_version": 1,
+        "semantics": {
+          "aggregation": "sum",
+          "dup_policy": "observed-sum",
+          "fs_discriminator": false,
+          "head_samples": "none",
+          "mode": "dwarf",
+          "output_count_unit": "normalized-event-count",
+          "p_ref": 1,
+          "p_ref_source": "explicit",
+          "raw_event_unit": "cycles",
+          "skid": "none",
+          "weight": "period",
+          "zero_fill": "none"
+        },
+        "throttle": "unknown",
+        "thumb_dwarf_normalization": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": [],
+          "unavailable_range_count": 0,
+          "unavailable_top50": []
+        },
+        "tool": {
+          "arguments": [
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+            "--ip-samples",
+            "--allow-missing-build-id",
+            "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/nonleaf-zero.perfbin",
+            "--binary-match-regex=^/target$",
+            "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/input.txt",
+            "--format=text",
+            "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/nonleaf-zero.profile",
+            "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/nonleaf-zero.json",
+            "--ip-aggregation=sum",
+            "--ip-period-unit=1",
+            "--show-ip-address-counts"
+          ],
+          "version": "22.1.8"
+        },
+        "verdict": {
+          "conversion": "ok",
+          "failure_stage": null,
+          "fallback_callback_count": 0,
+          "identity": "unverified",
+          "lost_ratio_check": "not_evaluated",
+          "reason": null,
+          "sample_threshold_check": "not_evaluated",
+          "sampling_adequacy": "unknown",
+          "usable_ratio_check": "not_evaluated"
+        },
+        "warnings": [
+          {
+            "code": "W_IDENTITY_UNVERIFIED",
+            "message": "binary identity is not verified"
+          },
+          {
+            "code": "W_LOW_DENSITY",
+            "message": "sample density below advisory threshold"
+          }
+        ]
+      }
+    },
+    {
+      "name": "head",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+        "--ip-samples",
+        "--allow-missing-build-id",
+        "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.perfbin",
+        "--binary-match-regex=^/target$",
+        "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/input.txt",
+        "--format=text",
+        "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/head.profile",
+        "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/head.json",
+        "--ip-aggregation=sum",
+        "--ip-period-unit=1",
+        "--show-ip-address-counts"
+      ],
+      "rc": 0,
+      "stdout": "IP-ADDRESS 0x12d8 sample_count=1 period_sum=7\nIP-ADDRESS 0x12f0 sample_count=1 period_sum=3\nIP-ADDRESS 0x1300 sample_count=1 period_sum=100\nIP-STATS input=3\nIP-EVENT cycles samples=3\nIP-STATS after_event=3\nIP-STATS after_pid=3\nIP-STATS pid_unknown=0\nIP-STATS kernel=0\nIP-STATS other_dso=0\nIP-STATS unmapped=0\nIP-STATS target=3\nIP-STATS unmapped_in_target=0\nIP-STATS lost_records=0\nIP-STATS lost_L=0\nIP-STATS mappings=0\nIP-IDENTITY observed_mmap_build_id=false\nIP-IDENTITY binary=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.perfbin\" binary_realpath=\"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.perfbin\" build_id=5d67041c1c84a45a3e2dd0058f191919037f23f3\nIP-IDENTITY debug_binary=none build_id=none\nIP-IDENTITY selection=regex\nIP-IDENTITY candidate=\"/target\" deleted=false\nIP-IDENTITY path=\"/target\" source=buildid-list build_id=none result=missing\nIP-IDENTITY path=\"/target\" executable_mappings=0 result=unverified\nIP-IDENTITY final=unverified\nIP-GENERATION p_ref=1 source=explicit weight=period aggregation=sum fs_discriminator=false\nIP-GENERATION in_cu_no_subprogram samples=0 period_sum=0\nIP-GENERATION in_func_no_line samples=0 period_sum=0\nIP-GENERATION no_cu samples=0 period_sum=0\nIP-GENERATION outside_dwarf_func samples=0 period_sum=0\nIP-GENERATION plt samples=0 period_sum=0\nIP-GENERATION skid_unadjusted samples=0 period_sum=0\nIP-GENERATION usable samples=3 period_sum=110\nIP-GENERATION usable_nonleaf_line_zero samples=0 period_sum=0\nIP-GENERATION enumerated_functions=0\n",
+      "stderr": "warning: Sample PGO is estimated to optimize better with 1.4x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n",
+      "profile": "both:110:0\n 2: 100\n 1: _ZL4leftj.__uniq.326972730918826971593076268821660195379:3\n  1: 3\n 1: _ZL5rightj.__uniq.326972730918826971593076268821660195379:7\n  1: 7\n",
+      "quality": {
+        "boundaries": {
+          "failures": [],
+          "function_count": 0,
+          "requested": false,
+          "sources": []
+        },
+        "consumer_hints": [
+          "Keep profi enabled during compilation and linking; explicitly enable it at the LTO link step."
+        ],
+        "coverage": {
+          "name_merged_functions": 0,
+          "name_merged_top50": [],
+          "sampled_functions": 1,
+          "top50": [
+            {
+              "counts": {
+                "normalized_weight": {
+                  "denominator": 1,
+                  "numerator": 110
+                },
+                "period_sum": 110,
+                "sample_count": 3
+              },
+              "name": "both",
+              "share": {
+                "denominator": 110,
+                "numerator": 110
+              }
+            }
+          ],
+          "unique_addresses": 3
+        },
+        "event": {
+          "before_filter": [
+            {
+              "name": "cycles",
+              "period_sum": 110,
+              "sample_count": 3
+            }
+          ],
+          "config": "unknown",
+          "selected": "cycles",
+          "type": "unknown"
+        },
+        "identity": {
+          "binary": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.perfbin",
+          "binary_build_id": "5d67041c1c84a45a3e2dd0058f191919037f23f3",
+          "binary_realpath": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.perfbin",
+          "candidates": [
+            {
+              "deleted": false,
+              "path": "/target"
+            }
+          ],
+          "debug_binary": null,
+          "debug_build_id": null,
+          "evidence": [
+            {
+              "build_id": null,
+              "mapping_index": "unknown",
+              "path": "/target",
+              "result": "missing",
+              "source": "buildid-list"
+            },
+            {
+              "build_id": null,
+              "mapping_index": "unknown",
+              "path": "/target",
+              "result": "unverified",
+              "source": "path-summary"
+            }
+          ],
+          "grade": "unverified",
+          "observed_mmap_build_id": false,
+          "selection": "regex"
+        },
+        "input": {
+          "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/input.txt",
+          "projection": "ip-only",
+          "sha256": "dcc4d3dbf9316fb7e58259c1cbae2559f9dc409e5cb5eee739bd2e4586be99e1"
+        },
+        "isa": {
+          "a32": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 0
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 0
+            }
+          },
+          "a64": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 3
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 110
+            }
+          },
+          "sources": {
+            "SF_Thumb": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "mapping-symbols": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            },
+            "unknown": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            }
+          },
+          "thumb": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 0
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 0
+            }
+          },
+          "unknown": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "sample_ratio": {
+              "denominator": 3,
+              "numerator": 0
+            },
+            "weight_ratio": {
+              "denominator": 110,
+              "numerator": 0
+            }
+          }
+        },
+        "lost": {
+          "L": "unknown",
+          "S": 3,
+          "completeness": "unknown",
+          "count_unit": "records",
+          "exported_lost_ratio": "unknown",
+          "records": 0,
+          "scope": "input",
+          "source": "PERF_RECORD_LOST"
+        },
+        "mapping": {
+          "candidate_executable_records": 0,
+          "candidate_nonexecutable_records": 0,
+          "completeness": "unknown",
+          "pid_count": 1,
+          "records": []
+        },
+        "ratios": {
+          "line_resolution_ratio": {
+            "denominator": 110,
+            "numerator": 110
+          },
+          "target_usable_period_ratio": {
+            "denominator": 110,
+            "numerator": 110
+          },
+          "target_usable_ratio": {
+            "denominator": 110,
+            "numerator": 110
+          },
+          "target_usable_sample_ratio": {
+            "denominator": 3,
+            "numerator": 3
+          }
+        },
+        "samples": {
+          "after_event": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 110
+            },
+            "period_sum": 110,
+            "sample_count": 3
+          },
+          "after_pid": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 110
+            },
+            "period_sum": 110,
+            "sample_count": 3
+          },
+          "input_total": {
+            "sample_count": 3
+          },
+          "kernel": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "other_dso": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "other_dso_top20": [],
+          "pid_unknown": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "skid_unadjusted": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "skid_unadjusted_reasons": {
+            "data_or_state_change": "unknown",
+            "first_instruction": "unknown",
+            "predecessor_no_line": "unknown",
+            "range_gap": "unknown"
+          },
+          "target": {
+            "counts": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            },
+            "in_cu_no_subprogram": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "in_func_no_line": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "no_cu": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "outside_dwarf_func": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "outside_symtab_top20": [],
+            "plt": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "unmapped_in_target": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 0
+              },
+              "period_sum": 0,
+              "sample_count": 0
+            },
+            "usable": {
+              "normalized_weight": {
+                "denominator": 1,
+                "numerator": 110
+              },
+              "period_sum": 110,
+              "sample_count": 3
+            }
+          },
+          "unmapped": {
+            "normalized_weight": {
+              "denominator": 1,
+              "numerator": 0
+            },
+            "period_sum": 0,
+            "sample_count": 0
+          },
+          "written_positions": 3
+        },
+        "sanity": {
+          "aarch64_alignment_ratio": {
+            "denominator": 3,
+            "numerator": 3
+          },
+          "dwarf_function_ratio": {
+            "denominator": 3,
+            "numerator": 3
+          }
+        },
+        "schema_version": 1,
+        "semantics": {
+          "aggregation": "sum",
+          "dup_policy": "observed-sum",
+          "fs_discriminator": false,
+          "head_samples": "none",
+          "mode": "dwarf",
+          "output_count_unit": "normalized-event-count",
+          "p_ref": 1,
+          "p_ref_source": "explicit",
+          "raw_event_unit": "cycles",
+          "skid": "none",
+          "weight": "period",
+          "zero_fill": "none"
+        },
+        "throttle": "unknown",
+        "thumb_dwarf_normalization": {
+          "alias_addresses_top50": [],
+          "alias_check_passed": 0,
+          "alias_query_count": 0,
+          "range_count": 0,
+          "top50": [],
+          "unavailable_range_count": 0,
+          "unavailable_top50": []
+        },
+        "tool": {
+          "arguments": [
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+            "--ip-samples",
+            "--allow-missing-build-id",
+            "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/counting-extra/head.perfbin",
+            "--binary-match-regex=^/target$",
+            "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/input.txt",
+            "--format=text",
+            "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/head.profile",
+            "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch9/head.json",
+            "--ip-aggregation=sum",
+            "--ip-period-unit=1",
+            "--show-ip-address-counts"
+          ],
+          "version": "22.1.8"
+        },
+        "verdict": {
+          "conversion": "ok",
+          "failure_stage": null,
+          "fallback_callback_count": 0,
+          "identity": "unverified",
+          "lost_ratio_check": "not_evaluated",
+          "reason": null,
+          "sample_threshold_check": "not_evaluated",
+          "sampling_adequacy": "unknown",
+          "usable_ratio_check": "not_evaluated"
+        },
+        "warnings": [
+          {
+            "code": "W_IDENTITY_UNVERIFIED",
+            "message": "binary identity is not verified"
+          },
+          {
+            "code": "W_LOW_DENSITY",
+            "message": "sample density below advisory threshold"
+          }
+        ]
+      }
+    }
+  ],
+  "meminfo": "MemTotal:       32297780 kB\nMemFree:          517884 kB\nMemAvailable:    5829540 kB\nBuffers:          934144 kB\nCached:          3658108 kB\nSwapCached:        40292 kB\nActive:         14026960 kB\nInactive:       13081716 kB\nActive(anon):   12543088 kB\nInactive(anon): 11219316 kB\nActive(file):    1483872 kB\nInactive(file):  1862400 kB\nUnevictable:      531940 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:            152 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              3624 kB\nWriteback:             0 kB\nAnonPages:      23010120 kB\nMapped:           981028 kB\nShmem:           1246028 kB\nKReclaimable:    2704288 kB\nSlab:            3488488 kB\nSReclaimable:    2704288 kB\nSUnreclaim:       784200 kB\nKernelStack:       51760 kB\nPageTables:       304240 kB\nSecPageTables:     13456 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   99271500 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       94008 kB\nVmallocChunk:          0 kB\nPercpu:            34480 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   264192 kB\nShmemPmdMapped:        0 kB\nFileHugePages:      4096 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+  "peak_rss_kib": 40880
+}

@@ -26,7 +26,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前阶段（2026-11-06；诊断首RUN按预注册停止，主机核实待续）
+## 当前阶段（2026-11-06；补丁9已实现待构建）
+
+- 正式补丁8最小复现确认非叶子line0会写入调用点65525（正常对照为1），total110含两个错误上下文。按授权完成IP专属排除草稿，归in_func_no_line并新增nonleaf_line_zero子项，测试与schema草稿已写；平台clang-format/dry-run通过。[报告15](profgen/impl/15_patch9_nonleaf_line0.md)
+- 重任务门禁一次检查：MemAvailable5.580803GiB、SwapFree0.000290GiB，不满足10GiB/1GiB，不启动不重试GBS/lit。LLVM HEAD仍660a46f，未提交补丁9/导出0009；正式工具未改，C1/重放/正式S重转待验收。不要使用草稿作质量结论。
+- 主机仍可做轻量准备：Thumb/A32 R参考IR已按原flags与真实profdata生成，无编译告警；最终配置矩阵依赖补丁9正式工具，尚未产出统计结论。后续进展见quality_round1。
+
+## 本轮板上阶段（历史，2026-11-06；诊断首RUN按预注册停止）
 
 - 判定规则原文已单独推送5219d15。首个FFmpeg a类用户态频率1.404018286GHz<1.455GHz，按规则“疑似真实降频”停止，不生成修订2，不重判原31/28/11资格；不能据此声称证明硬件降频。
 - 校准外层墙钟含perf启动/收尾，原比值1.400–1.447GHz不作为纯循环频率证据，cycles/task-clock约1.500GHz；其余诊断重复未做。CPU user+sys与task-clock也有计时口径差。原始证据保留，[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)。
