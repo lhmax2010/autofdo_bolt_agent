@@ -26,6 +26,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 本轮入口（2026-11-06；频率区分、覆盖分片、补丁9窗口）
+
+- 按用户原文登记 [frequency_disambiguation_rule.md](profgen/eval/frequency_disambiguation_rule.md)，本提交推送后才采集诊断。原预注册/修订文件不变，不开始最终质量矩阵或性能测量。
+- 轻任务≥4GiB，3G/200% scope串行；补丁9窗口为2026-11-06 22:00至11-07 08:00，每10分钟检查≥14GiB，不查SwapFree；构建10G/400%、-j4，连续两次<3GiB终止自己的构建。
+- 尚未采集本轮数据。板上必须root off/schedutil收尾；覆盖分片先验证spike逐行/函数计数一致，再逐源文件独立scope。
+
 ## 当前收尾状态（2026-11-06；诊断停止、补丁9待构建、质量参考已准备）
 
 - 判定规则预提交5219d15；首个FFmpeg a类用户态有效频率1.404GHz<1.455GHz，按规则停止，未生成修订2。校准外层墙钟包含perf开销，不能当作纯循环实际频率；物理降频未被证明。root off/schedutil恢复，RPM1232不变。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)
