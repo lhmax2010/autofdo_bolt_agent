@@ -513,3 +513,14 @@ finally回读policy0=schedutil，sdb root off后uid5001；RPM1232→1232。结�
 - 每秒原环境、频率前后界、cycles/task-clock、校验和、核验后的完整perf.data/script/buildid-list保留在各RUN。旧7份修订资格仍unknown；不得补造频率记录。
 - 尚缺35个正式逻辑组、14训练、LOST压力、5集成；保留的新失败RUN先按明确授权完成退出码/完整性核验再处置。续跑必须使用新阶段目录并显式排除这35组，**不能原样重跑当前worker覆盖清单或重复槽位**。
 - 独立avg结果与GNU CU诊断见第12节；非叶子line0规则待PM。本轮不进行5.8质量比较或消费构建。因停止条件生效，等待后续指示。
+
+
+## 14. 新裁决：只读缺退出码重试与保留RUN恢复（2026-11-06）
+
+### 待设计v0.8登记（执行流程）
+
+只读SHA/id/ls/stat/sysfs/proc/df/RPM读取缺退出码时最多重试2次，逐次保存时间、原stdout/stderr及传输退出码；成功结果必须与此前输出一致。真实非零退出或SDB断连不靠此规则重试。perf/负载/删除/governor/root/push等状态命令不重试，失败仍停下恢复。预注册及修订1不变。新SDB包装器默认不重试，调用者必须显式标记read_only；15项主机测试全通过，包含哈希错不删除及状态命令无重试。[测试](evidence/12/50_retry_tests.txt)
+
+第2条RUN已恢复：身份/同内核断言与非root25项预检通过，原uid5001；root下首次重新读取清单即成功，**重试0次**。99项与原首次清单及本机副本完全一致，删除确切目录后写完成收据，退出0。root恢复关闭、governor未改仍schedutil、RPM1232；/opt used292488KiB/available1013128KiB，耗时3.095秒。[全部原文](evidence/12/50_recovery_transport.jsonl)、[收据](evidence/12/50_recovered_receipt.json)、[恢复](evidence/12/50_recovery_result.json)。
+
+该RUN target106593、总样本106709，按修订1未观察到节流；现在纳入A32 spike中档r3，合计36/70组、55完整物理S，原历史停止记录不覆盖。后续使用新阶段目录temp/board-round1-retry，显式跳过已完成36组。剩余预计2.5–3小时板上时间；本阶段恢复后尚未恢复采集。补丁8小修验收前只用存档41440292…工具转换，不能使用开发工具。

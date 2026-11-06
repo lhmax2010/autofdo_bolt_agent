@@ -26,7 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-06；补丁8完成，板上在第二次清单退出码门禁停止）
+## 当前授权与执行状态（2026-11-06；只读重试裁决，保留RUN恢复完成）
+
+- 新授权：只读命令缺退出码最多重试2次、结果须一致、原stdout/stderr/时间全留；状态命令不重试。15主机测试通过。预注册/修订1不变。[报告12第14节](profgen/impl/12_board_round1.md)
+- 停住的A32 spike中档r3已核验99项、完成收据并删除，target106593；本阶段重试0次。累计36/70组、55物理S；root已恢复off(uid5001)，schedutil未改，RPM1232，/opt available1013128KiB。[收据](profgen/impl/evidence/12/50_recovered_receipt.json)
+- 本轮继续授权剩余34组、14训练、LOST及5集成；预计板上2.5–3小时。新阶段temp/board-round1-retry，不覆盖原件。状态命令缺退出码或SDB断连即停。
+- 补丁8小修已授权：映射元数据加载/缺失/冲突不使sum/max失败，保留原DWARF区间并报告不可用；avg/补零/skid按需boundary失败。小修未完成，正式仍41440292…，已在temp/profgen-patch8-amend存档；验收前不使用开发工具。
+- 真实avg挂账保持关闭，LOST/集成/训练未完成；非叶子line0规则待PM。下一步恢复矩阵并在主机小修/GBS验收，每阶段更新状态，不开始Agent。
+
+## 上轮阶段状态（历史）（2026-11-06；补丁8完成，板上在第二次清单退出码门禁停止）
 
 - 补丁8已完成：LLVM本地`cd5168c48b5422a50829259fd43e84cc3edd6694`，正式工具SHA `41440292c7cf3a380a6779dfea6d06ff74a22e18537127561829bf989bb16413`；lit84 PASS/0 FAIL/1 UNSUPPORTED/1 XFAIL，C1两遍各636条0差异，14份历史整份profile与补丁7一致，GBS791秒/113步，0008反向应用检查通过。结果仓库阶段提交41e0be8、2de3086已推送；LLVM/Gerrit未推。[报告13](profgen/impl/13_patch8_thumb_dwarf.md)
 - 本次矩阵23:48:02–01:34:01，6358.323秒，新增27逻辑组/46物理RUN。累计35/70组、54完整S导出，target5,911,900/usable4,390,651，全部verified、name_merged_functions=0；环境资格13 clean/12 abnormal/10 unknown，干净子集target1,991,272，原7份仍unknown，未做配置间比较。[逐组/分类](profgen/impl/evidence/12/40_matrix_summary.json)、[原件SHA/资源](profgen/impl/evidence/12/48_runs_receipts_resources.json)

@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 import subprocess
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[3]
 spec = importlib.util.spec_from_file_location('transfer', ROOT / 'tools/profgen/pull_verified_run.py')
@@ -60,7 +61,7 @@ class VerifiedTransfer(unittest.TestCase):
         # Run the actual manifest shell command locally with one failing SHA
         # command. No board connection or deletion is performed.
         class LocalSDB(transfer.SDB):
-            def shell(self, command):
+            def shell(self, command, **kwargs):
                 if command.startswith('readlink -f '):
                     return str(directory)
                 if command.endswith('-type l -print'):
@@ -77,6 +78,36 @@ class VerifiedTransfer(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, 'SHA failed'):
                 LocalSDB('host-only').manifest(str(directory))
 
+
+
+class RemoteExitRetry(unittest.TestCase):
+    def run_case(self, outputs, read_only):
+        with tempfile.TemporaryDirectory(dir=ROOT/'temp/tmp') as directory:
+            client = transfer.SDB('fake', Path(directory)/'audit.jsonl')
+            replies = [subprocess.CompletedProcess([], rc, out, 'raw-stderr') for rc, out in outputs]
+            with patch.object(transfer.subprocess, 'run', side_effect=replies) as run:
+                try:
+                    value = client.shell('read-or-mutate', read_only=read_only)
+                    error = None
+                except RuntimeError as e:
+                    value, error = None, str(e)
+                import json
+                audit = [json.loads(s) for s in client.audit_path.read_text().splitlines()]
+                self.assertTrue(all(x['stderr'] == 'raw-stderr' for x in audit if x['kind']=='command'))
+                return value, error, run.call_count, client.retry_count
+
+    def test_readonly_missing_marker_then_equal(self):
+        self.assertEqual(self.run_case([(0,'same\n'),(0,'same\n__RC=0\n')],True),('same',None,2,1))
+    def test_two_retries_maximum(self):
+        x=self.run_case([(0,'same')]*3,True); self.assertEqual(x[2:],(3,2)); self.assertIn('Missing remote exit marker',x[1])
+    def test_mutation_never_retries(self):
+        x=self.run_case([(0,'same')],False); self.assertEqual(x[2:],(1,0)); self.assertIsNotNone(x[1])
+    def test_changed_readonly_result_refused(self):
+        x=self.run_case([(0,'old'),(0,'new\n__RC=0\n')],True); self.assertIn('output changed',x[1])
+    def test_nonzero_remote_not_retried(self):
+        x=self.run_case([(0,'same\n__RC=9\n')],True); self.assertEqual(x[2:],(1,0))
+    def test_transport_failure_not_retried(self):
+        x=self.run_case([(1,'same')],True); self.assertEqual(x[2:],(1,0))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

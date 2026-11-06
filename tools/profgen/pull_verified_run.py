@@ -5,6 +5,7 @@ All failures propagate before deletion. The caller must stop the workload first.
 SDB directory pulls place contents directly in the empty destination directory.
 """
 import argparse
+import datetime
 import hashlib
 import json
 from pathlib import Path, PurePosixPath
@@ -56,33 +57,61 @@ def pull_verify_delete(remote, local, manifest, pull, reread_manifest, delete):
 
 
 class SDB:
-    def __init__(self, device):
+    def __init__(self, device, audit_path=None):
         self.device = device
+        work = Path(__file__).resolve().parents[2]
+        self.audit_path = Path(audit_path) if audit_path else work / 'temp/sdb-transport.jsonl'
+        self.audit_path.resolve().relative_to(work)
+        self.retry_count = 0
+
+    def audit(self, record):
+        record['time'] = datetime.datetime.now().astimezone().isoformat()
+        with self.audit_path.open('a') as stream:
+            stream.write(json.dumps(record) + '\n')
 
     def call(self, args):
-        return subprocess.run(['sdb', '-s', self.device] + args, check=True,
-                              text=True, capture_output=True).stdout
+        command = ['sdb', '-s', self.device] + args
+        p = subprocess.run(command, text=True, capture_output=True)
+        self.audit(dict(kind='command', command=command, transport_rc=p.returncode,
+                        stdout=p.stdout, stderr=p.stderr))
+        if p.returncode:
+            raise RuntimeError('SDB transport failed; no retry: ' + repr(command))
+        return p.stdout
 
-    def shell(self, command):
-        out = self.call(['shell', '( ' + command + ' ); r=$?; printf "\\n__RC=%s\\n" "$r"'])
-        m = re.search(r'\n__RC=(\d+)\s*$', out)
-        if not m or int(m[1]):
-            raise RuntimeError(out)
-        return out[:m.start()].strip()
+    def shell(self, command, *, read_only=False):
+        previous = []
+        for attempt in range(3 if read_only else 1):
+            out = self.call(['shell', '( ' + command + ' ); r=$?; printf "\\n__RC=%s\\n" "$r"'])
+            m = re.search(r'\n__RC=(\d+)\s*$', out)
+            self.audit(dict(kind='shell_result', command=command, read_only=read_only,
+                            attempt=attempt, remote_rc=int(m[1]) if m else None))
+            if m:
+                if int(m[1]):
+                    raise RuntimeError('Remote command failed; no retry: ' + out)
+                result = out[:m.start()].strip()
+                if any(value != result for value in previous):
+                    raise RuntimeError('Read-only retry output changed; stop: ' + command)
+                return result
+            previous.append(out.strip())
+            if read_only and attempt < 2:
+                self.retry_count += 1
+                self.audit(dict(kind='retry', command=command, retry=attempt + 1,
+                                reason='missing remote exit marker, read-only'))
+        raise RuntimeError('Missing remote exit marker; stop: ' + command)
 
     def manifest(self, remote):
         q = shlex.quote(remote)
-        canonical = self.shell('readlink -f ' + q)
+        canonical = self.shell('readlink -f ' + q, read_only=True)
         if canonical != remote:
             raise ValueError('Remote RUN alias refused')
-        links = self.shell('find ' + q + ' -type l -print')
+        links = self.shell('find ' + q + ' -type l -print', read_only=True)
         if links:
             raise ValueError('Remote symlink refused: ' + links)
         # Batched -exec propagates a failed SHA child to find's exit status;
         # the semicolon form can return success despite unreadable files.
         script = 'for f; do sha256sum -- "$f" || exit; done'
         return self.shell('find ' + q + ' -type f -exec /bin/bash -c ' +
-                          shlex.quote(script) + ' _ {} +')
+                          shlex.quote(script) + ' _ {} +', read_only=True)
 
 
 def main():
