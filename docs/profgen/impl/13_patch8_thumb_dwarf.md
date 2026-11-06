@@ -112,3 +112,28 @@ IP ELF32 little-endian EM_ARM函数加载时，仅遇到奇数low_pc才懒加载
 [报告12第13节](12_board_round1.md)已完成当前全部54份正式S重转换：target5,911,900/usable4,390,651，全部verified；FFmpeg Thumb/A32各33规范化区间，spike各0，33次别名查询全部通过一致性检查。P7对照24份profile变化，仅__udivsi3、__divsi3、__aeabi_idivmod；15份分类变化、合计28样本移入usable，完整逐函数差异见[证据](evidence/12/43_profile_function_changes.json)。真实avg原3热点715键独立核对通过。工具SHA及本地LLVM提交不变。
 
 板上剩余采集因第二次远端清单缺真实退出码停止，不是llvm-profgen失败：35/70组完成，未核验完的RUN保留，root/governor已恢复；不把未完成的训练/LOST/集成算作补丁8实证。别名查询在这些真实libavcodec上未出现一致性失败。冻结规则修正仍应登记设计v0.8并列入下一轮外部评审。
+
+
+## 8. 映射元数据不可用的小修（2026-11-06，amend）
+
+### 待设计 v0.8 登记
+
+按本轮PM裁决，奇数DWARF下界触发的映射读取错误、缺失、冲突不再令sum/max失败；原始区间保持，且不建立别名。avg、sampled-functions补零、prev-inst仍在按需boundary阶段失败。这是冻结5.7.2执行细节的授权修正；冻结正文与golden不改，不将缺失证据猜成Thumb。
+
+`ProfiledBinary.cpp:1041`缓存一次映射加载结果或Error文字，对每个受影响范围记录函数、原始上下界和原因。`IPBoundary.cpp:125`以Expected区分有效非Thumb状态与缺失/冲突/歧义；同一可执行节内存在冲突时不证明Thumb。`ProfileGenerator.cpp:263`把证据传入统计，`IPQualityReport.cpp:754`输出`unavailable_range_count`与`unavailable_top50`（按函数/上下界/原因排序，最多50项），增加`W_THUMB_DWARF_NORMALIZATION_UNAVAILABLE`。生成前unknown、生成后无问题为0/空数组。LBR和共享LLVM符号化库不变。
+
+### 素材与验收
+
+在原GNU AS三指令素材上派生3份明确标为合成的元数据负例：删除$t、添加同址局部$a、将独立调试文件.text重命名为.mismatch。原DWARF范围仍[0x1001,0x1009)，不修改机器指令。缺失/冲突时0x1000不在原范围，0x1002/0x1006分别贡献20/30，sum/max total=50且告警；avg、补零、skid均boundary失败。调试节无法对应产生真实Error，sum/max成功、avg boundary失败。原规范化、相邻函数、别名不一致等用例保持。生成命令及GBS readelf原文见[素材](evidence/13/18_amend_fixtures.json)，[开发用例输出](evidence/13/18_amend_development.txt)。未新增lit入口，扩展现有helper。
+
+- 正式GBS：10:49:02–11:08:20 +08:00，1157.977秒、111 Ninja步、GBS_EXIT=0、ALL-END OK；600秒资源采样原文保留，日志中的平台缺build-id警告未绕过。[构建记录](evidence/13/20_amend_build.json)
+- 正式%check：86项，84 PASS、1 UNSUPPORTED、1 XFAIL、0 FAIL；原86项状态逐项一致。[日志](evidence/13/21_amend_lit.txt)、[xunit](evidence/13/21_amend_lit.xml)
+- C1两遍各636条，0差异；开发C1同样两遍0差异。153份既有Clang素材profile SHA全部不变。[C1](evidence/13/22_amend_c1.json)、[逐素材](evidence/13/26_amend_clang_profiles.json)
+- 14份完整导出各两遍确定，profile与旧补丁8逐字节一致；JSON仅多出不可用范围0/空数组及两项输出路径变化，原统计不变。[逐份差异](evidence/13/23_amend_replay.json)
+- 136份质量报告观察到390字段路径，与schema双向差集0，空字符串0；改动行GBS clang-format及dry-run通过。[schema](evidence/13/24_amend_schema.json)、[格式检查](evidence/13/19_amend_format.json)
+
+### 提交与工具
+
+旧LLVM提交`cd5168c48b5422a50829259fd43e84cc3edd6694` → amend后`660a46f036a47ecc940e02b153d3e76e6eb39e79`；补丁整体24文件+627/-23，局部小修13个文件。作者/提交者均Hao Lin，spec未提交且本地diff保持。0008重新导出并通过反向应用检查，未推LLVM/Gerrit。[审计](evidence/13/25_amend_commit.json)
+
+正式工具SHA：`9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`。旧41440292工具与实际libLLVM已存档`temp/profgen-patch8-amend/`；小修前转换均用该存档。小修通过后，全部正式S以新工具重转并逐字节比对，进行中的板上工作及最终全量统计另记报告12，不提前宣称70组完成。边界例外：无新增。

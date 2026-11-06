@@ -30,8 +30,8 @@
 
 - 新授权：只读命令缺退出码最多重试2次、结果须一致、原stdout/stderr/时间全留；状态命令不重试。15主机测试通过。预注册/修订1不变。[报告12第14节](profgen/impl/12_board_round1.md)
 - 停住的A32 spike中档r3已核验99项、完成收据并删除，target106593；本阶段重试0次。累计36/70组、55物理S；root已恢复off(uid5001)，schedutil未改，RPM1232，/opt available1013128KiB。[收据](profgen/impl/evidence/12/50_recovered_receipt.json)
-- 本轮继续授权剩余34组、14训练、LOST及5集成；预计板上2.5–3小时。新阶段temp/board-round1-retry，不覆盖原件。状态命令缺退出码或SDB断连即停。
-- 补丁8小修已授权：映射元数据加载/缺失/冲突不使sum/max失败，保留原DWARF区间并报告不可用；avg/补零/skid按需boundary失败。小修未完成，正式仍41440292…，已在temp/profgen-patch8-amend存档；验收前不使用开发工具。
+- 本轮剩余矩阵已于10:45:38后台启动（temp/board-round1-retry/worker.py，PID1015752）；当前root已开启、policy0=performance，结束/失败必须恢复原uid5001/schedutil。上条“已恢复”仅指保留RUN恢复阶段，不是当前状态。剩余34组、14训练、LOST及5集成预计2.5–3小时；不覆盖原件。状态命令缺退出码或SDB断连即停。
+- 补丁8小修完成：LLVM amend `660a46f036a47ecc940e02b153d3e76e6eb39e79`，新工具SHA `9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`。GBS1157.977秒/111步，lit84 PASS/1 UNSUPPORTED/1 XFAIL/0 FAIL，C1两遍636条0差异，14重放及153个Clang profile不变，schema390字段差集0；0008反向检查通过，spec不提交。映射不可用保留原区间并告警，按需boundary仍失败，待v0.8登记。[报告13第8节](profgen/impl/13_patch8_thumb_dwarf.md)
 - 真实avg挂账保持关闭，LOST/集成/训练未完成；非叶子line0规则待PM。下一步恢复矩阵并在主机小修/GBS验收，每阶段更新状态，不开始Agent。
 
 ## 上轮阶段状态（历史）（2026-11-06；补丁8完成，板上在第二次清单退出码门禁停止）

@@ -1,0 +1,33 @@
+{
+  "old_LLVM_commit": "cd5168c48b5422a50829259fd43e84cc3edd6694",
+  "LLVM_commit": "660a46f036a47ecc940e02b153d3e76e6eb39e79",
+  "author": "Hao Lin <hao.lin@samsung.com> / Hao Lin <hao.lin@samsung.com>",
+  "stat": "660a46f036a4 [llvm-profgen] Normalize GNU AS Thumb DWARF addresses in IP mode\n llvm/docs/CommandGuide/llvm-profgen.rst            | 165 ++++++++++++++++++++-\n .../Inputs/ip-mode/gnu-thumb/README.txt            |  40 +++++\n .../Inputs/ip-mode/gnu-thumb/adjacent.perfbin      | Bin 0 -> 5692 bytes\n .../Inputs/ip-mode/gnu-thumb/adjacent.s            |  18 +++\n .../ip-mode/gnu-thumb/check-normalization.py       | 151 +++++++++++++++++++\n .../ip-mode/gnu-thumb/conflicting-map.perfbin      | Bin 0 -> 5676 bytes\n .../Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin     | Bin 0 -> 5656 bytes\n .../Inputs/ip-mode/gnu-thumb/gnu-thumb.s           |  12 ++\n .../Inputs/ip-mode/gnu-thumb/line-mismatch.perfbin | Bin 0 -> 5664 bytes\n .../Inputs/ip-mode/gnu-thumb/missing-map.perfbin   | Bin 0 -> 5640 bytes\n .../Inputs/ip-mode/gnu-thumb/odd-arm.perfbin       | Bin 0 -> 5656 bytes\n .../Inputs/ip-mode/gnu-thumb/odd-data.perfbin      | Bin 0 -> 5656 bytes\n .../Inputs/ip-mode/gnu-thumb/odd-middle.perfbin    | Bin 0 -> 5656 bytes\n .../ip-mode/gnu-thumb/unmatched-debug.perfbin      | Bin 0 -> 5660 bytes\n .../Inputs/ip-mode/quality/check-quality.py        |   2 +-\n .../tools/llvm-profgen/ip-thumb-dwarf-address.test |   4 +\n llvm/tools/llvm-profgen/IPBoundary.cpp             |  49 ++++--\n llvm/tools/llvm-profgen/IPBoundary.h               |   8 +-\n llvm/tools/llvm-profgen/IPQualityReport.cpp        |  69 +++++++++\n llvm/tools/llvm-profgen/IPQualityReport.h          |   6 +\n llvm/tools/llvm-profgen/ProfileGenerator.cpp       |   5 +\n llvm/tools/llvm-profgen/ProfileGenerator.h         |   2 +\n llvm/tools/llvm-profgen/ProfiledBinary.cpp         |  93 +++++++++++-\n llvm/tools/llvm-profgen/ProfiledBinary.h           |  26 +++-\n 24 files changed, 627 insertions(+), 23 deletions(-)\n",
+  "amend_files": [
+    "llvm/docs/CommandGuide/llvm-profgen.rst",
+    "llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt",
+    "llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py",
+    "llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/conflicting-map.perfbin",
+    "llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/missing-map.perfbin",
+    "llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/unmatched-debug.perfbin",
+    "llvm/tools/llvm-profgen/IPBoundary.cpp",
+    "llvm/tools/llvm-profgen/IPBoundary.h",
+    "llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "llvm/tools/llvm-profgen/ProfileGenerator.cpp",
+    "llvm/tools/llvm-profgen/ProfileGenerator.h",
+    "llvm/tools/llvm-profgen/ProfiledBinary.cpp",
+    "llvm/tools/llvm-profgen/ProfiledBinary.h"
+  ],
+  "patch": "patches/profgen/0008-llvm-profgen-Normalize-GNU-AS-Thumb-DWARF-addresses-in-IP-mode.patch",
+  "patch_sha256": "5e9444529afc778493deed02005c298aa23d6bbf44ced36ad72b0127a6cc6d6c",
+  "patch_bytes": 60031,
+  "reverse_apply_check": "PASS",
+  "spec_uncommitted_and_unchanged": true,
+  "scope": {
+    "docs/profgen/design/02_llvm_profgen_enhance_design_v0.7.md": "eec6b208d8e1fedb840f0933eb20a37c188890b6c8c29e43986c5c9bbca9f6be",
+    "temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-golden.json": "3ea33f704b33d36ea0370e67a277cb25039870bd4440d72a10dd5c52f5790971",
+    "spec_local_diff_sha256": "7bbc1828a5a05cde73b6b15225f18aa3280bdbbf4f6620704e6ecc215c97f8fc"
+  },
+  "source_status": "",
+  "tool_sha256": "9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7"
+}

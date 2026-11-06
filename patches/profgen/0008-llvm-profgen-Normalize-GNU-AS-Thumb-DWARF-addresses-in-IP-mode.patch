@@ -1,4 +1,4 @@
-From cd5168c48b5422a50829259fd43e84cc3edd6694 Mon Sep 17 00:00:00 2001
+From 660a46f036a47ecc940e02b153d3e76e6eb39e79 Mon Sep 17 00:00:00 2001
 From: Hao Lin <hao.lin@samsung.com>
 Date: Thu, 5 Nov 2026 23:42:13 +0800
 Subject: [PATCH] [llvm-profgen] Normalize GNU AS Thumb DWARF addresses in IP
@@ -7,43 +7,54 @@ Subject: [PATCH] [llvm-profgen] Normalize GNU AS Thumb DWARF addresses in IP
 Normalize odd Thumb DWARF ranges only with executable mapping-symbol evidence. Query the same instruction alias at normalized range starts, retaining the original PC and checking leaf file, line and discriminator consistency. Report normalization and alias evidence; preserve non-IP behavior.
 
 Add GNU AS fixtures for tagged ranges, adjacent functions and synthetic line inconsistencies. Keep shared symbolizer libraries and sampled PCs unchanged.
+
+Treat unavailable mapping metadata for odd DWARF normalization as a
+reported warning, preserving raw ranges for sum/max. On-demand boundaries
+retain their strict failure contract; test missing/conflicting mappings
+and a mapping-section load error.
 ---
- llvm/docs/CommandGuide/llvm-profgen.rst       | 136 +++++++++++++++++-
- .../Inputs/ip-mode/gnu-thumb/README.txt       |  29 ++++
+ llvm/docs/CommandGuide/llvm-profgen.rst       | 165 +++++++++++++++++-
+ .../Inputs/ip-mode/gnu-thumb/README.txt       |  40 +++++
  .../Inputs/ip-mode/gnu-thumb/adjacent.perfbin | Bin 0 -> 5692 bytes
- .../Inputs/ip-mode/gnu-thumb/adjacent.s       |  18 +++
- .../ip-mode/gnu-thumb/check-normalization.py  | 117 +++++++++++++++
+ .../Inputs/ip-mode/gnu-thumb/adjacent.s       |  18 ++
+ .../ip-mode/gnu-thumb/check-normalization.py  | 151 ++++++++++++++++
+ .../ip-mode/gnu-thumb/conflicting-map.perfbin | Bin 0 -> 5676 bytes
  .../ip-mode/gnu-thumb/gnu-thumb.perfbin       | Bin 0 -> 5656 bytes
  .../Inputs/ip-mode/gnu-thumb/gnu-thumb.s      |  12 ++
  .../ip-mode/gnu-thumb/line-mismatch.perfbin   | Bin 0 -> 5664 bytes
+ .../ip-mode/gnu-thumb/missing-map.perfbin     | Bin 0 -> 5640 bytes
  .../Inputs/ip-mode/gnu-thumb/odd-arm.perfbin  | Bin 0 -> 5656 bytes
  .../Inputs/ip-mode/gnu-thumb/odd-data.perfbin | Bin 0 -> 5656 bytes
  .../ip-mode/gnu-thumb/odd-middle.perfbin      | Bin 0 -> 5656 bytes
+ .../ip-mode/gnu-thumb/unmatched-debug.perfbin | Bin 0 -> 5660 bytes
  .../Inputs/ip-mode/quality/check-quality.py   |   2 +-
  .../llvm-profgen/ip-thumb-dwarf-address.test  |   4 +
- llvm/tools/llvm-profgen/IPBoundary.cpp        |  46 ++++--
+ llvm/tools/llvm-profgen/IPBoundary.cpp        |  49 ++++--
  llvm/tools/llvm-profgen/IPBoundary.h          |   8 +-
- llvm/tools/llvm-profgen/IPQualityReport.cpp   |  49 +++++++
+ llvm/tools/llvm-profgen/IPQualityReport.cpp   |  69 ++++++++
  llvm/tools/llvm-profgen/IPQualityReport.h     |   6 +
- llvm/tools/llvm-profgen/ProfileGenerator.cpp  |   2 +
- llvm/tools/llvm-profgen/ProfileGenerator.h    |   1 +
- llvm/tools/llvm-profgen/ProfiledBinary.cpp    |  71 ++++++++-
- llvm/tools/llvm-profgen/ProfiledBinary.h      |  14 +-
- 21 files changed, 492 insertions(+), 23 deletions(-)
+ llvm/tools/llvm-profgen/ProfileGenerator.cpp  |   5 +
+ llvm/tools/llvm-profgen/ProfileGenerator.h    |   2 +
+ llvm/tools/llvm-profgen/ProfiledBinary.cpp    |  93 +++++++++-
+ llvm/tools/llvm-profgen/ProfiledBinary.h      |  26 ++-
+ 24 files changed, 627 insertions(+), 23 deletions(-)
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.perfbin
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.s
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/conflicting-map.perfbin
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.s
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/line-mismatch.perfbin
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/missing-map.perfbin
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-arm.perfbin
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-data.perfbin
  create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/odd-middle.perfbin
+ create mode 100755 llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/unmatched-debug.perfbin
  create mode 100644 llvm/test/tools/llvm-profgen/ip-thumb-dwarf-address.test
 
 diff --git a/llvm/docs/CommandGuide/llvm-profgen.rst b/llvm/docs/CommandGuide/llvm-profgen.rst
-index 222de2d43acb..0eeaf79b2db4 100644
+index 222de2d43acb..e28841f9927c 100644
 --- a/llvm/docs/CommandGuide/llvm-profgen.rst
 +++ b/llvm/docs/CommandGuide/llvm-profgen.rst
 @@ -1077,18 +1077,78 @@ Field paths
@@ -129,7 +140,7 @@ index 222de2d43acb..0eeaf79b2db4 100644
  ``samples.target`` (object)
    Target conversion and DWARF classification.
  
-@@ -1356,6 +1416,70 @@ Field paths
+@@ -1356,6 +1416,95 @@ Field paths
  ``semantics.zero_fill`` (string)
    none or sampled-functions; these are literal policy names, not absence markers.
  
@@ -175,6 +186,31 @@ index 222de2d43acb..0eeaf79b2db4 100644
 +  Raw frame fields from querying N+1. After a successful consistency check,
 +  this frame chain supplies the profile identity, including adjacent functions.
 +
++``thumb_dwarf_normalization.unavailable_range_count`` (string | uint64)
++  Number of odd DWARF ranges retained unchanged because mapping metadata
++  could not be loaded or was missing, conflicting or ambiguous. Unknown before
++  generation starts. This alone does not fail sum/max; on-demand boundary
++  enumeration retains its failure contract.
++
++``thumb_dwarf_normalization.unavailable_top50`` (string | array)
++  First 50 unavailable ranges, sorted by function, original begin/end and reason;
++  unknown before generation starts, empty when no range is unavailable.
++
++``thumb_dwarf_normalization.unavailable_top50[]`` (object)
++  One range for which normalization evidence is unavailable.
++
++``thumb_dwarf_normalization.unavailable_top50[].function`` (string)
++  DWARF function name.
++
++``thumb_dwarf_normalization.unavailable_top50[].original_begin`` (uint64)
++  Original inclusive ELF virtual address, in bytes.
++
++``thumb_dwarf_normalization.unavailable_top50[].original_end`` (uint64)
++  Original exclusive ELF virtual address, in bytes.
++
++``thumb_dwarf_normalization.unavailable_top50[].reason`` (string)
++  Mapping metadata diagnostic; the original range is preserved.
++
 +``thumb_dwarf_normalization.top50`` (string | array)
 +  First 50 normalized ranges sorted by function, original begin, original end.
 +  Unknown before loading/generation; an empty array means none were normalized.
@@ -200,10 +236,14 @@ index 222de2d43acb..0eeaf79b2db4 100644
  ``throttle`` (string)
    Unknown: throttle records are not part of the admitted text grammar.
  
-@@ -1422,6 +1546,10 @@ Warning codes
+@@ -1422,6 +1571,14 @@ Warning codes
  ``W_DUPLICATE_FUNCTION_START``
    Existing DWARF loader encountered duplicate function starts.
  
++``W_THUMB_DWARF_NORMALIZATION_UNAVAILABLE``
++  Mapping metadata is unavailable for odd DWARF ranges. Original ranges are
++  retained; see ``thumb_dwarf_normalization.unavailable_top50`` for reasons.
++
 +``W_THUMB_DWARF_ADDRESS_NORMALIZED``
 +  At least one Thumb-tagged DWARF function range was normalized using executable
 +  section mapping symbols. See ``thumb_dwarf_normalization`` for the evidence.
@@ -213,10 +253,10 @@ index 222de2d43acb..0eeaf79b2db4 100644
  
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt
 new file mode 100644
-index 000000000000..75212350a536
+index 000000000000..ec75f5c821bc
 --- /dev/null
 +++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/README.txt
-@@ -0,0 +1,29 @@
+@@ -0,0 +1,40 @@
 +GNU AS Thumb DWARF addresses (patch 8)
 +GNU AS 2.43, GBS armv7l emul tools; GNU ld 2.43.
 +Commands run here with the GBS loader/library path:
@@ -246,6 +286,17 @@ index 000000000000..75212350a536
 +This intentionally impossible instruction-level line split tests alias consistency failure;
 +it is not a compiler-produced line table. Complete generator lives in alias-fixtures.py
 +in the project evidence; lit only reads the resulting ELF.
++
++Mapping-unavailability amendment (synthetic metadata, original GNU AS DWARF):
++  llvm-objcopy --strip-symbol='$t' gnu-thumb.perfbin missing-map.perfbin
++  llvm-objcopy --add-symbol='$a=.text:0,local' gnu-thumb.perfbin conflicting-map.perfbin
++Mapping metadata is unavailable, so retain [0x1001,0x1009). Sample 0x1000
++is outside the function; 0x1002/0x1006 contribute 20/30 (sum/max total 50).
++On-demand boundary modes must still fail. GBS LLVM objcopy 22.1.8.
++  llvm-objcopy --rename-section=.text=.mismatch gnu-thumb.perfbin unmatched-debug.perfbin
++Using unmatched-debug as --debug-binary retains the original build-id but causes
++mapping section correspondence to return Error. This is synthetic malformed
++metadata. sum/max preserve original ranges; avg fails at boundary.
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/adjacent.perfbin
 new file mode 100755
 index 0000000000000000000000000000000000000000..5058bdc9fba4666ea263398446750dcb6ae41ebe
@@ -297,10 +348,10 @@ index 000000000000..ec9b83ad0b8a
 +.size second, .-second
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py
 new file mode 100644
-index 000000000000..199cb82edbff
+index 000000000000..f9dbe84fe91b
 --- /dev/null
 +++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/check-normalization.py
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,151 @@
 +#===- check-normalization.py - Thumb DWARF address checks ------------------===#
 +# Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 +# See https://llvm.org/LICENSE.txt for license information.
@@ -319,7 +370,7 @@ index 000000000000..199cb82edbff
 +sequence = 0
 +
 +
-+def run(name, samples, flags, failure=None, stage="boundary"):
++def run(name, samples, flags, failure=None, stage="boundary", outside=0):
 +
 +    global sequence
 +    sequence += 1
@@ -346,7 +397,7 @@ index 000000000000..199cb82edbff
 +        assert not output.exists()
 +    else:
 +        assert p.returncode == 0, p.stderr
-+        assert 'IP-GENERATION outside_dwarf_func samples=0' in p.stdout
++        assert f'IP-GENERATION outside_dwarf_func samples={outside}' in p.stdout
 +    return p, q, output.read_text() if output.exists() else ''
 +
 +
@@ -418,6 +469,65 @@ index 000000000000..199cb82edbff
 +assert json.loads(report.read_text())['verdict']['failure_stage'] == 'generate'
 +assert not list(TMP.glob('*.tmp-*'))
 +print('PASS GNU AS Thumb normalization, classification, boundaries, zero-fill, skid and negatives')
++
++# Mapping evidence is optional for normalization, not for boundary enumeration.
++for name, reason in [('missing-map', 'no initial mapping symbol'),
++                     ('conflicting-map', 'conflicting mapping states')]:
++    for aggregation in ['sum', 'max']:
++        p, q, profile = run(name, [(0x1000,10), (0x1002,20), (0x1006,30)],
++                            ['--ip-aggregation='+aggregation], outside=1)
++        n = q['thumb_dwarf_normalization']
++        assert n['range_count'] == n['alias_query_count'] == 0, n
++        assert n['unavailable_range_count'] == 1, n
++        item = n['unavailable_top50'][0]
++        assert item['function'] == 'gnu_thumb' and item['original_begin'] == 0x1001
++        assert item['original_end'] == 0x1009 and reason in item['reason'], item
++        assert any(w['code'] == 'W_THUMB_DWARF_NORMALIZATION_UNAVAILABLE' for w in q['warnings'])
++        assert profile.startswith('gnu_thumb:50:0\n'), profile
++    for flags in [['--ip-aggregation=avg'],
++                  ['--ip-aggregation=sum', '--ip-zero-fill=sampled-functions'],
++                  ['--ip-aggregation=sum', '--ip-skid=prev-inst']]:
++        run(name, [(0x1002,20)], flags, failure='no usable mapping symbols' if name == 'missing-map' else 'conflicting mapping states', stage='boundary')
++print('PASS mapping unavailability preserves sum/max and rejects on-demand boundaries')
++
++# A real metadata load Error (debug section cannot be matched to runtime).
++for aggregation in ['sum', 'max']:
++    p, q, profile = run('gnu-thumb', [(0x1002,20), (0x1006,30)],
++                        ['--ip-aggregation='+aggregation,
++                         '--debug-binary='+str(HERE/'unmatched-debug.perfbin')])
++    n = q['thumb_dwarf_normalization']
++    assert n['range_count'] == 0 and n['unavailable_range_count'] == 1, n
++    assert 'cannot match section by name and address range: .mismatch' in n['unavailable_top50'][0]['reason'], n
++    assert profile.startswith('gnu_thumb:50:0\n'), profile
++run('gnu-thumb', [(0x1002,20)],
++    ['--ip-aggregation=avg', '--debug-binary='+str(HERE/'unmatched-debug.perfbin')],
++    failure='cannot match section by name and address range: .mismatch')
++print('PASS mapping load Error preserves sum/max and fails on demand')
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/conflicting-map.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/conflicting-map.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..52d3d108d21097a3d0bb075ce25668764f5974fd
+GIT binary patch
+literal 5676
+zcmeHLJ8#rL5T3Pj$>j(~9v}){7wIA)!Py}Mg)W?UM2HY19-;wRHs0in?riJ47l9NB
+z3dA2sdTL5K{sA>q6g2q>>5wR3KHGbkLr4@UJ<@n)_WO3V`gXm=yt=u5O9(;Q3_4G!
+z#5B<|$Mxg<F{rXk4Kf*<q9ZA;`G{5K!Ye2^V*Vb-J<i}wuHj?sz!Cq2ryTG~D-|de
+zC>1CbC>1CbC>1CbC>1CbC>1CbC>1CbI5Y)BgANRe*A8vLLs$qs0JI%U_O*>i<b3(i
+zsZH+gCr{@0Ka0hkr<HFj?b8gp()9uovz%5|T5TGyO|+|G(%>2}V%~K~`wrE#&OVno
+z<apNn;JyTU7_ce!U3T%>c!z*q$Rsc^Bc{h^#H=vur|Jv!Ic|6u7Mb<cDGV|J9TS7j
+z;VXXBYdke=tq9r*2QAeZ^gJtJkgZ~%6LRwGMME&F2-}^gC+%(!cHGE*7)9M@9XAMV
+zUvA586!&DP>~43v=ePqEZTgYpMP22%TNqce7pGt=?nj$E)RJK*9bhP7oL5W!AlSFV
+zc%TwHh+DnLm-cWY5WdlV&{(pTFJt#ky8CSJe|>Y^%)B#%o)65-71n$+JyBf&|Fhd;
+zW*wv<!KCqFj>M#ik-7>Ihc-qBKaZjs4hp)#Wwn7p3=6u#u~=Upsj>4SKF>AIA9rV#
+z=ieK_FO1Z<cg6WjTo?C4j^ibXlPI^ZsHqAUBO*tJenD$T`mS=R=@#cWPF^uL&9g|B
+zFTKH*<9c3SZj+_t3q@A@{$0yesvmd*KK~)7?}l5y%S81x5`>$P&iMjLvcgD7i;v&(
+z20_<v1wL6xhi53)<4nhwJ=Fhg$CwG7)6>OS<@)Lc^sRWz12}Q~r)e*dc}-2?sCg$i
+z=eHu(&`0K-(FMosHWDoqa=>4i*Fch+ejir3)^h-TXCCg2HjN?b99V0HXkL>F*quTS
+zc!POYk>sY=!0Um0F&}@+y!UyI01Upvp1ob1ur2Zfc#VM?=Xf`v3vZbeJKj)j@f;B}
+V)rPfT&)JK-Pt1FhBH2gtegR}dzKZ|=
+
+literal 0
+HcmV?d00001
+
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/gnu-thumb.perfbin
 new file mode 100755
 index 0000000000000000000000000000000000000000..20a5a37bd72da1bf4328666bcfdd0e7f5f8d0fc1
@@ -482,6 +592,31 @@ z!V6knFKqes&?hSiutK>WG9CBZT>r0K0FgCKPm<3i(^9Y3H{cl>e7gMGOy`H-Eoc&=
 z=3PRL??XpJpTN7S3q<}~Y>RN6bNvmx8Yh|QZ^9btJnsj1w>2q;F(=Qf&k)U@!FxEw
 z+X8R>3?9!|dB3F$dk5Z!As*ugaMncI9enhb0F0wC0cTzC%B0}@-P9J$5pC-Nk@sSI
 Q3D5IBgZDN?`VY<f4f(*mp8x;=
+
+literal 0
+HcmV?d00001
+
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/missing-map.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/missing-map.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..b5fc3ee4a381da815ecd4f09a9f7bfa17b9f834b
+GIT binary patch
+literal 5640
+zcmeHLJ#W-N5S_Ji$>j(~K0pWo;UXo{6`UO)C^QgV0Z{}*e2NBS+1R-=y0cH`y$Ga8
+zP$2$5(j!VrI{pS!6g2q>>5wSk&Dwi7hbWLzdZgKz+4pv}dTVbnuW#PDC4?Yt2Gxlx
+zF-^3BSU-uupwbG}$OJY;#}uyl9LwOcm$*RW^?QhW$k-QAvyZ_U=lCyNahO+Fp+KQP
+zp+KQPp+KQPp+KQPp+KQPp+KQPp+KR)ktrZ*bYM_#{m3>vf{nNbz-<Q;zP|aGoUfnS
+zmC4=x<mtlx7qPtatn_`gc@Cf(xL!zN7HMg<(WLRpM6)a=4b%*C%(@P$?@(5CI$T1?
+z@U;1Xz6AF$*rwpSaPh`?&w+a(lZ=TOF+DybW`$WjTV1Noq2XazWLDRvcoGEem>6_{
+zNAa^-!BW*)5!8wX4cQ)aJu3kSD;eAgIX!>T5MbqDyB&7}yAwujH?|+eap!s44I|qR
+zwu4UG>jsguJDu&W;|^rJ<;RW}cckOCcwPqGo&p=ae!PXLMi8~t1fT>sc1sQs?2V{5
+zkcl1k8r|3r?BPLJ_*(N}?XtCUg-`FO)2C<uYs_>rv(6CreAvuPVa+$yjp~Z=!`&V;
+z?H~;aCXEksPE48@smpXcH#0^Dziyx|*V4&poWmZeuaDGx(ma12HQzUXE3;U?F@o1e
+z>N6uXIgXbkP9ojD%-woSP7wJyA)UZ?rJH9vPF8`a@-&j=2i~CNxSrP!w#kygOG#Gq
+z!ClLhvLAW_-0YCkcca#yGLe0agwa;4b9`C>Sy3zl3m0p7gRtW_LZ7UpjTO@Mkm>lU
+z%k_WQ32<3cb#we(WLoMi^o>8k1m7nAgQ`ym-l8TUYTha2cn5kK`V8KAT_C1k8qrcN
+zXZRa<HBK_q|Na_ky@sJ5;9bo)95lvJ=RDt-AzI)hGmYIwt#gJp!Mm1mIB1Mt2F{mx
+z67~+fk7=q##@Kh@>AR$+X&H}O4L}7YJL`fYlZ5m8sO{by(S2PY@?LB&;CbE$@ZKsU
+H9W?JZ83epf
 
 literal 0
 HcmV?d00001
@@ -561,6 +696,31 @@ G(YoIr1HEVf
 literal 0
 HcmV?d00001
 
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/unmatched-debug.perfbin b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/gnu-thumb/unmatched-debug.perfbin
+new file mode 100755
+index 0000000000000000000000000000000000000000..7b4c1c33e7fc327da741f5f735dd58d71969655a
+GIT binary patch
+literal 5660
+zcmeHLO>5Lp6umF$w9{!F`ysgSYYG(vO)}O>6$G6{Ekdo}$4Vt8O*#ool40_uC<t~X
+z?%Ta<mx2rbhOS(==}+iRaG~dB^2T(m;G)YsxViVdb6)0g-kU7$o7MHZLI_erqf5j{
+z%n&Uj-#UedMwMl1kPdE|rZQgXIai_Os4zh0^?S&Bs5lmZImQsobN&~fX;@c|(t*-}
+z(t*-}(t*-}(t*-}(t*-}(t*-}(t*-}V{<?>=s=_H+OfUx7+%CZ0B$?zh_#I;WPkk_
+z)FyZL(`O6&Uqtiu^UC*?)>)8_@3<j}Ih2(ZqebJjiB?riYQRi$&btm--=Uh}!Q(1Y
+z&JUU&=u2=9gU2*t7a?}E_nf#FGRd5n6*J?rVovDwGxdx0c{DsUll1!SX`Y0DJ0==k
+z;HUUmuVHD{S`pNa`-Tkqk!z+PF)A8&LQbE*q6w&qv=t<gZ*{^ra1!frl5{o$CyXu6
+z-}XC6H}Yd?bvoOT?et}`<t4V8bfoRHd0zTaHzSR1FWJJB;m1KX0V)NLx21;!*1fpf
+zm#GzYjVSSaYq$|MzR`NrSTdKd@$T(x_k+Fv^~`<K^Ue_We0b=&!%DAbC#n$hhr2!c
+zpo26N=rlg8xzK511XtO_;TWTXUndw1Ck3?ts|}vyX+cZKMSN!j^UjO>0x+LH-<>(E
+zUmxKwk6^xc#r0&{ZkpPubb68&W#J+uWc#sK@YeP{M>@p?ww)sgvwD!p^nAD9wjI~)
+z`P*c+9^N+{DSM&Y$1xAto)fqKz*P1W6UJK!nNgTVj@%5?EN+}nW}Hah#Ce-;KkRr$
+z=#iNQSSuYDmCCOo#{WB3A!J{()8w<s{Z#AKEqICvK4Jb}X1zn`7L^ED=}w}?x1p=3
+z&(NJy0GWS_2mcRM&G;L14KDJbz6Upfi@G1sU00$4$C{$fm?c^`Lib=qw*lRaBXnl2
+zYv$Zr=st|-`1f`YgKyP<Y~q901W^N=La;B`GQC9bH&cxl^F)soKvsK?Q5SWepnG?O
+F?l*hzzb^m)
+
+literal 0
+HcmV?d00001
+
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
 index e17a2fa8abd9..62a803f95102 100644
 --- a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/quality/check-quality.py
@@ -585,7 +745,7 @@ index 000000000000..1037ff51ec5c
 +# RUN: %python %S/Inputs/ip-mode/gnu-thumb/check-normalization.py llvm-profgen %t | FileCheck %s
 +# CHECK: PASS GNU AS Thumb normalization, classification, boundaries, zero-fill, skid and negatives
 diff --git a/llvm/tools/llvm-profgen/IPBoundary.cpp b/llvm/tools/llvm-profgen/IPBoundary.cpp
-index 713653f9839c..52546a4437e7 100644
+index 713653f9839c..970943a2a42f 100644
 --- a/llvm/tools/llvm-profgen/IPBoundary.cpp
 +++ b/llvm/tools/llvm-profgen/IPBoundary.cpp
 @@ -31,7 +31,8 @@ char mappingISA(StringRef Name, bool ARM) {
@@ -622,7 +782,7 @@ index 713653f9839c..52546a4437e7 100644
      }
    }
    // ELFObjectFileBase::symbols iterates .symtab, not .dynsym.
-@@ -104,19 +109,36 @@ Error IPBoundaryMap::loadMappings(StringRef Path, bool Runtime) {
+@@ -104,19 +109,39 @@ Error IPBoundaryMap::loadMappings(StringRef Path, bool Runtime) {
    return Error::success();
  }
  
@@ -644,28 +804,31 @@ index 713653f9839c..52546a4437e7 100644
    return Result;
  }
  
-+bool IPBoundaryMap::isThumbAddress(uint64_t Address) const {
++Expected<bool> IPBoundaryMap::isThumbAddress(uint64_t Address) const {
 +  const Section *Match = nullptr;
 +  for (const auto &S : Sections)
 +    if (Address >= S.Begin && Address < S.End) {
 +      if (Match)
-+        return false;
++        return boundaryError(
++            "ambiguous executable section for Thumb DWARF address");
 +      Match = &S;
 +    }
 +  if (!Match)
-+    return false;
++    return boundaryError("no executable section for Thumb DWARF address");
++  if (!Match->Conflicts.empty())
++    return boundaryError("conflicting mapping states in executable section");
 +  auto It = Match->States.upper_bound(Address);
 +  if (It == Match->States.begin())
-+    return false;
++    return boundaryError("no initial mapping symbol for Thumb DWARF address");
 +  --It;
-+  return It->second == 't' && !Match->Conflicts.count(It->first);
++  return It->second == 't';
 +}
 +
  Expected<IPFunctionBoundaries>
  IPBoundaryMap::enumerate(StringRef Name,
                           ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
 diff --git a/llvm/tools/llvm-profgen/IPBoundary.h b/llvm/tools/llvm-profgen/IPBoundary.h
-index c46754ecc6f6..e28445820111 100644
+index c46754ecc6f6..f245c04fa943 100644
 --- a/llvm/tools/llvm-profgen/IPBoundary.h
 +++ b/llvm/tools/llvm-profgen/IPBoundary.h
 @@ -51,10 +51,14 @@ class IPBoundaryMap {
@@ -680,13 +843,13 @@ index c46754ecc6f6..e28445820111 100644
 +  static Expected<IPBoundaryMap> load(StringRef Binary, StringRef DebugBinary,
 +                                      bool ReadBytes = true);
 +  // Metadata-only lookup; ambiguity or missing evidence never proves Thumb.
-+  bool isThumbAddress(uint64_t Address) const;
++  Expected<bool> isThumbAddress(uint64_t Address) const;
 +
    const std::set<std::string> &sources() const { return Sources; }
    Expected<IPFunctionBoundaries>
    enumerate(StringRef Name, ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
 diff --git a/llvm/tools/llvm-profgen/IPQualityReport.cpp b/llvm/tools/llvm-profgen/IPQualityReport.cpp
-index 5b71b2bba9b9..6958e24cba35 100644
+index 5b71b2bba9b9..aad2c1e4ae8b 100644
 --- a/llvm/tools/llvm-profgen/IPQualityReport.cpp
 +++ b/llvm/tools/llvm-profgen/IPQualityReport.cpp
 @@ -78,6 +78,25 @@ json::Value stringOrNone(StringRef S) {
@@ -715,7 +878,7 @@ index 5b71b2bba9b9..6958e24cba35 100644
  Error llvm::validateIPOutputPaths(const IPQualityOptions &O) {
    auto Conflict = [](StringRef A, StringRef AP, StringRef B, StringRef BP) {
      return failure("path conflict: --" + A + "='" + AP + "' aliases --" + B +
-@@ -714,6 +733,36 @@ json::Value IPQualityReport::build() {
+@@ -714,6 +733,56 @@ json::Value IPQualityReport::build() {
         Statistics.Classified
             ? json::Value(Top(Merged, 50, weight(U, Generation.SampleWeight)))
             : json::Value("unknown")}};
@@ -737,7 +900,27 @@ index 5b71b2bba9b9..6958e24cba35 100644
 +      break;
 +    AliasTop.push_back(json::Object(Query));
 +  }
++  auto Unavailable = Statistics.UnavailableNormalizations;
++  llvm::sort(Unavailable, [](const auto &A, const auto &B) {
++    return std::tie(A.Function, A.Begin, A.End, A.Reason) <
++           std::tie(B.Function, B.Begin, B.End, B.Reason);
++  });
++  json::Array UnavailableTop;
++  for (const auto &R : ArrayRef(Unavailable).take_front(50))
++    UnavailableTop.push_back(json::Object{{"function", R.Function},
++                                          {"original_begin", R.Begin},
++                                          {"original_end", R.End},
++                                          {"reason", R.Reason}});
++  if (!Unavailable.empty())
++    warn("W_THUMB_DWARF_NORMALIZATION_UNAVAILABLE",
++         "Thumb DWARF normalization unavailable; original ranges retained");
 +  Root["thumb_dwarf_normalization"] = json::Object{
++      {"unavailable_range_count",
++       Statistics.Started ? json::Value(uint64_t(Unavailable.size()))
++                          : json::Value("unknown")},
++      {"unavailable_top50", Statistics.Started
++                                ? json::Value(std::move(UnavailableTop))
++                                : json::Value("unknown")},
 +      {"alias_query_count", AliasQueryCount},
 +      {"alias_check_passed", AliasCheckPassed},
 +      {"alias_addresses_top50", std::move(AliasTop)},
@@ -784,32 +967,36 @@ index 90940d9b9c4c..d3e945b11eb7 100644
    void setSemanticsKnown() { SemanticsKnown = true; }
    Error checkThresholds();
 diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.cpp b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
-index 61b7c725ad26..f183596eef16 100644
+index 61b7c725ad26..f9e13a742156 100644
 --- a/llvm/tools/llvm-profgen/ProfileGenerator.cpp
 +++ b/llvm/tools/llvm-profgen/ProfileGenerator.cpp
-@@ -258,6 +258,8 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
+@@ -258,6 +258,11 @@ Error ProfileGenerator::populateBodySamplesFromAddresses(
      const AddressCounter &Counts, const IPGenerationOptions &Options,
      IPGenerationStatistics &Statistics) {
    Statistics.Started = true;
 +  auto Normalized = Binary->getIPNormalizedRanges();
 +  Statistics.NormalizedRanges.assign(Normalized.begin(), Normalized.end());
++  auto Unavailable = Binary->getIPUnavailableNormalizations();
++  Statistics.UnavailableNormalizations.assign(Unavailable.begin(),
++                                              Unavailable.end());
    Statistics.FSDiscriminator = Binary->useFSDiscriminator();
    UseFSDiscriminator = Binary->useFSDiscriminator();
    FunctionSamples::ProfileIsFS = UseFSDiscriminator;
 diff --git a/llvm/tools/llvm-profgen/ProfileGenerator.h b/llvm/tools/llvm-profgen/ProfileGenerator.h
-index 6005b49e9d87..3555409dba05 100644
+index 6005b49e9d87..b0c8f408a5dd 100644
 --- a/llvm/tools/llvm-profgen/ProfileGenerator.h
 +++ b/llvm/tools/llvm-profgen/ProfileGenerator.h
-@@ -170,6 +170,7 @@ struct IPGenerationStatistics {
+@@ -170,6 +170,8 @@ struct IPGenerationStatistics {
    bool Started = false, Classified = false, Finished = false;
    bool FSDiscriminator = false;
    uint64_t WrittenPositions = 0;
 +  std::vector<IPNormalizedRange> NormalizedRanges;
++  std::vector<IPUnavailableNormalization> UnavailableNormalizations;
    IPAddressCount OriginalUsable;
    std::map<std::string, IPAddressCount> Functions;
    std::map<std::string, std::set<uint64_t>> FunctionOrigins;
 diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.cpp b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
-index 25c723d5a1c8..cf384ca43f9b 100644
+index 25c723d5a1c8..f800e8bf43f8 100644
 --- a/llvm/tools/llvm-profgen/ProfiledBinary.cpp
 +++ b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
 @@ -284,6 +284,9 @@ void ProfiledBinary::load() {
@@ -822,7 +1009,7 @@ index 25c723d5a1c8..cf384ca43f9b 100644
      SymbolizerOpts = getSymbolizerOpts();
      Symbolizer = std::make_unique<symbolize::LLVMSymbolizer>(SymbolizerOpts);
      if (!DebugBinaryPath.empty()) {
-@@ -1028,7 +1031,26 @@ void ProfiledBinary::loadSymbolsFromDWARFUnit(DWARFUnit &CompilationUnit) {
+@@ -1028,7 +1031,48 @@ void ProfiledBinary::loadSymbolsFromDWARFUnit(DWARFUnit &CompilationUnit) {
      auto RangesOrError = Die.getAddressRanges();
      if (!RangesOrError)
        continue;
@@ -834,10 +1021,32 @@ index 25c723d5a1c8..cf384ca43f9b 100644
 +          continue;
 +        // Even ranges need no mapping evidence. Keep their original loading
 +        // and boundary diagnostics, including malformed mapping metadata.
-+        if (!IPDWARFMappings)
-+          IPDWARFMappings = unwrapOrError(
-+              IPBoundaryMap::load(Path, DebugBinaryPath, false), Path);
-+        if (IPDWARFMappings->isThumbAddress(Range.LowPC & ~uint64_t(1))) {
++        // Normalization is optional. Mapping metadata errors must not turn
++        // sum/max into boundary-dependent modes. Preserve the original range
++        // and let on-demand enumeration diagnose unavailable boundaries.
++        if (!IPDWARFMappingsAttempted) {
++          IPDWARFMappingsAttempted = true;
++          auto Mappings = IPBoundaryMap::load(Path, DebugBinaryPath, false);
++          if (Mappings)
++            IPDWARFMappings = std::move(*Mappings);
++          else
++            IPDWARFMappingsError = toString(Mappings.takeError());
++        }
++        auto Unavailable = [&](StringRef Reason) {
++          IPUnavailableNormalizations.push_back(
++              {Name, Range.LowPC, Range.HighPC, Reason.str()});
++        };
++        if (!IPDWARFMappings) {
++          Unavailable(IPDWARFMappingsError);
++          continue;
++        }
++        auto Thumb =
++            IPDWARFMappings->isThumbAddress(Range.LowPC & ~uint64_t(1));
++        if (!Thumb) {
++          Unavailable(toString(Thumb.takeError()));
++          continue;
++        }
++        if (*Thumb) {
 +          uint64_t Begin = Range.LowPC & ~uint64_t(1);
 +          uint64_t End = Range.HighPC & ~uint64_t(1);
 +          IPNormalizedRanges.push_back(
@@ -850,7 +1059,7 @@ index 25c723d5a1c8..cf384ca43f9b 100644
  
      if (Ranges.empty())
        continue;
-@@ -1182,8 +1204,51 @@ SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
+@@ -1182,8 +1226,51 @@ SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,
          (injectIPFailure("symbolize") || injectIPFailure("debug-open")))
        return createStringError(inconvertibleErrorCode(),
                                 "injected symbolizer open/query failure");
@@ -905,7 +1114,7 @@ index 25c723d5a1c8..cf384ca43f9b 100644
    DIInliningInfo InlineStack = unwrapOrError(Query(), SymbolizerPath);
  
 diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.h b/llvm/tools/llvm-profgen/ProfiledBinary.h
-index 65dab67f19bc..7addcc8d6310 100644
+index 65dab67f19bc..3668d99c258c 100644
 --- a/llvm/tools/llvm-profgen/ProfiledBinary.h
 +++ b/llvm/tools/llvm-profgen/ProfiledBinary.h
 @@ -11,6 +11,7 @@
@@ -916,13 +1125,19 @@ index 65dab67f19bc..7addcc8d6310 100644
  #include "llvm/ADT/DenseMap.h"
  #include "llvm/ADT/StringRef.h"
  #include "llvm/ADT/StringSet.h"
-@@ -199,13 +200,21 @@ struct MMapEvent {
+@@ -199,13 +200,30 @@ struct MMapEvent {
    StringRef BinaryPath;
  };
  
 +struct IPNormalizedRange {
 +  std::string Function;
 +  uint64_t OriginalBegin, OriginalEnd, Begin, End;
++};
++
++struct IPUnavailableNormalization {
++  std::string Function;
++  uint64_t Begin, End;
++  std::string Reason;
 +};
 +
  class ProfiledBinary {
@@ -934,15 +1149,21 @@ index 65dab67f19bc..7addcc8d6310 100644
 -  bool IPMode = false;
 +  bool IPMode = false, IPThumbDWARF = false;
 +  std::optional<IPBoundaryMap> IPDWARFMappings;
++  bool IPDWARFMappingsAttempted = false;
++  std::string IPDWARFMappingsError;
++  std::vector<IPUnavailableNormalization> IPUnavailableNormalizations;
 +  std::vector<IPNormalizedRange> IPNormalizedRanges;
 +  std::map<uint64_t, uint64_t> IPDWARFAliases;
    std::unordered_set<uint64_t> IPNonLeafZeroLineAddresses;
    std::vector<std::pair<uint64_t, uint64_t>> IPCURanges, IPPLTRanges;
    Expected<bool> loadIPMetadata(object::ObjectFile &Obj);
-@@ -417,6 +426,9 @@ public:
+@@ -417,6 +435,12 @@ public:
    ProfiledBinary(const StringRef ExeBinPath, const StringRef DebugBinPath,
                   bool IPMode = false);
    StringRef classifyOutsideIP(uint64_t Address) const;
++  ArrayRef<IPUnavailableNormalization> getIPUnavailableNormalizations() const {
++    return IPUnavailableNormalizations;
++  }
 +  ArrayRef<IPNormalizedRange> getIPNormalizedRanges() const {
 +    return IPNormalizedRanges;
 +  }
