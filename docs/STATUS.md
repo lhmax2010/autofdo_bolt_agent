@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前任务停止记录（2026-11-06；频率诊断与质量分析启动前）
+## 当前恢复任务（2026-11-06；分级资源门禁）
+
+- 新规则替代上一轮8GiB统一门禁：轻任务≥4GiB，3G/200% scope，串行；重任务须≥10GiB且SwapFree≥1GiB，16G/600%、-j6，不满足则留待构建而不整体停止。运行中每60秒保存meminfo，连续两次<2.5GiB暂停，任一次<1.5GiB终止本任务进程并停止。
+- 主机初查MemAvailable约5.55GiB、SwapFree约38.6MiB，允许轻任务，不允许重构建。3G/200% user scope实际启动成功。资源基线在temp/frequency-diag-resume/baseline.txt。
+- 已按用户原文登记[修订2判定规则](profgen/eval/preregistration_amendment2_rule.md)，本次单独提交推送后才做板上诊断；不是资格修订2本身，预注册及修订1不变。先比对身份/板子状态，任何差异即停，不调整板子。
+- 尚未开始板上读取或诊断、line0核实、补丁9、统计质量分析。完成情况后续据实更新。
+
+## 上轮停止记录（2026-11-06；频率诊断与质量分析启动前）
 
 - 用户授权RPi4频率诊断、条件性补丁9及统计质量分析；资源上限nice19/ionice3、长任务可用时16GiB/600% scope、编译最多-j6、分析单进程。
 - MemAvailable连续三次5.714、5.805、6.297GiB，均低于8GiB；按“资源上限被触发两次以上”停止。这是同一次低内存状态的三次观测，未触及4GiB强停线，未启动计算任务。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)、[证据](profgen/impl/evidence/14/01_resource_gate_stop.json)
