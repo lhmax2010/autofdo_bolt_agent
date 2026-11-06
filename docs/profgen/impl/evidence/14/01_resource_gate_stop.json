@@ -1,0 +1,48 @@
+{
+  "start_threshold_kib": 8388608,
+  "stop_current_threshold_kib": 4194304,
+  "max_threshold_triggers": 2,
+  "samples": [
+    {
+      "time": "2026-11-06T16:44:21.083701+08:00",
+      "mem_available_kib": 5992092,
+      "source": "initial /proc/meminfo command",
+      "observation": 1,
+      "action": "pause_new_tasks",
+      "note": "No board connection or state change; no build or analysis started"
+    },
+    {
+      "time": "2026-11-06T16:45:32.806181+08:00",
+      "observation": 2,
+      "mem_available_kib": 6087040,
+      "mem_total_kib": 32297780,
+      "action": "pause_new_tasks",
+      "raw_meminfo": "MemTotal:       32297780 kB\nMemFree:          408184 kB\nMemAvailable:    6087040 kB\nBuffers:          356252 kB\nCached:          4552228 kB\nSwapCached:        35312 kB\nActive:         12802356 kB\nInactive:       14595024 kB\nActive(anon):   12028704 kB\nInactive(anon): 11643624 kB\nActive(file):     773652 kB\nInactive(file):  2951400 kB\nUnevictable:      269460 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:          19544 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              5376 kB\nWriteback:             0 kB\nAnonPages:      22725440 kB\nMapped:           640704 kB\nShmem:           1183420 kB\nKReclaimable:    2709092 kB\nSlab:            3496424 kB\nSReclaimable:    2709092 kB\nSUnreclaim:       787332 kB\nKernelStack:       51808 kB\nPageTables:       304696 kB\nSecPageTables:     13064 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   97589864 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       93928 kB\nVmallocChunk:          0 kB\nPercpu:            33040 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   282624 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "2.88 2.09 1.66 2/3215 1370782",
+      "monitor_peak_rss_kib": 11760
+    },
+    {
+      "time": "2026-11-06T16:46:52.222715+08:00",
+      "observation": 3,
+      "mem_available_kib": 6602928,
+      "mem_total_kib": 32297780,
+      "action": "pause_new_tasks",
+      "raw_meminfo": "MemTotal:       32297780 kB\nMemFree:         1055728 kB\nMemAvailable:    6602928 kB\nBuffers:          379388 kB\nCached:          4195036 kB\nSwapCached:        35308 kB\nActive:         12470900 kB\nInactive:       14366940 kB\nActive(anon):   11857940 kB\nInactive(anon): 11579964 kB\nActive(file):     612960 kB\nInactive(file):  2786976 kB\nUnevictable:      267732 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:          19680 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:               632 kB\nWriteback:             0 kB\nAnonPages:      22498164 kB\nMapped:           663168 kB\nShmem:           1174484 kB\nKReclaimable:    2710040 kB\nSlab:            3495212 kB\nSReclaimable:    2710040 kB\nSUnreclaim:       785172 kB\nKernelStack:       51056 kB\nPageTables:       302792 kB\nSecPageTables:     13052 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343188 kB\nCommitted_AS:   97152556 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       93272 kB\nVmallocChunk:          0 kB\nPercpu:            33040 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   278528 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      334980 kB\nDirectMap2M:    17969152 kB\nDirectMap1G:    15728640 kB\n",
+      "loadavg": "1.62 1.91 1.64 1/3173 1371939",
+      "monitor_peak_rss_kib": 11780
+    }
+  ],
+  "below_start_threshold_observations": 3,
+  "decision": "STOP",
+  "interpretation": "Three consecutive observations below the 8 GiB start gate in one continuous low-memory episode; not three independent memory-pressure episodes. No workload started.",
+  "resource_limits": {
+    "nice": 19,
+    "ionice_class": 3,
+    "long_task_memory_max": "16G",
+    "long_task_cpu_quota": "600%",
+    "build_parallelism_max": 6,
+    "analysis_processes": 1,
+    "scope_status": "not probed: no long task permitted to start"
+  },
+  "initial_observation_timestamp_note": "First sample timestamp is the time the initial command result was persisted, not the exact /proc read time."
+}

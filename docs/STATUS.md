@@ -26,7 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前授权与执行状态（2026-11-06；补丁8小修与RPi4第一轮闭合）
+## 当前任务停止记录（2026-11-06；频率诊断与质量分析启动前）
+
+- 用户授权RPi4频率诊断、条件性补丁9及统计质量分析；资源上限nice19/ionice3、长任务可用时16GiB/600% scope、编译最多-j6、分析单进程。
+- MemAvailable连续三次5.714、5.805、6.297GiB，均低于8GiB；按“资源上限被触发两次以上”停止。这是同一次低内存状态的三次观测，未触及4GiB强停线，未启动计算任务。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)、[证据](profgen/impl/evidence/14/01_resource_gate_stop.json)
+- 未连接板子，未改root/governor、LLVM、设计或预注册。尚未提交诊断判定规则，未生成修订2/补丁9，未做质量分析；原31 clean/28 abnormal/11 unknown不变。
+- 下一步资源恢复并获继续指示后，先提交诊断判定原文，再按原任务完成诊断、line0核实及质量分析；不提前给出候选配置或性能结论。
+
+## 上轮完成状态（2026-11-06；补丁8小修与RPi4第一轮闭合）
 
 - 保留RUN恢复完成：99项SHA与首次清单/本机完全一致，target106593计入矩阵，确切目录已删除。实际缺码重试0次；只读最多2次重试裁决已落实、15项主机门禁测试通过。预注册7d3d9d9与修订1不变。[恢复](profgen/impl/12_board_round1.md)、[审计](profgen/impl/evidence/12/51_retry_audit.json)
 - 补丁8小修完成：LLVM `660a46f036a47ecc940e02b153d3e76e6eb39e79`，正式工具SHA `9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7`。GBS1157.977秒/111步，lit84 PASS/1 UNSUPPORTED/1 XFAIL/0 FAIL，C1两遍各636条0差异，14历史重放与153个Clang profile不变，0008反向检查通过；spec未提交。[报告13](profgen/impl/13_patch8_thumb_dwarf.md)
