@@ -26,12 +26,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前设计状态（v1.0；待确认评审）
+## 当前设计状态（v1.1；待限定范围评审）
 
-- [设计v1.0](profgen/design/02_llvm_profgen_enhance_design_v1.0.md)已放入仓库，待三家限定范围确认评审；文档内容未修改，v0.7、v0.8、v0.9保留不动。
+- [设计v1.1](profgen/design/02_llvm_profgen_enhance_design_v1.1.md)已放入仓库，待三家限定范围评审；v1.0确认评审的处理见文档附录J。文档内容未修改，v0.7–v1.0保留不动。
 - 修订3未登记。
 - 没有计算任何正式 sample profile 的指标。
-- v1.0文件SHA-256：3eebb623de58e59d66bea0910cf6f672acaf8218446e96702f6443b07cdfbf10；按用户授权从Downloads移动，原路径不留副本。
+- v1.1文件SHA-256：50c36cd0828ee386fadc8d7da4b1f80d6a5654b0540861af2d3378dac8963817；按用户授权从Downloads移动，原路径不留副本。
 
 ## 当前完成状态（2026-11-09；P9正式S重转与FFmpeg整体覆盖）
 
