@@ -26,6 +26,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 当前设计状态（v1.0；待确认评审）
+
+- [设计v1.0](profgen/design/02_llvm_profgen_enhance_design_v1.0.md)已放入仓库，待三家限定范围确认评审；文档内容未修改，v0.7、v0.8、v0.9保留不动。
+- 修订3未登记。
+- 没有计算任何正式 sample profile 的指标。
+- v1.0文件SHA-256：3eebb623de58e59d66bea0910cf6f672acaf8218446e96702f6443b07cdfbf10；按用户授权从Downloads移动，原路径不留副本。
+
 ## 当前完成状态（2026-11-09；P9正式S重转与FFmpeg整体覆盖）
 
 - 固定工具2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5完成70组/106原件及额外20份period重转。输出temp/p9-formal-reconversion/outputs/；P8存档与旧结果保留，SHA已复核。移出usable=2736，与报告12独立统计一致；target11131603不变，usable8235324→8232588；身份全verified。sample50份变化/56份不变，period10变化/10不变；逐字段与profile树核对无额外差异。[质量报告](profgen/eval/quality_round1.md)、[逐份证据](profgen/impl/evidence/16/08_p9_reconversion_rows.json)
