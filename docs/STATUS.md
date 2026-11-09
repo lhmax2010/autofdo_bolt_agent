@@ -26,6 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 当前完成状态（2026-11-09；P9正式S重转与FFmpeg整体覆盖）
+
+- 固定工具2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5完成70组/106原件及额外20份period重转。输出temp/p9-formal-reconversion/outputs/；P8存档与旧结果保留，SHA已复核。移出usable=2736，与报告12独立统计一致；target11131603不变，usable8235324→8232588；身份全verified。sample50份变化/56份不变，period10变化/10不变；逐字段与profile树核对无额外差异。[质量报告](profgen/eval/quality_round1.md)、[逐份证据](profgen/impl/evidence/16/08_p9_reconversion_rows.json)
+- 每转换独立3G/200%scope串行，无工具OOM/失败/重试。比对器一次遗漏删除空祖先，保留原错误后修正并精确核对，没有重跑该转换；全部顶层total差值与原独立逐函数非叶子样本数一致，period派生文本由只读P8存档生成参考并与P9逐字节一致。
+- 用户后续改为立即10GiB门禁、8G/200%scope；旧等待在export启动前终止，保留未开始收尾。Thumb/A32整体export各一次、串行成功，8.025/6.674秒；运行中cgroup峰值4.324688/4.272709GiB，export RSS4190164/4179876KiB。两份JSON各498文件、28236函数实例记录（去重函数3575）、112206可执行行/8298覆盖行；大文件temp/coverage-whole-8g-20261109/。[覆盖证据](profgen/impl/evidence/16/09_whole_coverage_8g.json)
+- 已采样最低MemAvailable16528896KiB（15.763184GiB）；无资源暂停/终止、无OOM/重试。旧等待scope的主动取消是用户改指令后的执行流程调整，不是资源终止。[资源证据](profgen/impl/evidence/16/10_reconversion_coverage_resources.json)
+- 原资格31 clean/28 abnormal/11 unknown不变；未连接板子，未开始最终质量矩阵、消费构建或性能测量，LLVM源码与旧profile未改。后续质量分析可引用新P9 profile与整体C覆盖JSON，仍待用户授权；Agent开发不开始。
+
 ## 当前完成状态（2026-11-06；频率区分、覆盖分片与补丁9）
 
 - 判定规则原文预提交7546425；单核60区间约1.500GHz，四核38区间最低0.793GHz、仅连续2区间低于1.455GHz，80.341°C停止。欠压sticky全0，完整固件时钟/标志不可用；按规则unknown，不运行后续FFmpeg、不生成修订。两RUN已SHA核验后删除；root off/schedutil、RPM1232恢复。[报告14](profgen/impl/14_ffmpeg_frequency_diag.md)

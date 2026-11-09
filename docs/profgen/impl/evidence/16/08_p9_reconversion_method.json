@@ -1,0 +1,1470 @@
+{
+  "scripts": {
+    "compare.py": {
+      "sha256": "1b812e2e4b336c6678c880fbd5c4716caf2cca622e7f5afcf78fbe7a8681c4c9",
+      "content": "import json,re,copy,hashlib,subprocess,collections\nfrom pathlib import Path\nW=Path.cwd();D=W/'temp/p9-formal-reconversion';R=W/'temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0'\ndef sha(p):\n h=hashlib.sha256()\n with Path(p).open('rb') as f:\n  for b in iter(lambda:f.read(1048576),b''):h.update(b)\n return h.hexdigest()\ndef differences(a,b,p=''):\n ds=[]\n if isinstance(a,dict) and isinstance(b,dict):\n  for k in sorted(a.keys()|b.keys()):\n   if k not in a or k not in b:ds.append(dict(path=p+'.'+k,before=a.get(k,'ABSENT'),after=b.get(k,'ABSENT')))\n   else:ds+=differences(a[k],b[k],p+'.'+k)\n elif isinstance(a,list) and isinstance(b,list) and len(a)==len(b):\n  for i,(aa,bb) in enumerate(zip(a,b)):ds+=differences(aa,bb,p+f'[{i}]')\n elif a!=b:ds.append(dict(path=p,before=a,after=b))\n return ds\ndef parse(p):\n roots={};stack=[]\n for line in p.read_text().splitlines():\n  if not line or line.startswith('#'):continue\n  n=len(line)-len(line.lstrip());s=line.strip()\n  if n==0:\n   name,total,head=s.rsplit(':',2);node=dict(name=name,total=int(total),head=int(head),body={},calls={});roots[name]=node;stack=[(0,node)]\n  else:\n   while stack[-1][0]>=n:stack.pop()\n   parent=stack[-1][1];key,value=s.split(': ',1)\n   if re.fullmatch(r'\\d+',value):parent['body'][key]=int(value)\n   else:\n    name,total=value.rsplit(':',1);node=dict(name=name,total=int(total),body={},calls={})\n    parent['calls'][(key,name)]=node;stack.append((n,node))\n return roots\ndef positions(roots):\n def rec(n):return len(n['body'])+sum(rec(c) for c in n['calls'].values())\n return sum(rec(n) for n in roots.values())\ndef text_profile(src,dest):\n cmd=[str(R/'lib64/ld-linux-x86-64.so.2'),'--library-path',f'{R}/lib64:{R}/usr/lib64',str(R/'usr/bin/llvm-profdata'),'merge','--sample','--text',str(src),'-o',str(dest)]\n p=subprocess.run(cmd,capture_output=True,text=True)\n dest.with_suffix('.command.json').write_text(json.dumps(dict(command=cmd,rc=p.returncode,stderr=p.stderr),indent=2))\n assert p.returncode==0,p.stderr\ndef compare(x,out,nonleaf,period=False):\n suffix='-period' if period else ''\n old=Path(x['output_directory']);a=json.loads((old/f'quality{suffix}.json').read_text());b=json.loads((out/f'quality{suffix}.json').read_text())\n oldprof=old/f'profile{suffix}.extbinary';newprof=out/f'profile{suffix}.extbinary'\n text_profile(oldprof,out/f'old{suffix}.text');text_profile(newprof,out/f'new{suffix}.text')\n oldtree=parse(out/f'old{suffix}.text');newtree=parse(out/f'new{suffix}.text')\n # Prior independently classified raw addresses, never new P9 classifications.\n bad={int(v['address'],16):v for v in nonleaf['addresses']}\n raw={}\n for addr,count,ps in re.findall(r'^IP-ADDRESS (0x[0-9a-f]+) sample_count=(\\d+) period_sum=(\\d+)',(old/'stdout').read_text(),re.M):\n  raw[int(addr,16)]=(int(count),int(ps))\n lostcount=sum(raw[k][0] for k in bad);lostperiod=sum(raw[k][1] for k in bad)\n assert lostcount==nonleaf['nonleaf_samples']\n roots=collections.defaultdict(lambda:[0,0])\n for k,z in bad.items():\n  roots[z['root']][0]+=raw[k][0];roots[z['root']][1]+=raw[k][1]\n unit=a['semantics']['p_ref'];weighted=lostperiod if period else lostcount\n expected=copy.deepcopy(a)\n sub=dict(sample_count=lostcount,period_sum=lostperiod,normalized_weight=dict(numerator=weighted,denominator=unit))\n for name,sgn in [('usable',-1),('in_func_no_line',1)]:\n  node=expected['samples']['target'][name]\n  for k in ['sample_count','period_sum']:node[k]+=sgn*sub[k]\n  node['normalized_weight']['numerator']+=sgn*weighted\n expected['samples']['target']['in_func_no_line']['nonleaf_line_zero']=sub\n for key in ['target_usable_ratio','target_usable_sample_ratio','line_resolution_ratio']:\n  expected['ratios'][key]['numerator']-=weighted if key in ['target_usable_ratio','line_resolution_ratio'] and period else lostcount\n expected['ratios']['target_usable_period_ratio']['numerator']-=lostperiod\n # Validate every retained profile node/body exactly. Only wrapped zero-line\n # callsites under independently recorded zero-line frame names can disappear.\n zero_names=set(nonleaf['zero_line_frame_functions'])\n removed=[]\n def prune(n,path):\n  removed_total=0\n  for (key,name),child in list(n['calls'].items()):\n   if int(key.split('.')[0])>=60000 and n['name'] in zero_names:\n    removed.append(dict(parent=path,callsite=key,inlinee=name,total=child['total']))\n    removed_total+=child['total'];del n['calls'][(key,name)]\n   else:\n    removed_total+=prune(child,path+'/'+key+':'+name)\n    if child['total']==0 and not child['body'] and not child['calls']:del n['calls'][(key,name)]\n  n['total']-=removed_total\n  return removed_total\n expectedtree=copy.deepcopy(oldtree)\n for name,n in expectedtree.items():prune(n,name)\n # For sample weights, no per-key rounding: exact tree after subtraction.\n if not period:assert expectedtree==newtree,'profile difference beyond removal of invalid callsites'\n else:\n  # Independently remove the already catalogued nonleaf-zero sample lines,\n  # then run immutable P8 as an exact reference, avoiding rounding tolerance.\n  if lostcount:\n   binary=a['identity']['binary']\n   readelf=[str(R/'lib64/ld-linux-x86-64.so.2'),'--library-path',f'{R}/lib64:{R}/usr/lib64',str(R/'usr/bin/readelf'),'-lW',binary]\n   rr=subprocess.run(readelf,capture_output=True,text=True);assert rr.returncode==0\n   (out/'period-reference.readelf').write_text(rr.stdout)\n   segs=[]\n   for line in rr.stdout.splitlines():\n    cols=line.split()\n    if cols and cols[0]=='LOAD' and 'E' in cols[6:-1]:segs.append(tuple(int(cols[k],16) for k in [1,2,4]))\n   paths={c['path'] for c in a['identity']['candidates']}\n   filtered=out/'nonleaf-excluded.perfscript';removed_count=removed_period=0\n   src=Path(next(v.split('=',1)[1] for v in x['command'] if v.startswith('--perfscript=')))\n   pattern=re.compile(r'^\\s*(-?\\d+)/(-?\\d+)\\s+(\\d+)\\s+(\\S+):\\s+([0-9a-fA-F]+)\\s+\\((.*)\\+0x([0-9a-fA-F]+)\\)\\s*$')\n   with src.open() as fi,filtered.open('w') as fo:\n    for line in fi:\n     m=pattern.match(line);exclude=False\n     if m and m[6] in paths:\n      off=int(m[7],16);vs=[v+(off-o) for o,v,size in segs if o<=off<o+size]\n      if len(vs)==1 and vs[0] in bad:exclude=True;removed_count+=1;removed_period+=int(m[3])\n     if not exclude:fo.write(line)\n   assert (removed_count,removed_period)==(lostcount,lostperiod)\n   archive=W/'temp/profgen-patch9/prebuild-tool'\n   assert sha(archive/'llvm-profgen')=='9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7'\n   cmd=[('--output='+str(out/'reference-period.extbinary')) if v.startswith('--output=') else ('--quality-report='+str(out/'reference-period-quality.json')) if v.startswith('--quality-report=') else ('--perfscript='+str(filtered)) if v.startswith('--perfscript=') else '--ip-weight=period' if v=='--ip-weight=sample' else str(archive/'llvm-profgen') if v.endswith('/build/bin/llvm-profgen') else v for v in x['command']]+['--ip-period-unit=1000003']\n   cmd[cmd.index('--library-path')+1]=f'{archive}:{R}/lib64:{R}/usr/lib64'\n   with (out/'reference-period.stdout').open('w') as fo,(out/'reference-period.stderr').open('w') as fe:rr=subprocess.run(cmd,stdout=fo,stderr=fe)\n   (out/'reference-period.command.json').write_text(json.dumps(dict(command=cmd,rc=rr.returncode,removed_samples=removed_count,removed_period=removed_period),indent=2))\n   assert rr.returncode==0\n   assert (out/'reference-period.extbinary').read_bytes()==newprof.read_bytes(),'P9 period != exact immutable P8 reference with independently identified bad samples removed'\n  else:assert oldprof.read_bytes()==newprof.read_bytes()\n assert positions(oldtree)==a['samples']['written_positions']\n expected['samples']['written_positions']=positions(newtree)\n # Per-function raw coverage counters subtract the independently known\n # address contributions; sorted top50 uses normalized weight then name.\n for row in expected['coverage']['top50']:\n  c,p=roots.get(row['name'],(0,0));rw=p if period else c\n  row['counts']['sample_count']-=c;row['counts']['period_sum']-=p\n  row['counts']['normalized_weight']['numerator']-=rw\n  row['share']['numerator']-=rw\n  row['share']['denominator']-=weighted\n expected['coverage']['top50'].sort(key=lambda z:(-z['counts']['normalized_weight']['numerator'],z['name']))\n expected['tool']['arguments']=[s.replace(str(oldprof),str(newprof)).replace(str(old/f'quality{suffix}.json'),str(out/f'quality{suffix}.json')) for s in a['tool']['arguments']]\n ds=differences(a,b);unexpected=differences(expected,b)\n result=dict(source=x['source'],weight='period' if period else 'sample',moved_samples=lostcount,moved_period=lostperiod,old_profile_sha256=sha(oldprof),new_profile_sha256=sha(newprof),profile_equal=oldprof.read_bytes()==newprof.read_bytes(),removed_callsites=removed,JSON_differences=ds,unexpected=unexpected,old_written_positions=positions(oldtree),new_written_positions=positions(newtree))\n (out/f'comparison{suffix}.json').write_text(json.dumps(result,indent=2)+'\\n')\n assert not unexpected,unexpected[:3]\n return result\n"
+    },
+    "compare_cli.py": {
+      "sha256": "aa060570a0472e24e7497d23e54b1d71b6e7b3c6e4806af6f02eaa44e6217b5f",
+      "content": "import json,sys\nfrom pathlib import Path\nfrom compare import compare\nw=Path.cwd();d=Path(__file__).resolve().parent\ni=int(sys.argv[1]);x=json.loads((w/'temp/board-round1-retry/final-reconverted.json').read_text())['runs'][i]\nn={a['run']:a for a in json.loads((w/'temp/board-round1-retry/nonleaf-summary.json').read_text())['runs']}[x['source']]\nz=compare(x,d/'outputs'/Path(x['source']).name,n,period=len(sys.argv)>2)\nprint('OK',i,z['moved_samples'],len(z['JSON_differences']))\n"
+    },
+    "scope_runner.py": {
+      "sha256": "8ee95f2f9d0ebf3566ebaf073e81fea7c382214812a583509a207e000139a388",
+      "content": "from pathlib import Path\nimport subprocess,json,time,datetime\nD=Path(__file__).resolve().parent\ndef now():return datetime.datetime.now().astimezone().isoformat()\ndef memory(tag):\n raw=Path('/proc/meminfo').read_text()\n a=int(next(l.split()[1] for l in raw.splitlines() if l.startswith('MemAvailable:')))\n with (D/'resources.jsonl').open('a') as f:f.write(json.dumps(dict(time=now(),tag=tag,available_kib=a,meminfo=raw,loadavg=Path('/proc/loadavg').read_text()))+'\\n')\n return a\ndef run(spec,heavy=False):\n a=memory('start '+str(spec))\n if a<(14680064 if heavy else 4194304):raise RuntimeError('memory admission failed')\n unit='afdo-p9-reconvert-'+str(time.time_ns())\n cmd=['nice','-n','19','ionice','-c3','systemd-run','--user','--scope','--unit='+unit,'-p','MemoryMax='+('10G' if heavy else '3G'),'-p','CPUQuota='+('400%' if heavy else '200%'),'python3',str(D/'child.py'),str(spec)]\n log=Path(str(spec)+'.scope.log')\n t=time.monotonic();cg=None;peak=0;last=time.monotonic();low=0;event=None\n with log.open('w') as f:\n  p=subprocess.Popen(cmd,stdout=f,stderr=subprocess.STDOUT)\n  while p.poll() is None:\n   if cg is None:\n    s=subprocess.run(['systemctl','--user','show',unit+'.scope','-p','ControlGroup','--value'],capture_output=True,text=True)\n    if s.stdout.strip():cg=Path('/sys/fs/cgroup'+s.stdout.strip())\n   if cg:\n    try:peak=max(peak,int((cg/'memory.peak').read_text()))\n    except (FileNotFoundError,ValueError):pass\n   if time.monotonic()-last>=60:\n    a=memory('running '+unit);last=time.monotonic()\n    low=low+1 if a<(3145728 if heavy else 2621440) else 0\n    action='TERM' if (heavy and low>=2) or (not heavy and a<1572864) else ('STOP' if not heavy and low>=2 else None)\n    if action:\n     subprocess.run(['systemctl','--user','kill','--signal='+action,unit+'.scope'],capture_output=True)\n     event=action;break\n   time.sleep(.25)\n  if event=='STOP':\n   result=dict(scope=unit,event=event,peak_cgroup_bytes=peak)\n   Path(str(spec)+'.scope.json').write_text(json.dumps(result,indent=2))\n   raise RuntimeError('resource pause: scope remains stopped '+unit)\n  rc=p.wait()\n result=dict(scope=unit,command=cmd,rc=rc,seconds=time.monotonic()-t,peak_cgroup_bytes=peak,event=event)\n s=subprocess.run(['systemctl','--user','show',unit+'.scope','-p','Result','-p','MemoryPeak','-p','OOMPolicy'],capture_output=True,text=True);result['systemd_after']=s.stdout\n Path(str(spec)+'.scope.json').write_text(json.dumps(result,indent=2))\n memory('end '+unit)\n if rc or event:raise RuntimeError('task failure '+str(result))\n return result\n"
+    },
+    "worker.py": {
+      "sha256": "827929b4b2c5c01f3d9ce790d2bcebec6baf4856ecfc0ccb88db0bb556a8c4ee",
+      "content": "from pathlib import Path\nimport json,sys,traceback\nfrom scope_runner import run,now,memory\nfrom compare import sha\nW=Path.cwd();D=Path(__file__).resolve().parent\nrows=[];ok=False;reason=None\ntry:\n assert sha(W/'temp/llvm-profgen-enh/build/bin/llvm-profgen')=='2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5'\n xs=json.loads((W/'temp/board-round1-retry/final-reconverted.json').read_text())['runs'];assert len(xs)==106\n for i,x in enumerate(xs):\n  out=D/'outputs'/Path(x['source']).name;out.mkdir(exist_ok=True)\n  if not (out/'comparison.json').exists():\n   cmd=[('--output='+str(out/'profile.extbinary')) if s.startswith('--output=') else ('--quality-report='+str(out/'quality.json')) if s.startswith('--quality-report=') else s for s in x['command']]\n   spec=out/'command.json';spec.write_text(json.dumps(dict(command=cmd,stdout=str(out/'stdout'),stderr=str(out/'stderr'),result=str(out/'run.json')),indent=2));run(spec)\n   spec=out/'check-command.json';spec.write_text(json.dumps(dict(command=['python3',str(D/'compare_cli.py'),str(i)],stdout=str(out/'check.stdout'),stderr=str(out/'check.stderr'),result=str(out/'check-run.json')),indent=2));run(spec)\n  z=json.loads((out/'comparison.json').read_text());rows.append({k:v for k,v in z.items() if k!='JSON_differences'})\n  (D/'sample-summary.json').write_text(json.dumps(dict(completed=len(rows),moved_samples=sum(r['moved_samples'] for r in rows),runs=rows),indent=2))\n  print(now(),'COMPLETE',i+1,Path(x['source']).name,'moved',z['moved_samples'],flush=True)\n assert sum(r['moved_samples'] for r in rows)==2736\n ok=True\nexcept BaseException as e:\n reason=repr(e);traceback.print_exc()\nfinally:\n (D/'status.json').write_text(json.dumps(dict(end=now(),status='OK' if ok else 'FAILED',completed=len(rows),reason=reason),indent=2))\n print('\u5df2\u7ed3\u675f',now(),'\u6210\u529f' if ok else '\u5931\u8d25','ALL-END',flush=True)\n"
+    },
+    "period_worker.py": {
+      "sha256": "d04e3ea732d87c2435e327c78a49d0f68aaa48a85cc1c6f3f2f9b32cd388f09f",
+      "content": "from pathlib import Path\nimport json,traceback\nfrom scope_runner import run,now\nW=Path.cwd();D=Path(__file__).resolve().parent;rows=[];ok=False;reason=None\ntry:\n xs=json.loads((W/'temp/board-round1-retry/final-reconverted.json').read_text())['runs']\n for i,x in enumerate(xs):\n  old=Path(x['output_directory'])\n  if not (old/'profile-period.extbinary').exists():continue\n  out=D/'outputs'/Path(x['source']).name\n  cmd=[('--output='+str(out/'profile-period.extbinary')) if s.startswith('--output=') else ('--quality-report='+str(out/'quality-period.json')) if s.startswith('--quality-report=') else '--ip-weight=period' if s=='--ip-weight=sample' else s for s in x['command']]+['--ip-period-unit=1000003']\n  spec=out/'period-command.json';spec.write_text(json.dumps(dict(command=cmd,stdout=str(out/'period.stdout'),stderr=str(out/'period.stderr'),result=str(out/'period-run.json')),indent=2));run(spec)\n  spec=out/'period-check-command.json';spec.write_text(json.dumps(dict(command=['python3',str(D/'compare_cli.py'),str(i),'period'],stdout=str(out/'period-check.stdout'),stderr=str(out/'period-check.stderr'),result=str(out/'period-check-run.json')),indent=2));run(spec)\n  z=json.loads((out/'comparison-period.json').read_text());rows.append({k:v for k,v in z.items() if k!='JSON_differences'})\n  (D/'period-summary.json').write_text(json.dumps(dict(completed=len(rows),runs=rows),indent=2))\n  print(now(),'COMPLETE',len(rows),Path(x['source']).name,flush=True)\n assert len(rows)==20\n ok=True\nexcept BaseException as e:\n reason=repr(e);traceback.print_exc()\nfinally:\n (D/'period-status.json').write_text(json.dumps(dict(end=now(),status='OK' if ok else 'FAILED',completed=len(rows),reason=reason),indent=2))\n print('\u5df2\u7ed3\u675f',now(),'\u6210\u529f' if ok else '\u5931\u8d25','ALL-END',flush=True)\n"
+    },
+    "child.py": {
+      "sha256": "f2ea377b178f3ab149220ffb3e8d73be3856a0f9c85eebd2438393bce0d40caa",
+      "content": "import sys,subprocess,resource,json,time\nfrom pathlib import Path\np=Path(sys.argv[1]);j=json.loads(p.read_text());t=time.monotonic()\nwith open(j['stdout'],'w') as o,open(j['stderr'],'w') as e:\n r=subprocess.run(j['command'],stdout=o,stderr=e)\nPath(j['result']).write_text(json.dumps(dict(rc=r.returncode,seconds=time.monotonic()-t,peak_rss_kib=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss),indent=2))\nsys.exit(r.returncode)\n"
+    }
+  },
+  "checker_correction": {
+    "cause": "The checker retained zero-total empty ancestor inline contexts after deleting the only invalid call subtree. P9 correctly never creates these now-empty contexts.",
+    "tool_retried": false,
+    "converted_input_index": 9,
+    "removed_samples": 63,
+    "result": "After removing only empty zero-total ancestor contexts, exact sample profile tree and every report field equal the independently derived expectation.",
+    "original_evidence": "worker-initial.log; status-initial.json; outputs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s2/check.stderr; profile.diff",
+    "original_stderr": "Traceback (most recent call last):\n  File \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/p9-formal-reconversion/compare_cli.py\", line 7, in <module>\n    z=compare(x,d/'outputs'/Path(x['source']).name,n,period=len(sys.argv)>2)\n      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/p9-formal-reconversion/compare.py\", line 86, in compare\n    if not period:assert expectedtree==newtree,'profile difference beyond removal of invalid callsites'\n                         ^^^^^^^^^^^^^^^^^^^^^\nAssertionError: profile difference beyond removal of invalid callsites\n",
+    "profile_diff": "--- /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/p9-formal-reconversion/outputs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s2/old.text\t2026-11-09 15:14:03.908643923 +0800\n+++ /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/p9-formal-reconversion/outputs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s2/new.text\t2026-11-09 15:14:03.919324332 +0800\n@@ -74,7 +74,7 @@\n    5: _ZL6refillP12CABACContext.__uniq.27894887720519182085624620829320312160:56\n     2: 54\n     6: 2\n-ff_h264_decode_mb_cabac:10146:0\n+ff_h264_decode_mb_cabac:10087:0\n  1: 299\n  2: 30\n  5: 173\n@@ -699,15 +699,6 @@\n   13: 3\n   14: 11\n   16: 5\n- 63616: _ZL14fill_rectanglePviiiji.__uniq.27894887720519182085624620829320312160:59\n-  12: 5\n-  14: 3\n-  16: 2\n-  17: 6\n-  20: 14\n-  22: 12\n-  24: 11\n-  25: 6\n _ZL11loop_filterPK11H264ContextP16H264SliceContextii.__uniq.248544299231367077551893488431358088102:5671:0\n  1: 3\n  4: 6\n@@ -1019,7 +1010,7 @@\n  1: 422\n  1: _ZL20get_cabac_inline_armP12CABACContextPh.__uniq.27894887720519182085624620829320312160:3972\n   6: 3972\n-ff_h264_filter_mb:4117:0\n+ff_h264_filter_mb:4114:0\n  4: 283\n  5: 1\n  6: 55\n@@ -1113,7 +1104,7 @@\n    14: 4\n    15: 2\n    16: 16\n- 129: _ZL13filter_mb_dirPK11H264ContextP16H264SliceContextiiPhS4_S4_jjiiiiiiii.__uniq.275345673349404074195048302594725744325:1726\n+ 129: _ZL13filter_mb_dirPK11H264ContextP16H264SliceContextiiPhS4_S4_jjiiiiiiii.__uniq.275345673349404074195048302594725744325:1723\n   10: 17\n   13: 23\n   18: 118\n@@ -1200,8 +1191,6 @@\n    13: 11\n    15: 10\n    16: 9\n-  65068: _ZL16filter_mb_edgechPhiPKsjiiPK11H264Contexti.__uniq.275345673349404074195048302594725744325:3\n-   16: 3\n _ZL20mc_part_420_simple_8PK11H264ContextP16H264SliceContextiiiiPhS4_S4_iiPKPFvS4_PKhiEPFvS4_S6_iiiiESA_SC_PKPFvS4_iiiiiEPKPFvS4_S4_iiiiiiEii.__uniq.237198308776883668208751996125870213978:3822:0\n  13: 165\n  14: 894\n@@ -2471,12 +2460,6 @@\n ff_aom_uninit_film_grain_params:2:0\n  1: 1\n  3: 1\n-ff_h264_decode_ref_pic_marking:2:0\n- 3: 1\n- 24: _ZL18get_ue_golomb_longP13GetBitContext.__uniq.289719813497377065643056867246459224287:1\n-  8: _ZL13get_bits_longP13GetBitContexti.__uniq.289719813497377065643056867246459224287:1\n-   65117: _ZL8get_bitsP13GetBitContexti.__uniq.289719813497377065643056867246459224287:1\n-    5: 1\n ff_thread_release_ext_buffer:2:0\n  1: 2\n _ZL16fill_frame_propsPK14AVCodecContextP7AVFrame.__uniq.311450872606808733782875195227783721677:1:0\n@@ -2513,6 +2496,8 @@\n  1: 1\n ff_h2645_sei_to_frame:1:0\n  6: 1\n+ff_h264_decode_ref_pic_marking:1:0\n+ 3: 1\n ff_h264_get_profile:1:0\n  1: 1\n ff_h264_parse_ref_count:1:0\n"
+  },
+  "source_audit": [
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1",
+      "input_sha256": "5732dce25be037de92dd08f00e1e6adfabd6c1577532a0db545e476554d52405",
+      "old_profile_sha256": "c4eb748d2e08b93b59cbb678f51007abdb530afc3b72e4a7fd0b9491a65a5085",
+      "old_quality_sha256": "82701e9191151273a7088b42395151b82eeb60144485e6d7fdac9a8d8485d9b6",
+      "new_quality_sha256": "d77f8e2db1db3cd6640b472851b8bf2019a9afdec2511e7795c4c8b6b2411750",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 62,
+        "ff_h264_filter_mb": 4,
+        "ff_h264_queue_decode_slice": 1
+      },
+      "verified": true,
+      "target": 108145,
+      "usable": 64862,
+      "no_line": 11141
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-20000-r1-s1",
+      "input_sha256": "0289330a500ed343e0373b227c1f0bfe8420bb6393c57f99cb7bbe97f7147948",
+      "old_profile_sha256": "ff80bb1df468e550f492de5a96ece504b94c71777384a56a82c7a64fd94e1f2a",
+      "old_quality_sha256": "f7053c938a1a19523cdd5717b49e37f4d8911de54fbf2307cc211ee1f58fa867",
+      "new_quality_sha256": "063c9c19c38acc8cc9242657c51ba9242655a145f9a3aa7d00b160e7c240261f",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 20,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 36155,
+      "usable": 21511,
+      "no_line": 3741
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-spike-a32-S-sample-fixed-bbb-100000-r1-s1",
+      "input_sha256": "0aad68bb30209e8d70341ffd4996c9e8c8c9b3766ca447086728c71df46defad",
+      "old_profile_sha256": "ab38cf05021459f50c950d1985e873e5a96da0e23cd41eca71dd68d6829d1b8e",
+      "old_quality_sha256": "ec1d7e1f92434afbc7418b7a0532cbab862c8990a5e84ba4abace60ecd6d10c8",
+      "new_quality_sha256": "d44240ab8a84e7adb215e40c5ac36bae2aca13c2b5fbecaec4de0ea2d43ac583",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 106567,
+      "usable": 106287,
+      "no_line": 280
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-spike-a32-S-sample-fixed-bbb-20000-r1-s1",
+      "input_sha256": "e0ebd1b675733928f820b9e3eac6d615d27ff90ab4a59bf55f16df1954e18fb9",
+      "old_profile_sha256": "550e6dc35ccf020ab9109be5a06189015e38010eb5ec47fdc25cdf5851920a63",
+      "old_quality_sha256": "5a079f64fc474460d761834e44a35371ed98bc3d5069178d7767df9e84c96db7",
+      "new_quality_sha256": "acf900512ec259a518876514f57e5e2a1612cd3857307de95b0bb808f37edc92",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21347,
+      "usable": 21291,
+      "no_line": 56
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-spike-thumb-S-sample-fixed-bbb-100000-r1-s1",
+      "input_sha256": "0200f3bfc201f1c348cbb0bba866fc37a5776c627c667f66d063c68c4077cc18",
+      "old_profile_sha256": "a92e6c08807d16a83a7d1a0081c61d1029e045f71e3a84df822e9274d81b88ea",
+      "old_quality_sha256": "396c9ae9ea821070cba52ff33509adc2a444918d5d61d863d50cb6306219ea38",
+      "new_quality_sha256": "85af32b6b93bcfb36017548e35651aba39d78f5cc0f21cede2c1e393793f0400",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 106875,
+      "usable": 72762,
+      "no_line": 34113
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-spike-thumb-S-sample-fixed-bbb-20000-r1-s1",
+      "input_sha256": "2512650303d503f8f828b1e4aa64ab8f410ae858df7c1090d6ed063da1057834",
+      "old_profile_sha256": "35a50d8bea8179d4056351a75d9f0b579445e6873325f5101e7a5ae4346fb53b",
+      "old_quality_sha256": "ef43109a354c33d2353af0b8322f194ff07c9635f9cd628f0d5467f7ee7cca24",
+      "new_quality_sha256": "67b5cc3c87fd1205c5dc81482bc6df0d5a4e88b6103e636b9ebb8e169428953b",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21561,
+      "usable": 14846,
+      "no_line": 6715
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-spike-thumb-S-sample-fixed-bbb-400000-r1-s1",
+      "input_sha256": "3870e62e18a5d17f0a91e2b07c857754f2ac318fb7556a1dc3ab1ab3942c9af2",
+      "old_profile_sha256": "70933749fb2ac3f67e2851f3ccf0a4e6049aa8d2c04ad2d3c6335abaf31af29f",
+      "old_quality_sha256": "579a40418458863f5dd432e2bcdfa3544bcde20d81b18f5147a108e969fcfa87",
+      "new_quality_sha256": "e4be2da4d6511ccaef77776b5cb5a12d419455496139f085bfe6a80cf5dbd611",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 426661,
+      "usable": 290816,
+      "no_line": 135845
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-amend1/runs/spike-a32-S-sample-fixed-bbb-400000-r1-s1",
+      "input_sha256": "a50e1c0a78346ee5fd18d3325991173299eb5fa27bef7abe1d5a11ba90faf710",
+      "old_profile_sha256": "7fb8385208ddd256a8e6c05e731ffcff55ebab6a4628a80ea4a606b4bb3534ff",
+      "old_quality_sha256": "14c9efd5597ba8c04ca5e3704f400a14e3dc4bb90d348d4a72e8b0958824ffaf",
+      "new_quality_sha256": "335101f1caf311a6e51358389f754e4b9adf6e8bbb3a71f899115f3c17c24d95",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 431793,
+      "usable": 430722,
+      "no_line": 1071
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s1",
+      "input_sha256": "1fc08f7ae82ea7ecb556e834ca554678b7fb9f1d779d15e9f81ea9b2717b72f9",
+      "old_profile_sha256": "17cab68d9fe6ebceef315980bdbbb301ca1f6029ecb6500758737cbb4cca7151",
+      "old_quality_sha256": "f127e15e2ec6691ed11fed204e75cd6e3f1b5926800d7c4b59177ceeea46c049",
+      "new_quality_sha256": "3b8e262befa67bd5403322876cbea7bdd3db3120b1b88003c18688bec875b3e3",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 55,
+        "ff_h264_filter_mb": 6
+      },
+      "verified": true,
+      "target": 109260,
+      "usable": 65723,
+      "no_line": 11387
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s2",
+      "input_sha256": "cbf7890517a094f7b82ad1989996e55f8647389177c4e2d7e7e8553097d0dc15",
+      "old_profile_sha256": "5f96f3bdae0734225a1f44d0b23dfea0ae33b5c8d5aa1516a4021062f927735c",
+      "old_quality_sha256": "46648376de13055487714010f86233e96f5645e41d3868a6ee59d25e9db85be7",
+      "new_quality_sha256": "21a088dc726a6a5469c893b28a20232fdd193be281802c03c0f9f0794aebbd3a",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 59,
+        "ff_h264_filter_mb": 3,
+        "ff_h264_decode_ref_pic_marking": 1
+      },
+      "verified": true,
+      "target": 108997,
+      "usable": 65548,
+      "no_line": 11188
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s3",
+      "input_sha256": "e578100a3f2c623033ee272304231bb7f0049d4058c26d1f849bc69d962eeecd",
+      "old_profile_sha256": "cd38cf33076dff13acec31fad68e8d538c01f5fbfa6bb76fd0dbf04dbbf511e9",
+      "old_quality_sha256": "50dffc2d73c261d850ac9c76834c0fde0d4fc5dbc0a4fb0d902ee1326254c167",
+      "new_quality_sha256": "3ff3b266fa62eef5b878793f071f5905ebace55f6af842fa565044eff7f5bc37",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 63,
+        "ff_h264_filter_mb": 4
+      },
+      "verified": true,
+      "target": 108371,
+      "usable": 64559,
+      "no_line": 11283
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r1-s4",
+      "input_sha256": "d0163157f20e5e26e4f2486d5f453ae924d160fc335ce9d80bf92d30621aca14",
+      "old_profile_sha256": "8a2d04e1704393db0d71d05d7849534f440119862a0cd76e2044864f5a18485b",
+      "old_quality_sha256": "f9ec3dad2097f7ee763d203e0ed6304e49b9831a76ea5a30e4616a61e7745eef",
+      "new_quality_sha256": "0c421fee4c0b8465293154b3b17bca292b8785a71168ae4b02194df59d50e7e7",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 60,
+        "ff_h264_filter_mb": 2,
+        "ff_h264_queue_decode_slice": 1
+      },
+      "verified": true,
+      "target": 109388,
+      "usable": 65043,
+      "no_line": 11398
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-freq-bbb-100000-r1-s1",
+      "input_sha256": "a128377b6fc52a82a20548edc55c281e53f12eb38a587714fc38020eacc2d2c0",
+      "old_profile_sha256": "a6b472a03f57f6591a98c6dbdd6242ab1cf653b3baf7a2f2f05dc05b165304f4",
+      "old_quality_sha256": "8a5c1b19ff518e6ad7ce6b10d869add9d5ada20bdac5e7bb48aa657c2ef081fd",
+      "new_quality_sha256": "968b2d81796fe114478f86fe96d89b2381f5df0534bc8193f940e60afafa8817",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 112373,
+      "usable": 76088,
+      "no_line": 36285
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-freq-bbb-100000-r1-s1",
+      "input_sha256": "5ebb6a00b4b7792af68231d3614741e2752f355cf77756234cf70cd4c389fd62",
+      "old_profile_sha256": "0206628d0191687707adb54441508db828343535278980f841d45904b1b6a5e1",
+      "old_quality_sha256": "2320e355824b3069c96da0f3eb2ca1ead25542a90345b14bccc8be0bb9a52fb0",
+      "new_quality_sha256": "cae91561cabf928ae25056034ce687eb121dea75b42b6a1d7dd332dec748aff5",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 110845,
+      "usable": 110599,
+      "no_line": 246
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s1",
+      "input_sha256": "b02f50ce162d90b1591451e4bd69a509da508219d86463031e698a48bbcd20b8",
+      "old_profile_sha256": "ae89869c73bf60b9a04b8bd012bfc5c2f35a693e54d4143c0fd764b936a59a28",
+      "old_quality_sha256": "68f7fd882e6f9fd15b86b6bbe9c559ef07003fd258bfe90a592671f34139ea37",
+      "new_quality_sha256": "d46183fa926f96d2d9213e85af3ef9091d58e9a22cebf78f3d4b6b3e75c44c53",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 45,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 81116,
+      "usable": 48872,
+      "no_line": 8238
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r1-s2",
+      "input_sha256": "e01473be0fd92c77b590782b8c083eb86a895f8b52c325ccf450f0115b9cf8c4",
+      "old_profile_sha256": "4e011f84bfb72cfa3ea712c9d784e56244d1308cb3c5efd233d024f919add54a",
+      "old_quality_sha256": "304da0a5151307b469554fc07775cc0aa45563a26d89b8be9fc4b94b827e2199",
+      "new_quality_sha256": "82260714e0c84c986e518a434e1c38df1ee5760e6688a9dd76aa83ba6195a29b",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 16,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 27333,
+      "usable": 16128,
+      "no_line": 2842
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-tos-100000-r1-s1",
+      "input_sha256": "c2b0e22e08b6470db74c362a740e59d122a13eb11597b3c0d9c9d25105473a6b",
+      "old_profile_sha256": "a4413b644c8c241c160ec8e981c28a3c8849e1a5f68df29595803d829e99aaab",
+      "old_quality_sha256": "c0554efbb7c515039a74e2e44a9a99e26751a164257bfbef841f720e381cd1b3",
+      "new_quality_sha256": "288d8ad9492579bfd146a4d27e73a5af8596bec2da3d81b1fe333dff1146ae30",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 85,
+        "ff_h264_filter_mb": 6
+      },
+      "verified": true,
+      "target": 121641,
+      "usable": 70101,
+      "no_line": 12661
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-a32-S-sample-fixed-bbb-100000-r1-s1",
+      "input_sha256": "fb567cf23bbaaed9da70e3fbbe8c3f80becb682efc41730998bcd0fbb47c9d56",
+      "old_profile_sha256": "914b3b26e13f6f757b2a51f4aba33323747814c10ab13d10e461751d351c80ac",
+      "old_quality_sha256": "633b7516a64aef3247c60e0b2f946e4840cb46bf2b3c6aeef959d497a0572e5a",
+      "new_quality_sha256": "175b488e4ff69f8fcf2aac84104f8ac3cc0d156f5d3ed51e61d1b91d90b2349f",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 88
+      },
+      "verified": true,
+      "target": 110597,
+      "usable": 67249,
+      "no_line": 11455
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-100000-r2-s1",
+      "input_sha256": "a06a0cc34cf1d3b1c31c3d887acadaf5614e6708c0597014a82754730b7c49d0",
+      "old_profile_sha256": "a42ff456e4cf760777b88834966b19bdf381b41e321259f29faa706e2330375f",
+      "old_quality_sha256": "35dea320f892f2736b39a2499af6782402b9c7cf20a14f02d826ee60a200580c",
+      "new_quality_sha256": "73e42e80907bd16d1bf54a25f87c948c985c8bb34f875db50c37ab74a7730c2d",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 107999,
+      "usable": 74013,
+      "no_line": 33986
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-100000-r2-s1",
+      "input_sha256": "b6df33df7007d25a977c5eb3e5fa18d8a0a9adf9161892109f567833a02a2f78",
+      "old_profile_sha256": "4a41166c371b089a7a5ed7a69850cd9008b050834aed9087acd4c5f2f29ab810",
+      "old_quality_sha256": "8f22a474f85182ab4c2935c273ca228e997d758b303c5a37723db0ec2175ac15",
+      "new_quality_sha256": "26efe45d5bce2114cd1c5ba8ada545b0a3293a2dcbfbd3f2060916a09cceb70d",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 107593,
+      "usable": 107314,
+      "no_line": 279
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-100000-r2-s1",
+      "input_sha256": "44d135e787acced2f9b587530c7796acef51015578d255cf84e52481619cbfc4",
+      "old_profile_sha256": "3028881e4cc849abe35ecfe92b8dea8175fcda2f96151705f8890eb96482b777",
+      "old_quality_sha256": "466eb89c279242ca1d4aad6b06435fc940ca765ea497df987efd56ff7662791b",
+      "new_quality_sha256": "1ec8ea8dbf2ebe8cb67676204173313094c3eaa600a9863e3151cfe4cd1768f1",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 36,
+        "ff_h264_filter_mb": 3
+      },
+      "verified": true,
+      "target": 108758,
+      "usable": 65719,
+      "no_line": 11204
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r2-s1",
+      "input_sha256": "feac3a53e00da93cd9c684820c72b75acf08041572fb092bec457472d452b908",
+      "old_profile_sha256": "acf98a48849bb0ca3c5640a2b68c91906dd59e68d88a54623bce145c3c2a6c91",
+      "old_quality_sha256": "0d2757984a326346c0dac235e70dd13c1eeb9ac284c49fa5edbd5b32533ac2fc",
+      "new_quality_sha256": "0ab43239663d384d6ca75889934d06c61f5f68ef00aa809286d7741d6821eaf6",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 163364,
+      "usable": 112464,
+      "no_line": 50900
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r2-s2",
+      "input_sha256": "36a83d4da527ccfe667f59e744d933fb2b537905a44947a7938f364103ff3f8e",
+      "old_profile_sha256": "01b896a078cff385355f40cc897e521ad8f469865d719defb139f7fe7f3b6c5d",
+      "old_quality_sha256": "491a93fd2b47aa86280b69fbbb18ae1b0912d76417f016aa7c87a3328220de92",
+      "new_quality_sha256": "6b32febed92751ebe08550580c74f4b855bbe26a54e13759e3d6f9be9c4380d2",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 159001,
+      "usable": 108077,
+      "no_line": 50924
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r2-s3",
+      "input_sha256": "e893a9a44cfd277f22e9c42311508e9162265fbcf4d0accd52314c0355f6cfdc",
+      "old_profile_sha256": "92b684a37feed3dfffda973ea6a28cd29cf71a49836f03b49bdffb2913554f2f",
+      "old_quality_sha256": "2351a2c385125136f20e835898d00d8da7978badb5d2c8cbaef31119a9c0c9d7",
+      "new_quality_sha256": "73ee9cb62012d56af548f620b2d9ccbee1aea8cdbc12685fda67ad1ea5cd7399",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 83678,
+      "usable": 57074,
+      "no_line": 26604
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r2-s1",
+      "input_sha256": "d6fb8952e7f4306cbbe633e2b22de4e1724969e5bb4c60d3852ef8635d8775a4",
+      "old_profile_sha256": "49b2bebe7d3339ebdfb8010295d3742c12522489e5525c94bbb3830d85b1d4f9",
+      "old_quality_sha256": "0ca2338e3ad79df8940177c5ea5667d2d8e3c91af9697ba43b7500e4b53b51fc",
+      "new_quality_sha256": "63d3c1ce0061fe927c19426bbd450ae93ba3be65cd2a40f72f439f04ec200381",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 161893,
+      "usable": 161475,
+      "no_line": 418
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r2-s2",
+      "input_sha256": "e86617164c765b64b5fb89ed08eb93ee28f9dafc5cfc3c705b7ffdbfb86265b6",
+      "old_profile_sha256": "5dab792e2d8a436389999ad7b9834376d23fa89fb06c8899876b8b07cdc33ea8",
+      "old_quality_sha256": "60d4f0ceb34196e060371d422a62965a800f4a6338ebac9cc7b765929b06ceaf",
+      "new_quality_sha256": "bfccbefe04dc27847cedd927ec140ccc124116df84c6eda7c5e973c4848923c3",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 160045,
+      "usable": 159625,
+      "no_line": 420
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r2-s3",
+      "input_sha256": "e0c6dc96c23efa3a5510bbbd5568edf9ef0589e34857bb9eba5cb4844519380b",
+      "old_profile_sha256": "449dacf38ceb5e01c5d44b7ba1977a436839d83472ccdb8ee08b26f3545202ba",
+      "old_quality_sha256": "30dddc375690b93b7c53ae0a6ba9db193b300f512fadd5653a3be8edbcd9bea5",
+      "new_quality_sha256": "669a1f32473d25ed6236df44f47f49cf4d2c90bc409c4bbc654511920826a5b2",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 85190,
+      "usable": 84984,
+      "no_line": 206
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s1",
+      "input_sha256": "a1cd9c42e18bcd096be809ec003fcb3af9a6fe61b4b3f6819fabd86d57aef108",
+      "old_profile_sha256": "afbb107a35e27d63ea3ddde187baf1647dae4b5bb09f8a8e450174ab5697274c",
+      "old_quality_sha256": "cf89a0d7718e7994b961d35c83d9dc2c579119c77fc81841acf16c93cdd6f708",
+      "new_quality_sha256": "da8c953c3f384d5dcae1eba00de3c64d63f9d5d15b3903ea7c4db2190b8602a6",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 57,
+        "ff_h264_filter_mb": 4
+      },
+      "verified": true,
+      "target": 108594,
+      "usable": 65210,
+      "no_line": 11204
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s2",
+      "input_sha256": "b02d961b271370c9dad9d7f72d76c4067fe5eb7678763e3b4359e3347e7220c2",
+      "old_profile_sha256": "1167160903c2bd8442e4231f78c4edb4187aaa90eb0167bd7cef64830b3d9a2f",
+      "old_quality_sha256": "f59f36c017404c4723f095cd4b559d78e17a040f62b1acc1800db48ff3a42957",
+      "new_quality_sha256": "0763010290c0fc21c00cb9886b1f76f381f98d6b9696ac02155b8306b10f7a88",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 55,
+        "ff_h264_filter_mb": 3
+      },
+      "verified": true,
+      "target": 109512,
+      "usable": 65409,
+      "no_line": 11431
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s3",
+      "input_sha256": "04c8ec98f73b1fe5e6024d9025326566f5cf23bbf064539fa1ccecd5ac18526f",
+      "old_profile_sha256": "a9f49efef1c8885c5adbb2404470efa1eca961bd97f156444781faa100d9fc44",
+      "old_quality_sha256": "3160c934f5a7259a96fb07ad2f3eadefb46baa8a2eeaf08f9f76ce51f4c4db84",
+      "new_quality_sha256": "db373754f944a7f92cb7ae933469879ad5b276810bcd9a0f250658b46dc27a56",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 53,
+        "ff_h264_filter_mb": 7
+      },
+      "verified": true,
+      "target": 108039,
+      "usable": 64971,
+      "no_line": 11126
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r2-s4",
+      "input_sha256": "28c3ca98d5e59f4dea5abac1af4a5945cbca31f59b81fa49d293458e0612f151",
+      "old_profile_sha256": "aec60d0633c4ee45932a316dd3c5c01f2ff23d34219a0dd2adfb11f47419c048",
+      "old_quality_sha256": "76743fd896f89bd0f2d36bb9209f91a6f0ea73399ccc97acb7844106a8593343",
+      "new_quality_sha256": "1770fd4d815a56b696f141feade4c8ec9598631a5d1fedf67605eed4e90a815f",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 56,
+        "ff_h264_filter_mb": 4,
+        "ff_h264_decode_ref_pic_list_reordering": 1
+      },
+      "verified": true,
+      "target": 108798,
+      "usable": 65487,
+      "no_line": 11216
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-20000-r2-s1",
+      "input_sha256": "1badef6cbff1c8dc97c9b5e2da27a481baeeebc68d70a4533842e87c9425ed5b",
+      "old_profile_sha256": "53f9c95524698f7e1d8b544a2fb50a0e1f752f583e83a16cc9e1e83770724d3e",
+      "old_quality_sha256": "f4cc83f42d92bc487c40016a35bd8f0d70707c8a330ef5f453820c428d7a536f",
+      "new_quality_sha256": "cddb7f1f6d3a9eac2c50fbe751a85d09e019ce4dab22b883c9ec64644377309f",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21604,
+      "usable": 14840,
+      "no_line": 6764
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-20000-r2-s1",
+      "input_sha256": "42a5152e5b330c71351e7ae2a8bdb96e0907ae3b835df705997227f3feb4c4a9",
+      "old_profile_sha256": "a5ad0bf4cf9b8ea84f9e52e5d561387e9fdf35890e2a83e3a152aa8f66d2db8e",
+      "old_quality_sha256": "8d2ac63cc3ae0656645482fc78d08b570ce0cf75dd82db107f5f772e4cbe6b11",
+      "new_quality_sha256": "21cd4d563cb45101bbbd428de6d845dc059462f098682d72cb1231c671b838fd",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21334,
+      "usable": 21287,
+      "no_line": 47
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-20000-r2-s1",
+      "input_sha256": "55f6db765b5bdf781a6391e6a00979f0e6ab2108bcab51b850b4dfa2e28508a8",
+      "old_profile_sha256": "0f9a8407fc49d183b8bc1b4cb994cacdeaa221e5d0e52fc911dc43edbe5735ca",
+      "old_quality_sha256": "258647f90b1db29eca0a595a35daca454eeb62dadd6024989d4450960679a221",
+      "new_quality_sha256": "617d47401f139db6bb44c42cc33a535652b74229453b462b621892b285b1b611",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 21,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 36269,
+      "usable": 21507,
+      "no_line": 3707
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-freq-bbb-100000-r2-s1",
+      "input_sha256": "9e0a1c4366885fa1c360d1866233ac96c4b60dfd493f5423fa62b2694d6b2baa",
+      "old_profile_sha256": "b1b7e8ea25e1f1bf6b7f13ed4e9ef65ec2d4a5d2c3ee5b29995f4dd11f26099d",
+      "old_quality_sha256": "2c9159da80c92bfb3ba592d2e06f586e5bebfec140d3c23a7f2593b9e717ecee",
+      "new_quality_sha256": "ad3929e3b81691c750ffe22722445dc05c5a946f23e86334e83086ef4ee35fb9",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 113675,
+      "usable": 78040,
+      "no_line": 35635
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-freq-bbb-100000-r2-s1",
+      "input_sha256": "68897ee751bbf1b2018f90f88465ef9dfed03d9026e4ed2b7da3ae52c106ca63",
+      "old_profile_sha256": "52554213465ee97c7599789ca6fc61f826ebf43c53f45093068a1370e465b38d",
+      "old_quality_sha256": "3915c8d26fe0a397f1c7ae2e7c3a6523b0a5407c3092b600b655dee4e0ee7056",
+      "new_quality_sha256": "722f45c97462eed16fed4c2f1279154ad5cfe129e91179f14373b0d790bdc3a4",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 114435,
+      "usable": 114171,
+      "no_line": 264
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s1",
+      "input_sha256": "9ca1f8875c1317eef274457faf9cb05baed8483ba0c43092edfc00ca16b3f510",
+      "old_profile_sha256": "19f8835922fe9bc948ce7f9e4d02d052dff2dc056cb8689eacbdac89a1296526",
+      "old_quality_sha256": "c4f791ce997c3b78edad30f1f5207c78c41e614203578bafcfdac2391b863b77",
+      "new_quality_sha256": "4bd00776ff6e97e725726f85cf88ff5dfbbb6a2f8c0867391bdc2a0721a80a93",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 44,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 81329,
+      "usable": 48719,
+      "no_line": 8688
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r2-s2",
+      "input_sha256": "e62460552ffe9c87092707936338bc17a2097f161e7d0911aaa0b9f00818682c",
+      "old_profile_sha256": "f8519c3edaa5b461b2d1966bd9d4422c7d35d8f0ab2a94906f6499b7ea86cff7",
+      "old_quality_sha256": "7becc423e29f38a3ab647c55d4b9b68316d2ee60137fd24863016767bdb8ab8c",
+      "new_quality_sha256": "b4342a724afc90c7973eba8661c661560cf8f3dc1deb617403c0d17e52e83590",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 5,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 27030,
+      "usable": 16018,
+      "no_line": 2799
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-tos-100000-r2-s1",
+      "input_sha256": "f383c6d150814d4093ae4856af2159429e06f4822632e2bad6e8b3b75140cdf9",
+      "old_profile_sha256": "5e44577f11e6731815bdf6ce1daf8ac91b1ff006c0c45b7c0125e1a09ce0faa7",
+      "old_quality_sha256": "096351134dae3f4dbf900c833a03445cbb96ea6e25244f5419d3e9bf873a9394",
+      "new_quality_sha256": "e85b671cf3b2c7fc1cde04e9ecca637b9a093c2946038b567682733729cc801e",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 81,
+        "ff_h264_filter_mb": 4
+      },
+      "verified": true,
+      "target": 122088,
+      "usable": 70368,
+      "no_line": 12520
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-a32-S-sample-fixed-bbb-100000-r2-s1",
+      "input_sha256": "b0c6b8bffd99d7abf397eed6d8015d81a5f0bbaa7dc5787612f2956d99bddc2c",
+      "old_profile_sha256": "b2d7dbb2fd8c8303f2f58ad45421e5edbb5d351021ef962cb6a5f6c2bb0e7679",
+      "old_quality_sha256": "9adfafd0ad1531b810edcc704457b80fa6f311da6862417fe9b9853a80b1ceff",
+      "new_quality_sha256": "3f294a8550bbd9f48e900d9d40e69b685dc09bb6ecbcd4bdb7a5e78478f655d6",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 58,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 109994,
+      "usable": 66612,
+      "no_line": 11586
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r3-s1",
+      "input_sha256": "c2c4379a8a3b8e97a21557f6c40538ec39c56d6f7d2f8505f2de006aba1d6575",
+      "old_profile_sha256": "b035020f1fc3bb64860c4ea3ef99f5ea05889426e879d82af8ad89128ef0fffc",
+      "old_quality_sha256": "7554a89a4ec882d2a6f9cfa3b13ae3e3d03a76dca8089586f987605e19f1b997",
+      "new_quality_sha256": "c747b3d362c481eedd86502fd5a822d232e69420ad54843c908a28abdd8ab957",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 162284,
+      "usable": 111306,
+      "no_line": 50978
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r3-s2",
+      "input_sha256": "c3b9bb80a6467dcb5ff35577fb4249812e61acf967536d6910e919e32fbe5d4e",
+      "old_profile_sha256": "1397a27a6bb8e4247706cb2d8e4bb04a9b510d2852911905f2fdf2d59f50963b",
+      "old_quality_sha256": "5ee1d19cfd8c49855f082c4e6e8d314b3504b40661740a58d5ee7edb3cea4745",
+      "new_quality_sha256": "4ea607ef1bfb9dd50dde720700e9a9fbffe3c59ac516c2a41c3af949c1ffc52d",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 161904,
+      "usable": 110598,
+      "no_line": 51306
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-400000-r3-s3",
+      "input_sha256": "2c25987eb1103a464b28ebeede2394b9e11d0990fa8457064fe9e8391e6e14e0",
+      "old_profile_sha256": "0fb67bf52a3f95761716cd088f9c78eb533530d4f5221696dc3bb448fc404019",
+      "old_quality_sha256": "941ba9f42db216d435fba51a061648ad80185316e1684427585aac244c9fada7",
+      "new_quality_sha256": "41fc0d1e8f51f07874dee4aaa1be30d59ddc46c3183429a1404a169778144abe",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 81815,
+      "usable": 56112,
+      "no_line": 25703
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r3-s1",
+      "input_sha256": "f2146dc19870c638cb15e7c71e8c6a543c61b1adfbc8a04569758abfe6a2db04",
+      "old_profile_sha256": "8423e09eccb3ff14c81b2a33ca50f44f6d85e014115074c94d58e1305166cfa6",
+      "old_quality_sha256": "c4a15ef50622cab3a327c6bf067eaa14445b05590df8dc9d2b7cc935399a72f4",
+      "new_quality_sha256": "1c180852b8379f3d5c3727fff0080941eb1a2190f4f9728e66adb486c00183fd",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 161389,
+      "usable": 160951,
+      "no_line": 438
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r3-s2",
+      "input_sha256": "4e880d531dbf2e37078e43cac46935407c6b22b21cfae13b2b42802bcacfcfdf",
+      "old_profile_sha256": "562b1352ddf87201a99c58a0d21ac3c50d657e46712e2b7913a23fac98da874e",
+      "old_quality_sha256": "bc6b89dcc761d7cb10d88e25a3f1cdb8e51814246c19193f465aa67f335f0c23",
+      "new_quality_sha256": "d7dac460a2d5c9d13152b784cd1e835299c9f59b2f744814ec106e74261854b8",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 162109,
+      "usable": 161698,
+      "no_line": 411
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-400000-r3-s3",
+      "input_sha256": "41a76304bddfe7396e311ae2f3ed7935447293ef9ede5ff8dc2ca14826a6f31b",
+      "old_profile_sha256": "402656e5753085bc40931a923a34a13c6c17912a20df3109b8334cf940a8068d",
+      "old_quality_sha256": "8f3d6e60e371685ec66fc2d70ffe1f20594b6bffb384640f741aa4072393fb95",
+      "new_quality_sha256": "2fb1832e567615ab5cf84bce91229eaea966f37ea4704fd231db8472999403a3",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 81840,
+      "usable": 81617,
+      "no_line": 223
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s1",
+      "input_sha256": "6ca32ece277c7d0a5c45c4847ccde79e340088f66c7ebb76a29ab76a671bbe80",
+      "old_profile_sha256": "69ea5ffd0f2ed3b80d6ec5967240a73eb8310ba9a813d816950c61885cd526a4",
+      "old_quality_sha256": "ef95e783333c3816f3d32042f0e5fea04621f05400dcd2b8960893bf7545fee4",
+      "new_quality_sha256": "caa3dc46302731a6cc6e989741851a7c343bb29b59b330f1f43204db7a23b66b",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 63,
+        "ff_h264_filter_mb": 9,
+        "ff_h264_queue_decode_slice": 1
+      },
+      "verified": true,
+      "target": 109709,
+      "usable": 65496,
+      "no_line": 11539
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s2",
+      "input_sha256": "6122803aa37a27255cbc64e5560693e51296b84ba7c140bcd65a544e8eb574fa",
+      "old_profile_sha256": "fa5b863363dada0ab85e9c584a304e8ff6819926c3c262fb685989b334579755",
+      "old_quality_sha256": "bee83362f8fd2b98ae6ecdc0a77388158d891902407cd99be5b9c0c8b3c27040",
+      "new_quality_sha256": "750b1ba8e062a8b310754ae7af20aa98c8c059ba92573f8268c37a8d1174acd8",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 68,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 108809,
+      "usable": 65175,
+      "no_line": 11298
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s3",
+      "input_sha256": "eee266b86e193b0a41ec1d60fffcd80b0d86fd9eb4e9b496e3470d36ffd53085",
+      "old_profile_sha256": "33cef43bc10a825df88fcfc52caeb42713fd32ae14735f7153f2dfd83e34e867",
+      "old_quality_sha256": "d140bf22d3fb4fc0b939e864bfaab6ff18a2455dc9924e35f649448516fa9aae",
+      "new_quality_sha256": "6255f317b35fd6db01f6d06f62e336645485d941a3c08de7471e27a51a54ce1e",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 63,
+        "ff_h264_filter_mb": 2,
+        "ff_h264_queue_decode_slice": 1,
+        "ff_h264_decode_ref_pic_list_reordering": 1
+      },
+      "verified": true,
+      "target": 108819,
+      "usable": 64946,
+      "no_line": 11282
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r3-s4",
+      "input_sha256": "710e73be0a8f47847d0fba36b2b3fb116e07410a79ddb461fdfcb6c5077e7fca",
+      "old_profile_sha256": "0a8992b90917c14d470aa8fdef8a92f6bf70e2a5715411bf38302a28928a5281",
+      "old_quality_sha256": "577034105e79d52eb5d85f474afc75b0a49527e4e366bff46e7ebfab25658ed1",
+      "new_quality_sha256": "d821a6bfd803148ece4ba677fb464ac74ffe9b4979cce131455da88c47a1e338",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 50,
+        "ff_h264_filter_mb": 7
+      },
+      "verified": true,
+      "target": 108542,
+      "usable": 65196,
+      "no_line": 11069
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-20000-r3-s1",
+      "input_sha256": "91b1b4c910217c553b4f9f7ae66c6847f21a06bf857e1f38aab374c678fb1d2a",
+      "old_profile_sha256": "6369a9990f518f06383f670b5af6dfc5da7501407f87c80c107022abc5bf7519",
+      "old_quality_sha256": "9ebc78890e6be7ae34487ca3cbe2adccece948c4b99782184443745ad529d64a",
+      "new_quality_sha256": "31c822b5b1b2447745bc500ecdd019b2276bcb05c593fb8e3cda9dcba52b11be",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21338,
+      "usable": 14571,
+      "no_line": 6767
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-20000-r3-s1",
+      "input_sha256": "13acf0f343aa70fdc7dc8e28584cf5d197d88c842b32e47e2dbe5eaf8d04bf6d",
+      "old_profile_sha256": "771b0d4620430fdea7875cbb4b36dc8cd04407c0da6fc4e2cf389ad407e22947",
+      "old_quality_sha256": "fada0282e1deff88368d60113f93970803afe942104b9fd26f9ae769b707c599",
+      "new_quality_sha256": "1f81f14201e50664e1090b6beaff469f21696ba766df660ceb2023b45f0276e7",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21530,
+      "usable": 21465,
+      "no_line": 65
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/ffmpeg-thumb-S-sample-fixed-bbb-20000-r3-s1",
+      "input_sha256": "1403518e6a0f357ed35c354a2b8692c0353ef463c5c645a5238f48aedccd8500",
+      "old_profile_sha256": "d79b1b719bd46dd069435dd62dd07ffc48459c1a161f633b5e1c5bc658fc67a6",
+      "old_quality_sha256": "d77586559c5e4a911e64a9dadac7a1964190a2da042861f27db6dde59d29a50a",
+      "new_quality_sha256": "5eff1d60269739ab7f28ef080b58beed15603fdc8cdbe365cd7853a8a717dbe9",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 19,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 36570,
+      "usable": 21875,
+      "no_line": 3769
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-thumb-S-sample-fixed-bbb-100000-r3-s1",
+      "input_sha256": "55201bec2c72b7692bee353f7d782ddef94e8b9b23dd838c4d58f5940a513e55",
+      "old_profile_sha256": "f310c538458beeec43d4fddaa9b74538a4bcb9538e13ebf6c0933a4ffbf3fe67",
+      "old_quality_sha256": "4c2e39ff55272d9f5e445760f6406a8ab06621403b9e1caa7e3d5072e6c30496",
+      "new_quality_sha256": "2bd73cc1ca940fc7fc32dff3535c64376a7a4bc796cd2e940a7b7eac3d979876",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 105995,
+      "usable": 71883,
+      "no_line": 34112
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-patch8/runs/spike-a32-S-sample-fixed-bbb-100000-r3-s1",
+      "input_sha256": "d75ab402a7b90b50966d18b5709a24e4b3d00cfe52be367c82d3e3f541cfa393",
+      "old_profile_sha256": "797c07bba64e96bb5dcff993d9a57fa5e75659ec0f6d70f6c7cfd7bc89da511e",
+      "old_quality_sha256": "d66f55e8209d17afa930fbae76a9643af3af0ae8a62312a95cf86c76b4fe6fc9",
+      "new_quality_sha256": "cac56eb62c877a9de5190da16be67d9cf0098ce0c121ac6696cd22845861404c",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 106593,
+      "usable": 106324,
+      "no_line": 269
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-100000-r3-s1",
+      "input_sha256": "90ba76e26de32b5e02a16058e117c6cb314d4fb7b37f9b7e43d777a4c32dbeb7",
+      "old_profile_sha256": "5d5fe90c2d794c11066bd16f4114e2c92636c2db1745f5c1ac7ea3d588594502",
+      "old_quality_sha256": "6aaaa29a6b60d48494bf22414264216fd5dd8a22dd892c28227f7e0328e19c79",
+      "new_quality_sha256": "01e7dd95e4bea7cbbaf6e855041f5f6b79196b4117a32e687251fb50e334a3fb",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 63,
+        "ff_h264_filter_mb": 3
+      },
+      "verified": true,
+      "target": 109338,
+      "usable": 65513,
+      "no_line": 11275
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-freq-bbb-100000-r3-s1",
+      "input_sha256": "6fec7f7268b95687fb9040e0484eda887c43896da427667443e50ff13dfd9c86",
+      "old_profile_sha256": "036c92201ea10cb11a8d049d4e7065ddbefbee4c067be72b6127e9a48ac0c879",
+      "old_quality_sha256": "5c925422469f1183836d2df6766236ac66ca1f88d07e75bdd9593d2051b4502a",
+      "new_quality_sha256": "3e393e7b29bc4d93a726f4a13bfe79eda72fe95333aef0c7cbd0b0e9b86b541a",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 114942,
+      "usable": 79177,
+      "no_line": 35765
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-freq-bbb-100000-r3-s1",
+      "input_sha256": "0a03b4a31db85b53bccde195fa5fe907651f8e1e7cc88d41482999d40d8551b7",
+      "old_profile_sha256": "da3e4796e1ab091c4e43ce41d0529b98e2d79cf56bd3b69527e80008bfd52f18",
+      "old_quality_sha256": "471585311cf3cea424762af5df26ed14e9819a42a15935180cfa50ad95be16ec",
+      "new_quality_sha256": "87c1da621820545cb6699790fe6757f0d27a610962fdcf692c030cf12f1cc905",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 110749,
+      "usable": 110450,
+      "no_line": 299
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r3-s1",
+      "input_sha256": "a2344d4f564936da8bbead3baeec87d43b7faa1c8cf07b53564672427144cef9",
+      "old_profile_sha256": "cee5a3e9ee586522ab82f769ce07926b78fb73a1c5a7b4c6bb33278c680fd637",
+      "old_quality_sha256": "673d2a082a59b407a089fd86bc7e7e6add1e4baa1aa7b9f9e8fef333cec2b41a",
+      "new_quality_sha256": "022872fbfc1ee2c2db3ce8acc86cfb808620236b56d4dacaba6aa2490eb11c63",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 40,
+        "ff_h264_filter_mb": 4
+      },
+      "verified": true,
+      "target": 81233,
+      "usable": 48710,
+      "no_line": 8379
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r3-s2",
+      "input_sha256": "1e59f8d74a2385fdc54c5f48e256b93c209e0876db26bd100781b1c183c87d69",
+      "old_profile_sha256": "7927cb10116df2391b7d4a0f391e4a271fc8e5ddc1f688351d2addf85150f54c",
+      "old_quality_sha256": "6eb7b270fe9082898f375cd96e0d2c7acb57835f7455cabf3cafb2e95d24ee7b",
+      "new_quality_sha256": "d57f6ccc4574757dca780e725adc223b3cefe3c7f20b1760ae84900f247ebddd",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 14
+      },
+      "verified": true,
+      "target": 27128,
+      "usable": 16278,
+      "no_line": 2871
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-tos-100000-r3-s1",
+      "input_sha256": "a43c3637a2a381c96bfcb22475b9150728a727c1c03eddb0ba409323d893e904",
+      "old_profile_sha256": "173e0e7e090a3ace3ec615e10f33d3d137cc361fb43a60f978a7311712bb3123",
+      "old_quality_sha256": "6a62d1fc2d65834a19c9b0a91442733793c022ceb5b1cbfc1873eb3995be49a2",
+      "new_quality_sha256": "dd4ab79839af5687b9145600b3735a1cda3ee1359da45cf3279c75cefc70112f",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 66,
+        "ff_h264_filter_mb": 7
+      },
+      "verified": true,
+      "target": 122228,
+      "usable": 70084,
+      "no_line": 12763
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-a32-S-sample-fixed-bbb-100000-r3-s1",
+      "input_sha256": "f322589a31ff701c0e7d400543591975963f03109628496f4584795383cd1be0",
+      "old_profile_sha256": "4a8666b0b1c05af4e7343848f7969ada0eab0f4412a4e5a5f6adf3286a619fbb",
+      "old_quality_sha256": "fb705b666610d12c951a9d16356e1b7bf009f4d5ce8aa15233703ccaf9eb1d44",
+      "new_quality_sha256": "c55e9627c64f872c1c3c2254f3cc32597babc7f76cca4183d221ddf881282ac2",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 68,
+        "ff_h264_filter_mb": 1,
+        "ff_h264_queue_decode_slice": 1
+      },
+      "verified": true,
+      "target": 109882,
+      "usable": 66253,
+      "no_line": 11634
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-20000-r4-s1",
+      "input_sha256": "f3edac12dc090eeb6b00d7ae937a09abe928d0628db5b6a55e30daa8b73bee4f",
+      "old_profile_sha256": "dcfc7f35728df508f13186ae55c61eb1bbb9215ed7fd654f99dfc78f08e7294a",
+      "old_quality_sha256": "51c1271ca85872c90604c1cd844a7e9c90f1d3da5b7da8da9e88abd99e19c979",
+      "new_quality_sha256": "f7f97ea53cfc0ff74153afdce80be8317fcc69cd253763aea9109c122d1cc918",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21740,
+      "usable": 14964,
+      "no_line": 6775
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-20000-r4-s1",
+      "input_sha256": "13410fb8c5766ec3e0015f715d3db3fbe7af9e6a60299896a63f26d2506a2010",
+      "old_profile_sha256": "6775c22feb941a452c59b8a92b85536d4bcdf265ac117cb63d7197cda65a23d7",
+      "old_quality_sha256": "95c7ef8deddf405c79f11103d9bf338e4ce5d7257fb19884e6a8a8d452040e7b",
+      "new_quality_sha256": "ad5929dc485622e8a710a306274a6e5b0fc10f62a383d3bc61601f5f5ce90850",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21536,
+      "usable": 21482,
+      "no_line": 54
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-20000-r4-s1",
+      "input_sha256": "d557ed06ec6a38d3ea8918aa439e48b52031555b2a7e279779fc1b8f2ebd70f3",
+      "old_profile_sha256": "37a0344358fc0ea7b5f8ba7df8e02875e2136fe437eca2715bf9abdf1ad7eb56",
+      "old_quality_sha256": "b38c4c0f9f1141f0bde4615e500492fdb52eeaf27cb6ba9f7f6fa98955129a27",
+      "new_quality_sha256": "b2162109d8b3f87e6ae5235e90e264242bf4ae238e3bab4f9fb5faf38c031161",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 17,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 36306,
+      "usable": 21455,
+      "no_line": 3813
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-100000-r4-s1",
+      "input_sha256": "0b378008ab713beaf1e0139ecae08cf60334fa9cc17f1fabe1bd42aea1797999",
+      "old_profile_sha256": "7275f06d12e7df7b026ad540c50476542c37838a41d82fe94f2420840ebe6bb3",
+      "old_quality_sha256": "ed6eea82a6edc7c572721cb9e6cb962cb477c246bb350479ab76ed4c09b84e1a",
+      "new_quality_sha256": "8bbd2a2bba4be56fee0b811bc0b09948b583ce6001b74f2280a60081b37ce28d",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 107857,
+      "usable": 73503,
+      "no_line": 34354
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-100000-r4-s1",
+      "input_sha256": "b417d9fad6d202b566cb0df97616fb6b2340642bf17ae549bc48808483b48b83",
+      "old_profile_sha256": "966279c309dc8055b4b463b161b9e6b54cd527860480fa80cc57a327c5dc4f0d",
+      "old_quality_sha256": "157ff75b0efd2b517df4b7770ad06bff40776f300ce1fca744dd1d16f85eb3dc",
+      "new_quality_sha256": "43a3fe0a4d72c36238eaffa7e67e6d11156757382b0c97e78609e1b61b2436ed",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 107598,
+      "usable": 107347,
+      "no_line": 251
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-100000-r4-s1",
+      "input_sha256": "b7f5418f38b8c7999cd9624deb6a7186852f993b71949b0254c12c827fe4f028",
+      "old_profile_sha256": "76bf7d0c890503568172884009f0d9e0863704ecdcd516f1b9f39f4c7c08d8db",
+      "old_quality_sha256": "0ea1735155b4556303e6bcd83420ece0462567e9c1b5d6552297afea9d9f2cee",
+      "new_quality_sha256": "fd7d19bec7a28e1046dfdf193c1b1c5ec9a51d36274e7517e9552445bfcbbdb2",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 57,
+        "ff_h264_filter_mb": 4,
+        "ff_h264_decode_ref_pic_list_reordering": 1
+      },
+      "verified": true,
+      "target": 108334,
+      "usable": 65053,
+      "no_line": 11288
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-400000-r4-s1",
+      "input_sha256": "fb93bceb8c79a916ab34f371f4c22eadd509bcde38e5ac0b12a0bd91ba2cf44c",
+      "old_profile_sha256": "2883e6d6ef802a517f600623dec980b21d0ee5a44bfe1587d9184c79de34063f",
+      "old_quality_sha256": "40b261a3a2a2bdf2e1ccdc7131486868e342654fb78ce5139ef61a543bab2fe0",
+      "new_quality_sha256": "3d853b7226421d5907cb7cd4d18873f9e10a8bc9a1a85073ac84eb1f0f8ef7b0",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 160273,
+      "usable": 109240,
+      "no_line": 51033
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-400000-r4-s2",
+      "input_sha256": "b07ee912bc7174509ab52d7242a7be858bbca9fb33d011f8084f333c2e80d0f5",
+      "old_profile_sha256": "2de20387b0ed852f2d91d0b385d39b48b9d8c01371ac6a9fa81735653e8c1c2b",
+      "old_quality_sha256": "c19ebfc5f7b6fdfbb2b418fc98150272b17f81f757a5d1416c01368b0cb50534",
+      "new_quality_sha256": "b82ec85030bbbe957ee5eebfae8956057058a8a6408c3093f44051359fefc418",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 163411,
+      "usable": 111388,
+      "no_line": 52023
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-400000-r4-s3",
+      "input_sha256": "a661d32836b6e5ccde0872abdd56b0a0a1aa07291eaaf43774b2b3a4618af72b",
+      "old_profile_sha256": "72130146390e4bc8039449ce97af0d178575b6c9c17823468ac3afa08ebf5784",
+      "old_quality_sha256": "f0c56b6b5626804cd669dfbd67f540866edd3877b7a9a749ac0a9d454383ab1b",
+      "new_quality_sha256": "25fb9721dd80658f5b1b3557d92d39a08c6ab219fd2577d061d3bd092b6852ce",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 82466,
+      "usable": 56560,
+      "no_line": 25906
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-400000-r4-s1",
+      "input_sha256": "499ecfdbe7ebda9427ce41d1d06b980011443fd1f6c216e350e653d50eb4d43b",
+      "old_profile_sha256": "8a870471c12592355e9ddffc7d180d707780aa2b92dcca1c79a4139d70218906",
+      "old_quality_sha256": "2051c34981cea400ecead3c0cd7b6447940c1a573f6fc3a622a6a4cffa5265d8",
+      "new_quality_sha256": "5073a5e3e8162af4591d10414fe452b7d907702b50cfa5f1734d0c4f321b7951",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 161753,
+      "usable": 161325,
+      "no_line": 428
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-400000-r4-s2",
+      "input_sha256": "c9430ad1ca6b521f1c60db634e02f09d527273f14e7e68dbc9ff2375cff9c0f8",
+      "old_profile_sha256": "c9ad4e946b1dab595628e5f7223477804d72f208a350a021ffc0d820420165be",
+      "old_quality_sha256": "6d07deeb659ec849675e0eb473f49d0aaf74c7a07cc74640d0013521795fe4f7",
+      "new_quality_sha256": "53d7e209de3c98242493884ecc7429c97f0b8883d5d7d259a61f5dabd4b94741",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 161672,
+      "usable": 161306,
+      "no_line": 366
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-400000-r4-s3",
+      "input_sha256": "6e2cf8574cdee745c43b219da24fec49bd1abe0bcf28586ad252f0c57f70fbe9",
+      "old_profile_sha256": "f8300ad1bf541154d36895c569c9e569c7478cfb9f9c84f785ade0fa4f08e272",
+      "old_quality_sha256": "8c4ea24f0e6a9f3fe1747de8133dd7f10236b9bd460deced50c1c3be87db856e",
+      "new_quality_sha256": "0327378d01c567bccd5d726ebf22e4f21b6328af12d81029ea7b99acc18a027d",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 83797,
+      "usable": 83588,
+      "no_line": 209
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r4-s1",
+      "input_sha256": "e7c1800219d2b25d8b617c803074911974545210e23d95be649b7589f448eb2e",
+      "old_profile_sha256": "fad34750e896a1f07c57d216087c1d840a21979000641f2e7613d7e1ff6f549a",
+      "old_quality_sha256": "90723c14d77e303c4a565f73e256fdbe0f6d048fbd7d516d5af3a5d5d71d365a",
+      "new_quality_sha256": "83e13e0cc6528e73c8284fa234c6b02c6c079c2d747b102f712d309b3f46109b",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 48,
+        "ff_h264_filter_mb": 3
+      },
+      "verified": true,
+      "target": 108410,
+      "usable": 64675,
+      "no_line": 11388
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r4-s2",
+      "input_sha256": "78cb87984798914f2360c4c2907158d109c5e4171bb781da763051fbfd2206ad",
+      "old_profile_sha256": "6e1ecc21b64a30c8d9c00eac5559e619ee426596e441d23ba307dc4a26249208",
+      "old_quality_sha256": "c2fa75cbabfee812c0eb6758e4b0b0ff104420419f1ddd747831d4ca03a3ca7f",
+      "new_quality_sha256": "5cf835d9ce3d9ac6ae79d0579e8d8d35dba1661d954b3131444a56e17dea6d52",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 51,
+        "ff_h264_filter_mb": 2,
+        "ff_h264_queue_decode_slice": 1
+      },
+      "verified": true,
+      "target": 108391,
+      "usable": 64683,
+      "no_line": 11345
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r4-s3",
+      "input_sha256": "7a8ee5a653706ace168de83d55144896504e4baf26c1bcfceafbef4e243dee0e",
+      "old_profile_sha256": "a3f19f3da812de7e42841d66c6f2e83d1353f3b3017e183d2db9d999a1c15105",
+      "old_quality_sha256": "9ffb7c2c3d5a5a07d3e3c154ada1b2f61eacb646eb78158276e33ef463f173eb",
+      "new_quality_sha256": "c9eac26a575481d4e23ebb3791aaa3c523a054d05b4028ef53ec1ce99e2a4096",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 56,
+        "ff_h264_filter_mb": 6
+      },
+      "verified": true,
+      "target": 109120,
+      "usable": 65898,
+      "no_line": 11316
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r4-s4",
+      "input_sha256": "fc438225f897ea14b5b3d634a308e0949d1eddcae69f52279a161474cd0b9e15",
+      "old_profile_sha256": "d756dec47b8f2743c2056310844e39edcda8de640654c4486c43a69a1ac1008b",
+      "old_quality_sha256": "7e2c05927dfd3c4072bac0f7adf7a1be3eaae8c879de48e1c1909fd2e9ec0f4c",
+      "new_quality_sha256": "5e83630e32325731340b6c5eb5b0949b93c57400dc62cfe0c1b348a76308c972",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 53,
+        "ff_h264_filter_mb": 6
+      },
+      "verified": true,
+      "target": 109204,
+      "usable": 65832,
+      "no_line": 11301
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-freq-bbb-100000-r4-s1",
+      "input_sha256": "d214468ab60c94b7d80f3b35f57784364878aab99d0603854e8e9ae4d279fe91",
+      "old_profile_sha256": "dc99a4e05c61fb236793db257eec9efff66f2b8e7386d06dde2b21f2b30ed72f",
+      "old_quality_sha256": "890ea185428938a277a031b70de6f9db2b92b7b3d9952cc89731623658a3cf92",
+      "new_quality_sha256": "58764e068bc22a1e762090b51b40ae70c2ae3062ca111a8911ad698f3a71c3d1",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 112374,
+      "usable": 76377,
+      "no_line": 35997
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-freq-bbb-100000-r4-s1",
+      "input_sha256": "a88a9e50200f559e3ea68331f0e1619396d5425463fd330b5e1f5b69d78816a2",
+      "old_profile_sha256": "09676cee012a27cde6f5b331ee27ca31b90636e94125a7feaacb88bf16698284",
+      "old_quality_sha256": "60b3b272700239655a9b1e4f77435a38b768f278bd259f46ac7da2c3b70b1563",
+      "new_quality_sha256": "b32dbb0162212dfba9152fa89ef5e869b89dd81bbd0e5aa7f85688a5c1b17849",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 111776,
+      "usable": 111506,
+      "no_line": 270
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r4-s1",
+      "input_sha256": "99816904d76fe89147fd38b96e023cac4c64b6bf4e24ba8bb1e6cb99fcdf2df1",
+      "old_profile_sha256": "7d07f29c81d0833206de8718db44f583065932a5f5e3b7e4abc2ba3a9ab8b4f3",
+      "old_quality_sha256": "c25174ca4f3b4c7a9486655c4e4a75f7483c5e78f245cc2d4d6d4e2a894876c2",
+      "new_quality_sha256": "9545ab577a8f9a47882d3f6dbd1c9886debc1306458081efbc282bf236c78366",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 47,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 81735,
+      "usable": 48902,
+      "no_line": 8538
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r4-s2",
+      "input_sha256": "8ef6bae06418b84a5f8739b770f85d3d2ce7b20b87239722340ad8c6a9a60790",
+      "old_profile_sha256": "458ceffc1747cdfab95d6df526606eaf3955e2ffd1242374a063b58a3e228f2d",
+      "old_quality_sha256": "57a252c58dad90c42f77ab05528da05d06a9a08ec79e0a86bb74805a31fdb10f",
+      "new_quality_sha256": "b96cda9a9f1b7571365666c89173c3a4710703817ac50f97bb3572f5eebdbf18",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 13,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 27097,
+      "usable": 16227,
+      "no_line": 2845
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-tos-100000-r4-s1",
+      "input_sha256": "05e4e9976a9214dccb1e53a6d8be76ac69066b1e9eb04ef19ee18480fae421cd",
+      "old_profile_sha256": "fb9137cf0fec670be46b063de5628707f6b169c58cf497ec04e69f93898a759f",
+      "old_quality_sha256": "e30da37e6ecb2db2088a738afe89a82d546e82fdf53eab8c505610eb822fc180",
+      "new_quality_sha256": "0fddf0cc2e9dc937d899031a15f23e8e9ceab5ea48ae38bab548588a7fecedd4",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 78,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 122629,
+      "usable": 70467,
+      "no_line": 12490
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-a32-S-sample-fixed-bbb-100000-r4-s1",
+      "input_sha256": "c3201a759dc668aa5030daab60e535ab6032870ffcae3dbe98a632565899b4b3",
+      "old_profile_sha256": "53566f73c3a58a3d645be23f4754d69c50f8ce1713c673eae796c54d7a4c4d45",
+      "old_quality_sha256": "5576dd450b0d6d19f9a1531b47f54a5416244579bd16610dae0aeb8082a3832f",
+      "new_quality_sha256": "fb7985da0e19ce9224641620ccc90eb985bd8c54dde28bd61197cf503083e092",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 82,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 109747,
+      "usable": 66577,
+      "no_line": 11392
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-100000-r5-s1",
+      "input_sha256": "8053962e149cab85bd91b737f40aebd7eb1c84201ade7b77bf560178fe1f72da",
+      "old_profile_sha256": "b2fe21f18c1e60b14c7d65df748b9bf0f299471e31b980a11fa7e312538ad91d",
+      "old_quality_sha256": "507865b9913caac8e83ebd7a5192c31e3b5115cec2dfa93959d650c058375796",
+      "new_quality_sha256": "1de4378733353a80ce08d7e742e8ff33ff46e121137b909f693fabeada0c051b",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 109035,
+      "usable": 74978,
+      "no_line": 34057
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-100000-r5-s1",
+      "input_sha256": "f4bfd21f74a99c075217de6029ce41b4a39206dcd7880054a4406294165f90d5",
+      "old_profile_sha256": "1c384f47249d3d9b51f862d20edaa58467660de03c9a7429fae40d8b8977fe9e",
+      "old_quality_sha256": "efa0725e872bec57d9411c71aac81456e1d0efd5a150ddc54d286325c4962daf",
+      "new_quality_sha256": "b4aa69fbfdf9d01606f46156d335d261e064842de1769f5c645d3ce116cd5fdf",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 108983,
+      "usable": 108688,
+      "no_line": 295
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-100000-r5-s1",
+      "input_sha256": "e066eb84db0517da1159136adca5a28790b14d57957b095b1e1284d3c9c24f3c",
+      "old_profile_sha256": "6b4b9602c8157889860e6de7c69de6ac670878962faffe57968b6c0b8cc1ebf8",
+      "old_quality_sha256": "fe8b8d24d33318f779c6fc127f55949d1b2d0c7ff765987e117c4c1320689d0f",
+      "new_quality_sha256": "47a2c36c09c3a514195a686acb623b724adc957ccd537dbfb478e0c6ac0c56aa",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 57,
+        "ff_h264_filter_mb": 4,
+        "ff_h264_decode_ref_pic_marking": 1
+      },
+      "verified": true,
+      "target": 108718,
+      "usable": 64841,
+      "no_line": 11408
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-400000-r5-s1",
+      "input_sha256": "8b483c4a37ed38bfb6e76a5cf50b7a381ad3c53d8b774cf090a623306d212f59",
+      "old_profile_sha256": "c72999900c3705385bc29487976d9e8e70b43aca090c08b5cf4be259fbeef11c",
+      "old_quality_sha256": "2b441898d9a0e7fd1b69340f9886b4d21e4cd7255ab545f6f69bc46ed1de9916",
+      "new_quality_sha256": "87760e041ebd0daef346983e57158b4ca3c99cf498acc3603e685ec21ad1eca3",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 163686,
+      "usable": 112662,
+      "no_line": 51024
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-400000-r5-s2",
+      "input_sha256": "0000ef6a8debb6d303cd7aa6351e5e6dd29abc2a2c286d684486b201b34a3fbf",
+      "old_profile_sha256": "aafba7d648363f1ce74a5e64d384f257aeaccc50f363964e9a834e6923b23f78",
+      "old_quality_sha256": "24449892b74a497d7cc9281a29c436857d1289dc5462bc7d5fb97c83acb14bd3",
+      "new_quality_sha256": "2390437b9fdcb474c323065df301adf9d3a666edd33215bfb08836358b7b85ba",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 158663,
+      "usable": 108068,
+      "no_line": 50595
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-400000-r5-s3",
+      "input_sha256": "aefc7ba1e8c4945bd9da3d98910e5fdbe4ebbaf4a06eddbb7314ba1233a1a1ee",
+      "old_profile_sha256": "e5689b441ca0a4e7cea64108c1be5231da256bb2eed7f45356f86dbf06e1a4a2",
+      "old_quality_sha256": "7310c4f08e59a8c6960c2f95c22033cdabd8ca9b2956c608e454e6d3c8876ffd",
+      "new_quality_sha256": "f41c1440039df6c536b807b2d65be48bfc99bd40b52f7f66efd802f5495e1dbe",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 83736,
+      "usable": 57121,
+      "no_line": 26615
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-400000-r5-s1",
+      "input_sha256": "5663f7e5724abe8512bc305bc4e67ed6444541dca5dc0c31c508d016216c1912",
+      "old_profile_sha256": "8403d338d50649d673c91f02133590742de0d88aebb4dc1dcb179bd5b1fb2012",
+      "old_quality_sha256": "8017ae8a01204a5bae6a82d2386dcfa72d23dcdcb856a40b4cc28b62f78b826c",
+      "new_quality_sha256": "5888e2bc5a38e6e44bb906327841f7bd56c6bf8127fb16b8284a30b82e688ea1",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 159984,
+      "usable": 159602,
+      "no_line": 382
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-400000-r5-s2",
+      "input_sha256": "96c7c5cc0928b3573bc7949cfcff5f714dacd873b25db6d180d01f6229631819",
+      "old_profile_sha256": "bb9cb68f635c63f10aa60ce9deea82ad502c781acf72d07512e3028d20969454",
+      "old_quality_sha256": "fdb8b6a3ce79095f56438ca4f2960dfa2e9321b8ef9ad61d7b88af1005792847",
+      "new_quality_sha256": "2e1dd36caf4695f8bfaed5d03be9b146e53c0cd75b4a9731f7feb7ae107844e6",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 162084,
+      "usable": 161702,
+      "no_line": 382
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-400000-r5-s3",
+      "input_sha256": "0274fb6be55beefca9ccfa6762ac042974a4af15eb9ba696e3f533e4947685af",
+      "old_profile_sha256": "66dd454d3cbab6ba86f01b79bee63e0c3d7bf58a612fd9f577b33b27b484a2e4",
+      "old_quality_sha256": "58ad9e8b4aa582aa75b63537f1f6d64cf282d7ae1ba78f6e816587283280754c",
+      "new_quality_sha256": "a0088e9ef5a65e3066a30af8ae374b6599afab27d14a800af99d53321cfda98b",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 84185,
+      "usable": 83983,
+      "no_line": 202
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r5-s1",
+      "input_sha256": "dad28f62a1470c326d22df11c904343abc45a18de83ce5fac45550a2379c2c27",
+      "old_profile_sha256": "830ff835814bfac2c44b9eda62d72253ac603f608f8c587aa5c934cb2b3f76fc",
+      "old_quality_sha256": "6b5eb0e0b29a835ae0e3d163442005bbb0595b05f19fe4dae511335bf852c9e5",
+      "new_quality_sha256": "23c81a480ce3fd4c5af8355ac84426dd1c4382f3e1f1e8581d5ac5f9c8fcb961",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 77,
+        "ff_h264_filter_mb": 2
+      },
+      "verified": true,
+      "target": 108813,
+      "usable": 65224,
+      "no_line": 11435
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r5-s2",
+      "input_sha256": "e74810867158173a1d6d409acfa0ffbb2c65ff354cc215196cbd1d204a252155",
+      "old_profile_sha256": "bf42fdf33bb6f332b4207faa935c05ffbce754b6c35a81a4924a700c72896132",
+      "old_quality_sha256": "e0a091bd18a213e0a9439c9022b2377d9e78b024ad7de8d5733b593914bc095e",
+      "new_quality_sha256": "3bd46d9de87498a61ea2ec257033b266ce3b4cede56640ea0bca03882ae7f518",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 72,
+        "ff_h264_filter_mb": 4
+      },
+      "verified": true,
+      "target": 108361,
+      "usable": 64732,
+      "no_line": 11330
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r5-s3",
+      "input_sha256": "c061c9b114f27fc9a16eb99ec22bc477576046e5d9d943e00ac36857c6809d0a",
+      "old_profile_sha256": "42834ec98f59c613262310377182d4dc4858ba62fd71a5da75b891c68a974c0f",
+      "old_quality_sha256": "d7aae6272c18bd3070aed56a6c4bae346e872eb67cce696b023d94796c58d881",
+      "new_quality_sha256": "a1698fd45b214e0e8f0bb510f6e39662c912ac80fbafc8c99368cb889d2925bd",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 54,
+        "ff_h264_filter_mb": 3
+      },
+      "verified": true,
+      "target": 108599,
+      "usable": 65073,
+      "no_line": 11180
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-400000-r5-s4",
+      "input_sha256": "9162ed3aefb635c26ed508862c1dabc6f70f13b64c1de5cdfedc82d458d950b0",
+      "old_profile_sha256": "221aaf506846aced2c627fea9bb3507c851b71f35a0a5a2c6c9fde0a134de6b2",
+      "old_quality_sha256": "f25e9549d60ddc3dbaac77369e8d7161b384fd6784173652f6c7062b06bafd81",
+      "new_quality_sha256": "c2f0ef84da885f050d7eaf59751b5f0672c867dc53b128c05f48a663e56fc637",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 50,
+        "ff_h264_filter_mb": 5
+      },
+      "verified": true,
+      "target": 108537,
+      "usable": 64971,
+      "no_line": 11281
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-fixed-bbb-20000-r5-s1",
+      "input_sha256": "a69c61d414ce36d3e50b1cf2343e5a8cff196afe2fa02e32daefc0e8d6588b08",
+      "old_profile_sha256": "bb4f6ddb775865fde0168f650c01f7a2516258677c5907200c771f16eb0e74f7",
+      "old_quality_sha256": "9358ef594976950840167a32ffec93faad2d76c0f192eac9478c65fdb6e1b896",
+      "new_quality_sha256": "1a2739680770f5eee606d5ff16688b3c4b8fed7e5f2a1b46daf41a63893d2368",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21409,
+      "usable": 14732,
+      "no_line": 6677
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-fixed-bbb-20000-r5-s1",
+      "input_sha256": "f877708ec5edccc58c58107bfbfb40e0b579166d774b764597c4f15fd2a0bc2b",
+      "old_profile_sha256": "f474b19161276e5ae07fbfcf45645d6e973d269844c3f02ac32b4ad9f38e4ac5",
+      "old_quality_sha256": "821b1f18f68651d6fceccae4c991cf90777b203d402bbe386622f14e8de23b15",
+      "new_quality_sha256": "9d17dfb59241db3c132a3fd0875691fea8b8ed965c55b0e2dec2b2613681faf6",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 21298,
+      "usable": 21254,
+      "no_line": 44
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-bbb-20000-r5-s1",
+      "input_sha256": "21a0cf6353ca72ff03a4ec224e518f743d54041439d5e55c33288d49f178aa20",
+      "old_profile_sha256": "992bccc495ce657fdc959c24727680636c7b41c6dab84beecccb0ba82a4fcafd",
+      "old_quality_sha256": "ed226037b576694ad4b48242050b3578ccb12fcbbdb1dd3f6380e14aac9d62c2",
+      "new_quality_sha256": "6af8e96da3e86262a321968a5cf6c931f837203d639a3170b387e7321095748e",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 21,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 36180,
+      "usable": 21560,
+      "no_line": 3826
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-thumb-S-sample-freq-bbb-100000-r5-s1",
+      "input_sha256": "8d479145173da7088a241ef6887de53b493492cd4030bd80ef30c1c9803a64cc",
+      "old_profile_sha256": "f1e187801e9e9ed70620857f77035abf8820db30341da23433551e5a18f2c1f7",
+      "old_quality_sha256": "27975a1cb1f710179fb13cbca68f88557c202dfb078657882c55c6311ae53b3f",
+      "new_quality_sha256": "9057e14a5bb44fa3fbd266c55add672353847b1f66d8e2a9d38f761a959999d2",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 114759,
+      "usable": 79146,
+      "no_line": 35613
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/spike-a32-S-sample-freq-bbb-100000-r5-s1",
+      "input_sha256": "e76e8462e3e2831a536c8ce1b0f2dda8790ed1893d8e176f5e688aff07b212a7",
+      "old_profile_sha256": "226f826ef426612a2c6336a436234dc109874159ee6553fc393c252341ae0942",
+      "old_quality_sha256": "9532d332f33837b56d10df0c594c0055f844ddb25618736eff1de2b645011930",
+      "new_quality_sha256": "2a79c33c76bf5c6780a70b59de1de7ddf58a5eedebeb78f962037c3d54de2724",
+      "root_total_deltas": {},
+      "verified": true,
+      "target": 112028,
+      "usable": 111763,
+      "no_line": 265
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r5-s1",
+      "input_sha256": "6bc95ea7e8462bf3fc2f6938c37d0bf3a97e74cac6447614d898351c63765ebd",
+      "old_profile_sha256": "1f9a9de7e044fe7a28f71c92a338a70e7d1dbcec0b834a29884a79352b54901a",
+      "old_quality_sha256": "751957a98e73cd0f219b859bb2894f5939c5c8b3b1962ba83cfaf0611e923349",
+      "new_quality_sha256": "a21362922b644351259217bca8732c8321970bacfe24d7464599cc1ecc4733c8",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 45
+      },
+      "verified": true,
+      "target": 80956,
+      "usable": 48309,
+      "no_line": 8476
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-freq-bbb-100000-r5-s2",
+      "input_sha256": "62b6a199c57bca57dbdb5e627a054d1c3388735c2f9be70bf4d8635aa0621210",
+      "old_profile_sha256": "c35715e4176a3ad035e94b09689e0e147db6d0fcd75be5bc6c0f14be92f63dce",
+      "old_quality_sha256": "9ded2fd3443c98c0d358bc650ac248dd62a518ff7b5e23be29d74a8b52443366",
+      "new_quality_sha256": "3c6c591299c98544c5051b3f5f6c7609393265a43c1e486bc8b4c579d06bcce5",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 14,
+        "ff_h264_filter_mb": 1
+      },
+      "verified": true,
+      "target": 27243,
+      "usable": 16148,
+      "no_line": 2999
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-thumb-S-sample-fixed-tos-100000-r5-s1",
+      "input_sha256": "23788e17340dd99662743b4937975909f404e7b8f38be6821d9d5771782a2157",
+      "old_profile_sha256": "edc52168697127703e6aed3f7c25ac891430b2d65fe5f64351343dbb1f849b57",
+      "old_quality_sha256": "bec51e3a74649e148161e5a20b7a7ca64312110b35e58484efbf1372a21ef427",
+      "new_quality_sha256": "4010e9640aaca127a2bb1fd33bcda4d0524499d843da2f0b59401921e076b69b",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 83,
+        "ff_h264_filter_mb": 3
+      },
+      "verified": true,
+      "target": 122869,
+      "usable": 70763,
+      "no_line": 12763
+    },
+    {
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/runs/ffmpeg-a32-S-sample-fixed-bbb-100000-r5-s1",
+      "input_sha256": "d4c13467eb6f2400a666f29709b94f4a594bf0ba8c2e4115a256f99ad8d89477",
+      "old_profile_sha256": "2999c2c2062e8566d61f7df2b996cfb8893de76f6ca800a10f64f9a4c32ec4b0",
+      "old_quality_sha256": "b6b18a93a0ea4a477627332dd918d922245cbc0ca4bb2e94538eb570fd062489",
+      "new_quality_sha256": "1cd5180367e4b4919a46022467e991b5e8b781afc24930efcc0f2cfc41c6e59c",
+      "root_total_deltas": {
+        "ff_h264_decode_mb_cabac": 69
+      },
+      "verified": true,
+      "target": 110258,
+      "usable": 66844,
+      "no_line": 11600
+    }
+  ],
+  "raw_dir": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/p9-formal-reconversion"
+}

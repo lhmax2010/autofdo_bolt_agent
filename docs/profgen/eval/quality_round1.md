@@ -73,3 +73,58 @@ spike两次成功任务子进程峰值RSS分别38928/38968KiB。候选解释为�
 补丁9已正式验收，新工具SHA-256为2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5，LLVM本地提交15a5ec3f46283ad2eccaecf97b2eac2a0e43d65c，详见[报告15](../impl/15_patch9_nonleaf_line0.md)。本轮用户明确不重转正式S，因此原106份S及其质量报告仍是补丁8结果，没有将它们改标为补丁9。
 
 覆盖分片方案在spike上逐行/函数计数一致，但libavcodec首文件仍3GiB scope OOM；频率诊断为unknown、资格未修订。最终质量矩阵、配置间CI、候选配置、消费构建及性能测量均未开始。后续需另行授权正式S重转及覆盖办法；不把工具验收通过当成统计质量结论。
+
+## 补丁9正式S重转与整体覆盖导出（2026-11-09）
+
+### 正式S：已完成，资格与配置不变
+
+固定工具SHA-256为2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5，启动前与收尾各核对一次。补丁8存档工具9f63c692及libLLVM只读、SHA未变；106份旧profile逐个与已登记SHA核对，全部保留。重转输出写入temp/p9-formal-reconversion/outputs/，不覆盖旧结果。
+
+70逻辑组、106物理S原件全部按temp/board-round1-retry/final-reconverted.json登记的原命令执行，仅更换output和quality-report路径。原有20份频率模式period profile也保留其显式ip-period-unit=1000003参数重转，不计入106原件样本汇总第二次。每次转换使用独立user scope：MemoryMax=3G、CPUQuota=200%，串行、nice19/ionice3；没有OOM或转换重试。
+
+|对象|物理原件数|移出usable的样本|profile有变化|
+|---|---:|---:|---:|
+|spike Thumb|28|0|0|
+|spike A32|28|0|0|
+|FFmpeg Thumb（含ToS）|45|2366|45|
+|FFmpeg A32|5|370|5|
+|合计|106|2736|50|
+
+总target仍为11,131,603；usable从8,235,324降到8,232,588，差值正好2,736，与报告12独立统计一致。全部身份仍为verified；56份sample profile字节不变。额外20份period profile中10份不变，10份仅有相同排除带来的变化。[逐份清单](../impl/evidence/16/08_p9_reconversion_rows.json)、[汇总与存档SHA](../impl/evidence/16/08_p9_reconversion_summary.json)。
+
+核对没有按字段前缀笼统放行：复用报告12逐地址、逐函数非叶子line0清单，从旧IP-ADDRESS诊断独立求移出sample_count与period_sum，逐项重算新计数、比例、函数coverage排序和份额。所有其他JSON字段必须相同；top50数组中的name位置变化仅来自扣除后重新排序。profile解析为函数/调用点树，删除仅发生在已登记zero-line父函数下的wrapped调用点（例如63616、65068、65117）；删除其空祖先后，保留body和全部其余节点精确相同，所有顶层total差值又与独立逐函数样本数一致。written_positions的减少由剩余树重算，不放宽为任意减少。
+
+period涉及每键一次取整，未采用±1容差：按平台readelf可执行PT_LOAD与旧清单地址，从派生文本中仅删除已知异常样本；原始全文不变，MMAP与其他记录保留。只读补丁8存档工具对该派生文本使用同样的显式period单位生成参考，参考与新工具原始全文输出逐字节一致。这个辅助参考不是新增采集或最终配置矩阵。
+
+完整JSON差异分片：[01](../impl/evidence/16/08_p9_differences_01.json)、[02](../impl/evidence/16/08_p9_differences_02.json)、[03](../impl/evidence/16/08_p9_differences_03.json)、[04](../impl/evidence/16/08_p9_differences_04.json)、[05](../impl/evidence/16/08_p9_differences_05.json)、[06](../impl/evidence/16/08_p9_differences_06.json)、[07](../impl/evidence/16/08_p9_differences_07.json)。每份均为unexpected空；变化只包括nonleaf子计数、相应归类/比例/coverage、移除无效调用点及其派生total/空上下文/位置数、输出路径。
+
+比对器首次在第10份停止：错误地保留了被删除调用点上方的空内联上下文。保留原stderr及失败状态，依据实际diff修正只清除total=0且无body/calls的空祖先后，精确比较通过。工具未失败、未重新转换该原件；这不属于允许差异范围的扩张。[核对脚本全文、修正记录与每份原件SHA](../impl/evidence/16/08_p9_reconversion_method.json)。
+
+原31 clean / 28 abnormal / 11 unknown保持不变；没有重判资格、合并分段profile、最终质量矩阵、消费构建或性能测量，也没有连接开发板。
+
+### 整体覆盖：按后续裁决立即执行，已完成
+
+用户16:31的新指令将等待窗口替换为立即门禁10GiB、scope 8G/200%。原等待程序尚未启动任何export；仅终止本任务旧等待scope，确认inactive，保留“已结束 / 未开始 / 用户裁决替代”记录。INT因后台继承忽略未使其结束，随后TERM使该等待scope退出；这不是资源门禁终止，也没有终止他人的进程。原10G导出方案从未执行。
+
+16:32:28首门禁MemAvailable17,174,056KiB，立即通过；16:32:42第二门禁16,752,632KiB通过，不检查SwapFree。两份整体export各执行一次，串行，独立MemoryMax=8G/CPUQuota=200%scope，nice19/ionice3，无源文件过滤。runtime/debug都经报告11登记SHA验证，GBS eu-unstrip合成对象build-id分别为Thumb 07d083e754ba0c5162c08fc054644807bc140a8f、A32 b262c36697a0957d48c691b1bcad8b0517465741。引用对应train-ffmpeg-thumb-C/a32-C.profdata，未混入setup、G5或ToS数据。
+
+|对象|exit|export耗时|scope总耗时|运行中cgroup memory.peak|export子进程峰值RSS|文件数|函数实例记录数|可执行行|已覆盖行|
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|FFmpeg Thumb C|0|8.025秒|13.668秒|4,643,598,336B（4.324688GiB）|4,190,164KiB|498|28,236|112,206|8,298|
+|FFmpeg A32 C|0|6.674秒|12.059秒|4,587,786,240B（4.272709GiB）|4,179,876KiB|498|28,236|112,206|8,298|
+
+cgroup memory.peak为运行时实读，包含scope内存及计费缓存，不等同于单进程RSS；RSS另由wait/rusage取得。结束后systemd的MemoryPeak显示not set，因此不能用它替代运行中已保存的峰值。memory.events的oom、oom_kill、max均为0。两份JSON均完整解析成功（llvm.coverage.json.export 3.1.0），各306,634,391B；校验进程峰值RSS分别1,844,916/1,844,656KiB，也在同一8G scope内。
+
+函数实例记录数是data[].functions的条数，对应totals.instantiations.count=28,236；llvm-cov去重后的totals.functions.count另为3,575、covered=385，两者不得混称。行数为各文件summary.lines之和，并与totals.lines一致；不作跨ISA准确率或最终质量比较。
+
+- Thumb SHA-256：e96a2d43ec475556cde0508a3eac7ba9edfab5fc911edaceb088fd8c8f01b402。
+- A32 SHA-256：4a4c9970acba0c0c064fb923836be41781774053bd6ade27f900571a0529730a。
+- 原始JSON：temp/coverage-whole-8g-20261109/thumb.coverage.json、a32.coverage.json；命令、stderr、版本、对象/profdata SHA与日志均在同目录或准备目录temp/coverage-whole-20261109/。仓库只留[完整执行摘要与峰值证据](../impl/evidence/16/09_whole_coverage_8g.json)。
+
+等待与导出日志均有“已结束”、时间、状态；最终16:32:54成功。单份运行不足60秒，所以各有开始/结束完整meminfo记录，未到下一次60秒采样周期；监测代码仍按每60秒和连续两次<3GiB终止自己的scope实现。全流程已保存资源采样最低MemAvailable16,528,896KiB（15.763184GiB），这是采样最低值，不声称是每个瞬间的系统最小值。没有资源触发的暂停或终止、没有OOM/重试。[资源摘要](../impl/evidence/16/10_reconversion_coverage_resources.json)，其中保留全部观测时间/数值及初始、最低和覆盖任务的原文；每次完整meminfo原文留在摘要列出的temp JSONL中，并记录SHA。
+
+执行顺序说明：前一条任务授权下，正式S重转在15:20已全部完成；后续16:31指令到达时只剩等待。新指令生效后先结束旧等待，再完成两份覆盖导出，最后复核106+20份新结果/旧profile与固定工具SHA，没有重复转换、没有两部分并行。无需把已完成的授权工作撤销或重做，原执行时间如实保留。
+
+### 待设计v0.8登记
+
+补丁9在正式S上精确排除2,736条非叶子line0样本，原质量资格不变；相关比例与profile内容须使用这套新结果，不能将补丁8旧结果改标为补丁9。覆盖的立即门禁与8G/200%限额是后续执行授权，不改变质量判据或冻结设计正文。

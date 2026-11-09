@@ -1,0 +1,454 @@
+{
+  "result": {
+    "time": "2026-11-09T16:34:47.036115+08:00",
+    "all_profiles_rechecked": true,
+    "tool_sha256": "2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5",
+    "sample_originals": 106,
+    "period_extra": 20,
+    "moved_samples": 2736,
+    "coverage": {
+      "state": "成功",
+      "end": "2026-11-09T16:32:54.211283+08:00",
+      "reason": null,
+      "completed": 2,
+      "gates": [
+        {
+          "time": "2026-11-09T16:32:28.274473+08:00",
+          "isa": "thumb",
+          "available_kib": 17174056,
+          "pass_gate": true
+        },
+        {
+          "time": "2026-11-09T16:32:42.049942+08:00",
+          "isa": "a32",
+          "available_kib": 16752632,
+          "pass_gate": true
+        }
+      ],
+      "results": [
+        {
+          "isa": "thumb",
+          "start": "2026-11-09T16:32:28.274812+08:00",
+          "end": "2026-11-09T16:32:41.942656+08:00",
+          "scope": "afdo-covwhole-thumb-1794213148274802731",
+          "command": [
+            "nice",
+            "-n",
+            "19",
+            "ionice",
+            "-c3",
+            "systemd-run",
+            "--user",
+            "--scope",
+            "--unit=afdo-covwhole-thumb-1794213148274802731",
+            "-p",
+            "MemoryMax=8G",
+            "-p",
+            "CPUQuota=200%",
+            "python3",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/export_child.py",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/thumb.command.json"
+          ],
+          "scope_rc": 0,
+          "seconds": 13.667864346993156,
+          "cgroup_peak_bytes": 4643598336,
+          "observed_peak_process_rss_kib": 4191944,
+          "memory_events": {
+            "low": "0",
+            "high": "0",
+            "max": "0",
+            "oom": "0",
+            "oom_kill": "0",
+            "oom_group_kill": "0"
+          },
+          "systemd_after": "Result=success\nMemoryPeak=[not set]\n",
+          "terminated_low_memory": false,
+          "child": {
+            "start": "2026-11-09T16:32:28.314752+08:00",
+            "command": [
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+              "--library-path",
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-cov",
+              "export",
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-thumb-C.unstripped",
+              "-instr-profile=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-ffmpeg-thumb-C.profdata"
+            ],
+            "rc": 0,
+            "export_seconds": 8.024916613998357,
+            "export_peak_rss_kib": 4190164,
+            "output_sha256": "e96a2d43ec475556cde0508a3eac7ba9edfab5fc911edaceb088fd8c8f01b402",
+            "bytes": 306634391,
+            "JSON_parseable": true,
+            "files": 498,
+            "functions": 28236,
+            "executable_lines": 112206,
+            "covered_lines": 8298,
+            "totals": [
+              {
+                "branches": {
+                  "count": 63605,
+                  "covered": 3295,
+                  "notcovered": 60310,
+                  "percent": 5.180410345098656
+                },
+                "functions": {
+                  "count": 3575,
+                  "covered": 385,
+                  "percent": 10.76923076923077
+                },
+                "instantiations": {
+                  "count": 28236,
+                  "covered": 447,
+                  "percent": 1.5830854228644282
+                },
+                "lines": {
+                  "count": 112206,
+                  "covered": 8298,
+                  "percent": 7.395326453130849
+                },
+                "mcdc": {
+                  "count": 0,
+                  "covered": 0,
+                  "notcovered": 0,
+                  "percent": 0
+                },
+                "regions": {
+                  "count": 126128,
+                  "covered": 9387,
+                  "notcovered": 116741,
+                  "percent": 7.442439426614234
+                }
+              }
+            ],
+            "format": "llvm.coverage.json.export",
+            "version": "3.1.0",
+            "validation_peak_rss_kib": 1844916,
+            "state": "成功",
+            "end": "2026-11-09T16:32:39.104643+08:00",
+            "total_seconds": 10.789948732999619
+          },
+          "output_bytes": 306634391,
+          "output_sha256": "e96a2d43ec475556cde0508a3eac7ba9edfab5fc911edaceb088fd8c8f01b402",
+          "state": "成功"
+        },
+        {
+          "isa": "a32",
+          "start": "2026-11-09T16:32:42.050469+08:00",
+          "end": "2026-11-09T16:32:54.109800+08:00",
+          "scope": "afdo-covwhole-a32-1794213162050455367",
+          "command": [
+            "nice",
+            "-n",
+            "19",
+            "ionice",
+            "-c3",
+            "systemd-run",
+            "--user",
+            "--scope",
+            "--unit=afdo-covwhole-a32-1794213162050455367",
+            "-p",
+            "MemoryMax=8G",
+            "-p",
+            "CPUQuota=200%",
+            "python3",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/export_child.py",
+            "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/a32.command.json"
+          ],
+          "scope_rc": 0,
+          "seconds": 12.059350344003178,
+          "cgroup_peak_bytes": 4587786240,
+          "observed_peak_process_rss_kib": 4181712,
+          "memory_events": {
+            "low": "0",
+            "high": "0",
+            "max": "0",
+            "oom": "0",
+            "oom_kill": "0",
+            "oom_group_kill": "0"
+          },
+          "systemd_after": "Result=success\nMemoryPeak=[not set]\n",
+          "terminated_low_memory": false,
+          "child": {
+            "start": "2026-11-09T16:32:42.096099+08:00",
+            "command": [
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+              "--library-path",
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-cov",
+              "export",
+              "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-a32-C.unstripped",
+              "-instr-profile=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-ffmpeg-a32-C.profdata"
+            ],
+            "rc": 0,
+            "export_seconds": 6.674354471964762,
+            "export_peak_rss_kib": 4179876,
+            "output_sha256": "4a4c9970acba0c0c064fb923836be41781774053bd6ade27f900571a0529730a",
+            "bytes": 306634391,
+            "JSON_parseable": true,
+            "files": 498,
+            "functions": 28236,
+            "executable_lines": 112206,
+            "covered_lines": 8298,
+            "totals": [
+              {
+                "branches": {
+                  "count": 63605,
+                  "covered": 3295,
+                  "notcovered": 60310,
+                  "percent": 5.180410345098656
+                },
+                "functions": {
+                  "count": 3575,
+                  "covered": 385,
+                  "percent": 10.76923076923077
+                },
+                "instantiations": {
+                  "count": 28236,
+                  "covered": 447,
+                  "percent": 1.5830854228644282
+                },
+                "lines": {
+                  "count": 112206,
+                  "covered": 8298,
+                  "percent": 7.395326453130849
+                },
+                "mcdc": {
+                  "count": 0,
+                  "covered": 0,
+                  "notcovered": 0,
+                  "percent": 0
+                },
+                "regions": {
+                  "count": 126128,
+                  "covered": 9387,
+                  "notcovered": 116741,
+                  "percent": 7.442439426614234
+                }
+              }
+            ],
+            "format": "llvm.coverage.json.export",
+            "version": "3.1.0",
+            "validation_peak_rss_kib": 1844656,
+            "state": "成功",
+            "end": "2026-11-09T16:32:51.459694+08:00",
+            "total_seconds": 9.363656289991923
+          },
+          "output_bytes": 306634391,
+          "output_sha256": "4a4c9970acba0c0c064fb923836be41781774053bd6ade27f900571a0529730a",
+          "state": "成功"
+        }
+      ]
+    },
+    "old_wait_superseded": {
+      "end": "2026-11-09T16:32:28.175937+08:00",
+      "state": "未开始",
+      "reason": "用户改为立即8G/200%导出；停止旧等待scope，无导出启动",
+      "scope_state": "ActiveState=inactive\nSubState=dead\n",
+      "signal_sequence": [
+        "INT: inherited ignored; remained active",
+        "TERM: inactive verified"
+      ]
+    },
+    "memory_min_available_kib": 16528896,
+    "global_resource_pause": false,
+    "global_resource_termination": false,
+    "OOM": false,
+    "manual_cancel": "Only obsolete waiting scope stopped before any export, per user replacement; not a resource-triggered termination",
+    "raw_resource_paths": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/p9-formal-reconversion/resources.jsonl",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/resources.jsonl",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/resources.jsonl"
+    ],
+    "scope_coordinator_final": "ActiveState=inactive\n",
+    "old_tool_sha256": "9f63c692a4239a222bfb86cd9dcab93b04a28fc32421306b597f4c799627fdc7"
+  },
+  "commands": {
+    "thumb": {
+      "isa": "thumb",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-cov",
+        "export",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-thumb-C.unstripped",
+        "-instr-profile=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-ffmpeg-thumb-C.profdata"
+      ],
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/thumb.coverage.json",
+      "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/thumb.stderr",
+      "result": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/thumb.result.json",
+      "object_sha256": "960bc134e4501727ef7d281411eede40e4611e6ac4d0e4c8d5a378f415e4e60a",
+      "profdata_sha256": "80534b96c626a058ed7239521ea941c27e704e8fdecd2eb52bd38b56eedc9d71",
+      "build_id": "07d083e754ba0c5162c08fc054644807bc140a8f"
+    },
+    "a32": {
+      "isa": "a32",
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/llvm-cov",
+        "export",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-a32-C.unstripped",
+        "-instr-profile=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-ffmpeg-a32-C.profdata"
+      ],
+      "stdout": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/a32.coverage.json",
+      "stderr": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/a32.stderr",
+      "result": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-8g-20261109/a32.result.json",
+      "object_sha256": "575c37db573b8aefec394e0ec1996ce1915cd882661410aceca2aa521637017a",
+      "profdata_sha256": "492e2f67baed3a80d3bccdc37b07550bedbff9baebe9e0aafcd587fbb5f7f5e6",
+      "build_id": "b262c36697a0957d48c691b1bcad8b0517465741"
+    }
+  },
+  "stderr": {
+    "thumb": "warning: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-thumb-C.unstripped: profile data may be out of date - object is newer\n",
+    "a32": "warning: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-a32-C.unstripped: profile data may be out of date - object is newer\n"
+  },
+  "scope_logs": {
+    "thumb": "Running as unit: afdo-covwhole-thumb-1794213148274802731.scope; invocation ID: 1e739f87a2b543d4bb81f03f48abbbe4\n已结束 2026-11-09T16:32:39.104909+08:00 成功 ALL-END\n",
+    "a32": "Running as unit: afdo-covwhole-a32-1794213162050455367.scope; invocation ID: f36c0208b56a4dc8b62d71f172a3b5c9\n已结束 2026-11-09T16:32:51.459964+08:00 成功 ALL-END\n"
+  },
+  "worker_log": "Running as unit: afdo-covwhole-8g-coordinator-20261109.scope; invocation ID: 6050c9c4e81c479693882be865eb069a\n门禁 {\"time\": \"2026-11-09T16:32:28.274473+08:00\", \"isa\": \"thumb\", \"available_kib\": 17174056, \"pass_gate\": true}\n等待 已结束 2026-11-09T16:32:28.274562+08:00 成功：门禁通过 ALL-END\n导出 已结束 2026-11-09T16:32:42.049824+08:00 thumb 成功 ALL-END\n门禁 {\"time\": \"2026-11-09T16:32:42.049942+08:00\", \"isa\": \"a32\", \"available_kib\": 16752632, \"pass_gate\": true}\n导出 已结束 2026-11-09T16:32:54.211254+08:00 a32 成功 ALL-END\n已结束 2026-11-09T16:32:54.211515+08:00 成功 None ALL-END\n",
+  "scripts": {
+    "worker.py": "from pathlib import Path\nimport subprocess,json,time,datetime,traceback,hashlib\nW=Path.cwd();D=Path(__file__).resolve().parent\nZONE=datetime.timezone(datetime.timedelta(hours=8))\nSTART=datetime.datetime(2026,11,9,22,tzinfo=ZONE);END=datetime.datetime(2026,11,10,8,tzinfo=ZONE)\ndef now():return datetime.datetime.now(ZONE)\ndef stamp():return now().isoformat()\ndef mem(tag):\n raw=Path('/proc/meminfo').read_text();a=int(next(l.split()[1] for l in raw.splitlines() if l.startswith('MemAvailable:')))\n with (D/'resources.jsonl').open('a') as f:f.write(json.dumps(dict(time=stamp(),tag=tag,available_kib=a,meminfo=raw,loadavg=Path('/proc/loadavg').read_text()))+'\\n')\n return a\ndef write(p,j):p.write_text(json.dumps(j,indent=2)+'\\n')\ndef sha(p):\n h=hashlib.sha256()\n with p.open('rb') as f:\n  for b in iter(lambda:f.read(1048576),b''):h.update(b)\n return h.hexdigest()\ndef export(isa):\n spec=D/(isa+'.command.json');j=json.loads(spec.read_text());unit='afdo-covwhole-'+isa+'-'+str(time.time_ns())\n cmd=['nice','-n','19','ionice','-c3','systemd-run','--user','--scope','--unit='+unit,'-p','MemoryMax=8G','-p','CPUQuota=200%','python3',str(D/'export_child.py'),str(spec)]\n t=time.monotonic();start=stamp();cg=None;peak=0;peak_rss=0;events={};low=0;last=time.monotonic();terminated=False\n with (D/(isa+'.scope.log')).open('w') as log:\n  p=subprocess.Popen(cmd,stdout=log,stderr=subprocess.STDOUT)\n  while p.poll() is None:\n   if cg is None:\n    q=subprocess.run(['systemctl','--user','show',unit+'.scope','-p','ControlGroup','--value'],capture_output=True,text=True)\n    if q.stdout.strip():cg=Path('/sys/fs/cgroup'+q.stdout.strip())\n   if cg:\n    try:\n     peak=max(peak,int((cg/'memory.peak').read_text()))\n     events=dict(v.split() for v in (cg/'memory.events').read_text().splitlines())\n     for pid in (cg/'cgroup.procs').read_text().splitlines():\n      try:\n       vals=Path('/proc/'+pid+'/status').read_text().splitlines()\n       peak_rss=max(peak_rss,max([int(v.split()[1]) for v in vals if v.startswith(('VmRSS:','VmHWM:'))] or [0]))\n      except (FileNotFoundError,ProcessLookupError):pass\n    except (FileNotFoundError,ValueError):pass\n   if time.monotonic()-last>=60:\n    a=mem('running '+isa);last=time.monotonic();low=low+1 if a<3145728 else 0\n    if low>=2:\n     terminated=True\n     subprocess.run(['systemctl','--user','kill','--signal=TERM',unit+'.scope'],capture_output=True)\n     break\n   time.sleep(.2)\n  rc=p.wait()\n q=subprocess.run(['systemctl','--user','show',unit+'.scope','-p','Result','-p','MemoryPeak'],capture_output=True,text=True)\n child=json.loads(Path(j['result']).read_text()) if Path(j['result']).exists() else None\n out=Path(j['stdout'])\n z=dict(isa=isa,start=start,end=stamp(),scope=unit,command=cmd,scope_rc=rc,seconds=time.monotonic()-t,cgroup_peak_bytes=peak,observed_peak_process_rss_kib=peak_rss,memory_events=events,systemd_after=q.stdout,terminated_low_memory=terminated,child=child,output_bytes=out.stat().st_size if out.exists() else None,output_sha256=sha(out) if out.exists() else None)\n z['state']='成功' if rc==0 and child and child.get('state')=='成功' and not terminated else '失败'\n write(D/(isa+'.scope-result.json'),z);mem('end '+isa);print('导出 已结束',stamp(),isa,z['state'],'ALL-END',flush=True)\n if z['state']!='成功':raise RuntimeError('Export stopped, no retry: '+isa)\n return z\nstate='未开始';reason=None;rows=[];gates=[];waiting=True\nIMMEDIATE_END=now()+datetime.timedelta(minutes=30)\ntry:\n write(D/'status.json',dict(state='立即检查资源',immediate_end=IMMEDIATE_END.isoformat(),window_start=START.isoformat(),window_end=END.isoformat()))\n mem('baseline')\n for isa in ['thumb','a32']:\n  admitted=False\n  while now()<END:\n   a=mem('admission '+isa);g=dict(time=stamp(),isa=isa,available_kib=a,pass_gate=a>=10485760);gates.append(g);write(D/'gates.json',g)\n   with (D/'gates.jsonl').open('a') as f:f.write(json.dumps(g)+'\\\\n')\n   print('门禁',json.dumps(g),flush=True)\n   if g['pass_gate']:admitted=True;break\n   if now()<IMMEDIATE_END:\n    delay=min(300,(IMMEDIATE_END-now()).total_seconds())\n   elif now()<START:\n    delay=(START-now()).total_seconds()\n   else:delay=min(600,max(0,(END-now()).total_seconds()))\n   target=time.monotonic()+delay\n   while time.monotonic()<target and now()<END:\n    time.sleep(min(60,max(0,target-time.monotonic()),max(0,(END-now()).total_seconds())));mem('waiting resource')\n  if not admitted:\n   reason='窗口结束，内存门禁未满足';break\n  if waiting:\n   print('等待 已结束',stamp(),'成功：门禁通过','ALL-END',flush=True)\n   write(D/'wait-status.json',dict(end=stamp(),state='成功',reason='门禁通过',gates=gates));waiting=False\n  write(D/'status.json',dict(state='运行',isa=isa,start=stamp(),completed=len(rows)))\n  rows.append(export(isa));state='成功'\n if len(rows)!=2:state='未开始' if not rows else '部分完成'\nexcept BaseException as e:\n reason=repr(e);state='失败';traceback.print_exc()\nfinally:\n if waiting:\n  write(D/'wait-status.json',dict(end=stamp(),state='未开始',reason=reason,gates=gates));print('等待 已结束',stamp(),'未开始',reason,'ALL-END',flush=True)\n write(D/'status.json',dict(state=state,end=stamp(),reason=reason,completed=len(rows),gates=gates,results=rows))\n print('已结束',stamp(),state,reason,'ALL-END',flush=True)\n",
+    "export_child.py": "from pathlib import Path\nimport subprocess,json,time,resource,sys,hashlib,datetime\nspec=Path(sys.argv[1]);j=json.loads(spec.read_text());start=time.monotonic()\ndef now():return datetime.datetime.now().astimezone().isoformat()\nout=Path(j['stdout']);assert not out.exists(),'Never repeat an export'\nr=dict(start=now(),command=j['command'])\nwith out.open('w') as f,Path(j['stderr']).open('w') as e:p=subprocess.run(j['command'],stdout=f,stderr=e)\nr.update(rc=p.returncode,export_seconds=time.monotonic()-start,export_peak_rss_kib=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)\nPath(j['result']).write_text(json.dumps(r,indent=2))\ntry:\n if p.returncode:raise RuntimeError('llvm-cov exit '+str(p.returncode))\n h=hashlib.sha256()\n with out.open('rb') as f:\n  for b in iter(lambda:f.read(1048576),b''):h.update(b)\n r['output_sha256']=h.hexdigest();r['bytes']=out.stat().st_size\n with out.open() as f:cov=json.load(f)\n r['JSON_parseable']=True\n r['files']=sum(len(z['files']) for z in cov['data'])\n r['functions']=sum(len(z['functions']) for z in cov['data'])\n r['executable_lines']=sum(f['summary']['lines']['count'] for z in cov['data'] for f in z['files'])\n r['covered_lines']=sum(f['summary']['lines']['covered'] for z in cov['data'] for f in z['files'])\n r['totals']=[z['totals'] for z in cov['data']]\n r['format']=cov.get('type');r['version']=cov.get('version')\n r['validation_peak_rss_kib']=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss\n r['state']='成功'\nexcept BaseException as e:\n r['state']='失败';r['error']=repr(e);raise\nfinally:\n r['end']=now();r['total_seconds']=time.monotonic()-start\n Path(j['result']).write_text(json.dumps(r,indent=2))\n print('已结束',now(),r['state'],'ALL-END',flush=True)\n"
+  },
+  "preparation": {
+    "time": "2026-11-09T15:21:34.766330+08:00",
+    "peak_rss_kib": 38884,
+    "objects": [
+      {
+        "isa": "thumb",
+        "unstrip_command": [
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+          "--library-path",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/eu-unstrip",
+          "-o",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-thumb-C.unstripped",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-C/usr/lib/libavcodec.so.62.11.100",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-C/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+        ],
+        "rc": 0,
+        "stderr": "",
+        "object_sha256": "960bc134e4501727ef7d281411eede40e4611e6ac4d0e4c8d5a378f415e4e60a",
+        "runtime": {
+          "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-C/usr/lib/libavcodec.so.62.11.100",
+          "sha256": "faebfe024d46de175c571b0c1f657415b7d2bd0baaac923abe8933703098345f",
+          "build_id": "07d083e754ba0c5162c08fc054644807bc140a8f",
+          "mapping_symbols": {
+            "a": 0,
+            "t": 0,
+            "d": 0,
+            "x": 0
+          },
+          "profile_sections": [
+            "__llvm_prf_cnts",
+            "__llvm_prf_data",
+            "__llvm_prf_names",
+            "__llvm_prf_vnds"
+          ],
+          "coverage_sections": [],
+          "profile_runtime_symbol_present": false,
+          "unique_internal_names": 0,
+          "note_excerpt": "\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: 07d083e754ba0c5162c08fc054644807bc140a8f\n",
+          "section_excerpt": "  [ 1] .note.gnu.build-id NOTE            00000114 000114 000024 00   A  0   0  4\n  [12] .text             PROGBITS        000142c0 0142c0 4f5aa8 00  AX  0   0 64\n  [15] __llvm_prf_names  PROGBITS        0057ee83 57ee83 03eeb1 00  Ao  0   0  1\n  [25] __llvm_prf_cnts   PROGBITS        005d77c8 5d77c8 066470 00  WA  0   0  8\n  [26] __llvm_prf_data   PROGBITS        0063dc38 63dc38 056610 00  WA  0   0  8\n  [27] __llvm_prf_vnds   PROGBITS        00694248 694248 006000 00  WA  0   0  8"
+        },
+        "debug": {
+          "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-C/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+          "sha256": "e198b8eed02774258a0f44e4101ffb6235eb82c9f463ca6b9a26d6f3446e2f5e",
+          "build_id": "07d083e754ba0c5162c08fc054644807bc140a8f",
+          "mapping_symbols": {
+            "a": 40,
+            "t": 7754,
+            "d": 25584,
+            "x": 0
+          },
+          "profile_sections": [
+            "__llvm_prf_cnts",
+            "__llvm_prf_data",
+            "__llvm_prf_names",
+            "__llvm_prf_vnds"
+          ],
+          "coverage_sections": [
+            "__llvm_covfun",
+            "__llvm_covmap"
+          ],
+          "profile_runtime_symbol_present": true,
+          "unique_internal_names": 3867,
+          "note_excerpt": "\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: 07d083e754ba0c5162c08fc054644807bc140a8f\n",
+          "section_excerpt": "  [ 1] .note.gnu.build-id NOTE            00000114 000114 000024 00   A  0   0  4\n  [12] .text             NOBITS          000142c0 000140 4f5aa8 00  AX  0   0 64\n  [15] __llvm_prf_names  NOBITS          0057ee83 000140 03eeb1 00  Ao  0   0  1\n  [25] __llvm_prf_cnts   NOBITS          005d77c8 000140 066470 00  WA  0   0  8\n  [26] __llvm_prf_data   NOBITS          0063dc38 000140 056610 00  WA  0   0  8\n  [27] __llvm_prf_vnds   NOBITS          00694248 000140 006000 00  WA  0   0  8\n  [30] .ARM.attributes   ARM_ATTRIBUTES  00000000 000181 000037 00      0   0  1\n  [32] __llvm_covfun     PROGBITS        00000000 08bdd8 3bddbe 00   o  0   0  8\n  [33] __llvm_covmap     PROGBITS        00000000 449b98 00f9c0 00   o  0   0  8\n  [35] .debug_info       PROGBITS        00000000 459dd0 4def4d 00      0   0  1"
+        },
+        "profdata": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-ffmpeg-thumb-C.profdata",
+        "profdata_sha256": "80534b96c626a058ed7239521ea941c27e704e8fdecd2eb52bd38b56eedc9d71"
+      },
+      {
+        "isa": "a32",
+        "unstrip_command": [
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+          "--library-path",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/bin/eu-unstrip",
+          "-o",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/coverage-whole-20261109/ffmpeg-a32-C.unstripped",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-a32-C/usr/lib/libavcodec.so.62.11.100",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-a32-C/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug"
+        ],
+        "rc": 0,
+        "stderr": "",
+        "object_sha256": "575c37db573b8aefec394e0ec1996ce1915cd882661410aceca2aa521637017a",
+        "runtime": {
+          "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-a32-C/usr/lib/libavcodec.so.62.11.100",
+          "sha256": "85db2b5377c2a6bd9f13af5287f49f77e3ab1bde6d0042c54e238ad43779ab6f",
+          "build_id": "b262c36697a0957d48c691b1bcad8b0517465741",
+          "mapping_symbols": {
+            "a": 0,
+            "t": 0,
+            "d": 0,
+            "x": 0
+          },
+          "profile_sections": [
+            "__llvm_prf_cnts",
+            "__llvm_prf_data",
+            "__llvm_prf_names",
+            "__llvm_prf_vnds"
+          ],
+          "coverage_sections": [],
+          "profile_runtime_symbol_present": false,
+          "unique_internal_names": 0,
+          "note_excerpt": "\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: b262c36697a0957d48c691b1bcad8b0517465741\n",
+          "section_excerpt": "  [ 1] .note.gnu.build-id NOTE            00000114 000114 000024 00   A  0   0  4\n  [12] .text             PROGBITS        00014280 014280 713be8 00  AX  0   0 64\n  [15] __llvm_prf_names  PROGBITS        0079cf83 79cf83 03eeb1 00  Ao  0   0  1\n  [25] __llvm_prf_cnts   PROGBITS        007f57c8 7f57c8 066470 00  WA  0   0  8\n  [26] __llvm_prf_data   PROGBITS        0085bc38 85bc38 056610 00  WA  0   0  8\n  [27] __llvm_prf_vnds   PROGBITS        008b2248 8b2248 006000 00  WA  0   0  8"
+        },
+        "debug": {
+          "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-a32-C/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+          "sha256": "c62eb72159dda7ed577bc50665b534983a3c49718e41fca59c20581b47be46dd",
+          "build_id": "b262c36697a0957d48c691b1bcad8b0517465741",
+          "mapping_symbols": {
+            "a": 12041,
+            "t": 167,
+            "d": 30139,
+            "x": 0
+          },
+          "profile_sections": [
+            "__llvm_prf_cnts",
+            "__llvm_prf_data",
+            "__llvm_prf_names",
+            "__llvm_prf_vnds"
+          ],
+          "coverage_sections": [
+            "__llvm_covfun",
+            "__llvm_covmap"
+          ],
+          "profile_runtime_symbol_present": true,
+          "unique_internal_names": 3863,
+          "note_excerpt": "\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: b262c36697a0957d48c691b1bcad8b0517465741\n",
+          "section_excerpt": "  [ 1] .note.gnu.build-id NOTE            00000114 000114 000024 00   A  0   0  4\n  [12] .text             NOBITS          00014280 000140 713be8 00  AX  0   0 64\n  [15] __llvm_prf_names  NOBITS          0079cf83 000140 03eeb1 00  Ao  0   0  1\n  [25] __llvm_prf_cnts   NOBITS          007f57c8 000140 066470 00  WA  0   0  8\n  [26] __llvm_prf_data   NOBITS          0085bc38 000140 056610 00  WA  0   0  8\n  [27] __llvm_prf_vnds   NOBITS          008b2248 000140 006000 00  WA  0   0  8\n  [30] .ARM.attributes   ARM_ATTRIBUTES  00000000 000181 000037 00      0   0  1\n  [32] __llvm_covfun     PROGBITS        00000000 08c520 3bddbe 00   o  0   0  8\n  [33] __llvm_covmap     PROGBITS        00000000 44a2e0 00f9c0 00   o  0   0  8\n  [35] .debug_info       PROGBITS        00000000 45a518 53671c 00      0   0  1"
+        },
+        "profdata": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/training-profdata/train-ffmpeg-a32-C.profdata",
+        "profdata_sha256": "492e2f67baed3a80d3bccdc37b07550bedbff9baebe9e0aafcd587fbb5f7f5e6"
+      }
+    ]
+  },
+  "version": "LLVM (http://llvm.org/):\n  LLVM version 22.1.8\n  Optimized build.\n"
+}
