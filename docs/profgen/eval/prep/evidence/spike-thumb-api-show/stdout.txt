@@ -1,0 +1,184 @@
+    1|       |/* Deterministic profile-guided optimization feasibility workload.
+    2|       | * No elapsed-time loop: all variants must execute identical work.
+    3|       | * Usage: afdo-spike-{base,instr,pgo,afdo} [rounds] [seed]
+    4|       | * Unsigned arithmetic makes wraparound intentional and defined.
+    5|       | */
+    6|       |#include <errno.h>
+    7|       |#include <inttypes.h>
+    8|       |#include <stdint.h>
+    9|       |#include <stdio.h>
+   10|       |#include <stdlib.h>
+   11|       |
+   12|   388M|#define BLOCK_SIZE 128u
+   13|   128M|#define TABLE_SIZE 4096u
+   14|      1|#define DEFAULT_ROUNDS 100000u
+   15|      1|#define DEFAULT_SEED UINT64_C(0x123456789abcdef)
+   16|       |#define NOINLINE __attribute__((noinline))
+   17|       |
+   18|       |struct entry {
+   19|       |    uint32_t key;
+   20|       |    uint32_t value;
+   21|       |};
+   22|       |
+   23|       |static struct entry table[TABLE_SIZE];
+   24|       |static uint64_t initial_seed;
+   25|       |
+   26|       |/* Fixed PRNG, independent of libc and platform word size. */
+   27|       |static uint64_t next_random(uint64_t *state)
+   28|   128M|{
+   29|   128M|    uint64_t x = *state;
+   30|   128M|    x ^= x >> 12;
+   31|   128M|    x ^= x << 25;
+   32|   128M|    x ^= x >> 27;
+   33|   128M|    *state = x;
+   34|   128M|    return x * UINT64_C(2685821657736338717);
+   35|   128M|}
+   36|       |
+   37|       |static uint64_t rotate_left(uint64_t x, unsigned int shift)
+   38|   137M|{
+   39|   137M|    return (x << shift) | (x >> (64u - shift));
+   40|   137M|}
+   41|       |
+   42|       |/* A named hot function, retained for profile inspection. */
+   43|       |NOINLINE uint64_t hash_mix(uint64_t x)
+   44|   120M|{
+   45|   120M|    x ^= x >> 30;
+   46|   120M|    x *= UINT64_C(0xbf58476d1ce4e5b9);
+   47|   120M|    x ^= x >> 27;
+   48|   120M|    x *= UINT64_C(0x94d049bb133111eb);
+   49|   120M|    return x ^ (x >> 31);
+   50|   120M|}
+   51|       |
+   52|       |static void initialize_table(void)
+   53|      1|{
+   54|      1|    uint64_t state = initial_seed;
+   55|  [0;35m4.09k[0m|    for (uint32_t i = 0; i < TABLE_SIZE; ++i) {
+                                                       ^4.09k
+   56|  4.09k|        table[i].key = (uint32_t)next_random(&state);
+   57|  4.09k|        table[i].value = (uint32_t)hash_mix(table[i].key);
+   58|  4.09k|    }
+   59|      1|}
+   60|       |
+   61|       |/* Ordinary insertion sort gives biased comparisons and a clear hotspot. */
+   62|       |NOINLINE void sort_block(uint32_t *values, unsigned int count)
+   63|  1.00M|{
+   64|   [0;35m128M[0m|    for (unsigned int i = 1; i < count; ++i) {
+                                                      ^127M
+   65|   127M|        uint32_t value = values[i];
+   66|   127M|        unsigned int j = i;
+   67|  [0;35m4.19G[0m|        while (j != 0 && values[j - 1] > value) {
+                                       ^4.18G
+   68|  4.06G|            values[j] = values[j - 1];
+   69|  4.06G|            --j;
+   70|  4.06G|        }
+   71|   127M|        values[j] = value;
+   72|   127M|    }
+   73|  1.00M|}
+   74|       |
+   75|       |/* Repeated table lookups exercise data-dependent integer arithmetic. */
+   76|       |NOINLINE uint64_t lookup_work(const uint32_t *values, uint64_t state)
+   77|  1.00M|{
+   78|  1.00M|    uint64_t sum = 0;
+   79|   [0;35m129M[0m|    for (unsigned int i = 0; i < BLOCK_SIZE; ++i) {
+                                                           ^128M
+   80|   128M|        uint32_t key = values[i];
+   81|   128M|        uint32_t index = (key ^ (key >> 13)) & (TABLE_SIZE - 1);
+   82|   128M|        const struct entry *item = &table[index];
+   83|   128M|        uint64_t mixed = ((uint64_t)item->key << 32) | item->value;
+   84|   [0;35m128M[0m|        if ((key & 15u) != 0) {
+   85|   119M|            sum += hash_mix(mixed ^ state ^ key);
+   86|   119M|        } else {
+   87|  8.00M|            sum ^= rotate_left(mixed + key, 17);
+   88|  8.00M|        }
+   89|   128M|        state = rotate_left(state + sum + i, 11);
+   90|   128M|    }
+   91|  1.00M|    return sum ^ state;
+   92|  1.00M|}
+   93|       |
+   94|       |/* Invoked only once per 1024 rounds. No explicit cold/hot hints. */
+   95|       |NOINLINE uint64_t rare_path(uint64_t value)
+   96|    977|{
+   97|  [0;35m31.2k[0m|    for (unsigned int i = 0; i < 31; ++i) {
+                                                   ^30.2k
+   98|  [0;35m30.2k[0m|        if ((value & 7u) == 3u) {
+   99|  3.21k|            value = hash_mix(value + i);
+  100|  27.0k|        } else {
+  101|  27.0k|            value = rotate_left(value, 9) ^ UINT64_C(0xd6e8feb86659fd93);
+  102|  27.0k|        }
+  103|  30.2k|    }
+  104|    977|    return value;
+  105|    977|}
+  106|       |
+  107|       |static uint64_t checksum_block(const uint32_t *values)
+  108|  1.00M|{
+  109|  1.00M|    uint64_t sum = 0;
+  110|   [0;35m129M[0m|    for (unsigned int i = 0; i < BLOCK_SIZE; ++i) {
+                                                           ^128M
+  111|   128M|        sum += (uint64_t)values[i] * (i + 1u);
+  112|   128M|    }
+  113|  1.00M|    return sum;
+  114|  1.00M|}
+  115|       |
+  116|       |NOINLINE uint64_t run_workload(uint64_t rounds)
+  117|      1|{
+  118|      1|    uint32_t values[BLOCK_SIZE];
+  119|      1|    uint64_t random_state = initial_seed;
+  120|      1|    uint64_t checksum = UINT64_C(0x6a09e667f3bcc909);
+  121|  [0;35m1.00M[0m|    for (uint64_t round = 0; round < rounds; ++round) {
+                                                           ^1.00M
+  122|   [0;35m129M[0m|        for (unsigned int i = 0; i < BLOCK_SIZE; ++i) {
+                                                               ^128M
+  123|   128M|            values[i] = (uint32_t)next_random(&random_state);
+  124|   128M|        }
+  125|  1.00M|        sort_block(values, BLOCK_SIZE);
+  126|  1.00M|        checksum += checksum_block(values);
+  127|  1.00M|        checksum ^= lookup_work(values, random_state);
+  128|  [0;35m1.00M[0m|        if ((round & 1023u) == 0) {
+  129|    977|            checksum ^= rare_path(checksum);
+  130|   999k|        } else {
+  131|   999k|            checksum = rotate_left(checksum, 13) + round;
+  132|   999k|        }
+  133|  1.00M|    }
+  134|      1|    return checksum;
+  135|      1|}
+  136|       |
+  137|       |static int parse_number(const char *text, uint64_t *value)
+  138|      1|{
+  139|      1|    char *end = NULL;
+  140|      1|    unsigned long long parsed;
+  141|      [0;35m1[0m|    if (text[0] == '-' || text[0] == '\0') [0;41m{[0m
+  142|      0|[0;41m        return 0;[0m
+  143|      0|[0;41m    }[0m
+  144|      [0;35m1[0m|    errno = 0;
+  145|      1|    parsed = strtoull(text, &end, 0);
+  146|      [0;35m1[0m|    if (errno != 0 || end == text || *end != '\0' || parsed == 0) [0;41m{[0m
+  147|      0|[0;41m        return 0;[0m
+  148|      0|[0;41m    }[0m
+  149|      1|    *value = (uint64_t)parsed;
+  150|      1|    return 1;
+  151|      1|}
+  152|       |
+  153|       |int main(int argc, char **argv)
+  154|      1|{
+  155|      1|    uint64_t rounds = DEFAULT_ROUNDS;
+  156|      1|    uint64_t seed = DEFAULT_SEED;
+  157|      1|    uint64_t result;
+  158|      [0;35m1[0m|    if (argc > 3 || (argc > 1 && !parse_number(argv[1], &rounds)) ||
+  159|      [0;35m1[0m|        (argc > 2 && [0;41m!parse_number(argv[2], &seed)[0m)) [0;41m{[0m
+                                   ^0
+  160|      0|[0;41m        fprintf([0m[0;41mstderr, "usage: %s [positive-rounds] [positive-seed]\n", argv[0]);[0m
+  161|      0|[0;41m        return 2;[0m
+  162|      0|[0;41m    }[0m
+  163|       |    /* Bound accidental invocations while still allowing long measurements. */
+  164|      [0;35m1[0m|    if (rounds > UINT64_C(1000000000)) [0;41m{[0m
+  165|      0|[0;41m        fprintf([0m[0;41mstderr, "rounds exceeds 1000000000\n");[0m
+  166|      0|[0;41m        return 2;[0m
+  167|      0|[0;41m    }[0m
+  168|      1|    initial_seed = seed;
+  169|      1|    initialize_table();
+  170|      1|    result = run_workload(rounds);
+  171|      1|    printf("rounds=%" PRIu64 " seed=%016" PRIx64 " checksum=%016" PRIx64 "\n",
+  172|      1|           rounds, seed, result);
+  173|      1|    return 0;
+  174|      1|}
+

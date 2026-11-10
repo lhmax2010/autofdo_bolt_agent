@@ -34,11 +34,15 @@
 - v1.5文件SHA-256：be18d105d5711861b08517004d97eb40de5fb37b92213202cddd6b759fa9e636；从Downloads以mv移入，无同SHA重复副本，旧版本不动。
 
 
-## 登记前准备第一阶段（2026-11-10）
+## 登记前准备第一阶段（2026-11-10；身份门禁停止）
 
-- 计划已建立：[00_plan.md](profgen/eval/prep/00_plan.md)。按 N.5 #13 → #16 → #6/#15 顺序，先验证覆盖参考，再完整身份与静态映射，最后计算参考门槛。
-- 当前进度：v1.5 归档完成；覆盖处理、身份清单和③门槛尚未完成。
-- 挂账：任一未决身份不得登记；正式 sample profile（含 CALIBRATION）不读取、不计算。修订3未登记。
+- v1.5已单独提交推送dba4de162eab5058f16dfed8445da93ea058e49a；计划提交34f0013。修订3未登记，本轮没有打开或计算任何正式sample profile（含CALIBRATION）。
+- N.5 #13部分完成：四份C参考lcov与JSON segments逐行一致；7个合成覆盖夹具通过；spike17条HasMultipleRegions与Coverage API一致。summary与完整DA视图不同，范围交叉核对尚未闭合。[覆盖记录](profgen/eval/prep/01_coverage.md)
+- N.5 #16已生成独立S/C DWARF静态清单，未完成闭合对应表与全套夹具。FFmpeg系统头内联memcpy等有代码，但覆盖参考无候选；CU为评估clang，不满足现有not_instrumented规则。Thumb/A32各1308/1314个候选缺失DIE（其中系统头1236/1242），不是采样计数。[停止证据与清单](profgen/eval/prep/02_identity_stop.md)
+- 待人工裁决：系统头内联函数的封闭身份状态与范围处理；不自行扩展not_instrumented。其他无候选身份仍需逐条查明。
+- N.5 #6/#15未计算：身份门禁未闭合，未生成U、①②③③′、n_eff、K或损失分桶，不能声称③达标或不达标。ToS参考尚未推进。
+- 已有P9报告文字不足以逐份确认正式S的avg/prev-inst成功，挂账；本轮不为补证而转换profile。原统计/资格状态不改。
+- 所有新代码/证据在tools/profgen_eval与docs/profgen/eval/prep；资源scope限制、启动门禁、原文与SHA保留。未连接板子，未改LLVM/补丁/设计正文/认证/三项用户配置。
 
 ## 当前完成状态（2026-11-09；P9正式S重转与FFmpeg整体覆盖）
 

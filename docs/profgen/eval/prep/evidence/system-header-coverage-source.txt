@@ -1,0 +1,30 @@
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:45:                    "disable it on test)"),
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:46:     llvm::cl::init(true), llvm::cl::Hidden);
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:47: 
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:48: namespace llvm::coverage {
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:49: cl::opt<bool> SystemHeadersCoverage(
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:50:     "system-headers-coverage",
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:51:     cl::desc("Enable collecting coverage from system headers"), cl::init(false),
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:52:     cl::Hidden);
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:53: }
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:54: 
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:55: using namespace clang;
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1567:     // expression has been handled by visiting the sub-statement. The visitor
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1568:     // cannot be at a terminate statement leaving the statement expression.
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1569:     HasTerminateStmt = false;
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1570:   }
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1571: 
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1572:   void VisitDecl(const Decl *D) {
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1573:     Stmt *Body = D->getBody();
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1574: 
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1575:     // Do not propagate region counts into system headers unless collecting
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1576:     // coverage from system headers is explicitly enabled.
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1577:     if (!SystemHeadersCoverage && Body &&
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1578:         SM.isInSystemHeader(SM.getSpellingLoc(getStart(Body))))
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1579:       return;
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1580: 
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1581:     // Do not visit the artificial children nodes of defaulted methods. The
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1582:     // lexer may not be able to report back precise token end locations for
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1583:     // these children nodes (llvm.org/PR39822), and moreover users will not be
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1584:     // able to see coverage for them.
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1585:     Counter BodyCounter = getRegionCounter(Body);

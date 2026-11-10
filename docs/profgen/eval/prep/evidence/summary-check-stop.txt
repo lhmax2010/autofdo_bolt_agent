@@ -1,0 +1,7 @@
+During summary cross-check, an assertion that DA counts equal LF/LH failed.
+The exploratory command loaded *-coverage.json and compared:
+assert f["lcov_summary"]["LF"] == f["executable_lines"]
+Observed: spike DA126/116 versus LF/LH119/109.
+The assertion was not weakened into a passing N.5 #13 result.
+coverage-summary.json records all differing rows. No U or threshold was computed.
+The JSON segments versus DA checks themselves returned exit code 0.
