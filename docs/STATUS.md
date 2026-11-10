@@ -34,6 +34,12 @@
 - v1.5文件SHA-256：be18d105d5711861b08517004d97eb40de5fb37b92213202cddd6b759fa9e636；从Downloads以mv移入，无同SHA重复副本，旧版本不动。
 
 
+## 登记前准备第一阶段（2026-11-10）
+
+- 计划已建立：[00_plan.md](profgen/eval/prep/00_plan.md)。按 N.5 #13 → #16 → #6/#15 顺序，先验证覆盖参考，再完整身份与静态映射，最后计算参考门槛。
+- 当前进度：v1.5 归档完成；覆盖处理、身份清单和③门槛尚未完成。
+- 挂账：任一未决身份不得登记；正式 sample profile（含 CALIBRATION）不读取、不计算。修订3未登记。
+
 ## 当前完成状态（2026-11-09；P9正式S重转与FFmpeg整体覆盖）
 
 - 固定工具2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5完成70组/106原件及额外20份period重转。输出temp/p9-formal-reconversion/outputs/；P8存档与旧结果保留，SHA已复核。移出usable=2736，与报告12独立统计一致；target11131603不变，usable8235324→8232588；身份全verified。sample50份变化/56份不变，period10变化/10不变；逐字段与profile树核对无额外差异。[质量报告](profgen/eval/quality_round1.md)、[逐份证据](profgen/impl/evidence/16/08_p9_reconversion_rows.json)
