@@ -36,6 +36,8 @@
 
 ## 人工裁决（登记前准备）
 
+- [裁决2补充1](profgen/eval/prep/rulings.md)：PGO basename须由编译命令、链接输入和完整linkage唯一消歧；宏链须同一C命令的编译器AST证明，文本搜索不能独立闭合。
+
 - [裁决2：macro_generated_function](profgen/eval/prep/rulings.md)：宏生成函数须四项正面证据齐全才建立身份对应；参考行属于宏展开评价域外，FNDA决定组范围。先照录登记，后实现核对；不扩大原not_instrumented规则。
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
