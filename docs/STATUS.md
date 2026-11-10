@@ -44,6 +44,14 @@
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
 
+## 裁决2补充2执行状态（2026-11-10；token-paste拼写范围停止）
+
+- 补充2已照录并单独推送56c7cc7。实际C命令+GBS Clang外部只读取证插件直接记录逐token的isMacroArgExpansion、拼写/展开、调用实参和完整宏链；不修改LLVM。十个CU/ISA命令退出0。[报告§7](profgen/eval/prep/04_macro_function_ruling.md#7-裁决2补充2逐token实测与停止2026-11-10)
+- FFmpeg Thumb/A32各闭合6个macro_generated_function；ff_put_pixels16_x2_arm的28个body token中4个跨文件实参全部满足条件。每侧另外28个DIE各有2个##生成的scratch token，isMacroArgExpansion=true但拼写不在补充2允许的两类源码位置，保留未决、不扩规则。[完整token与汇总](profgen/eval/prep/evidence/ruling2/supplement2/macro-summary.json)
+- 27项规则/真实证据测试通过；真实DEF_PEL/PIXOP2“闭合”要求因scratch仍未满足，已保存两个完整示例而非改写拼写位置。待人工裁决：是否为token-paste另立严格的编译器来源证明规则。裁决1闭合spike各2、FFmpeg1236/1242不变；GNU外部CU每侧38不变。
+- 未决总数spike各15、FFmpeg26869/26904（其中macro scratch各28、原规则候选未完成26841/26876）。单候选/多候选歧义验收、U、③、损失分桶及映射范围静态规模均未继续。[完整清单](profgen/eval/prep/evidence/ruling2/supplement2/closure-summary.json)
+- 3G/200%串行scope，无OOM/资源暂停/终止；最低MemAvailable7.502766GiB、最高cgroup peak0.538528GiB，原始资源与辅助代码失败均留证。没有打开正式sample profile、未连接板子、修订3仍未登记。
+
 ## 裁决2执行状态（2026-11-10；宏实参AST条件停止）
 
 - 裁决1修正已推送f8f141f，11项夹具通过、闭合数不变。裁决2与补充1已分别推送099a78c、0c603bd。

@@ -1,0 +1,71 @@
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:46:31: error: chosen constructor is explicit in copy-initialization
+   46 |     if (L.isInvalid()) return {{"valid",false}};
+      |                               ^~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:49:12: error: chosen constructor is explicit in copy-initialization
+   49 |     return {{"raw", int64_t(L.getRawEncoding())}, {"file",filename(S)},
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   50 |             {"presumed_file",P.isValid()?P.getFilename():""},
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   51 |             {"line",SM.getSpellingLineNumber(S)}, {"column",SM.getSpellingColumnNumber(S)},
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   52 |             {"offset",SM.getFileOffset(S)}, {"is_macro",L.isMacroID()},
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   53 |             {"is_scratch",SM.isWrittenInScratchSpace(S)}};
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:56:12: error: chosen constructor is explicit in copy-initialization
+   56 |     return {{"begin",loc(R.getBegin())},{"end",loc(R.getEnd())}};
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:73:12: error: chosen constructor is explicit in copy-initialization
+   73 |     return {{"kind",T.getName()}, {"text",CI.getPreprocessor().getSpelling(T)},
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   74 |             {"location",loc(L)}, {"spelling",loc(SM.getSpellingLoc(L))},
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   75 |             {"expansion",loc(SM.getExpansionLoc(L))},
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   76 |             {"isMacroArgExpansion",SM.isMacroArgExpansion(L)}, {"trace",std::move(Trace)}};
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:93:12: error: chosen constructor is explicit in copy-initialization
+   93 |     R.emit({{"record","macro"},{"name",R.CI.getPreprocessor().getSpelling(Name)},
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   94 |             {"invocation",R.range(Call)}, {"expansion",R.loc(R.SM.getExpansionLoc(Name.getLocation()))},
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   95 |             {"definition",R.range({MI->getDefinitionLoc(),MI->getDefinitionEndLoc()})},
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   96 |             {"body",std::move(Body)}, {"arguments",std::move(Arguments)}});
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:58:32: note: passing argument to parameter 'O' here
+   58 |   void emit(llvm::json::Object O) { *Out << llvm::json::Value(std::move(O)) << "\n"; Out->flush(); }
+      |                                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:106:14: error: chosen constructor is explicit in copy-initialization
+  106 |       R.emit({{"record","function"},{"name",F->getNameAsString()},
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  107 |               {"location",R.loc(F->getLocation())},
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  108 |               {"expansion",R.loc(R.SM.getExpansionLoc(F->getLocation()))},
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  109 |               {"body",R.range(F->getBody()->getSourceRange())}});
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp:58:32: note: passing argument to parameter 'O' here
+   58 |   void emit(llvm::json::Object O) { *Out << llvm::json::Value(std::move(O)) << "\n"; Out->flush(); }
+      |                                ^
+6 errors generated.
+
+{"command": ["/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/bin/host-clang", "-x", "c++", "-std=c++17", "-fPIC", "-shared", "-fno-rtti", "-O0", "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.cpp", "-o", "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/token-api/token_evidence.so", "-I", "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/clang/include", "-I", "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include", "-I", "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/tools/clang/include", "-I", "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/include", "-L", "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64", "-lclang-cpp", "-lLLVM", "-lstdc++"], "exit_code": 1, "source_sha256": "75280d9e11ac39ed13d6b1d51a68f1d8a08b8743a70ee4168d589690bf7d6067", "stderr_sha256": "01476ea2449e236a67d1dbec8fff5ef9d02b408d3b1bf471076b27060388121a"}

@@ -31,3 +31,7 @@
 ## 归档记录
 
 Downloads仅发现02_llvm_profgen_enhance_design_v1.5.md；移入前后SHA一致，无重复副本；旧版本未改。工作区原有三项配置保持未跟踪且未读取。
+
+## 裁决2补充2取证方法
+
+标准 `-dump-tokens` 不输出逐token的 `isMacroArgExpansion`，AST节点位置不足以替代token证据。使用Python驱动的小型外部Clang取证插件，调用现有GBS libclang-cpp的SourceManager/PPCallbacks，保存真实布尔值、拼写/展开位置、宏定义体及实参范围。插件源码由仓库Python脚本写入temp并以GBS Clang编译，不修改LLVM源码，不安装依赖，编译与运行仍受3G/200%限制；输入编译参数沿用ast4的C构建复现命令。原始输出不更改拼写位置，scratch space不得推定为源码。

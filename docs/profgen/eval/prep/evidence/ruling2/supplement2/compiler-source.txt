@@ -1,0 +1,234 @@
+src/llvm/clang/lib/Lex/TokenLexer.cpp SHA-256 9c28632bf5d819bcc80d16e8a5138053cef359e0afeb1c714d4fc7ec067c20b4
+731: bool TokenLexer::pasteTokens(Token &LHSTok, ArrayRef<Token> TokenStream,
+732:                              unsigned int &CurIdx) {
+733:   assert(CurIdx > 0 && "## can not be the first token within tokens");
+734:   assert((TokenStream[CurIdx].is(tok::hashhash) ||
+735:          (PP.getLangOpts().MSVCCompat &&
+736:           isWideStringLiteralFromMacro(LHSTok, TokenStream[CurIdx]))) &&
+737:              "Token at this Index must be ## or part of the MSVC 'L "
+738:              "#macro-arg' pasting pair");
+739: 
+740:   // MSVC: If previous token was pasted, this must be a recovery from an invalid
+741:   // paste operation. Ignore spaces before this token to mimic MSVC output.
+786:       memcpy(&Buffer[LHSLen], BufPtr, RHSLen);
+787: 
+788:     // Trim excess space.
+789:     Buffer.resize(LHSLen+RHSLen);
+790: 
+791:     // Plop the pasted result (including the trailing newline and null) into a
+792:     // scratch buffer where we can lex it.
+793:     Token ResultTokTmp;
+794:     ResultTokTmp.startToken();
+795: 
+796:     // Claim that the tmp token is a string_literal so that we can get the
+797:     // character pointer back from CreateString in getLiteralData().
+798:     ResultTokTmp.setKind(tok::string_literal);
+799:     PP.CreateString(Buffer, ResultTokTmp);
+800:     SourceLocation ResultTokLoc = ResultTokTmp.getLocation();
+801:     ResultTokStrPtr = ResultTokTmp.getLiteralData();
+802: 
+803:     // Lex the resultant pasted token into Result.
+804:     Token Result;
+805: 
+806:     if (LHSTok.isAnyIdentifier() && RHS.isAnyIdentifier()) {
+807:       // Common paste case: identifier+identifier = identifier.  Avoid creating
+808:       // a lexer and other overhead.
+809:       PP.IncrementPasteCounter(true);
+810:       Result.startToken();
+811:       Result.setKind(tok::raw_identifier);
+812:       Result.setRawIdentifierData(ResultTokStrPtr);
+813:       Result.setLocation(ResultTokLoc);
+814:       Result.setLength(LHSLen+RHSLen);
+815:     } else {
+816:       PP.IncrementPasteCounter(false);
+817: 
+818:       assert(ResultTokLoc.isFileID() &&
+819:              "Should be a raw location into scratch buffer");
+820:       SourceManager &SourceMgr = PP.getSourceManager();
+821:       FileID LocFileID = SourceMgr.getFileID(ResultTokLoc);
+822: 
+823:       bool Invalid = false;
+824:       const char *ScratchBufStart
+825:         = SourceMgr.getBufferData(LocFileID, &Invalid).data();
+826:       if (Invalid)
+827:         return false;
+828: 
+829:       // Make a lexer to lex this string from.  Lex just this one token.
+830:       // Make a lexer object so that we lex and expand the paste result.
+831:       Lexer TL(SourceMgr.getLocForStartOfFile(LocFileID),
+832:                PP.getLangOpts(), ScratchBufStart,
+833:                ResultTokStrPtr, ResultTokStrPtr+LHSLen+RHSLen);
+834: 
+835:       // Lex a token in raw mode.  This way it won't look up identifiers
+836:       // automatically, lexing off the end will return an eof token, and
+870:               << Buffer;
+871:         }
+872: 
+873:         // An error has occurred so exit loop.
+874:         break;
+875:       }
+876: 
+877:       // Turn ## into 'unknown' to avoid # ## # from looking like a paste
+878:       // operator.
+879:       if (Result.is(tok::hashhash))
+880:         Result.setKind(tok::unknown);
+881:     }
+882: 
+883:     // Transfer properties of the LHS over the Result.
+884:     Result.setFlagValue(Token::StartOfLine , LHSTok.isAtStartOfLine());
+885:     Result.setFlagValue(Token::LeadingSpace, LHSTok.hasLeadingSpace());
+886: 
+887:     // Finally, replace LHS with the result, consume the RHS, and iterate.
+888:     ++CurIdx;
+889: 
+890:     // Set Token::HasUCN flag if LHS or RHS contains any UCNs.
+891:     HasUCNs = LHSTok.hasUCN() || RHS.hasUCN() || HasUCNs;
+892:     LHSTok = Result;
+src/llvm/clang/lib/Lex/Preprocessor.cpp SHA-256 7cc85e895b6bdee6b91cdbfa2540f7dd14fa352c0e0c73f7987fc9261f41408a
+236: void Preprocessor::DumpToken(const Token &Tok, bool DumpFlags) const {
+237:   llvm::errs() << tok::getTokenName(Tok.getKind());
+238: 
+239:   if (!Tok.isAnnotation())
+240:     llvm::errs() << " '" << getSpelling(Tok) << "'";
+241: 
+242:   if (!DumpFlags) return;
+243: 
+244:   llvm::errs() << "\t";
+245:   if (Tok.isAtStartOfLine())
+246:     llvm::errs() << " [StartOfLine]";
+247:   if (Tok.hasLeadingSpace())
+248:     llvm::errs() << " [LeadingSpace]";
+249:   if (Tok.isExpandDisabled())
+250:     llvm::errs() << " [ExpandDisabled]";
+251:   if (Tok.needsCleaning()) {
+252:     const char *Start = SourceMgr.getCharacterData(Tok.getLocation());
+253:     llvm::errs() << " [UnClean='" << StringRef(Start, Tok.getLength())
+254:                  << "']";
+255:   }
+256: 
+257:   llvm::errs() << "\tLoc=<";
+258:   DumpLocation(Tok.getLocation());
+259:   llvm::errs() << ">";
+260: }
+261: 
+486: /// CreateString - Plop the specified string into a scratch buffer and return a
+487: /// location for it.  If specified, the source location provides a source
+488: /// location for the token.
+489: void Preprocessor::CreateString(StringRef Str, Token &Tok,
+490:                                 SourceLocation ExpansionLocStart,
+491:                                 SourceLocation ExpansionLocEnd) {
+492:   Tok.setLength(Str.size());
+493: 
+494:   const char *DestPtr;
+495:   SourceLocation Loc = ScratchBuf->getToken(Str.data(), Str.size(), DestPtr);
+496: 
+497:   if (ExpansionLocStart.isValid())
+498:     Loc = SourceMgr.createExpansionLoc(Loc, ExpansionLocStart,
+499:                                        ExpansionLocEnd, Str.size());
+500:   Tok.setLocation(Loc);
+501: 
+502:   // If this is a raw identifier or a literal token, set the pointer data.
+503:   if (Tok.is(tok::raw_identifier))
+504:     Tok.setRawIdentifierData(DestPtr);
+src/llvm/clang/include/clang/Lex/Preprocessor.h SHA-256 34d9ee87fc5798d824594a9369ad221bfd66d5e7c9f6159db02f2e3d236e0ba3
+1352:     MaxTokensOverrideLoc = Loc;
+1353:   };
+1354: 
+1355:   SourceLocation getMaxTokensOverrideLoc() const { return MaxTokensOverrideLoc; }
+1356: 
+1357:   /// Register a function that would be called on each token in the final
+1358:   /// expanded token stream.
+1359:   /// This also reports annotation tokens produced by the parser.
+1360:   void setTokenWatcher(llvm::unique_function<void(const clang::Token &)> F) {
+1361:     OnToken = std::move(F);
+1362:   }
+1363: 
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp SHA-256 7152c85a9873e4b2583418f5d238010b4d25c4879167619b04ef9ba68d3f2e2e
+313:   SourceLocation Spelling = SM.getSpellingLoc(Loc);
+314:   SourceLocation Expansion = SM.getExpansionLoc(Loc);
+315: 
+316:   if (Expansion != Spelling) {
+317:     // If the expansion and the spelling are different, output subobjects
+318:     // describing both locations.
+319:     JOS.attributeObject(
+320:         "spellingLoc", [Spelling, this] { writeBareSourceLocation(Spelling); });
+321:     JOS.attributeObject("expansionLoc", [Expansion, Loc, this] {
+322:       writeBareSourceLocation(Expansion);
+323:       // If there is a macro expansion, add extra information if the interesting
+324:       // bit is the macro arg expansion.
+325:       if (SM.isMacroArgExpansion(Loc))
+326:         JOS.attribute("isMacroArgExpansion", true);
+327:     });
+328:   } else
+src/llvm/clang/lib/Frontend/FrontendAction.cpp SHA-256 9494ef7aa202bb55025c95508f7e5bcae9bd50c3c9e86f311b468a70433950be
+175:              Position::GetEndSpelling(SM, R, D->getLangOpts())});
+176:       }
+177:     }
+178: 
+179:     // To simplify output, merge consecutive and intersecting ranges.
+180:     std::vector<RequiredRanges> Result;
+181:     for (auto &[F, Data] : FileToRanges) {
+182:       auto &FromTo = Data.FromTo;
+183:       assert(!FromTo.empty());
+184: 
+185:       if (!Data.Ref)
+186:         continue;
+187: 
+188:       llvm::sort(FromTo);
+189: 
+190:       std::vector<std::pair<Position, Position>> MergedRanges;
+191:       MergedRanges.push_back(FromTo.front());
+192:       for (auto It = FromTo.begin() + 1; It < FromTo.end(); ++It) {
+193:         if (MergedRanges.back().second < It->first) {
+194:           MergedRanges.push_back(*It);
+195:           continue;
+196:         }
+197:         if (MergedRanges.back().second < It->second)
+198:           MergedRanges.back().second = It->second;
+199:       }
+200:       Result.push_back({Data.Ref->getName(), std::move(MergedRanges)});
+201:     }
+202:     printJson(Result);
+203:   }
+204: 
+205: private:
+206:   std::vector<const Decl *> PendingDecls;
+207:   llvm::SmallPtrSet<const DeclContext *, 0> ProcessedDeclContexts;
+208:   bool IsCollectingDecls = true;
+209:   const SourceManager &SM;
+210:   std::unique_ptr<llvm::raw_ostream> OS;
+211: 
+212:   static bool shouldIncludeDeclsIn(const DeclContext *DC) {
+213:     assert(DC && "DC is null");
+214:     // We choose to work at namespace level to reduce complexity and the number
+215:     // of cases we care about.
+216:     // We still need to carefully handle composite declarations like
+217:     // `ExportDecl`.
+218:     for (; DC; DC = DC->getLexicalParent()) {
+219:       if (DC->isFileContext())
+220:         return true;
+221:       if (isa<ExportDecl>(DC))
+222:         continue; // Depends on the parent.
+223:       return false;
+224:     }
+225:     llvm_unreachable("DeclContext chain must end with a translation unit");
+226:   }
+227: 
+228:   llvm::SmallVector<CharSourceRange, 2> getRangesToMark(const Decl *D) {
+229:     if (auto *ED = dyn_cast<ExportDecl>(D)) {
+230:       if (!ED->hasBraces())
+231:         return {SM.getExpansionRange(ED->getExportLoc())};
+232: 
+233:       return {SM.getExpansionRange(SourceRange(
+234:                   ED->getExportLoc(),
+235:                   lexForLBrace(ED->getExportLoc(), D->getLangOpts()))),
+236:               SM.getExpansionRange(ED->getRBraceLoc())};
+237:     }
+238: 
+239:     auto *NS = dyn_cast<NamespaceDecl>(D);
+240:     if (!NS)
+241:       return {SM.getExpansionRange(D->getSourceRange())};
+242: 
+243:     SourceLocation LBraceLoc;
+244:     if (NS->isAnonymousNamespace()) {
+245:       LBraceLoc = NS->getLocation();

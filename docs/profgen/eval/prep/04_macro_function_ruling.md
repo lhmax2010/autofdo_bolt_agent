@@ -103,3 +103,175 @@ U、排除权重、①②③③′、n_eff、K、分桶损失、映射范围内�
 全部任务串行、nice19/ionice idle、3G/200% user scope；任务通过≥4GiB启动检查。原文meminfo、scope实读峰值、命令、真实退出码、ALL-END见ruling1-fix-*与ruling2-*任务目录。资源摘要见ruling2/resources-summary.json；没有OOM、资源暂停或终止。最高峰值不是程序RSS，而是cgroup memory.peak（含子进程与缓存）。
 
 本轮脚本与证据SHA索引：ruling2/artifact-sha256.json。单个提交文件小于1MB。边界例外：无；三个用户配置未读取、未修改、未暂存。
+
+## 7. 裁决2补充2：逐token实测与停止（2026-11-10）
+
+裁决原文已单独提交并推送 **56c7cc7a9b4a62f8a70b9ced1149fa6c1c4361db**，见
+[rulings.md](rulings.md)。没有修改设计正文；仍未打开任何正式 sample profile，
+未连接板子，未计算 U、③或其他受控量。
+
+### 7.1 方法：直接读取API，不从AST节点推定token标志
+
+标准 `clang -dump-tokens` 只输出kind、文本、位置等，不输出
+`isMacroArgExpansion`（Preprocessor.cpp:236–261）；AST的节点位置不足以替代
+每个token。新增Python驱动的外部取证插件
+[compiler_token_evidence.py](../../../../tools/profgen_eval/compiler_token_evidence.py)，
+使用GBS内的Clang/libclang-cpp 22.1.8、现有源码/生成头文件；没有修改或构建LLVM。
+
+取证注册 `Preprocessor::setTokenWatcher`（Preprocessor.h:1355–1362）、
+`PPCallbacks::MacroExpands`；对每个最终函数体token直接调用
+`SourceManager::isMacroArgExpansion`、`getSpellingLoc`、
+`getExpansionLoc`，保存逐层 immediate spelling/expansion、宏名和布尔值。
+ASTConsumer同时记录函数体左右花括号的SourceLocation，按它们在最终token流中的
+唯一位置截取整个函数体（包括花括号），不只检查AST语句端点。
+
+每个实际宏展开实例通过**原始SourceLocation区间**与token的展开链关联；不能只按
+宏名或file:line关联，因为同一template会在不同位深下重复包含。外层调用实参范围
+取自MacroArgs的unexpanded tokens；宏定义体取自MacroInfo tokens，范围采用
+首、末token起始offset的闭区间（不是把整行都视为合法实参）。每个宏定义位置还与
+源码的对应 `#define` 行核对。原始位置绝不清洗成另一文件；scratch的真实
+`getFilename` 为空、presumed filename为 `<scratch space>`，保留两者。
+
+输入使用此前验证的五个CU、Thumb/A32各五条实际C编译命令及相同预处理定义。
+原命令、日志行号与头文件重建依据仍见
+`evidence/ruling2/{thumb,a32}-ast4-commands.json`；
+本轮插件参数与真实退出码见
+`evidence/ruling2/{thumb,a32}-token-api-commands.json`，十条最终命令均退出0。
+原始AST与逐token JSONL留在 `temp/prep-ruling2/`；每份证据保存路径和SHA。
+版本与源码原文见
+[compiler-version.json](evidence/ruling2/supplement2/compiler-version.json)、
+[compiler-source.txt](evidence/ruling2/supplement2/compiler-source.txt)。
+未读取C/S编译以外的sample数据。
+
+### 7.2 完整示例与实际结果
+
+| 对象 | 待核宏函数DIE | 闭合 | 未决 | 每侧scratch token数 | 所有这些记录FNDA之和 |
+|---|---:|---:|---:|---:|---:|
+| FFmpeg Thumb | 34 | 6 | 28 | 56 | 0 |
+| FFmpeg A32 | 34 | 6 | 28 | 56 | 0 |
+
+闭合的六个名字为：
+`ff_put_pixels16_x2_arm`、`ff_put_pixels16_y2_arm`、
+`ff_put_pixels16_xy2_arm`、`ff_put_no_rnd_pixels16_x2_arm`、
+`ff_put_no_rnd_pixels16_y2_arm`、`ff_put_no_rnd_pixels16_xy2_arm`。
+完整linkage（含.__uniq.）、CU、声明位置、FNDA及对应结论见
+[Thumb逐项表](evidence/ruling2/supplement2/ffmpeg-thumb-results.json)、
+[A32逐项表](evidence/ruling2/supplement2/ffmpeg-a32-results.json)。
+六个闭合记录均reference_unexecuted，不进入U/C；没有FNDA>0的闭合宏函数，
+其评价域外已执行DA之和为0。FNDA为0**不能**替代身份核对，另外28个仍未决。
+
+**直接调用实例** `ff_put_pixels16_x2_arm`：
+`hpeldsp_init_arm.c:38` → `pixels.h:34 CALL_2X_PIXELS` →
+`pixels.h:26–31 CALL_2X_PIXELS_MACRO`。
+整个函数体28个token，其中24个拼写在pixels.h，4个跨文件token为
+`ff_put_pixels8_x2_arm`两次（38:48）、`8`两次（38:78），
+四个的API布尔值均为true，均在该次调用的实参范围内。补充2条件通过。
+完整28-token表：
+[example-01-all-body-tokens.tsv](evidence/ruling2/supplement2/example-01-all-body-tokens.tsv)；
+含原始位置、完整trace、实参范围、宏定义源码、原始AST/token路径与SHA的完整证据：
+[ffmpeg-thumb-01-tokens.json](evidence/ruling2/supplement2/ffmpeg-thumb-01-tokens.json)。
+
+**PIXOP2两层链实例** `put_pixels16_x2_8_c`：
+`hpeldsp.c:333 PIXOP2`（定义38–325）→
+`pixels.h:34 CALL_2X_PIXELS` → `pixels.h:26–31 CALL_2X_PIXELS_MACRO`。
+函数体28个token；24个在pixels.h，两个数字 `8` 拼写在hpeldsp.c:310:16，
+isMacroArgExpansion=true且在已记录的PIXOP2定义体内，**这两个已按补充2通过**。
+另两个 `put_pixels8_x2_8_c` 的实际拼写位置是
+`<scratch space>:90:1`，isMacroArgExpansion=true，但不在允许的两类源码范围内。
+因此整个函数仍未决。完整token表：
+[example-18-all-body-tokens.tsv](evidence/ruling2/supplement2/example-18-all-body-tokens.tsv)；
+完整证据：
+[ffmpeg-thumb-18-tokens.json](evidence/ruling2/supplement2/ffmpeg-thumb-18-tokens.json)。
+
+**DEF_PEL链实例** `put_pixels16_8_c`（h264qpel.c中的pel_template.c:78）：
+38个body token；包含来自pel_template.c:72的中间宏实参和
+bit_depth_template.c:79的pixel定义。所有非主文件token的宏实参标志均为true；
+两个被调用名字 `put_pixels8_8_c` 拼写在
+`<scratch space>:58:1`，未通过允许位置检查。
+[完整38-token表](evidence/ruling2/supplement2/example-07-all-body-tokens.tsv)、
+[完整证据](evidence/ruling2/supplement2/ffmpeg-thumb-07-tokens.json)。
+其余28个未决DIE逐项也都保存完整token证据；没有仅用抽样代表全部函数。
+
+### 7.3 为什么必须停下
+
+28个函数每个都有两个token满足“宏实参=true”，却不满足补充2①的**拼写位置限制**。
+这是Clang的真实token拼接表示，不能由本轮自行归入某个宏定义体：
+
+- `src/llvm/clang/lib/Lex/TokenLexer.cpp:792–799` 将粘接后的文本通过
+  `PP.CreateString` 放入scratch buffer；:817–819断言其原始位置为scratch。
+- `src/llvm/clang/lib/Lex/Preprocessor.cpp:486–495` 中CreateString分配scratch位置。
+- 原文与SHA已存 `compiler-source.txt`。SourceManager的macro argument标志并不保证
+  最终拼写位置是物理源码文件。
+
+按“任一正面证据缺失仍未决”的规则，判为
+`argument_spelling_outside_allowed_ranges`，**没有新增闭合状态**。
+用户要求的“DEF_PEL/PIXOP2真实两层链闭合”目前不能通过；这不是把预期改成通过：
+规则夹具中“不含拼接、实参确实位于中间定义体”的正例通过，
+真实拼接实例作为停止证据保持未决。宏参数的普通中间传递已支持，未授权的是
+`##`生成的scratch拼写。
+
+待人工裁决的候选方向：是否另立严格的token-paste来源证据规则，要求编译器证明每个
+`##`操作数来自已允许的调用实参/定义体且拼接结果精确一致。**本轮没有实施该规则，
+没有用trace或文本搜索替换真实spelling**。也可以继续将这些条目保留未决；
+在完整身份门禁未闭合前不能计算U或③。
+
+### 7.4 实现、夹具与完整清单
+
+`macro_function_rule.py` 删除旧的“仅macro_definition_verified即可闭合”旁路；
+必须具备compiler AST、逐token证据。缺少任一token的布尔标志即未决；
+非实参拼写在decl_file时转原规则；实参位置超出调用范围/展开链定义体时未决。
+`audit_macro_tokens.py` 用真实证据执行判定，保留原清单每个DIE，不用FNDA过滤身份。
+
+[最终27项测试原文](evidence/ruling2-supp2-fixtures-final/stderr.txt)：27通过、0失败。
+包含原裁决的TU/linkage/声明/唯一性/组范围，补充1的前缀唯一性/宏链/缺AST，
+补充2的实参范围、第三文件、缺标志、非实参在decl_file、scratch拒绝；
+另直接读真实证据检验ff_put实例闭合、两种真实拼接实例保持未决。
+合成夹具均注明synthetic，不冒充编译器实测。
+既有裁决1修复的11项夹具与闭合数沿用已验收结果；本轮未改该实现。
+
+| 对象 | 裁决1已闭合 | 裁决2已闭合 | 外部CU已闭合 | 宏scratch未决 | 原规则候选核对未完成 | 未决总数 |
+|---|---:|---:|---:|---:|---:|---:|
+| spike Thumb | 2 | 0 | 0 | 0 | 15 | 15 |
+| spike A32 | 2 | 0 | 0 | 0 | 15 | 15 |
+| FFmpeg Thumb | 1236 | 6 | 38 | 28 | 26841 | 26869 |
+| FFmpeg A32 | 1242 | 6 | 38 | 28 | 26876 | 26904 |
+
+[完整闭合汇总](evidence/ruling2/supplement2/closure-summary.json)。
+新的完整清单在同目录 `<object>-inventory/index.json` 及CSV分片，索引保存前版SHA，
+所有原始属性与候选仍在原清单，不把“有候选”当作已闭合单候选。
+原规则单候选/多候选歧义最终数量尚未验收；因新的scratch门禁停止，没有继续这些工作。
+GNU外部CU每侧38、libgcc10成员的证据与上一节相同，本轮不重复构建或改变not_instrumented规则。
+U、排除清单、对象登记表、③损失分解、映射范围内系统头/宏函数静态地址与字节数均未计算。
+
+### 7.5 资源、失败记录与复现
+
+全程串行，nice19/ionice-c3，systemd scope 3G/200%；启动前均≥4GiB。
+本轮记录最低MemAvailable **8056033280字节（7.502766GiB）**，最高cgroup memory.peak **578240512字节（0.538528GiB）**，无OOM、无资源暂停/终止。
+
+[资源汇总](evidence/ruling2/supplement2/resources-summary.json)；
+每条run_scoped目录保留命令、原始meminfo、loadavg、stdout/stderr与ALL-END。
+所有新增文件均小于1MB；原始大AST/token只留temp。
+
+过程中的本地辅助代码失败如实保留：
+1. 插件初稿JSON显式构造语法编译失败，修正后构建成功。
+2. 插件初稿让Recorder随PluginASTAction销毁，callback引用失效导致崩溃；
+   改为callback/consumer共同持有shared_ptr，最终十条命令成功。不是FFmpeg/LLVM缺陷；
+   原始退出139诊断与保存路径见 `thumb-token-api-attempt1-commands.json`。
+3. 一次shell引用错误，命令尚未执行，无文件更改；改用here-doc。
+4. 首次打包证据重复保存tokens/完整callbacks，触发单文件1MB自检；
+   改为token仅存一份、完整callback原文保留temp及SHA，仓库仅存必要位置与原文引用。
+5. 按宏名/file:line筛链会混入同template其他包含实例；
+   最终按原始展开区间ID精确关联，十份原始输出无需重跑，闭合数未改变。
+
+最终生成命令（在WORKDIR内，外层统一nice/ionice/systemd scope；细节见对应command.json）：
+```text
+python3 tools/profgen_eval/compiler_token_evidence.py build
+python3 tools/profgen_eval/compiler_token_evidence.py thumb
+python3 tools/profgen_eval/compiler_token_evidence.py a32
+python3 tools/profgen_eval/audit_macro_tokens.py
+python3 -m unittest discover -s tools/profgen_eval -p test_macro_function_rule.py -v
+python3 tools/profgen_eval/package_token_evidence.py
+```
+文件SHA与生成命令入口见 `evidence/ruling2/supplement2/artifact-manifest.json`。
+边界例外：无项目输入/产出越界；未读取三项用户配置，未改LLVM源码、设计正文、认证。
+系统工具及其systemd scope/cgroup运行记录属于既有资源限额机制。

@@ -44,13 +44,13 @@ def classify_macro(record):
     chain = record.get("compiler_ast_chain")
     if chain is not None:
         chain_result = validate_ast_chain(chain, decl, record.get("s_decl_line"), main)
-        if chain_result == "statements_in_decl_file":
+        if chain_result == "nonargument_token_in_decl_file":
             return {"conclusion": None, "route": "original_correspondence_rules",
                     "reasons": [chain_result]}
         if chain_result is not None:
             reasons.append(chain_result)
-    elif record.get("macro_definition_verified") is not True or norm(record.get("macro_definition_file")) != main:
-        reasons.append("macro_definition_not_in_main_file")
+    else:
+        reasons.append("compiler_token_evidence_missing")
     if record.get("ordinary_same_name_other_file") is not True:
         reasons.append("ordinary_rule_exclusion_unproven")
     if not isinstance(record.get("fnda"), int) or record["fnda"] < 0:
@@ -75,20 +75,39 @@ def resolve_tu_prefix(prefix, full_linkage, commands):
     return next(iter(matched)) if len(matched) == 1 else None
 
 
+def within(location, region):
+    """Inclusive token-start offsets; files must be real, identical source files."""
+    return (bool(location.get("file")) and not location.get("is_scratch") and
+            norm(location["file"]) == norm(region.get("file")) and
+            isinstance(location.get("offset"), int) and
+            isinstance(region.get("begin"), int) and isinstance(region.get("end"), int) and
+            region["begin"] <= location["offset"] <= region["end"])
+
+
 def validate_ast_chain(chain, decl_file, decl_line, main_file):
+    """Supplement2: compiler truth, without reconstructing scratch spelling."""
     if not chain.get("ast_sha256") or not chain.get("compiler_command"):
         return "compiler_ast_evidence_missing"
+    if not chain.get("token_sha256"):
+        return "compiler_token_evidence_missing"
     definitions = chain.get("definitions", [])
     if not definitions or definitions != chain.get("compiler_definitions"):
         return "macro_chain_definition_disagrees"
-    locations = chain.get("statement_locations", [])
-    if not locations:
-        return "ast_statement_locations_missing"
-    for loc in locations:
-        if norm(loc.get("spelling_file")) == decl_file:
-            return "statements_in_decl_file"
-        if norm(loc.get("spelling_file")) != main_file:
-            return "statement_spelling_not_in_main_file"
-        if norm(loc.get("expansion_file")) != decl_file or loc.get("expansion_line") != decl_line:
-            return "statement_expansion_disagrees"
+    tokens = chain.get("tokens", [])
+    if not tokens:
+        return "body_tokens_missing"
+    allowed = chain.get("invocation_argument_ranges", []) + chain.get("definition_body_ranges", [])
+    for token in tokens:
+        spelling, expansion = token.get("spelling", {}), token.get("expansion", {})
+        if norm(expansion.get("file")) != decl_file or expansion.get("line") != decl_line:
+            return "token_expansion_disagrees"
+        if type(token.get("isMacroArgExpansion")) is not bool:
+            return "macro_argument_flag_missing"
+        if norm(spelling.get("file")) == main_file:
+            continue
+        if token["isMacroArgExpansion"] is not True:
+            return ("nonargument_token_in_decl_file" if norm(spelling.get("file")) == decl_file
+                    else "nonargument_token_outside_main_file")
+        if not any(within(spelling, region) for region in allowed):
+            return "argument_spelling_outside_allowed_ranges"
     return None
