@@ -38,6 +38,11 @@
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
 
+## 裁决1代码修正（2026-11-10）
+
+- 已删除三个常量True；逐对象、S/C逐侧从header-evidence.json读取核验结果，任一缺失/假则未决。11项夹具通过，重跑闭合数spike各2、FFmpeg1236/1242完全不变。[报告](profgen/eval/prep/03_system_header_ruling.md#6-裁决1实现修正用户裁决2入口)
+- 下一步按用户裁决2继续宏函数、外部CU与普通对应核对；仍不打开正式sample profile。
+
 ## 裁决1执行状态（2026-11-10；其他身份类别停止）
 
 - 裁决原文已先提交推送42925cce108de42b6a8dfc69a6d0c17d0254e643。四项证据已核对：S/C系统目录同为/usr/lib/clang/22/include、/usr/local/include、/usr/include；C未开启系统头覆盖，源码跳过条件及覆盖全局文件表核对通过。

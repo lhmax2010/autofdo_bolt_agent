@@ -97,3 +97,9 @@ S与C调试信息的声明文件均为libavcodec/arm/hpeldsp_init_arm.c；覆盖
 资源摘要：已保存最低MemAvailable=9.425247GiB；最大实读cgroup memory.peak=0.127079GiB；资源终止=0。所有任务短于60秒，scope监测仍保留60秒采样逻辑。
 
 补充计数口径：按“规范化decl_file、去后缀名字、decl_line”去重，仅用于展示，每侧同名异文件类别为30个身份，外部CU待证类别为38个身份；完整DIE与别名/副本均保留，不以展示去重改变对应规则。证据：distinct-unresolved-identities.json。
+
+## 6. 裁决1实现修正（用户裁决2入口）
+
+原实现把三个证据标志写成True，已移除。recheck_header_evidence.py从保存的逐侧clang -v退出码、stderr哈希与目录、编译命令和CoverageMappingGen.cpp实际内容重新推导标志，写入header-evidence.json每对象每侧。apply_header_ruling.py只读取这些标志，两侧任一字段缺失或不为布尔true即未决。
+
+11项夹具通过（含对每对象、每侧、三个字段逐一删除/置假，全部相关系统头记录变未决）；重跑闭合数与前次完全相同：spike各2、FFmpeg Thumb1236/A321242。证据：evidence/ruling1-fix-evidence/、ruling1-fix-tests/、ruling1-fix-apply/。旧artifact-sha256.json是前次提交的产物快照，不代表本次修正后的字节。

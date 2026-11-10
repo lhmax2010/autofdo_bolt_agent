@@ -10,7 +10,7 @@ import posixpath
 import re
 from pathlib import Path
 from dwarf_inventory import text
-from system_header_rule import classify
+from system_header_rule import classify, proof_from_record
 from pack_static_evidence import tables
 
 BASE=Path("docs/profgen/eval/prep/evidence")
@@ -54,11 +54,8 @@ def main():
                 relative_cu=relative_cu.split("/BUILD/",1)[1].split("/",1)[-1]
             file=norm_file(r["decl_file"]);name=norm_name(r["name"])
             candidates=by_key[(file,name)]
-            proof={"commands_verified":relative_cu in s_sources and relative_cu in c_sources and producer=="clang version 22.1.8",
-                   "clang_v_verified":True,"s_dirs":ev["sides"]["S"]["dirs"],
-                   "c_dirs":ev["sides"]["C"]["dirs"],"coverage_disabled_verified":True,
-                   "skip_source_verified":True,
-                   "global_coverage_file_check_passed":ev["global_coverage_file_check_passed"]}
+            proof=proof_from_record(ev, relative_cu in s_sources and relative_cu in c_sources
+                                    and producer=="clang version 22.1.8")
             decision=classify(file,candidates,proof)
             if decision["conclusion"]:
                 category="system_header_no_reference";sys_files[file]+=1;sys_names.add((file,name))

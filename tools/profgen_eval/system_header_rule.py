@@ -41,3 +41,16 @@ def group_scope(conclusions):
                                  "reference_unexecuted"} for c in conclusions):
         return "known_out_of_scope"
     return None
+
+
+def proof_from_record(record, commands_verified):
+    """Missing evidence on either side fails closed; no truthy strings."""
+    sides = record.get("sides", {})
+    proof = {"commands_verified": commands_verified,
+             "s_dirs": sides.get("S", {}).get("dirs", []),
+             "c_dirs": sides.get("C", {}).get("dirs", []),
+             "global_coverage_file_check_passed":
+                 record.get("global_coverage_file_check_passed") is True}
+    for field in ("clang_v_verified", "coverage_disabled_verified", "skip_source_verified"):
+        proof[field] = all(sides.get(side, {}).get(field) is True for side in ("S", "C"))
+    return proof
