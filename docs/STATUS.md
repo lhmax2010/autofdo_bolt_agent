@@ -34,6 +34,10 @@
 - v1.5文件SHA-256：be18d105d5711861b08517004d97eb40de5fb37b92213202cddd6b759fa9e636；从Downloads以mv移入，无同SHA重复副本，旧版本不动。
 
 
+## 人工裁决（登记前准备）
+
+- [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
+
 ## 登记前准备第一阶段（2026-11-10；身份门禁停止）
 
 - v1.5已单独提交推送dba4de162eab5058f16dfed8445da93ea058e49a；计划提交34f0013。修订3未登记，本轮没有打开或计算任何正式sample profile（含CALIBRATION）。
