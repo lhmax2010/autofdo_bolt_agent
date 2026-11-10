@@ -1,0 +1,34 @@
+Dumping ff_put_pixels16_x2_arm:
+FunctionDecl 0x55558bfbe340 <./libavcodec/pixels.h:34:54, line:31:54> libavcodec/arm/hpeldsp_init_arm.c:38:16 used ff_put_pixels16_x2_arm 'void (uint8_t *, const uint8_t *, ptrdiff_t, int)' static
+|-ParmVarDecl 0x55558bfbe110 <./libavcodec/pixels.h:27:15, col:24> col:24 used block 'uint8_t *'
+|-ParmVarDecl 0x55558bfbe198 <col:31, col:46> col:46 used pixels 'const uint8_t *'
+|-ParmVarDecl 0x55558bfbe218 <line:28:15, col:25> col:25 used line_size 'ptrdiff_t':'int'
+|-ParmVarDecl 0x55558bfbe298 <col:36, col:40> col:40 used h 'int'
+`-CompoundStmt 0x55558bfbe780 <col:54, line:31:54>
+  |-CallExpr 0x55558bfbe4f8 <libavcodec/arm/hpeldsp_init_arm.c:38:48, ./libavcodec/pixels.h:30:34> 'void'
+  | |-ImplicitCastExpr 0x55558bfbe4e0 <libavcodec/arm/hpeldsp_init_arm.c:38:48> 'void (*)(uint8_t *, const uint8_t *, ptrdiff_t, int)' <FunctionToPointerDecay>
+  | | `-DeclRefExpr 0x55558bfbe408 <col:48> 'void (uint8_t *, const uint8_t *, ptrdiff_t, int)' Function 0x55558bfbccd0 'ff_put_pixels8_x2_arm' 'void (uint8_t *, const uint8_t *, ptrdiff_t, int)'
+  | |-ImplicitCastExpr 0x55558bfbe540 <./libavcodec/pixels.h:30:7> 'uint8_t *' <LValueToRValue>
+  | | `-DeclRefExpr 0x55558bfbe428 <col:7> 'uint8_t *' lvalue ParmVar 0x55558bfbe110 'block' 'uint8_t *'
+  | |-ImplicitCastExpr 0x55558bfbe558 <col:14> 'const uint8_t *' <LValueToRValue>
+  | | `-DeclRefExpr 0x55558bfbe448 <col:14> 'const uint8_t *' lvalue ParmVar 0x55558bfbe198 'pixels' 'const uint8_t *'
+  | |-ImplicitCastExpr 0x55558bfbe570 <col:22> 'ptrdiff_t':'int' <LValueToRValue>
+  | | `-DeclRefExpr 0x55558bfbe468 <col:22> 'ptrdiff_t':'int' lvalue ParmVar 0x55558bfbe218 'line_size' 'ptrdiff_t':'int'
+  | `-ImplicitCastExpr 0x55558bfbe588 <col:33> 'int' <LValueToRValue>
+  |   `-DeclRefExpr 0x55558bfbe488 <col:33> 'int' lvalue ParmVar 0x55558bfbe298 'h' 'int'
+  `-CallExpr 0x55558bfbe708 <libavcodec/arm/hpeldsp_init_arm.c:38:48, ./libavcodec/pixels.h:31:42> 'void'
+    |-ImplicitCastExpr 0x55558bfbe6f0 <libavcodec/arm/hpeldsp_init_arm.c:38:48> 'void (*)(uint8_t *, const uint8_t *, ptrdiff_t, int)' <FunctionToPointerDecay>
+    | `-DeclRefExpr 0x55558bfbe5a0 <col:48> 'void (uint8_t *, const uint8_t *, ptrdiff_t, int)' Function 0x55558bfbccd0 'ff_put_pixels8_x2_arm' 'void (uint8_t *, const uint8_t *, ptrdiff_t, int)'
+    |-BinaryOperator 0x55558bfbe618 <./libavcodec/pixels.h:31:7, libavcodec/arm/hpeldsp_init_arm.c:38:78> 'uint8_t *' '+'
+    | |-ImplicitCastExpr 0x55558bfbe600 <./libavcodec/pixels.h:31:7> 'uint8_t *' <LValueToRValue>
+    | | `-DeclRefExpr 0x55558bfbe5c0 <col:7> 'uint8_t *' lvalue ParmVar 0x55558bfbe110 'block' 'uint8_t *'
+    | `-IntegerLiteral 0x55558bfbe5e0 <libavcodec/arm/hpeldsp_init_arm.c:38:78> 'int' 8
+    |-BinaryOperator 0x55558bfbe690 <./libavcodec/pixels.h:31:18, libavcodec/arm/hpeldsp_init_arm.c:38:78> 'const uint8_t *' '+'
+    | |-ImplicitCastExpr 0x55558bfbe678 <./libavcodec/pixels.h:31:18> 'const uint8_t *' <LValueToRValue>
+    | | `-DeclRefExpr 0x55558bfbe638 <col:18> 'const uint8_t *' lvalue ParmVar 0x55558bfbe198 'pixels' 'const uint8_t *'
+    | `-IntegerLiteral 0x55558bfbe658 <libavcodec/arm/hpeldsp_init_arm.c:38:78> 'int' 8
+    |-ImplicitCastExpr 0x55558bfbe750 <./libavcodec/pixels.h:31:30> 'ptrdiff_t':'int' <LValueToRValue>
+    | `-DeclRefExpr 0x55558bfbe6b0 <col:30> 'ptrdiff_t':'int' lvalue ParmVar 0x55558bfbe218 'line_size' 'ptrdiff_t':'int'
+    `-ImplicitCastExpr 0x55558bfbe768 <col:41> 'int' <LValueToRValue>
+      `-DeclRefExpr 0x55558bfbe6d0 <col:41> 'int' lvalue ParmVar 0x55558bfbe298 'h' 'int'
+

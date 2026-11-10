@@ -42,6 +42,14 @@
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
 
+## 裁决2执行状态（2026-11-10；宏实参AST条件停止）
+
+- 裁决1修正已推送f8f141f，11项夹具通过、闭合数不变。裁决2与补充1已分别推送099a78c、0c603bd。
+- C命令与LLVM源码证明PGO前缀为basename；显式TU映射与完整linkage、S/C声明位置、覆盖区域检查每个FFmpeg对象34/34通过。宏AST条件尚未闭合：CallExpr的宏实参拼写位置在decl_file或scratch space，均isMacroArgExpansion，需用户决定是否允许这一类；不自行忽略。[报告与原文](profgen/eval/prep/04_macro_function_ruling.md)
+- GNU外部CU每侧38个DIE已对应10个libgcc归档成员，按原规则not_instrumented；归档SHA、平台ar/dwarfdump、S链接日志/driver检查与局限见报告。规则辅助函数18项合成夹具通过，不冒充真实宏链验收。
+- 宏函数每侧34仍未决；普通候选的完整定义/叶子行集合验证未继续（spike各15、FFmpeg26841/26876）；尚未验收原规则单候选与多候选歧义数量。全部清单行保留，详见evidence/ruling2/closure-summary.json。
+- U、③、对象表、分桶损失与映射范围内静态代码规模未计算；正式sample profile未打开；修订3未登记。不改LLVM/设计、不碰板子。等待宏实参拼写位置裁决后继续。
+
 ## 裁决1代码修正（2026-11-10）
 
 - 已删除三个常量True；逐对象、S/C逐侧从header-evidence.json读取核验结果，任一缺失/假则未决。11项夹具通过，重跑闭合数spike各2、FFmpeg1236/1242完全不变。[报告](profgen/eval/prep/03_system_header_ruling.md#6-裁决1实现修正用户裁决2入口)

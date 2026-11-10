@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen_eval/prepare_macro_ast.py", line 48, in <module>
+    if __name__=="__main__":main()
+                            ^^^^^^
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen_eval/prepare_macro_ast.py", line 43, in main
+    results.append(dict(tu=tu,original_log=cr["log"],original_log_sha256=cr["log_sha256"],original_line=cmd["line"],original_command=cmd["args"],command=driver+args,cwd=str(src),ast=str(out),ast_sha256=sha(out),stderr=str(stderr),exit_code=proc.returncode,source_sha256=sha(src/tu),config_sha256=sha(src/"config.h"),debugsource_rpm=str(pkg),debugsource_sha256=sha(pkg),compiler_sha256=sha(emul/"usr/bin/clang-22")))
+                                                                                                                                                                                                                                                                              ^^^^^^^^^^^
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen_eval/run_scoped.py", line 24, in sha
+    with open(path, "rb") as f:
+         ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling2/source-thumb/usr/src/debug/ffmpeg-8.0.1-1.thumbC.arm/libavcodec/arm/hpeldsp_init_arm.c'

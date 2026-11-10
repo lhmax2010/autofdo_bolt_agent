@@ -1,0 +1,92 @@
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:5445:   // Set the main file name, so that debug info works even with
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:5446:   // -save-temps.
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:5447:   CmdArgs.push_back("-main-file-name");
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:5448:   CmdArgs.push_back(getBaseInputName(Args, Input));
+
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:8532: const char *Clang::getBaseInputName(const ArgList &Args,
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:8533:                                     const InputInfo &Input) {
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:8534:   return Args.MakeArgString(llvm::sys::path::filename(Input.getBaseInput()));
+src/llvm/clang/lib/Driver/ToolChains/Clang.cpp:8535: }
+
+src/llvm/clang/lib/CodeGen/CodeGenPGO.cpp:39: void CodeGenPGO::setFuncName(StringRef Name,
+src/llvm/clang/lib/CodeGen/CodeGenPGO.cpp:40:                              llvm::GlobalValue::LinkageTypes Linkage) {
+src/llvm/clang/lib/CodeGen/CodeGenPGO.cpp:41:   llvm::IndexedInstrProfReader *PGOReader = CGM.getPGOReader();
+src/llvm/clang/lib/CodeGen/CodeGenPGO.cpp:42:   FuncName = llvm::getPGOFuncName(
+src/llvm/clang/lib/CodeGen/CodeGenPGO.cpp:43:       Name, Linkage, CGM.getCodeGenOpts().MainFileName,
+src/llvm/clang/lib/CodeGen/CodeGenPGO.cpp:44:       PGOReader ? PGOReader->getVersion() : llvm::IndexedInstrProf::Version);
+
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:303: std::string getPGOFuncName(StringRef Name, GlobalValue::LinkageTypes Linkage,
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:304:                            StringRef FileName,
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:305:                            [[maybe_unused]] uint64_t Version) {
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:306:   // Value names may be prefixed with a binary '1' to indicate
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:307:   // that the backend should not modify the symbols due to any platform
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:308:   // naming convention. Do not include that '1' in the PGO profile name.
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:309:   if (Name[0] == '\1')
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:310:     Name = Name.substr(1);
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:311: 
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:312:   std::string NewName = std::string(Name);
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:313:   if (llvm::GlobalValue::isLocalLinkage(Linkage)) {
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:314:     // For local symbols, prepend the main file name to distinguish them.
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:315:     // Do not include the full path in the file name since there's no guarantee
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:316:     // that it will stay the same, e.g., if the files are checked out from
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:317:     // version control in different locations.
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:318:     if (FileName.empty())
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:319:       NewName = NewName.insert(0, "<unknown>:");
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:320:     else
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:321:       NewName = NewName.insert(0, FileName.str() + ":");
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:322:   }
+src/llvm/llvm/lib/ProfileData/InstrProf.cpp:323:   return NewName;
+
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:275: void JSONNodeDumper::writeBareSourceLocation(SourceLocation Loc) {
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:276:   PresumedLoc Presumed = SM.getPresumedLoc(Loc);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:277:   if (Presumed.isValid()) {
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:278:     StringRef ActualFile = SM.getBufferName(Loc);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:279:     auto [FID, FilePos] = SM.getDecomposedLoc(Loc);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:280:     unsigned ActualLine = SM.getLineNumber(FID, FilePos);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:281:     JOS.attribute("offset", FilePos);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:282:     if (LastLocFilename != ActualFile) {
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:283:       JOS.attribute("file", ActualFile);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:284:       JOS.attribute("line", ActualLine);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:285:     } else if (LastLocLine != ActualLine)
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:286:       JOS.attribute("line", ActualLine);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:287: 
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:288:     StringRef PresumedFile = Presumed.getFilename();
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:289:     if (PresumedFile != ActualFile && LastLocPresumedFilename != PresumedFile)
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:290:       JOS.attribute("presumedFile", PresumedFile);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:291: 
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:292:     unsigned PresumedLine = Presumed.getLine();
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:293:     if (ActualLine != PresumedLine && LastLocPresumedLine != PresumedLine)
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:294:       JOS.attribute("presumedLine", PresumedLine);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:295: 
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:296:     JOS.attribute("col", Presumed.getColumn());
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:297:     JOS.attribute("tokLen",
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:298:                   Lexer::MeasureTokenLength(Loc, SM, Ctx.getLangOpts()));
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:299:     LastLocFilename = ActualFile;
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:300:     LastLocPresumedFilename = PresumedFile;
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:301:     LastLocPresumedLine = PresumedLine;
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:302:     LastLocLine = ActualLine;
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:303: 
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:304:     // Orthogonal to the file, line, and column de-duplication is whether the
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:305:     // given location was a result of an include. If so, print where the
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:306:     // include location came from.
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:307:     writeIncludeStack(SM.getPresumedLoc(Presumed.getIncludeLoc()),
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:308:                       /*JustFirst*/ true);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:309:   }
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:310: }
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:311: 
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:312: void JSONNodeDumper::writeSourceLocation(SourceLocation Loc) {
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:313:   SourceLocation Spelling = SM.getSpellingLoc(Loc);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:314:   SourceLocation Expansion = SM.getExpansionLoc(Loc);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:315: 
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:316:   if (Expansion != Spelling) {
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:317:     // If the expansion and the spelling are different, output subobjects
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:318:     // describing both locations.
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:319:     JOS.attributeObject(
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:320:         "spellingLoc", [Spelling, this] { writeBareSourceLocation(Spelling); });
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:321:     JOS.attributeObject("expansionLoc", [Expansion, Loc, this] {
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:322:       writeBareSourceLocation(Expansion);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:323:       // If there is a macro expansion, add extra information if the interesting
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:324:       // bit is the macro arg expansion.
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:325:       if (SM.isMacroArgExpansion(Loc))
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:326:         JOS.attribute("isMacroArgExpansion", true);
+src/llvm/clang/lib/AST/JSONNodeDumper.cpp:327:     });
