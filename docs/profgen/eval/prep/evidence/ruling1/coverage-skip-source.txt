@@ -1,0 +1,12 @@
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:49: cl::opt<bool> SystemHeadersCoverage(
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:50:     "system-headers-coverage",
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:51:     cl::desc("Enable collecting coverage from system headers"), cl::init(false),
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:52:     cl::Hidden);
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1572:   void VisitDecl(const Decl *D) {
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1573:     Stmt *Body = D->getBody();
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1574: 
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1575:     // Do not propagate region counts into system headers unless collecting
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1576:     // coverage from system headers is explicitly enabled.
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1577:     if (!SystemHeadersCoverage && Body &&
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1578:         SM.isInSystemHeader(SM.getSpellingLoc(getStart(Body))))
+src/llvm/clang/lib/CodeGen/CoverageMappingGen.cpp:1579:       return;

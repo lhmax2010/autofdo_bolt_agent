@@ -38,6 +38,15 @@
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
 
+## 裁决1执行状态（2026-11-10；其他身份类别停止）
+
+- 裁决原文已先提交推送42925cce108de42b6a8dfc69a6d0c17d0254e643。四项证据已核对：S/C系统目录同为/usr/lib/clang/22/include、/usr/local/include、/usr/include；C未开启系统头覆盖，源码跳过条件及覆盖全局文件表核对通过。
+- 新规则10项合成夹具通过、0失败。静态清单新闭合system_header_no_reference：FFmpeg Thumb1236、A321242、spike Thumb/A32各2个DIE。[执行报告与证据](profgen/eval/prep/03_system_header_ruling.md)
+- 按裁决停止条件：FFmpeg每侧另有34个同名异定义文件DIE（hpeldsp_init_arm.c/pel_template.c/hpeldsp.c/rv40dsp.c，参考主文件不同），需人工裁决；另38个GNU外部CU DIE待现有规则的来源证据。未按同名或FNDA=0强行对应。
+- 完整清单全部行保留；有候选但定义/行集合尚未核对的记录仍为未决（spike各15、FFmpeg Thumb26841/A3226876），没有把候选当结论。未继续原规则核对和全套夹具。
+- U、①②③③′、n_eff、K、损失分桶与映射范围内系统头地址/字节数均未计算，原因是映射范围尚未建立。未打开正式sample profile、未连接板子、修订3未登记。
+- 待人工裁决：宏生成函数同名、两侧DWARF声明文件一致而覆盖主文件不同的处理；其他挂账保留。
+
 ## 登记前准备第一阶段（2026-11-10；身份门禁停止）
 
 - v1.5已单独提交推送dba4de162eab5058f16dfed8445da93ea058e49a；计划提交34f0013。修订3未登记，本轮没有打开或计算任何正式sample profile（含CALIBRATION）。
