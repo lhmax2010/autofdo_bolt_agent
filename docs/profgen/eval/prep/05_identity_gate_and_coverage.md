@@ -188,3 +188,13 @@ LCOV归档分片逐片和整体校验SHA后只在temp重建。
 
 提交前空白检查发现8份原始stdout的第一行有末尾空格；保留原文，不清洗证据。
 `git-whitespace-check.txt/json`保存原始检查输出与退出2；源码与文档另行检查。
+
+
+## 8. 新裁决恢复（静态计算继续，登记禁令保持）
+
+普通候选完整结果已推送d981471（fd4b5b5的后续提交）。用户裁决明确：
+1%不可登记门槛不阻止静态U的计算。现在继续四个对象的歧义证据包和完整静态表，
+保持门槛、不新增身份裁决、不按DA挑选闭合，不读正式sample profile。
+普通结果的集中入口为[evidence/identity-gate/ordinary-index.json](evidence/identity-gate/ordinary-index.json)，
+引用已推送的全部清单、SHA、单候选结果、参考DA和88项测试；旧路径保留。
+后续将把本报告第6、7节更新为完整歧义包与静态表，保留此前门槛发现记录。

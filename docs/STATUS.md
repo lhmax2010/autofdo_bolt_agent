@@ -36,6 +36,8 @@
 
 ## 人工裁决（登记前准备）
 
+- 静态计算与登记状态分离（本轮人工裁决）：按v1.5 5.8第5条原文，identity_ambiguous、unmatched_in_elf、boundary_unavailable任一项按③口径超过分母1%，即标为“评估不可用（当前）/不可登记”；不放宽。不可登记不等于停止静态计算：全部对象继续U、排除清单、权重和对象表，并保留登记状态与原因。不得新增或扩大身份裁决、不得按计数大小挑选闭合条目；将来的新裁决须对整类身份证据统一适用。完成静态表后停止，不登记修正案3，不进入仿真或其他N.5项目，不读取正式sample profile。
+
 - [裁决2补充3修订1](profgen/eval/prep/rulings.md)：直接未展开FileID实参以唯一MacroArgs槽位、该槽位的编译器区间、调用实例及同FileID证明来源，保留isMacroArgExpansion=false；不改变补充2物理函数体token规则。先登记，再实施与验收，身份门禁通过前不计算U/③。
 
 - [裁决2补充3](profgen/eval/prep/rulings.md)：仅scratch token允许按编译器API的唯一拼接层、展开实例、定义片段、未展开实参、文本与递归来源证明替代拼写位置条件；其余规则不变。实际GBS bind工作树TokenLexer.cpp:895–914前提核验通过；真实未展开实参的FileID标志与规则7冲突，执行状态见下。
