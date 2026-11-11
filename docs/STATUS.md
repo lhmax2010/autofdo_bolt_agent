@@ -48,6 +48,12 @@
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
 
+## 裁决2补充3修订1执行状态（2026-11-11）
+
+- 修订1已照录推送b17c93f；正式classifier接入完成，旧物理token规则不变。每个MacroArgs槽位用回调token位置/长度证明半开区间，保留false标志。
+- Thumb/A32各28条新闭合，未决0，FNDA均0，scope_role=reference_unexecuted；含既有6条后宏对应各34条。三例真实断言退出0。原27项及新增19项synthetic测试通过；初次夹具失误原文保留。[04§8.7](profgen/eval/prep/04_macro_function_ruling.md)
+- 下一步普通候选：Thumb26841、A3226876、spike各15。未把候选当闭合；U、③、损失分解未计算。正式sample profile未打开，修正案3未登记。[05门禁](profgen/eval/prep/05_identity_gate_and_coverage.md)
+
 ## 裁决2补充3执行状态（2026-11-11；未展开实参标志停止）
 
 - 裁决原文与TokenLexer前提已提交推送d79e285；GBS源码bind目录当前为空，核对实际bind工作树与f999源文件SHA一致，:895–914范围语义成立。[04报告§8](profgen/eval/prep/04_macro_function_ruling.md)

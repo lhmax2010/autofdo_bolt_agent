@@ -429,3 +429,51 @@ python3 tools/profgen_eval/record_paste_stop.py
 SHA清单：`evidence/ruling2/supplement3/artifact-manifest.json`。
 没有新增已知项目文件边界例外，没有改动三项用户配置、认证或任何LLVM源码；
 没有推送LLVM/Gerrit或llvm-optimize。
+
+
+### 8.7 补充3修订1：正式闭合与验收（2026-11-11）
+
+修订1已照录[裁决文件](rulings.md)，独立提交b17c93f。上面的停止记录保留。
+本轮只用静态编译器/ELF/覆盖参考证据，没有读取正式sample profile。
+
+实现：`compiler_token_evidence.py`在MacroExpands回调复制MacroArgs每个槽位的token，
+用getSpellingLoc和Token::getLength给出半开区间、raw值、FileID、槽位号及调用实例；
+没有搜索文本或逗号，也不使用所有实参的总范围。
+`token_paste_rule.py`实现补充3第1–8条与修订1的三路来源判定；
+`macro_function_rule.py`只在原补充2不允许的scratch token上调用此证明。
+旧物理函数体token路径不变，证据缺失仍未决。
+`apply_paste_ruling.py`真正调用classify_macro，未使用inspect草稿结果替代身份判定。
+
+| 对象 | 本轮检查记录 | 新闭合 | 未决 | FNDA>0 | (i)MacroID操作数 | (ii)直接槽位操作数 | (iii)scratch FileID操作数 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| FFmpeg Thumb | 28 | 28 | 0 | 0 | 84 | 56 | 0 |
+| FFmpeg A32 | 28 | 28 | 0 | 0 | 84 | 56 | 0 |
+
+操作数统计按每次证明出现计数，包含递归子证明，不是去重地址数；定义体字面不在三类实参中。
+每侧既有6条宏记录也重跑通过，宏对应合计34条。全部闭合的组范围角色均reference_unexecuted。
+[全量摘要](evidence/ruling2/supplement3/rev1/macro-summary.json)、
+[闭合总表](evidence/ruling2/supplement3/rev1/closure-summary.json)。
+
+三个正例逐层证明：
+- [thumb-18 PIXOP2](evidence/ruling2/supplement3/rev1/example-18-proof.txt)：
+  OPNAME##字面，put来自hpeldsp.c:333第0槽，direct_unexpanded_argument_slot，保留false。
+- [thumb-07 DEF_PEL](evidence/ruling2/supplement3/rev1/example-07-proof.txt)：
+  FUNC3的内层scratch操作数递归到DEF_PEL，put来自pel_template.c:78第0槽走(ii)；
+  8与_c走(i)，BIT_DEPTH与中间宏定义体的API链仍完整保存。
+- [thumb-33 PIXOP2](evidence/ruling2/supplement3/rev1/example-33-proof.txt)：
+  rv40dsp.c:265的put同样经唯一槽位证明。
+
+每份摘要链接完整proof JSON（L、B/E、X、定义片段、操作数位置链、槽位raw/offset、文本比较、子证明）。
+[真实断言](evidence/ruling2/supplement3/rev1/real-example-assertions.json)全部PASS，
+record_paste_stop.py已改为正例断言，实际退出0；旧停止文件不覆盖。
+
+测试：原27项文件不改，27/27通过；新增19项synthetic证据夹具通过（规定的①–⑮，加正式classifier接入、槽位缺证、跨FileID、物理函数体旧规则4项）。
+真实正例另计3项。第一次新增夹具有1项因Python字典共享引用导致先触发另一拒绝条件，
+修正为只篡改操作数spelling FileID后19/19通过；失败输出保留，未改生产规则迁就夹具。
+命令、真实退出码、完整stderr分别见rev1/tests-initial、tests-paste、tests-paste-final、real-positive-assertions。
+
+插件构建退出0；Thumb/A32各5个实际C编译命令退出0；未重编或修改Clang本体。
+原始AST/token留在temp/prep-ruling2/token-api-supplement3-rev1/，
+命令、大小、SHA在rev1/{thumb,a32}-token-api-commands.json；每个提交文件小于1MB。
+资源串行3G/200%，nice19/ionice-c3，门禁≥4GiB；见rev1/resources-summary.json。
+普通候选核对下一步进行，不把有候选当闭合。U及③尚未计算。

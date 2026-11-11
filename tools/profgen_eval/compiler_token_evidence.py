@@ -10,8 +10,8 @@ from pathlib import Path
 from run_scoped import WORK, ROOT, sha
 
 INPUT = WORK / "docs/profgen/eval/prep/evidence/ruling2"
-BASE = INPUT / "supplement3"
-OUT = WORK / "temp/prep-ruling2/token-api-supplement3"
+BASE = INPUT / "supplement3/rev1"
+OUT = WORK / "temp/prep-ruling2/token-api-supplement3-rev1"
 SOURCE = r"""
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/Decl.h"
@@ -105,7 +105,7 @@ struct Recorder {
       C = Next;
     }
     return llvm::json::Object{{"kind",T.getName()}, {"text",CI.getPreprocessor().getSpelling(T)},
-            {"location",loc(L)}, {"spelling",loc(SM.getSpellingLoc(L))},
+            {"location",loc(L)}, {"length",T.getLength()}, {"spelling",loc(SM.getSpellingLoc(L))},
             {"expansion",loc(SM.getExpansionLoc(L))},
             {"isMacroArgExpansion",SM.isMacroArgExpansion(L)}, {"trace",std::move(Trace)}};
   }
@@ -118,7 +118,7 @@ struct Callbacks: PPCallbacks {
                     const MacroArgs *Args) override {
     if (!R.selected(Name.getLocation())) return;
     const MacroInfo *MI = MD.getMacroInfo();
-    llvm::json::Array Body, Arguments, PasteFragments;
+    llvm::json::Array Body, Arguments, ArgumentSlots, PasteFragments;
     for (const auto &T: MI->tokens()) {
       auto O=R.token(T);
       O["parameter_num"]=T.getIdentifierInfo()?MI->getParameterNum(T.getIdentifierInfo()):-1;
@@ -151,6 +151,21 @@ struct Callbacks: PPCallbacks {
     if (Args) for (unsigned I=0; I<Args->getNumMacroArguments(); ++I) {
       llvm::json::Array A;
       for (const Token *T=Args->getUnexpArgument(I); !T->is(tok::eof); ++T) A.push_back(R.token(*T));
+      const Token *First = Args->getUnexpArgument(I), *Last = First;
+      unsigned Count = 0;
+      for (const Token *T=First; !T->is(tok::eof); ++T) {Last=T; ++Count;}
+      llvm::json::Object Slot{{"slot",I},{"count",Count},
+        {"copied_in_macroexpands",true},{"method","MacroArgs::getUnexpArgument"},
+        {"invocation",R.range(Call)}, {"name_raw",Name.getLocation().getRawEncoding()}};
+      if (Count) {
+        auto B=R.SM.getSpellingLoc(First->getLocation());
+        auto E=R.SM.getSpellingLoc(Last->getLocation()).getLocWithOffset(Last->getLength());
+        Slot["begin"]=R.loc(B); Slot["end_exclusive"]=R.loc(E);
+        llvm::json::Array Raw;
+        for (const Token *T=First; !T->is(tok::eof); ++T) Raw.push_back(T->getLocation().getRawEncoding());
+        Slot["token_raws"]=std::move(Raw);
+      }
+      ArgumentSlots.push_back(std::move(Slot));
       Arguments.push_back(std::move(A));
     }
     R.emit(llvm::json::Object{{"record","macro"},{"name",R.CI.getPreprocessor().getSpelling(Name)},
@@ -158,7 +173,7 @@ struct Callbacks: PPCallbacks {
             {"msvc_compat",bool(R.CI.getLangOpts().MSVCCompat)},
             {"expansion",R.loc(R.SM.getExpansionLoc(Name.getLocation()))},
             {"definition",R.range({MI->getDefinitionLoc(),MI->getDefinitionEndLoc()})},
-            {"body",std::move(Body)}, {"arguments",std::move(Arguments)}, {"paste_fragments",std::move(PasteFragments)}});
+            {"body",std::move(Body)}, {"arguments",std::move(Arguments)}, {"argument_slots",std::move(ArgumentSlots)}, {"paste_fragments",std::move(PasteFragments)}});
   }
 };
 struct Consumer: ASTConsumer {

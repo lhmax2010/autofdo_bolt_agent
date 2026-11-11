@@ -109,5 +109,14 @@ def validate_ast_chain(chain, decl_file, decl_line, main_file):
             return ("nonargument_token_in_decl_file" if norm(spelling.get("file")) == decl_file
                     else "nonargument_token_outside_main_file")
         if not any(within(spelling, region) for region in allowed):
+            context=chain.get("paste_context")
+            if (spelling.get("is_scratch") is True and
+                spelling.get("presumed_file")=="<scratch space>" and context is not None):
+                from token_paste_rule import prove
+                proof=prove(token,context,context.get("macros",[]))
+                chain.setdefault("paste_proofs",[]).append(proof)
+                if proof["status"]=="proved":
+                    continue
+                return ";".join(proof["reason_codes"])
             return "argument_spelling_outside_allowed_ranges"
     return None

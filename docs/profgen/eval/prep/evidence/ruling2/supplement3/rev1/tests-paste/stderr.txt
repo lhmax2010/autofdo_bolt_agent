@@ -1,0 +1,35 @@
+test_01_parameter_paste_literal (test_token_paste_rule.SyntheticPasteTests.test_01_parameter_paste_literal) ... ok
+test_02_two_level_scratch_operand (test_token_paste_rule.SyntheticPasteTests.test_02_two_level_scratch_operand) ... ok
+test_03_argument_from_other_chain_definition (test_token_paste_rule.SyntheticPasteTests.test_03_argument_from_other_chain_definition) ... ok
+test_04_argument_from_outside_chain (test_token_paste_rule.SyntheticPasteTests.test_04_argument_from_outside_chain) ... ok
+test_05_stringification (test_token_paste_rule.SyntheticPasteTests.test_05_stringification) ... ok
+test_06_multitoken_argument (test_token_paste_rule.SyntheticPasteTests.test_06_multitoken_argument) ... ok
+test_07_placemarker (test_token_paste_rule.SyntheticPasteTests.test_07_placemarker) ... ok
+test_08_tampered_text (test_token_paste_rule.SyntheticPasteTests.test_08_tampered_text) ... ok
+test_09_endpoint_outside_definition (test_token_paste_rule.SyntheticPasteTests.test_09_endpoint_outside_definition) ... ok
+test_10_recursion_depth (test_token_paste_rule.SyntheticPasteTests.test_10_recursion_depth) ... ok
+test_11_nonunique_layer (test_token_paste_rule.SyntheticPasteTests.test_11_nonunique_layer) ... ok
+test_12_direct_exact_slot (test_token_paste_rule.SyntheticPasteTests.test_12_direct_exact_slot) ... ok
+test_13_wrong_slot (test_token_paste_rule.SyntheticPasteTests.test_13_wrong_slot) ... ok
+test_14_same_file_outside_slot (test_token_paste_rule.SyntheticPasteTests.test_14_same_file_outside_slot) ... ok
+test_15_instance_outside_chain (test_token_paste_rule.SyntheticPasteTests.test_15_instance_outside_chain) ... ok
+test_16_formal_classifier_integration (test_token_paste_rule.SyntheticPasteTests.test_16_formal_classifier_integration) ... ok
+test_17_missing_slot_evidence (test_token_paste_rule.SyntheticPasteTests.test_17_missing_slot_evidence) ... ok
+test_18_cross_fileid (test_token_paste_rule.SyntheticPasteTests.test_18_cross_fileid) ... FAIL
+test_19_physical_body_unchanged (test_token_paste_rule.SyntheticPasteTests.test_19_physical_body_unchanged) ... ok
+
+======================================================================
+FAIL: test_18_cross_fileid (test_token_paste_rule.SyntheticPasteTests.test_18_cross_fileid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen_eval/test_token_paste_rule.py", line 118, in test_18_cross_fileid
+    self.check((t,c,ms),"direct_argument_cross_fileid")
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/profgen_eval/test_token_paste_rule.py", line 66, in check
+    else:self.assertIn(reason,r["reason_codes"]);self.assertEqual(r["status"],"unresolved")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'direct_argument_cross_fileid' not found in ['paste_endpoint_instances_differ']
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.003s
+
+FAILED (failures=1)
