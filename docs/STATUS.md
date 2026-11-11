@@ -36,6 +36,15 @@
 - 未登记修正案3；未读取正式sample profile（含CALIBRATION），未计算RUN级受控量，未连接板子。按要求完成后停止，不进入Q.5其他项目。
 - v0.7–v1.7设计与历史静态结果保留不动；历史状态见git记录。当前实现入口为v18_*，v17_*保留供历史复现。
 
+## 登记前核对第一批（已完成；按要求停止）
+
+- [06报告：Q.5状态总表与本批核对](profgen/eval/prep/06_registration_checklist.md)先建立21项状态表，再执行本批。当前已完成8项、部分完成4项、未开始9项；不表示整体可登记。
+- 第2、3、4、13项通过：注入argv/失败执行器证据、五类命令准入、3个GNU Thumb派生avg负对照、提交与canonical名字契约；四对象主FileID函数范围、lcov FN/FNDA、JSON/lcov summary全部交叉一致。
+- 第5项①②③通过：四对象共814859个静态指令起点构造合成输入，max的none/prev-inst共8次转换；写出键全部命中映射。独立llvm-symbolizer与键计算的地址→键→源位置、排除、地址重数差异均0。边界失败组的none分类与prev-inst/avg失败契约通过。5④CALIBRATION未执行，第5项整体仍为部分完成。
+- 原250项测试不变，新增46项synthetic测试，共296项通过；95次素材/契约调用与8次全地址转换通过。正式工具仍为补丁9 SHA 2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5，无GBS/llvm-profgen重建。辅助读取器与源码摘录的开发失败原文保留。
+- [证据](profgen/eval/prep/evidence/registration-checks/batch1/manifest.json)：完整大表/合成输出留temp并登记SHA；保存的采样最低MemAvailable为9075150848B，cgroup峰值2051166208B，3G/200%串行，无OOM或资源终止。
+- 未读取正式sample profile（含CALIBRATION），未登记修正案3，未连接板子；不进入其他Q.5项目。后续仍待第5④及状态总表所列剩余项，本批不启动。
+
 ## 人工裁决（登记前准备）
 
 - 裁决3修订1：C行域改为C/S两构建合格行表记录并集；不得用键接受或身份结论决定C。code_free的AST分类只作描述；裁决4修订2不变。待折入v1.6并经三家评审。

@@ -1,0 +1,161 @@
+[
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--allow-missing-build-id",
+      "--binary-match-regex=^/target$",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.perfbin",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-none-False/synthetic.perfscript",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-none-False/synthetic.proftext",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-none-False/report.json",
+      "--format=text",
+      "--ip-aggregation=max",
+      "--ip-skid=none"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "warning: Sample PGO is estimated to optimize better with 50.0x more samples. Please consider increasing sampling rate or profiling for longer duration to get more samples.\n",
+    "verdict": {
+      "conversion": "ok",
+      "failure_stage": null,
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": null,
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "output_created": true,
+    "report": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-none-False/report.json",
+    "report_sha256": "aeda5b4a60ab52175aa7de34914dba647d9cb84ea7c86be0c57e245e1ab68b43",
+    "synthetic_entries": [
+      [
+        [
+          [
+            "bad-conflict",
+            0,
+            0
+          ]
+        ],
+        1
+      ]
+    ],
+    "classifications": [
+      [
+        "boundary_unavailable",
+        "boundary_unavailable"
+      ]
+    ]
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--allow-missing-build-id",
+      "--binary-match-regex=^/target$",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.perfbin",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-prev-inst-False/synthetic.perfscript",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-prev-inst-False/synthetic.proftext",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-prev-inst-False/report.json",
+      "--format=text",
+      "--ip-aggregation=max",
+      "--ip-skid=prev-inst"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "llvm-profgen: error: IP sample mode: failure_stage=boundary\n  conflicting mapping states in section .text (function=bad-conflict address=0x1000 DWARF=[0x1000,0x1004))\n",
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "boundary",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: failure_stage=boundary\n  conflicting mapping states in section .text (function=bad-conflict address=0x1000 DWARF=[0x1000,0x1004))",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "output_created": false,
+    "report": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-max-prev-inst-False/report.json",
+    "report_sha256": "540b992b51065462c0b13fd776e8e834866b7e586d95678c3e51d1aeaa5b1536"
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--allow-missing-build-id",
+      "--binary-match-regex=^/target$",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/bad-conflict.perfbin",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-avg-none-False/synthetic.perfscript",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-avg-none-False/synthetic.proftext",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-avg-none-False/report.json",
+      "--format=text",
+      "--ip-aggregation=avg",
+      "--ip-skid=none"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "llvm-profgen: error: IP sample mode: failure_stage=boundary\n  conflicting mapping states in section .text (function=bad-conflict address=0x1000 DWARF=[0x1000,0x1004))\n",
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "boundary",
+      "fallback_callback_count": 0,
+      "identity": "unverified",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "IP sample mode: failure_stage=boundary\n  conflicting mapping states in section .text (function=bad-conflict address=0x1000 DWARF=[0x1000,0x1004))",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "output_created": false,
+    "report": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/bad-conflict-avg-none-False/report.json",
+    "report_sha256": "f002a03914cea0b3eec25d811bde971e5dcc36e18a9b51ba55869b6fcb237795"
+  },
+  {
+    "command": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+      "--library-path",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+      "--ip-samples",
+      "--allow-missing-build-id",
+      "--binary-match-regex=^/target$",
+      "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/test/tools/llvm-profgen/Inputs/ip-mode/boundary-extra/boundaries.perfbin",
+      "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/boundaries-max-none-True/synthetic.perfscript",
+      "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/boundaries-max-none-True/synthetic.proftext",
+      "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/boundaries-max-none-True/report.json",
+      "--format=text",
+      "--ip-aggregation=max",
+      "--ip-skid=none",
+      "--show-canonical-fname"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "llvm-profgen: error: option --show-canonical-fname is not supported with --ip-samples\n",
+    "verdict": {
+      "conversion": "failed",
+      "failure_stage": "parse",
+      "fallback_callback_count": 0,
+      "identity": "unknown",
+      "lost_ratio_check": "not_evaluated",
+      "reason": "option --show-canonical-fname is not supported with --ip-samples",
+      "sample_threshold_check": "not_evaluated",
+      "sampling_adequacy": "unknown",
+      "usable_ratio_check": "not_evaluated"
+    },
+    "output_created": false,
+    "report": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/registration-batch1/contract-extras/boundaries-max-none-True/report.json",
+    "report_sha256": "0bdf220bdd233325d95b9dcc601331603054c1dff8ec17f494d2fd1bf95f239c"
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-profgen/ProfiledBinary.h",
+    "sha256": "aabc5ec0b30e76f935073cb9ad9cf628181f44a7dc7d01b833e1acd6a0a86458",
+    "line_count": 753,
+    "excerpts": [
+      {
+        "start": 613,
+        "end": 622,
+        "text": "613: \n614:   // Load the symbols from debug table and populate into symbol list.\n615:   void populateSymbolListFromDWARF(ProfileSymbolList &SymbolList);\n616: \n617:   SampleContextFrameVector\n618:   getFrameLocationStack(uint64_t Address, bool UseProbeDiscriminator = false) {\n619:     InstructionPointer IP(this, Address);\n620:     return symbolize(IP, SymbolizerOpts.UseSymbolTable, UseProbeDiscriminator);\n621:   }\n622: "
+      }
+    ]
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-profgen/ProfiledBinary.cpp",
+    "sha256": "3638b5972f14814e31d9e15c086d219c7031b4a8e1ea4bbd4980e4b94218b92c",
+    "line_count": 1466,
+    "excerpts": [
+      {
+        "start": 1206,
+        "end": 1218,
+        "text": "1206: symbolize::LLVMSymbolizer::Options ProfiledBinary::getSymbolizerOpts() const {\n1207:   symbolize::LLVMSymbolizer::Options SymbolizerOpts;\n1208:   SymbolizerOpts.PrintFunctions =\n1209:       DILineInfoSpecifier::FunctionNameKind::LinkageName;\n1210:   SymbolizerOpts.Demangle = false;\n1211:   SymbolizerOpts.DefaultArch = TheTriple.getArchName().str();\n1212:   SymbolizerOpts.UseSymbolTable = false;\n1213:   SymbolizerOpts.RelativeAddresses = false;\n1214:   SymbolizerOpts.DWPName = DWPPath;\n1215:   return SymbolizerOpts;\n1216: }\n1217: \n1218: SampleContextFrameVector ProfiledBinary::symbolize(const InstructionPointer &IP,"
+      },
+      {
+        "start": 1275,
+        "end": 1310,
+        "text": "1275:   DIInliningInfo InlineStack = unwrapOrError(Query(), SymbolizerPath);\n1276: \n1277:   SampleContextFrameVector CallStack;\n1278:   if (IPMode &&\n1279:       (!InlineStack.getNumberOfFrames() || InlineStack.getFrame(0).Line == 0))\n1280:     return CallStack;\n1281:   if (IPMode)\n1282:     for (uint32_t I = 1; I < InlineStack.getNumberOfFrames(); ++I)\n1283:       if (InlineStack.getFrame(I).Line == 0) {\n1284:         IPNonLeafZeroLineAddresses.insert(IP.Address);\n1285:         // A missing callsite line cannot form a source offset. Subtracting\n1286:         // StartLine would wrap into a spurious positive callsite. Reject the\n1287:         // entire context before constructing even a partial inline tree.\n1288:         return {};\n1289:       }\n1290:   for (int32_t I = InlineStack.getNumberOfFrames() - 1; I >= 0; I--) {\n1291:     const auto &CallerFrame = InlineStack.getFrame(I);\n1292:     if (CallerFrame.FunctionName.empty() ||\n1293:         (CallerFrame.FunctionName == \"<invalid>\"))\n1294:       break;\n1295: \n1296:     StringRef FunctionName(CallerFrame.FunctionName);\n1297:     if (UseCanonicalFnName)\n1298:       FunctionName = FunctionSamples::getCanonicalFnName(FunctionName);\n1299: \n1300:     uint32_t Discriminator = CallerFrame.Discriminator;\n1301:     uint32_t LineOffset = (CallerFrame.Line - CallerFrame.StartLine) & 0xffff;\n1302:     if (UseProbeDiscriminator) {\n1303:       LineOffset =\n1304:           PseudoProbeDwarfDiscriminator::extractProbeIndex(Discriminator);\n1305:       Discriminator = 0;\n1306:     }\n1307: \n1308:     LineLocation Line(LineOffset, Discriminator);\n1309:     auto It = NameStrings.insert(FunctionName.str());\n1310:     CallStack.emplace_back(FunctionId(StringRef(*It.first)), Line);"
+      }
+    ]
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-profgen/llvm-profgen.cpp",
+    "sha256": "dc705790bcdd4ca61161d1c3a02f987faa6f1fdbe47d1b181234ca6af5eea1d5",
+    "line_count": 556,
+    "excerpts": [
+      {
+        "start": 237,
+        "end": 253,
+        "text": "237:         Name.starts_with(\"csprof-\") || Name.starts_with(\"csspgo-\") ||\n238:         StringSwitch<bool>(Name)\n239:             .Cases({\"unsymbolized-profile\", \"llvm-sample-profile\"}, true)\n240:             .Cases({\"skip-symbolization\", \"data-access-perftrace\"}, true)\n241:             .Cases({\"ignore-stack-samples\", \"use-context-cost-for-preinliner\"},\n242:                    true)\n243:             .Cases({\"max-search-depth\", \"gen-cs-nested-profile\"}, true)\n244:             .Cases({\"compress-recursion\", \"mark-all-context-preinlined\"}, true)\n245:             .Cases({\"use-offset\", \"use-first-loadable-segment-as-base\"}, true)\n246:             .Cases({\"update-total-samples\", \"fill-zero-for-all-funcs\"}, true)\n247:             .Cases({\"populate-profile-symbol-list\", \"kernel\"}, true)\n248:             .Cases({\"show-disassembly-only\", \"disassemble-functions\"}, true)\n249:             .Cases({\"show-source-locations\", \"show-canonical-fname\"}, true)\n250:             .Cases({\"show-pseudo-probe\", \"infer-missing-frames\"}, true)\n251:             .Default(false);\n252:     if (Forbidden)\n253:       Rejected.push_back(Name);"
+      }
+    ]
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-profgen/ProfileGenerator.cpp",
+    "sha256": "a17c036c6fcbfe71dcafc1105358c187f3fdc771c1d97b70b497b2a46158930a",
+    "line_count": 1852,
+    "excerpts": [
+      {
+        "start": 580,
+        "end": 622,
+        "text": "580:       } else\n581:         (*Writer)->setUseMD5();\n582:     }\n583:     WriteError = (*Writer)->write(ProfileMap);\n584:     if (injectIPFailure(\"profile-write\"))\n585:       WriteError = std::make_error_code(std::errc::io_error);\n586:   }\n587:   FileStream->flush();\n588:   bool FlushFailure = injectIPFailure(\"profile-flush\");\n589:   FileStream->close();\n590:   std::error_code CloseError = FileStream->error();\n591:   if (FlushFailure || injectIPFailure(\"profile-close\"))\n592:     CloseError = std::make_error_code(std::errc::io_error);\n593:   if (FileStream->has_error())\n594:     FileStream->clear_error();\n595:   // No error may be deferred to raw_fd_ostream's destructor.\n596:   if (WriteError)\n597:     return createStringError(WriteError,\n598:                              \"IP sample mode: profile serialization failed\");\n599:   if (CloseError)\n600:     return createStringError(CloseError,\n601:                              \"IP sample mode: profile flush/close failed\");\n602:   if (Error E = Report.commitReport())\n603:     return E;\n604:   setIPStage(\"commit\");\n605:   std::error_code EC = injectIPFailure(\"profile-rename\")\n606:                            ? std::make_error_code(std::errc::io_error)\n607:                            : sys::fs::rename(TemporaryPath, OutputFilename);\n608:   if (EC)\n609:     return createStringError(EC, \"IP sample mode: profile commit failed\");\n610:   Report.finish();\n611:   return Error::success();\n612: }\n613: \n614: void ProfileGeneratorBase::showDensitySuggestion(double Density) {\n615:   if (Density == 0.0)\n616:     recordIPWarning(\"W_EMPTY_DENSITY\",\n617:                     \"empty profile or density cutoff too low\");\n618:   else if (Density < ProfileDensityThreshold)\n619:     recordIPWarning(\"W_LOW_DENSITY\", \"sample density below advisory threshold\");\n620:   if (Density == 0.0)\n621:     WithColor::warning() << \"The output profile is empty or the \"\n622:                             \"--profile-density-cutoff-hot option is \""
+      }
+    ]
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-profgen/IPQualityReport.cpp",
+    "sha256": "eb22d2baa2862f2c0a7da128a7d92807e0d5945681ea2f5f36820f2f8e969c71",
+    "line_count": 886,
+    "excerpts": [
+      {
+        "start": 840,
+        "end": 886,
+        "text": "840:   JSON.value(build());\n841:   OS << '\\n';\n842:   bool InjectWrite = inject(\"report-write\");\n843:   OS.flush();\n844:   bool InjectFlush = inject(\"report-flush\");\n845:   OS.close();\n846:   auto EC = OS.error();\n847:   if (OS.has_error())\n848:     OS.clear_error();\n849:   if (InjectWrite || InjectFlush || inject(\"report-close\"))\n850:     EC = std::make_error_code(std::errc::io_error);\n851:   if (!EC)\n852:     EC = inject(\"report-rename\") ? std::make_error_code(std::errc::io_error)\n853:                                  : sys::fs::rename(Temp, Options.Report);\n854:   if (EC) {\n855:     ReportIOFailed = true;\n856:     return createStringError(\n857:         EC,\n858:         \"IP quality report: write/close/commit failed; old report preserved\");\n859:   }\n860:   return Error::success();\n861: }\n862: Error IPQualityReport::commitReport() {\n863:   enter(\"write\");\n864:   return writeReport();\n865: }\n866: void IPQualityReport::fail(StringRef Message) {\n867:   Failure = Message.str();\n868:   FailedStage = Stage;\n869:   if (UsableCheck == \"unknown\")\n870:     warn(\"W_USABLE_RATIO_UNKNOWN\",\n871:          \"configured usable ratio was not available before failure\");\n872:   if (SampleCheck == \"unknown\")\n873:     warn(\"W_TARGET_COUNT_UNKNOWN\",\n874:          \"configured target count was not available before failure\");\n875:   if (LostCheck == \"unknown\")\n876:     warn(\"W_LOST_RATIO_UNKNOWN\",\n877:          \"configured visible LOST ratio was not available before failure\");\n878:   if (!ProfileTemporary.empty()) {\n879:     sys::fs::remove(ProfileTemporary);\n880:     ProfileTemporary.clear();\n881:   }\n882:   if (!ReportIOFailed)\n883:     if (Error E = writeReport())\n884:       errs() << \"llvm-profgen: could not write failure quality report: \"\n885:              << toString(std::move(E)) << '\\n';\n886: }"
+      }
+    ]
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/lib/ProfileData/Coverage/CoverageMapping.cpp",
+    "sha256": "66f8b1cac45a0fc27c66bf8d3a1c32aa91e55b65acdf3828e19f2f87ef0b8d69",
+    "line_count": 1706,
+    "excerpts": [
+      {
+        "start": 1468,
+        "end": 1480,
+        "text": "1468: findMainViewFileID(const FunctionRecord &Function) {\n1469:   SmallBitVector IsNotExpandedFile(Function.Filenames.size(), true);\n1470:   for (const auto &CR : Function.CountedRegions)\n1471:     if (CR.Kind == CounterMappingRegion::ExpansionRegion)\n1472:       IsNotExpandedFile[CR.ExpandedFileID] = false;\n1473:   int I = IsNotExpandedFile.find_first();\n1474:   if (I == -1)\n1475:     return std::nullopt;\n1476:   return I;\n1477: }\n1478: \n1479: /// Check if SourceFile is the file that contains the definition of\n1480: /// the Function. Return the ID of the file in that case or std::nullopt"
+      },
+      {
+        "start": 1542,
+        "end": 1567,
+        "text": "1542: CoverageMapping::getCoverageForFunction(const FunctionRecord &Function) const {\n1543:   auto MainFileID = findMainViewFileID(Function);\n1544:   if (!MainFileID)\n1545:     return CoverageData();\n1546: \n1547:   assert(SingleByteCoverage);\n1548:   MergeableCoverageData FunctionCoverage(*SingleByteCoverage,\n1549:                                          Function.Filenames[*MainFileID]);\n1550:   FunctionCoverage.addFunctionRegions(\n1551:       Function, [&](auto &CR) { return (CR.FileID == *MainFileID); },\n1552:       [&](auto &CR) { return isExpansion(CR, *MainFileID); });\n1553: \n1554:   LLVM_DEBUG(dbgs() << \"Emitting segments for function: \" << Function.Name\n1555:                     << \"\\n\");\n1556: \n1557:   return FunctionCoverage.buildSegments();\n1558: }\n1559: \n1560: CoverageData CoverageMapping::getCoverageForExpansion(\n1561:     const ExpansionRecord &Expansion) const {\n1562:   assert(SingleByteCoverage);\n1563:   CoverageData ExpansionCoverage(\n1564:       *SingleByteCoverage, Expansion.Function.Filenames[Expansion.FileID]);\n1565:   std::vector<CountedRegion> Regions;\n1566:   for (const auto &CR : Expansion.Function.CountedRegions)\n1567:     if (CR.FileID == Expansion.FileID) {"
+      }
+    ]
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-cov/CoverageSummaryInfo.cpp",
+    "sha256": "e29773f34d1d649a4b48332773e79c572241ab0e445171bee27e5b8dd868c970",
+    "line_count": 139,
+    "excerpts": [
+      {
+        "start": 80,
+        "end": 139,
+        "text": "80:   for (const auto &LCS : getLineCoverageStats(CD)) {\n81:     if (!LCS.isMapped())\n82:       continue;\n83:     ++NumLines;\n84:     if (LCS.getExecutionCount())\n85:       ++CoveredLines;\n86:   }\n87: \n88:   return {RegionCoverageInfo(CoveredRegions, NumCodeRegions),\n89:           LineCoverageInfo(CoveredLines, NumLines)};\n90: }\n91: \n92: CoverageDataSummary::CoverageDataSummary(const CoverageData &CD,\n93:                                          ArrayRef<CountedRegion> CodeRegions) {\n94:   std::tie(RegionCoverage, LineCoverage) = sumRegions(CodeRegions, CD);\n95:   BranchCoverage = sumBranches(CD.getBranches());\n96:   MCDCCoverage = sumMCDCPairs(CD.getMCDCRecords());\n97: }\n98: \n99: FunctionCoverageSummary\n100: FunctionCoverageSummary::get(const CoverageMapping &CM,\n101:                              const coverage::FunctionRecord &Function) {\n102:   CoverageData CD = CM.getCoverageForFunction(Function);\n103: \n104:   auto Summary =\n105:       FunctionCoverageSummary(Function.Name, Function.ExecutionCount);\n106: \n107:   Summary += CoverageDataSummary(CD, Function.CountedRegions);\n108: \n109:   // Compute the branch coverage, including branches from expansions.\n110:   Summary.BranchCoverage += sumBranchExpansions(CM, CD.getExpansions());\n111: \n112:   return Summary;\n113: }\n114: \n115: FunctionCoverageSummary\n116: FunctionCoverageSummary::get(const InstantiationGroup &Group,\n117:                              ArrayRef<FunctionCoverageSummary> Summaries) {\n118:   std::string Name;\n119:   if (Group.hasName()) {\n120:     Name = std::string(Group.getName());\n121:   } else {\n122:     llvm::raw_string_ostream OS(Name);\n123:     OS << \"Definition at line \" << Group.getLine() << \", column \"\n124:        << Group.getColumn();\n125:   }\n126: \n127:   FunctionCoverageSummary Summary(Name, Group.getTotalExecutionCount());\n128:   Summary.RegionCoverage = Summaries[0].RegionCoverage;\n129:   Summary.LineCoverage = Summaries[0].LineCoverage;\n130:   Summary.BranchCoverage = Summaries[0].BranchCoverage;\n131:   Summary.MCDCCoverage = Summaries[0].MCDCCoverage;\n132:   for (const auto &FCS : Summaries.drop_front()) {\n133:     Summary.RegionCoverage.merge(FCS.RegionCoverage);\n134:     Summary.LineCoverage.merge(FCS.LineCoverage);\n135:     Summary.BranchCoverage.merge(FCS.BranchCoverage);\n136:     Summary.MCDCCoverage.merge(FCS.MCDCCoverage);\n137:   }\n138:   return Summary;\n139: }"
+      }
+    ]
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/llvm/tools/llvm-cov/CoverageReport.cpp",
+    "sha256": "510918179897db320aa4f461ef3ba714bf375cc40fb3360b844d546d6d8f2a87",
+    "line_count": 680,
+    "excerpts": [
+      {
+        "start": 444,
+        "end": 469,
+        "text": "444: \n445: void CoverageReport::prepareSingleFileReport(const StringRef Filename,\n446:     const coverage::CoverageMapping *Coverage,\n447:     const CoverageViewOptions &Options, const unsigned LCP,\n448:     FileCoverageSummary *FileReport, const CoverageFilter *Filters) {\n449:   for (const auto &Group : Coverage->getInstantiationGroups(Filename)) {\n450:     std::vector<FunctionCoverageSummary> InstantiationSummaries;\n451:     for (const coverage::FunctionRecord *F : Group.getInstantiations()) {\n452:       if (!Filters->matches(*Coverage, *F))\n453:         continue;\n454:       auto InstantiationSummary = FunctionCoverageSummary::get(*Coverage, *F);\n455:       FileReport->addInstantiation(InstantiationSummary);\n456:       InstantiationSummaries.push_back(InstantiationSummary);\n457:     }\n458:     if (InstantiationSummaries.empty())\n459:       continue;\n460: \n461:     auto GroupSummary =\n462:         FunctionCoverageSummary::get(Group, InstantiationSummaries);\n463: \n464:     if (Options.Debug)\n465:       outs() << \"InstantiationGroup: \" << GroupSummary.Name << \" with \"\n466:              << \"size = \" << Group.size() << \"\\n\";\n467: \n468:     FileReport->addFunction(GroupSummary);\n469:   }"
+      }
+    ]
+  }
+]
