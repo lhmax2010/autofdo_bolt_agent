@@ -1,0 +1,113 @@
+{
+  "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-retry/final-reconverted.json",
+  "source_sha256": "a87ab4b2bc68e64795ad2078cd6582011e96bcbaf63345f03eb4f076cec715a9",
+  "conversion_metadata_records": 126,
+  "configurations": {
+    "ffmpeg-thumb": {
+      "sum/none": 55
+    },
+    "spike-a32": {
+      "sum/none": 33
+    },
+    "spike-thumb": {
+      "sum/none": 33
+    },
+    "ffmpeg-a32": {
+      "sum/none": 5
+    }
+  },
+  "availability": {
+    "ffmpeg-thumb": {
+      "avg": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      },
+      "prev-inst": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      }
+    },
+    "spike-a32": {
+      "avg": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      },
+      "prev-inst": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      }
+    },
+    "spike-thumb": {
+      "avg": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      },
+      "prev-inst": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      }
+    },
+    "ffmpeg-a32": {
+      "avg": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      },
+      "prev-inst": {
+        "status": "not_attempted_in_patch9_reconversion",
+        "success": null,
+        "recorded_attempts": 0
+      }
+    }
+  },
+  "parts": [
+    {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/docs/profgen/eval/prep/evidence/registration-checks/batch2/historical-conversions-000.csv",
+      "sha256": "0f391ae36b7746130b61137b8dbcec39249a48bbd95280878aecd7c6c72e79d4",
+      "rows": 126
+    }
+  ],
+  "historical_patch8_avg": {
+    "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/docs/profgen/impl/evidence/12/31_real_avg_independent.json",
+    "sha256": "8206473b2b766688eb451e0f9ee3adb72a632fb82268330de1afa371918f3d33",
+    "commands": [
+      {
+        "command": [
+          "nice",
+          "-n",
+          "19",
+          "ionice",
+          "-c3",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+          "--library-path",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+          "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/build/bin/llvm-profgen",
+          "--ip-samples",
+          "--binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/libavcodec.so.62.11.100",
+          "--debug-binary=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/eval-prep11/verified/ffmpeg-thumb-S/usr/lib/debug/usr/lib/libavcodec.so.62.11.100.debug",
+          "--binary-match-regex=^/opt/afdo_agent/variants/ffmpeg\\-thumb\\-S/lib/libavcodec\\.so\\.62\\.11\\.100$",
+          "--perfscript=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1/perfscript.txt",
+          "--perf-buildid-list=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1-resume2/runs/formal2-ffmpeg-thumb-S-sample-fixed-bbb-100000-r1-s1/buildid-list.txt",
+          "--ip-weight=sample",
+          "--ip-aggregation=avg",
+          "--ip-head-samples=none",
+          "--ip-zero-fill=none",
+          "--ip-skid=none",
+          "--format=text",
+          "--output=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/independent-avg/avg.text",
+          "--quality-report=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-patch8/independent-avg/avg.json"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "interpretation": "Earlier patch8 FFmpeg Thumb avg success is not patch9 availability evidence"
+  },
+  "profiles_opened": 0,
+  "interpretation": "not attempted is neither success nor failure; no conversion was rerun"
+}

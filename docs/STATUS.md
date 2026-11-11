@@ -45,6 +45,15 @@
 - [证据](profgen/eval/prep/evidence/registration-checks/batch1/manifest.json)：完整大表/合成输出留temp并登记SHA；保存的采样最低MemAvailable为9075150848B，cgroup峰值2051166208B，3G/200%串行，无OOM或资源终止。
 - 未读取正式sample profile（含CALIBRATION），未登记修正案3，未连接板子；不进入其他Q.5项目。后续仍待第5④及状态总表所列剩余项，本批不启动。
 
+## 登记前核对第二批（已完成；停止）
+
+- [06报告§9](profgen/eval/prep/06_registration_checklist.md)：第5④、6剩余、7/8/10完成。Q.5当前已完成13项、部分完成2项、未开始6项；仍不表示整体可登记。
+- [第17项披露](profgen/eval/prep/17_profile_disclosure.md)先于打开数据登记路径/SHA。本次只开四个成功CALIBRATION的perf文本并按max/none/period生成新text，旧profile和perf.data未打开。分类条目数spike Thumb/A32为24/26，FFmpeg Thumb/A32为1551/1604；unknown_name、reference_unresolved、unmapped_key及其他未对齐均0。仅条目分类计数/流程退出码，没有受控量或body比例。
+- 第6项只读126份历史命令/退出记录：补丁9均为sum/none，四对象avg与prev-inst均未尝试（success=null）；封存草稿含①–③′、三口径③、代码承载/评价域外比例、n_eff、K与可用性，SHA c7095475d9c1e085ce39edd497a23d6eaa54c756cf56084e808c449f3db20caa；不是修正案3。
+- 第7/8/10项按原文42条列实现/夹具/PASS；共用统计模块、追加收据与计算日志SHA链、已推送Git历史与当前脚本核验、槽位终态、三段式恢复证据通过synthetic验收。未运行第9项模拟，未确定真实quality_equivalence_enabled。
+- 原296项不变，新增114项，共410项通过；开发失败原文保留。3G/200%、nice19/ionice-c3串行，最低MemAvailable6543753216B，cgroup峰值473284608B，无OOM/资源终止。[证据](profgen/eval/prep/evidence/registration-checks/batch2/manifest.json)
+- 未连接板子、未构建Clang/llvm-profgen、未改变设计或静态产物、未读取非CALIBRATION真实profile；修正案3未登记。按要求停止，不进入第9/11/12/14或其他项目。
+
 ## 人工裁决（登记前准备）
 
 - 裁决3修订1：C行域改为C/S两构建合格行表记录并集；不得用键接受或身份结论决定C。code_free的AST分类只作描述；裁决4修订2不变。待折入v1.6并经三家评审。

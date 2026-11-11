@@ -1,6 +1,6 @@
-# 登记前核对：Q.5 状态总表与第一批
+# 登记前核对：Q.5 状态总表与分批验收
 
-设计：v1.8；基线7c96c1e。本表先于本批执行建立。只根据仓库证据，不以设计中的“待核对”或历史局部通过推断整体通过。状态快照与本批结果分开记录。未读取任何正式sample profile（含CALIBRATION），未登记修正案3。
+设计：v1.8；基线7c96c1e。本表先于本批执行建立。只根据仓库证据，不以设计中的“待核对”或历史局部通过推断整体通过。状态快照与分批结果分开记录。第一批未读取任何正式sample profile（含CALIBRATION）；第二批仅在专项授权及打开前披露后读取四份CALIBRATION基准转换，见§9。修正案3未登记。
 
 ## 1. 执行前状态（Q.5第1–21项）
 
@@ -139,3 +139,81 @@ lcov FN的起始行、FNDA、JSON函数主区域范围与API全部一致；每�
 2. 契约额外4次调用已通过后，辅助脚本摘录源码请求到第891行，但文件仅886行，发生IndexError。4次原文已写出；修正摘录边界后单独重跑取证通过（`source-contracts-fixed/`），未重复或篡改工具运行结果。
 
 没有重编GBS Clang/llvm-profgen，没有修改设计、LLVM补丁、认证或三个用户配置项。未登记修正案3；不进入第5项④、模拟、统计质量或其他Q.5项目。完成本批后停止。
+
+## 9. 第二批：CALIBRATION、封存草稿与合成门禁（基线 ef57cd8）
+
+### 9.1 范围、披露与流程结果（第5项④、第17项）
+
+本批先读v1.8原文与既有状态，确认main与origin/main均为ef57cd80630fe17c987b57370af7fcb519b2d0a1；只有三个受保护的untracked配置项。未读这些配置，未接板、未编译Clang或llvm-profgen。
+
+[打开前披露](17_profile_disclosure.md)与[输入路径/SHA](evidence/registration-checks/batch2/disclosure-before.json)先于perf文本读取写入。选择第一轮`calibration-runs.json`登记的四个成功校准RUN，每对象一份：cal-thumb、cal-a32、cal-ffmpeg-thumb、cal-ffmpeg-a32。它们没有混入正式矩阵；失败的226样本校准、频率试采、其他正式RUN均不打开。原收据SHA先登记，执行时全部复核一致。
+
+正式工具仍为补丁9，SHA `2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5`，每次启动都核对。复用原命令的runtime/debug ELF、GBS加载器/库与锚定路径正则，按v1.8唯一基准改为 **max / skid=none / weight=period / head=none / zero-fill=none**；输出text只为分类读取。旧`profile.extbinary`不打开、不比较、不覆盖。原始`perf.data`只通过既有收据列出路径/SHA，不打开；实际输入为完整`perfscript.txt`与`buildid-list.txt`。
+
+每次生成后先做不解析内容的字节SHA，写入`cal-*/before-classification.json`，再解析新profile。解析器丢弃body数值，只保留原始名字、完整调用链键及文本行号；没有计算body权重之和、任何比例、M1/M2/M2b/M3或其他受控量。工具转换自身写出的quality报告保留在temp，未用于分析。新profile及输入的准确路径、SHA、命令、stdout/stderr、退出码都在各`cal-*`证据中。
+
+|对象/RUN|转换/分类退出码|条目总数|进入U|系统头（已对齐、域外）|参考歧义（已对齐、不在U）|身份歧义（已对齐、不在U）|known_out_of_scope|未对齐|
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+|spike Thumb / cal-thumb|0 / 0|24|24|0|0|0|0|0|
+|spike A32 / cal-a32|0 / 0|26|26|0|0|0|0|0|
+|FFmpeg Thumb / cal-ffmpeg-thumb|0 / 0|1551|1477|4|67|1|2|0|
+|FFmpeg A32 / cal-ffmpeg-a32|0 / 0|1604|1532|2|69|0|1|0|
+
+这些都是**条目个数**，不是body权重、采样条数或质量比例。四份的boundary_unavailable、unknown_name、reference_unresolved、unmapped_key均为0；宏生成、参考侧未执行等其余分类也为0。各条目的精确键与分类见`cal-*/entries-*.csv`；排除原因用已封存的C₀排除清单细分，见`reason-detail-*.csv`。不存在因计数小而忽略未对齐条目的处理。汇总：[smoke-summary.json](evidence/registration-checks/batch2/smoke-summary.json)。第5项④通过，第5项现已完成。
+
+### 9.2 第6项：历史可用性与对象封存草稿
+
+只读历史命令与退出码元数据，不读取历史profile。检查补丁9重转的106次sample转换与额外20次period转换，共126次；命令均为sum / skid=none。因此不能从这批结果声称avg或prev-inst成功，亦不把未尝试算为转换失败。
+
+|对象|补丁9历史命令记录数|avg|prev-inst|
+|---|---:|---|---|
+|spike Thumb|33|未尝试，success=null|未尝试，success=null|
+|spike A32|33|未尝试，success=null|未尝试，success=null|
+|FFmpeg Thumb|55|未尝试，success=null|未尝试，success=null|
+|FFmpeg A32|5|未尝试，success=null|未尝试，success=null|
+
+另保存12报告`31_real_avg_independent.json`中的旧补丁8 FFmpeg Thumb avg退出0事实，明确不等于补丁9可用性。没有为填表重新运行avg/prev-inst。逐命令/退出报告路径与SHA见[availability.json](evidence/registration-checks/batch2/availability.json)及`historical-conversions-*.csv`。
+
+[对象封存草稿](evidence/registration-checks/batch2/object-seal-draft.json)汇集四个既有训练参考对象的①②③③′、三口径③、代码承载比例、评价域外比例、n_eff、K、domain状态与上述可用性，来源均为v1.8静态summary；没有重算或改变C/U/权重。SHA：`c7095475d9c1e085ce39edd497a23d6eaa54c756cf56084e808c449f3db20caa`。它是`unregistered_seal_draft`，**不是修正案3**；第19项仍需把最终全部产物与协议一起登记。第6项剩余的核对与草稿已完成，参数实际可用性仍如上表，不推定。
+
+### 9.3 第7、8、10项：原文逐条实施与synthetic验收
+
+完整对应表：[clause-mapping.md](evidence/registration-checks/batch2/clause-mapping.md) / [JSON](evidence/registration-checks/batch2/clause-mapping.json)。表保留Q.5原文、设计行号、实现文件/函数/行号、测试名与PASS；按原文分号展开42条，复合条款列出全部子例。原文、实现与测试的SHA随索引保存。
+
+|项目|实现|本批验收|
+|---|---|---|
+|7 M1/M2与分支|`registration_statistics.py`：`line_metrics`、`hot_reference`、`interpretation`|22项MFixtures通过；含N15/K9、全零/单正/正并列/正计数不足、T0/U空/K无定义、null n_eff四个K、n_eff=3、10行空集合、80%整数边界；另外保留v1.8评价域输出门禁|
+|8 合并口径|同模块`merge_lines`|6项通过；互补上下文得到100/200/200，不同内联调用点、覆盖region原值保存、discriminator、未执行模板不借用执行实例行、源函数归属、显式0|
+|10 统计|同模块`phase_diagnostics`、`stratified_t`、`intervals_joint`、`paired_differences`、`assess_paired_metrics`、`outliers`|27项通过；同ID配对、缺失不补零/不改阶段权重、逻辑RUN、退化与nextafter、NaN、单/双阶段、包络、全局回退及敏感性分支、模型标识、离群、固定间隔不比较权重|
+|10 收据/状态/门禁|`registration_protocol.py`：`validate_slots`、`replay`、`validate_recovery`、`admit_computation`、`compute_guarded`、`GitEvidence`|18项协议＋19项恢复＋18项准入通过；全部Q.5停止/恢复负例，三段证据，未推送/缺初始化/重复原件/终态改写/14槽未终态/缺日志拒绝|
+
+实现选择与边界：
+
+- 统计模块纯Python标准库、单进程，无profile读取器，无第9项模拟驱动。未来模拟与正式分析共用此模块；本批只运行指定synthetic夹具。bootstrap固定seed=20261104、20000次，阶段内重采样，M1/M2共用索引；percentile采用固定的经验线性插值`(B−1)*p`，没有按结果选择方法。t分位数用正则不完全beta的连分式和二分反解，df=1/2解析值及df=14对照通过。退化严格用double字面量1e-9，先记录原始极值和极差，未量化后计算区间。
+- 缺失保留计划槽位与阶段权重；没有给失败转换记零分、没有只删某配置的RUN。尚未收齐15个终态、required指标缺失、flat或全局开关false均不输出等价。判读只是内存结果；实际文件输出仍必须走既有`v18_rules.write_conclusion`的对象表SHA/评价域/数值检查。本批未输出任何真实质量结论。
+- 收据/计算日志是追加式SHA链。`append_file`校验tip、加锁追加并fsync；`GitEvidence`校验blob SHA和已存在于origin/main的提交历史，并验证已推送事件历史只能扩展，重算整条链不能掩盖改写。只读后端不fetch、不改认证；正式执行前应由入口刷新远端引用。合成Git夹具位于WORKDIR/temp，无网络、无LLVM远端。
+- 登记前或没有已推送计算意图时，`compute_guarded`在调用数据操作前拒绝。真实路径核对登记协议、槽位、全部锁定产物的blob及工作区字节、脚本SHA、原件归属与收据、计算日志链；合成路径单独标记。敏感性与新增质量量同受此门禁，不用白名单遗漏来放行。
+- 证据schema以attempt_id/boot_id/单调时钟关联故障、恢复前环境、身份复核三段，并引用SHA核验的证据。空间/过热/人工停止均需关联停止动作；仅时间附近异常不够。恢复沿用原条件和尝试次数，后续尝试引用恢复事件；不可恢复错误优先，stopped_missing不可撤销。传输中断只允许同attempt、同原件重传，不是再跑负载。原因码白名单及阈值均由将来登记协议输入；测试中的数值与原因码明确是synthetic，不改变真实资格阈值或采集规则。
+- 没有把真实输入交给指标模块。第9项模拟、第11/12/14项以及其他未授权项目均未启动；本批不提前确定`quality_equivalence_enabled`的真实值。
+
+### 9.4 测试、资源与失败记录
+
+原有296项测试文件逐字节不变；新增114项，合计**410项全部通过**。新增数包含上述110项以及4项只读取合成字符串的CALIBRATION解析器测试。旧静态产物、设计文档无diff：[unchanged-baseline.json](evidence/registration-checks/batch2/unchanged-baseline.json)。正式验收原文：[tests-acceptance-final/stderr.txt](evidence/registration-checks/batch2/tests-acceptance-final/stderr.txt)。
+
+开发失败保留：可用性脚本首次漏导入Path，退出1，补导入后成功；追加历史的合成Git测试发现单行JSONL被读作普通dict，改为识别单条链记录后通过。分别见`run-availability/stderr.txt`、`tests-final/stderr.txt`；没有真实工具失败、没有重试CALIBRATION转换或提高资源上限。索引生成曾报一个Python字符串转义SyntaxWarning，改为raw string后无警告；不影响执行结果。
+
+实质任务全部串行，nice19/ionice-c3、systemd user scope **3G/200%**，启动前MemAvailable≥4GiB。持久采样最低MemAvailable **6543753216 B**，实读cgroup memory.peak最大 **473284608 B**（提交触发的Git自动打包；转换/测试scope最高107290624 B）；无OOM、暂停或资源终止。完整原文与各scope索引：[resource-summary.json](evidence/registration-checks/batch2/resource-summary.json)。短任务在scope内完成；长任务的通用runner每60秒保存meminfo，最终全量测试约90秒，已保存60秒时的meminfo，其余主要转换均不足60秒。所有新增证据文件<1MB，原始profile与临时Git夹具仅在`temp/registration-batch2/`。
+
+边界例外：上下文恢复后曾执行一次未包装scope/nice的`pwd`来确认当前目录；它没有打开项目数据或创建文件。该探测不符合“所有命令包装”的字面要求，予以披露；之后的读取、修改、转换、测试及Git操作均使用指定包装。另在最后索引整理时，前一条写入脚本命令的完成状态尚未取回即发出了索引命令，随后分别确认两者均退出0；预提交检查发现manifest尚未生成，未暂存任何文件，确认写入完成后串行重跑索引并重新核验全部SHA；这不满足严格串行的确认流程，不能据此声称所有短命令均无重叠。转换、测试与统计任务没有并行，后续操作等待前一命令退出后执行。
+
+提交时Git自动启动后台打包；暂停推送并监测到进程结束。它继承了3G/200% scope，记录峰值473284608B；原始资源记录见`git-autogc-monitor.json`。没有更改Git持久配置；后续本次提交修订与推送用命令级`-c gc.auto=0 -c maintenance.auto=false`避免再次启动自动整理。
+
+### 9.5 更新后的Q.5状态与停止
+
+|当前状态|编号|说明|
+|---|---|---|
+|已完成（13项）|1、2、3、4、5、6、7、8、10、13、15、20、21|本批完成5④、6剩余草稿/可用性、7/8/10；6的avg/prev-inst明确未尝试，不等于工具成功保证|
+|部分完成（2项）|16、17|16仍待全部扩展身份条款核销；17本次披露已完成，历史总体披露/G0信息仍待齐全|
+|未开始（6项）|9、11、12、14、18、19|未运行模拟、未接板，未登记修正案3|
+
+完成后按要求停止，不开始其他Q.5项目；没有对正式矩阵profile进行读取、转换或计算，没有跨配置比较，没有改变资格判定。全部新增代码与证据由本报告所在提交封存，清单见[batch2 manifest](evidence/registration-checks/batch2/manifest.json)。
