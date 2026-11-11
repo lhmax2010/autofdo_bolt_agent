@@ -1,0 +1,35 @@
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling3-rev1/stmt_ranges.cpp:30:56: error: chosen constructor is explicit in copy-initialization
+   30 |   if(Targets.count(F)&&SeenFiles.insert(F).second)emit({{"record","available_file"},{"file",F}});
+      |                                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling3-rev1/stmt_ranges.cpp:27:31: note: passing argument to parameter 'O' here
+   27 |  void emit(llvm::json::Object O){*Out<<llvm::json::Value(std::move(O))<<"\n";}
+      |                               ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling3-rev1/stmt_ranges.cpp:43:8: error: chosen constructor is explicit in copy-initialization
+   43 |   emit({{"record","range"},{"file",F},{"kind",S->getStmtClassName()},{"begin_line",L},{"end_line",H},
+      |        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   44 |     {"begin_offset",SM.getFileOffset(B)},{"end_offset",SM.getFileOffset(E)},
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   45 |     {"begin_raw",RawB.getRawEncoding()},{"end_raw",RawE.getRawEncoding()},
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   46 |     {"view",Spelling?"spelling":"expansion"},{"begin_macro",RawB.isMacroID()},{"end_macro",RawE.isMacroID()}});
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling3-rev1/stmt_ranges.cpp:27:31: note: passing argument to parameter 'O' here
+   27 |  void emit(llvm::json::Object O){*Out<<llvm::json::Value(std::move(O))<<"\n";}
+      |                               ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling3-rev1/stmt_ranges.cpp:59:11: error: chosen constructor is explicit in copy-initialization
+   59 |   R->emit({{"record","complete"},{"errors",C.getDiagnostics().hasErrorOccurred()}});
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/include/llvm/Support/JSON.h:645:16: note: explicit constructor declared here
+  645 | inline Object::Object(std::initializer_list<KV> Properties) {
+      |                ^
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/prep-ruling3-rev1/stmt_ranges.cpp:27:31: note: passing argument to parameter 'O' here
+   27 |  void emit(llvm::json::Object O){*Out<<llvm::json::Value(std::move(O))<<"\n";}
+      |                               ^
+3 errors generated.
+

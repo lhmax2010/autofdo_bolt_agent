@@ -630,3 +630,324 @@ S有键却不在新C的行全部排除，逐行保存在S-key-outside-C分片：
 所有新增文件<1MB；manifest登记SHA及路径，大原始取证数据在temp并由命令记录登记SHA。旧v1.5正文、旧代码/证据、用户配置未改，无板上操作、无挂载、无认证变更、无正式sample profile读取，边界例外：无。
 
 本任务到此停止。不登记修正案3，不进入仿真或其他N.5项目。待折入v1.6并经评审后再由用户决定后续。
+
+## 11. 裁决3修订1：两构建行表并集与 code_free 描述（2026-11-11）
+本节基于 cb2da1b；裁决原文已登记到 rulings.md，仍待折入 v1.6 并经三家评审。未读取正式 sample profile（含 CALIBRATION），未登记修正案3，未接板、未进入仿真或其他 N.5。
+
+### 11.1 数据流、实现与可复核范围
+
+三套表固定裁决4修订2的身份与键事实，只改变C域。“旧规则”在本节指v1.5原C域＋裁决4修订2，并非§10历史旧身份表；因此FFmpeg旧C的U与§10历史行不同，这是有意控制身份变量。C-only表的C/U/质量比、n_eff、K、损失桶、三个门槛均与cb2da1b逐字段相等（断言）。
+ruling3_union.py只读覆盖参考、独立C/S DWARF行表与既有映射范围的顶层函数名清单。S证据要求非end_sequence、已解析文件、非零行号、地址属于选定函数区间（原始DIE链）；使用行表叶子文件/行，不读地址→键映射表或身份结论，不要求完整上下文接受。每个C成员保存C/S见证；域先独立封存，ruling3_union_static.py随后才复用cb2已验收的裁决4修订2静态键数据库和逐行原因。数据库只读，路径/SHA入索引，未打开任何RUN数据。
+每个对象的domain/index.json保留输入SHA、实际生成命令、选择范围SHA与行表原文位置；static/{v15,ruling3,ruling3-rev1}/index.json登记U、排除、权重及摘要SHA。证据根目录：[ruling3-rev1](evidence/identity-gate/ruling3-rev1/)。旧代码/旧结果均未覆盖。
+code_free_ast.py仅构建独立插件，使用GBS Clang公开API；clang本体不改不重编。用实际C构建命令保留优化、覆盖、预处理参数，仅去掉对象/依赖输出并加-fsyntax-only、插件参数。按已验证方法重定位源目录、sysroot与生成头；AST-config-provenance.json记录实际config.h/config.mak、avconfig.h及2270项config_components对应证据与SHA。spike每侧1个CU、FFmpeg每侧311个CU全部退出0，complete.errors=false。原始大JSONL仅在temp/prep-ruling3-rev1/*-AST，每条命令单独记录源SHA、原日志行、完整命令、原始输出SHA。
+分类只按编译器SourceManager的spelling/expansion源码范围：先GCCAsmStmt，再含其他新C行的跨行Stmt/Expr，再other；无成功AST为ast_unavailable。范围冲突取最短范围，再按类型/TU排序，确定性输出。依条文字面，CompoundStmt也是Stmt，没有自行排除；故stmt_continuation不能一概解释为“实参续行”，下面单列CompoundStmt规模。无法形成同文件范围的跨文件端点不拼接、不猜测；它们的原始AST仍留存。
+
+### 11.2 三套对象表
+
+表内“可登记”只表示本表门槛通过，不代表裁决已评审或其余登记条件已完成。④body比例仍未计算。①②③③′的分子分母定义保持原实现；n_eff=null有显式分支，本数据无null；spike K<50仍仅描述。
+
+|对象|C规则|C行|ΣR(C)|U行|ΣR(U)|①|②|③|③′|n_eff|K|状态|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|spike-thumb|旧C（身份固定）|122|21362787097|73|11673422882|59.836066%|61.206897%|54.643726%|53.354972%|1.328515|19|可登记|
+|spike-thumb|裁决3原文|75|11674422883|73|11673422882|97.333333%|61.206897%|99.991434%|53.354972%|1.328515|19|可登记|
+|spike-thumb|裁决3修订1|75|11674422883|73|11673422882|97.333333%|61.206897%|99.991434%|53.354972%|1.328515|19|可登记|
+|spike-a32|旧C（身份固定）|122|21362787097|72|11545422882|59.016393%|60.344828%|54.044553%|52.769930%|1.299623|10|可登记|
+|spike-a32|裁决3原文|74|11546422883|72|11545422882|97.297297%|60.344828%|99.991339%|52.769930%|1.299623|10|可登记|
+|spike-a32|裁决3修订1|74|11546422883|72|11545422882|97.297297%|60.344828%|99.991339%|52.769930%|1.299623|10|可登记|
+|ffmpeg-thumb|旧C（身份固定）|13040|28769855208|6810|5870786315|52.223926%|53.614043%|20.406034%|17.232788%|22.607016|465|不可登记：coverage_3_below_50_percent|
+|ffmpeg-thumb|裁决3原文|7504|6789285726|6679|5778242097|89.005864%|52.684718%|85.108247%|16.961138%|22.295678|457|可登记|
+|ffmpeg-thumb|裁决3修订1|7637|6890196397|6810|5870786315|89.171141%|53.614043%|85.204920%|17.232788%|22.607016|465|可登记|
+|ffmpeg-a32|旧C（身份固定）|13040|28769855208|6828|5856961473|52.361963%|53.671409%|20.357980%|17.192207%|22.643693|464|不可登记：coverage_3_below_50_percent|
+|ffmpeg-a32|裁决3原文|7523|6780632541|6698|5756536364|89.033630%|52.810922%|84.896746%|16.897425%|22.113109|455|可登记|
+|ffmpeg-a32|裁决3修订1|7656|6889424103|6828|5856961473|89.184953%|53.671409%|85.013804%|17.192207%|22.643693|464|可登记|
+
+三个1%门槛，分子/分母原值（同对象分母随C规则变化）：
+
+|对象|C规则|原因|分子DA|分母ΣR(C)|比例|超1%|
+|---|---|---|---|---|---|---|
+|spike-thumb|旧C（身份固定）|identity_ambiguous|0|21362787097|0.000000%|False|
+|spike-thumb|旧C（身份固定）|unmatched_in_elf|0|21362787097|0.000000%|False|
+|spike-thumb|旧C（身份固定）|boundary_unavailable|0|21362787097|0.000000%|False|
+|spike-thumb|裁决3原文|identity_ambiguous|0|11674422883|0.000000%|False|
+|spike-thumb|裁决3原文|unmatched_in_elf|0|11674422883|0.000000%|False|
+|spike-thumb|裁决3原文|boundary_unavailable|0|11674422883|0.000000%|False|
+|spike-thumb|裁决3修订1|identity_ambiguous|0|11674422883|0.000000%|False|
+|spike-thumb|裁决3修订1|unmatched_in_elf|0|11674422883|0.000000%|False|
+|spike-thumb|裁决3修订1|boundary_unavailable|0|11674422883|0.000000%|False|
+|spike-a32|旧C（身份固定）|identity_ambiguous|0|21362787097|0.000000%|False|
+|spike-a32|旧C（身份固定）|unmatched_in_elf|0|21362787097|0.000000%|False|
+|spike-a32|旧C（身份固定）|boundary_unavailable|0|21362787097|0.000000%|False|
+|spike-a32|裁决3原文|identity_ambiguous|0|11546422883|0.000000%|False|
+|spike-a32|裁决3原文|unmatched_in_elf|0|11546422883|0.000000%|False|
+|spike-a32|裁决3原文|boundary_unavailable|0|11546422883|0.000000%|False|
+|spike-a32|裁决3修订1|identity_ambiguous|0|11546422883|0.000000%|False|
+|spike-a32|裁决3修订1|unmatched_in_elf|0|11546422883|0.000000%|False|
+|spike-a32|裁决3修订1|boundary_unavailable|0|11546422883|0.000000%|False|
+|ffmpeg-thumb|旧C（身份固定）|identity_ambiguous|21849|28769855208|0.000076%|False|
+|ffmpeg-thumb|旧C（身份固定）|unmatched_in_elf|10096086|28769855208|0.035093%|False|
+|ffmpeg-thumb|旧C（身份固定）|boundary_unavailable|0|28769855208|0.000000%|False|
+|ffmpeg-thumb|裁决3原文|identity_ambiguous|15555|6789285726|0.000229%|False|
+|ffmpeg-thumb|裁决3原文|unmatched_in_elf|26367|6789285726|0.000388%|False|
+|ffmpeg-thumb|裁决3原文|boundary_unavailable|0|6789285726|0.000000%|False|
+|ffmpeg-thumb|裁决3修订1|identity_ambiguous|15555|6890196397|0.000226%|False|
+|ffmpeg-thumb|裁决3修订1|unmatched_in_elf|26367|6890196397|0.000383%|False|
+|ffmpeg-thumb|裁决3修订1|boundary_unavailable|0|6890196397|0.000000%|False|
+|ffmpeg-a32|旧C（身份固定）|identity_ambiguous|21849|28769855208|0.000076%|False|
+|ffmpeg-a32|旧C（身份固定）|unmatched_in_elf|10096086|28769855208|0.035093%|False|
+|ffmpeg-a32|旧C（身份固定）|boundary_unavailable|0|28769855208|0.000000%|False|
+|ffmpeg-a32|裁决3原文|identity_ambiguous|15555|6780632541|0.000229%|False|
+|ffmpeg-a32|裁决3原文|unmatched_in_elf|26367|6780632541|0.000389%|False|
+|ffmpeg-a32|裁决3原文|boundary_unavailable|0|6780632541|0.000000%|False|
+|ffmpeg-a32|裁决3修订1|identity_ambiguous|15555|6889424103|0.000226%|False|
+|ffmpeg-a32|裁决3修订1|unmatched_in_elf|26367|6889424103|0.000383%|False|
+|ffmpeg-a32|裁决3修订1|boundary_unavailable|0|6889424103|0.000000%|False|
+
+
+### 11.3 代码承载比例、S新增行与域外键
+
+
+|对象|新ΣR(C)|原ΣR(C)|代码承载比例|因(b)新增行/DA|进入U行/DA|仍损失行/DA|
+|---|---|---|---|---|---|---|
+|spike-thumb|11674422883|21362787097|54.648407%|0/0|0/0|0/0|
+|spike-a32|11546422883|21362787097|54.049234%|0/0|0/0|0/0|
+|ffmpeg-thumb|6890196397|28769855208|23.949361%|133/100910671|131/92544218|2/8366453|
+|ffmpeg-a32|6889424103|28769855208|23.946676%|133/108791562|130/100425109|3/8366453|
+
+新增行逐行见*-static/added-by-S-*.csv，保留in_U与完整loss_reasons。Thumb两行、A32三行仍为损失，DA均8366453，不能因S行表存在便记入U：
+
+|对象|文件|行|DA|原因|
+|---|---|---|---|---|
+|ffmpeg-thumb|libavcodec/h264_mb_template.c|94|6480000|["reference_ambiguity"]|
+|ffmpeg-thumb|libavcodec/h264_mb_template.c|234|1886453|["reference_ambiguity"]|
+|ffmpeg-a32|libavcodec/h264_mb_template.c|68|0|["reference_ambiguity"]|
+|ffmpeg-a32|libavcodec/h264_mb_template.c|94|6480000|["reference_ambiguity"]|
+|ffmpeg-a32|libavcodec/h264_mb_template.c|234|1886453|["reference_ambiguity"]|
+
+
+|对象|所有S键域外行|已知DA|原C内域外行|原C内域外DA|无参考DA行|
+|---|---|---|---|---|---|
+|spike-thumb|0|0|0|0|0|
+|spike-a32|0|0|0|0|0|
+|ffmpeg-thumb|27502|10|0|0|26|
+|ffmpeg-a32|27595|10|0|0|26|
+
+修订针对的“满足原C条件但被行表筛走”子集四侧均DA=0，已断言。若字面统计全部S键，FFmpeg两侧仍各有10 DA在原C之外：bytestream.h:94=1、96=1、99=8。逐行参考owner查询均为空（无任何参考函数主文件行范围覆盖），不是因两边行表缺失被筛走；不符合v1.5原C条件，不能为使总量为0而扩大C。全量逐行明细及原因见S-keys-outside-C分片；无覆盖DA的行写空值，不伪造0。
+
+### 11.4 code_free结构描述（不用于门槛）
+
+
+|对象|类别|行数|DA|占原ΣR(C)|
+|---|---|---|---|---|
+|spike-thumb|stmt_continuation|47|9688364214|45.351593%|
+|spike-thumb|asm_interior|0|0|0.000000%|
+|spike-thumb|other|0|0|0.000000%|
+|spike-thumb|ast_unavailable|0|0|0.000000%|
+|spike-a32|stmt_continuation|48|9816364214|45.950766%|
+|spike-a32|asm_interior|0|0|0.000000%|
+|spike-a32|other|0|0|0.000000%|
+|spike-a32|ast_unavailable|0|0|0.000000%|
+|ffmpeg-thumb|stmt_continuation|5294|7828843778|27.211968%|
+|ffmpeg-thumb|asm_interior|68|14050578484|48.837849%|
+|ffmpeg-thumb|other|41|236549|0.000822%|
+|ffmpeg-thumb|ast_unavailable|0|0|0.000000%|
+|ffmpeg-a32|stmt_continuation|5275|7829616072|27.214652%|
+|ffmpeg-a32|asm_interior|68|14050578484|48.837849%|
+|ffmpeg-a32|other|41|236549|0.000822%|
+|ffmpeg-a32|ast_unavailable|0|0|0.000000%|
+
+所有code_free行逐行归入且只归入一个类别；分类行数/DA之和等于原C减并集C，断言通过。CompoundStmt见证的stmt_continuation规模：
+
+|对象|行数|DA|
+|---|---|---|
+|spike-thumb|46|9688364213|
+|spike-a32|47|9816364213|
+|ffmpeg-thumb|4274|6959873067|
+|ffmpeg-a32|4251|6960082326|
+
+各类DA最高10行（不足10行全列；0行类别无条目）。完整raw AST行号/命令/SHA在*-code-free-classification/summary.json与lines分片中；下面为可读摘要。
+**spike-thumb**
+
+
+|类别|文件|行|DA|Stmt类型|范围|view|
+|---|---|---|---|---|---|---|
+|stmt_continuation|eval-spike-1.0/spike.c|69|4063610861|CompoundStmt|67–70|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|70|4063610861|CompoundStmt|67–70|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|38|137029154|CompoundStmt|38–40|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|40|137029154|CompoundStmt|38–40|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|28|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|29|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|33|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|35|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|90|128000000|CompoundStmt|79–90|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|112|128000000|CompoundStmt|110–112|spelling|
+
+**spike-a32**
+
+
+|类别|文件|行|DA|Stmt类型|范围|view|
+|---|---|---|---|---|---|---|
+|stmt_continuation|eval-spike-1.0/spike.c|69|4063610861|CompoundStmt|67–70|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|70|4063610861|CompoundStmt|67–70|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|38|137029154|CompoundStmt|38–40|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|40|137029154|CompoundStmt|38–40|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|28|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|29|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|33|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|35|128004096|CompoundStmt|28–35|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|82|128000000|CompoundStmt|79–90|spelling|
+|stmt_continuation|eval-spike-1.0/spike.c|90|128000000|CompoundStmt|79–90|spelling|
+
+**ffmpeg-thumb**
+
+
+|类别|文件|行|DA|Stmt类型|范围|view|
+|---|---|---|---|---|---|---|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|32|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|33|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|34|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|105|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/cabac_functions.h|146|215694437|CompoundStmt|144–146|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1649|201269902|CompoundStmt|1596–1776|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1670|85349935|BinaryOperator|1670–1696|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1671|84904984|BinaryOperator|1671–1696|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1672|84904984|BinaryOperator|1671–1696|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1680|84904984|BinaryOperator|1673–1696|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|37|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|38|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|39|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|40|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|41|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|42|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|43|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|44|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|45|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|46|255523038|GCCAsmStmt|36–102|spelling|
+|other|ffmpeg-8.0.1/libavcodec/codec_internal.h|285|19950|CompoundStmt|285–287|spelling|
+|other|ffmpeg-8.0.1/libavcodec/codec_internal.h|286|19950|DeclRefExpr|286–286|spelling|
+|other|ffmpeg-8.0.1/libavcodec/codec_internal.h|287|19950|CompoundStmt|285–287|spelling|
+|other|ffmpeg-8.0.1/libavcodec/decode.c|103|19820|CompoundStmt|103–105|spelling|
+|other|ffmpeg-8.0.1/libavcodec/decode.c|104|19820|DeclRefExpr|104–104|spelling|
+|other|ffmpeg-8.0.1/libavcodec/decode.c|105|19820|CompoundStmt|103–105|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|72|14423|CompoundStmt|72–75|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|73|14423|DeclRefExpr|73–73|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|74|14423|DeclRefExpr|74–74|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|75|14423|CompoundStmt|72–75|spelling|
+
+**ffmpeg-a32**
+
+
+|类别|文件|行|DA|Stmt类型|范围|view|
+|---|---|---|---|---|---|---|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|32|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|33|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|34|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/arm/cabac.h|105|255523038|CompoundStmt|32–105|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/cabac_functions.h|146|215694437|CompoundStmt|144–146|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1649|201269902|CompoundStmt|1596–1776|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1670|85349935|BinaryOperator|1670–1696|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1671|84904984|BinaryOperator|1671–1696|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1672|84904984|BinaryOperator|1671–1696|spelling|
+|stmt_continuation|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1680|84904984|BinaryOperator|1673–1696|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|37|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|38|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|39|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|40|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|41|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|42|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|43|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|44|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|45|255523038|GCCAsmStmt|36–102|spelling|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|46|255523038|GCCAsmStmt|36–102|spelling|
+|other|ffmpeg-8.0.1/libavcodec/codec_internal.h|285|19950|CompoundStmt|285–287|spelling|
+|other|ffmpeg-8.0.1/libavcodec/codec_internal.h|286|19950|DeclRefExpr|286–286|spelling|
+|other|ffmpeg-8.0.1/libavcodec/codec_internal.h|287|19950|CompoundStmt|285–287|spelling|
+|other|ffmpeg-8.0.1/libavcodec/decode.c|103|19820|CompoundStmt|103–105|spelling|
+|other|ffmpeg-8.0.1/libavcodec/decode.c|104|19820|DeclRefExpr|104–104|spelling|
+|other|ffmpeg-8.0.1/libavcodec/decode.c|105|19820|CompoundStmt|103–105|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|72|14423|CompoundStmt|72–75|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|73|14423|DeclRefExpr|73–73|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|74|14423|DeclRefExpr|74–74|spelling|
+|other|ffmpeg-8.0.1/libavutil/rational.h|75|14423|CompoundStmt|72–75|spelling|
+
+
+### 11.5 完整互斥损失账本
+
+下表为三套C→U完整原因集合。另一个原C→该套U账本在每套summary.old_C_to_new_U_loss及old-C-exclusions分片中：被移出域的行增加code_free_line并保留其余完整原因，不重复计数。共12个C→U与12个原C→U差值均断言为0。
+
+|对象|C规则|完整原因集合|行数|DA|
+|---|---|---|---|---|
+|spike-thumb|旧C（身份固定）|no_key_line|49|9689364215|
+|spike-thumb|裁决3原文|no_key_line|2|1000001|
+|spike-thumb|裁决3修订1|no_key_line|2|1000001|
+|spike-a32|旧C（身份固定）|no_key_line|50|9817364215|
+|spike-a32|裁决3原文|no_key_line|2|1000001|
+|spike-a32|裁决3修订1|no_key_line|2|1000001|
+|ffmpeg-thumb|旧C（身份固定）|identity_ambiguous + no_key_line + reference_ambiguity + unmatched_in_elf|10|36|
+|ffmpeg-thumb|旧C（身份固定）|identity_ambiguous + no_key_line + unmatched_in_elf|17|21813|
+|ffmpeg-thumb|旧C（身份固定）|no_key_line|5873|22390280990|
+|ffmpeg-thumb|旧C（身份固定）|no_key_line + reference_ambiguity|142|236199535|
+|ffmpeg-thumb|旧C（身份固定）|no_key_line + unmatched_in_elf|37|10074237|
+|ffmpeg-thumb|旧C（身份固定）|reference_ambiguity|151|262492282|
+|ffmpeg-thumb|裁决3原文|identity_ambiguous + no_key_line + unmatched_in_elf|6|15555|
+|ffmpeg-thumb|裁决3原文|no_key_line|650|724950846|
+|ffmpeg-thumb|裁决3原文|no_key_line + reference_ambiguity|17|31940587|
+|ffmpeg-thumb|裁决3原文|no_key_line + unmatched_in_elf|3|10812|
+|ffmpeg-thumb|裁决3原文|reference_ambiguity|149|254125829|
+|ffmpeg-thumb|裁决3修订1|identity_ambiguous + no_key_line + unmatched_in_elf|6|15555|
+|ffmpeg-thumb|裁决3修订1|no_key_line|650|724950846|
+|ffmpeg-thumb|裁决3修订1|no_key_line + reference_ambiguity|17|31940587|
+|ffmpeg-thumb|裁决3修订1|no_key_line + unmatched_in_elf|3|10812|
+|ffmpeg-thumb|裁决3修订1|reference_ambiguity|151|262492282|
+|ffmpeg-a32|旧C（身份固定）|identity_ambiguous + no_key_line + reference_ambiguity + unmatched_in_elf|10|36|
+|ffmpeg-a32|旧C（身份固定）|identity_ambiguous + no_key_line + unmatched_in_elf|17|21813|
+|ffmpeg-a32|旧C（身份固定）|no_key_line|5855|22404105832|
+|ffmpeg-a32|旧C（身份固定）|no_key_line + reference_ambiguity|146|235797038|
+|ffmpeg-a32|旧C（身份固定）|no_key_line + unmatched_in_elf|37|10074237|
+|ffmpeg-a32|旧C（身份固定）|reference_ambiguity|147|262894779|
+|ffmpeg-a32|裁决3原文|identity_ambiguous + no_key_line + unmatched_in_elf|6|15555|
+|ffmpeg-a32|裁决3原文|no_key_line|654|731523394|
+|ffmpeg-a32|裁决3原文|no_key_line + reference_ambiguity|18|38018090|
+|ffmpeg-a32|裁决3原文|no_key_line + unmatched_in_elf|3|10812|
+|ffmpeg-a32|裁决3原文|reference_ambiguity|144|254528326|
+|ffmpeg-a32|裁决3修订1|identity_ambiguous + no_key_line + unmatched_in_elf|6|15555|
+|ffmpeg-a32|裁决3修订1|no_key_line|654|731523394|
+|ffmpeg-a32|裁决3修订1|no_key_line + reference_ambiguity|18|38018090|
+|ffmpeg-a32|裁决3修订1|no_key_line + unmatched_in_elf|3|10812|
+|ffmpeg-a32|裁决3修订1|reference_ambiguity|147|262894779|
+
+新并集C的原C→新U账本（包括code_free）：
+
+|对象|完整原因集合|行数|DA|
+|---|---|---|---|
+|spike-thumb|code_free_line + no_key_line|47|9688364214|
+|spike-thumb|no_key_line|2|1000001|
+|spike-a32|code_free_line + no_key_line|48|9816364214|
+|spike-a32|no_key_line|2|1000001|
+|ffmpeg-thumb|code_free_line + identity_ambiguous + no_key_line + reference_ambiguity + unmatched_in_elf|10|36|
+|ffmpeg-thumb|code_free_line + identity_ambiguous + no_key_line + unmatched_in_elf|11|6258|
+|ffmpeg-thumb|code_free_line + no_key_line|5223|21665330144|
+|ffmpeg-thumb|code_free_line + no_key_line + reference_ambiguity|125|204258948|
+|ffmpeg-thumb|code_free_line + no_key_line + unmatched_in_elf|34|10063425|
+|ffmpeg-thumb|identity_ambiguous + no_key_line + unmatched_in_elf|6|15555|
+|ffmpeg-thumb|no_key_line|650|724950846|
+|ffmpeg-thumb|no_key_line + reference_ambiguity|17|31940587|
+|ffmpeg-thumb|no_key_line + unmatched_in_elf|3|10812|
+|ffmpeg-thumb|reference_ambiguity|151|262492282|
+|ffmpeg-a32|code_free_line + identity_ambiguous + no_key_line + reference_ambiguity + unmatched_in_elf|10|36|
+|ffmpeg-a32|code_free_line + identity_ambiguous + no_key_line + unmatched_in_elf|11|6258|
+|ffmpeg-a32|code_free_line + no_key_line|5201|21672582438|
+|ffmpeg-a32|code_free_line + no_key_line + reference_ambiguity|128|197778948|
+|ffmpeg-a32|code_free_line + no_key_line + unmatched_in_elf|34|10063425|
+|ffmpeg-a32|identity_ambiguous + no_key_line + unmatched_in_elf|6|15555|
+|ffmpeg-a32|no_key_line|654|731523394|
+|ffmpeg-a32|no_key_line + reference_ambiguity|18|38018090|
+|ffmpeg-a32|no_key_line + unmatched_in_elf|3|10812|
+|ffmpeg-a32|reference_ambiguity|147|262894779|
+
+
+### 11.6 测试、失败记录、资源与停止
+
+原134项测试文件未修改、全部保留；新增10项synthetic，共144项通过。前7项逐项覆盖用户要求；另加AST不可得不归other、macro-only原域外不准入、范围内没有其他C行不归continuation。真实AST624条编译命令均成功；C-only重现及所有账本/域外DA断言通过。
+保留3次开发失败：AST-plugin-build-run的显式JSON构造编译错误；spike-thumb-AST-run在插件未成功时缺少so；spike-thumb-AST-v2-run把collect当对象名的CLI错误。修正后独立插件构建成功、调用前检查so存在，真实取证均通过。它们不是OOM，未采纳失败输出。
+串行nice19/ionice-c3、systemd scope MemoryMax=3G/CPUQuota=200%；每次分析启动前检查≥4GiB。最低实测MemAvailable=6861107200B；最高实读cgroup memory.peak=614322176B；资源终止=False。原始meminfo、scope、真实退出码、ALL-END和resources-summary.json保留。未提高限额、未并行运行分析。系统scope自身记账属系统服务行为；未观察到项目在WORKDIR外产生文件。
+四对象新表③均≥80%，三个1%门槛均未超限；仅本表门槛可登记。裁决待折入v1.6并经三家评审。按要求完成后停止：不登记修正案3，不进入仿真/其他N.5，不计算④body比例或任何正式sample profile受控量。
