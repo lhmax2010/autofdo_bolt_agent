@@ -16,17 +16,23 @@ def load_functions(obj):
             if r["kind"]=="function":result[r["die"]]=r
     return result
 
-def calculate(obj):
+def calculate(obj, key_input=None, key_guard=None):
     refs,da,rlines,inv,old,lp=data(obj);funcs=load_functions(obj)
     key_proofs={};failed_top=set()
-    key_input=TEMP/(obj+"-official-key-presence.jsonl")
+    key_input=key_input or TEMP/(obj+"-official-key-presence.jsonl")
     with key_input.open() as f:
         for line in f:
             x=json.loads(line)
             if x["kind"]=="die_keys":key_proofs[x["die"]]=x
             elif x["kind"]=="boundary_unavailable":failed_top.update(x["dies"])
-    assert set(key_proofs)==set(inv),("key inventory changed",set(key_proofs)^set(inv))
-    assert not any(key_proofs[d]["top_die"] in failed_top for d in old),"ordinary candidate has unavailable static key proof"
+    if key_guard is None:
+        assert set(key_proofs)==set(inv),("key inventory changed",set(key_proofs)^set(inv))
+    else:
+        # A missing proof is not evidence of zero keys. The v1.7 guard
+        # sends that instance through the active-instance checks below.
+        assert set(key_proofs)<=set(inv),"foreign key-proof DIE"
+    if key_guard is None:
+        assert not any(key_proofs[d]["top_die"] in failed_top for d in old),"ordinary candidate has unavailable static key proof"
     assert all(funcs[d]["ranges"] for d in inv)
     # Propagate positive leaf witnesses through actual parent DIE links, not name matches.
     descendant_positive=set()
@@ -34,7 +40,9 @@ def calculate(obj):
         if any(x["line"]>0 for x in r["leaf_lines"]):descendant_positive.update(r["ancestors"])
     instances={};groups=collections.defaultdict(list)
     for d,ch in old.items():
-        r=funcs[d];r["descendant_nonzero_leaf"]=d in descendant_positive;r["accepted_key_instructions"]=key_proofs[d]["accepted_key_instructions"]
+        r=funcs[d];r["descendant_nonzero_leaf"]=d in descendant_positive;r["accepted_key_instructions"]=key_proofs.get(d,{}).get("accepted_key_instructions",0)
+        if key_guard is not None:
+            r["no_key_proof_unavailable"]=(d not in key_proofs or not key_guard(d))
         # Collection must agree with the original leaf evidence, not silently repair it.
         oldleaf={(norm_file(x["file"]),x["line"]) for x in json.loads(ch["leaf_rows"])}
         newleaf={(norm_file(x["file"]),x["line"]) for x in r["leaf_lines"]}

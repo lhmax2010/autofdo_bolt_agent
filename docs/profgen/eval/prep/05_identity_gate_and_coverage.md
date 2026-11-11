@@ -1511,7 +1511,9 @@ label的具体case/default/普通标号以及所有原始token在逐行CSV中；
 完成后停止。本轮仅描述，不改变C、U、权重、任何门槛或资格；不登记修正案3，不做仿真、正式profile分析或板上工作。
 
 
-## 13. v1.7 入库与独立核对（C 的输入契约待裁决，尚未重算）
+## 13. v1.7 入库与静态重算（含修正稿前停止记录）
+
+13.1–13.3 保留修正稿前的停止记录；该问题已由用户修正稿与13.4解决。最终结果见13.5–13.10。
 
 ### 13.1 入库及已完成项
 
@@ -1556,3 +1558,179 @@ label的具体case/default/普通标号以及所有原始token在逐行CSV中；
 记录范围为测试与源码/规则取证，轻量文件阅读没有单独峰值记录。
 两项作业最低MemAvailable=5150109696字节，最高cgroup memory.peak=23052288字节；无资源终止。
 资源与SHA索引：[summary.json](evidence/identity-gate/v17-recompute/summary.json)、[manifest.json](evidence/identity-gate/v17-recompute/manifest.json)。
+
+
+### 13.4 修正稿与最终规则
+
+用户裁决不另立宏事实输入。设计修正稿以mv替换，移动前后SHA均为
+`9132af9a8242bdb7fa0a37aaf4f43b7eb2e06825fa6546309d5a3e46596ae092`；
+Downloads源文件不存在，文档内容未改。替换提交为bc2dc60（“v1.7 修正稿，见附录 P.4 第7条”）；初次入库/停止记录提交为d632b45。
+
+最终C生成不包含任何宏排除规则。宏生成身份仅从U排除该行，并在账本中加
+macro_generated_function；无见证时与code_free_line组成完整原因集合。
+实测宏函数68个（两侧各34），FNDA均0，身份结论全部不变；已执行宏函数的两个账本分支由synthetic夹具独立验证。
+证据：[macro-recheck.json](evidence/identity-gate/v17-recompute/macro-recheck.json)。
+
+| v1.7条款 | 修改前/复用部分 | 最终实现与验证 |
+|---|---|---|
+| O.2.2#2 | 已按定义体/形参角色分流；未标definition_body | token_paste_rule.py记录该证明路径；test_v17_paste.py三例通过；68个真实宏身份重新核对不变 |
+| O.2.3#1–2 | 旧domain使用函数/selected-groups过滤，取原始行而非有效查询区间 | v17_domain.py的独立LLVM API工具只取ELF执行节及LineTable.Sequences；v17_rules.witnesses按序列相邻行构造半开区间，重复地址只保留末条，排除end_sequence与零长；不做函数、边界或键筛选 |
+| O.2.3#2输入隔离 | 映射选择曾参与S见证 | C₀由C覆盖参考封存为file/line/DA；生成器仅使用该C₀与C/S两份调试ELF。现有inventory索引仅用于取得ELF路径，不读取其函数记录。各domain/index.json的admitted_domain_inputs列出三个输入SHA；static/index.json另列mapping_range_inputs_separate_from_C |
+| O.2.3#3/P.4#7 | 旧稿宏排除与输入独立性冲突 | C不消费身份；v17_rules.ledger在U/账本阶段处理宏状态，保留完整原因集合。取证失败时domain_unresolved保守保留C并作为U损失，不能变成code_free；无法定位失败影响时保留所有尚未取得见证的C₀行 |
+| O.2.3#5 | 旧描述无inlined_call_site | v17_calls.py直接遍历两份ELF的全部DIE，独立取得call_file/call_line；v17_classify.py复用已校验C命令AST/raw Lexer，在own_stmt之前加入内联调用点分类，不将分类结果反向用于C。own_stmt描述改为“未取得指令行归属见证” |
+| O.2.4#3 | 已有全部顶层函数键枚举；旧apply以全量记录/无边界失败断言保证前置条件 | v17_key_audit.py重跑原独立helper，仍使用正式工具原样复制的键生成块；校验完整清单、全部范围、指令数量、符号化退出码和逐DIE记录。新增显式无键证明门禁；不完整证明按有键实例检查，不默认0豁免。旧入口默认行为保留 |
+| 5.8#5特殊状态 | 无统一的受检条目分类接口 | v17_rules.classify_body按boundary→unknown_name→reference_unresolved→known_out_of_scope→unmapped_key→特殊已登记值→其他排除→U处理。仅synthetic输入验证，不读取真实body |
+| 5.8#6结论域门禁 | 未有强制输出字段检查 | validate_conclusion/write_conclusion在打开文件前要求评价域原文、③三口径、③′、代码承载与非重复域外比例。static摘要实际通过门禁；缺字段既不创建文件也不覆盖旧文件 |
+| P.5#20 | 原161项 | 原测试文件逐字节未改；新增44项（含3项拼接），共205项通过；完整名字见test-inventory.json |
+
+LLVM22.1.8的DWARFDebugLine.cpp:1297–1316源码已核对：同sequence内通过upper_bound−1选择最后一条同地址记录。
+SHA与原文见compiler-source.txt。新增C取证工具与callsite工具是独立程序，只链接GBS LLVM库，不修改或重编Clang。
+C的定义理由分开：结构性重复计数修正对应asm/structural/expr三类；其余无见证行的排除是可测量性限定。行级结论**只覆盖固定构建中有指令行归属见证的行**，不推断其他构建也没有指令。
+
+### 13.5 v1.6/v1.7对象登记表（只含静态参考量）
+
+“可登记”仅为表内门槛状态；实际仍等待限定范围评审，未登记修正案3。
+①=U行/C行，②=正DA的U行/全部已覆盖行，③′=ΣR(U)/覆盖全部DA。
+④的RUN body比例仍未计算。
+
+| 对象 | 规则 | C行 | ΣR(C) | U行 | ΣR(U) | ① | ② | ③′ | n_eff | K |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|spike Thumb|v1.6|75|11674422883|73|11673422882|97.333333%|61.206897%|53.354972%|1.328514991|19|
+|spike Thumb|v1.7|75|11674422883|73|11673422882|97.333333%|61.206897%|53.354972%|1.328514991|19|
+|spike A32|v1.6|74|11546422883|72|11545422882|97.297297%|60.344828%|52.769930%|1.299622728|10|
+|spike A32|v1.7|74|11546422883|72|11545422882|97.297297%|60.344828%|52.769930%|1.299622728|10|
+|FFmpeg Thumb|v1.6|7637|6890196397|6810|5870786315|89.171141%|53.614043%|17.232788%|22.607015895|465|
+|FFmpeg Thumb|v1.7|7670|6908301525|6810|5870786315|88.787484%|53.614043%|17.232788%|22.607015895|465|
+|FFmpeg A32|v1.6|7656|6889424103|6828|5856961473|89.184953%|53.671409%|17.192207%|22.643693057|464|
+|FFmpeg A32|v1.7|7687|6912581744|6828|5856961473|88.825289%|53.671409%|17.192207%|22.643693057|464|
+
+两侧spike的n_eff<3、K<50，按显式分支记录，K仅描述；不据本表输出任何RUN级统计结论。
+
+| 对象 | 规则 | ③(C₀)：ΣR(U)/ΣR(C₀) | ③(C_dc)：ΣR(U)/ΣR(C_dc) | ③(C)：ΣR(U)/ΣR(C) |
+|---|---|---|---|---|
+|spike Thumb|v1.6|11673422882/21362787097 = 54.643726%|11673422882/16124041944 = 72.397622%|11673422882/11674422883 = 99.991434%|
+|spike Thumb|v1.7|11673422882/21362787097 = 54.643726%|11673422882/16124041944 = 72.397622%|11673422882/11674422883 = 99.991434%|
+|spike A32|v1.6|11545422882/21362787097 = 54.044553%|11545422882/16124041944 = 71.603776%|11545422882/11546422883 = 99.991339%|
+|spike A32|v1.7|11545422882/21362787097 = 54.044553%|11545422882/16124041944 = 71.603776%|11545422882/11546422883 = 99.991339%|
+|FFmpeg Thumb|v1.6|5870786315/28769855208 = 20.406034%|5870786315/11751913019 = 49.956006%|5870786315/6890196397 = 85.204920%|
+|FFmpeg Thumb|v1.7|5870786315/28769855208 = 20.406034%|5870786315/11757799111 = 49.930997%|5870786315/6908301525 = 84.981617%|
+|FFmpeg A32|v1.6|5856961473/28769855208 = 20.357980%|5856961473/11741913027 = 49.880811%|5856961473/6889424103 = 85.013804%|
+|FFmpeg A32|v1.7|5856961473/28769855208 = 20.357980%|5856961473/11741913027 = 49.880811%|5856961473/6912581744 = 84.729001%|
+
+FFmpeg的C_dc口径仍小于50%，C口径超过80%。门槛通过依赖可测量性限定；不称为对齐能力提升，也不把C_dc作为新的门槛。
+
+| 对象（v1.7） | C_dc行 | 代码承载ΣR(C)/ΣR(C₀) | 非重复域外ΣR(C_dc\C)/ΣR(C_dc) | domain_unresolved行/DA |
+|---|---:|---|---|---|
+|spike Thumb|94|11674422883/21362787097 = 54.648407%|4449619061/16124041944 = 27.596176%|0/0|
+|spike A32|94|11546422883/21362787097 = 54.049234%|4577619061/16124041944 = 28.390022%|0/0|
+|FFmpeg Thumb|10843|6908301525/28769855208 = 24.012292%|4849497586/11757799111 = 41.244943%|0/0|
+|FFmpeg A32|10847|6912581744/28769855208 = 24.027169%|4829331283/11741913027 = 41.128999%|0/0|
+
+### 13.6 三个1%门槛与登记状态
+
+| 对象 | 规则 | identity_ambiguous 分子/分母 | unmatched_in_elf 分子/分母 | boundary_unavailable 分子/分母 | ③门槛 | 表内状态 |
+|---|---|---|---|---|---|---|
+|spike Thumb|v1.6|0/11674422883 = 0.000000%|0/11674422883 = 0.000000%|0/11674422883 = 0.000000%|≥80%|可登记（未实际登记）|
+|spike Thumb|v1.7|0/11674422883 = 0.000000%|0/11674422883 = 0.000000%|0/11674422883 = 0.000000%|≥80%|可登记（未实际登记）|
+|spike A32|v1.6|0/11546422883 = 0.000000%|0/11546422883 = 0.000000%|0/11546422883 = 0.000000%|≥80%|可登记（未实际登记）|
+|spike A32|v1.7|0/11546422883 = 0.000000%|0/11546422883 = 0.000000%|0/11546422883 = 0.000000%|≥80%|可登记（未实际登记）|
+|FFmpeg Thumb|v1.6|15555/6890196397 = 0.000226%|26367/6890196397 = 0.000383%|0/6890196397 = 0.000000%|≥80%|可登记（未实际登记）|
+|FFmpeg Thumb|v1.7|15555/6908301525 = 0.000225%|26367/6908301525 = 0.000382%|0/6908301525 = 0.000000%|≥80%|可登记（未实际登记）|
+|FFmpeg A32|v1.6|15555/6889424103 = 0.000226%|26367/6889424103 = 0.000383%|0/6889424103 = 0.000000%|≥80%|可登记（未实际登记）|
+|FFmpeg A32|v1.7|15555/6912581744 = 0.000225%|26367/6912581744 = 0.000381%|0/6912581744 = 0.000000%|≥80%|可登记（未实际登记）|
+
+所有门槛均未超限。四对象C→U与C₀→U的完整原因集合账本如下；每行只计一次，各账本差值均断言为0。
+
+| 对象 | 账本 | 原因集合 | 行数 | DA |
+|---|---|---|---:|---:|
+|spike Thumb|C→U|no_key_line|2|1000001|
+|spike Thumb|C₀→U|code_free_line, no_key_line|47|9688364214|
+|spike Thumb|C₀→U|no_key_line|2|1000001|
+|spike A32|C→U|no_key_line|2|1000001|
+|spike A32|C₀→U|code_free_line, no_key_line|48|9816364214|
+|spike A32|C₀→U|no_key_line|2|1000001|
+|FFmpeg Thumb|C→U|identity_ambiguous, no_key_line, unmatched_in_elf|6|15555|
+|FFmpeg Thumb|C→U|no_key_line|683|743055974|
+|FFmpeg Thumb|C→U|no_key_line, reference_ambiguity|17|31940587|
+|FFmpeg Thumb|C→U|no_key_line, unmatched_in_elf|3|10812|
+|FFmpeg Thumb|C→U|reference_ambiguity|151|262492282|
+|FFmpeg Thumb|C₀→U|code_free_line, identity_ambiguous, no_key_line, reference_ambiguity, unmatched_in_elf|10|36|
+|FFmpeg Thumb|C₀→U|code_free_line, identity_ambiguous, no_key_line, unmatched_in_elf|11|6258|
+|FFmpeg Thumb|C₀→U|code_free_line, no_key_line|5190|21647225016|
+|FFmpeg Thumb|C₀→U|code_free_line, no_key_line, reference_ambiguity|125|204258948|
+|FFmpeg Thumb|C₀→U|code_free_line, no_key_line, unmatched_in_elf|34|10063425|
+|FFmpeg Thumb|C₀→U|identity_ambiguous, no_key_line, unmatched_in_elf|6|15555|
+|FFmpeg Thumb|C₀→U|no_key_line|683|743055974|
+|FFmpeg Thumb|C₀→U|no_key_line, reference_ambiguity|17|31940587|
+|FFmpeg Thumb|C₀→U|no_key_line, unmatched_in_elf|3|10812|
+|FFmpeg Thumb|C₀→U|reference_ambiguity|151|262492282|
+|FFmpeg A32|C→U|identity_ambiguous, no_key_line, unmatched_in_elf|6|15555|
+|FFmpeg A32|C→U|no_key_line|685|754681035|
+|FFmpeg A32|C→U|no_key_line, reference_ambiguity|18|38018090|
+|FFmpeg A32|C→U|no_key_line, unmatched_in_elf|3|10812|
+|FFmpeg A32|C→U|reference_ambiguity|147|262894779|
+|FFmpeg A32|C₀→U|code_free_line, identity_ambiguous, no_key_line, reference_ambiguity, unmatched_in_elf|10|36|
+|FFmpeg A32|C₀→U|code_free_line, identity_ambiguous, no_key_line, unmatched_in_elf|11|6258|
+|FFmpeg A32|C₀→U|code_free_line, no_key_line|5170|21649424797|
+|FFmpeg A32|C₀→U|code_free_line, no_key_line, reference_ambiguity|128|197778948|
+|FFmpeg A32|C₀→U|code_free_line, no_key_line, unmatched_in_elf|34|10063425|
+|FFmpeg A32|C₀→U|identity_ambiguous, no_key_line, unmatched_in_elf|6|15555|
+|FFmpeg A32|C₀→U|no_key_line|685|754681035|
+|FFmpeg A32|C₀→U|no_key_line, reference_ambiguity|18|38018090|
+|FFmpeg A32|C₀→U|no_key_line, unmatched_in_elf|3|10812|
+|FFmpeg A32|C₀→U|reference_ambiguity|147|262894779|
+
+逐行账本、U及权重均在各对象static目录分片保存并登记SHA。当前真实宏FNDA全0，无宏执行量；有见证/无见证且FNDA>0的两个互斥账本分支均由synthetic验证，不伪造真实数据。
+
+### 13.7 code_free描述分类
+
+新C移出的目标是旧code_free的子集，因此复用624条原C命令的AST及raw Lexer原件；逐件核验SHA及旧Stmt/Expr一致性元数据，不需要再次编译源码。全部目标有AST与Lexer证据。
+
+| 类别（行数 / DA） | spike Thumb | spike A32 | FFmpeg Thumb | FFmpeg A32 |
+|---|---:|---:|---:|---:|
+|asm_interior|0 / 0|0 / 0|68 / 14050578484|68 / 14050578484|
+|structural_line|28 / 5238745153|28 / 5238745153|2104 / 2961475814|2100 / 2977361898|
+|expr_continuation|0 / 0|0 / 0|25 / 1799|25 / 1799|
+|inlined_call_site|1 / 1|1 / 1|327 / 173856712|335 / 175649375|
+|own_stmt_no_code|18 / 4449619060|19 / 4577619060|2697 / 4482119345|2676 / 4460160379|
+|other|0 / 0|0 / 0|149 / 193521529|149 / 193521529|
+|ast_unavailable|0 / 0|0 / 0|0 / 0|0 / 0|
+
+每类占C₀/C的分子分母、own_stmt语句种类、逐行token/AST/callsite证据和top20见classification/summary.json及CSV分片。own_stmt仅表示未取得指令行归属见证；other保留原因，未推断其优化机制。两份构建所有inlined_subroutine的call属性均独立收集，包含lexical block下的节点。
+
+### 13.8 全量键证明、变化行与独立性
+
+| 对象 | 完整有代码DIE | 全部顶层组 | 枚举指令出现数 | 已证明无键实例 | 普通候选豁免实例 | 失败顶层组 |
+|---|---:|---:|---:|---:|---:|---:|
+|spike Thumb|17|9|385|0|0|0|
+|spike A32|17|9|386|0|0|0|
+|FFmpeg Thumb|28149|4630|1046243|965|928|0|
+|FFmpeg A32|28190|4633|1026941|963|925|0|
+
+四份新键证明原始输出与旧输出SHA完全相同；普通候选所有组结论完全相同。边界失败/漏范围/缺记录/符号化失败在synthetic中不得获得豁免；整组无键时完整参考质量进入no_key_line。
+
+| 对象 | 新增C行/DA | 新增行进入U：行/DA | 移出C行/DA | S有被接受键却不在C的C₀行/DA |
+|---|---|---|---|---|
+|spike Thumb|0/0|0/0|0/0|0/0|
+|spike A32|0/0|0/0|0/0|0/0|
+|FFmpeg Thumb|33/18105128|0/0|0/0|0/0|
+|FFmpeg A32|31/23157641|0/0|0/0|0/0|
+
+新增行逐项列于static/added-C分片，均以原有键/身份证据判损失，没有静默删除。每对象三次重放使用完全相同C₀与ELF派生行表，只改变合成的外部对应/键/映射范围状态，C SHA均不变；另对实际见证行作DA=1的明确synthetic宏状态切换，只有U/账本变化。证据为各对象invariance.json。C⊆C_dc⊆C₀及U⊆C均有运行时断言。
+
+### 13.9 验收、资源与证据索引
+
+205项测试通过（原161项逐文件未变，新增44项）。完整测试名、原文、源代码与输入SHA分别见test-inventory.json、tests-final-205/stderr.txt、final-manifest.json和各命令记录。旧ruling3-4、ruling3-rev1及code-free-v2产物git差异为空；旧路径输出未覆盖。
+
+所有记录作业串行、nice19/ionice-c3、systemd scope MemoryMax=3G / CPUQuota=200%；启动检查MemAvailable≥4GiB。记录最低MemAvailable=5150109696字节（4.796GiB），峰值cgroup memory.peak=1302265856字节（1241.938MiB）；无资源终止，所有记录作业退出0。原始meminfo与scope记录在各*-run/和作业目录。轻量文件编辑/阅读没有逐条独立峰值记录，峰值统计范围为带run_scoped记录的作业。
+
+- spike Thumb：[对象表/两个账本](evidence/identity-gate/v17-recompute/spike-thumb-static/comparison.json)；[C输入SHA](evidence/identity-gate/v17-recompute/spike-thumb-domain/index.json)；[描述分类](evidence/identity-gate/v17-recompute/spike-thumb-classification/summary.json)；[全部顶层键证明](evidence/identity-gate/v17-recompute/spike-thumb-key-audit/summary.json)。
+- spike A32：[对象表/两个账本](evidence/identity-gate/v17-recompute/spike-a32-static/comparison.json)；[C输入SHA](evidence/identity-gate/v17-recompute/spike-a32-domain/index.json)；[描述分类](evidence/identity-gate/v17-recompute/spike-a32-classification/summary.json)；[全部顶层键证明](evidence/identity-gate/v17-recompute/spike-a32-key-audit/summary.json)。
+- FFmpeg Thumb：[对象表/两个账本](evidence/identity-gate/v17-recompute/ffmpeg-thumb-static/comparison.json)；[C输入SHA](evidence/identity-gate/v17-recompute/ffmpeg-thumb-domain/index.json)；[描述分类](evidence/identity-gate/v17-recompute/ffmpeg-thumb-classification/summary.json)；[全部顶层键证明](evidence/identity-gate/v17-recompute/ffmpeg-thumb-key-audit/summary.json)。
+- FFmpeg A32：[对象表/两个账本](evidence/identity-gate/v17-recompute/ffmpeg-a32-static/comparison.json)；[C输入SHA](evidence/identity-gate/v17-recompute/ffmpeg-a32-domain/index.json)；[描述分类](evidence/identity-gate/v17-recompute/ffmpeg-a32-classification/summary.json)；[全部顶层键证明](evidence/identity-gate/v17-recompute/ffmpeg-a32-key-audit/summary.json)。
+
+大的新原始行表、callsite、键证明与独立工具产物只在temp/prep-v17/；各command/index记录路径与SHA。复用的大AST/Lexer仍在temp/prep-code-free-v2/，SHA来源登记于classification摘要。仓库新增证据每个小于1MB。
+
+### 13.10 本阶段结束
+
+按v1.7修正稿完成本任务指定的静态重算，等待限定范围评审后再决定后续；不登记修正案3，不进入其他N.5/P.5项目。未连接开发板，未打开任何正式sample profile，未计算任何RUN级受控量；宏/条目分类/结论门禁的动态形态用例全部是synthetic。

@@ -26,20 +26,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前设计状态（v1.7修正稿已入库；静态重算进行中）
+## 当前设计状态（v1.7修正稿已入库；静态重算完成，等待限定范围评审）
 
-- v1.7修正稿已以mv替换，SHA-256：9132af9a8242bdb7fa0a37aaf4f43b7eb2e06825fa6546309d5a3e46596ae092（见附录P.4第7条）。人工裁决已解决C输入契约：C不使用宏生成身份；该身份只影响U与账本，完整原因集合可同时包含code_free_line与macro_generated_function。开始按修正稿恢复静态重算，未登记修正案3、未读取正式sample profile。下列停止记录保留历史。
-- [设计v1.7](profgen/design/02_llvm_profgen_enhance_design_v1.7.md)已按指定SHA以mv入库，Downloads源文件已移走；文档内容不改。SHA-256：4a72d97fd26174e3fd454b43adfb183b942a0ea6e90fbc4308ccf1cad78d842e。
-- [05报告§13](profgen/eval/prep/05_identity_gate_and_coverage.md)：操作数按角色分流已核对，新增definition_body路径标签与3项synthetic；原161项加新增3项共164项通过。LLVM同地址取最后一行查询语义已核对。
-- v1.7重算尚未完成：O.2.3#2禁止C使用身份结论并要求对应表变化不改变C，#3却要求排除裁决2的宏生成函数行；已请求明确独立宏排除证明的输入与优先级，等待人工裁决，不自行放宽。旧静态表保留，不作为v1.7新结果。证据：profgen/eval/prep/evidence/identity-gate/v17-recompute/。
-- 未登记修正案3，未读取正式sample profile；恢复后完成指定重算再等待限定范围评审。
-
-- [设计v1.6](profgen/design/02_llvm_profgen_enhance_design_v1.6.md)已入库，等待三家评审；评审通过前不登记修正案3，不读取正式 sample profile。
-- v1.6文件SHA-256：1cee7d66b9334722634e985eaedac48caee34fb03b1d0807e6b5df9b5fec81ad；从Downloads以mv移入，原文件已移走，文档内容未修改。
-- [设计v1.5](profgen/design/02_llvm_profgen_enhance_design_v1.5.md)定稿，按人工裁决不再评审设计；进入附录N.5登记前准备第一阶段。
-- 修订3未登记；未计算任何正式 sample profile 的受控量。
-- 本阶段只使用静态ELF/调试文件、C构建覆盖参考与源码；不连接板子，不打开或转换正式sample profile（含CALIBRATION）。
-- v1.5文件SHA-256：be18d105d5711861b08517004d97eb40de5fb37b92213202cddd6b759fa9e636；从Downloads以mv移入，无同SHA重复副本，旧版本不动。
+- [设计v1.7](profgen/design/02_llvm_profgen_enhance_design_v1.7.md)修正稿已以mv替换，SHA-256：9132af9a8242bdb7fa0a37aaf4f43b7eb2e06825fa6546309d5a3e46596ae092。Downloads源文件不存在，设计内容未改；替换提交bc2dc60，见附录P.4第7条。
+- [05报告§13](profgen/eval/prep/05_identity_gate_and_coverage.md)：C只用两份调试ELF与C₀；宏身份仅影响U/账本。四对象重放与输入隔离断言通过，domain_unresolved均0。旧产物保留；当前状态取代修正稿前的停止记录d632b45。
+- v1.7的③(C)：spike Thumb/A32为99.991434%/99.991339%；FFmpeg Thumb/A32为84.981617%/84.729001%。三个1%门槛均未超限；表内可登记，实际仍待限定范围评审。FFmpeg的③(C_dc)为49.930997%/49.880811%，通过C门槛依赖可测量性限定，不称为对齐改善。
+- 全部顶层键枚举与旧证据逐字节相同，身份结论不变。原161项加新增44项，共205项测试通过；两份损失账本差值均0。证据：profgen/eval/prep/evidence/identity-gate/v17-recompute/。
+- 未登记修正案3；未读取正式sample profile（含CALIBRATION），未计算RUN级受控量。已按任务完成后停止，不进入其他N.5/P.5项目，不连接板子。
+- v0.7–v1.6文件与历史静态结果保留不动。v1.6及更早状态见git历史；本次只使用静态ELF/调试文件、C覆盖参考和源码。
 
 
 ## 人工裁决（登记前准备）

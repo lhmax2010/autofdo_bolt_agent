@@ -22,7 +22,8 @@ def instance_check(instance,candidates,c_definitions):
     leaf={r["line"] for r in positive if norm_file(r["file"])==file}
     call={r["call_line"] for r in instance["direct_inline_calls"] if r["call_file_resolved"] and r["call_line_present"] and r["call_line"]>0 and norm_file(r["call_file"])==file}
     combined=leaf|call;c=candidates[0];lower=min(decl,int(c["start"]));upper=int(c["end"])
-    has_key=instance["accepted_key_instructions"]>0
+    has_key=(instance["accepted_key_instructions"]>0 or
+             instance.get("no_key_proof_unavailable",False))
     if not has_key:
         category=("a_self_and_descendants_zero" if not positive and not instance["descendant_nonzero_leaf"]
                   else ("e_nonleaf_zero_rejected" if not positive and instance["descendant_nonzero_leaf"]
