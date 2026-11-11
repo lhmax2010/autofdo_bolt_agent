@@ -26,8 +26,9 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前设计状态（v1.7已入库；C输入契约待裁决，尚未重算）
+## 当前设计状态（v1.7修正稿已入库；静态重算进行中）
 
+- v1.7修正稿已以mv替换，SHA-256：9132af9a8242bdb7fa0a37aaf4f43b7eb2e06825fa6546309d5a3e46596ae092（见附录P.4第7条）。人工裁决已解决C输入契约：C不使用宏生成身份；该身份只影响U与账本，完整原因集合可同时包含code_free_line与macro_generated_function。开始按修正稿恢复静态重算，未登记修正案3、未读取正式sample profile。下列停止记录保留历史。
 - [设计v1.7](profgen/design/02_llvm_profgen_enhance_design_v1.7.md)已按指定SHA以mv入库，Downloads源文件已移走；文档内容不改。SHA-256：4a72d97fd26174e3fd454b43adfb183b942a0ea6e90fbc4308ccf1cad78d842e。
 - [05报告§13](profgen/eval/prep/05_identity_gate_and_coverage.md)：操作数按角色分流已核对，新增definition_body路径标签与3项synthetic；原161项加新增3项共164项通过。LLVM同地址取最后一行查询语义已核对。
 - v1.7重算尚未完成：O.2.3#2禁止C使用身份结论并要求对应表变化不改变C，#3却要求排除裁决2的宏生成函数行；已请求明确独立宏排除证明的输入与优先级，等待人工裁决，不自行放宽。旧静态表保留，不作为v1.7新结果。证据：profgen/eval/prep/evidence/identity-gate/v17-recompute/。
