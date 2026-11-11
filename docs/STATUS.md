@@ -26,8 +26,10 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前设计状态（v1.5定稿；登记前准备第一阶段）
+## 当前设计状态（v1.6已入库；等待三家评审）
 
+- [设计v1.6](profgen/design/02_llvm_profgen_enhance_design_v1.6.md)已入库，等待三家评审；评审通过前不登记修正案3，不读取正式 sample profile。
+- v1.6文件SHA-256：1cee7d66b9334722634e985eaedac48caee34fb03b1d0807e6b5df9b5fec81ad；从Downloads以mv移入，原文件已移走，文档内容未修改。
 - [设计v1.5](profgen/design/02_llvm_profgen_enhance_design_v1.5.md)定稿，按人工裁决不再评审设计；进入附录N.5登记前准备第一阶段。
 - 修订3未登记；未计算任何正式 sample profile 的受控量。
 - 本阶段只使用静态ELF/调试文件、C构建覆盖参考与源码；不连接板子，不打开或转换正式sample profile（含CALIBRATION）。
