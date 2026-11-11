@@ -26,7 +26,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前设计状态（v1.6已入库；等待三家评审）
+## 当前设计状态（v1.7已入库；C输入契约待裁决，尚未重算）
+
+- [设计v1.7](profgen/design/02_llvm_profgen_enhance_design_v1.7.md)已按指定SHA以mv入库，Downloads源文件已移走；文档内容不改。SHA-256：4a72d97fd26174e3fd454b43adfb183b942a0ea6e90fbc4308ccf1cad78d842e。
+- [05报告§13](profgen/eval/prep/05_identity_gate_and_coverage.md)：操作数按角色分流已核对，新增definition_body路径标签与3项synthetic；原161项加新增3项共164项通过。LLVM同地址取最后一行查询语义已核对。
+- v1.7重算尚未完成：O.2.3#2禁止C使用身份结论并要求对应表变化不改变C，#3却要求排除裁决2的宏生成函数行；已请求明确独立宏排除证明的输入与优先级，等待人工裁决，不自行放宽。旧静态表保留，不作为v1.7新结果。证据：profgen/eval/prep/evidence/identity-gate/v17-recompute/。
+- 未登记修正案3，未读取正式sample profile；恢复后完成指定重算再等待限定范围评审。
 
 - [设计v1.6](profgen/design/02_llvm_profgen_enhance_design_v1.6.md)已入库，等待三家评审；评审通过前不登记修正案3，不读取正式 sample profile。
 - v1.6文件SHA-256：1cee7d66b9334722634e985eaedac48caee34fb03b1d0807e6b5df9b5fec81ad；从Downloads以mv移入，原文件已移走，文档内容未修改。

@@ -1,0 +1,24 @@
+{
+  "status": "awaiting_rule_clarification",
+  "kind": "synthetic_logic_counterexample_not_real_data",
+  "fixed_inputs": [
+    "C0 contains (f,10) with DA=1",
+    "C-debug ELF contains a valid executable line interval for (f,10)",
+    "S-debug ELF unchanged"
+  ],
+  "case_a": {
+    "identity": "ordinary",
+    "witness_rule_in_C": true
+  },
+  "case_b": {
+    "identity": "macro_generated_function",
+    "macro_exclusion_in_C": false
+  },
+  "conflict": "Changing only the identity conclusion would change C despite O.2.3.2 invariance; the C generator is forbidden to consume that conclusion.",
+  "candidate": "Define and authorize a separately sealed reference/compiler macro-line fact set, including provenance and priority; do not silently consume correspondence as a hidden input.",
+  "actual_static_results_recomputed": false,
+  "formal_profiles_read": false,
+  "amendment3_registered": false,
+  "design_sha256": "4a72d97fd26174e3fd454b43adfb183b942a0ea6e90fbc4308ccf1cad78d842e",
+  "design_source_absent": true
+}

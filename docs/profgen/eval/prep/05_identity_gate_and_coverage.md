@@ -1509,3 +1509,50 @@ label的具体case/default/普通标号以及所有原始token在逐行CSV中；
 资源全程串行nice19/ionice-c3，scope MemoryMax=3G、CPUQuota=200%；分析前MemAvailable≥4GiB。最低MemAvailable=7198117888 B，最高实读cgroup memory.peak=544968704 B，资源终止=False；无OOM。原始meminfo/退出码/scope/ALL-END均保留。边界例外：无已知项目文件在WORKDIR外生成；systemd自身系统记账不属于项目输出。
 
 完成后停止。本轮仅描述，不改变C、U、权重、任何门槛或资格；不登记修正案3，不做仿真、正式profile分析或板上工作。
+
+
+## 13. v1.7 入库与独立核对（C 的输入契约待裁决，尚未重算）
+
+### 13.1 入库及已完成项
+
+设计 v1.7 从指定 Downloads 文件以 mv 移入；移动前后 SHA-256 均为
+`4a72d97fd26174e3fd454b43adfb183b942a0ea6e90fbc4308ccf1cad78d842e`，源文件已不存在。
+基线为 main 的 fbf317a41e254587e9ed7f8f7489b7f104ad60d3，fetch 后与 origin/main 一致。
+旧设计、静态表和分类结果均保留；没有读取正式 sample profile，没有登记修正案3。
+
+| 条款 | 修改前 | 本轮结果 |
+|---|---|---|
+| O.2.2#2 操作数按角色分流 | 已先按 MacroInfo 的 parameter_num 分出 definition/argument，定义体操作数直接来自唯一 X 的片段；缺 definition_body 证明路径标签 | 增加该标签，不改变判定条件；形参后续三分支不变 |
+| P.5#20 定义体操作数夹具 | 未具名覆盖三种指定结构 | 新增 OPNAME ## _pixels8、a ## _ ## b ## c 正例与同文本异定义反例；全部通过 |
+| O.2.3 LLVM 行表语义 | 旧 C 生成曾使用函数/selected-groups 过滤，不能直接沿用 | 核对源码 findRowInSeq：同一 sequence 中 upper_bound−1 取最后一条同地址记录；源码摘录及 SHA 已保存。新 C 生成器尚未实施 |
+
+测试命令：`python3 -m unittest discover -s tools/profgen_eval -p 'test_*.py'`。
+原161项保留并通过，新增3项synthetic，共164项通过。
+证据：[tests-role](evidence/identity-gate/v17-recompute/tests-role/command.json)、
+[测试原文](evidence/identity-gate/v17-recompute/tests-role/stderr.txt)、
+[LLVM源码摘录及SHA](evidence/identity-gate/v17-recompute/compiler-source.txt)。
+
+### 13.2 待裁决：C 输入独立性与宏生成行排除
+
+原文证据：[domain-rule-conflict.txt](evidence/identity-gate/v17-recompute/domain-rule-conflict.txt)。
+
+- O.2.3#2要求 C 只用两份调试ELF与C₀，不用任何身份结论；仅改变对应结论时C的SHA不变。
+- O.2.3#3、5.8#5同时要求裁决2认定的宏生成函数行不进入C。P.5#20明确要求覆盖FNDA>0宏函数，不能以当前真实34项FNDA全为0代替此项验证。
+- 最小合成逻辑反例：固定C₀中的一行（DA=1）与两份ELF，该行有有效可执行行表见证。若作为普通对应，应进入C；若仅改变对应结论为macro_generated_function，按排除条文则不进入C。不能同时保持SHA不变。
+- 尚未采用的候选方向：将宏生成行的排除证明明确为独立于跨侧对应表、随C₀封存的参考/编译器事实，并定义允许输入、证明方法及优先级。这需要人工裁决，不能由实现暗中引入对应表。
+
+[逻辑反例记录](evidence/identity-gate/v17-recompute/pending-domain-decision.json)是synthetic规则核对，不是真实profile分析。
+本轮已提出澄清，等待裁决；不把“重算完成”写入STATUS。
+
+### 13.3 未完成项与资源
+
+| 工作 | 状态 |
+|---|---|
+| 新C、C_dc、U及三口径③、两个账本、domain_unresolved、四对象门槛/登记状态 | 未重算；依赖13.2裁决，旧结果不冒充v1.7结果 |
+| inlined_call_site分类、完整无键重跑、特殊状态分类器、结论输出门禁、其余P.5#20夹具 | 未完成；保留到恢复执行 |
+| 正式sample profile、修正案3、其他N.5/P.5任务 | 未打开、未登记、未开展 |
+
+串行nice19/ionice-c3，systemd scope 3G/200%。两项记录作业启动时MemAvailable均≥4GiB；
+记录范围为测试与源码/规则取证，轻量文件阅读没有单独峰值记录。
+两项作业最低MemAvailable=5150109696字节，最高cgroup memory.peak=23052288字节；无资源终止。
+资源与SHA索引：[summary.json](evidence/identity-gate/v17-recompute/summary.json)、[manifest.json](evidence/identity-gate/v17-recompute/manifest.json)。

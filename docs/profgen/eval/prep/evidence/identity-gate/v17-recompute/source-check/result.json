@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python3",
+    "-c",
+    "\nfrom pathlib import Path\nimport hashlib,json\nbase=Path(\"docs/profgen/eval/prep/evidence/identity-gate/v17-recompute\")\ndef sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()\ndoc=Path(\"docs/profgen/design/02_llvm_profgen_enhance_design_v1.7.md\")\nassert sha(doc)==\"4a72d97fd26174e3fd454b43adfb183b942a0ea6e90fbc4308ccf1cad78d842e\"\nassert not Path(\"/home/linhao/Downloads/02_llvm_profgen_enhance_design_v1.7.md\").exists()\nsource=Path(\"src/llvm/llvm/lib/DebugInfo/DWARF/DWARFDebugLine.cpp\")\nlines=source.read_text().splitlines()\n(base/\"compiler-source.txt\").write_text(str(source)+\"\\nSHA-256 \"+sha(source)+\"\\n\"+\"\\n\".join(f\"{i+1}: {lines[i]}\" for i in range(1290,1316))+\"\\n\")\ndl=doc.read_text().splitlines()\nselect=[i for i,l in enumerate(dl) if (\"C \u7684\u751f\u6210\u53ea\u4f7f\u7528\" in l or \"\u5b8f\u751f\u6210\u51fd\u6570\uff08\u88c1\u51b3 2\uff09\u7684\u884c\" in l or \"FNDA > 0 \u7684\u5b8f\u751f\u6210\u51fd\u6570\u5728 C\" in l)]\n(base/\"domain-rule-conflict.txt\").write_text(\"\u8bbe\u8ba1 SHA-256 \"+sha(doc)+\"\\n\"+\"\\n\".join(f\"{doc}:{i+1}: {dl[i]}\" for i in select)+\"\\n\")\n(base/\"pending-domain-decision.json\").write_text(json.dumps({\n \"status\":\"awaiting_rule_clarification\",\n \"kind\":\"synthetic_logic_counterexample_not_real_data\",\n \"fixed_inputs\":[\"C0 contains (f,10) with DA=1\",\"C-debug ELF contains a valid executable line interval for (f,10)\",\"S-debug ELF unchanged\"],\n \"case_a\":{\"identity\":\"ordinary\",\"witness_rule_in_C\":True},\n \"case_b\":{\"identity\":\"macro_generated_function\",\"macro_exclusion_in_C\":False},\n \"conflict\":\"Changing only the identity conclusion would change C despite O.2.3.2 invariance; the C generator is forbidden to consume that conclusion.\",\n \"candidate\":\"Define and authorize a separately sealed reference/compiler macro-line fact set, including provenance and priority; do not silently consume correspondence as a hidden input.\",\n \"actual_static_results_recomputed\":False,\n \"formal_profiles_read\":False,\n \"amendment3_registered\":False,\n \"design_sha256\":sha(doc),\n \"design_source_absent\":True\n},ensure_ascii=False,indent=2)+\"\\n\")\nprint(\"source semantics verified; domain decision remains pending; no C/U computation\")\n"
+  ],
+  "tier": "light",
+  "limit": "3G",
+  "cpu_quota": "200%",
+  "started": "2026-11-11T20:28:43.433971+08:00",
+  "admission_memavailable": 5471473664,
+  "exit_code": 0,
+  "elapsed_seconds": 0.16058887401595712,
+  "status": "success",
+  "ended": "2026-11-11T20:28:43.594686+08:00",
+  "stdout.txt_sha256": "83799be21a101c7cc7d40b79b30c0a31d604e365209db26c533f7adb3643f198",
+  "stderr.txt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

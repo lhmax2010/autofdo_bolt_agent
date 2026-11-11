@@ -157,6 +157,9 @@ def _prove(token,chain,macros,depth=0):
     for o in resolved:
         t=o["token"]
         if o["kind"]=="definition":
+            # Role is established from X's original MacroInfo token above,
+            # before inspecting SourceLocation or requiring a MacroArgs slot.
+            o["proof_path"]="definition_body"
             o["source_valid"]=loc_in_definition(t["spelling"],x)
             if not o["source_valid"]:result["reason_codes"].append("paste_literal_outside_definition")
             continue

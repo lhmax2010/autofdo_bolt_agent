@@ -1,0 +1,28 @@
+src/llvm/llvm/lib/DebugInfo/DWARF/DWARFDebugLine.cpp
+SHA-256 d93b021fc369b45b9c95d5ff742d1fce40a4173472557ae3d910c48e2bf0121d
+1291: uint32_t DWARFDebugLine::LineTable::findRowInSeq(
+1292:     const DWARFDebugLine::Sequence &Seq,
+1293:     object::SectionedAddress Address) const {
+1294:   if (!Seq.containsPC(Address))
+1295:     return UnknownRowIndex;
+1296:   assert(Seq.SectionIndex == Address.SectionIndex);
+1297:   // In some cases, e.g. first instruction in a function, the compiler generates
+1298:   // two entries, both with the same address. We want the last one.
+1299:   //
+1300:   // In general we want a non-empty range: the last row whose address is less
+1301:   // than or equal to Address. This can be computed as upper_bound - 1.
+1302:   //
+1303:   // TODO: This function, and its users, needs to be update to return multiple
+1304:   // rows for bundles with multiple op-indexes.
+1305:   DWARFDebugLine::Row Row;
+1306:   Row.Address = Address;
+1307:   RowIter FirstRow = Rows.begin() + Seq.FirstRowIndex;
+1308:   RowIter LastRow = Rows.begin() + Seq.LastRowIndex;
+1309:   assert(FirstRow->Address.Address <= Row.Address.Address &&
+1310:          Row.Address.Address < LastRow[-1].Address.Address);
+1311:   RowIter RowPos = std::upper_bound(FirstRow + 1, LastRow - 1, Row,
+1312:                                     DWARFDebugLine::Row::orderByAddress) -
+1313:                    1;
+1314:   assert(Seq.SectionIndex == RowPos->Address.SectionIndex);
+1315:   return RowPos - Rows.begin();
+1316: }
