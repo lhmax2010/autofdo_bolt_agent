@@ -80,3 +80,20 @@
    任何一项缺失，判未决，原因码写具体项，不要笼统写 argument_spelling_outside_allowed_ranges。
 
 前提核验（先做；不成立就停止报告，不实施规则）：在 GBS 根目录的 clang 22.1.8 源码中，找到 TokenLexer::pasteTokens 末尾为拼接结果创建 expansion location 的代码，即把起止位置映射到当前展开（getExpansionLocForMacroDefLoc / createExpansionLoc）。确认第2条所依据的语义确实成立：拼接层的 immediate expansion range 覆盖从首操作数到末操作数起点的 `##` 表达式。把原文行号和 SHA 追加进 compiler-source.txt。若语义与上述不符，停止并报告。
+
+
+## 裁决2 补充3 修订1
+
+背景：补充3第5(a)条取的是 MacroArgs 中的未展开实参。如果这个实参直接写在宏调用处，它在 Clang 中是物理文件的 FileID 位置（SourceManager.cpp:984–986：非 MacroID 位置，isMacroArgExpansion 恒为 false）。原第7条要求“用 token 自身位置链按补充2规则判定”，与第5(a)条矛盾。这是规则缺陷，不是证据缺失。
+
+修订：第7条中的“实参操作数”分三种情况，按 token 自身的 SourceLocation 判定：
+(i) 宏位置（MacroID）：按原第7条处理，即用自身位置链套补充2规则。若其拼写位置是 scratch，按原规则递归应用补充3。
+(ii) 物理文件位置（FileID，且不是 scratch）：改用“直接调用实参”证明，必须同时满足：
+   a. 该 token 是从唯一实例 X 的 MacroArgs 槽位 n 取得的（n = MacroInfo::getParameterNum(该形参)，在 MacroExpands 回调时复制），且该槽位恰好只有这 1 个 token；
+   b. X 是本函数已记录展开链上的调用实例，且 X 的调用位置本身满足补充2对调用位置的要求，即它就是已记录的 invocation；
+   c. token 的拼写区间 [offset, offset+len) 完整落在 X 这次调用中第 n 个实参的区间内。这个区间按槽位切：只包含第 n 个实参自己的 token，不含括号和分隔逗号。用整个调用的实参总范围代替判定无效；
+   d. token 与 X 调用的名字位置（name_location）在同一个 FileID 中；
+   e. 证据如实记录 isMacroArgExpansion=false，不得改写成 true。证明路径写成 `direct_unexpanded_argument_slot`，并写明槽位 n 及该槽位区间的 raw/offset。
+(iii) scratch 的 FileID 位置：按原规则递归应用补充3。
+其他情况一律判未决：取不到槽位、槽位多 token 或为空、区间不在第 n 个槽位内、跨 FileID、X 不在链上，等等。
+本修订不改变补充2对函数体内“非实参 token 必须在 coverage 主文件”的规则；它只适用于从 MacroArgs 槽位取得的拼接操作数。

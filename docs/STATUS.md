@@ -36,6 +36,8 @@
 
 ## 人工裁决（登记前准备）
 
+- [裁决2补充3修订1](profgen/eval/prep/rulings.md)：直接未展开FileID实参以唯一MacroArgs槽位、该槽位的编译器区间、调用实例及同FileID证明来源，保留isMacroArgExpansion=false；不改变补充2物理函数体token规则。先登记，再实施与验收，身份门禁通过前不计算U/③。
+
 - [裁决2补充3](profgen/eval/prep/rulings.md)：仅scratch token允许按编译器API的唯一拼接层、展开实例、定义片段、未展开实参、文本与递归来源证明替代拼写位置条件；其余规则不变。实际GBS bind工作树TokenLexer.cpp:895–914前提核验通过；真实未展开实参的FileID标志与规则7冲突，执行状态见下。
 
 - [裁决2补充2](profgen/eval/prep/rulings.md)：宏拼写条件改为逐token校验；仅有clang isMacroArgExpansion正面证据、且位于指定调用实参或已记录宏定义体内的实参允许跨文件，其他条件不变。
