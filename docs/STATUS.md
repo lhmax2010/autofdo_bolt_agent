@@ -36,7 +36,7 @@
 
 ## 人工裁决（登记前准备）
 
-- [裁决2补充3](profgen/eval/prep/rulings.md)：仅scratch token允许按编译器API的唯一拼接层、展开实例、定义片段、未展开实参、文本与递归来源证明替代拼写位置条件；其余规则不变。实际GBS bind工作树TokenLexer.cpp:895–914前提核验通过，尚未实施/验收。
+- [裁决2补充3](profgen/eval/prep/rulings.md)：仅scratch token允许按编译器API的唯一拼接层、展开实例、定义片段、未展开实参、文本与递归来源证明替代拼写位置条件；其余规则不变。实际GBS bind工作树TokenLexer.cpp:895–914前提核验通过；真实未展开实参的FileID标志与规则7冲突，执行状态见下。
 
 - [裁决2补充2](profgen/eval/prep/rulings.md)：宏拼写条件改为逐token校验；仅有clang isMacroArgExpansion正面证据、且位于指定调用实参或已记录宏定义体内的实参允许跨文件，其他条件不变。
 
@@ -45,6 +45,14 @@
 - [裁决2：macro_generated_function](profgen/eval/prep/rulings.md)：宏生成函数须四项正面证据齐全才建立身份对应；参考行属于宏展开评价域外，FNDA决定组范围。先照录登记，后实现核对；不扩大原not_instrumented规则。
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
+
+## 裁决2补充3执行状态（2026-11-11；未展开实参标志停止）
+
+- 裁决原文与TokenLexer前提已提交推送d79e285；GBS源码bind目录当前为空，核对实际bind工作树与f999源文件SHA一致，:895–914范围语义成立。[04报告§8](profgen/eval/prep/04_macro_function_ruling.md)
+- 插件扩展公开API取证，Thumb/A32各5个CU退出0。共56个记录/112个scratch token全量核对，第1–6条与递归文本可证明；每侧28个记录在第7条失败：MacroArgs未展开直接实参put/avg为FileID、isMacroArgExpansion=false，虽然落在调用实参范围，却不在coverage主文件。具体原因paste_argument_nonmacro_outside_main；FNDA全部0，不替代证据。
+- 原27项测试保留并重跑通过；两个必过真实例失败，第三个独立源码实例同样失败，真实断言退出1。新增11项合成夹具及正式classifier接入未完成；macro_function_rule.py未改，不扩大补充2物理token规则。
+- 待裁决：是否允许“唯一X的MacroArgs槽位＋精确调用实参范围”证明这种未展开FileID操作数，保留真实false标志。未裁决前停止。普通候选（Thumb26841/A3226876/spike各15）、U、③、损失分解与静态规模均未继续；既有身份计数不变。[门禁报告](profgen/eval/prep/05_identity_gate_and_coverage.md)
+- 全部文件在WORKDIR；未连接板子、未打开正式sample profile、修正案3未登记；未改LLVM本体/设计/认证/用户配置。资源3G/200%串行，资源原文见evidence/ruling2/supplement3/resources-summary.json。
 
 ## 裁决2补充2执行状态（2026-11-10；token-paste拼写范围停止）
 

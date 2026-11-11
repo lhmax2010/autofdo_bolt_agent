@@ -275,3 +275,157 @@ python3 tools/profgen_eval/package_token_evidence.py
 文件SHA与生成命令入口见 `evidence/ruling2/supplement2/artifact-manifest.json`。
 边界例外：无项目输入/产出越界；未读取三项用户配置，未改LLVM源码、设计正文、认证。
 系统工具及其systemd scope/cgroup运行记录属于既有资源限额机制。
+
+## 8. 裁决2补充3：拼接来源证明与规则7停止（2026-11-11）
+
+补充3原文与前提核验已先提交并推送 **d79e285**。本轮只读取静态源码、ELF/DWARF清单、
+C覆盖参考及既有编译证据；没有打开正式sample profile、没有连接板子，也没有修改或
+重编GBS Clang本体。
+
+### 8.1 前提核验：通过，但GBS源码目录当前已卸载bind
+
+GBS root 的 `home/abuild/rpmbuild/BUILD/llvm-22.1.8` 当前为空。首次直接读取该目录
+下TokenLexer.cpp得到FileNotFoundError，没有伪称从空目录读到源码。
+按00构建报告:17、47、155确认实际bind来源为 `temp/llvm-profgen-enh`；
+其TokenLexer.cpp与 `src/llvm` 及提交f999bd406c0a70fe8107aa992164fe6945c5d46a中的
+同一文件逐字节SHA一致：
+`9c28632bf5d819bcc80d16e8a5138053cef359e0afeb1c714d4fc7ec067c20b4`。
+没有执行挂载、GBS构建或改动源码。
+
+`TokenLexer::pasteTokens`：
+- :749保存初始左操作数的StartLoc；
+- :895取最后一个右操作数token的起始位置EndLoc；
+- :903–911将两者映射/回溯到当前MacroFID；
+- :913–914调用createExpansionLoc，将scratch拼写与完整##表达式范围组合。
+这支持补充3第2条要求的范围语义，E并非表达式结束后的地址。
+
+[源码与SHA原文](evidence/ruling2/supplement3/compiler-source.txt)、
+[前提核验记录](evidence/ruling2/supplement3/prerequisite.json)。
+
+### 8.2 API取证扩展与边界
+
+`compiler_token_evidence.py`仍是外部只读取证插件的Python驱动：
+新增FileID、B/E的实际宏owner与immediate invocation range，
+MacroExpands回调的name_location raw、MSVCCompat、MacroInfo::getParameterNum、
+回调时复制的MacroArgs::getUnexpArgument tokens，以及各拼接前缀的Clang Lexer kind。
+文本由Preprocessor::getSpelling取得，词法判断调用Clang Lexer与LookUpIdentifierInfo。
+不以正则或宏名搜索替代拼接实例、片段或操作数来源。
+
+本轮单独使用 `temp/prep-ruling2/token-api-supplement3/`，
+未覆盖补充2的原始输出。Thumb/A32各五个CU命令退出0，编译参数与前轮实际C命令相同，
+只增加插件取证字段。命令、raw输出路径/SHA与退出码：
+`evidence/ruling2/supplement3/{thumb,a32}-token-api-commands.json`。
+
+`inspect_token_paste.py`是**静态证明检查草稿**，不是已验收的新身份判定入口。
+它按API原始位置找到唯一拼接层/宏实例、定义片段、形参槽与实参，检查逐级文本和kind，
+递归保存子证明。没有接入 `macro_function_rule.py` 的正式闭合路径；
+该文件本轮未改，补充2对物理文件token的判定保持原样。
+原因是两个必过实例在规则7处均无法通过，不能先把规则扩大再宣布实现完成。
+
+拼接会使最终token位置链不再携带所有实参展开细节，因此必须读取**已复制的实参token
+自己的API位置链**。首轮检查遗漏了BIT_DEPTH这个实参依赖，报告过14个
+`paste_argument_source_outside_chain`；修正检查器后，使用其实际
+MacroExpands回调和raw展开区间补齐依赖（非文本推断），该额外原因全部消失。
+首轮/最终输出均保留在 `paste-inspection/`、`paste-inspection2/`。
+当前唯一停止原因是下述直接调用实参的FileID标志。
+
+### 8.3 两个必过实例的逐层证明：1–6通过，7未通过
+
+**PIXOP2：ffmpeg-thumb-18，put_pixels16_x2_8_c**
+
+| 项目 | 实测 |
+|---|---|
+| 唯一拼接层 | 1层，immediate spelling为scratch FileID |
+| X | PIXOP2，回调name_location raw=22758，B/E同FileID=17362 |
+| 定义片段 | hpeldsp.c:309:16–26，`OPNAME ## _pixels8_x2_8_c` |
+| 参数 | getParameterNum(OPNAME)=0；MacroArgs[0]恰好一个token `put` |
+| 文本与kind | `put` + `_pixels8_x2_8_c` = `put_pixels8_x2_8_c`；各前缀及结果均identifier |
+| **第7条失败** | `put`的raw=22765，FileID位置，spelling=hpeldsp.c:333:8，isMacroArgExpansion=false |
+| 位置范围 | 确实处于该次调用实参范围，但不在coverage主文件pixels.h |
+
+**DEF_PEL：ffmpeg-thumb-07，put_pixels16_8_c**
+
+1. 外层X=FUNC3，invocation raw=2148574100，定义片段
+   `a ## _ ## b ## c`，四个操作数分别是内层scratch `put_pixels8`、
+   定义字面 `_`、BIT_DEPTH展开的 `8`、`_c`。
+   文本精确拼成 `put_pixels8_8_c`，前缀均identifier。
+2. 对a递归：X=DEF_PEL，invocation raw=1065185，定义片段
+   `OPNAME ## _pixels8`；文本精确拼成 `put_pixels8`。
+3. **递归最终失败**：MacroArgs[0]是直接调用的 `put`，
+   raw=1065193，FileID位置，spelling=pel_template.c:78:9，
+   isMacroArgExpansion=false；它在调用实参范围，却不在pixels.h。
+4. b的 `8`：isMacroArgExpansion=true，spelling=h264qpel.c:26:19。
+   通过实参自己的API位置链取得BIT_DEPTH定义体，来源检查通过。
+   c的 `_c`：isMacroArgExpansion=true，位于bit_depth_template.c:102:38的链上定义体，
+   来源检查通过。不是BIT_DEPTH或递归文本的问题。
+
+完整逐层记录（含L、B/E、X、定义token、每个操作数完整位置链、拼接前缀、递归子证明）：
+- [PIXOP2完整JSON](evidence/ruling2/supplement3/ffmpeg-thumb-18-paste-proof.json)；
+  [逐层可读摘要](evidence/ruling2/supplement3/example-18-proof.txt)。
+- [DEF_PEL完整JSON](evidence/ruling2/supplement3/ffmpeg-thumb-07-paste-proof.json)；
+  [逐层可读摘要](evidence/ruling2/supplement3/example-07-proof.txt)。
+- 第三个独立源码位置实例：[rv40dsp PIXOP2完整JSON](evidence/ruling2/supplement3/ffmpeg-thumb-33-paste-proof.json)，
+  直接实参put在rv40dsp.c:265:8，raw=13657，同样false；
+  [摘要](evidence/ruling2/supplement3/example-33-proof.txt)。
+
+### 8.4 具体冲突与候选裁决方向
+
+补充3第5(a)条要求复制**未展开**实参，直接写在调用处的实参因此仍是物理FileID。
+`SourceManager.cpp:984–986`对非MacroID直接返回false；
+`MacroArgs.h:78–81`注明getUnexpArgument返回未展开token。
+宏实参展开位置稍后才由TokenLexer.cpp:1053、1090等位置创建。
+代码原文已追加到 `compiler-source.txt`，与API实测相符。
+
+按第7条“用该token自己的位置链按补充2规则”及“非实参须在coverage主文件”，
+这类token必然失败，具体原因码：
+**`paste_argument_nonmacro_outside_main`**。
+没有把MacroArgs槽位证据等价成SourceManager标志true，也没有因为FNDA=0而跳过。
+
+候选裁决方向（尚未实施）：仅对通过唯一X/形参槽取得的未展开实参，
+允许“MacroArgs来源＋精确落在该次调用实参范围”作为额外来源证明，保留真实false标志；
+其他来源、缺失证据、链外文件依旧拒绝。是否接受由用户决定。
+本轮已提出此精确问题，未收到裁决前不改规则、不推进身份门禁。
+
+### 8.5 全量结果、测试与未完成项
+
+| 对象 | 检查记录 | scratch token | 新闭合 | 未决 | 原因码分布 | FNDA>0 |
+|---|---:|---:|---:|---:|---|---:|
+| FFmpeg Thumb | 28 | 56 | 0 | 28 | paste_argument_nonmacro_outside_main:28 | 0 |
+| FFmpeg A32 | 28 | 56 | 0 | 28 | paste_argument_nonmacro_outside_main:28 | 0 |
+
+未抽样；[全量汇总](evidence/ruling2/supplement3/paste-inspection-summary.json)，
+逐项文件为 `ffmpeg-{thumb,a32}-paste-inspection.json`，每个函数都有独立证明JSON与SHA。
+
+- 原27项测试文件未改，重跑27 PASS、0 FAIL，见
+  [原文](evidence/ruling2/supplement3/original-27-tests/stderr.txt)。
+- 两个规定的真实正例均FAIL；另一个独立来源实例同样FAIL。
+  `record_paste_stop.py`实际以非零码1退出，没有把“正确识别停止原因”伪装成正例通过。
+  [断言结果](evidence/ruling2/supplement3/real-example-assertions.json)、
+  [退出码](evidence/ruling2/supplement3/required-real-assertions/result.json)。
+- 新增11项合成夹具尚未实施/验收：在真实正例发现规则7冲突后停止；
+  不声明补充3实现完成，也不声明真实例验收通过。
+- 普通候选、U、①②③③′、n_eff、K、损失分解与静态代码规模未继续。
+  新报告 [05_identity_gate_and_coverage.md](05_identity_gate_and_coverage.md)记录门禁现状。
+
+### 8.6 资源与复现
+
+所有执行串行、nice19/ionice-c3、systemd scope 3G/200%，启动前MemAvailable≥4GiB。
+已记录最低MemAvailable 10861895680字节（10.115929GiB），最高cgroup memory.peak 633831424字节（0.590302GiB），无OOM或资源终止。
+
+[资源原文与汇总](evidence/ruling2/supplement3/resources-summary.json)。
+run_scoped目录逐项保存命令、开始/结束时间、meminfo、loadavg、真实退出码和ALL-END。
+本轮所有任务不足60秒，均有起始资源快照。
+
+复现入口（仍需外层nice/ionice/3G scope，见各command.json）：
+```text
+python3 tools/profgen_eval/compiler_token_evidence.py build
+python3 tools/profgen_eval/compiler_token_evidence.py thumb
+python3 tools/profgen_eval/compiler_token_evidence.py a32
+python3 tools/profgen_eval/inspect_token_paste.py
+python3 -m unittest discover -s tools/profgen_eval -p test_macro_function_rule.py -v
+python3 tools/profgen_eval/record_paste_stop.py
+```
+最后一条在本轮证据下预期退出1，因为用户规定必须通过的实际正例未通过。
+SHA清单：`evidence/ruling2/supplement3/artifact-manifest.json`。
+没有新增已知项目文件边界例外，没有改动三项用户配置、认证或任何LLVM源码；
+没有推送LLVM/Gerrit或llvm-optimize。

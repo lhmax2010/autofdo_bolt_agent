@@ -55,3 +55,63 @@ Provenance: docs/profgen/00_incremental_build.md:17,47,155; f999bd406c0a70fe8107
 912: 
 913:   LHSTok.setLocation(SM.createExpansionLoc(LHSTok.getLocation(), StartLoc, EndLoc,
 914:                                         LHSTok.getLength()));
+
+clang/lib/Basic/SourceManager.cpp SHA-256 ec0da2b032840454acb8e1d2caf331e24c1961a18bf73df0566548ccaff3e815
+984: bool SourceManager::isMacroArgExpansion(SourceLocation Loc,
+985:                                         SourceLocation *StartLoc) const {
+986:   if (!Loc.isMacroID()) return false;
+987: 
+988:   FileID FID = getFileID(Loc);
+989:   const SrcMgr::ExpansionInfo &Expansion = getSLocEntry(FID).getExpansion();
+990:   if (!Expansion.isMacroArgExpansion()) return false;
+991: 
+992:   if (StartLoc)
+993:     *StartLoc = Expansion.getExpansionLocStart();
+994:   return true;
+995: }
+996: 
+997: bool SourceManager::isMacroBodyExpansion(SourceLocation Loc) const {
+
+clang/include/clang/Lex/MacroArgs.h SHA-256 087cbf36717da69dcc4c4cd4260aef9cc6cf32d2120babeaaf2b86a3177d9997
+76:   bool ArgNeedsPreexpansion(const Token *ArgTok, Preprocessor &PP) const;
+77: 
+78:   /// getUnexpArgument - Return a pointer to the first token of the unexpanded
+79:   /// token list for the specified formal.
+80:   ///
+81:   const Token *getUnexpArgument(unsigned Arg) const;
+82: 
+83:   /// getArgLength - Given a pointer to an expanded or unexpanded argument,
+84:   /// return the number of tokens, not counting the EOF, that make up the
+85:   /// argument.
+86:   static unsigned getArgLength(const Token *ArgPtr);
+
+clang/lib/Lex/TokenLexer.cpp SHA-256 9c28632bf5d819bcc80d16e8a5138053cef359e0afeb1c714d4fc7ec067c20b4
+1050:       Partition.front().getLocation().getRawEncoding();
+1051:   // Create a macro expansion SLocEntry that will "contain" all of the tokens.
+1052:   SourceLocation Expansion =
+1053:       SM.createMacroArgExpansionLoc(BeginLoc, ExpandLoc, FullLength);
+1054: 
+1055: #ifdef EXPENSIVE_CHECKS
+1056:   assert(llvm::all_of(Partition.drop_front(),
+1057:                       [&SM, ID = SM.getFileID(Partition.front().getLocation())](
+1058:                           const Token &T) {
+
+clang/lib/Lex/TokenLexer.cpp SHA-256 9c28632bf5d819bcc80d16e8a5138053cef359e0afeb1c714d4fc7ec067c20b4
+1080:                                             Token *end_tokens) {
+1081:   SourceManager &SM = PP.getSourceManager();
+1082: 
+1083:   SourceLocation ExpandLoc =
+1084:       getExpansionLocForMacroDefLoc(ArgIdSpellLoc);
+1085: 
+1086:   while (begin_tokens < end_tokens) {
+1087:     // If there's only one token just create a SLocEntry for it.
+1088:     if (end_tokens - begin_tokens == 1) {
+1089:       Token &Tok = *begin_tokens;
+1090:       Tok.setLocation(SM.createMacroArgExpansionLoc(Tok.getLocation(),
+1091:                                                     ExpandLoc,
+1092:                                                     Tok.getLength()));
+1093:       return;
+1094:     }
+1095: 
+1096:     updateConsecutiveMacroArgTokens(SM, ExpandLoc, begin_tokens, end_tokens);
+1097:   }

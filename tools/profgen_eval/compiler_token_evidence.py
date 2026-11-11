@@ -9,8 +9,9 @@ import subprocess
 from pathlib import Path
 from run_scoped import WORK, ROOT, sha
 
-BASE = WORK / "docs/profgen/eval/prep/evidence/ruling2"
-OUT = WORK / "temp/prep-ruling2/token-api"
+INPUT = WORK / "docs/profgen/eval/prep/evidence/ruling2"
+BASE = INPUT / "supplement3"
+OUT = WORK / "temp/prep-ruling2/token-api-supplement3"
 SOURCE = r"""
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/Decl.h"
@@ -62,13 +63,31 @@ struct Recorder {
     return llvm::json::Object{{"raw", int64_t(L.getRawEncoding())}, {"file",filename(S)},
             {"presumed_file",P.isValid()?P.getFilename():""},
             {"line",SM.getSpellingLineNumber(S)}, {"column",SM.getSpellingColumnNumber(S)},
-            {"offset",SM.getFileOffset(S)}, {"is_macro",L.isMacroID()},
+            {"offset",SM.getFileOffset(S)}, {"file_id",SM.getFileID(L).getHashValue()}, {"is_macro",L.isMacroID()},
             {"is_scratch",SM.isWrittenInScratchSpace(S)}};
   }
   llvm::json::Object range(SourceRange R) {
     return llvm::json::Object{{"begin",loc(R.getBegin())},{"end",loc(R.getEnd())}};
   }
   void emit(llvm::json::Object O) { *Out << llvm::json::Value(std::move(O)) << "\n"; Out->flush(); }
+  llvm::json::Object owner(SourceLocation L) {
+    if (!L.isMacroID()) return llvm::json::Object{{"valid",false}};
+    return llvm::json::Object{
+      {"macro",Lexer::getImmediateMacroName(L, SM, CI.getLangOpts()).str()},
+      {"instance_range",range(SM.getImmediateExpansionRange(L).getAsRange())},
+      {"file_id",SM.getFileID(L).getHashValue()}};
+  }
+  llvm::json::Object lexText(const std::string &S) {
+    auto Buffer = llvm::MemoryBuffer::getMemBufferCopy(S);
+    Lexer Lex(SourceLocation(), CI.getLangOpts(), Buffer->getBufferStart(),
+              Buffer->getBufferStart(), Buffer->getBufferEnd());
+    Token T; Lex.LexFromRawLexer(T);
+    auto RawKind = std::string(T.getName());
+    if (T.is(tok::raw_identifier)) CI.getPreprocessor().LookUpIdentifierInfo(T);
+    bool Whole = T.getLength()==S.size();
+    return llvm::json::Object{{"text",S},{"raw_kind",RawKind},
+                             {"kind",T.getName()},{"whole_token",Whole}};
+  }
   llvm::json::Object token(const Token &T) {
     SourceLocation L = T.getLocation();
     llvm::json::Array Trace;
@@ -78,7 +97,9 @@ struct Recorder {
         {"macro",Lexer::getImmediateMacroName(C, SM, CI.getLangOpts()).str()},
         {"location",loc(C)}, {"isMacroArgExpansion",SM.isMacroArgExpansion(C)},
         {"immediate_spelling",loc(SM.getImmediateSpellingLoc(C))},
-        {"immediate_expansion",range(SM.getImmediateExpansionRange(C).getAsRange())}});
+        {"immediate_expansion",range(SM.getImmediateExpansionRange(C).getAsRange())},
+        {"begin_owner",owner(SM.getImmediateExpansionRange(C).getBegin())},
+        {"end_owner",owner(SM.getImmediateExpansionRange(C).getEnd())}});
       auto Next = SM.getImmediateMacroCallerLoc(C);
       if (Next == C) break;
       C = Next;
@@ -97,17 +118,47 @@ struct Callbacks: PPCallbacks {
                     const MacroArgs *Args) override {
     if (!R.selected(Name.getLocation())) return;
     const MacroInfo *MI = MD.getMacroInfo();
-    llvm::json::Array Body, Arguments;
-    for (const auto &T: MI->tokens()) Body.push_back(R.token(T));
+    llvm::json::Array Body, Arguments, PasteFragments;
+    for (const auto &T: MI->tokens()) {
+      auto O=R.token(T);
+      O["parameter_num"]=T.getIdentifierInfo()?MI->getParameterNum(T.getIdentifierInfo()):-1;
+      Body.push_back(std::move(O));
+    }
+    auto DefTokens=MI->tokens();
+    for (unsigned I=0; I+2<DefTokens.size(); ++I) {
+      if (!DefTokens[I+1].is(tok::hashhash)) continue;
+      unsigned J=I;
+      std::string Spliced; llvm::json::Array Prefixes;
+      bool Resolved=true;
+      do {
+        const Token *T=&DefTokens[J];
+        int Param=T->getIdentifierInfo()?MI->getParameterNum(T->getIdentifierInfo()):-1;
+        if (Param>=0) {
+          if (!Args || unsigned(Param)>=Args->getNumMacroArguments()) {Resolved=false;break;}
+          T=Args->getUnexpArgument(Param);
+          if (T->is(tok::eof) || !(T+1)->is(tok::eof)) {Resolved=false;break;}
+        }
+        Spliced+=R.CI.getPreprocessor().getSpelling(*T);
+        Prefixes.push_back(R.lexText(Spliced));
+        if (J+2>=DefTokens.size() || !DefTokens[J+1].is(tok::hashhash)) break;
+        J+=2;
+      } while (true);
+      PasteFragments.push_back(llvm::json::Object{
+        {"begin",R.loc(DefTokens[I].getLocation())},{"end",R.loc(DefTokens[J].getLocation())},
+        {"operands_resolved",Resolved},{"prefix_lexing",std::move(Prefixes)}});
+      while (I+2<DefTokens.size() && DefTokens[I+1].is(tok::hashhash)) I+=2;
+    }
     if (Args) for (unsigned I=0; I<Args->getNumMacroArguments(); ++I) {
       llvm::json::Array A;
       for (const Token *T=Args->getUnexpArgument(I); !T->is(tok::eof); ++T) A.push_back(R.token(*T));
       Arguments.push_back(std::move(A));
     }
     R.emit(llvm::json::Object{{"record","macro"},{"name",R.CI.getPreprocessor().getSpelling(Name)},
-            {"invocation",R.range(Call)}, {"expansion",R.loc(R.SM.getExpansionLoc(Name.getLocation()))},
+            {"invocation",R.range(Call)}, {"name_location",R.loc(Name.getLocation())},
+            {"msvc_compat",bool(R.CI.getLangOpts().MSVCCompat)},
+            {"expansion",R.loc(R.SM.getExpansionLoc(Name.getLocation()))},
             {"definition",R.range({MI->getDefinitionLoc(),MI->getDefinitionEndLoc()})},
-            {"body",std::move(Body)}, {"arguments",std::move(Arguments)}});
+            {"body",std::move(Body)}, {"arguments",std::move(Arguments)}, {"paste_fragments",std::move(PasteFragments)}});
   }
 };
 struct Consumer: ASTConsumer {
@@ -166,11 +217,11 @@ def build():
     return p.returncode
 
 def collect(mode):
-    audit=json.loads((BASE/f"ffmpeg-{mode}-macro-audit.json").read_text())
+    audit=json.loads((INPUT/f"ffmpeg-{mode}-macro-audit.json").read_text())
     targets=sorted({(r["decl_file"].split("ffmpeg-8.0.1/")[-1],int(r["decl_line"])) for r in audit})
     cfg=OUT/(mode+"-targets.json");cfg.write_text(json.dumps([dict(file=f,line=l) for f,l in targets],indent=2)+"\n")
     records=[]
-    for r in json.loads((BASE/f"{mode}-ast4-commands.json").read_text()):
+    for r in json.loads((INPUT/f"{mode}-ast4-commands.json").read_text()):
         stem=mode+"-"+Path(r["tu"]).stem
         output=OUT/(stem+".jsonl")
         cmd=r["command"][:r["command"].index("-Xclang")]
