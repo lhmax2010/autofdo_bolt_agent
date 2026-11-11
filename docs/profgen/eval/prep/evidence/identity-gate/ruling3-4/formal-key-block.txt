@@ -1,0 +1,37 @@
+  SampleContextFrameVector CallStack;
+  if (IPMode &&
+      (!InlineStack.getNumberOfFrames() || InlineStack.getFrame(0).Line == 0))
+    return CallStack;
+  if (IPMode)
+    for (uint32_t I = 1; I < InlineStack.getNumberOfFrames(); ++I)
+      if (InlineStack.getFrame(I).Line == 0) {
+        IPNonLeafZeroLineAddresses.insert(IP.Address);
+        // A missing callsite line cannot form a source offset. Subtracting
+        // StartLine would wrap into a spurious positive callsite. Reject the
+        // entire context before constructing even a partial inline tree.
+        return {};
+      }
+  for (int32_t I = InlineStack.getNumberOfFrames() - 1; I >= 0; I--) {
+    const auto &CallerFrame = InlineStack.getFrame(I);
+    if (CallerFrame.FunctionName.empty() ||
+        (CallerFrame.FunctionName == "<invalid>"))
+      break;
+
+    StringRef FunctionName(CallerFrame.FunctionName);
+    if (UseCanonicalFnName)
+      FunctionName = FunctionSamples::getCanonicalFnName(FunctionName);
+
+    uint32_t Discriminator = CallerFrame.Discriminator;
+    uint32_t LineOffset = (CallerFrame.Line - CallerFrame.StartLine) & 0xffff;
+    if (UseProbeDiscriminator) {
+      LineOffset =
+          PseudoProbeDwarfDiscriminator::extractProbeIndex(Discriminator);
+      Discriminator = 0;
+    }
+
+    LineLocation Line(LineOffset, Discriminator);
+    auto It = NameStrings.insert(FunctionName.str());
+    CallStack.emplace_back(FunctionId(StringRef(*It.first)), Line);
+  }
+
+  return CallStack;

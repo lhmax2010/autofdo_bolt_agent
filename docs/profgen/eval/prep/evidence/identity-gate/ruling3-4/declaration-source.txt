@@ -1,0 +1,45 @@
+Source: src/llvm/llvm/lib/DebugInfo/DWARF/DWARFDie.cpp
+SHA256: 9a44e4109070fc6f48643fd52e36b677a02098f4c1c07c815f4c50b938167f76
+340: std::optional<DWARFFormValue>
+341: DWARFDie::findRecursively(ArrayRef<dwarf::Attribute> Attrs) const {
+342:   SmallVector<DWARFDie, 3> Worklist;
+343:   Worklist.push_back(*this);
+344:
+345:   // Keep track if DIEs already seen to prevent infinite recursion.
+346:   // Empirically we rarely see a depth of more than 3 when dealing with valid
+347:   // DWARF. This corresponds to following the DW_AT_abstract_origin and
+348:   // DW_AT_specification just once.
+349:   SmallSet<DWARFDie, 3> Seen;
+350:   Seen.insert(*this);
+351:
+352:   while (!Worklist.empty()) {
+353:     DWARFDie Die = Worklist.pop_back_val();
+354:
+355:     if (!Die.isValid())
+356:       continue;
+357:
+358:     if (auto Value = Die.find(Attrs))
+359:       return Value;
+360:
+361:     for (dwarf::Attribute Attr :
+362:          {DW_AT_abstract_origin, DW_AT_specification, DW_AT_signature}) {
+363:       if (auto D = Die.getAttributeValueAsReferencedDie(Attr))
+364:         if (Seen.insert(D).second)
+365:           Worklist.push_back(D);
+366:     }
+367:   }
+368:
+369:   return std::nullopt;
+370: }
+557: uint64_t DWARFDie::getDeclLine() const {
+558:   return toUnsigned(findRecursively(DW_AT_decl_line), 0);
+559: }
+560:
+561: std::string
+562: DWARFDie::getDeclFile(DILineInfoSpecifier::FileLineInfoKind Kind) const {
+563:   if (auto FormValue = findRecursively(DW_AT_decl_file))
+564:     if (auto OptString = FormValue->getAsFile(Kind))
+565:       return *OptString;
+566:   return {};
+567: }
+568:
