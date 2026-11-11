@@ -48,3 +48,35 @@
 - 三项都满足时，补充 1-③ 的宏生成证据成立；任一不满足时：非实参 token 拼写在 decl_file 中的，不适用本裁决，走原规则；实参 token 的拼写位置落在调用范围与展开链之外，或 isMacroArgExpansion 证据缺失的，保留未决。
 - 证据保存：每个闭合函数的 token 清单（拼写位置、展开位置、isMacroArgExpansion、所属宏层级）、调用的实参范围、展开链各层的定义位置，以及原始 AST/token 输出与 SHA。
 - 夹具：ff_put_pixels16_x2_arm 实例（实参 ff_put_pixels8_x2_arm 与 8 拼写在调用处，其余在 pixels.h → 闭合）；DEF_PEL/PIXOP2 两层链中由中间宏定义体传下的实参（闭合）；某个运算符或语句关键字拼写在 decl_file（不适用，走原规则）；实参 token 拼写在调用范围与展开链之外的第三个文件（未决）；缺少 isMacroArgExpansion 证据（未决）。
+
+## 裁决2 补充3
+
+适用对象：补充2判定中，拼写位置为 scratch buffer（presumed_file=`<scratch space>`）、因而判为 argument_spelling_outside_allowed_ranges 的 token。补充3只替代这类 token 的“拼写位置”条件；裁决2和补充1、补充2的其他所有条件不变（TU、linkage、声明、唯一性、组范围、AST、逐token标志、非实参token规则、coverage region规则）。FNDA 不得替代任何一步。
+
+一个 scratch token T 通过补充3，当且仅当以下全部由编译器 API 的实测数据给出（不得用文本搜索、正则或 trace 推断替代）：
+
+1. 拼接层唯一：在 T 的位置链中，恰好有一层的 immediate spelling 是 scratch 的 FileID 位置（is_macro=false、is_scratch=true），称为拼接层 L。若有 0 层或多层，判未决。
+2. 拼接范围：对 L 调用 SourceManager::getImmediateExpansionRange，得到 [B,E]。B 和 E 都必须是宏位置，且属于同一个宏展开实例 X。X 必须能与插件记录的 MacroExpands 回调一一对应：宏名相同，展开位置 raw 值相同。
+3. 定义体内：B 和 E 的 spelling 必须都落在 X 的 MacroInfo 的定义范围 [DefinitionLoc, DefinitionEndLoc] 内，且 X 位于该函数已记录的展开链上。
+4. 拼接结构：从 X 的 MacroInfo::tokens() 中按位置取出 [B, E] 所覆盖的定义 token（E 是最后一个操作数的起始位置）。这段 token 必须严格符合“操作数 (tok::hashhash 操作数)+”。以下情况判未决：
+   - 出现字符串化 `#`；
+   - GNU 逗号拼接 `, ## __VA_ARGS__`；
+   - MSVCCompat。
+5. 操作数解析：
+   (a) 若操作数是 X 的形参（MacroInfo::getParameterNum），则取 X 的 MacroArgs 中对应的“未展开”实参 token，在回调时复制保存，含 SourceLocation。该实参必须恰好是 1 个 token；空实参（placemarker）或多 token，判未决。
+   (b) 否则，操作数就是定义体 token 本身。
+6. 文本一致：按顺序把各操作数的 Preprocessor::getSpelling 拼起来，结果必须与 T 的文本逐字节相等。T 和每个中间结果的 kind 只能是 identifier 或 numeric_constant。
+7. 操作数来源（递归）：
+   - 定义体操作数：满足第3条即可。
+   - 实参操作数：用该 token 自己的位置链按补充2的规则判定，即 isMacroArgExpansion 标志、调用实参范围、已记录展开链定义体、非实参须在 coverage 主文件。
+   - 若实参操作数本身也是 scratch token（嵌套拼接，例如 DEF_PEL→FUNCC→FUNC2→FUNC3），则对它递归应用补充3。递归深度上限为 8，超过判未决。
+8. 证据：每个 scratch token 输出完整的证明记录：
+   - L 与 [B,E] 的 raw/presumed 位置；
+   - X 的身份；
+   - 定义 token 片段；
+   - 每个操作数的来源与位置链；
+   - 拼接后的文本与 T 的比对；
+   - 递归子证明。
+   任何一项缺失，判未决，原因码写具体项，不要笼统写 argument_spelling_outside_allowed_ranges。
+
+前提核验（先做；不成立就停止报告，不实施规则）：在 GBS 根目录的 clang 22.1.8 源码中，找到 TokenLexer::pasteTokens 末尾为拼接结果创建 expansion location 的代码，即把起止位置映射到当前展开（getExpansionLocForMacroDefLoc / createExpansionLoc）。确认第2条所依据的语义确实成立：拼接层的 immediate expansion range 覆盖从首操作数到末操作数起点的 `##` 表达式。把原文行号和 SHA 追加进 compiler-source.txt。若语义与上述不符，停止并报告。

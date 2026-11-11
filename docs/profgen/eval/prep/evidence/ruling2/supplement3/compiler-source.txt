@@ -1,0 +1,57 @@
+Supplement3 prerequisite: GBS bind source (root BUILD directory currently unmounted/empty).
+Provenance: docs/profgen/00_incremental_build.md:17,47,155; f999bd406c0a70fe8107aa992164fe6945c5d46a.
+[
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-enh/clang/lib/Lex/TokenLexer.cpp",
+    "sha256": "9c28632bf5d819bcc80d16e8a5138053cef359e0afeb1c714d4fc7ec067c20b4"
+  },
+  {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/clang/lib/Lex/TokenLexer.cpp",
+    "sha256": "9c28632bf5d819bcc80d16e8a5138053cef359e0afeb1c714d4fc7ec067c20b4"
+  }
+]
+749:   SourceLocation StartLoc = LHSTok.getLocation();
+750:   SourceLocation PasteOpLoc;
+751:   bool HasUCNs = false;
+752: 
+753:   auto IsAtEnd = [&TokenStream, &CurIdx] {
+754:     return TokenStream.size() == CurIdx;
+755:   };
+756: 
+757:   do {
+758:     // Consume the ## operator if any.
+759:     PasteOpLoc = TokenStream[CurIdx].getLocation();
+760:     if (TokenStream[CurIdx].is(tok::hashhash))
+761:       ++CurIdx;
+762:     assert(!IsAtEnd() && "No token on the RHS of a paste operator!");
+763: 
+764:     // Get the RHS token.
+765:     const Token &RHS = TokenStream[CurIdx];
+887:     // Finally, replace LHS with the result, consume the RHS, and iterate.
+888:     ++CurIdx;
+889: 
+890:     // Set Token::HasUCN flag if LHS or RHS contains any UCNs.
+891:     HasUCNs = LHSTok.hasUCN() || RHS.hasUCN() || HasUCNs;
+892:     LHSTok = Result;
+893:   } while (!IsAtEnd() && TokenStream[CurIdx].is(tok::hashhash));
+894: 
+895:   SourceLocation EndLoc = TokenStream[CurIdx - 1].getLocation();
+896: 
+897:   // The token's current location indicate where the token was lexed from.  We
+898:   // need this information to compute the spelling of the token, but any
+899:   // diagnostics for the expanded token should appear as if the token was
+900:   // expanded from the full ## expression. Pull this information together into
+901:   // a new SourceLocation that captures all of this.
+902:   SourceManager &SM = PP.getSourceManager();
+903:   if (StartLoc.isFileID())
+904:     StartLoc = getExpansionLocForMacroDefLoc(StartLoc);
+905:   if (EndLoc.isFileID())
+906:     EndLoc = getExpansionLocForMacroDefLoc(EndLoc);
+907:   FileID MacroFID = SM.getFileID(MacroExpansionStart);
+908:   while (SM.getFileID(StartLoc) != MacroFID)
+909:     StartLoc = SM.getImmediateExpansionRange(StartLoc).getBegin();
+910:   while (SM.getFileID(EndLoc) != MacroFID)
+911:     EndLoc = SM.getImmediateExpansionRange(EndLoc).getEnd();
+912: 
+913:   LHSTok.setLocation(SM.createExpansionLoc(LHSTok.getLocation(), StartLoc, EndLoc,
+914:                                         LHSTok.getLength()));

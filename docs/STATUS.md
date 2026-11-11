@@ -36,6 +36,8 @@
 
 ## 人工裁决（登记前准备）
 
+- [裁决2补充3](profgen/eval/prep/rulings.md)：仅scratch token允许按编译器API的唯一拼接层、展开实例、定义片段、未展开实参、文本与递归来源证明替代拼写位置条件；其余规则不变。实际GBS bind工作树TokenLexer.cpp:895–914前提核验通过，尚未实施/验收。
+
 - [裁决2补充2](profgen/eval/prep/rulings.md)：宏拼写条件改为逐token校验；仅有clang isMacroArgExpansion正面证据、且位于指定调用实参或已记录宏定义体内的实参允许跨文件，其他条件不变。
 
 - [裁决2补充1](profgen/eval/prep/rulings.md)：PGO basename须由编译命令、链接输入和完整linkage唯一消歧；宏链须同一C命令的编译器AST证明，文本搜索不能独立闭合。
