@@ -26,15 +26,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## 当前设计状态（v1.7修正稿已入库；静态重算完成，等待限定范围评审）
+## 当前设计状态（v1.8已入库；门禁与静态验收完成）
 
-- [设计v1.7](profgen/design/02_llvm_profgen_enhance_design_v1.7.md)修正稿已以mv替换，SHA-256：9132af9a8242bdb7fa0a37aaf4f43b7eb2e06825fa6546309d5a3e46596ae092。Downloads源文件不存在，设计内容未改；替换提交bc2dc60，见附录P.4第7条。
-- [05报告§13](profgen/eval/prep/05_identity_gate_and_coverage.md)：C只用两份调试ELF与C₀；宏身份仅影响U/账本。四对象重放与输入隔离断言通过，domain_unresolved均0。旧产物保留；当前状态取代修正稿前的停止记录d632b45。
-- v1.7的③(C)：spike Thumb/A32为99.991434%/99.991339%；FFmpeg Thumb/A32为84.981617%/84.729001%。三个1%门槛均未超限；表内可登记，实际仍待限定范围评审。FFmpeg的③(C_dc)为49.930997%/49.880811%，通过C门槛依赖可测量性限定，不称为对齐改善。
-- 全部顶层键枚举与旧证据逐字节相同，身份结论不变。原161项加新增44项，共205项测试通过；两份损失账本差值均0。证据：profgen/eval/prep/evidence/identity-gate/v17-recompute/。
-- 未登记修正案3；未读取正式sample profile（含CALIBRATION），未计算RUN级受控量。已按任务完成后停止，不进入其他N.5/P.5项目，不连接板子。
-- v0.7–v1.6文件与历史静态结果保留不动。v1.6及更早状态见git历史；本次只使用静态ELF/调试文件、C覆盖参考和源码。
-
+- [设计v1.8](profgen/design/02_llvm_profgen_enhance_design_v1.8.md)已用mv入库，SHA-256：ae667bd61470118179f6876c912285b7c57ab22518640c2af9f42103ad428e59；Downloads源文件不存在，内容未修改。设计评审已完成，按约定不再评审。
+- [05报告§14](profgen/eval/prep/05_identity_gate_and_coverage.md)：O.2.3 sequence前提、domain_evidence_incomplete阻断、按SHA读取对象表的数值/结论输出门禁已实现；校验失败不创建或覆盖输出，JSON禁非有限数。inlined_call_site固定归可测量性侧。
+- 四对象静态C/U、权重、三口径③、③′、n_eff、K、三个1%门槛、两份账本与分类计数相对v1.7均无变化。八份ELF的sequence前提全部通过，重叠、部分相交区间、低地址sequence均0，domain_unresolved均0。
+- ③(C)：spike Thumb/A32为99.991434%/99.991339%；FFmpeg Thumb/A32为84.981617%/84.729001%；三个1%门槛均未超限。仅表内可登记，实际未登记。FFmpeg的③(C_dc)仍为49.930997%/49.880811%，不将评价域收窄解释为对齐改善。
+- 原205项测试文件未变，新增45项，共250项通过；四个静态候选对象表门禁通过（非修订3）。证据：profgen/eval/prep/evidence/identity-gate/v18-gates/。资源峰值422420480字节，记录最低MemAvailable6200696832字节；没有资源终止。
+- 未登记修正案3；未读取正式sample profile（含CALIBRATION），未计算RUN级受控量，未连接板子。按要求完成后停止，不进入Q.5其他项目。
+- v0.7–v1.7设计与历史静态结果保留不动；历史状态见git记录。当前实现入口为v18_*，v17_*保留供历史复现。
 
 ## 人工裁决（登记前准备）
 

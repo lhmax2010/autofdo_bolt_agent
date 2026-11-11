@@ -1,0 +1,84 @@
+Source: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/src/llvm/llvm/lib/DebugInfo/DWARF/DWARFDebugLine.cpp
+SHA-256: d93b021fc369b45b9c95d5ff742d1fce40a4173472557ae3d910c48e2bf0121d
+1271:   // Sort all sequences so that address lookup will work faster.
+1272:   if (!Sequences.empty()) {
+1273:     llvm::stable_sort(Sequences, Sequence::orderByHighPC);
+1274:     // Note: actually, instruction address ranges of sequences should not
+1275:     // overlap (in shared objects and executables). If they do, the address
+1276:     // lookup would still work, though, but result would be ambiguous.
+1277:     // We don't report warning in this case. For example,
+1278:     // sometimes .so compiled from multiple object files contains a few
+1279:     // rudimentary sequences for address ranges [0x0, 0xsomething).
+1280:     // Address ranges may also overlap when using ICF.
+1281:   }
+1282:
+1283:   // Terminate the table with a final blank line to clearly delineate it from
+1284:   // later dumps.
+1285:   if (OS)
+1286:     *OS << "\n";
+1287:
+1288:   return Error::success();
+1289: }
+1290:
+1291: uint32_t DWARFDebugLine::LineTable::findRowInSeq(
+1292:     const DWARFDebugLine::Sequence &Seq,
+1293:     object::SectionedAddress Address) const {
+1294:   if (!Seq.containsPC(Address))
+1295:     return UnknownRowIndex;
+1296:   assert(Seq.SectionIndex == Address.SectionIndex);
+1297:   // In some cases, e.g. first instruction in a function, the compiler generates
+1298:   // two entries, both with the same address. We want the last one.
+1299:   //
+1300:   // In general we want a non-empty range: the last row whose address is less
+1301:   // than or equal to Address. This can be computed as upper_bound - 1.
+1302:   //
+1303:   // TODO: This function, and its users, needs to be update to return multiple
+1304:   // rows for bundles with multiple op-indexes.
+1305:   DWARFDebugLine::Row Row;
+1306:   Row.Address = Address;
+1307:   RowIter FirstRow = Rows.begin() + Seq.FirstRowIndex;
+1308:   RowIter LastRow = Rows.begin() + Seq.LastRowIndex;
+1309:   assert(FirstRow->Address.Address <= Row.Address.Address &&
+1310:          Row.Address.Address < LastRow[-1].Address.Address);
+1311:   RowIter RowPos = std::upper_bound(FirstRow + 1, LastRow - 1, Row,
+1312:                                     DWARFDebugLine::Row::orderByAddress) -
+1313:                    1;
+1314:   assert(Seq.SectionIndex == RowPos->Address.SectionIndex);
+1315:   return RowPos - Rows.begin();
+1316: }
+1317:
+1318: uint32_t
+1319: DWARFDebugLine::LineTable::lookupAddress(object::SectionedAddress Address,
+1320:                                          bool *IsApproximateLine) const {
+1321:
+1322:   // Search for relocatable addresses
+1323:   uint32_t Result = lookupAddressImpl(Address, IsApproximateLine);
+1324:
+1325:   if (Result != UnknownRowIndex ||
+1326:       Address.SectionIndex == object::SectionedAddress::UndefSection)
+1327:     return Result;
+1328:
+1329:   // Search for absolute addresses
+1330:   Address.SectionIndex = object::SectionedAddress::UndefSection;
+1331:   return lookupAddressImpl(Address, IsApproximateLine);
+1332: }
+1333:
+1334: uint32_t
+1335: DWARFDebugLine::LineTable::lookupAddressImpl(object::SectionedAddress Address,
+1336:                                              bool *IsApproximateLine) const {
+1337:   assert((!IsApproximateLine || !*IsApproximateLine) &&
+1338:          "Make sure IsApproximateLine is appropriately "
+1339:          "initialized, if provided");
+1340:   // First, find an instruction sequence containing the given address.
+1341:   DWARFDebugLine::Sequence Sequence;
+1342:   Sequence.SectionIndex = Address.SectionIndex;
+1343:   Sequence.HighPC = Address.Address;
+1344:   SequenceIter It = llvm::upper_bound(Sequences, Sequence,
+1345:                                       DWARFDebugLine::Sequence::orderByHighPC);
+1346:   if (It == Sequences.end() || It->SectionIndex != Address.SectionIndex)
+1347:     return UnknownRowIndex;
+1348:
+1349:   uint32_t RowIndex = findRowInSeq(*It, Address);
+1350:   if (RowIndex == UnknownRowIndex || !IsApproximateLine)
+1351:     return RowIndex;
+1352:

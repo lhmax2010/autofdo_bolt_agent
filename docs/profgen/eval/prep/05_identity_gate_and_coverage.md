@@ -1734,3 +1734,135 @@ FFmpeg的C_dc口径仍小于50%，C口径超过80%。门槛通过依赖可测量
 ### 13.10 本阶段结束
 
 按v1.7修正稿完成本任务指定的静态重算，等待限定范围评审后再决定后续；不登记修正案3，不进入其他N.5/P.5项目。未连接开发板，未打开任何正式sample profile，未计算任何RUN级受控量；宏/条目分类/结论门禁的动态形态用例全部是synthetic。
+
+## 14. v1.8 门禁、sequence 前提与不变性验收
+
+### 14.1 范围与入库
+
+设计 v1.8 从用户指定 Downloads 文件以 **mv** 移入；移动前后 SHA-256 均为
+`ae667bd61470118179f6876c912285b7c57ab22518640c2af9f42103ad428e59`。
+目标：[设计 v1.8](../../design/02_llvm_profgen_enhance_design_v1.8.md)；源文件已不存在。
+正文没有修改，旧设计与 v1.7 原始产物保留。基于 main 的 aa77cd75402b013d2ec877830acff9ecb1e495e6。
+
+本轮只使用静态 ELF/调试文件、已封存 C 覆盖参考、AST/Lexer、静态键与身份取证；没有打开正式 sample profile（含 CALIBRATION），没有登记修正案3，没有连接板子，没有开始 Q.5 其他项目。只编译独立行表取证程序，不修改或重编 Clang。
+
+**结论：所有要求的静态数值与第13节 v1.7 逐项一致，差异为0。** 设计评审已完成，按约定不再评审设计；本轮以门禁和夹具验收闭合。表内“可登记”不等于已登记修订3。
+
+### 14.2 改动前后与规则对应
+
+新入口为 tools/profgen_eval/v18_domain.py、v18_classify.py、v18_static.py；纯规则与结论写出 API 位于 v18_rules.py。
+v17_* 仅保留用于历史复现，不是当前结论输出入口。原205项测试文件逐字节保留。
+
+| 条文 | v1.7 行为 | v1.8 实现与验收 |
+|---|---|---|
+| O.2.3.1 sequence 前提 | 未保存 SectionIndex/范围，直接并集 | 提取器保存 CU、SectionIndex、LowPC/HighPC、全部行；sequence_check 在取任何并集前验证同 CU 同节的可执行交集不重叠。相邻可接受，节不同不混合。 |
+| O.2.3.1 操作性定义 | 有效区间与执行节求交 | 原行域不变；新增部分相交区间、低于最低执行节起点的 sequence 明细与计数。无指令起点要求，literal pool 的合法行表区间可成为见证。 |
+| O.2.3.3 未决 | 未决保留C、排除U，但未加入登记阻断 | registration 按行数（不按DA）设 domain_evidence_incomplete；存在任意未决行即阻断登记与结论。退出非0/任何诊断/前提失败使全部未见证C₀行未决。 |
+| O.2.3.5 callsite | 已归可测量性侧 | 保持 coverage_views 只从 C_dc 排除前三类，调用点行数与DA另列；描述改“未取得行表归属见证”。 |
+| O.2.3.7 数值与身份 | 只检查字段存在 | validate_conclusion 检查整数/正分母/有限且准确比值/三个分子相同/分母有序；按调用者提供的登记SHA读取对象表，并校验对象ID及各指定字段。 |
+| O.2.3.7 写出 | 可接受空值与默认JSON非有限数 | 拒绝null、空对象、NaN、Infinity；递归检查附加字段，allow_nan=False；所有校验和序列化在打开输出文件前。无定义情况仅 write_diagnostic。 |
+| 5.8.6 评价域说明 | “有指令行归属见证” | 使用下文完整限定，禁止“已证明每行都有指令”的声明。 |
+
+评价域说明：
+> 只覆盖固定构建中满足登记的行表归属见证规则的行；该规则不等同于逐行证明存在真实指令。这是可执行节内有效行表区间的操作性定义，可能保留数据；三口径比例是参考行计数质量比例，不是运行时间或独立执行事件比例。
+
+实现选择：若某一侧 sequence 前提失败，不合并该侧任何 sequence；另一侧通过前提的见证仍可保留，其余C₀全部记未决。不同 SectionIndex 分开验证；链接ELF的 UndefSection（18446744073709551615）按绝对地址与执行节求交。没有用函数、对应表或映射范围限制 C。
+本轮提取程序实际退出码均0且无诊断，所有前提成立，所以该失败路径只由 synthetic 验证。
+
+### 14.3 八份输入的前提核验
+
+原始行表 JSONL（包含每条sequence的CU/SectionIndex/范围）在 temp/prep-v18/，路径、命令、ELF与输出SHA及前提检查索引见
+[eight-inputs-index.json](evidence/identity-gate/v18-gates/eight-inputs-index.json)。
+其中部分相交统计覆盖全部非end_sequence、正长度行区间（包括行号0）；只有非零且文件可解的行才用于C见证。
+
+| 对象 | 构建 | sequence数 | 同CU同节重叠 | 部分相交区间 | 低地址sequence |
+|---|---|---:|---:|---:|---:|
+|spike Thumb|C|160|0|0|0|
+|spike Thumb|S|15|0|0|0|
+|spike A32|C|160|0|0|0|
+|spike A32|S|15|0|0|0|
+|FFmpeg Thumb|C|4960|0|0|0|
+|FFmpeg Thumb|S|4661|0|0|0|
+|FFmpeg A32|C|4956|0|0|0|
+|FFmpeg A32|S|4664|0|0|0|
+
+八份均通过，后两项全为0，无非零明细需列出。四对象 domain_unresolved 行数/DA 均为0。
+源码依据：[compiler-source.txt](evidence/identity-gate/v18-gates/compiler-source.txt) 保存文件SHA与带行号原文：
+src/llvm/llvm/lib/DebugInfo/DWARF/DWARFDebugLine.cpp:1274–1280 提醒重叠和ICF；1297–1315说明同址取最后记录及upper_bound−1；1335–1351先选sequence再找row。独立取证程序使用工作区平台LLVM库，完整编译命令见 domain-tool-build.json。
+
+### 14.4 四对象结果：v1.7 = v1.8
+
+下表每个值在两版完全相同；完整逐字段比较在各对象static/comparison.json，differences为空。C/U集合、排除清单、权重逐行相同；分类除规定的描述文字外，类别、DA、节点/token证据均相同。
+
+| 对象 | C行数 | ΣR(C) | U行数 | ΣR(U) | ① | ② | ③′ | n_eff | K |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|spike Thumb|75|11674422883|73|11673422882|97.333333%|61.206897%|53.354972%|1.328514991|19|
+|spike A32|74|11546422883|72|11545422882|97.297297%|60.344828%|52.769930%|1.299622728|10|
+|FFmpeg Thumb|7670|6908301525|6810|5870786315|88.787484%|53.614043%|17.232788%|22.607015895|465|
+|FFmpeg A32|7687|6912581744|6828|5856961473|88.825289%|53.671409%|17.192207%|22.643693057|464|
+
+spike的K<50，按原规则仅描述；n_eff的显式分支与v1.7相同。④的RUN级body比例未计算。
+
+| 对象 | ③(C₀)：分子/分母；比值 | ③(C_dc)：分子/分母；比值 | ③(C)：分子/分母；比值 |
+|---|---|---|---|
+|spike Thumb|11673422882/21362787097；54.643726%|11673422882/16124041944；72.397622%|11673422882/11674422883；99.991434%|
+|spike A32|11545422882/21362787097；54.044553%|11545422882/16124041944；71.603776%|11545422882/11546422883；99.991339%|
+|FFmpeg Thumb|5870786315/28769855208；20.406034%|5870786315/11757799111；49.930997%|5870786315/6908301525；84.981617%|
+|FFmpeg A32|5856961473/28769855208；20.357980%|5856961473/11741913027；49.880811%|5856961473/6912581744；84.729001%|
+
+| 对象 | identity_ambiguous DA/ΣR(C) | unmatched_in_elf DA/ΣR(C) | boundary_unavailable DA/ΣR(C) | ③门槛 / 表内状态 |
+|---|---|---|---|---|
+|spike Thumb|0/11674422883|0/11674422883|0/11674422883|≥80%；三个1%均未超限；可登记（尚未实际登记）|
+|spike A32|0/11546422883|0/11546422883|0/11546422883|≥80%；三个1%均未超限；可登记（尚未实际登记）|
+|FFmpeg Thumb|15555/6908301525|26367/6908301525|0/6908301525|≥80%；三个1%均未超限；可登记（尚未实际登记）|
+|FFmpeg A32|15555/6912581744|26367/6912581744|0/6912581744|≥80%；三个1%均未超限；可登记（尚未实际登记）|
+
+两份互斥损失账本保持全部原因集合，逐桶与v1.7相同；差值均有assert证明为0：
+
+| 对象 | C→U损失DA | C₀→U损失DA | 两份差值 | inlined_call_site 行/DA（固定可测量性侧） |
+|---|---:|---:|---|---|
+|spike Thumb|1000001|9689364215|0 / 0|1 / 1|
+|spike A32|1000001|9817364215|0 / 0|1 / 1|
+|FFmpeg Thumb|1037515210|22899068893|0 / 0|327 / 173856712|
+|FFmpeg A32|1055620271|22912893735|0 / 0|335 / 175649375|
+
+C⊆C_dc⊆C₀、U⊆C、C SHA不变均再次断言。代码承载比例、评价域外不重复参考执行量比例与分类各桶详情在对象表及分类摘要内，逐项与v1.7相同。
+FFmpeg的C_dc口径仍约49.9%，C口径约85%；门槛通过依赖评价域的可测量性限定，不解释为对齐改善或运行时间改善。
+
+### 14.5 夹具与结论写出门禁
+
+原205项全部保留且通过；新增45项，共250项通过。完整名字与历史测试SHA见
+[test-inventory.json](evidence/identity-gate/v18-gates/test-inventory.json)，原始结果见
+[tests-first/stderr.txt](evidence/identity-gate/v18-gates/tests-first/stderr.txt)。
+
+新增夹具均注明synthetic，覆盖：
+- Codex分母稀释：已证无见证时980/1000、歧义12/1000超1%；取证失败时980/1210、12/1210虽低于1%，仍为domain_evidence_incomplete，不能登记。
+- 未决DA为0/非0均阻断；修复为有见证或证无见证均重算状态/账本；存在普通键也不能把未决行放回U；退出非0、诊断输出使全部未见证行未决。
+- 同CU重叠拒绝、相邻通过、不同CU及不同节相同数字地址分别处理；执行节外重叠不算执行交集冲突。
+- 执行节的数据区合法行表区间进入C、无键计损失；非执行节不作见证；地址0序列未到.text不作见证；部分交集和低地址分别报告。
+- 全null、空对象、NaN、Infinity、零分母、非整数/负数/bool、三个分子不同、分母无序、比值不符、跨对象、与表差1、SHA不符、缺评价域/③、虚称指令证明、未决状态、附加字段非有限数全部拒绝。
+- 每条结论负例同时检查“新路径不存在”和“旧文件原字节不变”；零分子/正分母合法结果通过；无定义只允许明确diagnostic且不标可登记，诊断JSON也禁止非有限数。
+- inlined_call_site保留在C_dc，不能移往结构性侧以跨越50%。
+
+四个真实静态摘要均通过SHA校验的对象表比较及写出API夹具（gate-acceptance.json和final-audit.json）。此处对象表为 **candidate-table.json，pre_registration_static_candidate**，不是修订3；只用于静态验收，写出夹具在temp/prep-v18/，没有生成真实RUN质量结论。将来调用者必须传修订3封存的SHA和对象ID，不能从待输出payload取得信任锚。
+
+### 14.6 证据、资源与收尾
+
+- spike Thumb：[v1.7/v1.8逐项对照](evidence/identity-gate/v18-gates/spike-thumb-static/comparison.json)；[C输入与前提](evidence/identity-gate/v18-gates/spike-thumb-domain/index.json)；[描述分类](evidence/identity-gate/v18-gates/spike-thumb-classification/summary.json)；[门禁验收](evidence/identity-gate/v18-gates/spike-thumb-static/gate-acceptance.json)。
+- spike A32：[v1.7/v1.8逐项对照](evidence/identity-gate/v18-gates/spike-a32-static/comparison.json)；[C输入与前提](evidence/identity-gate/v18-gates/spike-a32-domain/index.json)；[描述分类](evidence/identity-gate/v18-gates/spike-a32-classification/summary.json)；[门禁验收](evidence/identity-gate/v18-gates/spike-a32-static/gate-acceptance.json)。
+- FFmpeg Thumb：[v1.7/v1.8逐项对照](evidence/identity-gate/v18-gates/ffmpeg-thumb-static/comparison.json)；[C输入与前提](evidence/identity-gate/v18-gates/ffmpeg-thumb-domain/index.json)；[描述分类](evidence/identity-gate/v18-gates/ffmpeg-thumb-classification/summary.json)；[门禁验收](evidence/identity-gate/v18-gates/ffmpeg-thumb-static/gate-acceptance.json)。
+- FFmpeg A32：[v1.7/v1.8逐项对照](evidence/identity-gate/v18-gates/ffmpeg-a32-static/comparison.json)；[C输入与前提](evidence/identity-gate/v18-gates/ffmpeg-a32-domain/index.json)；[描述分类](evidence/identity-gate/v18-gates/ffmpeg-a32-classification/summary.json)；[门禁验收](evidence/identity-gate/v18-gates/ffmpeg-a32-static/gate-acceptance.json)。
+
+所有记录作业串行，nice19/ionice-c3，systemd scope MemoryMax=3G/CPUQuota=200%，启动MemAvailable≥4GiB。
+记录最低MemAvailable **6200696832字节（5.775GiB）**；
+峰值cgroup memory.peak **422420480字节（402.852MiB）**；
+没有资源终止。范围为15个带run_scoped的作业，逐作业meminfo、scope路径、command/result与memory.peak见
+[resource-summary.json](evidence/identity-gate/v18-gates/resource-summary.json)。轻量编辑/读取也使用相同nice/ionice/scope限制，但不逐条保存独立峰值。
+
+首次启动记录程序因证据父目录尚未建立而退出1，尚未运行编译器/提取器；建立任务目录后正式build成功。保留
+[原始诊断摘录](evidence/identity-gate/v18-gates/initial-launch-error.txt)，没有隐瞒或忽略输入取证错误。
+其后15个记录作业退出均0。
+
+原始大行表与检查JSON只在temp/prep-v18/；AST/raw lexer与callsite沿用封存文件，重新核对SHA并重算分类，不重采、不读取正式profile。输入与产物SHA分别在各index、final-audit和final-manifest。新增证据文件均小于1MB。
+
+本任务完成后停止；不登记修正案3，不进入Q.5其他项目。v1.8已入库；设计评审已完成，按约定不再评审，新增门禁与前提检查验收通过。
