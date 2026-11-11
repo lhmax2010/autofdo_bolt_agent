@@ -61,6 +61,14 @@
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
 
 
+## code_free描述分类v2已完成（2026-11-11；停止）
+
+- [05报告§12](profgen/eval/prep/05_identity_gate_and_coverage.md)：只替换描述分类；旧分类及C/U/权重/门槛1048个证据文件SHA全部不变。未读取正式sample profile，修正案3未登记。
+- PM允许按原C命令补采Decl/语句细类字段；624条命令成功，旧Stmt/Expr集合逐条零差异。仅插件与新JSONL产物路径替换，完整命令、源/config SHA及退出码全部留证。raw lex覆盖72个源文件。
+- spike Thumb/A32：structural均28行；own_stmt为19/20行。FFmpeg Thumb/A32：asm均68行，structural2105/2100，expr_continuation均25，own_stmt3056/3042，other均149；ast_unavailable均0。每侧2行FunctionDecl容器无法证明声明续行，列other并保留原因，不猜测。
+- 四对象分类DA守恒且每行唯一；新旧行数/DA交叉表、每类Top20完整token、own语句类别见[证据](profgen/eval/prep/evidence/identity-gate/code-free-v2/)。原144+新增17=161项测试通过；无OOM/资源终止。
+- 已按要求停止；不改变登记状态，不进入其他N.5或正式指标计算。
+
 ## 裁决3修订1已完成（2026-11-11；按要求停止）
 
 - [05报告§11](profgen/eval/prep/05_identity_gate_and_coverage.md)：三套C规则并列、裁决4修订2固定。C域只取C/S合格行表并集，封存后才读取静态键/身份事实；旧结果不覆盖。新表spike Thumb/A32的③为99.991434%/99.991339%，FFmpeg Thumb/A32为85.204920%/85.013804%。

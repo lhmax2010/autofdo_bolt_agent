@@ -951,3 +951,561 @@ code_free_ast.py仅构建独立插件，使用GBS Clang公开API；clang本体�
 保留3次开发失败：AST-plugin-build-run的显式JSON构造编译错误；spike-thumb-AST-run在插件未成功时缺少so；spike-thumb-AST-v2-run把collect当对象名的CLI错误。修正后独立插件构建成功、调用前检查so存在，真实取证均通过。它们不是OOM，未采纳失败输出。
 串行nice19/ionice-c3、systemd scope MemoryMax=3G/CPUQuota=200%；每次分析启动前检查≥4GiB。最低实测MemAvailable=6861107200B；最高实读cgroup memory.peak=614322176B；资源终止=False。原始meminfo、scope、真实退出码、ALL-END和resources-summary.json保留。未提高限额、未并行运行分析。系统scope自身记账属系统服务行为；未观察到项目在WORKDIR外产生文件。
 四对象新表③均≥80%，三个1%门槛均未超限；仅本表门槛可登记。裁决待折入v1.6并经三家评审。按要求完成后停止：不登记修正案3，不进入仿真/其他N.5，不计算④body比例或任何正式sample profile受控量。
+
+## 12. code_free 描述性分类 v2（2026-11-11；完成后停止）
+
+基于4459894，只重做描述分类；旧分类与C、U、权重、三个1%门槛及登记状态不变。1048个旧证据文件全部SHA逐项一致。未读取任何正式sample profile/CALIBRATION，未登记修正案3，未接板。证据根目录：[code-free-v2](evidence/identity-gate/code-free-v2/)。
+
+### 12.1 补采授权、命令与一致性
+
+旧插件只保存Stmt/Expr，缺少Decl、运算符、初始化和标号冒号事实，因此先停下确认。PM明确授权沿用原C命令补采独立插件字段，并要求旧节点集合完全一致；本轮按此执行，不改/不重编clang本体、不挂载。完整授权及缺失字段见authorization.md与pending.json（历史停止点，现已闭合）。
+
+新插件保留旧Stmt/Expr遍历及去重顺序，额外记录Decl（含DeclStmt各Decl、DeclContext子节点）、VarDecl初始化、Binary/CompoundAssign运算符及语句类名。case/default冒号取Clang AST API，普通标号冒号由Clang Lexer::findNextToken取得并确认tok::colon。旧Stmt/Expr的完整字段投影按多重集合比较：类型、spelling/expansion视图、起止raw/offset/line、文件及macro标志全部逐条一致。
+
+完整原C命令及实际取证命令逐条保存；原编译参数、cwd、源SHA、sysroot、生成头/config及目标行清单SHA不变。命令字面仅替换两个产物路径：旧插件.so→新插件.so、旧JSONL→temp/prep-code-free-v2的新JSONL，避免覆盖旧产物；不把这两项隐藏成整串字节相同。两侧FFmpeg各311 CU、spike各1 CU，真实退出码与上轮均为0，complete.errors=false。
+
+|对象|命令数|旧/新Stmt-Expr记录数|新增Decl范围|差异数|
+|---|---|---|---|---|
+|spike-thumb|1|96|25|0|
+|spike-a32|1|104|26|0|
+|ffmpeg-thumb|311|63900|7776|0|
+|ffmpeg-a32|311|63970|7779|0|
+
+72个物理源文件由GBS Clang公开Lexer API从文件起点raw lex，保留跨行token状态，忽略注释/空白；标识符经Clang IdentifierTable取得关键字kind。原始tokens JSONL为temp/prep-code-free-v2/raw-tokens.jsonl（路径/SHA/源码SHA见lexer-command.json），AST大JSONL也只留该temp目录。Lex使用C17/GNU C；FFmpeg原命令为-std=c17，spike为该clang默认GNU C。仓库仅存小分片与索引。
+
+### 12.2 分类算法与未决描述
+
+优先级固定为asm→structural→expr_continuation→own_stmt_no_code→other；取不到AST或lex证据单列ast_unavailable。structural按该行全部raw token检查，只接受{、}、;、else、do以及编译器确认的标号范围；空白/注释-only单列结构子类。未从文件名或源文本推测语义。
+
+expr_continuation要求本行没有任何非CompoundStmt节点起始，候选起始行在新C中，并排除CompoundStmt与if/for/while/switch/do整体范围；取最内层合格范围。own_stmt按本行起始的非CompoundStmt节点判定，汇总种类选择起点最早、覆盖最外层的节点，固定排序去除TU遍历顺序影响；同时保存全部起始节点类型。语句细类来自AST（赋值运算、调用、return、声明初始化等），不把词法等号当作AST赋值证据。
+
+每侧有2行（cabac.c:167，DA=1800；h264idct_template.c:283，DA=38861）仅能找到整段FunctionDecl容器。无法证明该行属于普通声明部分而非函数体，因此不猜成expr_continuation，列other，原因only_FunctionDecl_range_declarator_vs_body_eligibility_unavailable。其他other逐行记录no_node_start_and_no_eligible_range_starting_in_C及可得AST上下文。AST不可得为0，但并不把other解释成全部已证实优化消除。
+
+### 12.3 四对象分类汇总与两种分母
+
+|对象|类别|行数|DA分子|原ΣR(C)|占原C|新ΣR(C)|占新C|
+|---|---|---|---|---|---|---|---|
+|spike-thumb|asm_interior|0|0|21362787097|0.000000%|11674422883|0.000000%|
+|spike-thumb|structural_line|28|5238745153|21362787097|24.522761%|11674422883|44.873697%|
+|spike-thumb|expr_continuation|0|0|21362787097|0.000000%|11674422883|0.000000%|
+|spike-thumb|own_stmt_no_code|19|4449619061|21362787097|20.828832%|11674422883|38.114253%|
+|spike-thumb|other|0|0|21362787097|0.000000%|11674422883|0.000000%|
+|spike-thumb|ast_unavailable|0|0|21362787097|0.000000%|11674422883|0.000000%|
+|spike-a32|asm_interior|0|0|21362787097|0.000000%|11546422883|0.000000%|
+|spike-a32|structural_line|28|5238745153|21362787097|24.522761%|11546422883|45.371153%|
+|spike-a32|expr_continuation|0|0|21362787097|0.000000%|11546422883|0.000000%|
+|spike-a32|own_stmt_no_code|20|4577619061|21362787097|21.428005%|11546422883|39.645344%|
+|spike-a32|other|0|0|21362787097|0.000000%|11546422883|0.000000%|
+|spike-a32|ast_unavailable|0|0|21362787097|0.000000%|11546422883|0.000000%|
+|ffmpeg-thumb|asm_interior|68|14050578484|28769855208|48.837849%|6890196397|203.921306%|
+|ffmpeg-thumb|structural_line|2105|2967361906|28769855208|10.314136%|6890196397|43.066434%|
+|ffmpeg-thumb|expr_continuation|25|1799|28769855208|0.000006%|6890196397|0.000026%|
+|ffmpeg-thumb|own_stmt_no_code|3056|4668195093|28769855208|16.225994%|6890196397|67.751263%|
+|ffmpeg-thumb|other|149|193521529|28769855208|0.672654%|6890196397|2.808650%|
+|ffmpeg-thumb|ast_unavailable|0|0|28769855208|0.000000%|6890196397|0.000000%|
+|ffmpeg-a32|asm_interior|68|14050578484|28769855208|48.837849%|6889424103|203.944165%|
+|ffmpeg-a32|structural_line|2100|2977361898|28769855208|10.348894%|6889424103|43.216412%|
+|ffmpeg-a32|expr_continuation|25|1799|28769855208|0.000006%|6889424103|0.000026%|
+|ffmpeg-a32|own_stmt_no_code|3042|4658967395|28769855208|16.193920%|6889424103|67.624918%|
+|ffmpeg-a32|other|149|193521529|28769855208|0.672654%|6889424103|2.808965%|
+|ffmpeg-a32|ast_unavailable|0|0|28769855208|0.000000%|6889424103|0.000000%|
+
+各类均为描述，不设门槛；分类总DA是被排除部分，因此占新C的比例允许超过100%，不是新C的组成比例。
+
+### 12.4 structural_line token细类
+
+|对象|结构token种类集合|行数|DA|
+|---|---|---|---|
+|spike-thumb|else+l_brace+r_brace|1|999023|
+|spike-thumb|l_brace|4|266033251|
+|spike-thumb|r_brace|23|4971712879|
+|spike-a32|else+l_brace+r_brace|1|999023|
+|spike-a32|l_brace|4|266033251|
+|spike-a32|r_brace|23|4971712879|
+|ffmpeg-thumb|blank_or_comment_only|13|90175272|
+|ffmpeg-thumb|do+l_brace|3|33561179|
+|ffmpeg-thumb|else|58|32549782|
+|ffmpeg-thumb|else+l_brace|7|9256741|
+|ffmpeg-thumb|else+l_brace+r_brace|197|355532176|
+|ffmpeg-thumb|else+r_brace|35|12252810|
+|ffmpeg-thumb|l_brace|154|577689901|
+|ffmpeg-thumb|l_brace+label|6|1352|
+|ffmpeg-thumb|label|242|1960229|
+|ffmpeg-thumb|r_brace|1375|1771258151|
+|ffmpeg-thumb|r_brace+semi|15|83124313|
+|ffmpeg-a32|blank_or_comment_only|13|90175272|
+|ffmpeg-a32|do+l_brace|3|33561179|
+|ffmpeg-a32|else|58|32549782|
+|ffmpeg-a32|else+l_brace|7|9256741|
+|ffmpeg-a32|else+l_brace+r_brace|192|363149473|
+|ffmpeg-a32|else+r_brace|35|12252810|
+|ffmpeg-a32|l_brace|154|577689901|
+|ffmpeg-a32|l_brace+label|6|1352|
+|ffmpeg-a32|label|242|1960229|
+|ffmpeg-a32|r_brace|1375|1773640846|
+|ffmpeg-a32|r_brace+semi|15|83124313|
+
+label的具体case/default/普通标号以及所有原始token在逐行CSV中；表中按结构token集合互斥汇总。blank_or_comment_only是忽略注释空白后的空集合。
+
+### 12.5 own_stmt_no_code语句种类
+
+|对象|AST语句种类|行数|DA|
+|---|---|---|---|
+|spike-thumb|DeclRefExpr|1|1|
+|spike-thumb|UnaryOperator|1|4063610861|
+|spike-thumb|assignment|1|128004096|
+|spike-thumb|declaration_with_initializer|6|257004098|
+|spike-thumb|declaration_without_initializer|3|3|
+|spike-thumb|function_call|1|1|
+|spike-thumb|return|6|1000001|
+|spike-a32|DeclRefExpr|1|1|
+|spike-a32|UnaryOperator|1|4063610861|
+|spike-a32|assignment|1|128004096|
+|spike-a32|declaration_with_initializer|7|385004098|
+|spike-a32|declaration_without_initializer|3|3|
+|spike-a32|function_call|1|1|
+|spike-a32|return|6|1000001|
+|ffmpeg-thumb|ArraySubscriptExpr|122|1114130|
+|ffmpeg-thumb|BinaryOperator|70|58618768|
+|ffmpeg-thumb|BreakStmt|98|12230745|
+|ffmpeg-thumb|CStyleCastExpr|63|274996719|
+|ffmpeg-thumb|ConditionalOperator|1|0|
+|ffmpeg-thumb|ContinueStmt|34|11283590|
+|ffmpeg-thumb|DeclRefExpr|97|102307406|
+|ffmpeg-thumb|DoStmt|29|33388885|
+|ffmpeg-thumb|ForStmt|80|199757035|
+|ffmpeg-thumb|FunctionDecl|9|94987739|
+|ffmpeg-thumb|GotoStmt|84|618778|
+|ffmpeg-thumb|IfStmt|164|555002171|
+|ffmpeg-thumb|ImplicitCastExpr|108|115138141|
+|ffmpeg-thumb|InitListExpr|27|163213424|
+|ffmpeg-thumb|IntegerLiteral|27|11347734|
+|ffmpeg-thumb|MemberExpr|34|1063|
+|ffmpeg-thumb|ParenExpr|11|20145619|
+|ffmpeg-thumb|UnaryExprOrTypeTraitExpr|13|5|
+|ffmpeg-thumb|UnaryOperator|36|239538229|
+|ffmpeg-thumb|WhileStmt|7|17923586|
+|ffmpeg-thumb|assignment|566|458930553|
+|ffmpeg-thumb|declaration_with_initializer|354|1057123850|
+|ffmpeg-thumb|declaration_without_initializer|375|1016200791|
+|ffmpeg-thumb|function_call|226|146115141|
+|ffmpeg-thumb|return|421|78210991|
+|ffmpeg-a32|ArraySubscriptExpr|121|1044167|
+|ffmpeg-a32|BinaryOperator|70|58881829|
+|ffmpeg-a32|BreakStmt|95|12230745|
+|ffmpeg-a32|CStyleCastExpr|63|274996719|
+|ffmpeg-a32|ConditionalOperator|1|0|
+|ffmpeg-a32|ContinueStmt|33|11283590|
+|ffmpeg-a32|DeclRefExpr|97|102307406|
+|ffmpeg-a32|DoStmt|29|33388885|
+|ffmpeg-a32|ForStmt|83|201776305|
+|ffmpeg-a32|FunctionDecl|9|94987739|
+|ffmpeg-a32|GotoStmt|84|618778|
+|ffmpeg-a32|IfStmt|162|554793292|
+|ffmpeg-a32|ImplicitCastExpr|111|115138141|
+|ffmpeg-a32|InitListExpr|27|163213424|
+|ffmpeg-a32|IntegerLiteral|27|11347734|
+|ffmpeg-a32|MemberExpr|34|1063|
+|ffmpeg-a32|ParenExpr|11|20145619|
+|ffmpeg-a32|UnaryExprOrTypeTraitExpr|13|5|
+|ffmpeg-a32|UnaryOperator|36|239538229|
+|ffmpeg-a32|WhileStmt|7|17923586|
+|ffmpeg-a32|assignment|540|441445128|
+|ffmpeg-a32|declaration_with_initializer|355|1056941438|
+|ffmpeg-a32|declaration_without_initializer|375|1016200791|
+|ffmpeg-a32|function_call|238|151329288|
+|ffmpeg-a32|return|421|79433494|
+
+### 12.6 新旧分类交叉表
+
+**spike-thumb：行数**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|0|0|0|0|0|0|
+|stmt_continuation|0|28|0|19|0|0|
+|other|0|0|0|0|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+**spike-thumb：DA**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|0|0|0|0|0|0|
+|stmt_continuation|0|5238745153|0|4449619061|0|0|
+|other|0|0|0|0|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+**spike-a32：行数**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|0|0|0|0|0|0|
+|stmt_continuation|0|28|0|20|0|0|
+|other|0|0|0|0|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+**spike-a32：DA**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|0|0|0|0|0|0|
+|stmt_continuation|0|5238745153|0|4577619061|0|0|
+|other|0|0|0|0|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+**ffmpeg-thumb：行数**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|68|0|0|0|0|0|
+|stmt_continuation|0|2086|25|3034|149|0|
+|other|0|19|0|22|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+**ffmpeg-thumb：DA**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|14050578484|0|0|0|0|0|
+|stmt_continuation|0|2967213852|1799|4668106598|193521529|0|
+|other|0|148054|0|88495|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+**ffmpeg-a32：行数**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|68|0|0|0|0|0|
+|stmt_continuation|0|2081|25|3020|149|0|
+|other|0|19|0|22|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+**ffmpeg-a32：DA**
+
+|旧类→新类|asm_interior|structural_line|expr_continuation|own_stmt_no_code|other|ast_unavailable|
+|---|---|---|---|---|---|---|
+|asm_interior|14050578484|0|0|0|0|0|
+|stmt_continuation|0|2977213844|1799|4658878900|193521529|0|
+|other|0|148054|0|88495|0|0|
+|ast_unavailable|0|0|0|0|0|0|
+
+### 12.7 每类DA最高20行
+
+不足20行全列、空类别无条目。下表token为该行全部raw token文本序列（不含注释/空白），详细kind/offset/跨行跨度、AST原始JSONL行号与SHA见各对象top20分片。structural的AST列仅列上下文，不参与除标号范围之外的结构性判断。
+
+**spike-thumb**
+
+|类|文件|行|DA|全部token|AST节点|范围|
+|---|---|---|---|---|---|---|
+|structural_line|eval-spike-1.0/spike.c|70|4063610861|["}"]|CompoundStmt|67–70|
+|structural_line|eval-spike-1.0/spike.c|38|137029154|["{"]|CompoundStmt|38–40|
+|structural_line|eval-spike-1.0/spike.c|40|137029154|["}"]|CompoundStmt|38–40|
+|structural_line|eval-spike-1.0/spike.c|28|128004096|["{"]|CompoundStmt|28–35|
+|structural_line|eval-spike-1.0/spike.c|35|128004096|["}"]|CompoundStmt|28–35|
+|structural_line|eval-spike-1.0/spike.c|90|128000000|["}"]|CompoundStmt|79–90|
+|structural_line|eval-spike-1.0/spike.c|112|128000000|["}"]|CompoundStmt|110–112|
+|structural_line|eval-spike-1.0/spike.c|124|128000000|["}"]|CompoundStmt|122–124|
+|structural_line|eval-spike-1.0/spike.c|72|127000000|["}"]|CompoundStmt|64–72|
+|structural_line|eval-spike-1.0/spike.c|50|120004252|["}"]|CompoundStmt|44–50|
+|structural_line|eval-spike-1.0/spike.c|88|8003062|["}"]|CompoundStmt|86–88|
+|structural_line|eval-spike-1.0/spike.c|92|1000000|["}"]|CompoundStmt|77–92|
+|structural_line|eval-spike-1.0/spike.c|108|1000000|["{"]|CompoundStmt|108–114|
+|structural_line|eval-spike-1.0/spike.c|114|1000000|["}"]|CompoundStmt|108–114|
+|structural_line|eval-spike-1.0/spike.c|133|1000000|["}"]|CompoundStmt|121–133|
+|structural_line|eval-spike-1.0/spike.c|130|999023|["}", "else", "{"]|CompoundStmt|128–130|
+|structural_line|eval-spike-1.0/spike.c|132|999023|["}"]|CompoundStmt|130–132|
+|structural_line|eval-spike-1.0/spike.c|103|30287|["}"]|CompoundStmt|97–103|
+|structural_line|eval-spike-1.0/spike.c|102|27069|["}"]|CompoundStmt|100–102|
+|structural_line|eval-spike-1.0/spike.c|58|4096|["}"]|CompoundStmt|55–58|
+|own_stmt_no_code|eval-spike-1.0/spike.c|69|4063610861|["--", "j", ";"]|UnaryOperator|69–69|
+|own_stmt_no_code|eval-spike-1.0/spike.c|29|128004096|["uint64_t", "x", "=", "*", "state", ";"]|DeclStmt|29–29|
+|own_stmt_no_code|eval-spike-1.0/spike.c|33|128004096|["*", "state", "=", "x", ";"]|BinaryOperator|33–33|
+|own_stmt_no_code|eval-spike-1.0/spike.c|66|127000000|["unsigned", "int", "j", "=", "i", ";"]|DeclStmt|66–66|
+|own_stmt_no_code|eval-spike-1.0/spike.c|78|1000000|["uint64_t", "sum", "=", "0", ";"]|DeclStmt|78–78|
+|own_stmt_no_code|eval-spike-1.0/spike.c|109|1000000|["uint64_t", "sum", "=", "0", ";"]|DeclStmt|109–109|
+|own_stmt_no_code|eval-spike-1.0/spike.c|113|1000000|["return", "sum", ";"]|ReturnStmt|113–113|
+|own_stmt_no_code|eval-spike-1.0/spike.c|54|1|["uint64_t", "state", "=", "initial_seed", ";"]|DeclStmt|54–54|
+|own_stmt_no_code|eval-spike-1.0/spike.c|118|1|["uint32_t", "values", "[", "BLOCK_SIZE", "]", ";"]|DeclStmt|118–118|
+|own_stmt_no_code|eval-spike-1.0/spike.c|120|1|["uint64_t", "checksum", "=", "UINT64_C", "(", "0x6a09e667f3bcc909", ")", ";"]|DeclStmt|120–120|
+|own_stmt_no_code|eval-spike-1.0/spike.c|140|1|["unsigned", "long", "long", "parsed", ";"]|DeclStmt|140–140|
+|own_stmt_no_code|eval-spike-1.0/spike.c|157|1|["uint64_t", "result", ";"]|DeclStmt|157–157|
+|own_stmt_no_code|eval-spike-1.0/spike.c|169|1|["initialize_table", "(", ")", ";"]|CallExpr|169–169|
+|own_stmt_no_code|eval-spike-1.0/spike.c|172|1|["rounds", ",", "seed", ",", "result", ")", ";"]|DeclRefExpr|172–172|
+|own_stmt_no_code|eval-spike-1.0/spike.c|173|1|["return", "0", ";"]|ReturnStmt|173–173|
+|own_stmt_no_code|eval-spike-1.0/spike.c|142|0|["return", "0", ";"]|ReturnStmt|142–142|
+|own_stmt_no_code|eval-spike-1.0/spike.c|147|0|["return", "0", ";"]|ReturnStmt|147–147|
+|own_stmt_no_code|eval-spike-1.0/spike.c|161|0|["return", "2", ";"]|ReturnStmt|161–161|
+|own_stmt_no_code|eval-spike-1.0/spike.c|166|0|["return", "2", ";"]|ReturnStmt|166–166|
+
+**spike-a32**
+
+|类|文件|行|DA|全部token|AST节点|范围|
+|---|---|---|---|---|---|---|
+|structural_line|eval-spike-1.0/spike.c|70|4063610861|["}"]|CompoundStmt|67–70|
+|structural_line|eval-spike-1.0/spike.c|38|137029154|["{"]|CompoundStmt|38–40|
+|structural_line|eval-spike-1.0/spike.c|40|137029154|["}"]|CompoundStmt|38–40|
+|structural_line|eval-spike-1.0/spike.c|28|128004096|["{"]|CompoundStmt|28–35|
+|structural_line|eval-spike-1.0/spike.c|35|128004096|["}"]|CompoundStmt|28–35|
+|structural_line|eval-spike-1.0/spike.c|90|128000000|["}"]|CompoundStmt|79–90|
+|structural_line|eval-spike-1.0/spike.c|112|128000000|["}"]|CompoundStmt|110–112|
+|structural_line|eval-spike-1.0/spike.c|124|128000000|["}"]|CompoundStmt|122–124|
+|structural_line|eval-spike-1.0/spike.c|72|127000000|["}"]|CompoundStmt|64–72|
+|structural_line|eval-spike-1.0/spike.c|50|120004252|["}"]|CompoundStmt|44–50|
+|structural_line|eval-spike-1.0/spike.c|88|8003062|["}"]|CompoundStmt|86–88|
+|structural_line|eval-spike-1.0/spike.c|92|1000000|["}"]|CompoundStmt|77–92|
+|structural_line|eval-spike-1.0/spike.c|108|1000000|["{"]|CompoundStmt|108–114|
+|structural_line|eval-spike-1.0/spike.c|114|1000000|["}"]|CompoundStmt|108–114|
+|structural_line|eval-spike-1.0/spike.c|133|1000000|["}"]|CompoundStmt|121–133|
+|structural_line|eval-spike-1.0/spike.c|130|999023|["}", "else", "{"]|CompoundStmt|128–130|
+|structural_line|eval-spike-1.0/spike.c|132|999023|["}"]|CompoundStmt|130–132|
+|structural_line|eval-spike-1.0/spike.c|103|30287|["}"]|CompoundStmt|97–103|
+|structural_line|eval-spike-1.0/spike.c|102|27069|["}"]|CompoundStmt|100–102|
+|structural_line|eval-spike-1.0/spike.c|58|4096|["}"]|CompoundStmt|55–58|
+|own_stmt_no_code|eval-spike-1.0/spike.c|69|4063610861|["--", "j", ";"]|UnaryOperator|69–69|
+|own_stmt_no_code|eval-spike-1.0/spike.c|29|128004096|["uint64_t", "x", "=", "*", "state", ";"]|DeclStmt|29–29|
+|own_stmt_no_code|eval-spike-1.0/spike.c|33|128004096|["*", "state", "=", "x", ";"]|BinaryOperator|33–33|
+|own_stmt_no_code|eval-spike-1.0/spike.c|82|128000000|["const", "struct", "entry", "*", "item", "=", "&", "table", "[", "index", "]", ";"]|DeclStmt|82–82|
+|own_stmt_no_code|eval-spike-1.0/spike.c|66|127000000|["unsigned", "int", "j", "=", "i", ";"]|DeclStmt|66–66|
+|own_stmt_no_code|eval-spike-1.0/spike.c|78|1000000|["uint64_t", "sum", "=", "0", ";"]|DeclStmt|78–78|
+|own_stmt_no_code|eval-spike-1.0/spike.c|109|1000000|["uint64_t", "sum", "=", "0", ";"]|DeclStmt|109–109|
+|own_stmt_no_code|eval-spike-1.0/spike.c|113|1000000|["return", "sum", ";"]|ReturnStmt|113–113|
+|own_stmt_no_code|eval-spike-1.0/spike.c|54|1|["uint64_t", "state", "=", "initial_seed", ";"]|DeclStmt|54–54|
+|own_stmt_no_code|eval-spike-1.0/spike.c|118|1|["uint32_t", "values", "[", "BLOCK_SIZE", "]", ";"]|DeclStmt|118–118|
+|own_stmt_no_code|eval-spike-1.0/spike.c|120|1|["uint64_t", "checksum", "=", "UINT64_C", "(", "0x6a09e667f3bcc909", ")", ";"]|DeclStmt|120–120|
+|own_stmt_no_code|eval-spike-1.0/spike.c|140|1|["unsigned", "long", "long", "parsed", ";"]|DeclStmt|140–140|
+|own_stmt_no_code|eval-spike-1.0/spike.c|157|1|["uint64_t", "result", ";"]|DeclStmt|157–157|
+|own_stmt_no_code|eval-spike-1.0/spike.c|169|1|["initialize_table", "(", ")", ";"]|CallExpr|169–169|
+|own_stmt_no_code|eval-spike-1.0/spike.c|172|1|["rounds", ",", "seed", ",", "result", ")", ";"]|DeclRefExpr|172–172|
+|own_stmt_no_code|eval-spike-1.0/spike.c|173|1|["return", "0", ";"]|ReturnStmt|173–173|
+|own_stmt_no_code|eval-spike-1.0/spike.c|142|0|["return", "0", ";"]|ReturnStmt|142–142|
+|own_stmt_no_code|eval-spike-1.0/spike.c|147|0|["return", "0", ";"]|ReturnStmt|147–147|
+|own_stmt_no_code|eval-spike-1.0/spike.c|161|0|["return", "2", ";"]|ReturnStmt|161–161|
+|own_stmt_no_code|eval-spike-1.0/spike.c|166|0|["return", "2", ";"]|ReturnStmt|166–166|
+
+**ffmpeg-thumb**
+
+|类|文件|行|DA|全部token|AST节点|范围|
+|---|---|---|---|---|---|---|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|37|255523038|["\"ldrb       %[bit]        , [%[state]]                  \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|38|255523038|["\"add        %[r_b]        , %[tables]   , %[lps_off]    \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|39|255523038|["\"mov        %[tmp]        , %[range]                    \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|40|255523038|["\"and        %[range]      , %[range]    , #0xC0         \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|41|255523038|["\"add        %[r_b]        , %[r_b]      , %[bit]        \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|42|255523038|["\"ldrb       %[range]      , [%[r_b], %[range], lsl #1]  \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|43|255523038|["\"add        %[r_b]        , %[tables]   , %[norm_off]   \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|44|255523038|["\"sub        %[r_c]        , %[tmp]      , %[range]      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|45|255523038|["\"lsl        %[tmp]        , %[r_c]      , #17           \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|46|255523038|["\"cmp        %[tmp]        , %[low]                      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|47|255523038|["\"it         gt                                          \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|48|255523038|["\"movgt      %[range]      , %[r_c]                      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|49|255523038|["\"itt        cc                                          \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|50|255523038|["\"mvncc      %[bit]        , %[bit]                      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|51|255523038|["\"subcc      %[low]        , %[low]      , %[tmp]        \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|52|255523038|["\"add        %[r_c]        , %[tables]   , %[mlps_off]   \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|53|255523038|["\"ldrb       %[tmp]        , [%[r_b], %[range]]          \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|54|255523038|["\"ldrb       %[r_b]        , [%[r_c], %[bit]]            \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|55|255523038|["\"lsl        %[low]        , %[low]      , %[tmp]        \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|56|255523038|["\"lsl        %[range]      , %[range]    , %[tmp]        \\n\\t\""]|GCCAsmStmt|36–102|
+|structural_line|ffmpeg-8.0.1/libavcodec/arm/cabac.h|32|255523038|["{"]|CompoundStmt|32–105|
+|structural_line|ffmpeg-8.0.1/libavcodec/arm/cabac.h|105|255523038|["}"]|CompoundStmt|32–105|
+|structural_line|ffmpeg-8.0.1/libavcodec/cabac_functions.h|146|215694437|["}"]|CompoundStmt|144–146|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1680|84904984|["}"]|CompoundStmt|1670–1680|
+|structural_line|ffmpeg-8.0.1/libavcodec/cabac_functions.h|142|39828601|["}"]|CompoundStmt|140–142|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|585|39117292|["}"]|CompoundStmt|571–585|
+|structural_line|ffmpeg-8.0.1/libavcodec/cabac_functions.h|180|36812720|["}"]|CompoundStmt|167–180|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1723|33561176|["do", "{"]|CompoundStmt|1723–1763|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1725|33561176|[]|CompoundStmt|1723–1763|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1727|33561176|[]|CompoundStmt|1723–1763|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1679|33116225|["}"]|CompoundStmt|1672–1679|
+|structural_line|ffmpeg-8.0.1/libavcodec/rectangle.h|122|27667920|["}"]|CompoundStmt|41–122|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_parse.h|128|26374116|["{"]|CompoundStmt|128–134|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_parse.h|134|26374116|["}"]|CompoundStmt|128–134|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1735|25893332|["}", "else", "{"]|CompoundStmt|1728–1735|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1732|23970368|["}", "else", "{"]|CompoundStmt|1730–1732|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1734|23970368|["}"]|CompoundStmt|1732–1734|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|668|23755400|["}"]|CompoundStmt|654–668|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264dec.h|676|20947440|["{"]|CompoundStmt|676–678|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264dec.h|678|20947440|["}"]|CompoundStmt|676–678|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_slice.c|1088|1799|[")", ")", ";"]|ParenExpr|1082–1088|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/avcodec.c|302|0|["\"add '-strict %d' if you want to use it.\\n\"", ","]|CallExpr|300–303|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/avcodec.c|390|0|["\"that doesn't support it\\n\"", ")", ";"]|ImplicitCastExpr|389–390|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/bsf.c|161|0|["\"bitstream filter '%s'. Supported codecs are: \"", ","]|ImplicitCastExpr|160–161|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|121|0|["\"changes, but PARAM_CHANGE side data was sent to it.\\n\"", ")", ";"]|ImplicitCastExpr|120–121|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|481|0|["\"Stop draining and force EOF.\\n\"", ")", ";"]|ImplicitCastExpr|480–481|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|743|0|["\"%\"", "SIZE_SPECIFIER", "\"/%\"", "SIZE_SPECIFIER", "\"/%\"", "SIZE_SPECIFIER", "\"/%\"", "SIZE_SPECIFIER", "\" \""]|CallExpr|741–746|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|744|0|["\"(frame size %dx%d). This is a bug, please report it\\n\"", ","]|CallExpr|741–746|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|784|0|["\"This is a bug, please report it.\\n\"", ")", ";"]|ImplicitCastExpr|783–784|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1239|0|["\"get_format() callback.\\n\"", ")", ";"]|ImplicitCastExpr|1238–1239|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1283|0|["\"does not match the format of the provided frames \""]|ImplicitCastExpr|1282–1284|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1294|0|["\"does not match the type of the provided device \""]|ImplicitCastExpr|1293–1295|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1903|0|["\"supported with subtitles codecs\\n\"", ")", ";"]|ImplicitCastExpr|1902–1903|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1907|0|["\"subtitles character encoding will be ignored\\n\"", ","]|ImplicitCastExpr|1906–1907|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|771|0|[":"]|ConditionalOperator|769–772|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_ps.c|485|0|["\"values are l:%d r:%d t:%d b:%d\\n\"", ","]|ImplicitCastExpr|484–485|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_ps.c|573|0|[")", ";"]|CallExpr|557–573|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_ps.c|718|0|["\"(%\"", "SIZE_SPECIFIER", "\" > %\"", "SIZE_SPECIFIER", "\")\\n\"", ","]|ImplicitCastExpr|717–718|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_refs.c|372|0|[")", ";"]|CallExpr|369–372|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_refs.c|743|0|["\"assignment for second field \""]|ImplicitCastExpr|742–745|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/arm/cabac.h|33|255523038|["int", "bit", ";"]|DeclStmt|33–33|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/arm/cabac.h|34|255523038|["void", "*", "reg_b", ",", "*", "reg_c", ",", "*", "tmp", ";"]|DeclStmt|34–34|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1649|201269902|["#", "define", "CC", "&", "cc"]|UnaryOperator|1649–1649|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1670|85349935|["for", "(", "last", "=", "0", ";", "last", "<", "coefs", ";", "last", "++", ")", "{"]|ForStmt|1670–1680|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1671|84904984|["uint8_t", "*", "sig_ctx", "=", "significant_coeff_ctx_base", "+", "sig_off", ";"]|VarDecl|1671–1701|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1672|84904984|["if", "(", "get_cabac", "(", "CC", ",", "sig_ctx", ")", ")", "{"]|IfStmt|1672–1679|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|571|48896615|["for", "(", "i", "=", "0", ";", "i", "<", "4", ";", "i", "++", ")", "{"]|ForStmt|571–585|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|41|42499258|["static", "av_always_inline", "void", "fill_rectangle", "(", "void", "*", "vp", ",", "int", "w", ",", "int", "h", ",", "int", "stride", ",", "uint32_t", "val", ",", "int", "size", ")", "{"]|FunctionDecl|41–122|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|42|42499258|["uint8_t", "*", "p", "=", "(", "uint8_t", "*", ")", "vp", ";"]|DeclStmt|42–42|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|43|42499258|["av_assert2", "(", "size", "==", "1", "\|\|", "size", "==", "2", "\|\|", "size", "==", "4", ")", ";"]|CStyleCastExpr|43–43|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|44|42499258|["av_assert2", "(", "w", "<=", "4", ")", ";"]|CStyleCastExpr|44–44|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|46|42499258|["w", "*=", "size", ";"]|CompoundAssignOperator|46–46|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|47|42499258|["stride", "*=", "size", ";"]|CompoundAssignOperator|47–47|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|49|42499258|["av_assert2", "(", "(", "(", "(", "long", ")", "vp", ")", "&", "(", "FFMIN", "(", "w", ",", "8", "<<", "(", "HAVE_NEON", "\|", "ARCH_PPC", "\|", "HAVE_MMX", ")", ")", "-", "1", ")", ")", "==", "0", ")", ";"]|CStyleCastExpr|49–49|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|50|42499258|["av_assert2", "(", "(", "stride", "&", "(", "w", "-", "1", ")", ")", "==", "0", ")", ";"]|CStyleCastExpr|50–50|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|51|42499258|["if", "(", "w", "==", "2", ")", "{"]|IfStmt|51–120|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|572|39117292|["int", "x", "=", "dir", "==", "0", "?", "0", ":", "i", ";"]|DeclStmt|572–572|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|573|39117292|["int", "y", "=", "dir", "==", "0", "?", "i", ":", "0", ";"]|DeclStmt|573–573|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|574|39117292|["int", "b_idx", "=", "8", "+", "4", "+", "x", "+", "8", "*", "y", ";"]|DeclStmt|574–574|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|575|39117292|["int", "bn_idx", "=", "b_idx", "-", "(", "dir", "?", "8", ":", "1", ")", ";"]|DeclStmt|575–575|
+|other|ffmpeg-8.0.1/libavcodec/h264_parse.h|133|26374116|["#", "endif"]|CompoundStmt|128–134|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1645|12657144|["#", "if", "!", "ARCH_X86"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1646|12657144|["#", "define", "CABAC_ON_STACK"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1647|12657144|["#", "endif"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1648|12657144|["#", "ifdef", "CABAC_ON_STACK"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1722|12657144|["#", "define", "STORE_BLOCK", "(", "type", ")"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1770|12657144|["#", "ifdef", "CABAC_ON_STACK"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1774|12657144|["#", "endif"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1703|10681452|["#", "endif"]|CompoundStmt|1697–1704|
+|other|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|496|10534474|[")", "{"]|CompoundStmt|496–543|
+|other|ffmpeg-8.0.1/libavcodec/rectangle.h|118|8964616|["#", "endif"]|CompoundStmt|100–119|
+|other|ffmpeg-8.0.1/libavcodec/h264_mb.c|554|6300442|["}", "else", "if", "(", "xchg", ")"]|CompoundStmt|547–554|
+|other|ffmpeg-8.0.1/libavcodec/h264_mb.c|555|6300442|["AV_SWAP64", "(", "b", ",", "a", ")", ";"]|CompoundStmt|515–594|
+|other|ffmpeg-8.0.1/libavcodec/h264_mb.c|557|6300442|["AV_COPY64", "(", "b", ",", "a", ")", ";"]|CompoundStmt|515–594|
+|other|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|846|5354692|["#", "endif"]|CompoundStmt|720–847|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|2090|2896608|["sl", "->", "intra4x4_pred_mode_cache", "[", "scan8", "[", "i", "]", "]", ")", ";"]|CompoundStmt|2085–2091|
+|other|ffmpeg-8.0.1/libavcodec/cabac_functions.h|65|2610383|["#", "if", "CABAC_BITS", "==", "16"]|CompoundStmt|64–75|
+|other|ffmpeg-8.0.1/libavcodec/h264_mvpred.h|280|2610331|["\"pred_motion (%2d %2d %2d) (%2d %2d %2d) (%2d %2d %2d) -> (%2d %2d %2d) at %2d %2d %d list %d\\n\"", ","]|CompoundStmt|231–283|
+|other|ffmpeg-8.0.1/libavcodec/h264_mvpred.h|281|2610331|["top_ref", ",", "B", "[", "0", "]", ",", "B", "[", "1", "]", ",", "diagonal_ref", ",", "C", "[", "0", "]", ",", "C", "[", "1", "]", ",", "left_ref", ","]|CompoundStmt|231–283|
+|other|ffmpeg-8.0.1/libavcodec/h264_mvpred.h|282|2610331|["A", "[", "0", "]", ",", "A", "[", "1", "]", ",", "ref", ",", "*", "mx", ",", "*", "my", ",", "sl", "->", "mb_x", ",", "sl", "->", "mb_y", ",", "n", ",", "list", ")", ";"]|CompoundStmt|231–283|
+
+**ffmpeg-a32**
+
+|类|文件|行|DA|全部token|AST节点|范围|
+|---|---|---|---|---|---|---|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|37|255523038|["\"ldrb       %[bit]        , [%[state]]                  \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|38|255523038|["\"add        %[r_b]        , %[tables]   , %[lps_off]    \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|39|255523038|["\"mov        %[tmp]        , %[range]                    \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|40|255523038|["\"and        %[range]      , %[range]    , #0xC0         \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|41|255523038|["\"add        %[r_b]        , %[r_b]      , %[bit]        \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|42|255523038|["\"ldrb       %[range]      , [%[r_b], %[range], lsl #1]  \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|43|255523038|["\"add        %[r_b]        , %[tables]   , %[norm_off]   \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|44|255523038|["\"sub        %[r_c]        , %[tmp]      , %[range]      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|45|255523038|["\"lsl        %[tmp]        , %[r_c]      , #17           \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|46|255523038|["\"cmp        %[tmp]        , %[low]                      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|47|255523038|["\"it         gt                                          \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|48|255523038|["\"movgt      %[range]      , %[r_c]                      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|49|255523038|["\"itt        cc                                          \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|50|255523038|["\"mvncc      %[bit]        , %[bit]                      \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|51|255523038|["\"subcc      %[low]        , %[low]      , %[tmp]        \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|52|255523038|["\"add        %[r_c]        , %[tables]   , %[mlps_off]   \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|53|255523038|["\"ldrb       %[tmp]        , [%[r_b], %[range]]          \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|54|255523038|["\"ldrb       %[r_b]        , [%[r_c], %[bit]]            \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|55|255523038|["\"lsl        %[low]        , %[low]      , %[tmp]        \\n\\t\""]|GCCAsmStmt|36–102|
+|asm_interior|ffmpeg-8.0.1/libavcodec/arm/cabac.h|56|255523038|["\"lsl        %[range]      , %[range]    , %[tmp]        \\n\\t\""]|GCCAsmStmt|36–102|
+|structural_line|ffmpeg-8.0.1/libavcodec/arm/cabac.h|32|255523038|["{"]|CompoundStmt|32–105|
+|structural_line|ffmpeg-8.0.1/libavcodec/arm/cabac.h|105|255523038|["}"]|CompoundStmt|32–105|
+|structural_line|ffmpeg-8.0.1/libavcodec/cabac_functions.h|146|215694437|["}"]|CompoundStmt|144–146|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1680|84904984|["}"]|CompoundStmt|1670–1680|
+|structural_line|ffmpeg-8.0.1/libavcodec/cabac_functions.h|142|39828601|["}"]|CompoundStmt|140–142|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|585|39117292|["}"]|CompoundStmt|571–585|
+|structural_line|ffmpeg-8.0.1/libavcodec/cabac_functions.h|180|36812720|["}"]|CompoundStmt|167–180|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1723|33561176|["do", "{"]|CompoundStmt|1723–1763|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1725|33561176|[]|CompoundStmt|1723–1763|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1727|33561176|[]|CompoundStmt|1723–1763|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1679|33116225|["}"]|CompoundStmt|1672–1679|
+|structural_line|ffmpeg-8.0.1/libavcodec/rectangle.h|122|27667920|["}"]|CompoundStmt|41–122|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_parse.h|128|26374116|["{"]|CompoundStmt|128–134|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_parse.h|134|26374116|["}"]|CompoundStmt|128–134|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1735|25893332|["}", "else", "{"]|CompoundStmt|1728–1735|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1732|23970368|["}", "else", "{"]|CompoundStmt|1730–1732|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1734|23970368|["}"]|CompoundStmt|1732–1734|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|668|23755400|["}"]|CompoundStmt|654–668|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264dec.h|676|20947440|["{"]|CompoundStmt|676–678|
+|structural_line|ffmpeg-8.0.1/libavcodec/h264dec.h|678|20947440|["}"]|CompoundStmt|676–678|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_slice.c|1088|1799|[")", ")", ";"]|ParenExpr|1082–1088|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/avcodec.c|302|0|["\"add '-strict %d' if you want to use it.\\n\"", ","]|CallExpr|300–303|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/avcodec.c|390|0|["\"that doesn't support it\\n\"", ")", ";"]|ImplicitCastExpr|389–390|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/bsf.c|161|0|["\"bitstream filter '%s'. Supported codecs are: \"", ","]|ImplicitCastExpr|160–161|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|121|0|["\"changes, but PARAM_CHANGE side data was sent to it.\\n\"", ")", ";"]|ImplicitCastExpr|120–121|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|481|0|["\"Stop draining and force EOF.\\n\"", ")", ";"]|ImplicitCastExpr|480–481|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|743|0|["\"%\"", "SIZE_SPECIFIER", "\"/%\"", "SIZE_SPECIFIER", "\"/%\"", "SIZE_SPECIFIER", "\"/%\"", "SIZE_SPECIFIER", "\" \""]|CallExpr|741–746|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|744|0|["\"(frame size %dx%d). This is a bug, please report it\\n\"", ","]|CallExpr|741–746|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|784|0|["\"This is a bug, please report it.\\n\"", ")", ";"]|ImplicitCastExpr|783–784|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1239|0|["\"get_format() callback.\\n\"", ")", ";"]|ImplicitCastExpr|1238–1239|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1283|0|["\"does not match the format of the provided frames \""]|ImplicitCastExpr|1282–1284|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1294|0|["\"does not match the type of the provided device \""]|ImplicitCastExpr|1293–1295|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1903|0|["\"supported with subtitles codecs\\n\"", ")", ";"]|ImplicitCastExpr|1902–1903|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/decode.c|1907|0|["\"subtitles character encoding will be ignored\\n\"", ","]|ImplicitCastExpr|1906–1907|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|771|0|[":"]|ConditionalOperator|769–772|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_ps.c|485|0|["\"values are l:%d r:%d t:%d b:%d\\n\"", ","]|ImplicitCastExpr|484–485|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_ps.c|573|0|[")", ";"]|CallExpr|557–573|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_ps.c|718|0|["\"(%\"", "SIZE_SPECIFIER", "\" > %\"", "SIZE_SPECIFIER", "\")\\n\"", ","]|ImplicitCastExpr|717–718|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_refs.c|372|0|[")", ";"]|CallExpr|369–372|
+|expr_continuation|ffmpeg-8.0.1/libavcodec/h264_refs.c|743|0|["\"assignment for second field \""]|ImplicitCastExpr|742–745|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/arm/cabac.h|33|255523038|["int", "bit", ";"]|DeclStmt|33–33|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/arm/cabac.h|34|255523038|["void", "*", "reg_b", ",", "*", "reg_c", ",", "*", "tmp", ";"]|DeclStmt|34–34|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1649|201269902|["#", "define", "CC", "&", "cc"]|UnaryOperator|1649–1649|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1670|85349935|["for", "(", "last", "=", "0", ";", "last", "<", "coefs", ";", "last", "++", ")", "{"]|ForStmt|1670–1680|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1671|84904984|["uint8_t", "*", "sig_ctx", "=", "significant_coeff_ctx_base", "+", "sig_off", ";"]|VarDecl|1671–1701|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1672|84904984|["if", "(", "get_cabac", "(", "CC", ",", "sig_ctx", ")", ")", "{"]|IfStmt|1672–1679|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|571|48896615|["for", "(", "i", "=", "0", ";", "i", "<", "4", ";", "i", "++", ")", "{"]|ForStmt|571–585|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|41|42499258|["static", "av_always_inline", "void", "fill_rectangle", "(", "void", "*", "vp", ",", "int", "w", ",", "int", "h", ",", "int", "stride", ",", "uint32_t", "val", ",", "int", "size", ")", "{"]|FunctionDecl|41–122|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|42|42499258|["uint8_t", "*", "p", "=", "(", "uint8_t", "*", ")", "vp", ";"]|DeclStmt|42–42|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|43|42499258|["av_assert2", "(", "size", "==", "1", "\|\|", "size", "==", "2", "\|\|", "size", "==", "4", ")", ";"]|CStyleCastExpr|43–43|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|44|42499258|["av_assert2", "(", "w", "<=", "4", ")", ";"]|CStyleCastExpr|44–44|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|46|42499258|["w", "*=", "size", ";"]|CompoundAssignOperator|46–46|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|47|42499258|["stride", "*=", "size", ";"]|CompoundAssignOperator|47–47|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|49|42499258|["av_assert2", "(", "(", "(", "(", "long", ")", "vp", ")", "&", "(", "FFMIN", "(", "w", ",", "8", "<<", "(", "HAVE_NEON", "\|", "ARCH_PPC", "\|", "HAVE_MMX", ")", ")", "-", "1", ")", ")", "==", "0", ")", ";"]|CStyleCastExpr|49–49|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|50|42499258|["av_assert2", "(", "(", "stride", "&", "(", "w", "-", "1", ")", ")", "==", "0", ")", ";"]|CStyleCastExpr|50–50|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/rectangle.h|51|42499258|["if", "(", "w", "==", "2", ")", "{"]|IfStmt|51–120|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|572|39117292|["int", "x", "=", "dir", "==", "0", "?", "0", ":", "i", ";"]|DeclStmt|572–572|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|573|39117292|["int", "y", "=", "dir", "==", "0", "?", "i", ":", "0", ";"]|DeclStmt|573–573|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|574|39117292|["int", "b_idx", "=", "8", "+", "4", "+", "x", "+", "8", "*", "y", ";"]|DeclStmt|574–574|
+|own_stmt_no_code|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|575|39117292|["int", "bn_idx", "=", "b_idx", "-", "(", "dir", "?", "8", ":", "1", ")", ";"]|DeclStmt|575–575|
+|other|ffmpeg-8.0.1/libavcodec/h264_parse.h|133|26374116|["#", "endif"]|CompoundStmt|128–134|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1645|12657144|["#", "if", "!", "ARCH_X86"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1646|12657144|["#", "define", "CABAC_ON_STACK"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1647|12657144|["#", "endif"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1648|12657144|["#", "ifdef", "CABAC_ON_STACK"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1722|12657144|["#", "define", "STORE_BLOCK", "(", "type", ")"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1770|12657144|["#", "ifdef", "CABAC_ON_STACK"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1774|12657144|["#", "endif"]|CompoundStmt|1596–1776|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|1703|10681452|["#", "endif"]|CompoundStmt|1697–1704|
+|other|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|496|10534474|[")", "{"]|CompoundStmt|496–543|
+|other|ffmpeg-8.0.1/libavcodec/rectangle.h|118|8964616|["#", "endif"]|CompoundStmt|100–119|
+|other|ffmpeg-8.0.1/libavcodec/h264_mb.c|554|6300442|["}", "else", "if", "(", "xchg", ")"]|CompoundStmt|547–554|
+|other|ffmpeg-8.0.1/libavcodec/h264_mb.c|555|6300442|["AV_SWAP64", "(", "b", ",", "a", ")", ";"]|CompoundStmt|515–594|
+|other|ffmpeg-8.0.1/libavcodec/h264_mb.c|557|6300442|["AV_COPY64", "(", "b", ",", "a", ")", ";"]|CompoundStmt|515–594|
+|other|ffmpeg-8.0.1/libavcodec/h264_loopfilter.c|846|5354692|["#", "endif"]|CompoundStmt|720–847|
+|other|ffmpeg-8.0.1/libavcodec/h264_cabac.c|2090|2896608|["sl", "->", "intra4x4_pred_mode_cache", "[", "scan8", "[", "i", "]", "]", ")", ";"]|CompoundStmt|2085–2091|
+|other|ffmpeg-8.0.1/libavcodec/cabac_functions.h|65|2610383|["#", "if", "CABAC_BITS", "==", "16"]|CompoundStmt|64–75|
+|other|ffmpeg-8.0.1/libavcodec/h264_mvpred.h|280|2610331|["\"pred_motion (%2d %2d %2d) (%2d %2d %2d) (%2d %2d %2d) -> (%2d %2d %2d) at %2d %2d %d list %d\\n\"", ","]|CompoundStmt|231–283|
+|other|ffmpeg-8.0.1/libavcodec/h264_mvpred.h|281|2610331|["top_ref", ",", "B", "[", "0", "]", ",", "B", "[", "1", "]", ",", "diagonal_ref", ",", "C", "[", "0", "]", ",", "C", "[", "1", "]", ",", "left_ref", ","]|CompoundStmt|231–283|
+|other|ffmpeg-8.0.1/libavcodec/h264_mvpred.h|282|2610331|["A", "[", "0", "]", ",", "A", "[", "1", "]", ",", "ref", ",", "*", "mx", ",", "*", "my", ",", "sl", "->", "mb_x", ",", "sl", "->", "mb_y", ",", "n", ",", "list", ")", ";"]|CompoundStmt|231–283|
+
+### 12.8 不变量、测试、资源与停止
+
+|对象|分类行数|分类DA|原C−新C|差值|
+|---|---|---|---|---|
+|spike-thumb|47|9688364214|9688364214|0|
+|spike-a32|48|9816364214|9816364214|0|
+|ffmpeg-thumb|5403|21879658811|21879658811|0|
+|ffmpeg-a32|5384|21880431105|21880431105|0|
+
+每个code_free行恰好出现一次、分类DA之和=原ΣR(C)−新ΣR(C)，四对象断言均通过；新旧交叉表边际和亦核对。原144项测试文件字节不变，新增17项synthetic，共161项通过。包含用户要求的7例及asm/other/ast_unavailable、排除控制语句整体、节点本行起始阻止续行、最内层节点、Decl续行、标号后跟调用及FunctionDecl无法确认时不猜测。
+
+保留开发草稿：最初把Clang token kind else/do误写成kw_else/kw_do，检查真实token后修正；未发布的分类草稿移到temp/prep-code-free-v2/draft-keyword-spelling，SHA/原因见draft-classification-disposition.json。旧发布分类从未改写，最终证据以*-classify-final-run与*-classification/index.json为准。不是编译器缺陷或规则修改。
+
+资源全程串行nice19/ionice-c3，scope MemoryMax=3G、CPUQuota=200%；分析前MemAvailable≥4GiB。最低MemAvailable=7198117888 B，最高实读cgroup memory.peak=544968704 B，资源终止=False；无OOM。原始meminfo/退出码/scope/ALL-END均保留。边界例外：无已知项目文件在WORKDIR外生成；systemd自身系统记账不属于项目输出。
+
+完成后停止。本轮仅描述，不改变C、U、权重、任何门槛或资格；不登记修正案3，不做仿真、正式profile分析或板上工作。
