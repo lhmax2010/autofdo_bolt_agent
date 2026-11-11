@@ -36,6 +36,8 @@
 
 ## 人工裁决（登记前准备）
 
+- ④ 的 body 比例按设计属登记后 RUN 级量，登记前不计算（依据 v1.5 第538、540行）；只计算静态歧义键数、受影响行数及代码规模，不以静态量替代body比例。
+
 - 静态计算与登记状态分离（本轮人工裁决）：按v1.5 5.8第5条原文，identity_ambiguous、unmatched_in_elf、boundary_unavailable任一项按③口径超过分母1%，即标为“评估不可用（当前）/不可登记”；不放宽。不可登记不等于停止静态计算：全部对象继续U、排除清单、权重和对象表，并保留登记状态与原因。不得新增或扩大身份裁决、不得按计数大小挑选闭合条目；将来的新裁决须对整类身份证据统一适用。完成静态表后停止，不登记修正案3，不进入仿真或其他N.5项目，不读取正式sample profile。
 
 - [裁决2补充3修订1](profgen/eval/prep/rulings.md)：直接未展开FileID实参以唯一MacroArgs槽位、该槽位的编译器区间、调用实例及同FileID证明来源，保留isMacroArgExpansion=false；不改变补充2物理函数体token规则。先登记，再实施与验收，身份门禁通过前不计算U/③。
@@ -49,6 +51,15 @@
 - [裁决2：macro_generated_function](profgen/eval/prep/rulings.md)：宏生成函数须四项正面证据齐全才建立身份对应；参考行属于宏展开评价域外，FNDA决定组范围。先照录登记，后实现核对；不扩大原not_instrumented规则。
 
 - [裁决1：system_header_no_reference](profgen/eval/prep/rulings.md)：系统头无覆盖参考是评价域外；仅四项正面证据全部满足时给出该封闭状态，不能扩大not_instrumented。本轮先核对编译命令、系统头目录与覆盖全局文件表；仍不打开正式sample profile。若有其他未决类别，停止并报告。
+
+## 静态身份门禁与U完成（2026-11-11；停止等裁决）
+
+- 普通候选推送d981471，继续静态计算裁决838c886。四对象完整身份未决0；未新增或扩大裁决。
+- [05报告§6–7](profgen/eval/prep/05_identity_gate_and_coverage.md)：spike Thumb/A32的③=54.643726%/54.044553%，K=19/10、n_eff=1.328515/1.299623，仅描述。本表门槛可登记不表示其余N.5已完成。
+- FFmpeg Thumb/A32的③=19.269762%/19.172781%，均<50%；identity_ambiguous=5.580146%/5.652581%，unmatched_in_elf两侧2.284188%，均>1%；boundary_unavailable=0。当前不可登记。
+- U/排除清单/权重、①②③③′/n_eff/K与互斥损失账本已生成，四个差值为0断言通过。④body比例未计算；静态歧义键0，身份歧义组1795/1802，前20组覆盖>99.99999%歧义DA。SHA索引见[evidence/identity-gate](profgen/eval/prep/evidence/identity-gate/ordinary-index.json)及各对象index。
+- 映射范围系统头地址/字节：FFmpeg Thumb为3067/10036、A32为3375/13500；spike两侧0；宏函数0（FNDA0、范围外）。原88+新增25=113项测试通过。本轮峰值528437248B，最低MemAvailable 11063332864B，无OOM/资源阈值终止。
+- 已停止，等待歧义类别及低保留率裁决。修正案3未登记；不做仿真/其他N.5，不打开正式sample profile，不计算正式受控量，不碰板子。
 
 ## 裁决2补充3修订1执行状态（2026-11-11）
 
