@@ -52,7 +52,9 @@
 
 - 修订1已照录推送b17c93f；正式classifier接入完成，旧物理token规则不变。每个MacroArgs槽位用回调token位置/长度证明半开区间，保留false标志。
 - Thumb/A32各28条新闭合，未决0，FNDA均0，scope_role=reference_unexecuted；含既有6条后宏对应各34条。三例真实断言退出0。原27项及新增19项synthetic测试通过；初次夹具失误原文保留。[04§8.7](profgen/eval/prep/04_macro_function_ruling.md)
-- 下一步普通候选：Thumb26841、A3226876、spike各15。未把候选当闭合；U、③、损失分解未计算。正式sample profile未打开，修正案3未登记。[05门禁](profgen/eval/prep/05_identity_gate_and_coverage.md)
+- 普通候选53747条已全量核对：spike各15通过；FFmpeg Thumb/A32普通对应通过21944/21950，identity_ambiguous4897/4926（空叶子行1187/1209，行越界3710/3717）。加既有裁决与外部CU后全部身份闭合、未决0；不是把“有候选”当闭合。16项普通对应夹具通过。[05门禁§5](profgen/eval/prep/05_identity_gate_and_coverage.md)
+- 新门槛发现：FFmpeg身份歧义DA占ΣR(C)为5.580146%/5.652581%，触发v1.5 5.8第5条的1%对象不可用规则。③仅得到上界94.419854%/94.347419%，不是完整U的实际③；未判定50%门槛通过。已请求用户决定是否继续不可登记对象的静态U/③准备；当前保留门禁状态。完整U/权重/登记表/静态代码规模未生成，正式sample profile未打开，修正案3未登记。[05§6–7](profgen/eval/prep/05_identity_gate_and_coverage.md)
+- 资源失败如实保留：第一次普通候选汇总触发3GiB scope OOM；优化共享声明索引后同限额通过。不是加内存重试。详见identity-gate/ordinary-oom.json与final-audit.json。
 
 ## 裁决2补充3执行状态（2026-11-11；未展开实参标志停止）
 

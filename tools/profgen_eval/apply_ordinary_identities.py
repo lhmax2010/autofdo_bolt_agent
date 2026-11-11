@@ -1,0 +1,104 @@
+"""Complete ordinary-candidate checks using static S/C DWARF and C coverage."""
+import collections,json,hashlib
+from pathlib import Path
+from apply_header_ruling import rows,norm_file,norm_name
+from ordinary_identity_rule import classify_ordinary
+from pack_static_evidence import tables
+from run_scoped import WORK,sha
+BASE=WORK/"docs/profgen/eval/prep/evidence"
+PREV=BASE/"ruling2/supplement3/rev1"
+OUT=PREV/"identity-gate/ordinary-v2"
+COMMANDS=PREV/"identity-gate"
+TEMP=WORK/"temp/prep-identity-gate"
+EXPECTED={"spike-thumb":15,"spike-a32":15,"ffmpeg-thumb":26841,"ffmpeg-a32":26876}
+
+def main():
+    OUT.mkdir(exist_ok=True)
+    summaries=[]
+    for obj,nexpected in EXPECTED.items():
+        sidx=BASE/(obj+"-S-inventory-tables");cidx=BASE/(obj+"-C-inventory-tables");covidx=BASE/(obj+"-coverage-tables")
+        cmeta=json.loads((cidx/"index.json").read_text());assert Path(cmeta["elf"]).exists(),cmeta
+        def verified_rows(folder,pattern):
+            meta=json.loads((folder/"index.json").read_text());expected={Path(p["path"]).name:p["sha256"] for p in meta["parts"]}
+            for f in sorted(folder.glob(pattern)):
+                assert sha(f)==expected[f.name],f
+            return list(rows(folder,pattern))
+        sd=verified_rows(sidx,"code-dies-*.csv");cd=verified_rows(cidx,"code-dies-*.csv")
+        cov=verified_rows(covidx,"merged-functions-*.csv")
+        sm={int(r["die"],16):r for r in sd}
+        cmd=json.loads((COMMANDS/(obj+"-command-v2.json")).read_text());assert cmd["exit_code"]==0
+        raw=Path(cmd["output"]);assert sha(raw)==cmd["output_sha256"]
+        api={r["die"]:r for r in map(json.loads,raw.open())}
+        assert set(api)==set(sm),(obj,"API vs prior inventory missing DIEs")
+        for off,s in sm.items():
+            a=api[off]
+            assert (a["name"],norm_file(a["decl_file"]),a["decl_line"])==(s["name"],norm_file(s["decl_file"]),int(s["decl_line"] or 0)),(obj,off,"identity API mismatch")
+        refs=collections.defaultdict(list);cdefs=collections.defaultdict(list)
+        for i,c in enumerate(cov):
+            c=dict(c);c["reference_id"]=i;c["file"]=norm_file(c["file"])
+            for k in ("start","end","fnda"):c[k]=int(c[k])
+            c["copies"]=json.loads(c["copies"]);refs[(c["file"],c["name"])].append(c)
+        # Build a declaration identity index once per key, never copy every
+        # repeated inlined C DIE into every S DIE result (quadratic space).
+        grouped=collections.defaultdict(lambda:collections.defaultdict(list))
+        for c in cd:
+            key=(norm_file(c["decl_file"]),norm_name(c["name"]))
+            grouped[key][(norm_file(c["decl_file"]),int(c["decl_line"] or 0))].append(c["die"])
+        definition_ids={};definition_rows=[]
+        for key,positions in grouped.items():
+            gid=hashlib.sha256(json.dumps(key).encode()).hexdigest()
+            definition_ids[key]=gid
+            cdefs[key]=[dict(decl_file=f,decl_line=n) for f,n in positions]
+            definition_rows.append([gid,*key,[dict(file=f,line=n,dies=ds) for (f,n),ds in positions.items()]])
+        dd=OUT/(obj+"-definitions");dd.mkdir(exist_ok=True)
+        dp=tables(dd,"definitions",["id","file","name","declarations"],definition_rows)
+        (dd/"index.json").write_text(json.dumps(dict(parts=dp),indent=2)+"\n")
+        results=[];new=[];counts=collections.Counter();reasons=collections.Counter();n=0;multi=0;single=0;examples=collections.defaultdict(list)
+        for r in rows(PREV/(obj+"-inventory"),"identities-*.csv"):
+            if not r["conclusion"]:
+                assert r["category"]=="original_correspondence_checks_pending",r
+                s=sm[int(r["die"],16)];a=api[int(r["die"],16)]
+                key=(norm_file(s["decl_file"]),norm_name(s["name"]))
+                cs=refs[key];ds=cdefs[key]
+                res=classify_ordinary(s,cs,ds,a["leaf_lines"])
+                n+=1;multi+=len(cs)>1;single+=len(cs)==1
+                counts[res["conclusion"] or "unresolved"]+=1
+                reasons.update(res["reasons"])
+                row=dict(die=r["die"],name=s["name"],decl_file=key[0],decl_line=int(s["decl_line"]),
+                    candidate_ids=[c["reference_id"] for c in cs],
+                    candidates=[{k:c[k] for k in ("reference_id","file","name","start","end","fnda")} for c in cs],
+                    c_definition_group=definition_ids.get(key),c_declaration_positions=ds,
+                    leaf_rows=a["leaf_lines"],**res)
+                results.append(row)
+                for reason in res["reasons"]:
+                    if len(examples[reason])<3:examples[reason].append(row)
+                r["conclusion"]=res["conclusion"] or "";r["category"]=res["conclusion"] or ";".join(res["reasons"])
+                r["evidence"]=str((OUT/(obj+"-ordinary/index.json")).relative_to(WORK))+"#"+r["die"]
+            new.append(r)
+        assert n==nexpected,(obj,n,nexpected)
+        dest=OUT/(obj+"-ordinary");dest.mkdir(exist_ok=True)
+        cols=["die","name","decl_file","decl_line","conclusion","reasons","candidate_ids","candidates","c_definition_group","c_declaration_positions","leaf_lines","leaf_rows","candidate_executed"]
+        parts=tables(dest,"checks",cols,([r.get(k) for k in cols] for r in results))
+        (dest/"index.json").write_text(json.dumps(dict(parts=parts,leaf_api=cmd,inputs=[dict(path=str(x.relative_to(WORK)),sha256=sha(x)) for x in (sidx/"index.json",cidx/"index.json",covidx/"index.json")]),indent=2)+"\n")
+        cols=["die","cu","raw_name","decl_file","decl_line","conclusion","category","evidence"]
+        dest=OUT/(obj+"-inventory");dest.mkdir(exist_ok=True)
+        parts=tables(dest,"identities",cols,([r[k] for k in cols] for r in new))
+        (dest/"index.json").write_text(json.dumps(dict(parts=parts),indent=2)+"\n")
+        # One example per file keeps every artifact below 1 MB.
+        for reason,exs in examples.items():
+            for i,row in enumerate(exs):
+                (OUT/f"{obj}-{reason}-example{i+1}.json").write_text(json.dumps(row,indent=2)+"\n")
+        failedrefs={c["reference_id"]:c for row in results if row["conclusion"]=="identity_ambiguous" for c in row["candidates"]}
+        summary=dict(object=obj,checked=n,single_candidates=single,multiple_candidates=multi,conclusions=dict(counts),
+            failure_reasons=dict(reasons),unresolved=sum(not r["conclusion"] for r in new),
+            complete_inventory_conclusions=dict(collections.Counter(r["conclusion"] for r in new)),
+            ambiguous_reference_functions=len(failedrefs),ambiguous_reference_fnda_sum=sum(c["fnda"] for c in failedrefs.values()),
+            fnda_note="unique reference FNDA only, not line DA mass or ratio",C_debug_present=True,
+            definition_index=str(dd.relative_to(WORK)/"index.json"),
+            api_inventory_name_decl_check="all DIEs match prior inventory")
+        summaries.append(summary)
+        (OUT/"ordinary-summary.json").write_text(json.dumps(summaries,indent=2)+"\n")
+        print(json.dumps(summary),flush=True)
+    return 1 if any(s["unresolved"] for s in summaries) else 0
+
+if __name__=="__main__":raise SystemExit(main())

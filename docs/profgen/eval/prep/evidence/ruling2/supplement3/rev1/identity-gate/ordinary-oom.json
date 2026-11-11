@@ -1,0 +1,39 @@
+{
+  "command": [
+    "journalctl",
+    "--user",
+    "--since",
+    "2026-11-11 11:51:00",
+    "--until",
+    "2026-11-11 11:51:40",
+    "--no-pager",
+    "-o",
+    "short-iso",
+    "-g",
+    "run-r6508822db9854b77b1149556797ed514"
+  ],
+  "exit_code": 0,
+  "unit_command": [
+    "systemctl",
+    "--user",
+    "show",
+    "run-r6508822db9854b77b1149556797ed514.scope",
+    "-p",
+    "MemoryPeak",
+    "-p",
+    "MemoryMax",
+    "-p",
+    "Result",
+    "-p",
+    "OOMPolicy"
+  ],
+  "unit_exit_code": 0,
+  "scope_exit_code": -15,
+  "result": "oom-kill",
+  "accepted": [
+    "spike-thumb",
+    "spike-a32"
+  ],
+  "ffmpeg_accepted": false,
+  "next": "streaming CSV and disk sqlite indexes; same 3G cap; no unchanged retry"
+}

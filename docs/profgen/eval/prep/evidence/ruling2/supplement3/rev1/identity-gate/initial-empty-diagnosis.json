@@ -1,0 +1,24 @@
+{
+  "initial_exit_codes": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "initial_api_code_die_counts": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "expected": [
+    17,
+    17,
+    28149,
+    28190
+  ],
+  "accepted": false,
+  "cause": "getUnitDIE defaults ExtractUnitDIEOnly=true; child DIEs not parsed",
+  "source": "src/llvm/llvm/include/llvm/DebugInfo/DWARF/DWARFUnit.h:450-452",
+  "fix": "explicit getUnitDIE(false); preserve initial raw outputs/commands; v2 uses distinct paths"
+}

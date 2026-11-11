@@ -78,6 +78,7 @@ def worker(out, command):
     with (out/"stdout.txt").open("w") as stdout, (out/"stderr.txt").open("w") as stderr:
         p = subprocess.Popen(command, stdout=stdout, stderr=stderr, start_new_session=True)
         next_poll = 0
+        next_live = 0
         terminated = False
         while True:
             elapsed = time.monotonic()-start
@@ -93,6 +94,11 @@ def worker(out, command):
                 next_poll = elapsed + 60
             if peak.exists():
                 high = max(high, int(peak.read_text()))
+            if elapsed >= next_live:
+                (out/"resources-live.json").write_text(json.dumps(
+                    {"scope":cg,"memory_peak_bytes":high,"min_memavailable":lowest,
+                     "elapsed_seconds":elapsed,"resource_terminated":terminated},indent=2)+"\n")
+                next_live = elapsed + 1
             rc = p.poll()
             if rc is not None:
                 break

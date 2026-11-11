@@ -477,3 +477,12 @@ record_paste_stop.py已改为正例断言，实际退出0；旧停止文件不�
 命令、大小、SHA在rev1/{thumb,a32}-token-api-commands.json；每个提交文件小于1MB。
 资源串行3G/200%，nice19/ionice-c3，门禁≥4GiB；见rev1/resources-summary.json。
 普通候选核对下一步进行，不把有候选当闭合。U及③尚未计算。
+
+
+### 8.7.4 后续身份门禁（本轮补充）
+
+补充3修订1验收提交为fd4b5b5。随后普通候选全量核对已完成，
+没有剩余未决；但FFmpeg Thumb/A32的identity_ambiguous参考DA超过
+v1.5规定的1%门槛。详细单候选行范围证据、必然损失分桶与未完成的U项目
+见[05报告§5–7](05_identity_gate_and_coverage.md)。
+这不是补充3证明失败，也没有按FNDA=0绕过任何宏证据。
