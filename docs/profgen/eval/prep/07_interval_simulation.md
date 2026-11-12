@@ -237,3 +237,30 @@
 完成估时后停止，不进入其他Q.5项目，不读任何真实profile，不登记修正案3，不接板。没有提出放宽阈值。
 
 提交检查记录：Python CSV导出默认CRLF被git diff --check判为行尾空白，预提交退出2，未执行commit。仅将派生计时CSV的行尾改为LF，逐单元格对比完全一致；原CSV和完整诊断保留temp，路径/SHA见presentation-check.json。模拟代码、清单、种子、原始JSONL及任何统计数据均未改变，不属于统计实现修复，未重跑模拟。
+
+## 8. 本轮裁决：解除12小时门槛，分两阶段串行
+
+1. 解除上一轮任务中“总耗时超过12小时即停止”的门槛。重复次数（验收10⁶次分层t、包络10000次）、场景清单、种子、阈值、共用统计模块一律不变。
+2. 单进程串行运行，只占一个核：systemd-run scope改为MemoryMax=3G、CPUQuota=100%，nice19 / ionice -c3不变。
+3. 运行前锁（6946344的prerun-lock.json）不变；正式运行前按锁逐字节核对origin/main中的清单、代码、测试、设计与共用模块，不一致即拒绝启动。
+
+原执行器run_row把t与包络连在一起，main保留旧12小时门禁，不能直接用于新的执行顺序。本轮**不改它或原锁**：新增interval_simulation_phased.py调度入口，直接调用锁定代码的sample、evaluate、acceptance、summarize、append/read_results；其中evaluate仍调用原共用统计模块。只拆分运行顺序与完成点，未替换统计实现、生成分布、种子流、阈值或次数。新增入口与24项调度夹具另行封存到phased/scheduler-lock.json；正式前同时验证原锁与补充锁已推送。共558项测试通过；仅小型synthetic夹具，没有正式重复。
+
+第一阶段：122个A场景各1000000次分层t，完成后立刻汇总开关、更新第6节与06/STATUS，显式add、署名Hao Lin、提交推送main。第二阶段只有读到origin/main中的第一阶段summary与完整结果字节均一致，才开始150行各10000次包络及B报告；开关只引用已推送第一阶段值。第一阶段统计不通过仍按原要求进行第二阶段报告，不更改阈值。
+
+输出根目录temp/interval-simulation/formal-001，下设acceptance/、envelope/；每阶段results.jsonl追加/fsync/SHA链；进度同时写阶段目录与根progress.json，含阶段、完成数、当前场景与预计剩余秒数。恢复时核验参数、种子、重复数、事件统计与SHA，只有完整记录跳过。未完成场景原种子重跑；若最后追加被中断，保留尾字节再截断未完成尾部，完整前缀校验失败则拒绝继续。每阶段与控制器都有追加式结束记录，失败或中断不悄悄重试。
+
+资源由同一scope限制3G/100%；启动MemAvailable≥4GiB，连续计算期间每60秒保存meminfo、实时读取cgroup memory.peak；无统计多进程或线程池。预计总时长沿用试跑35.50小时，仅用于进度，不再阻止启动。执行期间不改锁定文件。后续提交由调度器仅写报告/证据/STATUS；工作区出现其他改动、main与origin不一致、认证推送失败时停止，不修改认证。
+
+启动命令（本轮新增调度入口提交推送后执行）：
+
+    TMPDIR="$PWD/temp/tmp" PYTHONDONTWRITEBYTECODE=1 nice -n 19 ionice -c3 systemd-run --user --scope -q -p MemoryMax=3G -p CPUQuota=100% python3 tools/profgen_eval/interval_simulation_phased.py both
+
+查看进度（同样按资源包装）：读取temp/interval-simulation/formal-001/progress.json。stdout/ALL-END写入根目录controller.log；阶段结果提交哈希写入published-acceptance.json、published-envelope.json。完成第二阶段并推送后控制器停止，不进入其他Q.5项目。不读任何真实profile，不登记修正案3。
+
+补充调度文件SHA：
+
+|文件|SHA-256|
+|---|---|
+|tools/profgen_eval/interval_simulation_phased.py|0a3010a2e752bcf7d1a9a6581fed5a3d125e067e76a8ed70f5970f3c53aef53a|
+|tools/profgen_eval/test_interval_simulation_phased.py|add5261466b4bb2f762fd1ede5f4eefe167a36414043f7edbc4cdc0767e97946|
