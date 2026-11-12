@@ -217,3 +217,104 @@ lcov FN的起始行、FNDA、JSON函数主区域范围与API全部一致；每�
 |未开始（6项）|9、11、12、14、18、19|未运行模拟、未接板，未登记修正案3|
 
 完成后按要求停止，不开始其他Q.5项目；没有对正式矩阵profile进行读取、转换或计算，没有跨配置比较，没有改变资格判定。全部新增代码与证据由本报告所在提交封存，清单见[batch2 manifest](evidence/registration-checks/batch2/manifest.json)。
+
+## 10. 第三批：合成avg、性能协议、离线资格与身份/披露核销（基线 c5ad459）
+
+### 10.1 范围与第6项合成可用性
+
+本批不接板，不重编Clang/llvm-profgen，不打开任何真实profile（包括CALIBRATION），不登记修正案3，不执行第9、12、18、19项。设计、C/U及旧资格标签均不修改。正式工具启动时核对SHA：2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5。
+
+[avg-plan.json](evidence/registration-checks/batch3/avg-plan.json)先列组合及设计依据：5.8第6条的avg与max/none基准，及最终推荐组合、5.9第2条对入选aggregation/skid组合的要求，因此同时核对avg/none和avg/prev-inst。复用第一批814859个指令起点的四份合成全地址文本，逐份SHA与batch1一致；只换aggregation与新输出路径，其余沿用第一批命令（sample、head=none、zero-fill=none、text）。没有对两个组合做质量比较或选择。
+
+|对象|none / prev-inst 退出码|none写出条目|prev-inst写出条目|分类|
+|---|---|---:|---:|---|
+|spike-thumb|0 / 0|93|92|全部映射命中；未对齐0|
+|spike-a32|0 / 0|92|91|全部映射命中；未对齐0|
+|ffmpeg-thumb|0 / 0|83031|81017|全部映射命中；未对齐0|
+|ffmpeg-a32|0 / 0|82287|80083|全部映射命中；未对齐0|
+
+8次转换全部成功，无失败阶段；boundary_unavailable与known_out_of_scope均0。各目录conversion.json、classification.json及entries分片保存完整命令、真实退出码、输入/输出SHA与逐键分类。只解析键与条目数，不汇总body权重或计算质量比例。大输出保留temp/registration-batch3/，不会覆盖第一批、第二批或真实数据。
+
+新[对象封存草稿](evidence/registration-checks/batch3/object-seal-draft.json)SHA为8cb026abe12fde4bcfae5225db41152090bc58ff44d9bfc5e4f2b0dd1ec991c0；新增synthetic_input_availability，旧历史可用性字段原样保留。它不是修正案3，也不能据此声称真实avg/prev-inst可用。第二批草稿不覆盖。
+
+### 10.2 第11项：性能协议与不混用
+
+实现registration_performance.py，23项synthetic测试通过。N由预试CV（四位有效数字）计算：min(40,max(10,ceil(2*(1.96*1.2533*CV/0.005)^2)))；无定义/非有限CV取40，非法负数拒绝。预试离群保留、正式N锁定、预热/预试不并入正式轮次。G0–G5参数、driver禁内联、stale/salvage、LTO一致性、小矩阵缺失交互说明、probe准入都有正负例。性能使用中位数相对差、独立percentile bootstrap 95% CI与±1%，不得替换质量配对统计、±0.01、区间类型或停止规则。这里只验证合成数据，没有产生真实N、性能组或性能结果。
+
+### 10.3 第14项：离线资格及历史遥测重放
+
+实现registration_telemetry.py与重放入口，新增61项synthetic测试；逐条包括完整单调窗口、端点/采样间隙、逐policy状态、校准有效区间与25点、忙碌率、MAD、kmsg序号/boot/时间边界/错误粘性、EAGAIN及非阻塞读取器。实际非阻塞管道用于验证drain，不打开板子或本机/dev/kmsg；保存失败不推进最后成功序号。板上降温后的正常对照属于第12项，仍未执行。
+
+先写[遥测披露](evidence/registration-checks/batch3/telemetry-disclosure.json)、telemetry-before分片与telemetry-extra-before.json，随后按SHA核对并读取12480个遥测文件。路径、SHA、逐RUN原文依据均留存；未读取perf样本或任何真实profile。完整结论见[重放汇总](evidence/registration-checks/batch3/telemetry-replay-summary.json)及telemetry-group-differences-000.csv。
+
+|旧标签→本批重放|组数|
+|---|---:|
+|clean→unknown|31|
+|abnormal→unknown|20|
+|abnormal→abnormal|8|
+|unknown→unknown|11|
+
+70组（106个物理RUN）为8 abnormal、62 unknown、0 clean；51组变化。逐组原因完整列在CSV，旧标签逐字节保持不变。8组有温度达到75°C的正面异常证据；unknown来自缺少四个单调端点、开机连续kmsg、cpuinfo频率和规定的前后四核30秒校准等，不能用其他RUN或墙钟猜测补齐。原异常标签只因旧总体有效频率而成立的，不自动继承为v1.8异常。
+
+另重放既有单核/四核诊断：单核unknown；四核abnormal，最高80.341°C，scaling_cur_freq出现600MHz（也记录1.5GHz）。原始逐秒数据同时保留缺证据原因；不把“已观察到异常”误写成所有资格数据齐全。没有重新采集、修改资格阈值或据此进行配置比较。
+
+### 10.4 第16项：扩展身份核销与同名范围外清单
+
+原有身份、宏、完整清单与边界夹具保留，新加16项synthetic测试。完整清单覆盖核对不能以“有候选”代替结论，编译变体、外部CU来源及覆盖缺席是正面证据条件。23条扩展身份条文逐项指向新旧实现与具体测试，不重复放宽已有规则。
+
+|对象|清单DIE|未决|顶层定义|同名范围外顶层|外部CU|
+|---|---:|---:|---:|---:|---:|
+|spike Thumb|17|0|9|0|0|
+|spike A32|17|0|9|0|0|
+|FFmpeg Thumb|28149|0|4630|0|10|
+|FFmpeg A32|28190|0|4633|0|10|
+
+[identity-audit-summary.json](evidence/registration-checks/batch3/identity-audit-summary.json)记录完整清单与来源SHA、封闭枚举分布和显式空清单。FFmpeg每侧10个外部CU包括5个GNU AS、5个GNU C，涉及38个DIE；沿用归档成员来源登记，不新增状态。identity_ambiguous是已有封闭结论，不等于未决。本批不重算静态身份或U。
+
+### 10.5 第17项：历史总体披露
+
+[完整披露表](17_profile_disclosure.md)新增历史汇总；批3CSV逐路径合并批2CALIBRATION，并给出元数据来源、SHA引用与历史计算量。扫描1759个仓库/保留日志元数据文件，汇总1139次转换尝试、616个profile路径；410个路径有保留的读取/哈希核对证据，其余只作保守的输出尝试披露，不声称文件实际生成或打开。扫描错误0。
+
+历史包括补丁验证的字节/树/计数、真实avg三个热点的独立核对、第一轮转换层级报告、补丁9剔除无效调用点的重转比对，以及第二批CALIBRATION仅条目分类与退出码。这些历史量不在本批重算；来源日志中的SHA为引用值，未重新打开真实profile计算SHA。披露不能恢复未保留的操作记录，因此未知打开/生成状态显式保留。G0预试标为待第12项完成后补充，第17项仍部分完成。
+
+### 10.6 逐条对应与当前Q.5状态
+
+[72条对应表](evidence/registration-checks/batch3/clause-mapping.md)保留原文、设计行号、实现位置、具体夹具与结果；[校验索引](evidence/registration-checks/batch3/validation-summary.json)记录设计/工具/草稿SHA。原有§1/§9为历史快照，以本表为最新状态。
+
+|项|状态|本批结果或剩余|
+|---|---|---|
+|1|已完成|沿用§1证据|
+|2|已完成|第一批注入/准入契约|
+|3|已完成|第一批派生负对照|
+|4|已完成|第一批提交/canonical契约|
+|5|已完成|第一批①②③、第二批④；本批不再打开CALIBRATION|
+|6|已完成|静态封存草稿及历史报告；本批补8次合成avg可用性|
+|7|已完成|第二批M1/M2 synthetic|
+|8|已完成|第二批覆盖合并synthetic|
+|9|未开始|模拟不在本批范围|
+|10|已完成|第二批统计/协议/恢复门禁synthetic|
+|11|已完成|本批23项性能协议synthetic|
+|12|未开始|需板上验证、G0预试；本批不执行|
+|13|已完成|第一批主FileID/lcov/JSON范围核对|
+|14|已完成|本批离线实现、61项夹具及已有遥测重放；不替代第12项|
+|15|已完成|沿用静态表/门槛证据|
+|16|已完成|本批扩展条款核销与全清单审计|
+|17|部分完成|历史与CALIBRATION已汇总；G0待12；无证据的历史打开状态保留未知|
+|18|未开始|不进入本批之外项目|
+|19|未开始|未登记修正案3|
+|20|已完成|沿用v1.8全部新增夹具证据|
+|21|已完成|沿用已有条文与证据|
+
+合计16项完成、1项部分、4项未开始，不表示整体可登记。
+
+### 10.7 测试、资源与边界
+
+正式验收510项全部通过，原410项测试文件逐字节不变，新增100项（性能23、遥测61、身份16）。原文tests-acceptance/stderr.txt。没有变更设计、LLVM代码、正式工具、静态C/U/权重或三个用户配置文件。仅新合成profile被解析，未计算M1/M2、质量比例、正式RUN受控量。
+
+记录的最低MemAvailable为17274179584 B，实读cgroup memory.peak最大616714240 B。没有OOM、资源暂停或终止。完整资源索引见[resource-summary.json](evidence/registration-checks/batch3/resource-summary.json)。
+
+所有shell命令使用nice19/ionice-c3与3G/200% scope，实质转换/审计/测试任务经启动门禁并保存资源；短编辑/读取scope未逐一持久保存启动检查与峰值，因此不能声称该最低值覆盖每个简单命令及所有采样间隔。这是本批资源取证不完整之处，未提高限额。
+
+失败保留：最初avg计划输出目录尚未创建（工具未运行，setup-failure.txt）；初版遥测读取器误把after.txt当数字命名快照，退出1（telemetry-replay/stderr.txt），修正输入选择后重放成功；两次编排层JavaScript字符串解析错误发生在shell启动前，无任务执行或文件变更。未隐藏真实转换失败或原样重试OOM。
+
+新增证据均小于1MB；大输出在temp/registration-batch3/并由conversion.json登记路径/SHA。完成后停止，不进入第9、12、18、19项，不登记修正案3。

@@ -1,0 +1,104 @@
+{
+  "groups": 70,
+  "physical_formal_runs": 106,
+  "diagnostics": 2,
+  "new": {
+    "unknown": 62,
+    "abnormal": 8
+  },
+  "transitions": {
+    "unknown -> unknown": 11,
+    "clean -> unknown": 31,
+    "abnormal -> unknown": 20,
+    "abnormal -> abnormal": 8
+  },
+  "changed": 51,
+  "parts": [
+    {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/docs/profgen/eval/prep/evidence/registration-checks/batch3/telemetry-run-replay-000.csv",
+      "sha256": "f83970257b4cbe9441d7b56f190a4399bedb11ff0d8cc1ccd898487a9f67f16c",
+      "rows": 108
+    },
+    {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/docs/profgen/eval/prep/evidence/registration-checks/batch3/telemetry-group-differences-000.csv",
+      "sha256": "6ef231d8422139ed1df23082b1129217e1ac54d633146f6975d6af3068c1baec",
+      "rows": 70
+    }
+  ],
+  "diagnostic_results": {
+    "single": {
+      "status": "unknown",
+      "abnormal": [],
+      "unknown": [
+        "alarm:/sys/class/hwmon/hwmon0/in0_lcrit_alarm:missing_monotonic_window",
+        "calibration:missing",
+        "cpuinfo_cur_freq:missing",
+        "cpuinfo_cur_freq:missing_monotonic_window",
+        "governor:missing",
+        "governor:missing_baseline",
+        "governor:missing_monotonic_window",
+        "kmsg:missing",
+        "max_freq:missing",
+        "max_freq:missing_baseline",
+        "max_freq:missing_monotonic_window",
+        "min_freq:missing",
+        "min_freq:missing_baseline",
+        "min_freq:missing_monotonic_window",
+        "missing_monotonic_windows",
+        "scaling_cur_freq:/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq:missing_monotonic_window",
+        "temperature:/sys/class/thermal/thermal_zone0/temp:missing_monotonic_window"
+      ],
+      "warnings": [],
+      "firmware_throttling": "unknown",
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/frequency-disambiguation/runs/single",
+      "telemetry_records": 60,
+      "wall_clock_only": true,
+      "known_temperature_max": 64.757,
+      "observed_scaling_hz": [
+        1500000000.0
+      ],
+      "parse_errors": []
+    },
+    "four": {
+      "status": "abnormal",
+      "abnormal": [
+        "scaling_cur_freq:/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq:threshold_deviation",
+        "temperature:/sys/class/thermal/thermal_zone0/temp:threshold_deviation"
+      ],
+      "unknown": [
+        "alarm:/sys/class/hwmon/hwmon0/in0_lcrit_alarm:missing_monotonic_window",
+        "calibration:missing",
+        "cpuinfo_cur_freq:missing",
+        "cpuinfo_cur_freq:missing_monotonic_window",
+        "governor:missing",
+        "governor:missing_baseline",
+        "governor:missing_monotonic_window",
+        "kmsg:missing",
+        "max_freq:missing",
+        "max_freq:missing_baseline",
+        "max_freq:missing_monotonic_window",
+        "min_freq:missing",
+        "min_freq:missing_baseline",
+        "min_freq:missing_monotonic_window",
+        "missing_monotonic_windows",
+        "scaling_cur_freq:/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq:missing_monotonic_window",
+        "temperature:/sys/class/thermal/thermal_zone0/temp:missing_monotonic_window"
+      ],
+      "warnings": [],
+      "firmware_throttling": "unknown",
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/frequency-disambiguation/runs/four",
+      "telemetry_records": 38,
+      "wall_clock_only": true,
+      "known_temperature_max": 80.34100000000001,
+      "observed_scaling_hz": [
+        600000000.0,
+        1500000000.0
+      ],
+      "parse_errors": []
+    }
+  },
+  "old_labels_unchanged": true,
+  "formal_profiles_opened": false,
+  "missing": "Legacy inputs have no four monotonic endpoints, continuous boot kmsg, cpuinfo readings or prescribed before/after 4x30s calibration. No other RUN fills missing data. Wall timestamps retained as wall timestamps.",
+  "data_sha_verified": 12480
+}

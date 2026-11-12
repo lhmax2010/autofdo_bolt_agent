@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python3",
+    "-c",
+    "from pathlib import Path; import subprocess, json, hashlib, ast; root=Path(\"docs/profgen/eval/prep/evidence/registration-checks/batch3\"); git=[\"git\",\"-c\",\"gc.auto=0\",\"-c\",\"maintenance.auto=false\"]; print(subprocess.check_output(git+[\"diff\",\"--stat\"],text=True)); subprocess.run(git+[\"diff\",\"--check\"],check=True); files=[p for p in root.rglob(\"*\") if p.is_file()]; assert all(p.stat().st_size<1000000 for p in files); print(\"evidence files\",len(files),\"largest\",max(p.stat().st_size for p in files)); tests=(root/\"tests-acceptance/stderr.txt\").read_text(); assert \"Ran 510 tests\" in tests and \"OK\" in tests; print(tests[-180:]); names=subprocess.check_output(git+[\"ls-files\",\"--others\",\"--exclude-standard\",\"tools/profgen_eval\"],text=True).splitlines(); [ast.parse(Path(n).read_text(),filename=n) for n in names]; print(\"new Python files\",len(names)); print(\"HEAD\",subprocess.check_output(git+[\"rev-parse\",\"HEAD\"],text=True).strip()); print(\"BRANCH\",subprocess.check_output(git+[\"branch\",\"--show-current\"],text=True).strip()); print(\"design sha\",hashlib.sha256(Path(\"docs/profgen/design/02_llvm_profgen_enhance_design_v1.8.md\").read_bytes()).hexdigest())"
+  ],
+  "tier": "light",
+  "limit": "3G",
+  "cpu_quota": "200%",
+  "started": "2026-11-12T15:39:14.938113+08:00",
+  "admission_memavailable": 18201964544,
+  "exit_code": 0,
+  "elapsed_seconds": 0.351680519990623,
+  "status": "success",
+  "ended": "2026-11-12T15:39:15.289915+08:00",
+  "stdout.txt_sha256": "e21c345177c7e2440a65d308baa906e0cdbf9caddd0048750af906b651ba211d",
+  "stderr.txt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
