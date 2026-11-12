@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python3",
+    "-c",
+    "import sys,json,hashlib,subprocess; from pathlib import Path; sys.path.insert(0,\"tools/profgen_eval\"); import interval_simulation as s; m,l=s.verify_lock(); p=Path(\"temp/interval-simulation/pilot\"); rs=s.read_results(p); assert len(rs)==150 and all(r[\"timing_only\"] for r in rs); assert [r[\"parameters\"] for r in rs]==m[\"scenarios\"]; e=json.loads((p/\"estimate.json\").read_text()); assert e[\"projected_seconds\"]>43200 and not e[\"formal_allowed\"]; root=s.EVIDENCE; assert all(f.stat().st_size<1000000 for f in root.rglob(\"*\") if f.is_file()); t=(root/\"prerun-tests/stderr.txt\").read_text(); assert \"Ran 534 tests\" in t and \"OK\" in t; G=[\"git\",\"-c\",\"gc.auto=0\",\"-c\",\"maintenance.auto=false\"]; subprocess.run(G+[\"diff\",\"--check\"],check=True); old=subprocess.check_output(G+[\"show\",\"3ace1cb:tools/profgen_eval/registration_statistics.py\"]); assert old==Path(\"tools/profgen_eval/registration_statistics.py\").read_bytes(); assert not (p.parent/\"complete-runs.jsonl\").exists(); print(json.dumps({\"validated_rows\":150,\"tests\":534,\"locked_files_unchanged\":True,\"formal_repeats\":0,\"quality_equivalence_enabled\":False,\"reason\":\"estimated_runtime_exceeds_12_hours\",\"projected_seconds\":e[\"projected_seconds\"]},indent=2))"
+  ],
+  "tier": "light",
+  "limit": "3G",
+  "cpu_quota": "200%",
+  "started": "2026-11-12T16:36:03.754180+08:00",
+  "admission_memavailable": 18129461248,
+  "exit_code": 0,
+  "elapsed_seconds": 3.971792108961381,
+  "status": "success",
+  "ended": "2026-11-12T16:36:07.726320+08:00",
+  "stdout.txt_sha256": "a4eb73b8c05836e0c4afdb6d2c8ce20532a933ce8ca2d62a24fd138fcd5a5e62",
+  "stderr.txt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
