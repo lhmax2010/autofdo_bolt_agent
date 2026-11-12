@@ -318,3 +318,7 @@ lcov FN的起始行、FNDA、JSON函数主区域范围与API全部一致；每�
 失败保留：最初avg计划输出目录尚未创建（工具未运行，setup-failure.txt）；初版遥测读取器误把after.txt当数字命名快照，退出1（telemetry-replay/stderr.txt），修正输入选择后重放成功；两次编排层JavaScript字符串解析错误发生在shell启动前，无任务执行或文件变更。未隐藏真实转换失败或原样重试OOM。
 
 新增证据均小于1MB；大输出在temp/registration-batch3/并由conversion.json登记路径/SHA。完成后停止，不进入第9、12、18、19项，不登记修正案3。
+
+## 11. 第9项模拟运行前封存
+
+场景、种子、代码及共用统计模块SHA见[07报告](07_interval_simulation.md)。150行逐项矩核对通过；新增24项夹具，共534项通过。第9项由未开始改为部分完成（先推送清单，再试跑估时）；其余项目状态保持§10不变。未登记修正案3、未读取任何真实profile。

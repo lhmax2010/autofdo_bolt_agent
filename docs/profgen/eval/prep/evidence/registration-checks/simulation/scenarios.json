@@ -1,0 +1,5501 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "epsilon": 0.02,
+  "bootstrap_seed": 20261104,
+  "bootstrap_resamples": 20000,
+  "planned_two_stage": [
+    5,
+    10
+  ],
+  "not_amendment3": true,
+  "shared_module": "tools/profgen_eval/registration_statistics.py",
+  "shared_module_sha256": "2815e458c1a2cc791d902572fb87072003a968faed4a086131083ebe3b2feb12",
+  "rules_verbatim": "t 单独的覆盖率 ≥ 93%；Δ 为 ±0.02 与 ±0.03 时，t 单独的判等价比例 ≤ 3.0%；A4 必须 100% 退化、0% 判等价；退化重复按“不判等价、覆盖为真”计。quality_equivalence_enabled 取全部验收场景都通过且全部运行完整时的逻辑与；任一场景不通过或未完成，即为 false。",
+  "trial_policy": "Each row: 10000 t-only calls plus 1 full shared 20000-resample envelope call, timing only. Project formal t and envelope costs separately; sum all rows. If >12 hours no formal repeats.",
+  "scenarios": [
+    {
+      "id": "A1-001",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.003872983346207417
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0
+      ],
+      "phase_variances": [
+        1.5e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120001,
+      "envelope_stream": "202611120001:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-002",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.003872983346207417
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        1.5e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120002,
+      "envelope_stream": "202611120002:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-003",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.003872983346207417
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        1.5e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120003,
+      "envelope_stream": "202611120003:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-004",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.003872983346207417
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        1.5e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120004,
+      "envelope_stream": "202611120004:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-005",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.003872983346207417
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        1.5e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120005,
+      "envelope_stream": "202611120005:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-006",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.007745966692414834
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120006,
+      "envelope_stream": "202611120006:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-007",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.007745966692414834
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120007,
+      "envelope_stream": "202611120007:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-008",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.007745966692414834
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120008,
+      "envelope_stream": "202611120008:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-009",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.007745966692414834
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120009,
+      "envelope_stream": "202611120009:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-010",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.007745966692414834
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120010,
+      "envelope_stream": "202611120010:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-011",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.019364916731037084
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0
+      ],
+      "phase_variances": [
+        0.000375
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120011,
+      "envelope_stream": "202611120011:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-012",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.019364916731037084
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        0.000375
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120012,
+      "envelope_stream": "202611120012:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-013",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.019364916731037084
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        0.000375
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120013,
+      "envelope_stream": "202611120013:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-014",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.019364916731037084
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        0.000375
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120014,
+      "envelope_stream": "202611120014:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-015",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.019364916731037084
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        0.000375
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120015,
+      "envelope_stream": "202611120015:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-016",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.03872983346207417
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0
+      ],
+      "phase_variances": [
+        0.0015
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120016,
+      "envelope_stream": "202611120016:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-017",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.03872983346207417
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        0.0015
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120017,
+      "envelope_stream": "202611120017:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-018",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.03872983346207417
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        0.0015
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120018,
+      "envelope_stream": "202611120018:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-019",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.03872983346207417
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        0.0015
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120019,
+      "envelope_stream": "202611120019:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-020",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.03872983346207417
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        0.0015
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120020,
+      "envelope_stream": "202611120020:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-021",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0038729833462074173
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0038729833462074173
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        1.5000000000000004e-05,
+        1.5000000000000004e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120021,
+      "envelope_stream": "202611120021:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-022",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0038729833462074173
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0038729833462074173
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        1.5000000000000004e-05,
+        1.5000000000000004e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120022,
+      "envelope_stream": "202611120022:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-023",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0038729833462074173
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0038729833462074173
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        1.5000000000000004e-05,
+        1.5000000000000004e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120023,
+      "envelope_stream": "202611120023:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-024",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0038729833462074173
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0038729833462074173
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        1.5000000000000004e-05,
+        1.5000000000000004e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120024,
+      "envelope_stream": "202611120024:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-025",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0038729833462074173
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0038729833462074173
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        1.5000000000000004e-05,
+        1.5000000000000004e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120025,
+      "envelope_stream": "202611120025:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-026",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.007745966692414835
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.007745966692414835
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        6.0000000000000015e-05,
+        6.0000000000000015e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120026,
+      "envelope_stream": "202611120026:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-027",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.007745966692414835
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.007745966692414835
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        6.0000000000000015e-05,
+        6.0000000000000015e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120027,
+      "envelope_stream": "202611120027:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-028",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.007745966692414835
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.007745966692414835
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        6.0000000000000015e-05,
+        6.0000000000000015e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120028,
+      "envelope_stream": "202611120028:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-029",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.007745966692414835
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.007745966692414835
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        6.0000000000000015e-05,
+        6.0000000000000015e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120029,
+      "envelope_stream": "202611120029:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-030",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.007745966692414835
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.007745966692414835
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        6.0000000000000015e-05,
+        6.0000000000000015e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120030,
+      "envelope_stream": "202611120030:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-031",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.019364916731037088
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.019364916731037088
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0.0003750000000000001,
+        0.0003750000000000001
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120031,
+      "envelope_stream": "202611120031:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-032",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.019364916731037088
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.019364916731037088
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.0003750000000000001,
+        0.0003750000000000001
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120032,
+      "envelope_stream": "202611120032:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-033",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.019364916731037088
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.019364916731037088
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.0003750000000000001,
+        0.0003750000000000001
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120033,
+      "envelope_stream": "202611120033:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-034",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.019364916731037088
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.019364916731037088
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.0003750000000000001,
+        0.0003750000000000001
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120034,
+      "envelope_stream": "202611120034:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-035",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.019364916731037088
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.019364916731037088
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.0003750000000000001,
+        0.0003750000000000001
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120035,
+      "envelope_stream": "202611120035:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-036",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.038729833462074176
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.038729833462074176
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0.0015000000000000005,
+        0.0015000000000000005
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120036,
+      "envelope_stream": "202611120036:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-037",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.038729833462074176
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.038729833462074176
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.0015000000000000005,
+        0.0015000000000000005
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120037,
+      "envelope_stream": "202611120037:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-038",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.038729833462074176
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.038729833462074176
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.0015000000000000005,
+        0.0015000000000000005
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120038,
+      "envelope_stream": "202611120038:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-039",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.038729833462074176
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.038729833462074176
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.0015000000000000005,
+        0.0015000000000000005
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120039,
+      "envelope_stream": "202611120039:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-040",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.038729833462074176
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.038729833462074176
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.0015000000000000005,
+        0.0015000000000000005
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120040,
+      "envelope_stream": "202611120040:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-041",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.006324555320336759
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0015811388300841897
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        4e-05,
+        2.5e-06
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120041,
+      "envelope_stream": "202611120041:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-042",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.006324555320336759
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0015811388300841897
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        4e-05,
+        2.5e-06
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120042,
+      "envelope_stream": "202611120042:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-043",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.006324555320336759
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0015811388300841897
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        4e-05,
+        2.5e-06
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120043,
+      "envelope_stream": "202611120043:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-044",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.006324555320336759
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0015811388300841897
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        4e-05,
+        2.5e-06
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120044,
+      "envelope_stream": "202611120044:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-045",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.006324555320336759
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0015811388300841897
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        4e-05,
+        2.5e-06
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.05,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120045,
+      "envelope_stream": "202611120045:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-046",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.012649110640673518
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0031622776601683794
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0.00016,
+        1e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120046,
+      "envelope_stream": "202611120046:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-047",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.012649110640673518
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0031622776601683794
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.00016,
+        1e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120047,
+      "envelope_stream": "202611120047:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-048",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.012649110640673518
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0031622776601683794
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.00016,
+        1e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120048,
+      "envelope_stream": "202611120048:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-049",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.012649110640673518
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0031622776601683794
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.00016,
+        1e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120049,
+      "envelope_stream": "202611120049:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-050",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.012649110640673518
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0031622776601683794
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.00016,
+        1e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120050,
+      "envelope_stream": "202611120050:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-051",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0316227766016838
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.00790569415042095
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0.0010000000000000002,
+        6.250000000000001e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120051,
+      "envelope_stream": "202611120051:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-052",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0316227766016838
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.00790569415042095
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.0010000000000000002,
+        6.250000000000001e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120052,
+      "envelope_stream": "202611120052:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-053",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0316227766016838
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.00790569415042095
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.0010000000000000002,
+        6.250000000000001e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120053,
+      "envelope_stream": "202611120053:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-054",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0316227766016838
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.00790569415042095
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.0010000000000000002,
+        6.250000000000001e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120054,
+      "envelope_stream": "202611120054:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-055",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0316227766016838
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.00790569415042095
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.0010000000000000002,
+        6.250000000000001e-05
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120055,
+      "envelope_stream": "202611120055:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-056",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0632455532033676
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0158113883008419
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0.004000000000000001,
+        0.00025000000000000006
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120056,
+      "envelope_stream": "202611120056:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-057",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0632455532033676
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0158113883008419
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.004000000000000001,
+        0.00025000000000000006
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120057,
+      "envelope_stream": "202611120057:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-058",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0632455532033676
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0158113883008419
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.004000000000000001,
+        0.00025000000000000006
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120058,
+      "envelope_stream": "202611120058:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-059",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0632455532033676
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0158113883008419
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.004000000000000001,
+        0.00025000000000000006
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120059,
+      "envelope_stream": "202611120059:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-060",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0632455532033676
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0158113883008419
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.004000000000000001,
+        0.00025000000000000006
+      ],
+      "variance_ratio": 16.0,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120060,
+      "envelope_stream": "202611120060:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-061",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.0011677484162422845
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.004670993664969138
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        1.3636363636363636e-06,
+        2.1818181818181818e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.04999999999999999,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120061,
+      "envelope_stream": "202611120061:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-062",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.0011677484162422845
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.004670993664969138
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        1.3636363636363636e-06,
+        2.1818181818181818e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.04999999999999999,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120062,
+      "envelope_stream": "202611120062:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-063",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.0011677484162422845
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.004670993664969138
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        1.3636363636363636e-06,
+        2.1818181818181818e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.04999999999999999,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120063,
+      "envelope_stream": "202611120063:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-064",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.0011677484162422845
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.004670993664969138
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        1.3636363636363636e-06,
+        2.1818181818181818e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.04999999999999999,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120064,
+      "envelope_stream": "202611120064:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-065",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.0011677484162422845
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.004670993664969138
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        1.3636363636363636e-06,
+        2.1818181818181818e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.04999999999999999,
+      "target_se_ratio": 0.05,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120065,
+      "envelope_stream": "202611120065:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-066",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.002335496832484569
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.009341987329938276
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        5.4545454545454545e-06,
+        8.727272727272727e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120066,
+      "envelope_stream": "202611120066:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-067",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.002335496832484569
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.009341987329938276
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        5.4545454545454545e-06,
+        8.727272727272727e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120067,
+      "envelope_stream": "202611120067:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-068",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.002335496832484569
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.009341987329938276
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        5.4545454545454545e-06,
+        8.727272727272727e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120068,
+      "envelope_stream": "202611120068:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-069",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.002335496832484569
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.009341987329938276
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        5.4545454545454545e-06,
+        8.727272727272727e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120069,
+      "envelope_stream": "202611120069:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-070",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.002335496832484569
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.009341987329938276
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        5.4545454545454545e-06,
+        8.727272727272727e-05
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120070,
+      "envelope_stream": "202611120070:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-071",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.005838742081211422
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.02335496832484569
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        3.409090909090909e-05,
+        0.0005454545454545455
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120071,
+      "envelope_stream": "202611120071:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-072",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.005838742081211422
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.02335496832484569
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        3.409090909090909e-05,
+        0.0005454545454545455
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120072,
+      "envelope_stream": "202611120072:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-073",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.005838742081211422
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.02335496832484569
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        3.409090909090909e-05,
+        0.0005454545454545455
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120073,
+      "envelope_stream": "202611120073:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-074",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.005838742081211422
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.02335496832484569
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        3.409090909090909e-05,
+        0.0005454545454545455
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120074,
+      "envelope_stream": "202611120074:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-075",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.005838742081211422
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.02335496832484569
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        3.409090909090909e-05,
+        0.0005454545454545455
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.25,
+      "target_se_ratio": 0.25,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120075,
+      "envelope_stream": "202611120075:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-076",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.011677484162422844
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.04670993664969138
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0.00013636363636363637,
+        0.002181818181818182
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120076,
+      "envelope_stream": "202611120076:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-077",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.011677484162422844
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.02,
+          "sd": 0.04670993664969138
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.00013636363636363637,
+        0.002181818181818182
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120077,
+      "envelope_stream": "202611120077:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-078",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.011677484162422844
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.02,
+          "sd": 0.04670993664969138
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.00013636363636363637,
+        0.002181818181818182
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120078,
+      "envelope_stream": "202611120078:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-079",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.011677484162422844
+        },
+        {
+          "distribution": "normal",
+          "mean": 0.03,
+          "sd": 0.04670993664969138
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.00013636363636363637,
+        0.002181818181818182
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120079,
+      "envelope_stream": "202611120079:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A1-080",
+      "family": "A1",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.011677484162422844
+        },
+        {
+          "distribution": "normal",
+          "mean": -0.03,
+          "sd": 0.04670993664969138
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.00013636363636363637,
+        0.002181818181818182
+      ],
+      "variance_ratio": 0.0625,
+      "se_ratio": 0.5,
+      "target_se_ratio": 0.5,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120080,
+      "envelope_stream": "202611120080:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-001",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0,
+          "K": 50
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0
+      ],
+      "phase_variances": [
+        0.0002666666666666667
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.21081851067789198,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120081,
+      "envelope_stream": "202611120081:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-002",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.02,
+          "K": 50
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        0.0002666666666666667
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.21081851067789198,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120082,
+      "envelope_stream": "202611120082:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-003",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.02,
+          "K": 50
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        0.0002666666666666667
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.21081851067789198,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120083,
+      "envelope_stream": "202611120083:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-004",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.03,
+          "K": 50
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        0.0002666666666666667
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.21081851067789198,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120084,
+      "envelope_stream": "202611120084:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-005",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.03,
+          "K": 50
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        0.0002666666666666667
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.21081851067789198,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120085,
+      "envelope_stream": "202611120085:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-006",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0,
+          "K": 200
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.052704627669472995,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120086,
+      "envelope_stream": "202611120086:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-007",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.02,
+          "K": 200
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.052704627669472995,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120087,
+      "envelope_stream": "202611120087:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-008",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.02,
+          "K": 200
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.052704627669472995,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120088,
+      "envelope_stream": "202611120088:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-009",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.03,
+          "K": 200
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.052704627669472995,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120089,
+      "envelope_stream": "202611120089:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-010",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.03,
+          "K": 200
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.052704627669472995,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120090,
+      "envelope_stream": "202611120090:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-011",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0,
+          "K": 50
+        },
+        {
+          "distribution": "discrete",
+          "mean": 0,
+          "K": 50
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0.0002666666666666667,
+        0.0002666666666666667
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.21081851067789192,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120091,
+      "envelope_stream": "202611120091:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-012",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.02,
+          "K": 50
+        },
+        {
+          "distribution": "discrete",
+          "mean": 0.02,
+          "K": 50
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.0002666666666666667,
+        0.0002666666666666667
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.21081851067789192,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120092,
+      "envelope_stream": "202611120092:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-013",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.02,
+          "K": 50
+        },
+        {
+          "distribution": "discrete",
+          "mean": -0.02,
+          "K": 50
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.0002666666666666667,
+        0.0002666666666666667
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.21081851067789192,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120093,
+      "envelope_stream": "202611120093:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-014",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.03,
+          "K": 50
+        },
+        {
+          "distribution": "discrete",
+          "mean": 0.03,
+          "K": 50
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.0002666666666666667,
+        0.0002666666666666667
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.21081851067789192,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120094,
+      "envelope_stream": "202611120094:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-015",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.03,
+          "K": 50
+        },
+        {
+          "distribution": "discrete",
+          "mean": -0.03,
+          "K": 50
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.0002666666666666667,
+        0.0002666666666666667
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.21081851067789192,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120095,
+      "envelope_stream": "202611120095:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-016",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0,
+          "K": 200
+        },
+        {
+          "distribution": "discrete",
+          "mean": 0,
+          "K": 200
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05,
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05270462766947298,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120096,
+      "envelope_stream": "202611120096:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-017",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.02,
+          "K": 200
+        },
+        {
+          "distribution": "discrete",
+          "mean": 0.02,
+          "K": 200
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05,
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05270462766947298,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120097,
+      "envelope_stream": "202611120097:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-018",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.02,
+          "K": 200
+        },
+        {
+          "distribution": "discrete",
+          "mean": -0.02,
+          "K": 200
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05,
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05270462766947298,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120098,
+      "envelope_stream": "202611120098:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-019",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": 0.03,
+          "K": 200
+        },
+        {
+          "distribution": "discrete",
+          "mean": 0.03,
+          "K": 200
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05,
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05270462766947298,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120099,
+      "envelope_stream": "202611120099:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A2-020",
+      "family": "A2",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "discrete",
+          "mean": -0.03,
+          "K": 200
+        },
+        {
+          "distribution": "discrete",
+          "mean": -0.03,
+          "K": 200
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        1.6666666666666667e-05,
+        1.6666666666666667e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.05270462766947298,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120100,
+      "envelope_stream": "202611120100:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-001",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.39999999999999997,
+          "p": 0.05
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        0.007599999999999998
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 1.1254628677422753,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120101,
+      "envelope_stream": "202611120101:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-002",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.39999999999999997,
+          "p": 0.05
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        0.007599999999999998
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 1.1254628677422753,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120102,
+      "envelope_stream": "202611120102:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-003",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.6,
+          "p": 0.05
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        0.017099999999999997
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 1.6881943016134129,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120103,
+      "envelope_stream": "202611120103:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-004",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.6,
+          "p": 0.05
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        0.017099999999999997
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 1.6881943016134129,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120104,
+      "envelope_stream": "202611120104:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-005",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.13333333333333333,
+          "p": 0.15
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        0.0022666666666666664
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.6146362971528591,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120105,
+      "envelope_stream": "202611120105:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-006",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.13333333333333333,
+          "p": 0.15
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        0.0022666666666666664
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.6146362971528591,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120106,
+      "envelope_stream": "202611120106:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-007",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.2,
+          "p": 0.15
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        0.0051
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.9219544457292888,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120107,
+      "envelope_stream": "202611120107:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-008",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.2,
+          "p": 0.15
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03
+      ],
+      "phase_variances": [
+        0.0051
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.9219544457292888,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120108,
+      "envelope_stream": "202611120108:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-009",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.39999999999999997,
+          "p": 0.05
+        },
+        {
+          "distribution": "bernoulli",
+          "a": 0.39999999999999997,
+          "p": 0.05
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.007599999999999998,
+        0.007599999999999998
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 1.1254628677422753,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120109,
+      "envelope_stream": "202611120109:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-010",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.39999999999999997,
+          "p": 0.05
+        },
+        {
+          "distribution": "bernoulli",
+          "a": -0.39999999999999997,
+          "p": 0.05
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.007599999999999998,
+        0.007599999999999998
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 1.1254628677422753,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120110,
+      "envelope_stream": "202611120110:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-011",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.6,
+          "p": 0.05
+        },
+        {
+          "distribution": "bernoulli",
+          "a": 0.6,
+          "p": 0.05
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.017099999999999997,
+        0.017099999999999997
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 1.6881943016134129,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120111,
+      "envelope_stream": "202611120111:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-012",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.6,
+          "p": 0.05
+        },
+        {
+          "distribution": "bernoulli",
+          "a": -0.6,
+          "p": 0.05
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.017099999999999997,
+        0.017099999999999997
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 1.6881943016134129,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120112,
+      "envelope_stream": "202611120112:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-013",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.13333333333333333,
+          "p": 0.15
+        },
+        {
+          "distribution": "bernoulli",
+          "a": 0.13333333333333333,
+          "p": 0.15
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        0.0022666666666666664,
+        0.0022666666666666664
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.6146362971528591,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120113,
+      "envelope_stream": "202611120113:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-014",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.13333333333333333,
+          "p": 0.15
+        },
+        {
+          "distribution": "bernoulli",
+          "a": -0.13333333333333333,
+          "p": 0.15
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        0.0022666666666666664,
+        0.0022666666666666664
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.6146362971528591,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120114,
+      "envelope_stream": "202611120114:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-015",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.2,
+          "p": 0.15
+        },
+        {
+          "distribution": "bernoulli",
+          "a": 0.2,
+          "p": 0.15
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.0051,
+        0.0051
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.9219544457292888,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120115,
+      "envelope_stream": "202611120115:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A3-016",
+      "family": "A3",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.2,
+          "p": 0.15
+        },
+        {
+          "distribution": "bernoulli",
+          "a": -0.2,
+          "p": 0.15
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.03,
+        -0.03
+      ],
+      "phase_variances": [
+        0.0051,
+        0.0051
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.9219544457292888,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120116,
+      "envelope_stream": "202611120116:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A4-001",
+      "family": "A4",
+      "role": "acceptance",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "constant",
+          "value": 0
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0
+      ],
+      "phase_variances": [
+        0
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.0,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120117,
+      "envelope_stream": "202611120117:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A4-002",
+      "family": "A4",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "constant",
+          "value": 0
+        },
+        {
+          "distribution": "constant",
+          "value": 0
+        }
+      ],
+      "delta": 0,
+      "phase_means": [
+        0,
+        0
+      ],
+      "phase_variances": [
+        0,
+        0
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.0,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120118,
+      "envelope_stream": "202611120118:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A5-001",
+      "family": "A5",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.4,
+          "p": 0.15
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.001
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.06,
+        0
+      ],
+      "phase_variances": [
+        0.0204,
+        1e-06
+      ],
+      "variance_ratio": 20400.000000000004,
+      "se_ratio": 1.0646334789233542,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120119,
+      "envelope_stream": "202611120119:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A5-002",
+      "family": "A5",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.4,
+          "p": 0.15
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.001
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.06,
+        0
+      ],
+      "phase_variances": [
+        0.0204,
+        1e-06
+      ],
+      "variance_ratio": 20400.000000000004,
+      "se_ratio": 1.0646334789233542,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120120,
+      "envelope_stream": "202611120120:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A5-003",
+      "family": "A5",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": 0.6,
+          "p": 0.15
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.001
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.09,
+        0
+      ],
+      "phase_variances": [
+        0.045899999999999996,
+        1e-06
+      ],
+      "variance_ratio": 45900.0,
+      "se_ratio": 1.5969067321265542,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120121,
+      "envelope_stream": "202611120121:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "A5-004",
+      "family": "A5",
+      "role": "acceptance",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "bernoulli",
+          "a": -0.6,
+          "p": 0.15
+        },
+        {
+          "distribution": "normal",
+          "mean": 0,
+          "sd": 0.001
+        }
+      ],
+      "delta": -0.03,
+      "phase_means": [
+        -0.09,
+        0
+      ],
+      "phase_variances": [
+        0.045899999999999996,
+        1e-06
+      ],
+      "variance_ratio": 45900.0,
+      "se_ratio": 1.5969067321265542,
+      "target_se_ratio": null,
+      "t_repeats": 1000000,
+      "envelope_repeats": 10000,
+      "seed": 202611120122,
+      "envelope_stream": "202611120122:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-001",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": 1,
+          "scale": 0.04458674969993222,
+          "shift": -0.02523570564789084
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        5.999999999999999e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120123,
+      "envelope_stream": "202611120123:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-002",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": 1,
+          "scale": 0.04458674969993222,
+          "shift": -0.06523570564789084
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.020000000000000004
+      ],
+      "phase_variances": [
+        5.999999999999999e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120124,
+      "envelope_stream": "202611120124:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-003",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": -1,
+          "scale": 0.04458674969993222,
+          "shift": 0.06523570564789084
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.020000000000000004
+      ],
+      "phase_variances": [
+        5.999999999999999e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120125,
+      "envelope_stream": "202611120125:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-004",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": -1,
+          "scale": 0.04458674969993222,
+          "shift": 0.02523570564789084
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        5.999999999999999e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120126,
+      "envelope_stream": "202611120126:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-005",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": 1,
+          "scale": 0.02241181174780369,
+          "shift": -0.003589179946404411
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120127,
+      "envelope_stream": "202611120127:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-006",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": 1,
+          "scale": 0.02241181174780369,
+          "shift": -0.04358917994640441
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120128,
+      "envelope_stream": "202611120128:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-007",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": -1,
+          "scale": 0.02241181174780369,
+          "shift": 0.04358917994640441
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120129,
+      "envelope_stream": "202611120129:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-008",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": -1,
+          "scale": 0.02241181174780369,
+          "shift": 0.003589179946404411
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        6e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120130,
+      "envelope_stream": "202611120130:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-009",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": 1,
+          "scale": 0.00672885402547756,
+          "shift": 0.011085716743335956
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02
+      ],
+      "phase_variances": [
+        5.999999999999998e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120131,
+      "envelope_stream": "202611120131:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-010",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": 1,
+          "scale": 0.00672885402547756,
+          "shift": -0.028914283256664043
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.019999999999999997
+      ],
+      "phase_variances": [
+        5.999999999999998e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120132,
+      "envelope_stream": "202611120132:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-011",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": -1,
+          "scale": 0.00672885402547756,
+          "shift": 0.028914283256664043
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.019999999999999997
+      ],
+      "phase_variances": [
+        5.999999999999998e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120133,
+      "envelope_stream": "202611120133:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-012",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": -1,
+          "scale": 0.00672885402547756,
+          "shift": -0.011085716743335956
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02
+      ],
+      "phase_variances": [
+        5.999999999999998e-05
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120134,
+      "envelope_stream": "202611120134:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-013",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": 1,
+          "scale": 0.04458674969993222,
+          "shift": -0.02523570564789084
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": 1,
+          "scale": 0.04458674969993222,
+          "shift": -0.02523570564789084
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        5.999999999999999e-05,
+        5.999999999999999e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120135,
+      "envelope_stream": "202611120135:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-014",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": 1,
+          "scale": 0.04458674969993222,
+          "shift": -0.06523570564789084
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": 1,
+          "scale": 0.04458674969993222,
+          "shift": -0.06523570564789084
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.020000000000000004,
+        -0.020000000000000004
+      ],
+      "phase_variances": [
+        5.999999999999999e-05,
+        5.999999999999999e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120136,
+      "envelope_stream": "202611120136:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-015",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": -1,
+          "scale": 0.04458674969993222,
+          "shift": 0.06523570564789084
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": -1,
+          "scale": 0.04458674969993222,
+          "shift": 0.06523570564789084
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.020000000000000004,
+        0.020000000000000004
+      ],
+      "phase_variances": [
+        5.999999999999999e-05,
+        5.999999999999999e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120137,
+      "envelope_stream": "202611120137:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-016",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": -1,
+          "scale": 0.04458674969993222,
+          "shift": 0.02523570564789084
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.17,
+          "sign": -1,
+          "scale": 0.04458674969993222,
+          "shift": 0.02523570564789084
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        5.999999999999999e-05,
+        5.999999999999999e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120138,
+      "envelope_stream": "202611120138:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-017",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": 1,
+          "scale": 0.02241181174780369,
+          "shift": -0.003589179946404411
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": 1,
+          "scale": 0.02241181174780369,
+          "shift": -0.003589179946404411
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        6e-05,
+        6e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120139,
+      "envelope_stream": "202611120139:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-018",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": 1,
+          "scale": 0.02241181174780369,
+          "shift": -0.04358917994640441
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": 1,
+          "scale": 0.02241181174780369,
+          "shift": -0.04358917994640441
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        6e-05,
+        6e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120140,
+      "envelope_stream": "202611120140:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-019",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": -1,
+          "scale": 0.02241181174780369,
+          "shift": 0.04358917994640441
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": -1,
+          "scale": 0.02241181174780369,
+          "shift": 0.04358917994640441
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        6e-05,
+        6e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120141,
+      "envelope_stream": "202611120141:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-020",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": -1,
+          "scale": 0.02241181174780369,
+          "shift": 0.003589179946404411
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.32,
+          "sign": -1,
+          "scale": 0.02241181174780369,
+          "shift": 0.003589179946404411
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        6e-05,
+        6e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.1,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120142,
+      "envelope_stream": "202611120142:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-021",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": 1,
+          "scale": 0.00672885402547756,
+          "shift": 0.011085716743335956
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": 1,
+          "scale": 0.00672885402547756,
+          "shift": 0.011085716743335956
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.02,
+        0.02
+      ],
+      "phase_variances": [
+        5.999999999999998e-05,
+        5.999999999999998e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120143,
+      "envelope_stream": "202611120143:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-022",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": 1,
+          "scale": 0.00672885402547756,
+          "shift": -0.028914283256664043
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": 1,
+          "scale": 0.00672885402547756,
+          "shift": -0.028914283256664043
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.019999999999999997,
+        -0.019999999999999997
+      ],
+      "phase_variances": [
+        5.999999999999998e-05,
+        5.999999999999998e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120144,
+      "envelope_stream": "202611120144:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-023",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": -1,
+          "scale": 0.00672885402547756,
+          "shift": 0.028914283256664043
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": -1,
+          "scale": 0.00672885402547756,
+          "shift": 0.028914283256664043
+        }
+      ],
+      "delta": 0.02,
+      "phase_means": [
+        0.019999999999999997,
+        0.019999999999999997
+      ],
+      "phase_variances": [
+        5.999999999999998e-05,
+        5.999999999999998e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120145,
+      "envelope_stream": "202611120145:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B1-024",
+      "family": "B1",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": -1,
+          "scale": 0.00672885402547756,
+          "shift": -0.011085716743335956
+        },
+        {
+          "distribution": "lognormal",
+          "sigma_log": 0.75,
+          "sign": -1,
+          "scale": 0.00672885402547756,
+          "shift": -0.011085716743335956
+        }
+      ],
+      "delta": -0.02,
+      "phase_means": [
+        -0.02,
+        -0.02
+      ],
+      "phase_variances": [
+        5.999999999999998e-05,
+        5.999999999999998e-05
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.09999999999999998,
+      "target_se_ratio": 0.1,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120146,
+      "envelope_stream": "202611120146:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B2-001",
+      "family": "B2",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "rare_rademacher"
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        0.028801000000000004
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 2.1909282659792098,
+      "target_se_ratio": null,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120147,
+      "envelope_stream": "202611120147:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B2-002",
+      "family": "B2",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "rare_rademacher"
+        },
+        {
+          "distribution": "rare_rademacher"
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.028801000000000004,
+        0.028801000000000004
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 2.1909282659792098,
+      "target_se_ratio": null,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120148,
+      "envelope_stream": "202611120148:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B3-001",
+      "family": "B3",
+      "role": "report",
+      "sizes": [
+        15
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "rare_normal"
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03
+      ],
+      "phase_variances": [
+        0.0051010000000000005
+      ],
+      "variance_ratio": "not_applicable",
+      "se_ratio": 0.9220448289897117,
+      "target_se_ratio": null,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120149,
+      "envelope_stream": "202611120149:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    },
+    {
+      "id": "B3-002",
+      "family": "B3",
+      "role": "report",
+      "sizes": [
+        5,
+        10
+      ],
+      "phase_parameters": [
+        {
+          "distribution": "rare_normal"
+        },
+        {
+          "distribution": "rare_normal"
+        }
+      ],
+      "delta": 0.03,
+      "phase_means": [
+        0.03,
+        0.03
+      ],
+      "phase_variances": [
+        0.0051010000000000005,
+        0.0051010000000000005
+      ],
+      "variance_ratio": 1.0,
+      "se_ratio": 0.9220448289897117,
+      "target_se_ratio": null,
+      "t_repeats": 0,
+      "envelope_repeats": 10000,
+      "seed": 202611120150,
+      "envelope_stream": "202611120150:envelope",
+      "pilot_t_repeats": 10000,
+      "pilot_envelope_repeats": 1
+    }
+  ]
+}
