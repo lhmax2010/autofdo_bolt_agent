@@ -38,6 +38,10 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 周报入库备份（2026-11-14）
+
+- [2026-11-14周报](reports/weekly/2026-11-14_weekly_report.md)已从用户指定的Downloads文件以mv移入，内容未修改；移动前、后SHA-256均为 e6487ba0241367e79036ee0593ce876db3591d0b61edc223e0841e1aa2ca390a。周报索引见[README](reports/weekly/README.md)。仅更新main，不修改hq、不推送Gerrit。
+
 ## M1补丁fix1构建停止（2026-11-14）
 
 - [目标报告第8节](workflow/m1/01_ffmpeg_target_build.md)：授权的两行末尾空格修正已完成，fix1 SHA 0c94e54d252ad1ecbc625f629af090b257edba4cd3753d76352fd031486243b6，新检出git apply --check通过，其余新增内容无同类粘连。
