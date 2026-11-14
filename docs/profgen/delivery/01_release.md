@@ -374,3 +374,29 @@ createrepo_c是主机已有工具；示例不承诺未来GBS/root环境必然相
 构建及发布回归通过，已满足用户后续sandbox/hq指令的前提；本节提交时尚未推送sandbox或创建hq，后续结果单独记录。统计质量等价与性能收益未验证，显式保守策略不等于默认值已验证，三个门槛仍为可选。被采样程序仍须显式-Wl,--build-id=sha1；armv7l probe编译崩溃等既有限制不变。
 
 完整日志、大primary与回归原始输出留temp，逐文件SHA见evidence/03/raw-index-00.json；仓库证据单文件均小于1MB。轻任务scope峰值最高414,142,464 B，无OOM或资源停止。
+
+## 10. Gerrit sandbox发布与独立核验（2026-11-14）
+
+用户授权Codex直接创建唯一分支sandbox/lhmax2025/afdo_profgen；发布构建/回归前提已在main提交374ece0c6a962b16c766b84bae4459bf4046b8ab通过并推送。
+
+- 项目：**platform/upstream/llvm**。
+- 分支：**sandbox/lhmax2025/afdo_profgen**。
+- tip：**c8942ae1b53099a78a97dca2b64427af6e58432b**；基线f999bd406c0a70fe8107aa992164fe6945c5d46a。
+- 推送前ls-remote退出0且目标不存在；推送成功，新建branch，未force、未推refs/for、未改作者/提交者/提交信息。Gerrit的subject/正文长度警告原样保留，非拒绝。
+- 发布树原origin为本地src/llvm克隆地址，仅将该独立发布树origin改为src/llvm现有Gerrit项目URL；未修改原src/开发树remote或认证。
+- 推送后ls-remote tip一致；全新temp/llvm-profgen-sandbox-verify-20261114只fetch此分支（depth10/no-tags），detached检出；358文件SHA全部与发布树相同，工作区干净。
+- 独立核验103.092秒，3G scope峰值3,221,225,472 B，触发max回收759次，oom/oom_kill均0，最低MemAvailable24,440,156,160 B。
+
+| 补丁 | Sandbox commit | 标题 |
+|---|---|---|
+| 1 | d1ba7bb9ddc6bc4e00d6bc860fff0f7d9d488d31 | Add test inputs for IP sample mode |
+| 2 | a361351e360ae15e9e352db727d177f5dcaf9ba4 | Add IP sample reader and dsoff address conversion |
+| 3 | 792c7a7fad1945ceb5a0670a75970c441bc50360 | Add build-id identity checks for IP sample mode |
+| 4 | e802e2546e9f02433260856fa86a50a5108367a0 | Generate line-level profiles from IP samples |
+| 5 | 3e9b77e2998efc02cda786c3a77a0c3d2be75fc4 | Enumerate instruction boundaries on demand for IP samples |
+| 6 | 34787d22b5cf31e2e54e737f5627f6e891c83277 | Add quality reports and failure contracts for IP samples |
+| 7 | 7a2d54a7458f2e8dd25539e8cf6f3293f53d57de | Document IP mode and finalize options and reports |
+| 8 | 91be904558efbfa391872bc12a0e5662e3905129 | Normalize GNU AS Thumb DWARF addresses in IP mode |
+| 9 | c8942ae1b53099a78a97dca2b64427af6e58432b | Exclude IP samples with missing non-leaf callsite lines |
+
+[推送原文](evidence/04/sandbox-push.json)、[独立核验](evidence/04/sandbox-verification.json)。hq按后续授权创建，结果待另记；sandbox不代表统计质量或性能收益已验证。

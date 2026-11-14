@@ -24,11 +24,17 @@
 4. 以后用户放在 Downloads 的材料一律移动到工作目录，不在 Downloads 保留副本；只处理用户指定的材料，不遍历或触碰其他文件。
 5. llvm-profgen 增强设计须经多方评审并冻结后才开工；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
 6. 自 2026-11-14 起，PM 与设计由 Claude 接任。开发顺序：llvm-profgen 增强完成后，先做 AutoFDO 与 BOLT 的工作流（workflow），再做 skill（SKILL.md + 脚本），最后做 Agent。
-7. LLVM 代码只推送到 Gerrit 的 sandbox 分支；不推 refs/for 正式评审，不新建其他远端分支；afdo/profgen-enhance 等开发分支只在本地使用；结果仓库不包含 LLVM 源码树；对外文档记录 sandbox 的项目名、分支名与 commit ID。sandbox 分支名与推送人待用户确认，在此之前不推送。本轮不推送任何 Gerrit 分支，包括 sandbox。
-8. 对外发布：以本仓库的 orphan 分支 hq 向总部发布（内容与 README 要求见 workflow 设计 §14）；hq 分支另行指令创建，本轮不建。
+7. LLVM 代码只推送到 Gerrit 的 sandbox 分支；不推 refs/for 正式评审，不新建其他远端分支；afdo/profgen-enhance 等开发分支只在本地使用；结果仓库不包含 LLVM 源码树；对外文档记录 sandbox 的项目名、分支名与 commit ID。2026-11-14用户已授权Codex直接推送新分支sandbox/lhmax2025/afdo_profgen；仅此目标，禁止force、refs/for及其他分支，拒绝时原样记录并停止，不改认证或改写提交。
+8. 对外发布：以本仓库的 orphan 分支 hq 向总部发布（内容与 README 要求见 workflow 设计 §14）；2026-11-14用户已另行授权创建英文第一版hq，须在发布回归及sandbox核验通过后执行；推送后只标“待PM审阅”，不宣称已发布。
 9. 2026-11-14 用户批准 llvm-profgen 第一批有限范围交付，范围与延期事项以[范围决定](profgen/delivery/00_scope_decision.md)为准。CLI不改，workflow采用显式保守策略；统计质量等价与性能收益未验证。设计§10步骤5–7延期不取消；预注册材料保留，未来同对象profile接触按Q.5第17项披露。
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
+
+## Sandbox已推送并独立核验（2026-11-14）
+
+- [发布报告§10](profgen/delivery/01_release.md)：platform/upstream/llvm，sandbox/lhmax2025/afdo_profgen，新建成功，tip c8942ae1b53099a78a97dca2b64427af6e58432b；9个git-am提交保持原样。目标此前不存在，无force/refs-for/其他分支推送。
+- 全新检出只fetch该sandbox，358文件SHA与发布树相同。Gerrit仅提交信息长度警告，未拒绝。3G scope触及上限但oom/oom_kill为0，无资源终止。
+- 发布验收main提交374ece0c6a962b16c766b84bae4459bf4046b8ab已推送；下一步创建英文hq第一版，尚不对外宣称已发布。仍不接板、不登记修正案3、不做质量矩阵/性能测量。
 
 ## 固定snapshot发布构建与回归通过（2026-11-14）
 
