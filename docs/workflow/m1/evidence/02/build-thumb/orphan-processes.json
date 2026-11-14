@@ -1,0 +1,142 @@
+[
+  {
+    "pid": 98383,
+    "status": [
+      "Name:\tgbs",
+      "Umask:\t0002",
+      "State:\tS (sleeping)",
+      "Tgid:\t98383",
+      "Ngid:\t0",
+      "Pid:\t98383",
+      "PPid:\t2476",
+      "TracerPid:\t0"
+    ],
+    "command": "/usr/bin/python3 /usr/bin/gbs -c /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg-armv7l.conf build -A armv7l --spec ffmpeg.spec --include-all --buildroot /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114 --threads 1 --define _smp_mflags -j4 V=1 --define profile_isa thumb "
+  },
+  {
+    "pid": 98421,
+    "status": [
+      "Name:\tsh",
+      "Umask:\t0002",
+      "State:\tS (sleeping)",
+      "Tgid:\t98421",
+      "Ngid:\t0",
+      "Pid:\t98421",
+      "PPid:\t98383",
+      "TracerPid:\t0"
+    ],
+    "command": "sh -c -- depanneur --arch=armv7l --repository=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ --dist='tizen_unified_standard' --configdir='/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/gbs-tmp/linhao-gbs' --path='/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg' --style=git --threads=1 --packaging-dir=packaging --include-all --define=\"_smp_mflags -j4 V=1\" --define=\"profile_isa thumb\" --spec=ffmpeg.spec "
+  },
+  {
+    "pid": 98422,
+    "status": [
+      "Name:\tdepanneur",
+      "Umask:\t0002",
+      "State:\tS (sleeping)",
+      "Tgid:\t98422",
+      "Ngid:\t0",
+      "Pid:\t98422",
+      "PPid:\t98421",
+      "TracerPid:\t0"
+    ],
+    "command": "/usr/bin/perl /usr/bin/depanneur --arch=armv7l --repository=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ --dist=tizen_unified_standard --configdir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/gbs-tmp/linhao-gbs --path=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg --style=git --threads=1 --packaging-dir=packaging --include-all --define=_smp_mflags -j4 V=1 --define=profile_isa thumb --spec=ffmpeg.spec "
+  },
+  {
+    "pid": 98655,
+    "status": [
+      "Name:\tsh",
+      "Umask:\t0002",
+      "State:\tS (sleeping)",
+      "Tgid:\t98655",
+      "Ngid:\t0",
+      "Pid:\t98655",
+      "PPid:\t98422",
+      "TracerPid:\t0"
+    ],
+    "command": "sh -c sudo /usr/bin/build --uid 1000:1000 --target armv7l-tizen-linux --jobs 40 --cachedir '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/cache' --dist '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/gbs-tmp/linhao-gbs'/tizen_unified_standard.conf --arch 'armv7l:armv7el:armv6l:armv5tejl:armv5tel:armv5l:armv4tl:armv4l:armv3l:noarch' '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/sources/tizen_unified_standard/ffmpeg-8.0.1-1/ffmpeg.spec' --repository '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/repos/tizen_unified_standard/armv7l/RPMS' --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ --debug --root '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/BUILD-ROOTS/scratch.armv7l.0'  --define '_smp_mflags -j4 V=1' --define 'profile_isa thumb' "
+  },
+  {
+    "pid": 98656,
+    "status": [
+      "Name:\tsudo",
+      "Umask:\t0022",
+      "State:\tS (sleeping)",
+      "Tgid:\t98656",
+      "Ngid:\t0",
+      "Pid:\t98656",
+      "PPid:\t98655",
+      "TracerPid:\t0"
+    ],
+    "command": "sudo /usr/bin/build --uid 1000:1000 --target armv7l-tizen-linux --jobs 40 --cachedir /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/cache --dist /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/gbs-tmp/linhao-gbs/tizen_unified_standard.conf --arch armv7l:armv7el:armv6l:armv5tejl:armv5tel:armv5l:armv4tl:armv4l:armv3l:noarch /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/sources/tizen_unified_standard/ffmpeg-8.0.1-1/ffmpeg.spec --repository /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/repos/tizen_unified_standard/armv7l/RPMS --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ --debug --root /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/BUILD-ROOTS/scratch.armv7l.0 --define _smp_mflags -j4 V=1 --define profile_isa thumb "
+  },
+  {
+    "pid": 98657,
+    "status": [
+      "Name:\tbuild",
+      "Umask:\t0022",
+      "State:\tS (sleeping)",
+      "Tgid:\t98657",
+      "Ngid:\t0",
+      "Pid:\t98657",
+      "PPid:\t98656",
+      "TracerPid:\t0"
+    ],
+    "command": "/bin/bash /usr/bin/build --uid 1000:1000 --target armv7l-tizen-linux --jobs 40 --cachedir /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/cache --dist /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/gbs-tmp/linhao-gbs/tizen_unified_standard.conf --arch armv7l:armv7el:armv6l:armv5tejl:armv5tel:armv5l:armv4tl:armv4l:armv3l:noarch /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/sources/tizen_unified_standard/ffmpeg-8.0.1-1/ffmpeg.spec --repository /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/repos/tizen_unified_standard/armv7l/RPMS --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ --debug --root /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/BUILD-ROOTS/scratch.armv7l.0 --define _smp_mflags -j4 V=1 --define profile_isa thumb "
+  },
+  {
+    "pid": 98689,
+    "status": [
+      "Name:\tperl",
+      "Umask:\t0022",
+      "State:\tS (sleeping)",
+      "Tgid:\t98689",
+      "Ngid:\t0",
+      "Pid:\t98689",
+      "PPid:\t98657",
+      "TracerPid:\t0"
+    ],
+    "command": "build logging -e open(F,\">>\",$ARGV[0])||die(\"$ARGV[0]: $!\\n\");$|=1;select(F);$|=1;while(<STDIN>){my $p=sprintf(\"[%5ds] \", time()-1794659700);print STDOUT $p.$_;print F $p.$_} /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/BUILD-ROOTS/scratch.armv7l.0/.build.log "
+  },
+  {
+    "pid": 98706,
+    "status": [
+      "Name:\tinit_buildsyste",
+      "Umask:\t0022",
+      "State:\tS (sleeping)",
+      "Tgid:\t98706",
+      "Ngid:\t0",
+      "Pid:\t98706",
+      "PPid:\t98657",
+      "TracerPid:\t0"
+    ],
+    "command": "/bin/bash /usr/lib/build/init_buildsystem --configdir /usr/lib/build/configs --cachedir /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/cache --define _smp_mflags -j4 V=1 --define profile_isa thumb --repository /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/repos/tizen_unified_standard/armv7l/RPMS --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/sources/tizen_unified_standard/ffmpeg-8.0.1-1/ffmpeg.spec "
+  },
+  {
+    "pid": 102268,
+    "status": [
+      "Name:\trpm2cpio",
+      "Umask:\t0022",
+      "State:\tR (running)",
+      "Tgid:\t102268",
+      "Ngid:\t0",
+      "Pid:\t102268",
+      "PPid:\t98706",
+      "TracerPid:\t0"
+    ],
+    "command": "rpm2cpio /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/BUILD-ROOTS/scratch.armv7l.0/.init_b_cache/rpms/clang-accel-x86_64-armv7l.rpm "
+  },
+  {
+    "pid": 102269,
+    "status": [
+      "Name:\tcpio",
+      "Umask:\t0000",
+      "State:\tS (sleeping)",
+      "Tgid:\t102269",
+      "Ngid:\t0",
+      "Pid:\t102269",
+      "PPid:\t98706",
+      "TracerPid:\t0"
+    ],
+    "command": "cpio --extract --unconditional --preserve-modification-time --make-directories --no-absolute-filenames --quiet "
+  }
+]

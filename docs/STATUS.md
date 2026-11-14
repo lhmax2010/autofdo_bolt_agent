@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1目标构建恢复后停止（2026-11-14）
+
+- [目标构建报告第7节](workflow/m1/01_ffmpeg_target_build.md)：RPi4实读armv7l、6.12.80-arm-rpi4-v7l，镜像Unified20261104.160709；对应snapshot返回404，按规则使用Unified20261104.125239/Base20261030.120529。RPi5用户周一确认后提供，本轮AArch64不启动。
+- Thumb监督进程丢失，停止本任务scope，GBS真实退出码未知，不计成功且不重试；A32正常监督，236.606秒、退出1，在%prep报Unknown option "--disable-thumb--extra-cflags=-mfpu=neon"。没有目标RPM/build-id；按失败门禁不改HQ patch/spec绕过，等待处理指令。
+- 两root下载的108个RPM集合相同，全部来自Base，clang22.1.8-4.1；已复制校验归档temp/gbs-deps-archive/ffmpeg-armv7l-20261114/，271,003,299 B，清单与SHA见evidence/02/。A32峰值2,010,705,920 B，无OOM；Thumb监测缺口如实记录。构建单元已inactive/dead。
+- 仅main登记结果；hq保持已审阅498724f不变（Thumb与AArch64成功前提未满足）。无板上状态改动、Gerrit推送、profile读取或消费构建。下节是第一次预检历史，不代表当前RPi4不可查询。
+
 ## M1目标构建预检（2026-11-14，两板不可查询，尚未构建）
 
 - [目标构建报告](workflow/m1/01_ffmpeg_target_build.md)：两次sdb devices均无设备，无法取得当前镜像，不能跳过“当前镜像snapshot优先”规则。已请求设备查询信息；三个变体均未启动，未生成发布配置或依赖RPM存档，hq保持已审阅提交498724f不变。

@@ -1,0 +1,21 @@
+240: %endif
+241: 
+242: CFLAGS="%{optflags} -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "; export CFLAGS
+243: export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV %{profile_flags} %{profile_use}"
+244: %ifarch armv7l
+245: %if "%{profile_isa}" == "a32"
+246: export CFLAGS="$CFLAGS -marm"
+247: CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --disable-thumb"
+248: %else
+249: export CFLAGS="$CFLAGS -mthumb"
+250: CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-thumb"
+251: %endif
+252: %endif
+253: 
+254: %ifarch %{arm}
+255: export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--extra-cflags=-mfpu=neon"
+256: %endif
+257: 
+258: export AR=%{__ar} RANLIB=%{__ranlib}
+259: export CC=clang CXX=clang++
+260: 
