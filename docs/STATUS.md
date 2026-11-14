@@ -25,10 +25,26 @@
 5. llvm-profgen 增强设计须经多方评审并冻结后才开工；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
 6. 自 2026-11-14 起，PM 与设计由 Claude 接任。开发顺序：llvm-profgen 增强完成后，先做 AutoFDO 与 BOLT 的工作流（workflow），再做 skill（SKILL.md + 脚本），最后做 Agent。
 7. LLVM 代码只推送到 Gerrit 的 sandbox 分支；不推 refs/for 正式评审，不新建其他远端分支；afdo/profgen-enhance 等开发分支只在本地使用；结果仓库不包含 LLVM 源码树；对外文档记录 sandbox 的项目名、分支名与 commit ID。2026-11-14用户已授权Codex直接推送新分支sandbox/lhmax2025/afdo_profgen；仅此目标，禁止force、refs/for及其他分支，拒绝时原样记录并停止，不改认证或改写提交。
-8. 对外发布：以本仓库的 orphan 分支 hq 向总部发布（内容与 README 要求见 workflow 设计 §14）；2026-11-14用户已另行授权创建英文第一版hq，须在发布回归及sandbox核验通过后执行；推送后只标“待PM审阅”，不宣称已发布。
+8. 对外发布：以本仓库的 orphan 分支 hq 向总部提供文件。发布回归与 sandbox 核验为前提；内容遵守下列第10–15条用户规则。此前第一版的“待PM审阅”只属于本仓库历史记录，不得写入对外文件或后续hq提交信息。
 9. 2026-11-14 用户批准 llvm-profgen 第一批有限范围交付，范围与延期事项以[范围决定](profgen/delivery/00_scope_decision.md)为准。CLI不改，workflow采用显式保守策略；统计质量等价与性能收益未验证。设计§10步骤5–7延期不取消；预注册材料保留，未来同对象profile接触按Q.5第17项披露。
 
+
+10. hq 只用英文：所有文件不得含其他语言文字或中文标点。每次推送前运行 tools/hq/check_hq.py；CJK/全角标点报错，其他非ASCII字符警告并人工确认。
+11. 总部只拿到hq文件，无权访问本GitHub；hq文件不得出现GitHub URL/仓库名、main/hq/orphan分支、内部commit/仓库/文件路径或主机真实路径。Gerrit sandbox项目、分支与commit ID保留。
+12. hq不得含AI相关信息：Codex、Claude、Kimi、Cline、GPT等工具/模型名、AI评审/生成表述和PM审阅等内部流程状态一律不写。
+13. hq必须展示完整计划：llvm-profgen有限交付 → AutoFDO/插桩PGO workflow（M1 FFmpeg RPi4，M2 RPi5及两板PGO，M3 GStreamer）→ M4 BOLT RPi5 → M5 skill（SKILL.md+脚本）→ 基于workflow与skill的Agent；内核单列待定。用中性工程术语，不出现“AI”；包维护者提供benchmark与采集方法。
+14. README须为总部工程师提供详细的从零环境、操作与复现测试指南；没有证据的步骤明确标注Not documented yet或Not verified，不编造。需要说明原始证据时使用“Detailed raw evidence is retained by the project team”。
+15. 今后hq提交信息用中性描述，不提main、GitHub、AI或PM；已有提交不改写，禁止force push。自动检查的误报仅允许精确到完整单行的白名单并写明理由；推送前检查必须通过。
+
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
+
+## HQ全面修订与发布门禁（2026-11-14，本轮完成）
+
+- [修订报告](handover/03_hq_revision.md)：hq普通新提交 **498724fed8796da4190a458c01b95b9f65e334d5** 已推送并核验，原历史保留、不force；本轮无Gerrit推送。
+- 永久规则见长期规则10–15；新增tools/hq/check_hq.py。13项测试通过，推送前0违规/0警告、19个相对链接有效、白名单空；全部对外文件英文ASCII，无内部仓库/主机路径/AI或PM流程信息。
+- hq共11文件、63,722 B：英文workflow概要、完整路线图、README0–10、实际demo JSON、完整GBS模板与FFmpeg示例patch。模板除路径外逐字段等价；patch应用及4项spec语法检查通过，完整消费构建未验证。
+- README0/5/6复用既有源码/RPM，实际执行提取、SHA/version/help和AArch64/Thumb合成demo，各1样本/1写出位置，退出0。未重新构建、接板、读取正式profile或执行质量矩阵/性能测量；设计v1.8与既有证据不改，修正案3未登记。
+- 有记录任务cgroup峰值175,828,992 B，采样最低MemAvailable 23,387,074,560 B，无OOM/资源停止。证据handover/evidence/03/；未验证/未记录事项逐项列于报告。完成后停止。
 
 ## HQ英文第一版已推送（2026-11-14，待PM审阅；本轮完成）
 

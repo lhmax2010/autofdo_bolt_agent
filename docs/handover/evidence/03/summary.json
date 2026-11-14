@@ -1,0 +1,70 @@
+{
+  "hq_commit": "498724fed8796da4190a458c01b95b9f65e334d5",
+  "file_count": 11,
+  "bytes": 63722,
+  "checker_violations": 0,
+  "checker_warnings": 0,
+  "relative_links": 19,
+  "whitelist": [],
+  "tests_passed": 13,
+  "minimum_MemAvailable": 23387074560,
+  "cgroup_memory_peak": 175828992,
+  "resource_records": [
+    {
+      "label": "extraction",
+      "command": [
+        "bash",
+        "temp/hq-revised-20261114/demo/extract_tool.sh",
+        "temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/RPMS",
+        "temp/hq-revision-20261114-work/extracted",
+        "temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0"
+      ],
+      "start": "2026-11-14T03:32:04.606075-08:00",
+      "end": "2026-11-14T03:32:07.608207-08:00",
+      "seconds": 3.0021256969994283,
+      "exit": 0,
+      "reason": null,
+      "minimum_MemAvailable": 23490605056,
+      "cgroup_memory_peak": 175828992,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+    },
+    {
+      "label": "demo",
+      "command": [
+        "bash",
+        "temp/hq-revised-20261114/demo/run_host_demo.sh",
+        "temp/llvm-profgen-sandbox-verify-20261114",
+        "temp/hq-revision-20261114-work/extracted",
+        "temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0",
+        "temp/hq-revision-20261114-work/demo-output"
+      ],
+      "start": "2026-11-14T03:32:16.462447-08:00",
+      "end": "2026-11-14T03:32:17.463817-08:00",
+      "seconds": 1.0013652710003953,
+      "exit": 0,
+      "reason": null,
+      "minimum_MemAvailable": 23387074560,
+      "cgroup_memory_peak": 12660736,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+    },
+    {
+      "label": "verify",
+      "command": [
+        "python3",
+        "temp/hq-revision-20261114-work/verify_documents.py"
+      ],
+      "start": "2026-11-14T03:35:15.645667-08:00",
+      "end": "2026-11-14T03:35:16.646928-08:00",
+      "seconds": 1.001256273000763,
+      "exit": 0,
+      "reason": null,
+      "minimum_MemAvailable": 23496564736,
+      "cgroup_memory_peak": 50376704,
+      "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+    }
+  ],
+  "formal_profiles_opened": false,
+  "board_connected": false,
+  "builds_run": false,
+  "gerrit_pushes": 0
+}

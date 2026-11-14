@@ -1,0 +1,33 @@
+test_ai_boundaries (__main__.PolicyTests.test_ai_boundaries) ... ok
+test_all_forbidden_words (__main__.PolicyTests.test_all_forbidden_words) ... ok
+test_binary (__main__.PolicyTests.test_binary) ... ok
+test_cjk_and_fullwidth (__main__.PolicyTests.test_cjk_and_fullwidth) ... ok
+test_exact_line_whitelist (__main__.PolicyTests.test_exact_line_whitelist) ... ERROR
+test_main_function_is_not_banned (__main__.PolicyTests.test_main_function_is_not_banned) ... ok
+test_non_ascii_warning (__main__.PolicyTests.test_non_ascii_warning) ... ok
+test_path_name (__main__.PolicyTests.test_path_name) ... ok
+test_reference_and_html_links (__main__.PolicyTests.test_reference_and_html_links) ... ok
+test_relative_links (__main__.PolicyTests.test_relative_links) ... ok
+test_symlink_escape (__main__.PolicyTests.test_symlink_escape) ... ok
+test_urls (__main__.PolicyTests.test_urls) ... ok
+test_workspace_path (__main__.PolicyTests.test_workspace_path) ... ok
+
+======================================================================
+ERROR: test_exact_line_whitelist (__main__.PolicyTests.test_exact_line_whitelist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/hq/test_check_hq.py", line 77, in test_exact_line_whitelist
+    self.assertTrue(self.scan("AI")["passed"])
+                    ^^^^^^^^^^^^^^^
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/hq/test_check_hq.py", line 21, in scan
+    return checker.check_tree(self.root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/tools/hq/check_hq.py", line 120, in check_tree
+    whitelist_entries=[dict(file=k[0], line=k[1], **v)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: dict() got multiple values for keyword argument 'line'
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.019s
+
+FAILED (errors=1)
