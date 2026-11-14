@@ -2,7 +2,7 @@
 
 Status: limited functional delivery; statistical quality and performance validation deferred.
 
-The [Chinese v1.8 source](original/02_llvm_profgen_enhance_design_v1.8.md) is reproduced unchanged. This English summary is a usage guide, not a replacement for its detailed contracts. The limited-delivery decision defers the quality matrix, performance/staleness experiment and second-stage default freeze; it does not cancel them.
+This English summary explains the delivered interfaces and failure contracts. Detailed field definitions are in llvm/docs/CommandGuide/llvm-profgen.rst in the Gerrit sandbox source. Statistical quality comparisons, performance/staleness experiments and validation of default policies remain future work.
 
 ## Input and address conversion
 

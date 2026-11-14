@@ -1,29 +1,103 @@
-# AutoFDO and BOLT for Tizen
+# Tizen user-space profiling and optimization
 
-**First HQ draft — awaiting PM review.** This branch is an orphan documentation/demo publication branch. It contains no LLVM source tree, captured perf data, profiles, raw evidence or binary tools.
+## 0. Quick start: host-only
 
-## 1. Overview
+This is the shortest path from source to a tested profile. It needs no board. Set PROJECT and DOCS to absolute paths on your machine; DOCS is the directory containing this README.
+
+```bash
+export PROJECT=/path/to/project
+export DOCS=/path/to/this/documentation
+export GERRIT_USER=your_gerrit_account
+mkdir -p "$PROJECT/scratch/gbs-tmp"
+export TMPDIR="$PROJECT/scratch/gbs-tmp"
+git clone --single-branch --branch sandbox/lhmax2025/afdo_profgen \
+  "ssh://${GERRIT_USER}@review.tizen.org:29418/platform/upstream/llvm" "$PROJECT/llvm"
+git -C "$PROJECT/llvm" checkout --detach c8942ae1b53099a78a97dca2b64427af6e58432b
+
+python3 - "$DOCS/examples/gbs/llvm-release.conf.in" "$PROJECT" <<'PY'
+from pathlib import Path
+import sys
+source, project = Path(sys.argv[1]), Path(sys.argv[2]).resolve()
+(project / "release.conf").write_text(source.read_text().replace("@PROJECT@", str(project)))
+PY
+
+cd "$PROJECT/llvm"
+gbs -c "$PROJECT/release.conf" build -A x86_64 --spec llvm.spec \
+  --buildroot "$PROJECT/build/llvm-root" --threads 1 \
+  --define '_smp_mflags -j4' --define 'mlgo_build_jobs 4'
+
+export RPMDIR="$PROJECT/build/llvm-root/local/repos/tizen_unified_standard/x86_64/RPMS"
+export ROOT="$PROJECT/build/llvm-root/local/BUILD-ROOTS/scratch.x86_64.0"
+export EXTRACTED="$PROJECT/extracted"
+bash "$DOCS/demo/extract_tool.sh" "$RPMDIR" "$EXTRACTED" "$ROOT"
+bash "$DOCS/demo/run_host_demo.sh" "$PROJECT/llvm" "$EXTRACTED" "$ROOT" "$PROJECT/demo-output"
+```
+
+The build root and extraction/demo output directories should be new. Compare the output to [the executed demo](docs/04_demo.md): both examples report conversion ok, one target and usable sample, one written position, identity unverified and sampling adequacy unknown. The identity waiver is for these synthetic fixtures only.
+
+For this documentation revision, the already verified release source/build artifacts were reused; extraction, version/help and demo commands were executed again. LLVM was not rebuilt. Full build instructions reproduce the prior successful normal build configuration; see section 4 for remaining host-environment limitations.
+
+## 1. Overview and roadmap
 
 | Component | Status |
 |---|---|
-| llvm-profgen DWARF IP mode | Delivered, limited functional scope |
-| AutoFDO / PGO workflow | Design under multi-AI review; Planned (milestone M1) |
-| BOLT | Planned, RPi5 only |
-| Kernel profiling | Not supported yet |
-| Skill / Agent | Planned after workflows |
+| llvm-profgen IP mode | Delivered (limited scope): user-space AArch64 and ARMv7 Thumb-2/A32 |
+| Optimization workflow | Planned / Not implemented |
+| BOLT on RPi5 | Planned / Not implemented |
+| Skill and Agent | Planned / Not implemented |
+| Kernel | Separate track; method to be decided |
 
-[Introduction](docs/01_introduction.md) · [Design summary](docs/02_design/llvm_profgen_ip_mode_design_summary.md) · [Delivery report](docs/03_reports/llvm_profgen_delivery.md) · [Host demo](docs/04_demo.md)
+| Component / milestone | Sequence and acceptance | Status |
+|---|---|---|
+| llvm-profgen IP mode | User-space DWARF IP on AArch64 and ARMv7 Thumb-2/A32; functional release checks passed | Delivered (limited scope) |
+| M1 | FFmpeg on RPi4: reproducible collection, identity checks, conversion, rebuild, correctness and timed comparison | Planned / Not implemented |
+| M2 | FFmpeg on RPi5, plus instrumented PGO on both boards; equivalent artifact and result contracts | Planned / Not implemented |
+| M3 | GStreamer package profiles and multi-library collection/rebuild | Planned / Not implemented |
+| M4 | BOLT on RPi5 only; relocation/identity checks, host conversion and correctness/timing | Planned / Not implemented |
+| M5 Skill | Reusable SKILL.md instructions plus scripts that run workflow stages and interpret results | Planned / Not implemented |
+| Agent | After the skill: select packages, run the workflow through the skill, report results; builds on both layers | Planned / Not implemented |
+| Kernel | Separate track; method to be decided; current llvm-profgen delivery has no kernel support | Planned / Not implemented |
 
-**Statistical quality equivalence and performance gains have not been validated.** Explicit max aggregation with skid/zero-fill/head set to none is a conservative caller policy, not a validated default.
+Package owners provide benchmark and data-collection methods through package profiles.
 
-## 2. Source locations
+Validated: normal release build, strict input/address/identity/failure behavior, prior integration checks, fixed C1 output regression, IP profile/JSON preservation and the host demo.
 
-- Gerrit project: **platform/upstream/llvm**, host **review.tizen.org**, port 29418.
-- Branch: **sandbox/lhmax2025/afdo_profgen**.
-- Exact tip: **c8942ae1b53099a78a97dca2b64427af6e58432b**.
-- Base: **f999bd406c0a70fe8107aa992164fe6945c5d46a**.
-- Internal main source: **41bae45466b853cee173fe80189f2f44b0500b95**.
-- This HQ commit: use `git rev-parse HEAD`; the literal is filled on a later update to avoid a self-referential hash.
+Not validated: statistical quality equivalence, optimal defaults, performance gains, the proposed workflow automation, BOLT, skill or Agent. Explicit max/none/none/none is a conservative calling policy; it is not a claim that defaults were statistically validated.
+
+[Introduction](docs/01_introduction.md) | [IP design](docs/02_design/llvm_profgen_ip_mode_design_summary.md) | [Workflow plan](docs/02_design/workflow_design_overview.md) | [Delivery report](docs/03_reports/llvm_profgen_delivery.md)
+
+## 2. Prerequisites
+
+| Requirement | Tested / recommended |
+|---|---|
+| Host | Ubuntu 24.04.5 LTS, x86_64 |
+| GBS | 2.1.1; existing working Tizen build environment and privileges |
+| Python | 3.12.3 tested; scripts use the standard library |
+| Source access | Tizen Gerrit account; registered SSH public key; reachable review.tizen.org port 29418 |
+| Utilities | git, bash, curl, rpm, rpm2cpio, cpio, readelf, sha256sum |
+| Board access | sdb compatible with the Tizen image; not required for the host demo |
+| Memory | At least 16 GiB host RAM; at least 14 GiB available recommended for the full build |
+| Disk | At least 100 GiB free is a conservative planning allowance, not a measured minimum |
+| Optional resource control | systemd user scopes, nice and ionice |
+| Media preparation | ffmpeg with libx264, ffprobe, Python zipfile support |
+
+Register your SSH public key with Gerrit and verify source access with git ls-remote. Use your organization's SSH host-key verification procedure. Credential provisioning and GBS installation are **Not documented yet** here; this guide assumes those prerequisites work. It contains no account secrets.
+
+## 3. Get and identify the source
+
+Project: platform/upstream/llvm. Sandbox: sandbox/lhmax2025/afdo_profgen.
+Tip: c8942ae1b53099a78a97dca2b64427af6e58432b.
+Base: f999bd406c0a70fe8107aa992164fe6945c5d46a.
+
+```bash
+git -C "$PROJECT/llvm" rev-parse HEAD
+git -C "$PROJECT/llvm" log --reverse --format='%H %s' \
+  f999bd406c0a70fe8107aa992164fe6945c5d46a..HEAD
+git -C "$PROJECT/llvm" diff --exit-code f999bd406c0a70fe8107aa992164fe6945c5d46a \
+  -- packaging/llvm.spec
+```
+
+The last command should report no change. The log must contain these nine commits:
 
 | Patch | Commit | Subject |
 |---|---|---|
@@ -37,207 +111,316 @@
 | 8 | 91be904558efbfa391872bc12a0e5662e3905129 | Normalize GNU AS Thumb DWARF addresses in IP mode |
 | 9 | c8942ae1b53099a78a97dca2b64427af6e58432b | Exclude IP samples with missing non-leaf callsite lines |
 
-## 3. Host setup
+## 4. Build the host tool
 
-The release host used Ubuntu 24.04.5 LTS x86_64, GBS 2.1.1, Python 3.12.3, git, curl, rpm/rpm2cpio/cpio and readelf. Use your existing authorized Gerrit/GitHub credentials; this repository contains none. Board work additionally requires an existing compatible sdb and board-architecture perf plus its shared libraries; host-only demonstration does not use sdb.
+The complete [GBS configuration template](examples/gbs/llvm-release.conf.in) is:
 
-GBS supplies the target toolchain/dependencies. A user systemd manager must support resource-limited scopes. The release used 10 GiB / 400% and -j4; start a full build only with at least 14 GiB MemAvailable. Allow at least 100 GiB free disk as a conservative planning allowance for source, build roots, RPMs and verification clones (not a measured minimum). Lightweight checks use a 3 GiB / 100% scope and start with at least 4 GiB MemAvailable. Do not install missing prerequisites implicitly.
-
-Choose an absolute WORKDIR on local storage. Keep sources, configuration, caches, temporary files and outputs beneath it. Credentials stay in your existing authentication setup.
-
-## 4. Build from the sandbox (normal, non-incremental)
-
-These commands describe the validated release configuration. The host demo below was actually executed with the resulting RPM tool; a second build was not run just for this README.
-
-```bash
-export WORKDIR=/absolute/path/to/your/workdir
-mkdir -p "$WORKDIR/temp/tmp" "$WORKDIR/temp/gbs-home" "$WORKDIR/temp/gbs-tmp"
-export TMPDIR="$WORKDIR/temp/tmp"
-cd "$WORKDIR"
-# Use your existing authorized Gerrit account; never embed a password or token.
-git clone --single-branch --branch sandbox/lhmax2025/afdo_profgen \
-  "ssh://${GERRIT_USER}@review.tizen.org:29418/platform/upstream/llvm" llvm-release
-git -C llvm-release checkout --detach c8942ae1b53099a78a97dca2b64427af6e58432b
-test -z "$(git -C llvm-release diff -- packaging/llvm.spec)"
-
-cat > "$WORKDIR/release.conf" <<EOF
+```ini
 [general]
-tmpdir = $WORKDIR/temp/gbs-tmp
+tmpdir = @PROJECT@/scratch/gbs-tmp
 profile = profile.tizen_unified_standard
-buildroot = $WORKDIR/temp/GBS-ROOT-LLVM-RELEASE
+buildroot = @PROJECT@/build/llvm-root
+
 [profile.tizen_unified_standard]
 repos = repo.base-standard, repo.unified-standard
+
 [repo.base-standard]
 url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/
+
 [repo.unified-standard]
 url=https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/
-EOF
-
-test "$(awk '/MemAvailable/ {print $2}' /proc/meminfo)" -ge 14680064
-test ! -e "$WORKDIR/temp/GBS-ROOT-LLVM-RELEASE"
-cd "$WORKDIR/llvm-release"
-nice -n 19 ionice -c3 systemd-run --user --scope \
-  -p MemoryMax=10G -p CPUQuota=400% \
-  env HOME="$WORKDIR/temp/gbs-home" TMPDIR="$WORKDIR/temp/gbs-tmp" \
-  GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_COUNT=2 \
-  GIT_CONFIG_KEY_0=gc.auto GIT_CONFIG_VALUE_0=0 \
-  GIT_CONFIG_KEY_1=maintenance.auto GIT_CONFIG_VALUE_1=false \
-  SUDO_ASKPASS=/bin/false \
-  gbs -c "$WORKDIR/release.conf" build -A x86_64 --spec llvm.spec \
-  --buildroot "$WORKDIR/temp/GBS-ROOT-LLVM-RELEASE" --threads 1 \
-  --define '_smp_mflags -j4' --define 'mlgo_build_jobs 4' </dev/null
 ```
 
-Record every 60 seconds the full meminfo and cgroup memory.peak; record free/uptime every 600 seconds. Stop only your build if MemAvailable stays below 3 GiB for two samples. Preserve the real GBS exit and a timestamped ALL-END on success or failure. The validated supervised command took **79m40s** and 7637 Ninja steps, exit 0; duration depends on the host.
+Replace @PROJECT@ with your absolute project path as in quick start. All effective fields match the tested configuration except filesystem paths. **No configuration fields are omitted.** The URLs use fixed snapshots. Metadata is at packages/repodata/repomd.xml; it is shared across architectures, rather than residing under packages/x86_64/repodata.
 
-Both packages directories returned HTTP 200, and their shared `repodata/repomd.xml` included x86_64 content. Metadata is not under `packages/x86_64/repodata`. These are fixed IDs, not latest aliases.
+Use the normal non-incremental command in quick start. --threads 1 selects one package build, _smp_mflags -j4 bounds normal compilation, and mlgo_build_jobs 4 bounds the spec's separate MLGO job setting. There is no test-spec overlay, incremental or short-circuit flag.
 
-**Snapshots are periodically deleted.** If unavailable, record current fixed snapshot IDs and their actual dependency versions, rebuild, and repeat output regressions. Do not expect the same binary SHA across dependency changes. The release dependency archive is retained internally, not included in hq.
+Optional resource-limited form:
 
-RPMs appear in `$WORKDIR/temp/GBS-ROOT-LLVM-RELEASE/local/repos/tizen_unified_standard/x86_64/RPMS/`. llvm-profgen is in the `llvm` RPM at `/usr/bin/llvm-profgen`; libLLVM is in `libllvm`. Extract rather than installing on the host:
+```bash
+nice -n 19 ionice -c3 systemd-run --user --scope \
+  -p MemoryMax=10G -p CPUQuota=400% \
+  gbs -c "$PROJECT/release.conf" build -A x86_64 --spec llvm.spec \
+  --buildroot "$PROJECT/build/llvm-root" --threads 1 \
+  --define '_smp_mflags -j4' --define 'mlgo_build_jobs 4'
+```
+
+Expected duration on the tested host was 79m40s, 7637 Ninja steps, exit 0. Peak cgroup memory was 10 GiB with reclaim pressure but no OOM. Running this simplified command from a newly provisioned host is **Not verified**; the configuration and build arguments are those of the successful release.
+
+Snapshots can be deleted. Check the directories and repomd.xml before building. If removed, select available fixed IDs, record actual dependency versions and repeat functional/output regression. Binary SHA equality is not expected after dependency changes. The [delivery report](docs/03_reports/llvm_profgen_delivery.md) identifies the versions used here.
+
+## 5. Extract and verify
+
+The llvm RPM installs /usr/bin/llvm-profgen and llvm-profdata. libLLVM is in the libllvm RPM. No host RPM installation is needed:
+
+```bash
+bash "$DOCS/demo/extract_tool.sh" "$RPMDIR" "$EXTRACTED" "$ROOT"
+sha256sum "$EXTRACTED/usr/bin/llvm-profgen"
+LOADER="$ROOT/lib64/ld-linux-x86-64.so.2"
+LIBS="$EXTRACTED/usr/lib64:$ROOT/lib64:$ROOT/usr/lib64"
+"$LOADER" --library-path "$LIBS" "$EXTRACTED/usr/bin/llvm-profgen" --version
+"$LOADER" --library-path "$LIBS" "$EXTRACTED/usr/bin/llvm-profgen" --help
+```
+
+The extraction script requires a new destination; if quick start already ran it, run the last four verification commands rather than extracting again.
+
+Release SHA-256: **67ad21faba787d276a80673c1f324f7c0591d28d76bd37a8bd57de0d86426be6**.
+Version contains LLVM version 22.1.8 and Optimized build. Help must list ip-samples, ip-aggregation, ip-skid, ip-zero-fill, ip-head-samples and quality-report.
+
+This tool and its debug file have no build-ID under the unchanged spec; .gnu_debuglink CRC matches. This does not waive the build-ID requirement for the programs being sampled.
+
+## 6. Test
+
+```bash
+bash "$DOCS/demo/run_host_demo.sh" "$PROJECT/llvm" "$EXTRACTED" "$ROOT" "$PROJECT/demo-output-new"
+```
+
+See [actual output and per-field expectations](docs/04_demo.md). Both examples use synthetic input from the sandbox tree, not captured data.
+
+Prior acceptance ran the llvm-profgen lit suite: 84 PASS, 1 UNSUPPORTED, 1 XFAIL, 0 FAIL. The normal release spec does not build/run tests. A separate test-enabled build can normally run `ninja check-llvm-profgen`, or the build's llvm-lit on its configured llvm-profgen test directory; the exact standalone source-build recipe and dependencies are **Not verified** for this release environment. Do not invoke lit directly on unconfigured source tests and interpret missing substitutions as tool failures.
+
+## 7. Board setup
+
+Historical working configurations:
+
+| Board | Image snapshot / build ID | Kernel |
+|---|---|---|
+| RPi4 Cortex-A72, armv7l | tizen-unified-toolchain_20261028.105834_tizen-headed-armv7l | 6.12.80-arm-rpi4-v7l, Oct 28 12:18:25 UTC 2026 |
+| RPi5 Cortex-A76, aarch64 | tizen-unified-toolchain_20261028.105834_tizen-headed-aarch64 | 6.12.80-arm64-rpi4-v8, Oct 28 12:37:44 UTC 2026 |
+| Later RPi4 data collection | tizen-unified-toolchain_20261104.160709 | 6.12.80-arm-rpi4-v7l, Nov 4 17:05:36 UTC 2026 |
+
+These identify tested historical images, not guaranteed current download availability. Installation/flashing instructions and the current cooling installation are **Not documented yet**.
+
+RPi4 requires CONFIG_ARM_PMUV3=y in arch/arm/configs/tizen_bcm2711_defconfig, alongside PERF_EVENTS/HW_PERF_EVENTS support. The tested configuration change added that one line; comparison to the same image baseline found only that option changed among 5649 configuration values. Cortex-A72's PMU is matched by arm_pmuv3, whose default was ARM64, so ARM32 needed an explicit setting. No arm64 defconfig change is required by this fix. Kernel Gerrit project is platform/kernel/linux-rpi; the exact merged branch/commit carrying the change is **Not documented yet**. Do not treat a local patch ID as proof of a merged image.
+
+### perf and deployment
+
+Tested perf version: 6.12.80, from linux-kernel-perf-6.12.80-0.<arch>.rpm in the Tizen Unified repositories. RPi5 used Unified 20261027.063617 with Base 20261026.051209; these older snapshots may no longer exist. RPi4's perf package VCS identified platform/kernel/linux-rpi at 21645b17c0d913e2ba7e10fbc9c993d286b3f57d. Use matching architecture packages and check dynamic dependencies on your image.
+
+Historical extracted perf SHA values:
+- armv7l: 41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138
+- aarch64: d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949
+
+libLLVM.so.22.1 is required; other dependencies, including libxml2.so.16, resolved from the tested image. Run ldd again on your image rather than assuming the same dependency closure.
+
+```bash
+# Host: PERF_RPM and BOARD_LLVM_RPM are matching target-architecture packages.
+mkdir -p "$PROJECT/board-tools" "$PROJECT/board-libs"
+rpm2cpio "$PERF_RPM" | (cd "$PROJECT/board-tools" && cpio -idm --no-absolute-filenames)
+rpm2cpio "$BOARD_LLVM_RPM" | (cd "$PROJECT/board-libs" && cpio -idm --no-absolute-filenames)
+sdb devices
+sdb -s "$SERIAL" shell 'cat /proc/device-tree/model; uname -m; uname -r'
+sdb -s "$SERIAL" root on
+sdb -s "$SERIAL" shell 'mkdir -p /opt/afdo_agent/tools /opt/afdo_agent/lib /opt/afdo_agent/variants /opt/afdo_agent/inputs /opt/afdo_agent/work'
+sdb -s "$SERIAL" push "$PROJECT/board-tools/usr/bin/perf" /opt/afdo_agent/tools/perf
+# ARMv7 libraries use usr/lib; AArch64 libraries use usr/lib64.
+sdb -s "$SERIAL" push "$BOARD_LIBLLVM_FILE" /opt/afdo_agent/lib/libLLVM.so.22.1
+sdb -s "$SERIAL" shell 'chmod 755 /opt/afdo_agent/tools/perf; LD_LIBRARY_PATH=/opt/afdo_agent/lib ldd /opt/afdo_agent/tools/perf; LD_LIBRARY_PATH=/opt/afdo_agent/lib /opt/afdo_agent/tools/perf --version'
+```
+
+Verify both transferred files with sha256sum on host and board. Match the device-tree model and architecture; RPi5's tested kernel string still contains rpi4-v8, so kernel text alone is not board identification. Deploy libraries by extraction/copy and LD_LIBRARY_PATH, not by replacing system libraries.
+
+### Frequency, temperature and hardware event check
+
+Run on the board:
+
+```bash
+for p in /sys/devices/system/cpu/cpufreq/policy*; do
+  echo "$p"; cat "$p/scaling_governor" "$p/scaling_min_freq" "$p/scaling_max_freq" "$p/scaling_cur_freq"
+done
+for z in /sys/class/thermal/thermal_zone*; do
+  echo "$z"; cat "$z/type" "$z/temp"
+done
+P=/opt/afdo_agent/tools/perf
+export LD_LIBRARY_PATH=/opt/afdo_agent/lib
+"$P" list hw
+mkdir -p /opt/afdo_agent/work/hardware-check
+"$P" --buildid-dir /opt/afdo_agent/work/hardware-check/buildid record \
+  --buildid-mmap -e cycles -c 1000003 \
+  -o /opt/afdo_agent/work/hardware-check/perf.data -- sleep 1
+"$P" evlist -v -i /opt/afdo_agent/work/hardware-check/perf.data
+```
+
+cycles must have type=0 and config=0. A workload run must also produce nonzero cycles samples. Software cpu-clock is not a substitute. Missing hardware access, unresolved dependencies or unexpected identity require correction before collection.
+
+For repeatable comparisons save each governor value, set performance for collection/measurement and restore each saved value on exit. A shell-session example:
+
+```bash
+SAVE=/opt/afdo_agent/work/governor-save
+mkdir -p "$SAVE"
+for p in /sys/devices/system/cpu/cpufreq/policy*; do
+  cat "$p/scaling_governor" > "$SAVE/${p##*/}"
+  printf 'performance\n' > "$p/scaling_governor"
+done
+restore_governors() {
+  for p in /sys/devices/system/cpu/cpufreq/policy*; do
+    cat "$SAVE/${p##*/}" > "$p/scaling_governor"
+  done
+}
+trap restore_governors EXIT
+```
+
+Use effective cooling, record frequency/temperature during runs and preserve firmware throttle/undervoltage readings when available. Missing indicators remain unknown. Finish the session with governors restored and restore the original root state (for a session started unprivileged: sdb -s "$SERIAL" root off from the host).
+
+## 8. End-to-end manual AutoFDO: FFmpeg
+
+**Performance gains not yet validated.** The [FFmpeg example](examples/ffmpeg/README.md) supplies a spec patch and exact fixed source revision in Gerrit platform/upstream/ffmpeg. It appends profiling DWARF/unique-name flags, selects Thumb/A32, adds SHA-1 build-ID and optionally consumes a sample profile inside the build root. Patch application is verified; full builds of this newly packaged example and its consuming variant are Not verified. The guide identifies the missing target-repository configuration rather than silently using the host-tool configuration.
+
+### Training and test media
+
+Training: Blender Foundation / Big Buck Bunny, CC-BY 3.0; public source:
+https://download.blender.org/demo/movies/BBB/bbb_sunflower_1080p_30fps_normal.mp4.zip
+License/background: https://peach.blender.org/about/
+
+| File | SHA-256 |
+|---|---|
+| Source ZIP | e320fef389ec749117d0c1583945039266a40f25483881c2ff0d33207e62b362 |
+| bbb_sunflower_1080p_30fps_normal.mp4 | ae51005850b0ff757fe60c3dd7a12d754d3cd2397d87d939b55235e457f97658 |
+| bbb_720p_h264_60s.mp4 | b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4 |
+
+Extract the MP4 with Python zipfile or an existing unzip utility, then reproduce the 300-360 second segment:
+
+```bash
+ffmpeg -nostdin -hide_banner -ss 300 -i bbb_sunflower_1080p_30fps_normal.mp4 \
+  -t 60 -an -vf scale=1280:720,setsar=1,fps=30 -c:v libx264 \
+  -preset veryfast -profile:v high -pix_fmt yuv420p \
+  -b:v 4M -maxrate 4M -bufsize 8M -threads 2 -filter_threads 1 \
+  -movflags +faststart bbb_720p_h264_60s.mp4
+sha256sum bbb_720p_h264_60s.mp4
+```
+
+The recorded segment is 60s, 1280x720, 30fps, High profile, level 3.1. Encoder/version differences can change bytes; record the actual generated checksum and use identical input bytes for comparisons.
+
+A separate test source was Tears of Steel, Blender Foundation / Mango Open Movie Project, CC-BY 3.0:
+https://download.blender.org/demo/movies/ToS/tears_of_steel_720p.mov
+Source SHA efa9062d9cdb7a338e40ad530dfdf234806743f29ae6a1a136b97ece4e588e8f.
+The same 300-360 second encoding recipe yielded test-segment SHA 280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1.
+License/background: https://mango.blender.org/sharing/
+
+### Deploy, collect and export
+
+Extract baseline libavcodec and its matching library dependencies under a local runtime directory; keep matching packaged debuginfo on the host. Transfer the runtime tree and media:
+
+```bash
+sdb -s "$SERIAL" push "$BASELINE_RUNTIME" /opt/afdo_agent/variants/baseline
+sdb -s "$SERIAL" push bbb_720p_h264_60s.mp4 /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4
+```
+
+Check the actual resulting directory layout and full SHA manifest. For RPi4 set the library directory to usr/lib; use usr/lib64 on RPi5. On the board, after the setup checks:
 
 ```bash
 set -euo pipefail
-RPMDIR="$WORKDIR/temp/GBS-ROOT-LLVM-RELEASE/local/repos/tizen_unified_standard/x86_64/RPMS"
-mkdir "$WORKDIR/temp/extracted"
-cd "$WORKDIR/temp/extracted"
-rpm2cpio "$RPMDIR/llvm-22.1.8-1.x86_64.rpm" | cpio -idm --no-absolute-filenames
-rpm2cpio "$RPMDIR/libllvm-22.1.8-1.x86_64.rpm" | cpio -idm --no-absolute-filenames
-sha256sum usr/bin/llvm-profgen
-```
-
-This release's extracted tool SHA-256 is **67ad21faba787d276a80673c1f324f7c0591d28d76bd37a8bd57de0d86426be6**. Runtime/debug build IDs are absent under the unchanged LLVM spec; debuglink CRC was verified. The unresolved linker-default follow-up is separate from target-program identity requirements.
-
-## 5. Board setup (documentation only; not run for this release)
-
-Use a compatible Tizen image, matching perf/libLLVM architecture, and adequate cooling. RPi4 needs a kernel with usable hardware cycles/PMU support (the project used a PMUv3-enabled configuration); do not substitute cpu-clock. Verify model, architecture and kernel, not an IP address:
-
-```bash
-sdb devices
-sdb -s "$SERIAL" shell 'cat /proc/device-tree/model; uname -m; uname -r'
-# RPi4: Raspberry Pi 4, armv7l, kernel identifying rpi4/v7l.
-# RPi5: Raspberry Pi 5, aarch64, appropriate rpi5 kernel.
-```
-
-Use only `/opt/afdo_agent/` for board writes: tools/, lib/, variants/<variant>/, inputs/, work/<run>/. Extract runtime RPMs on the host, then `sdb push` the selected files; do not install RPMs, remount, reboot or alter system libraries. Preserve root/governor initial state and restore on all exits. Privileged operations require separate authorization.
-
-After identity, dependency and SHA checks, establish the authorized performance governor setting. Then record hardware cycles and inspect `perf evlist -v`; the cycles selector must show **type=0, config=0**. Root does not justify changing perf_event_paranoid or kptr_restrict automatically. Check temperature, actual frequency and available firmware throttle/undervoltage indicators. Missing indicators remain unknown; do not label a run clean merely because the governor says performance.
-
-Record /proc/PID/maps and buildid-list to prove which library was loaded. Debug files remain on the host; use packaged runtime/debug counterparts, not a possibly different BUILD-directory link result.
-
-## 6. Running
-
-### (a) Host-only demo
-
-See [demo instructions and actual expected output](docs/04_demo.md). It uses AArch64 and Thumb synthetic fixtures already in the sandbox checkout, with no board connection.
-
-### (b) Manual AutoFDO flow
-
-**Build flags.** The proven FFmpeg method is a local evaluation-spec overlay preserving %{optflags}, with GBS --define selecting ISA/variant. It does not rewrite a user's GBS configuration. Append these to CFLAGS:
-
-```text
--fdebug-info-for-profiling -funique-internal-linkage-names
--mthumb   (RPi4 Thumb)   or -marm (RPi4 A32)
-```
-
-AArch64 uses its target defaults. Append `-Wl,--build-id=sha1` to FFmpeg configure's --extra-ldflags. Keep source-relative paths consistent across variants. The tested FFmpeg generation builds used O3 via configure and no LTO.
-
-The internal overlay selects `--define 'eval_isa thumb|a32|a64'` and `--define 'eval_variant S|R|C|G5'`. R uses -fprofile-generate -mllvm -disable-preinline; C uses -fprofile-instr-generate -fcoverage-mapping; G5 uses -fprofile-generate. They are distinct builds. Their overlay is not shipped here as an implemented workflow.
-
-**Deploy and collect.** After separately approved board setup, the following is the historical RPi4 command form (substitute a unique RUN and approved media):
-
-```bash
-export LC_ALL=C
-export RUN=/opt/afdo_agent/work/NEW_RUN
-mkdir -p "$RUN/buildid"
-export HOME="$RUN" TMPDIR="$RUN" XDG_CACHE_HOME="$RUN/cache"
-export GST_REGISTRY="$RUN/gst-registry.bin"
-export LD_LIBRARY_PATH=/opt/afdo_agent/variants/ffmpeg-thumb-S/usr/lib:/opt/afdo_agent/lib
+RUN=/opt/afdo_agent/work/collect-new
+mkdir -p "$RUN/buildid" "$RUN/cache"
+export LC_ALL=C HOME="$RUN" TMPDIR="$RUN" XDG_CACHE_HOME="$RUN/cache"
+export GST_REGISTRY="$RUN/registry.bin"
+export LD_LIBRARY_PATH=/opt/afdo_agent/variants/baseline/usr/lib:/opt/afdo_agent/lib
 P=/opt/afdo_agent/tools/perf
-mkfifo "$RUN/decoded.fifo"
-sha256sum "$RUN/decoded.fifo" > "$RUN/decoded.sha256" &
-hasher=$!
-"$P" --buildid-dir "$RUN/buildid" record --buildid-mmap -e cycles -c 1000003 \
-  -o "$RUN/perf.data" -- "$P" --buildid-dir "$RUN/buildid" stat \
-  -x ';' -e cycles,instructions,task-clock -o "$RUN/perf-stat.csv" -- \
-  gst-launch-1.0 -q filesrc location=/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 \
-  ! qtdemux ! h264parse ! avdec_h264 max-threads=1 \
-  ! video/x-raw,format=I420 ! filesink location="$RUN/decoded.fifo" sync=false
-wait "$hasher"
-"$P" --buildid-dir "$RUN/buildid" evlist -v -i "$RUN/perf.data" > "$RUN/evlist.txt"
-"$P" --buildid-dir "$RUN/buildid" script -i "$RUN/perf.data" \
-  --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > "$RUN/perfscript.txt"
-"$P" --buildid-dir "$RUN/buildid" buildid-list -i "$RUN/perf.data" > "$RUN/buildid-list.txt"
-```
-
-The historical RPi5 probe used the same record/export fields with a 300-frame workload:
-
-```bash
-export LD_LIBRARY_PATH=/opt/afdo_agent/lib
 "$P" --buildid-dir "$RUN/buildid" record --buildid-mmap -e cycles -c 1000003 \
   -o "$RUN/perf.data" -- gst-launch-1.0 -q \
   filesrc location=/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 \
-  ! qtdemux ! h264parse ! avdec_h264 ! identity eos-after=300 ! fakesink sync=false
+  ! qtdemux ! h264parse ! avdec_h264 max-threads=1 \
+  ! video/x-raw,format=I420 ! fakesink sync=false
+"$P" evlist -v -i "$RUN/perf.data" > "$RUN/evlist.txt"
 "$P" --buildid-dir "$RUN/buildid" script -i "$RUN/perf.data" \
   --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > "$RUN/perfscript.txt"
 "$P" --buildid-dir "$RUN/buildid" buildid-list -i "$RUN/perf.data" > "$RUN/buildid-list.txt"
 ```
 
-That old RPi5 probe used the system libavcodec. For a new variant use its usr/lib64 in LD_LIBRARY_PATH and verify maps/build-id; do not reuse old addresses with a new ELF. Preserve complete raw perf.data, unfiltered exports, stderr, exit codes and telemetry. Pull files and compare the complete SHA manifest before deleting only the exact run directory. The internal collection scripts are tools/profgen/board/{common,collect,measure,integration}.sh in main; they are not a completed M1 workflow.
+During the workload save /proc/<decoder-pid>/maps and verify the actual libavcodec path/build-ID. Keep complete perf.data, unfiltered text, stderr/exit codes and environment records. Pull the whole run, check every SHA and file path, then remove only that verified run directory. The commands describe the established collection form; this documentation update did not connect a board.
 
-**Convert on the host** using the packaged target ELF/debug and captured text. Define `PROFGEN` as a shell array so the correct GBS loader/library paths are preserved:
+### Convert on the host
 
 ```bash
-ROOT="$WORKDIR/temp/GBS-ROOT-LLVM-RELEASE/local/BUILD-ROOTS/scratch.x86_64.0"
-EXTRACTED="$WORKDIR/temp/extracted"
+mkdir -p "$PROJECT/results"
 PROFGEN=("$ROOT/lib64/ld-linux-x86-64.so.2" --library-path \
   "$EXTRACTED/usr/lib64:$ROOT/lib64:$ROOT/usr/lib64" "$EXTRACTED/usr/bin/llvm-profgen")
-mkdir -p "$WORKDIR/temp/output"
 "${PROFGEN[@]}" --ip-samples \
-  --binary="$WORKDIR/inputs/libavcodec.so" \
-  --debug-binary="$WORKDIR/inputs/libavcodec.so.debug" \
-  --perfscript="$WORKDIR/inputs/perfscript.txt" \
-  --perf-buildid-list="$WORKDIR/inputs/buildid-list.txt" \
-  --binary-match-regex='^/opt/afdo_agent/variants/ffmpeg-thumb-S/usr/lib/libavcodec\.so\.62\.11\.100$' \
+  --binary="$PROJECT/inputs/libavcodec.so" \
+  --debug-binary="$PROJECT/inputs/libavcodec.so.debug" \
+  --perfscript="$PROJECT/inputs/perfscript.txt" \
+  --perf-buildid-list="$PROJECT/inputs/buildid-list.txt" \
+  --binary-match-regex='^/opt/afdo_agent/variants/baseline/usr/lib/libavcodec\.so\.62\.11\.100$' \
   --ip-event=cycles --ip-weight=period --ip-period-unit=1000003 \
   --ip-aggregation=max --ip-skid=none --ip-zero-fill=none --ip-head-samples=none \
-  --format=extbinary --output="$WORKDIR/temp/output/profile.extbinary" \
-  --quality-report="$WORKDIR/temp/output/quality.json"
+  --format=extbinary --output="$PROJECT/results/profile.extbinary" \
+  --quality-report="$PROJECT/results/quality.json"
 ```
 
-Replace the regex with the actual full DSO path (usr/lib64 on AArch64); event names are exact, so cycles:u differs from cycles. The fixed period unit is a package policy example, not a tool default. Add optional usable/target/LOST gates only according to your package policy. Missing-ID waiver is not the production default.
+Adjust the exact regex and event to the captured path/name; use usr/lib64 for AArch64. Fixed period unit is a package policy example. Optional usable/target/LOST thresholds belong to the package configuration. Verify conversion and identity before consumption; missing-ID allowance is not a production default.
 
-**Consume.** In the package's consumption-spec overlay retain the same base/profiling flags and add `-fprofile-sample-use=<absolute locked profile>` to CFLAGS; build the matching architecture with GBS. For a standalone source the form is:
+### Rebuild and compare
 
-```bash
-clang -O3 -g -fdebug-info-for-profiling -funique-internal-linkage-names \
-  -fprofile-sample-use=/absolute/path/to/locked.extbinary -c workload.c -o workload.o
+Follow the example patch's Source2000 procedure to rebuild with -fprofile-sample-use. Preserve source-relative paths, architecture and base flags. Verify packaged runtime/debug identities and keep both variants.
+
+First compare decoded-output SHA for baseline and optimized libraries using an I420 filesink output (or a FIFO hashed concurrently). Then time otherwise identical pipelines with /usr/bin/time and alternate the LD_LIBRARY_PATH of baseline and optimized variants. Exclude fixed warmups, run at least ten interleaved rounds, retain every round and its correctness/thermal/frequency data. Use the planned [measurement method](docs/02_design/workflow_design_overview.md) for intervals and interpretation. Exact timed runner automation and FFmpeg profile-consuming performance results are **Not verified**. Performance gains not yet validated.
+
+## 9. Read the result
+
+Check process exit before reading JSON. Below is an actual projection of the demo report (complete verdict, selected sample counters; the [demo report](docs/04_demo.md) includes the complete samples object). Values are copied from the executed AArch64 demo; Thumb is identical:
+
+```json
+{
+  "verdict": {
+    "conversion": "ok",
+    "failure_stage": null,
+    "fallback_callback_count": 0,
+    "identity": "unverified",
+    "lost_ratio_check": "not_evaluated",
+    "reason": null,
+    "sample_threshold_check": "not_evaluated",
+    "sampling_adequacy": "unknown",
+    "usable_ratio_check": "not_evaluated"
+  },
+  "samples": {
+    "input_total": {
+      "sample_count": 1
+    },
+    "target": {
+      "counts": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 1000003
+        },
+        "period_sum": 1000003,
+        "sample_count": 1
+      },
+      "usable": {
+        "normalized_weight": {
+          "denominator": 1000003,
+          "numerator": 1000003
+        },
+        "period_sum": 1000003,
+        "sample_count": 1
+      }
+    },
+    "written_positions": 1
+  }
+}
 ```
 
-Use the target GBS clang, target flags and original build system. FFmpeg G1–G4 consumption builds and performance gains are **not yet validated**; this is a manual recipe, not a completed FFmpeg workflow. LTO is outside the initial workflow design.
+| Condition / field | Interpretation |
+|---|---|
+| exit 0, verdict.conversion=ok | Conversion completed |
+| nonzero exit | Failure; do not trust an old report left on disk |
+| verdict.identity=verified | Identity evidence agrees; not proof of adequate samples |
+| unverified | Missing evidence explicitly allowed; not a production default |
+| usable_ratio_check / sample_threshold_check / lost_ratio_check | Optional package-policy checks |
+| failure_stage, reason | Failure location and diagnosis |
+| sampling_adequacy=unknown | No general proof of adequacy; unspecified or satisfied gates cannot establish it |
+| sampling_adequacy=insufficient | A configured sufficiency-related check failed |
+| throttle fields unknown | Board telemetry still needs separate qualification |
 
-### (c) Workflow commands
+Failures preserve an old profile. Non-path-conflict failures atomically replace failure JSON. Output/report/input alias conflicts and output '-' write neither output. Report write/commit failure can leave the previous report. The profile/report pair is not a crash-atomic transaction.
 
-**Planned (milestone M1).** No workflow command is implemented or shipped in this branch. See [workflow design v0.1](docs/02_design/workflow_design_v0.1.md).
+## 10. Troubleshooting and known limitations
 
-## 7. Read the result
-
-Check process exit status before JSON. Success is zero and verdict.conversion=ok; failure is nonzero. Inspect verdict.identity, usable_ratio_check, sample_threshold_check, lost_ratio_check, failure_stage and reason. Verified identity is not adequate sampling. sampling_adequacy remains unknown or insufficient; throttle fields do not replace board telemetry.
-
-Failures preserve an old profile. Non-conflicting failures atomically replace the quality report with failed JSON; path aliases/output '-' write neither output. Report-write/commit failure can leave an old report: never trust it instead of the invocation exit code. See [contract details](docs/02_design/llvm_profgen_ip_mode_design_summary.md).
-
-## 8. Package owners
-
-Planned under [workflow design §6](docs/02_design/workflow_design_v0.1.md). Each package supplies package.toml, spec-overlay/build hooks, train/benchmark/check scripts and a hashed train/test input manifest. Owners choose target DSOs, fixed period unit, optional gates, metric, rounds and correctness check. Core workflow code will remain package-independent. FFmpeg and GStreamer are proposed first package profiles, not shipped implementations.
-
-## 9. Troubleshooting and limitations
-
-- Aggregation has no default; always pass it. Max/none/none/none is explicit policy, not statistically validated defaults.
-- All three quality gates are optional; absent gates do not mean sampling is sufficient.
-- Explicitly link sampled programs with -Wl,--build-id=sha1. The LLVM linker-default follow-up is not closed.
-- Keep packaged runtime/debug files together. A BUILD artifact may differ from the packaged identity.
-- Avg/zero-fill/prev-inst require valid mapping symbols and instruction boundaries; stripping .symtab can make these fail.
-- ARMv7 pseudo-probe compilation is known to crash; pseudo-probe and IP perf.data input are outside delivery.
-- BOLT is planned only for RPi5; kernel profiles are not supported.
-- No statistical quality-equivalence or performance-gain claim. Cooling/current board state was not checked in this host-only release.
-- Some detailed inputs and dependency archives remain internal to the host; hq intentionally does not carry them.
+- Always specify aggregation. Max with none/none/none is explicit policy, not validated defaults.
+- Thresholds are optional; no failed threshold does not prove adequate sampling.
+- Link sampled programs with -Wl,--build-id=sha1; the linker-default follow-up remains open.
+- Use packaged runtime/debug pairs; BUILD artifacts can have different identities.
+- Avg, zero filling and prev-inst need usable mapping symbols and provable boundaries.
+- ARMv7 pseudo-probe compilation has a known crash; pseudo-probe, IP perf.data input and kernel profiles are outside delivery.
+- BOLT is planned for RPi5 only and is not provided by the delivered tool package.
+- Current board condition, a fresh host provisioning recipe, standalone lit recipe and full consumption of the new FFmpeg example are not verified as detailed above.
+- Detailed raw evidence is retained by the project team.

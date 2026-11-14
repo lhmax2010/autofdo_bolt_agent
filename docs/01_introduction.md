@@ -1,15 +1,35 @@
 # Introduction
 
-Status: first HQ draft, awaiting PM review.
+RPi4 uses Cortex-A72; RPi5 uses Cortex-A76. Project probes found no usable branch-recording input in the tested Tizen configurations on either board. Hardware cycles sampling was available once the RPi4 PMU configuration was corrected. These observations concern the tested systems, not every possible processor/kernel configuration.
 
-The RPi4 and RPi5 environments used by this project do not provide the branch-stack input expected by the existing llvm-profgen flow. The delivered extension accepts exported instruction-pointer samples and uses ELF file offsets and DWARF information to produce LLVM sample profiles. It does not reconstruct branch traces or claim that sampled counts are execution counts.
+The existing llvm-profgen branch-stack flow cannot consume those instruction-pointer samples directly. The delivered extension accepts strict exported perf text, converts DSO file offsets to ELF addresses, verifies identity and uses DWARF to generate LLVM sample profiles.
 
-The limited delivery consists of nine commits on the Tizen LLVM Gerrit sandbox. It covers user-space AArch64 and little-endian ARMv7 Thumb-2/A32 code. It adds strict text parsing, conservative identity checks, address conversion, profile counting, optional instruction-boundary features, and a machine-readable quality/failure report.
+```text
+Board perf IP sampling
+  -> complete text export and build-ID list
+  -> host llvm-profgen with packaged runtime/debug ELF
+  -> sample profile and quality report
+  -> rebuild with -fprofile-sample-use
+  -> correctness check and timed comparison
+```
 
-The normal non-incremental release build and fixed output regressions passed. Historical board integration and independent address/average checks are summarized in the [delivery report](03_reports/llvm_profgen_delivery.md). These are functional checks. **Statistical quality equivalence and performance gains have not been validated.**
+Functional validation includes parsing, address conversion, identity, counting, failure contracts, instruction boundaries and host output regression. Statistical quality equivalence and performance gains have not been validated. The delivery does not claim that sampled counts are execution counts.
 
-The call-site policy recommended for the future workflow is explicit: max aggregation, no skid correction, no zero filling, and no head estimate. It is not a statistically validated default; the CLI still requires aggregation to be specified.
+## Roadmap
 
-The next work is AutoFDO/PGO and BOLT workflows, then skills (SKILL.md plus scripts), then an Agent. Workflow design is under review. BOLT is planned only for RPi5 in that design, and kernel profiling is outside this delivery.
+| Component / milestone | Sequence and acceptance | Status |
+|---|---|---|
+| llvm-profgen IP mode | User-space DWARF IP on AArch64 and ARMv7 Thumb-2/A32; functional release checks passed | Delivered (limited scope) |
+| M1 | FFmpeg on RPi4: reproducible collection, identity checks, conversion, rebuild, correctness and timed comparison | Planned / Not implemented |
+| M2 | FFmpeg on RPi5, plus instrumented PGO on both boards; equivalent artifact and result contracts | Planned / Not implemented |
+| M3 | GStreamer package profiles and multi-library collection/rebuild | Planned / Not implemented |
+| M4 | BOLT on RPi5 only; relocation/identity checks, host conversion and correctness/timing | Planned / Not implemented |
+| M5 Skill | Reusable SKILL.md instructions plus scripts that run workflow stages and interpret results | Planned / Not implemented |
+| Agent | After the skill: select packages, run the workflow through the skill, report results; builds on both layers | Planned / Not implemented |
+| Kernel | Separate track; method to be decided; current llvm-profgen delivery has no kernel support | Planned / Not implemented |
 
-Start with the [host-only demo](04_demo.md), then read the [design summary](02_design/llvm_profgen_ip_mode_design_summary.md). Board collection requires separately approved access and appropriate hardware, cooling and identity checks.
+Package owners provide benchmark and data-collection methods through package profiles.
+
+The workflow makes the low-level operations repeatable. The skill packages the workflow instructions and scripts for reuse. The later Agent automates package selection and execution through that same interface. The layers complement one another.
+
+Read the [workflow overview](02_design/workflow_design_overview.md), [IP design summary](02_design/llvm_profgen_ip_mode_design_summary.md), [delivery report](03_reports/llvm_profgen_delivery.md) and [host demo](04_demo.md).

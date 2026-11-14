@@ -1,6 +1,6 @@
 # Limited llvm-profgen delivery
 
-Status: first HQ draft, awaiting PM review. Internal main source commit: 41bae45466b853cee173fe80189f2f44b0500b95.
+Status: delivered, limited functional scope. Statistical quality equivalence and performance gains are not validated.
 
 ## Source and reproducibility
 
@@ -23,7 +23,7 @@ The release spec is unchanged from the base. Changes are confined to llvm-profge
 - --version and --help pass under the GBS loader, LLVM 22.1.8.
 - Build memory.peak 10 GiB, max-limit events 14050, OOM / OOM-kill zero. Minimum sampled MemAvailable 20,526,964,736 bytes.
 
-122 actual dependency RPMs (195,060,672 bytes) were archived internally with checksums; all selected downloads came from Base. The configured Unified metadata was live and valid but supplied none of the selected dependencies. No old-cache fallback was used.
+122 actual dependency RPMs (195,060,672 bytes) were archived with checksums; all selected downloads came from Base. The configured Unified metadata was live and valid but supplied none of the selected dependencies. No old-cache fallback was used.
 
 | Dependency | Patch-9 retained root | Release root |
 |---|---|---|
@@ -43,7 +43,7 @@ Snapshots expire. If removed, choose and record currently available fixed snapsh
 - Release spec does not run lit. Source equality plus prior patch-9 acceptance substitutes for a new lit run: 84 PASS, 1 UNSUPPORTED, 1 XFAIL, 0 FAIL (86 total). No claim of release %check execution.
 - The [host demo](../04_demo.md) uses this release executable and sandbox fixtures.
 
-Detailed raw evidence remains in the internal main repository and host archive; it is intentionally not copied into hq.
+Detailed raw evidence is retained by the project team.
 
 ## Earlier RPi4 integration and real-input checks
 
@@ -67,4 +67,11 @@ These establish functional behavior. **Statistical quality equivalence and perfo
 
 User-space DWARF IP only: AArch64 and ARMv7 Thumb-2/A32. No pseudo-probe, perf.data input, kernel profile or BOLT in this delivery. Aggregation has no default; explicit max/none/none/none is a conservative calling policy, not a validated default. All three thresholds are optional and owned by future package configuration.
 
-Explicit -Wl,--build-id=sha1 is required for sampled program builds until the linker-default follow-up is closed. ARMv7 pseudo-probe compilation has a known Clang crash. Some historical inputs exist only in the host archive. No amendment 3 was registered and no new quality matrix/performance test was run for this release.
+Explicit -Wl,--build-id=sha1 is required for sampled program builds until the linker-default follow-up is closed. ARMv7 pseudo-probe compilation has a known Clang crash. Some historical inputs are not included with this documentation. No new quality matrix or performance experiment was run for this release.
+
+
+## Documentation verification
+
+The extraction and host-demo commands were rerun with the existing release RPMs: SHA/version/help passed; AArch64 and Thumb each converted one target sample to one usable sample and one written profile position. Both reports have conversion ok, identity unverified and sampling adequacy unknown, as expected for the no-build-ID synthetic fixtures.
+
+The complete GBS configuration template was compared field by field with the release configuration; only filesystem paths differ and no fields are omitted. The new FFmpeg example patch passed git apply --check against its stated baseline. This documentation verification did not build LLVM or FFmpeg, connect a board, or execute a performance test. Fresh host provisioning, the simplified GBS launch command on a new host, separate lit setup and the new FFmpeg consuming build remain Not verified.
