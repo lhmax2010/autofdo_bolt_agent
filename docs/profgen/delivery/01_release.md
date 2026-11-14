@@ -1,6 +1,6 @@
 # llvm-profgen 第一批有限范围发布记录
 
-> 最新状态（§9，2026-11-14）：指定Unified20261104.125239与按规则选择的Base20261030.120529完成正常非增量发布构建，GBS退出0；C1及IP输出回归通过。sandbox/hq后续结果另记。统计质量等价与性能收益未验证。
+> 最新状态（§9，2026-11-14）：指定Unified20261104.125239与按规则选择的Base20261030.120529完成正常非增量发布构建，GBS退出0；C1及IP输出回归通过。sandbox已核验，hq第一版已推送、待PM审阅（§10–11）。统计质量等价与性能收益未验证。
 >
 > 历史说明：§1–7记录第一次旧snapshot解析404；§8记录前次指定Unified URL失效，均为历史停止点，不代表§9的最新结果。旧记录不覆盖。
 
@@ -48,7 +48,7 @@
 
 `src/llvm`与`temp/llvm-profgen-enh`的HEAD、全部refs摘要、相对HEAD的diff摘要、spec摘要前后均相同：[前](evidence/01/original-trees.json) / [后](evidence/01/original-trees-after.json)。开发树的本地spec测试修改与现有build保留；并非在开发树撤销。开发工具SHA复核仍为 `2e8895afce661b5fdc8cacab2b3323496fca51af7bd7b51c3753aa8328b7d0d5`。
 
-Gerrit sandbox：**项目名 `platform/upstream/llvm` / 分支：待用户确认 / commit ID：待推送**。上述本地发布HEAD只是候选，不是远端已发布ID。本轮未推任何Gerrit/LLVM引用，也未建hq分支。
+Gerrit sandbox（最新结果见§10）：**platform/upstream/llvm / sandbox/lhmax2025/afdo_profgen / c8942ae1b53099a78a97dca2b64427af6e58432b**。§1–7其余内容为首次构建停止记录；当前发布构建已通过，sandbox已推送，hq结果见§11。
 
 ## 3. 后续 rebase 说明
 
@@ -400,3 +400,28 @@ createrepo_c是主机已有工具；示例不承诺未来GBS/root环境必然相
 | 9 | c8942ae1b53099a78a97dca2b64427af6e58432b | Exclude IP samples with missing non-leaf callsite lines |
 
 [推送原文](evidence/04/sandbox-push.json)、[独立核验](evidence/04/sandbox-verification.json)。hq按后续授权创建，结果待另记；sandbox不代表统计质量或性能收益已验证。
+
+## 11. 英文hq第一版（2026-11-14，待PM审阅）
+
+- 使用独立temp/hq-release-20261114克隆，创建orphan hq，提交无父节点、与main无共同历史；只推送新hq分支，无force。
+- hq commit：**9a34528ff2bd9804a10b4c38b2b8fbc936a5cddd**；来源main 41bae45466b853cee173fe80189f2f44b0500b95，sandbox tip c8942ae1b53099a78a97dca2b64427af6e58432b；提交信息明确记录两者。推送后ls-remote tip一致。
+- **8文件，583,711字节**，不含LLVM源码树、原始证据、perf/profile、二进制工具或凭据。v1.8中文原文SHA不变，workflow仅增加Status: under multi-AI review行；其余说明英文。
+
+```text
+README.md
+docs/01_introduction.md
+docs/02_design/llvm_profgen_ip_mode_design_summary.md
+docs/02_design/original/02_llvm_profgen_enhance_design_v1.8.md
+docs/02_design/workflow_design_v0.1.md
+docs/03_reports/llvm_profgen_delivery.md
+docs/04_demo.md
+demo/run_host_demo.sh
+```
+
+README含实际snapshot、正常GBS命令/资源/耗时、工具SHA与RPM路径、板上部署与手工采集/转换/消费示例、质量失败契约及已知局限。workflow标为Planned (milestone M1)，未写成实现；BOLT仅RPi5计划，内核不支持。不会把显式保守策略称为已验证默认值。
+
+演示从全新sandbox检出引用a64-pie与thumb-count素材，用本次发布RPM解包工具运行；两者各1目标/1 usable/1写出位置，exit0，llvm-profdata show成功。身份均unverified（演示显式缺ID放行），adequacy均unknown；实际输出已写docs/04_demo.md。没有重新构建、接板或使用真实采集数据。演示1.001秒，memory.peak12,701,696 B，无OOM。
+
+15个相对文件链接全部存在，bash -n通过；8个文件SHA/字节数见[清单](evidence/05/hq-file-manifest.json)。原文、推送、独立远端tip与演示输出见[evidence/05索引](evidence/05/index.json)。敏感模式扫描未命中；目录人工核对不含原始数据。
+
+hq状态为**待PM审阅**，不对外宣称已发布。此轮完成后停止，等待下一步指令。

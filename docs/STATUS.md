@@ -30,6 +30,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## HQ英文第一版已推送（2026-11-14，待PM审阅；本轮完成）
+
+- [发布报告§9–11](profgen/delivery/01_release.md)：正常发布构建与回归通过，验收提交374ece0c6a962b16c766b84bae4459bf4046b8ab；sandbox核验提交41bae45466b853cee173fe80189f2f44b0500b95均已推送main。
+- Gerrit platform/upstream/llvm 的sandbox/lhmax2025/afdo_profgen tip为c8942ae1b53099a78a97dca2b64427af6e58432b，9个原样提交；独立检出358文件SHA一致。没有推其他Gerrit分支。
+- 英文orphan hq首提交**9a34528ff2bd9804a10b4c38b2b8fbc936a5cddd**已推送并核验远端；8文件583,711 B，与main无共同历史。状态为**待PM审阅**，不宣称对外发布。README使用实际Unified20261104.125239/Base20261030.120529及snapshot失效时的复建说明。
+- host demo实际通过（aarch64/Thumb各1样本，profile/report及profdata show正常；unverified缺ID素材不代表生产准入）；15个相对链接无断链，bash -n通过。详细清单与输出见profgen/delivery/evidence/05/。
+- 本轮未接板、不登记修正案3、不运行质量矩阵/性能测量、不修改设计v1.8/既有证据，不删除旧temp目录。完成后停止，等待PM审阅与下一步指令。
+
 ## Sandbox已推送并独立核验（2026-11-14）
 
 - [发布报告§10](profgen/delivery/01_release.md)：platform/upstream/llvm，sandbox/lhmax2025/afdo_profgen，新建成功，tip c8942ae1b53099a78a97dca2b64427af6e58432b；9个git-am提交保持原样。目标此前不存在，无force/refs-for/其他分支推送。
