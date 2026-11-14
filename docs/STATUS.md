@@ -23,9 +23,17 @@
 
 4. 以后用户放在 Downloads 的材料一律移动到工作目录，不在 Downloads 保留副本；只处理用户指定的材料，不遍历或触碰其他文件。
 5. llvm-profgen 增强设计须经多方评审并冻结后才开工；Agent 的设计与开发在 llvm-profgen 增强完成后才开始。
-6. 自 2026-11-14 起，PM 与设计由 Claude 接任。开发顺序：llvm-profgen 增强完成后，先做 AutoFDO 与 BOLT 的工作流（workflow），再做 skill，最后做 Agent。
+6. 自 2026-11-14 起，PM 与设计由 Claude 接任。开发顺序：llvm-profgen 增强完成后，先做 AutoFDO 与 BOLT 的工作流（workflow），再做 skill（SKILL.md + 脚本），最后做 Agent。
+7. LLVM 代码只推送到 Gerrit 的 sandbox 分支；不推 refs/for 正式评审，不新建其他远端分支；afdo/profgen-enhance 等开发分支只在本地使用；结果仓库不包含 LLVM 源码树；对外文档记录 sandbox 的项目名、分支名与 commit ID。sandbox 分支名与推送人待用户确认，在此之前不推送。本轮不推送任何 Gerrit 分支，包括 sandbox。
+8. 对外发布：以本仓库的 orphan 分支 hq 向总部发布（内容与 README 要求见 workflow 设计 §14）；hq 分支另行指令创建，本轮不建。
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
+
+## 发布准备入口（2026-11-14；远端tip前进，触发分支门禁）
+
+- [LLVM分支查询](handover/02_llvm_branch.md)：src/llvm跟踪origin/tizen_base，本地基线f999bd406c0a70fe8107aa992164fe6945c5d46a；Gerrit当前tip为61ef5d31ca91025c414c748477bef0c64ddfa67c，新增3提交，其中cf4b6777改packaging/llvm.spec。独立查询克隆fetch成功，原源码/开发树refs未改变。afdo/profgen-enhance无upstream，当前远端无该head；历史绝对未推送的证明边界见报告。
+- [workflow设计v0.1](workflow/01_afdo_bolt_workflow_design_v0.1.md)已mv入库，移动前后SHA-256均为cf935c5344067faba8f296bd508e871aad2428d9ebc416d42e2482ff5601699f；创建reviews/.gitkeep。设计正文不改，供多方评审。
+- 本批仅规则、查询与设计入库先提交推送main。按用户分支门禁，随后只登记三.1有限范围决定并停止，等待PM决定是否基于新tip重放；不创建发布树、不做GBS构建/回归，不推任何LLVM/Gerrit分支、不建hq。
 
 ## PM交接（2026-11-14；只读核对完成，停止）
 
