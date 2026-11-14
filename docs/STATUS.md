@@ -30,6 +30,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 固定snapshot发布构建与回归通过（2026-11-14）
+
+- [发布报告§9](profgen/delivery/01_release.md)：Unified20261104.125239、Base20261030.120529实时验证通过，按规则配对，无偏离；旧缓存122/122归属Base，新依赖122/122也来自所选Base，未使用回退。
+- 发布树c8942ae1、原样spec、全新root正常非增量GBS成功：4780.358秒（79分40秒），退出0，7637步；产出22个二进制RPM和1个SRPM。工具SHA 67ad21faba787d276a80673c1f324f7c0591d28d76bd37a8bd57de0d86426be6。运行/调试文件均无build-id，debuglink CRC一致；ENABLE_LINKER_BUILD_ID挂账不关闭。
+- C1两遍各636条、0差异；14历史导出＋18素材/格式比较项全部保持补丁9行为，profile逐字节一致，JSON仅tool.arguments[0]不同，替换该字段后字节一致。非预期差异0；源码358文件相同。发布spec不跑lit，以源码等价＋补丁9既有84 PASS/1 UNSUPPORTED/1 XFAIL替代。
+- 122个实际依赖RPM已存档temp/gbs-deps-archive/llvm-release-20261114/，195,060,672 B，清单SHA及离线复建示例见报告。新旧依赖版本不同，工具SHA不同为预期，以输出回归为准。
+- 构建memory.peak=10GiB，max事件14050，oom/oom_kill均0；最低MemAvailable20,526,964,736 B，没有资源终止。每分钟原文和ALL-END已保留。原源码、开发树、spec测试修改与既有temp目录不变。
+- 本阶段满足后续sandbox/hq前提，下一步按已授权指令执行；此条提交时尚未推送sandbox/创建hq。不接板、不登记修正案3、不做质量矩阵或性能测量。证据profgen/delivery/evidence/03/。
+
 ## 新固定snapshot发布预检停止（2026-11-14，未启动构建）
 
 - PM已允许更换固定依赖snapshot，二进制SHA不要求等于补丁9，输出回归要求不变。[发布报告§8](profgen/delivery/01_release.md)记录本次授权与证据；下方此前“同依赖来源”停止条件为历史。

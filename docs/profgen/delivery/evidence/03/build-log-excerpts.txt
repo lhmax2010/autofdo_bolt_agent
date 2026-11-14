@@ -1,0 +1,266 @@
+START 2026-11-14T01:10:26.299348-08:00 ['systemd-run', '--user', '--scope', '--unit=profgen-release-build-20261114c', '-p', 'MemoryMax=10G', '-p', 'CPUQuota=400%', 'nice', '-n', '19', 'ionice', '-c3', 'python3', '-u', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-release-20261114c/build_worker.py']
+Running as unit: profgen-release-build-20261114c.scope; invocation ID: da0377db31954040baefa5d6087149f7
+GBS-START 2026-11-14T01:10:26.374288-08:00 PID 29234 COMMAND ['gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_release.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--buildroot', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c', '--threads', '1', '--define', '_smp_mflags -j4', '--define', 'mlgo_build_jobs 4']
+RESOURCE 2026-11-14T01:10:26.374516-08:00
+               total        used        free      shared  buff/cache   available
+Mem:           31540        9503        3375         716       19848       22037
+Swap:           4095           0        4095
+ 01:10:26 up  4:49,  1 user,  load average: 0.56, 0.49, 0.73
+info: generate repositories ...
+warning: No local package repository for arch x86_64
+info: build conf has been downloaded at:
+      /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs-tmp-llvm-x86/linhao-gbs/tizen_unified_standard.conf
+info: start building packages from: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-release (git)
+2026-11-14 01:10 -0800
+gbs 2.1.1
+info: prepare sources...
+info: start export source from: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/llvm-profgen-release ...
+info: Creating (native) source archive llvm-22.1.8.tar.gz from 'HEAD'
+info: Creating (native) source archive llvm-22.1.8.tar.gz from 'HEAD'
+info: package files have been exported to:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/sources/tizen_unified_standard/llvm-22.1.8-1
+info: retrieving repo metadata...
+info: parsing package data...
+info: building repo metadata ...
+info: resolving skipped packages ...
+info: package dependency resolving ...
+info: there is no circle in 1 packages
+info: *** [1/1] building llvm-22.1.8-1 x86_64 tizen_unified_standard (worker: 0) ***
+logging output to /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/.build.log...
+[    0s] on X86_64, no limit mem size
+[    0s] Using BUILD_ROOT=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0
+[    0s] Using BUILD_ARCH=x86_64:i686:i586:i486:i386:noarch
+[    0s] 
+[    0s] 
+[    0s] linhao-linux started "build llvm.spec" at Sat Nov 14 09:12:25 UTC 2026.
+[    0s] 
+[    0s] 
+[    0s] processing recipe /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/sources/tizen_unified_standard/llvm-22.1.8-1/llvm.spec ...
+[    0s] init_buildsystem --configdir /usr/lib/build/configs --cachedir /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/cache --define _smp_mflags -j4 --define mlgo_build_jobs 4 --repository /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/RPMS --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/sources/tizen_unified_standard/llvm-22.1.8-1/llvm.spec ...
+[    0s] initializing /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/.srcfiles.cache ...
+[    0s] /usr/lib/build/createdirdeps --oldfile /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/.srcfiles.cache /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/RPMS
+[    0s] /usr/lib/build/createrepomddeps --cachedir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/cache https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/
+[    1s] /usr/lib/build/createrepomddeps --cachedir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/cache https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/
+[    3s] expanding package dependencies...
+[    3s] copying qemu
+[    3s]  /usr/bin/qemu-arm-binfmt /usr/bin/qemu-arm-static /usr/bin/qemu-arm64-binfmt /usr/bin/qemu-arm64-static /usr/bin/qemu-riscv32-binfmt /usr/bin/qemu-riscv32-static /usr/bin/qemu-riscv64-binfmt /usr/bin/qemu-riscv64-static /usr/sbin/qemu-binfmt-conf.sh
+[    3s] 
+[    3s] calculating packages to download...
+[    4s] [1/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/app-rootstrap-checker-1.0.0-1.1.x86_64.rpm ... 
+[    5s] [2/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/autoconf-2.71-1.16.noarch.rpm ... 
+[    6s] [3/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/automake-1.16.5-1.16.noarch.rpm ... 
+[    8s] [4/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/bash-3.2.57-1.15.x86_64.rpm ... 
+[    9s] [5/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/binutils-2.43-1.15.x86_64.rpm ... 
+[   11s] [6/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/binutils-devel-2.43-1.15.x86_64.rpm ... 
+[   13s] [7/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/binutils-libs-2.43-1.15.x86_64.rpm ... 
+[   15s] [8/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/build-20120927-1.1.noarch.rpm ... 
+[   16s] [9/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/build-compare-2023.06.18-1.5.noarch.rpm ... 
+[   17s] [10/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/build-mkbaselibs-20120927-1.1.noarch.rpm ... 
+[   18s] [11/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/bzip2-1.0.8-1.13.x86_64.rpm ... 
+[   19s] [12/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/clang-22.1.8-4.1.x86_64.rpm ... 
+[   24s] [13/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/cmake-3.31.2-1.6.x86_64.rpm ... 
+[   28s] [14/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/coreutils-6.9-14.5.x86_64.rpm ... 
+[   29s] [15/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/cpio-2.8-1.2.x86_64.rpm ... 
+[   31s] [16/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/cpp-14.2.0-1.14.x86_64.rpm ... 
+[   34s] [17/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/dash-0.5.13.4-1.2.x86_64.rpm ... 
+[   35s] [18/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/diffutils-3.10-1.2.x86_64.rpm ... 
+[   36s] [19/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/elfutils-0.189-1.14.x86_64.rpm ... 
+[   38s] [20/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/file-5.46-1.13.x86_64.rpm ... 
+[   39s] [21/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/filesystem-3.1-1.1.x86_64.rpm ... 
+[   40s] [22/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/findutils-4.3.8-1.14.x86_64.rpm ... 
+[   41s] [23/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/gawk-3.1.5-1.2.x86_64.rpm ... 
+[   43s] [24/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/gcc-14.2.0-1.14.x86_64.rpm ... 
+[   47s] [25/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/gcc-c++-14.2.0-1.14.x86_64.rpm ... 
+[   51s] [26/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/gdbm-1.8.3-1.16.x86_64.rpm ... 
+[   52s] [27/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/glibc-2.40-2.5.x86_64.rpm ... 
+[   54s] [28/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/glibc-devel-2.40-2.5.x86_64.rpm ... 
+[   55s] [29/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/glibc-locale-2.40-2.5.x86_64.rpm ... 
+[   57s] [30/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/grep-2.5.2-1.16.x86_64.rpm ... 
+[   58s] [31/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/gzip-1.3.12-1.14.x86_64.rpm ... 
+[   60s] [32/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/x86_64/hal-rootstrap-checker-1.0.0-4.1.x86_64.rpm ... 
+[   61s] [33/122] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-
+[full log remains in temp; see raw index]
+x86_64/usr/lib/debug/usr/bin/llvm-readtapi.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-reduce.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-remarkutil.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-rtdyld.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-sim.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-size.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-split.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-stress.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-strings.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-symbolizer.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-tblgen.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-tli-checker.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-undname.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/llvm-xray.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/offload-arch.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/opt.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/pp-trace.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/reduce-chunk-list.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/sancov.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/sanstats.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/verify-uselistorder.debug
+[ 4177s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/yaml2macho-core.debug
+[ 4193s] Provides: llvm-debuginfo = 22.1.8-1 llvm-debuginfo(x86-64) = 22.1.8-1
+[ 4193s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4193s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4193s] Processing files: llvm-devel-debuginfo-22.1.8-1.x86_64
+[ 4193s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4193s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4193s] 
+[ 4193s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/LLVMgold.so.debug
+[ 4193s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libLTO.so.22.1.debug
+[ 4193s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libRemarks.so.22.1.debug
+[ 4193s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/share/gdb/python/ompd/ompdModule.so.debug
+[ 4193s] Provides: llvm-devel-debuginfo = 22.1.8-1 llvm-devel-debuginfo(x86-64) = 22.1.8-1
+[ 4193s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4193s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4193s] Processing files: libllvm-debuginfo-22.1.8-1.x86_64
+[ 4193s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4193s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4193s] 
+[ 4193s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libLLVM.so.22.1.debug
+[ 4200s] Provides: libllvm-debuginfo = 22.1.8-1 libllvm-debuginfo(x86-64) = 22.1.8-1
+[ 4200s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4200s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4200s] Processing files: clang-debuginfo-22.1.8-1.x86_64
+[ 4200s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4200s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4200s] 
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-22.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-apply-replacements.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-change-namespace.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-check.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-doc.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-extdef-mapping.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-format.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-include-cleaner.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-include-fixer.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-installapi.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-move.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-nvlink-wrapper.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-offload-bundler.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-query.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-refactor.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-reorder-fields.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-scan-deps.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-sycl-linker.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-tidy.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clangd.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/find-all-symbols.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/modularize.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libclang-cpp.so.22.1.debug
+[ 4200s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libclang.so.22.1.8.debug
+[ 4215s] Provides: clang-debuginfo = 22.1.8-1 clang-debuginfo(x86-64) = 22.1.8-1
+[ 4215s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4215s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4215s] Processing files: clang-devel-debuginfo-22.1.8-1.x86_64
+[ 4215s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4215s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4215s] 
+[ 4215s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/clang-tblgen.debug
+[ 4215s] Provides: clang-devel-debuginfo = 22.1.8-1 clang-devel-debuginfo(x86-64) = 22.1.8-1
+[ 4215s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4215s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4215s] Processing files: lldb-debuginfo-22.1.8-1.x86_64
+[ 4215s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4215s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4215s] 
+[ 4215s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb.debug
+[ 4215s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-argdumper.debug
+[ 4215s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-server.debug
+[ 4215s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/home/owner/share/tmp/sdk_tools/lldb/lib64/liblldb.so.22.1.8.debug
+[ 4215s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/lldb-mcp.debug
+[ 4218s] Provides: lldb-debuginfo = 22.1.8-1 lldb-debuginfo(x86-64) = 22.1.8-1
+[ 4218s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4218s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4218s] Processing files: lldb-devel-debuginfo-22.1.8-1.x86_64
+[ 4218s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4218s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4218s] 
+[ 4218s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/bin/lldb-tblgen.debug
+[ 4218s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/liblldb.so.22.1.8.debug
+[ 4218s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/liblldbIntelFeatures.so.22.1.debug
+[ 4220s] Provides: lldb-devel-debuginfo = 22.1.8-1 lldb-devel-debuginfo(x86-64) = 22.1.8-1
+[ 4220s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4220s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4220s] Processing files: compiler-rt-debuginfo-22.1.8-1.x86_64
+[ 4220s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4220s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4220s] 
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.asan-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.dyndd-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.hwasan-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.hwasan_aliases-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.memprof-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.nsan-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.scudo_standalone-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.tsan-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_minimal-x86_64.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/clang/22/lib/linux/libclang_rt.ubsan_standalone-x86_64.so.debug
+[ 4220s] Provides: compiler-rt-debuginfo = 22.1.8-1 compiler-rt-debuginfo(x86-64) = 22.1.8-1
+[ 4220s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4220s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4220s] Processing files: libomp-debuginfo-22.1.8-1.x86_64
+[ 4220s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[ 4220s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[ 4220s] 
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libarcher.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libomp.so.debug
+[ 4220s] warning: Missing build-id in /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/debug/usr/lib64/libompd.so.debug
+[ 4220s] Provides: libomp-debuginfo = 22.1.8-1 libomp-debuginfo(x86-64) = 22.1.8-1
+[ 4220s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[ 4220s] Recommends: llvm-debugsource(x86-64) = 22.1.8-1
+[ 4220s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 4228s] Wrote: /home/abuild/rpmbuild/SRPMS/llvm-22.1.8-1.src.rpm
+[ 4236s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-22.1.8-1.x86_64.rpm
+[ 4258s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debugsource-22.1.8-1.x86_64.rpm
+[ 4262s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-22.1.8-1.x86_64.rpm
+[ 4297s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-static-devel-22.1.8-1.x86_64.rpm
+[ 4305s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-22.1.8-1.x86_64.rpm
+[ 4314s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-22.1.8-1.x86_64.rpm
+[ 4317s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-22.1.8-1.x86_64.rpm
+[ 4321s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-22.1.8-1.x86_64.rpm
+[ 4326s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-22.1.8-1.x86_64.rpm
+[ 4328s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-22.1.8-1.x86_64.rpm
+[ 4329s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-22.1.8-1.x86_64.rpm
+[ 4329s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-devel-22.1.8-1.x86_64.rpm
+[ 4329s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/python-clang-22.1.8-1.x86_64.rpm
+[ 4395s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-debuginfo-22.1.8-1.x86_64.rpm
+[ 4395s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/llvm-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 4470s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libllvm-debuginfo-22.1.8-1.x86_64.rpm
+[ 4606s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-debuginfo-22.1.8-1.x86_64.rpm
+[ 4610s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/clang-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 4636s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-debuginfo-22.1.8-1.x86_64.rpm
+[ 4652s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/lldb-devel-debuginfo-22.1.8-1.x86_64.rpm
+[ 4654s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/compiler-rt-debuginfo-22.1.8-1.x86_64.rpm
+[ 4655s] Wrote: /home/abuild/rpmbuild/RPMS/x86_64/libomp-debuginfo-22.1.8-1.x86_64.rpm
+[ 4655s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.xiMv6G
+[ 4655s] + umask 022
+[ 4655s] + cd /home/abuild/rpmbuild/BUILD
+[ 4655s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 4656s] + cd llvm-22.1.8
+[ 4656s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64
+[ 4656s] + exit 0
+[ 4656s] ... checking for files with abuild user/group
+[ 4656s] 
+[ 4656s] linhao-linux finished "build llvm.spec" at Sat Nov 14 10:30:01 UTC 2026.
+[ 4656s] 
+info: finished building llvm
+info: updating local repo
+info: *** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+info: generated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/index.html
+info: generated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/RPMS
+info: generated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/SRPMS
+info: build logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/logs
+info: build roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.*
+GBS-END 2026-11-14T02:30:06.602349-08:00 EXIT 0
+已结束 2026-11-14T02:30:06.656813-08:00 成功 SCOPE_EXIT 0
+ALL-END 2026-11-14T02:30:06.656813-08:00 成功

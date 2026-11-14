@@ -1,0 +1,30 @@
+{
+  "start": "2026-11-14T01:10:26.299348-08:00",
+  "end": "2026-11-14T02:30:06.601059-08:00",
+  "seconds": 4780.357987429001,
+  "scope_exit": 0,
+  "status": "成功",
+  "scope_command": [
+    "systemd-run",
+    "--user",
+    "--scope",
+    "--unit=profgen-release-build-20261114c",
+    "-p",
+    "MemoryMax=10G",
+    "-p",
+    "CPUQuota=400%",
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "python3",
+    "-u",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-release-20261114c/build_worker.py"
+  ],
+  "gbs_exit": 0,
+  "reason": null,
+  "minimum_MemAvailable": 20526964736,
+  "cgroup_memory_peak": 10737418240,
+  "memory_events": "low 0\nhigh 0\nmax 14050\noom 0\noom_kill 0\noom_group_kill 0\n"
+}

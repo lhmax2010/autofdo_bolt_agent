@@ -1,8 +1,8 @@
 # llvm-profgen 第一批有限范围发布记录
 
-> 最新状态（2026-11-14，第二次配置准备，见§8）：PM已允许更换固定依赖快照，二进制SHA不要求与补丁9相同，验收以输出回归为准。但新指定Base URL为200、Unified URL为404，未通过启动门禁，本次没有运行GBS。下面§1–7保留第一次尝试的历史记录；“需相同依赖来源”的旧停止条件已由本次PM决定替代。当前仍无发布产物与发布回归结果。
-
-2026-11-14。本轮**发布未完成，停在GBS仓库解析阶段**：已完成基线决定、两个独立树的补丁应用、源码等价核对；固定配置的两个snapshot URL返回HTTP 404，GBS退出1，未产生发布RPM。不得把本报告作为发布产物已验收的证明。
+> 最新状态（§9，2026-11-14）：指定Unified20261104.125239与按规则选择的Base20261030.120529完成正常非增量发布构建，GBS退出0；C1及IP输出回归通过。sandbox/hq后续结果另记。统计质量等价与性能收益未验证。
+>
+> 历史说明：§1–7记录第一次旧snapshot解析404；§8记录前次指定Unified URL失效，均为历史停止点，不代表§9的最新结果。旧记录不覆盖。
 
 ## 1. 范围、基线与本轮结论
 
@@ -266,3 +266,111 @@ https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-u
 本轮证据索引：[evidence/02/index.json](evidence/02/index.json)。
 
 证据容器检查：config.diff的两条空白上下文行保留标准unified diff的单空格前缀，Git将其报告为新增文件尾空白；原始diff不删改。除该证据容器外的本次文件通过diff --check，详见[evidence/02/diff-check.json](evidence/02/diff-check.json)。
+
+## 9. 指定Unified、按规则选Base的发布重试（2026-11-14）
+
+### 9.1 实时仓库与选择规则
+
+用户更正Unified为`20261104.125239`，此前`20261003.102419`来自过期缓存，已作废。实时读取Base顶层目录，取得下表全部5个固定snapshot；没有使用latest别名。
+
+| Snapshot | packages目录HTTP | 实际repomd.xml HTTP | primary中x86_64包数 |
+|---|---:|---:|---:|
+| tizen-unified-toolchain_20261104.125239 | 200 | 200 | 2957 |
+| tizen-base-toolchain_20261013.024319 | 200 | 200 | 541 |
+| tizen-base-toolchain_20261030.061318 | 200 | 200 | 538 |
+| tizen-base-toolchain_20261030.120529 | 200 | 200 | 541 |
+| tizen-base-toolchain_20261109.032334 | 200 | 200 | 538 |
+| tizen-base-toolchain_20261111.130848 | 200 | 200 | 538 |
+
+按“不晚于20261104.125239的最新可用Base”选中 **20261030.120529**；不是更新的20261109或20261111，无配对偏离。实际元数据位于 `packages/repodata/repomd.xml`，为多架构仓库。最初探测`packages/x86_64/repodata/repomd.xml`返回404，只说明该路径没有元数据；随后根据目录索引取实际位置，并下载primary、验证repomd所列校验和、解析x86_64包条目后才判定通过。这不是Unified不可用，未据错误路径启动回退。
+
+请求时间、HTTP、下载文件路径与SHA：[请求记录](evidence/03/requests.json)；[最终选择](evidence/03/selection.json)；初始路径探测另存，不覆盖。大的primary文件仅留`temp/profgen-release-20261114c/`。
+
+仅替换release conf的两个URL，其他设置与baseline conf一致：
+
+```text
+Base: https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/
+Unified: https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/
+```
+
+`temp/gbs/gbs_llvm_x86_release.conf`新SHA为 `cf82a48af046d5d5c7dbd6bb8df8dec6ff6254ea9ddda35bebe47d3844442c32`；旧baseline仍为 `9044bdbf6914980e3f5f4af0f5e491632211e15bb05bddbed5b16ee1b95a745a`。前次release conf另存本轮temp以保留历史，[diff](evidence/03/config.diff) / [SHA](evidence/03/config.json)。
+
+### 9.2 旧缓存归属与新依赖对照
+
+原122个RPM共195,048,240字节，全部位于旧cache `204325f8253bb29b6c2e0fc83a717f67`。该目录名等于旧Base 20261026.051209完整仓库URL的MD5；进一步用该目录保留的primary元数据逐包比对文件名及RPM内容checksum，**122/122一致，均归属Base，未知0、Unified 0**。旧Unified元数据目录`dbacf29d570bcb92c8fa446a5c4c83ea`没有缓存RPM。[逐包来源与元数据SHA](evidence/03/old-cache-sources.json)。没有只靠包名猜来源，也没有更改原缓存。
+
+在线解析成功，新下载122个RPM、195,060,672字节，全部来自选中的Base 20261030.120529；每个下载文件都与新primary的checksum一致。[下载清单](evidence/03/downloaded-dependencies.json)、[安装查询](evidence/03/installed-dependencies.json)。Unified参与配置与解析，但此次实际选中的依赖RPM均来自Base。
+
+| 工具 | 原补丁9构建root现存版本 | 新root实际版本 |
+|---|---|---|
+| gcc | gcc-14.2.0-1.6.x86_64 | gcc-14.2.0-1.14.x86_64 |
+| binutils | binutils-2.43-1.6.x86_64 | binutils-2.43-1.15.x86_64 |
+| cmake | cmake-3.31.2-1.6.x86_64 | cmake-3.31.2-1.6.x86_64 |
+| python3 | python3-3.14.2-1.6.x86_64 | python3-3.14.2-1.10.x86_64 |
+| ninja | ninja-1.13.1-1.5.x86_64 | ninja-1.13.1-1.15.x86_64 |
+
+完整122项比较中6项相同、116项不同：[逐包对照](evidence/03/all-dependency-comparison.json)。旧列以保留的补丁9构建root只读`rpm -qa`为依据，非凭版本号推测；不能将缓存存在误写为所有缓存恰好都在补丁9那一次安装。当前主机GBS日志版本为2.1.1，旧00报告记录2.1.0；本轮没有安装或升级主机软件。
+
+### 9.3 正常非增量构建与产物（成功）
+
+独立发布树HEAD为c8942ae1b53099a78a97dca2b64427af6e58432b；全新buildroot，spec保持f999bd40原样。完整命令：
+
+```sh
+gbs -c "$WORKDIR/temp/gbs/gbs_llvm_x86_release.conf" build -A x86_64 \
+  --spec llvm.spec --buildroot "$WORKDIR/temp/GBS-ROOT-LLVM-RELEASE-20261114c" \
+  --threads 1 --define '_smp_mflags -j4' --define 'mlgo_build_jobs 4'
+```
+
+cwd为temp/llvm-profgen-release。启动前MemAvailable≥14GiB；systemd scope 10G/400%，nice19/ionice-c3，未使用incremental、short-circuit或测试spec。GBS命令的隔离环境与完整argv见[build-command.json](evidence/03/build-command.json)，监督器与worker也已存证。
+
+- 开始2026-11-14 01:10:26.299 PST，结束02:30:06.657 PST；墙钟 **4780.358秒（79分40秒）**，真实GBS退出0、scope退出0，日志末尾有带时间“已结束”和ALL-END。
+- Ninja **7637/7637**；22个二进制RPM及1个SRPM，共23个产物，逐包路径/大小/SHA见[rpm-manifest.json](evidence/03/rpm-manifest.json)。
+- 构建cgroup memory.peak=10,737,418,240 B（10GiB）；memory.events max=14050，说明触及限制并发生回收，**oom=0、oom_kill=0**。最低采样MemAvailable=20,526,964,736 B。没有内存/空间终止。[结果](evidence/03/build-result.json)、[每分钟原文](evidence/03/meminfo-samples.json)；每600秒free/uptime保留在完整日志。
+- 原122包缓存未使用；在线依赖解析成功，不满足回退条件。
+- 本轮GBS内部日志中的/home/abuild、/var/tmp是新buildroot内路径，宿主实际均位于WORKDIR；没有手动挂载、安装主机软件或使用系统/tmp执行脚本。
+
+工具在llvm-22.1.8-1.x86_64.rpm的 **/usr/bin/llvm-profgen**；libLLVM在libllvm RPM。从RPM实际解包至temp/profgen-release-20261114c/extracted，工具SHA：
+
+```text
+67ad21faba787d276a80673c1f324f7c0591d28d76bd37a8bd57de0d86426be6
+```
+
+与补丁9开发工具2e8895af…不同是预期：依赖版本/release和正常RPM剥离流程不同，不用二进制相等作为验收标准。GBS新root加载器下--version退出0（LLVM22.1.8 Optimized build）、--help退出0且IP选项齐全：[产物检查](evidence/03/artifact-result.json)、[help](evidence/03/help.txt)。
+
+**实际build-id：运行文件和llvm-debuginfo中的llvm-profgen.debug均没有build-id**（原样spec与ENABLE_LINKER_BUILD_ID挂账，未补造ID或改链接参数）。运行文件.gnu_debuglink指向llvm-profgen.debug，记录CRC与对完整调试文件重算CRC均为2847750365，匹配。调试文件SHA d8d389d01f8f04dcf55d7fd723c172a1121e57db89a93cb4a7d90ba2a71050b8。此为debuglink关联验证，不称“build-id相同”；readelf原文见runtime-notes.txt/debug-notes.txt。
+
+### 9.4 输出回归与源码等价
+
+- C1：固定50测试，**两遍各636条，基线差异0，两遍相等**。36个新增IP测试仍列为未纳入C1。完整[清单](evidence/03/release-c1.json)、[输出](evidence/03/c1.log)。原有C1临时目录先整体改名保留，新运行产物另存后恢复原目录；没有删除旧证据。
+- IP：14份历史完整导出，加补丁1的a64-pie/a64-16k/a64-64k/arm-count/thumb-count/a64-multi-load各text、binary、extbinary三种格式，共**32个比较项、64次实际调用**。开发工具和发布工具使用相同输入、参数及输出位置；所有退出码与profile SHA一致。
+- 14份历史输入保留补丁9结果：07-fork-cases、07-exec-cases、07-exec-after、07-deleted-libdeleted_probe.so四次成功；其余10次仍在generate阶段因no usable samples失败。不能称14份都产生profile。18个素材/格式调用全部成功。
+- 32份质量JSON的唯一差异均为 **tool.arguments[0]**：旧值temp/llvm-profgen-enh/build/bin/llvm-profgen，新值temp/profgen-release-20261114c/extracted/usr/bin/llvm-profgen（完整绝对路径逐项记录）。没有tool SHA字段差异或其他字段差异。对该唯一字符串作一处替换后，JSON原始字节完全相同；不只做解析后比较。[逐项差异](evidence/03/replay-result.json)、[字节断言](evidence/03/json-byte-comparison.json)。非预期差异 **0**。
+- 发布源码/测试/CommandGuide共358文件与补丁9验收开发树逐字节相同，原src与开发树HEAD/refs/diff/spec均未变：[构建后复核](evidence/03/postbuild-source-equivalence.json)。
+- 发布spec没有测试开关和%check，本轮**不运行lit**；采用上述源码等价＋补丁9已验收的86项（84 PASS、1 UNSUPPORTED、1 XFAIL、0 FAIL）作替代，不能写成本次发布构建跑了lit。
+- 回归只用既有固定基线、补丁素材和14份历史导出；未重转正式S、未计算质量受控量。辅助脚本初次shell引号错误在运行前修正，未影响构建或回归调用，原错误记录保留。
+
+### 9.5 依赖存档与未来复现
+
+成功后复制本次实际下载的122个RPM至 **temp/gbs-deps-archive/llvm-release-20261114/**，RPM总大小 **195,060,672 B**；源缓存不动，每份复制前后SHA一致。[归档清单](evidence/03/archive-result.json)，归档manifest SHA 7e3624c4afadf832269f8d7886fb8559c3db5f58d5019c292d017b07023cf43c。同时保存GBS实际buildconf，SHA 4f9f17e1e3aa7d97b4018c7925491502882c3c1b767735e7b8bb3df1b9d4d489。RPM不进git。
+
+将来离线复建的示例（**本轮不执行**，先核对归档清单，使用新的buildroot）：
+
+```sh
+archive="$WORKDIR/temp/gbs-deps-archive/llvm-release-20261114"
+createrepo_c "$archive"
+# 新建独立conf：general的tmpdir、buildroot仍在WORKDIR；
+# profile保留tizen_unified_standard，repos只设repo.release-cache；
+# [repo.release-cache] url=file://<archive的绝对路径>
+gbs -c "$WORKDIR/temp/gbs/gbs_llvm_x86_archive.conf" build -A x86_64 \
+  --spec llvm.spec -D "$archive/tizen_unified_standard.conf" \
+  --buildroot "$WORKDIR/temp/GBS-ROOT-LLVM-ARCHIVE-REBUILD" \
+  --threads 1 --define '_smp_mflags -j4' --define 'mlgo_build_jobs 4'
+```
+
+createrepo_c是主机已有工具；示例不承诺未来GBS/root环境必然相同，仍需完整输出回归。在线复建使用§9.1两个实际固定ID。**Tizen snapshot会被定期删除；被删除后使用当时可用的固定snapshot重新构建，以工具输出回归为准**，二进制SHA可以变化。不要把本轮未执行的离线复建写成已验证。
+
+### 9.6 本阶段结论与后续
+
+构建及发布回归通过，已满足用户后续sandbox/hq指令的前提；本节提交时尚未推送sandbox或创建hq，后续结果单独记录。统计质量等价与性能收益未验证，显式保守策略不等于默认值已验证，三个门槛仍为可选。被采样程序仍须显式-Wl,--build-id=sha1；armv7l probe编译崩溃等既有限制不变。
+
+完整日志、大primary与回归原始输出留temp，逐文件SHA见evidence/03/raw-index-00.json；仓库证据单文件均小于1MB。轻任务scope峰值最高414,142,464 B，无OOM或资源停止。

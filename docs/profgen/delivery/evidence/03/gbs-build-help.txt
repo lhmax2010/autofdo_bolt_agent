@@ -1,0 +1,228 @@
+usage: gbs build [-h] [-A ARCH] [-D DIST] [-P PROFILE] [-R REPOSITORIES]
+                 [--skip-conf-repos] [--overwrite] [--define DEFINE] [--debug]
+                 [--baselibs] [-B BUILDROOT] [-C] [--clean-once]
+                 [--clean-repos] [--fail-fast] [--keepgoing KEEPGOING]
+                 [--extra-packs EXTRA_PACKS] [--keep-packs]
+                 [--use-higher-deps] [--kvm] [--vm-memory VM_MEMORY]
+                 [--vm-disk VM_DISK] [--vm-swap VM_SWAP]
+                 [--vm-diskfilesystem VM_DISKFILESYSTEM]
+                 [--vm-initrd VM_INITRD] [--vm-kernel VM_KERNEL]
+                 [--not-export-source] [--full-build] [--deps-build]
+                 [--snapshot SNAPSHOT]
+                 [--failures-to-rebuild FAILURES_TO_REBUILD]
+                 [--rebuild-count REBUILD_COUNT]
+                 [--spec-check {warn,strict,off}] [--incremental]
+                 [--no-configure] [--noinit] [--ccache]
+                 [--pkg-ccache PKG_CCACHE] [--icecream ICECREAM]
+                 [--threads THREADS] [--skip-srcrpm] [-c COMMIT]
+                 [--include-all] [--packaging-dir PACKAGING_DIR] [--spec SPEC]
+                 [--upstream-branch UPSTREAM_BRANCH]
+                 [--upstream-tag UPSTREAM_TAG] [--fallback-to-native]
+                 [--squash-patches-until SQUASH_PATCHES_UNTIL]
+                 [--no-patch-export] [--worktree WORKTREE]
+                 [--package-list PACKAGE_LIST]
+                 [--package-from-file PACKAGE_FROM_FILE]
+                 [--binary-list BINARY_LIST]
+                 [--binary-from-file BINARY_FROM_FILE] [--exclude EXCLUDE]
+                 [--exclude-from-file EXCLUDE_FROM_FILE] [--deps] [--rdeps]
+                 [--disable-debuginfo] [--style STYLE] [--export-only]
+                 [--preordered-list PREORDERED_LIST] [--profiling PROFILING]
+                 [--with-submodules] [--release RELEASE] [--nocumulate]
+                 [gitdir]
+
+    Examples:
+      $ gbs build -A i586   # build all packages under current dir for i586
+      $ gbs build -A armv7l # build all packages under current dir for armv7l
+      $ gbs build -A i586 --overwrite   # rebuild the packages
+      $ gbs build -A i586 --include-all # build packages including un-commit changes
+      $ gbs build -A i586 --incremental # incremental build
+      $ gbs build -A i586 --noinit      # build with offline mode
+      $ gbs build -A i586 --clean       # clean build by deleting the old build root
+      $ gbs build -A i586 <gitdir>      # build all packages under <gitdir>
+
+    
+
+positional arguments:
+  gitdir                git repository path, which can contain multiple
+                        packages, in this case, all packages will be built in
+                        dependency order
+
+options:
+  -h, --help            show this help message and exit
+
+build configuration options:
+  -A ARCH, --arch ARCH  build target arch. Supported arch types are: x86_64
+                        i586 armv6l armv7hl armv7l aarch64 aarch64ilp32
+                        aarch64_ilp32 mips mipsel riscv32 riscv64
+  -D DIST, --dist DIST  specify project (build) configuration file. User can
+                        specify build config in [profile.xx] section of
+                        gbs.conf using 'buildconf' key, and the value is local
+                        path of build conf file
+  -P PROFILE, --profile PROFILE
+                        profile to be used for building, it is defined in
+                        .gbs.conf, can be given without the "profile." prefix
+  -R REPOSITORIES, --repository REPOSITORIES
+                        specify package repositories, only rpm-md format is
+                        supported
+  --skip-conf-repos     skip repositories mentioned in config file, and only
+                        use repos from command line -R option
+  --overwrite           overwrite existing binaries and build them anyway
+  --define DEFINE       define macro X with value Y with format "X Y"
+  --debug               debug output
+  --baselibs            create -32bit/-64bit/-x86 rpms for other architectures
+
+build env options:
+  -B BUILDROOT, --buildroot BUILDROOT
+                        specify build root to setup chroot environment. By
+                        default, ~/GBS-ROOT/ will be used. User can specify
+                        customized build root in gbs.conf with 'buildroot'
+                        key, which can be set in [general] section for default
+                        build root, or in [profile.xx] section for profile
+                        special build root
+  -C, --clean           delete old build root before initialization
+  --clean-once          clean the build environment only once when you start
+                        building multiple packages, after that use existing
+                        environment for all packages.
+  --clean-repos         clean up local repos created by gbs build before
+                        building packages
+  --fail-fast           stop build if one of packages fails
+  --keepgoing KEEPGOING
+                        If a package build fails, do not abort and
+                        continuebuilding other packages in the queue
+  --extra-packs EXTRA_PACKS
+                        specify extra packages to install to build root,
+                        Multiple packages can be separated by comma(,)
+  --keep-packs          keep unused packages in build root. without this
+                        option, unused packages will be removed from build
+                        root
+  --use-higher-deps     Which repo provides higher version deps, use it
+  --kvm                 Launch a kvm machine to build package instead of using
+                        chroot
+  --vm-memory VM_MEMORY
+                        The memory size of kvm machine
+  --vm-disk VM_DISK     The disk size of kvm machine
+  --vm-swap VM_SWAP     The swap size of kvm machine
+  --vm-diskfilesystem VM_DISKFILESYSTEM
+                        The filesystem type of kvm machine
+  --vm-initrd VM_INITRD
+                        The initrd of kvm machine
+  --vm-kernel VM_KERNEL
+                        The kernel of kvm machine
+  --not-export-source   Do not export source, use git source to build directly
+  --full-build          Download all the package sources except local package
+                        in gbs.conf, and do build
+  --deps-build          Download packages depends on local package from
+                        gbs.conf, and do build
+  --snapshot SNAPSHOT   Specify snapshot id to use
+  --failures-to-rebuild FAILURES_TO_REBUILD
+                        Specify the failure list of build, if the package
+                        build fails and the failure is in the list, the
+                        package will be rebuilt.Multiple failures can be
+                        separated by line (|).
+  --rebuild-count REBUILD_COUNT
+                        The rebuild count of package which depended on
+                        --failures-to-rebuild
+  --spec-check {warn,strict,off}
+                        scan spec files for dangerous commands before
+                        building. warn: print findings and continue (default);
+                        strict: abort build on critical findings; off: disable
+                        the scan
+
+speed up building options:
+  --incremental         build a package from the local git tree incremental.
+                        If the build fails, changes can be done directly to
+                        the source and build can continue from where it
+                        stopped
+  --no-configure        this option disables running configure scripts and
+                        auto generation of auto-tools to make incremental
+                        build possible. This requires the configure scripts in
+                        the spec to be referenced using the %configure,
+                        %reconfigure and %autogen macros
+  --noinit              working in offline mode. Start building directly
+  --ccache              use ccache to speed up rebuilds
+  --pkg-ccache PKG_CCACHE
+                        set ccache.tar file and enable ccache option , use
+                        ccache.tar file to speed up rebuilds
+  --icecream ICECREAM   Use N parallel build jobs with icecream
+  --threads THREADS     number of threads to build multiple packages in
+                        parallel
+  --skip-srcrpm         don't build source rpm file
+
+git-tree options:
+  -c COMMIT, --commit COMMIT
+                        specify a commit ID to build
+  --include-all         uncommitted changes and untracked files would be
+                        included while generating tar ball
+  --packaging-dir PACKAGING_DIR
+                        directory containing packaging files
+  --spec SPEC           specify a spec file to use. It should be a file name
+                        that GBS will find it in packaging dir
+  --upstream-branch UPSTREAM_BRANCH
+                        upstream branch
+  --upstream-tag UPSTREAM_TAG
+                        upstream tag format, '${upstreamversion}' is expanded
+                        to the version in the spec file. E.g.
+                        'v${upstreamversion}'
+  --fallback-to-native  Fall back to native packaging mode (i.e. create
+                        tarball directly from exported commit, not from
+                        upstream tag, and without patches) in case patch or
+                        upstream tarball generation fails.
+  --squash-patches-until SQUASH_PATCHES_UNTIL
+                        when generating patches, squash patches up to given
+                        commit-ish into one monolithic diff file. Format is
+                        the commit-ish optionally followed by a colon and diff
+                        filename base.
+  --no-patch-export     don't create patches between upstream and export-
+                        treeish, and create tar ball from the export-treeish
+                        instead of upstream branch
+
+worktree options:
+  --worktree WORKTREE   specify git worktree directory path(s) to build.
+                        Multiple worktrees can be separated by comma or
+                        specified multiple times. Each worktree will be built
+                        with its own GBS-ROOT directory (named with branch
+                        suffix). Example: --worktree=/path/to/wt1,/path/to/wt2
+                        or --worktree=/path/to/wt1 --worktree=/path/to/wt2
+
+package selection options:
+  --package-list PACKAGE_LIST
+                        specify a package list to be built. Multiple packages
+                        can be separated by comma(,). Note: packages are
+                        package dir name
+  --package-from-file PACKAGE_FROM_FILE
+                        specify a package list file. Packages listed in this
+                        file will be selected to be built. The format of file
+                        is one package dir for one line
+  --binary-list BINARY_LIST
+                        specify a package list to be built. Multiple packages
+                        can be separated by comma(,). Note: package names are
+                        from spec files, not the package dir name
+  --binary-from-file BINARY_FROM_FILE
+                        specify a binary package list file. Packages listed in
+                        this file will be selected to be built. The format of
+                        binary-list file is one package for one line, and only
+                        binary RPM name is accepted
+  --exclude EXCLUDE     specify a package list to be excluded for building.
+                        Multiple packages can be separated by comma(,)
+  --exclude-from-file EXCLUDE_FROM_FILE
+                        specify an exclude package list text file, the format
+                        is one package in one line, and only binary RPM
+                        package name is accepted. Packages listed in this file
+                        will be skipped to be built.
+  --deps                build specified packages and all packages they depend
+                        on, such as A depends B,C,D, first build B,C,D and
+                        then build A
+  --rdeps               build specified packages and all packages depend on
+                        them, such as A B C depends D, first build D and then
+                        build A,B,C
+  --disable-debuginfo   Do not create debuginfo packages when building
+  --style STYLE         specify source type: git, or tar, default is git
+  --export-only         only export, not building
+  --preordered-list PREORDERED_LIST
+                        List of package to support manual ordering, either
+                        comma separated string or local file location.
+  --profiling PROFILING
+                        Profiling report location to be used package ordering.
+  --with-submodules     build project with submodules togerther
+  --release RELEASE     Override Release in spec file
+  --nocumulate          without cumulative build

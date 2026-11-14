@@ -1,0 +1,77 @@
+{
+  "tool_sha256": "67ad21faba787d276a80673c1f324f7c0591d28d76bd37a8bd57de0d86426be6",
+  "debug_sha256": "d8d389d01f8f04dcf55d7fd723c172a1121e57db89a93cb4a7d90ba2a71050b8",
+  "build_ids": {
+    "runtime": [],
+    "debug": []
+  },
+  "debuglink": {
+    "name": "llvm-profgen.debug",
+    "recorded_crc": 2847750365,
+    "actual_crc": 2847750365,
+    "match": true
+  },
+  "extract": [
+    {
+      "rpm": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-22.1.8-1.x86_64.rpm",
+      "patterns": [
+        "./usr/bin/llvm-profgen",
+        "./usr/bin/llvm-profdata"
+      ],
+      "rpm2cpio_exit": 0,
+      "cpio_exit": 0
+    },
+    {
+      "rpm": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/RPMS/libllvm-22.1.8-1.x86_64.rpm",
+      "patterns": [
+        "./usr/lib64/libLLVM*"
+      ],
+      "rpm2cpio_exit": 0,
+      "cpio_exit": 0
+    },
+    {
+      "rpm": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/RPMS/llvm-debuginfo-22.1.8-1.x86_64.rpm",
+      "patterns": [
+        "./usr/lib/debug/usr/bin/llvm-profgen.debug"
+      ],
+      "rpm2cpio_exit": 0,
+      "cpio_exit": 0
+    }
+  ],
+  "tool_checks": [
+    {
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-release-20261114c/extracted/usr/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-release-20261114c/extracted/usr/bin/llvm-profgen",
+        "--version"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/lib64/ld-linux-x86-64.so.2",
+        "--library-path",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-release-20261114c/extracted/usr/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/lib64:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib64",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-release-20261114c/extracted/usr/bin/llvm-profgen",
+        "--help"
+      ],
+      "exit": 0
+    }
+  ],
+  "help_options": [
+    "--ip-samples",
+    "--ip-event",
+    "--binary-match-regex",
+    "--ip-weight",
+    "--ip-aggregation",
+    "--ip-head-samples",
+    "--ip-zero-fill",
+    "--ip-skid",
+    "--quality-report",
+    "--ip-max-lost-ratio"
+  ],
+  "rpm_count": 23,
+  "rpm_bytes": 1436753631
+}
