@@ -1,0 +1,54 @@
+{
+  "old_patch_sha256": "297133bda02da82f55c6007b3bd6e4e3391176596162dfb7b068f7d2d191416c",
+  "new_patch_sha256": "0c94e54d252ad1ecbc625f629af090b257edba4cd3753d76352fd031486243b6",
+  "patched_spec_sha256": "0e611e7eb95ada2c024dbea379821c5b109383f1545bcb0c86ef85f238740c27",
+  "commands": [
+    [
+      "git",
+      "-c",
+      "gc.auto=0",
+      "-c",
+      "maintenance.auto=false",
+      "clone",
+      "--shared",
+      "--no-checkout",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg-fix1"
+    ],
+    [
+      "git",
+      "-c",
+      "gc.auto=0",
+      "-c",
+      "maintenance.auto=false",
+      "-C",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg-fix1",
+      "checkout",
+      "--detach",
+      "5fe76358596f66e955f005094e6f34ca525ab23d"
+    ],
+    [
+      "git",
+      "-c",
+      "gc.auto=0",
+      "-c",
+      "maintenance.auto=false",
+      "-C",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg-fix1",
+      "apply",
+      "--check",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/profiling-fix1.patch"
+    ],
+    [
+      "git",
+      "-c",
+      "gc.auto=0",
+      "-c",
+      "maintenance.auto=false",
+      "-C",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/ffmpeg-fix1",
+      "apply",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/profiling-fix1.patch"
+    ]
+  ]
+}

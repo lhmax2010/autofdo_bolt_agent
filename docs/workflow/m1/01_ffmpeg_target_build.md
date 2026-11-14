@@ -1,6 +1,6 @@
 # M1 首项交付：FFmpeg目标构建（2026-11-14）
 
-> 最新结果见第7节：RPi4已查询；Thumb基础设施中断，A32在configure阶段失败；RPi5用户周一确认后提供。第1–6节保留为第一次预检的历史记录。
+> 最新结果见第8节：获准的两行空格修正已应用；Thumb/A32均进入编译，但因构建命令中的V=1干扰调试包处理而失败。hq未改；RPi5仍等待周一信息。第1–7节保留历史记录。
 
 ## 1. 停止点
 
@@ -207,3 +207,109 @@ A32每60秒保存meminfo原文，最低MemAvailable **24,064,823,296 B**，cgrou
 Thumb监督失败期间60秒监测缺口如实保留：停止前实读cgroup峰值 **661,307,392 B**，不能宣称连续监测完整或缺口内最低可用内存已知。中断后没有重跑。归档两个轻任务峰值分别562,987,008 B、271,618,048 B，最低MemAvailable分别23,914,958,848 B、23,798,030,336 B，均退出0、OOM0。本轮上述有记录任务最高cgroup峰值2,010,705,920 B；不把scope峰值相加或冒充宿主峰值。
 
 两构建已结束，scope无残留；所有root、失败日志、原证据保留。没有碰板上状态、安装板上RPM、读取真实profile、跑质量矩阵/性能测试或推送Gerrit。主机SDB服务仍沿用第6节记录的边界例外，不声称没有宿主工具日志。hq **498724fed8796da4190a458c01b95b9f65e334d5** 保持不变；Thumb与AArch64成功的更新前提尚未满足。下一步等待A32失败处理指令与周一RPi5信息。
+
+## 8. 授权修正fix1与两变体构建（2026-11-14，失败停止）
+
+### 8.1 只改新增两行，其他源码/spec保持原样
+
+PM授权在补丁新增的--disable-thumb与--enable-thumb之后各补一个空格。新文件为temp/m1-target-20261114/profiling-fix1.patch；原文件、原检出、旧buildroot全部保留。
+
+~~~diff
+-+CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --disable-thumb"
+++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --disable-thumb "
+-+CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-thumb"
+++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-thumb "
+~~~
+
+| 文件 | SHA-256 |
+|---|---|
+| 原profiling.patch | 297133bda02da82f55c6007b3bd6e4e3391176596162dfb7b068f7d2d191416c |
+| profiling-fix1.patch | 0c94e54d252ad1ecbc625f629af090b257edba4cd3753d76352fd031486243b6 |
+| 新检出应用后的spec | 0e611e7eb95ada2c024dbea379821c5b109383f1545bcb0c86ef85f238740c27 |
+
+[新补丁](evidence/03/profiling-fix1.patch)、[精确diff](evidence/03/fix1/patch-diff.txt)、[两行断言](evidence/03/fix1/patch-validation.json)。其余新增内容逐项检查：CFLAGS附加值前有空格；profile_flags各选项分开；profile_use作为独立CFLAGS项；CC/CXX不是选项字符串拼接；extra-ldflags为独立configure参数。未发现另一处同类粘连，不作额外修改。[检查记录](evidence/03/fix1/patch-review.json)。
+
+在全新temp/m1-target-20261114/ffmpeg-fix1检出5fe76358596f66e955f005094e6f34ca525ab23d，git apply --check与git apply均退出0。完整命令和SHA见[准备记录](evidence/03/fix1/source-prepare.json)、[原日志](evidence/03/fix1/prepare.log)。构建结束后重新核验新旧patch/spec均未变化，[最终核对](evidence/03/final-source-check.json)。
+
+### 8.2 构建命令、退出码与错误归因
+
+沿用ffmpeg-armv7l.conf，SHA 2bc10fa0e93c9d094481129a9bc88f32974d44eeff2635cba2eef8a2fcf966b7；Unified20261104.125239 / Base20261030.120529不变。全新root分别为：
+
+- temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114-FIX1
+- temp/GBS-ROOT-FFMPEG-M1-A32-20261114-FIX1
+
+实际执行的GBS命令如下，工作目录为ffmpeg-fix1；没有incremental/short-circuit：
+
+~~~sh
+gbs -c "$WORKDIR/temp/m1-target-20261114/ffmpeg-armv7l.conf" \
+  build -A armv7l --spec ffmpeg.spec --include-all \
+  --buildroot "$WORKDIR/temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114-FIX1" \
+  --threads 1 --define '_smp_mflags -j4 V=1' --define 'profile_isa thumb'
+
+gbs -c "$WORKDIR/temp/m1-target-20261114/ffmpeg-armv7l.conf" \
+  build -A armv7l --spec ffmpeg.spec --include-all \
+  --buildroot "$WORKDIR/temp/GBS-ROOT-FFMPEG-M1-A32-20261114-FIX1" \
+  --threads 1 --define '_smp_mflags -j4 V=1' --define 'profile_isa a32'
+~~~
+
+**上述V=1放置方式是执行器错误，不是推荐命令。**它由本任务执行器沿用上一轮命令引入，不是PM要求，也不是补丁新增内容。第7节“V=1只要求显示实际命令”的判断被本次日志证伪：_smp_mflags还进入find-debuginfo.sh，该脚本把V=1当作路径。因此不能将本轮打包失败归咎于修正版补丁。
+
+两变体串行由独立systemd service监督，每个构建scope 10G/400%、nice19/ionice-c3、启动MemAvailable≥14GiB，60秒保存meminfo/cgroup峰值。没有使用上一轮失效的nohup方式。[监督启动证据](evidence/03/fix1/supervisor-start-proof.txt)、[监督脚本](evidence/03/fix1/build_supervisor.py)、[构建脚本](evidence/03/fix1/build_worker.py)。
+
+| 变体 | 起止时间（UTC−08） | 墙钟（秒） | GBS退出码 | 结果 |
+|---|---|---:|---:|---|
+| Thumb | 05:26:02.446061–05:30:51.033144 | 288.587 | 1 | 已编译/链接，调试包处理失败 |
+| A32 | 05:30:51.117642–05:35:39.820129 | 288.702 | 1 | 已编译/链接，同样失败 |
+
+两变体实际构建墙钟合计577.289秒（约9分37秒，不含收尾取证）。精确起止与真实退出码以[Thumb结果](evidence/03/fix1/build-thumb/result.json)、[A32结果](evidence/03/fix1/build-a32/result.json)为准；GBS及scope退出码均为1。每份日志有带时间的“已结束/失败”和ALL-END。两变体失败后都未重试、未进一步修改补丁/spec。
+
+共同失败原文（完整行号分别见[Thumb摘录](evidence/03/fix1/build-thumb/failure-excerpts.txt)、[A32摘录](evidence/03/fix1/build-a32/failure-excerpts.txt)）：
+
+~~~text
++ /usr/lib/rpm/find-debuginfo.sh -j4 V=1 --build-id-seed 8.0.1-1 ... -S debugsourcefiles.list ...
+/usr/lib/rpm/find-debuginfo.sh: line 241: V=1/debugsources.list: No such file or directory
+/usr/lib/rpm/find-debuginfo.sh: line 242: V=1/debugfiles.list: No such file or directory
+error: Could not open %files file .../debugsourcefiles.list: No such file or directory
+~~~
+
+另有独立诊断，不能遗漏：
+
+~~~text
+/usr/lib/rpm/debugedit: ...libavcodec.so.62.11.100: Unknown debugging section .debug_line_str
+/usr/lib/rpm/debugedit: ...libavcodec.so.62.11.100: DWARF version 5 unhandled
+~~~
+
+libavutil也有同类DWARF5诊断。后续候选处理是让_smp_mflags只包含-j4，把verbose设置放在只影响make的环境/参数中；这是执行器修正方向，本轮不执行重建。debugedit兼容性仍须核查，不能承诺移除V=1后一定成功，也不能修改spec去绕过当前诊断。根据本轮失败门禁，保留原件后停止。
+
+### 8.3 编译参数核对与未完成的产物验收
+
+从每个完整日志提取实际clang命令，以最后出现的-mthumb/-marm核对有效ISA（平台optflags可能先含-mthumb）。每侧560条libav系列C源码编译命令均包含两项profiling选项；libavcodec/libavutil各保存2条完整原文。
+
+| 变体 | 实际C编译命令 | profiling两项 | 有效ISA | 编译参数核对 |
+|---|---:|---|---|---|
+| Thumb | 560 | 全部包含 | -mthumb | 通过（限C编译命令） |
+| A32 | 560 | 全部包含 | -marm | 通过（限C编译命令） |
+
+[Thumb结果](evidence/03/fix1/build-thumb/compile-validation.json)及[原文](evidence/03/fix1/build-thumb/compile-excerpts.txt)；[A32结果](evidence/03/fix1/build-a32/compile-validation.json)及[原文](evidence/03/fix1/build-a32/compile-excerpts.txt)。
+
+每侧另有54条手写.S的clang汇编命令，没有上述CFLAGS中的profiling选项或显式-mthumb/-marm；不将它们冒充C编译参数通过，不声称Thumb库全部是Thumb代码。[Thumb汇编命令](evidence/03/fix1/build-thumb/assembly-excerpts.txt)、[A32汇编命令](evidence/03/fix1/build-a32/assembly-excerpts.txt)。第一版日志检查错误地对C和.S统一断言，退出1；修正检查器后分开报告，原失败日志和两个检查器都保留。只修取证脚本，没有修改构建参数、补丁或重跑构建。
+
+两root的二进制RPM清单均为空：[Thumb](evidence/03/fix1/build-thumb/rpm-manifest.json)、[A32](evidence/03/fix1/build-a32/rpm-manifest.json)。因此**打包后的libavcodec/libavutil SHA-1 build-id与debuginfo一致性尚未验收**；不以构建中间产物代替。无成功RPM/library SHA清单。AArch64与with_autofdo=1消费构建本轮均未启动。
+
+### 8.4 原件、依赖、资源与交付状态
+
+完整构建日志各超过1MB，保留在temp/m1-target-20261114/fix1/build-{thumb,a32}/build.log，不进git。SHA：
+
+- Thumb：59cf7a4e76babb1e02546683f0f0281d21322bbc21ae7ea459cfa0fa28658183
+- A32：a29525e1989e9eb90a4ca7f82dec68ec3c31f9d6504012bc02adfe6cb5d31f5f
+
+所有证据路径、大小、SHA见[source-index](evidence/03/source-index.json)。本次108个依赖与先前归档集合相同，仍为271,003,299 B；复制核验完成，新增manifest-fix1-thumb.json与manifest-fix1-a32.json，旧manifest不改。[归档摘要](evidence/03/archive-summary.json)。
+
+| 变体 | 最低MemAvailable（B） | cgroup memory.peak（B） | max / oom / oom_kill |
+|---|---:|---:|---|
+| Thumb | 21,003,026,432 | 2,200,326,144 | 0 / 0 / 0 |
+| A32 | 21,004,312,576 | 2,222,645,248 | 0 / 0 / 0 |
+
+没有资源门禁暂停或终止；每60秒原始meminfo和resources.jsonl已保存。收尾取证峰值566,599,680 B、退出0，早先检查器退出1原文同时保留。[构建与监督单元全部inactive/dead](evidence/03/units-final.txt)。新worker所需的fix1/gbs-tmp目录在启动后补建，GBS当时仍处于正常导出/元数据阶段；配置指向的原gbs-tmp始终存在，日志没有因此失败，时间顺序不隐瞒。
+
+本轮只修改main报告/STATUS并添加新证据，不改既有证据、设计、原patch/spec/root，不操作任何开发板、不查询RPi5、不推Gerrit、不读profile。hq更新前提未满足，保持498724fed8796da4190a458c01b95b9f65e334d5，未替换hq补丁、未新增配置、未将任何Not verified改为已验证。完成失败取证后停止，等待构建执行器与打包诊断处理指令。

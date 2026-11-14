@@ -1,0 +1,15 @@
+--- profiling.patch
++++ profiling-fix1.patch
+@@ -21,10 +21,10 @@
+ +%ifarch armv7l
+ +%if "%{profile_isa}" == "a32"
+ +export CFLAGS="$CFLAGS -marm"
+-+CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --disable-thumb"
+++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --disable-thumb "
+ +%else
+ +export CFLAGS="$CFLAGS -mthumb"
+-+CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-thumb"
+++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-thumb "
+ +%endif
+ +%endif
+  

@@ -1,0 +1,44 @@
+--- a/packaging/ffmpeg.spec
++++ b/packaging/ffmpeg.spec
+@@ -1,2 +1,12 @@
++# Profiling and optional sample-profile consumption (non-LTO).
++%{!?profile_isa:%global profile_isa thumb}
++%global profile_flags -fdebug-info-for-profiling -funique-internal-linkage-names
++%global profile_use %{nil}
++%if 0%{?with_autofdo}
++Source2000: autofdo.extbinary
++%global profile_use -fprofile-sample-use=%{SOURCE2000}
++%endif
++BuildRequires: clang
++
+ Name:       ffmpeg
+ Summary:    AV codec lib
+@@ -231,5 +241,14 @@
+ 
+ CFLAGS="%{optflags} -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "; export CFLAGS
+-export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV"
++export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV %{profile_flags} %{profile_use}"
++%ifarch armv7l
++%if "%{profile_isa}" == "a32"
++export CFLAGS="$CFLAGS -marm"
++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --disable-thumb "
++%else
++export CFLAGS="$CFLAGS -mthumb"
++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-thumb "
++%endif
++%endif
+ 
+ %ifarch %{arm}
+@@ -238,5 +257,5 @@
+ 
+ export AR=%{__ar} RANLIB=%{__ranlib}
+-export CC=%{__cc} CXX=%{__cxx}
++export CC=clang CXX=clang++
+ 
+ ./configure \
+@@ -245,4 +264,5 @@
+     --shlibdir=%{_libdir} \
+     --datadir=%{_datadir}/%{name} \
++    --extra-ldflags="-Wl,--build-id=sha1" \
+     $CONFIGURE_OPTIONS
+ 

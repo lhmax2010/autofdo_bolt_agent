@@ -1,0 +1,9 @@
+['systemctl', '--user', 'show', 'm1-ffmpeg-supervisor-fix1-20261114.service', '-p', 'ExecStart', '-p', 'WorkingDirectory', '-p', 'MemoryMax', '-p', 'CPUQuotaPerSecUSec', '-p', 'ActiveState', '-p', 'MainPID']
+MainPID=114731
+ExecStart={ path=/usr/bin/nice ; argv[]=/usr/bin/nice -n 19 ionice -c3 python3 -u /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/fix1/build_supervisor.py ; ignore_errors=no ; start_time=[Sat 2026-11-14 05:26:02 PST] ; stop_time=[n/a] ; pid=114731 ; code=(null) ; status=0/0 }
+CPUQuotaPerSecUSec=1s
+MemoryMax=3221225472
+WorkingDirectory=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent
+ActiveState=active
+
+EXIT 0

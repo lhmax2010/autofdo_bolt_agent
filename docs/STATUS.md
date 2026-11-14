@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1补丁fix1构建停止（2026-11-14）
+
+- [目标报告第8节](workflow/m1/01_ffmpeg_target_build.md)：授权的两行末尾空格修正已完成，fix1 SHA 0c94e54d252ad1ecbc625f629af090b257edba4cd3753d76352fd031486243b6，新检出git apply --check通过，其余新增内容无同类粘连。
+- 独立service串行监督新root：Thumb 288.587秒、A32 288.702秒，真实GBS退出码均1。两侧各560条libav C编译命令含profiling两项及正确最终ISA；54条.S单列。打包因执行器把V=1放进_smp_mflags、污染find-debuginfo.sh参数而失败，不是两行空格修正失败。另保留debugedit的DWARF5不支持诊断，不承诺去掉V=1即可成功。
+- 未进一步改patch/spec或重试；没有二进制RPM，运行/调试库build-id验收未完成。108个依赖复核归档，原件与全部失败日志保留。峰值2,222,645,248 B、最低MemAvailable21,003,026,432 B，无OOM或资源门禁停止；监督/构建单元均结束。
+- hq保持498724f不变（两个变体成功前提未满足）；本轮不接板、不查RPi5、不选择AArch64仓库、不做消费构建、不推Gerrit。按失败门禁停止，等待执行器/打包问题处理指令。证据workflow/m1/evidence/03/。
+
 ## M1目标构建恢复后停止（2026-11-14）
 
 - [目标构建报告第7节](workflow/m1/01_ffmpeg_target_build.md)：RPi4实读armv7l、6.12.80-arm-rpi4-v7l，镜像Unified20261104.160709；对应snapshot返回404，按规则使用Unified20261104.125239/Base20261030.120529。RPi5用户周一确认后提供，本轮AArch64不启动。
