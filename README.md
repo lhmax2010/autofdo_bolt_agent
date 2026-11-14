@@ -264,7 +264,7 @@ Use effective cooling, record frequency/temperature during runs and preserve fir
 
 ## 8. End-to-end manual AutoFDO: FFmpeg
 
-**Performance gains not yet validated.** The [FFmpeg example](examples/ffmpeg/README.md) supplies a spec patch and exact fixed source revision in Gerrit platform/upstream/ffmpeg. It appends profiling DWARF/unique-name flags, selects Thumb/A32, adds SHA-1 build-ID and optionally consumes a sample profile inside the build root. Patch application is verified; full builds of this newly packaged example and its consuming variant are Not verified. The guide identifies the missing target-repository configuration rather than silently using the host-tool configuration.
+**Performance gains not yet validated.** The [FFmpeg example](examples/ffmpeg/README.md) supplies a spec patch and exact fixed source revision in Gerrit platform/upstream/ffmpeg. It appends profiling DWARF/unique-name flags, selects Thumb/A32, adds SHA-1 build-ID and optionally consumes a sample profile inside the build root. ARMv7 Thumb and A32 baseline builds are verified using the [target GBS configuration](examples/gbs/ffmpeg-target.conf.in): Unified 20261104.125239 / Base 20261030.120529, clang 22.1.8-4.1, fresh roots, -j2, exits 0. Measured times were 303.08 and 314.09 seconds. The example gives exact commands and runtime/debug build-ID checks; packaged libavcodec/libavutil identities match and their DWARF/line tables are readable. AArch64 and profile-consuming builds remain **Not verified**.
 
 ### Training and test media
 
@@ -423,4 +423,5 @@ Failures preserve an old profile. Non-path-conflict failures atomically replace 
 - ARMv7 pseudo-probe compilation has a known crash; pseudo-probe, IP perf.data input and kernel profiles are outside delivery.
 - BOLT is planned for RPi5 only and is not provided by the delivered tool package.
 - Current board condition, a fresh host provisioning recipe, standalone lit recipe and full consumption of the new FFmpeg example are not verified as detailed above.
+- FFmpeg ARMv7 packaging emitted eight nonfatal debugedit DWARF 5 diagnostics per variant. Runtime/debug IDs and readable sections passed for libavcodec/libavutil; complete debugsource/path rewriting is not established. See the [FFmpeg limitations](examples/ffmpeg/README.md#known-limitations).
 - Detailed raw evidence is retained by the project team.
