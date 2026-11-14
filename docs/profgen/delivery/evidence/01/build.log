@@ -1,0 +1,16 @@
+START 2026-11-14T00:39:53.720664-08:00 ['systemd-run', '--user', '--scope', '--unit=profgen-release-build-20261114', '-p', 'MemoryMax=10G', '-p', 'CPUQuota=400%', 'nice', '-n', '19', 'ionice', '-c3', 'python3', '-u', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/profgen-release-20261114/build_worker.py']
+Running as unit: profgen-release-build-20261114.scope; invocation ID: 24043343d7c644dab0231082f4881191
+GBS-START 2026-11-14T00:39:54.011079-08:00 PID 25280 COMMAND ['gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/gbs/gbs_llvm_x86_baseline.conf', 'build', '-A', 'x86_64', '--spec', 'llvm.spec', '--buildroot', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114', '--threads', '1', '--define', '_smp_mflags -j4', '--define', 'mlgo_build_jobs 4']
+RESOURCE 2026-11-14T00:39:54.011616-08:00
+               total        used        free      shared  buff/cache   available
+Mem:           31540        9912        2393         692       20384       21628
+Swap:           4095           0        4095
+ 00:39:54 up  4:19,  1 user,  load average: 2.01, 1.86, 1.06
+info: generate repositories ...
+warning: No local package repository for arch x86_64
+error: <gbs>no available repositories found for arch x86_64 under the following repos:
+https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261026.051209/repos/standard/packages/
+https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261027.063617/repos/standard/packages/
+GBS-END 2026-11-14T00:40:01.023622-08:00 EXIT 1
+已结束 2026-11-14T00:40:01.030441-08:00 失败 SCOPE_EXIT 1
+ALL-END 2026-11-14T00:40:01.030441-08:00 失败

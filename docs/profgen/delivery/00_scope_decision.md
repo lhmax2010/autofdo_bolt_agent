@@ -39,3 +39,13 @@
 - 当前Gerrit sandbox项目为 `platform/upstream/llvm`；分支与推送人待确认，commit ID待推送。本轮不推送任何LLVM/Gerrit引用、不创建hq，不接板，不登记修正案3，不运行质量矩阵或性能测量。
 
 完成本登记并推送后停止，等待基线裁决；这不是有限范围发布已经完成的声明。
+
+## 4. 发布基线（PM决定，2026-11-14）
+
+发布基线采用 `f999bd406c0a70fe8107aa992164fe6945c5d46a`（即查询时 accepted/tizen_base 与 accepted/tizen_base_x 的 tip；也是补丁1–9开发与验收所用基线），不基于 tizen_base 新 tip `61ef5d31ca91025c414c748477bef0c64ddfa67c` 构建。
+
+理由：新增3个提交只改打包（重新启用clang bootstrap + ThinLTO及相关脚本），不涉及llvm-profgen；以已接受快照为基线，发布验收可与既有证据直接对应，避免把打包策略变化混入本次交付。
+
+新增提交为：`cf4b6777d056131e2534ecb460c5575327d99646`（修改llvm.spec并新增native静态归档脚本）、`13c3e223d9e1b35e4affb55255c5042f8c940f35`（修改该脚本）、`61ef5d31ca91025c414c748477bef0c64ddfa67c`（合并提交）。路径核查见[分支报告](../../handover/02_llvm_branch.md)。
+
+本决定解除第3节的分支停止门禁。允许在独立临时树对61ef5d31依次git am补丁1–9做前向兼容核对（不构建、不改补丁）；发布树从src/llvm本地克隆并检出f999bd40，按原序应用同一补丁，保留git am产生的提交作为未来sandbox候选。原开发树及其中spec测试改动保持原状。本轮允许执行已授权的正常非增量GBS、产物身份和固定回归；仍不接板、不推任何LLVM/Gerrit分支、不登记修正案3、不计算质量受控量。

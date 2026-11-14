@@ -30,6 +30,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 发布基线已决定；正常发布构建被固定仓库404阻塞（2026-11-14，已停止）
+
+- [范围决定§4](profgen/delivery/00_scope_decision.md)：PM指定f999bd406c0a70fe8107aa992164fe6945c5d46a，不混入tizen_base新tip的打包策略；上轮分支停止门禁已解除，下方旧等待记录为历史。
+- [发布记录](profgen/delivery/01_release.md)：新tip独立树9/9补丁干净应用，未构建；f999独立发布树9/9应用，HEAD c8942ae1b53099a78a97dca2b64427af6e58432b。358文件与补丁9开发树SHA一致，229改动文件均在C2范围；发布spec原样，原开发树与spec测试修改保留。
+- 正常非增量GBS一次尝试，独立新buildroot，10G/400%、-j4；墙钟7.310秒，GBS退出1，尚未编译。两个固定Tizen依赖snapshot均HTTP404；未切换仓库、改spec、重试或用增量RPM替代。完整日志含时间、真实退出码及ALL-END，见delivery/evidence/01/。
+- 无发布RPM/新工具；产物身份、version/help、发布C1及素材/14历史输入回归均未执行。lit以源码等价与补丁9既有84 PASS/1 UNSUPPORTED/1 XFAIL为替代依据，不称本轮重新运行通过。构建scope峰值49,094,656 B；已记录最低MemAvailable22,680,793,088 B；无OOM/内存终止，scope已结束。
+- 等待固定依赖快照恢复，或PM批准并核验可重建相同依赖的归档来源。统计质量等价与性能收益未验证；不登记修正案3、不接板、不推LLVM/Gerrit、不建hq。本轮基线/发布准备与失败证据同commit推送main。
+
 ## 有限范围决定已登记（2026-11-14；等待新tip基线裁决）
 
 - 第一批提交e0beb1bce1a067cc2be0ea9d0817cd7967325155已推送main：长期发布规则、[LLVM分支查询](handover/02_llvm_branch.md)、workflow设计v0.1与reviews目录。
