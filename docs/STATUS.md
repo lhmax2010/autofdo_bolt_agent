@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1目标构建预检（2026-11-14，两板不可查询，尚未构建）
+
+- [目标构建报告](workflow/m1/01_ffmpeg_target_build.md)：两次sdb devices均无设备，无法取得当前镜像，不能跳过“当前镜像snapshot优先”规则。已请求设备查询信息；三个变体均未启动，未生成发布配置或依赖RPM存档，hq保持已审阅提交498724f不变。
+- 独立FFmpeg基线5fe7635已应用hq原patch，SHA与原件一致，未改src或绕过spec；回退候选Unified20261104.125239/Base20261030.120529元数据通过，Base目标clang为22.1.8-4.1（候选而非实际构建版本）。
+- PMUv3在Gerrit sandbox/lhmax2025/kernel_optimization找到0fac5de6a63091d141ad1cd3ed9d9e92b8dde708（2026-10-28）；本次检查的tizen/tizen_dev/accepted/tizen_unified/accepted/tizen_unified_toolchain未包含。不能称已合入accepted，也不能据此推断当前镜像。
+- 未执行板上命令、GBS、Gerrit推送、安装或profile消费；第一次sdb devices自动启动了主机SDB服务，边界情况见报告。待设备可查询后继续M1，不修改hq。
+
 ## HQ审阅通过（2026-11-14，已审阅，可发布）
 
 - PM已审阅通过hq提交 **498724fed8796da4190a458c01b95b9f65e334d5**；当前状态由“待PM审阅”改为 **已审阅，可发布**。可交给总部，实际发送时间由用户决定；本次登记不表示已经发送。
