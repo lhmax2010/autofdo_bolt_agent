@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1周末J2重建完成（2026-11-14；hq待PM审阅）
+
+- [目标报告第9节](workflow/m1/01_ffmpeg_target_build.md)：历史成功日志Thumb/A32各8条DWARF5 debugedit诊断、退出0；本轮去掉V=1，独立HOME/TMPDIR/cache/root、-j2、6G/5G高水位/200% scope串行重建成功，Thumb303.082秒、A32 314.093秒，GBS均0。
+- 两变体各23个二进制RPM，libavcodec/libavutil打包runtime/debug的40位SHA1 build-id一致，.debug_info/.debug_line可读。每侧libavcodec含DWARF4/5 CU 313/52，libavutil 99/2；各8条debugedit诊断非致命，不声称debugsource或路径改写完整。纯加载profgen可选检查跳过，未做profile消费。
+- 两次启动门禁立即通过，等待/资源停止/重试均0；最低MemAvailable25,751,736,320 B，最低磁盘206,662,979,584 B，最大load1=2.4722；构建峰值2,196,312,064 B，无high/max/OOM事件，所有任务单元结束。未调整其他构建或系统设置，不操作板子/RPi5，不推Gerrit，不删旧目录。
+- hq已更新为 **2c962454a4186a40ba8e9fabb7df0e5b8ae1cb59**，状态 **待 PM 审阅**；4个授权文件，配置模板@PROJECT@、-j2命令与已验证身份/时长，AArch64和消费仍Not verified。check_hq 0违规/0警告，22链接有效；原文/命令/SHA/RPM清单见workflow/m1/evidence/04/。完成后停止，等待周一PM处理。
+
 ## 周报入库备份（2026-11-14）
 
 - [2026-11-14周报](reports/weekly/2026-11-14_weekly_report.md)已从用户指定的Downloads文件以mv移入，内容未修改；移动前、后SHA-256均为 e6487ba0241367e79036ee0593ce876db3591d0b61edc223e0841e1aa2ca390a。周报索引见[README](reports/weekly/README.md)。仅更新main，不修改hq、不推送Gerrit。

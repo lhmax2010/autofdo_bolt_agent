@@ -1,0 +1,2066 @@
+START 2026-11-14T06:22:18.671997-08:00 ['systemd-run', '--user', '--scope', '--unit', 'm1-weekend-j2-thumb-a0', '-p', 'MemoryMax=6G', '-p', 'MemoryHigh=5G', '-p', 'CPUQuota=200%', 'nice', '-n', '19', 'ionice', '-c3', 'python3', '-u', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/worker.py', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/thumb-attempt-0', 'thumb', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0']
+Running as unit: m1-weekend-j2-thumb-a0.scope; invocation ID: 434e660ba9964c9b8cf435481b116bbc
+GBS-START 2026-11-14T06:22:18.730309-08:00 ['gbs', '-c', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/ffmpeg-armv7l.conf', 'build', '-A', 'armv7l', '--spec', 'ffmpeg.spec', '--include-all', '--buildroot', '/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0', '--threads', '1', '--define', '_smp_mflags -j2', '--define', 'profile_isa thumb']
+warning: Created a new config file /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/home/.gbs.conf. Please check and edit your authentication information.
+warning: plaintext password in config files will be replaced by encoded ones
+info: generate repositories ...
+warning: No local package repository for arch armv7l
+info: build conf has been downloaded at:
+      /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/gbs-tmp/linhao-gbs/tizen_unified_standard.conf
+[32minfo: [0mstart building packages from: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/ffmpeg (git)
+2026-11-14 06:22 -0800
+gbs 2.1.1
+[32minfo: [0mprepare sources...
+[32minfo: [0mstart export source from: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/ffmpeg ...
+info: the following uncommitted changes would be included:
+   packaging/ffmpeg.spec
+info: Creating (native) source archive ffmpeg-8.0.1.tar.gz from '30586e61b8b9459dc667729e99e0da8d5ba74def'
+info: package files have been exported to:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/sources/tizen_unified_standard/ffmpeg-8.0.1-1
+[32minfo: [0mretrieving repo metadata...
+[32minfo: [0mparsing package data...
+[32minfo: [0mbuilding repo metadata ...
+[32minfo: [0mresolving skipped packages ...
+[32minfo: [0mpackage dependency resolving ...
+[32minfo: [0mthere is no circle in 1 packages
+[32minfo: [0m*** [1/1] building ffmpeg-8.0.1-1 armv7l tizen_unified_standard (worker: 0) ***
+logging output to /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS/scratch.armv7l.0/.build.log...
+[    0s] on X86_64, no limit mem size
+[    0s] Using BUILD_ROOT=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS/scratch.armv7l.0
+[    0s] Using BUILD_ARCH=armv7l:armv7el:armv6l:armv5tejl:armv5tel:armv5l:armv4tl:armv4l:armv3l:noarch
+[    0s] 
+[    0s] 
+[    0s] linhao-linux started "build ffmpeg.spec" at Sat Nov 14 14:22:32 UTC 2026.
+[    0s] 
+[    0s] 
+[    0s] processing recipe /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/sources/tizen_unified_standard/ffmpeg-8.0.1-1/ffmpeg.spec ...
+[    0s] init_buildsystem --configdir /usr/lib/build/configs --cachedir /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/cache --define _smp_mflags -j2 --define profile_isa thumb --repository /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/repos/tizen_unified_standard/armv7l/RPMS --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/ --repository https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/ /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/sources/tizen_unified_standard/ffmpeg-8.0.1-1/ffmpeg.spec ...
+[    0s] initializing /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS/scratch.armv7l.0/.srcfiles.cache ...
+[    0s] /usr/lib/build/createdirdeps --oldfile /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS/scratch.armv7l.0/.srcfiles.cache /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/repos/tizen_unified_standard/armv7l/RPMS
+[    0s] /usr/lib/build/createrepomddeps --cachedir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/cache https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/
+[    1s] /usr/lib/build/createrepomddeps --cachedir=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/cache https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261104.125239/repos/standard/packages/
+[    3s] expanding package dependencies...
+[    3s] copying qemu
+[    4s]  /usr/bin/qemu-arm-binfmt /usr/bin/qemu-arm-static /usr/bin/qemu-arm64-binfmt /usr/bin/qemu-arm64-static /usr/bin/qemu-riscv32-binfmt /usr/bin/qemu-riscv32-static /usr/bin/qemu-riscv64-binfmt /usr/bin/qemu-riscv64-static /usr/sbin/qemu-binfmt-conf.sh
+[    4s] 
+[    4s] registering binfmt handlers for cross build
+[    4s] calculating packages to download...
+[    4s] [1/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/app-rootstrap-checker-1.0.0-1.1.armv7l.rpm ... 
+[    5s] [2/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/autoconf-2.71-1.16.noarch.rpm ... 
+[    7s] [3/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/automake-1.16.5-1.16.noarch.rpm ... 
+[    8s] [4/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/bash-3.2.57-1.15.armv7l.rpm ... 
+[   10s] [5/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/binutils-2.43-1.16.armv7l.rpm ... 
+[   11s] [6/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/binutils-libs-2.43-1.16.armv7l.rpm ... 
+[   13s] [7/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/build-20120927-1.1.noarch.rpm ... 
+[   14s] [8/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/build-compare-2023.06.18-1.5.noarch.rpm ... 
+[   16s] [9/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/build-mkbaselibs-20120927-1.1.noarch.rpm ... 
+[   17s] [10/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/bzip2-1.0.8-1.15.armv7l.rpm ... 
+[   18s] [11/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/clang-22.1.8-4.1.armv7l.rpm ... 
+[   22s] [12/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/clang-accel-x86_64-armv7l-0.4-2.3.armv7l.rpm ... 
+[   30s] [13/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/coreutils-6.9-14.3.armv7l.rpm ... 
+[   31s] [14/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/cpio-2.8-1.2.armv7l.rpm ... 
+[   33s] [15/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/cpp-14.2.0-1.14.armv7l.rpm ... 
+[   35s] [16/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/dash-0.5.13.4-1.2.armv7l.rpm ... 
+[   36s] [17/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/diffutils-3.10-1.2.armv7l.rpm ... 
+[   38s] [18/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/elfutils-0.189-1.14.armv7l.rpm ... 
+[   39s] [19/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/file-5.46-1.14.armv7l.rpm ... 
+[   40s] [20/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/filesystem-3.1-1.1.armv7l.rpm ... 
+[   42s] [21/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/findutils-4.3.8-1.14.armv7l.rpm ... 
+[   43s] [22/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/gawk-3.1.5-1.2.armv7l.rpm ... 
+[   44s] [23/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/gcc-14.2.0-1.14.armv7l.rpm ... 
+[   48s] [24/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/gcc-c++-14.2.0-1.14.armv7l.rpm ... 
+[   51s] [25/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/gdbm-1.8.3-1.16.armv7l.rpm ... 
+[   52s] [26/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/glibc-2.40-2.5.armv7l.rpm ... 
+[   54s] [27/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/glibc-devel-2.40-2.5.armv7l.rpm ... 
+[   56s] [28/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/glibc-locale-2.40-2.5.armv7l.rpm ... 
+[   57s] [29/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/grep-2.5.2-1.15.armv7l.rpm ... 
+[   59s] [30/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/gzip-1.3.12-1.14.armv7l.rpm ... 
+[   60s] [31/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/hal-rootstrap-checker-1.0.0-4.1.armv7l.rpm ... 
+[   61s] [32/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/hostname-3.23-1.2.armv7l.rpm ... 
+[   62s] [33/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/less-685-1.2.armv7l.rpm ... 
+[   63s] [34/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libacl-2.3.2-1.16.armv7l.rpm ... 
+[   64s] [35/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libarchive-3.8.1-2.5.armv7l.rpm ... 
+[   66s] [36/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libarchive-tools-3.8.1-2.5.armv7l.rpm ... 
+[   67s] [37/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libasm-0.189-1.14.armv7l.rpm ... 
+[   68s] [38/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libatomic-14.2.0-1.14.armv7l.rpm ... 
+[   69s] [39/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libattr-2.5.1-1.16.armv7l.rpm ... 
+[   70s] [40/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libblkid-2.41.2-1.8.armv7l.rpm ... 
+[   72s] [41/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libbz2-1.0.8-1.15.armv7l.rpm ... 
+[   73s] [42/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libcap-2.73-1.14.armv7l.rpm ... 
+[   74s] [43/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libcc1-14.2.0-1.14.armv7l.rpm ... 
+[   75s] [44/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libdw-0.189-1.14.armv7l.rpm ... 
+[   76s] [45/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libelf-0.189-1.14.armv7l.rpm ... 
+[   77s] [46/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libfdisk-2.41.2-1.8.armv7l.rpm ... 
+[   79s] [47/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libfreebl3-3.109-1.5.armv7l.rpm ... 
+[   80s] [48/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libgcc-14.2.0-1.14.armv7l.rpm ... 
+[   82s] [49/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libgfortran-14.2.0-1.14.armv7l.rpm ... 
+[   83s] [50/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libgomp-14.2.0-1.14.armv7l.rpm ... 
+[   84s] [51/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libitm-14.2.0-1.14.armv7l.rpm ... 
+[   85s] [52/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/liblastlog2-2.41.2-1.8.armv7l.rpm ... 
+[   87s] [53/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libllvm-22.1.8-4.1.armv7l.rpm ... 
+[   90s] [54/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libltdl-2.5.4-1.14.armv7l.rpm ... 
+[   91s] [55/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/liblua-5.1.5-1.12.armv7l.rpm ... 
+[   92s] [56/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/liblzma-5.8.1-1.13.armv7l.rpm ... 
+[   93s] [57/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libmagic-5.46-1.14.armv7l.rpm ... 
+[   94s] [58/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libmagic-data-5.46-1.14.armv7l.rpm ... 
+[   96s] [59/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libmount-2.41.2-1.8.armv7l.rpm ... 
+[   97s] [60/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libncurses-6.6-1.10.armv7l.rpm ... 
+[   98s] [61/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libncurses6-6.6-1.10.armv7l.rpm ... 
+[  100s] [62/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libopenssl3-3.5.5-1.14.armv7l.rpm ... 
+[  101s] [63/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libpcre-8.45-1.14.armv7l.rpm ... 
+[  103s] [64/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libpopt-1.16-1.13.armv7l.rpm ... 
+[  104s] [65/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libreadline-5.2-1.14.armv7l.rpm ... 
+[  105s] [66/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libsmack-1.3.1-1.12.armv7l.rpm ... 
+[  106s] [67/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libsmartcols-2.41.2-1.8.armv7l.rpm ... 
+[  107s] [68/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libsoftokn3-3.109-1.5.armv7l.rpm ... 
+[  109s] [69/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libsqlite-3.51.0-1.14.armv7l.rpm ... 
+[  110s] [70/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libstdc++-14.2.0-1.14.armv7l.rpm ... 
+[  112s] [71/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libstdc++-devel-14.2.0-1.14.armv7l.rpm ... 
+[  114s] [72/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libtool-2.5.4-1.14.armv7l.rpm ... 
+[  115s] [73/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libuuid-2.41.2-1.8.armv7l.rpm ... 
+[  116s] [74/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libxcrypt-4.4.36-1.16.armv7l.rpm ... 
+[  118s] [75/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libxcrypt-devel-4.4.36-1.16.armv7l.rpm ... 
+[  119s] [76/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libxml2-2.15.1-1.12.armv7l.rpm ... 
+[  120s] [77/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/libzstd1-1.5.7-1.13.armv7l.rpm ... 
+[  122s] [78/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/linux-glibc-devel-6.6-1.16.armv7l.rpm ... 
+[  124s] [79/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/lldb-22.1.8-4.1.armv7l.rpm ... 
+[  126s] [80/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/llvm-22.1.8-4.1.armv7l.rpm ... 
+[  128s] [81/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/llvm-devel-22.1.8-4.1.armv7l.rpm ... 
+[  130s] [82/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/m4-1.4.20-1.2.armv7l.rpm ... 
+[  132s] [83/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/make-4.4.1-1.14.armv7l.rpm ... 
+[  133s] [84/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/net-tools-2.0_20121208git-1.12.armv7l.rpm ... 
+[  135s] [85/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/nspr-4.36-2.3.armv7l.rpm ... 
+[  136s] [86/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/nss-3.109-1.5.armv7l.rpm ... 
+[  137s] [87/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/nss-certs-3.109-1.5.armv7l.rpm ... 
+[  139s] [88/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/pam-1.1.6-1.10.armv7l.rpm ... 
+[  140s] [89/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/patch-2.8-1.13.armv7l.rpm ... 
+[  141s] [90/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/perl-5.42.0-1.14.armv7l.rpm ... 
+[  145s] [91/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/pkg-config-0.29.2-1.13.armv7l.rpm ... 
+[  146s] [92/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/qemu-accel-x86_64-armv7l-0.4-2.3.armv7l.rpm ... 
+[  156s] [93/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/qemu-linux-user-x86_64-cross-9.2.3.1-3.5.armv7l.rpm ... 
+[  160s] [94/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/rpm-4.14.1.1-1.9.armv7l.rpm ... 
+[  161s] [95/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/rpm-build-4.14.1.1-1.9.armv7l.rpm ... 
+[  163s] [96/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/sed-4.1c-1.13.armv7l.rpm ... 
+[  164s] [97/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/noarch/setup-0.9-2.7.noarch.rpm ... 
+[  165s] [98/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/smack-1.3.1-1.12.armv7l.rpm ... 
+[  166s] [99/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/tar-1.17-2.2.armv7l.rpm ... 
+[  167s] [100/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/terminfo-base-full-6.6-1.10.armv7l.rpm ... 
+[  169s] [101/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/toybox-0.6.0-1.3.armv7l.rpm ... 
+[  170s] [102/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/tzdata-2025b-1.2.armv7l.rpm ... 
+[  171s] [103/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/update-alternatives-1.22.21-1.2.armv7l.rpm ... 
+[  172s] [104/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/util-linux-2.41.2-1.8.armv7l.rpm ... 
+[  174s] [105/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/util-linux-su-2.41.2-1.8.armv7l.rpm ... 
+[  175s] [106/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/which-2.17-1.2.armv7l.rpm ... 
+[  176s] [107/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/xz-5.8.1-1.13.armv7l.rpm ... 
+[  177s] [108/108] downloading https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261030.120529/repos/standard/packages/armv7l/zlib-1.3.1-1.16.armv7l.rpm ... 
+[  179s] 
+[  179s] cycle: nss -> libsoftokn3
+[  179s]   breaking dependency nss -> libsoftokn3
+[  179s] [1/46] preinstalling filesystem...
+[  179s] [2/46] preinstalling libmagic-data...
+[  179s] [3/46] preinstalling libncurses...
+[  179s] [4/46] preinstalling glibc...
+[  179s] [5/46] preinstalling libgcc...
+[  179s] [6/46] preinstalling bash...
+[  179s] [7/46] preinstalling diffutils...
+[  179s] [8/46] preinstalling grep...
+[  179s] [9/46] preinstalling libarchive-tools...
+[  179s] [10/46] preinstalling libattr...
+[  179s] [11/46] preinstalling libblkid...
+[  179s] [12/46] preinstalling libbz2...
+[  179s] [13/46] preinstalling libcap...
+[  179s] [14/46] preinstalling libfreebl3...
+[  179s] [15/46] preinstalling liblua...
+[  179s] [16/46] preinstalling liblzma...
+[  179s] [17/46] preinstalling libopenssl3...
+[  179s] [18/46] preinstalling libpopt...
+[  179s] [19/46] preinstalling libreadline...
+[  179s] [20/46] preinstalling libsmack...
+[  179s] [21/46] preinstalling libsqlite...
+[  179s] [22/46] preinstalling libuuid...
+[  179s] [23/46] preinstalling libxcrypt...
+[  179s] [24/46] preinstalling libxml2...
+[  179s] [25/46] preinstalling libzstd1...
+[  179s] [26/46] preinstalling nspr...
+[  179s] [27/46] preinstalling sed...
+[  179s] [28/46] preinstalling toybox...
+[  179s] [29/46] preinstalling zlib...
+[  179s] [30/46] preinstalling clang-accel-x86_64-armv7l...
+[  182s] [31/46] preinstalling qemu-accel-x86_64-armv7l...
+[  185s] [32/46] preinstalling qemu-linux-user-x86_64-cross...
+[  186s] [33/46] preinstalling coreutils...
+[  186s] [34/46] preinstalling dash...
+[  186s] [35/46] preinstalling libacl...
+[  186s] [36/46] preinstalling libelf...
+[  186s] [37/46] preinstalling libmount...
+[  186s] [38/46] preinstalling smack...
+[  186s] [39/46] preinstalling bzip2...
+[  186s] [40/46] preinstalling libmagic...
+[  186s] [41/46] preinstalling tar...
+[  186s] [42/46] preinstalling util-linux...
+[  186s] [43/46] preinstalling rpm...
+[  186s] [44/46] preinstalling util-linux-su...
+[  187s] [45/46] preinstalling nss...
+[  187s] [46/46] preinstalling libsoftokn3...
+[  187s] 
+[  187s] running qemu-linux-user-x86_64-cross postinstall script
+[  187s] running qemu-accel-x86_64-armv7l postinstall script
+[  188s] mv: cannot stat `/usr/lib/gcc/armv7l-tizen-linux-gnueabi/14.2.0/liblto_plugin.so': No such file or directory
+[  188s] running clang-accel-x86_64-armv7l postinstall script
+[  188s] initializing rpm db...
+[  189s] reordering...cycle: glibc-devel -> libxcrypt-devel
+[  189s]   breaking dependency libxcrypt-devel -> glibc-devel
+[  189s] cycle: clang -> llvm
+[  189s]   breaking dependency llvm -> clang
+[  189s] cycle: clang -> llvm -> lldb
+[  189s]   breaking dependency llvm -> lldb
+[  189s] cycle: libsoftokn3 -> nss
+[  189s]   breaking dependency nss -> libsoftokn3
+[  189s] reordering done
+[  189s] [1/108] cumulate libmagic-data-5.46-1.14
+[  189s] [2/108] cumulate setup-0.9-2.7
+[  189s] [3/108] cumulate filesystem-3.1-1.1
+[  189s] [4/108] cumulate glibc-2.40-2.5
+[  189s] [5/108] cumulate libatomic-14.2.0-1.14
+[  189s] [6/108] cumulate libgcc-14.2.0-1.14
+[  189s] [7/108] cumulate bash-3.2.57-1.15
+[  189s] [8/108] cumulate cpio-2.8-1.2
+[  189s] [9/108] cumulate diffutils-3.10-1.2
+[  189s] [10/108] cumulate findutils-4.3.8-1.14
+[  189s] [11/108] cumulate gdbm-1.8.3-1.16
+[  189s] [12/108] cumulate hostname-3.23-1.2
+[  189s] [13/108] cumulate libattr-2.5.1-1.16
+[  189s] [14/108] cumulate libblkid-2.41.2-1.8
+[  189s] [15/108] cumulate libbz2-1.0.8-1.15
+[  189s] [16/108] cumulate libcap-2.73-1.14
+[  189s] [17/108] cumulate libfreebl3-3.109-1.5
+[  189s] [18/108] cumulate libgfortran-14.2.0-1.14
+[  189s] [19/108] cumulate libgomp-14.2.0-1.14
+[  189s] [20/108] cumulate libitm-14.2.0-1.14
+[  189s] [21/108] cumulate libltdl-2.5.4-1.14
+[  189s] [22/108] cumulate liblua-5.1.5-1.12
+[  189s] [23/108] cumulate liblzma-5.8.1-1.13
+[  189s] [24/108] cumulate libopenssl3-3.5.5-1.14
+[  189s] [25/108] cumulate libpcre-8.45-1.14
+[  189s] [26/108] cumulate libpopt-1.16-1.13
+[  189s] [27/108] cumulate libsmack-1.3.1-1.12
+[  189s] [28/108] cumulate libsmartcols-2.41.2-1.8
+[  189s] [29/108] cumulate libsqlite-3.51.0-1.14
+[  189s] [30/108] cumulate libstdc++-14.2.0-1.14
+[  189s] [31/108] cumulate libuuid-2.41.2-1.8
+[  189s] [32/108] cumulate libxcrypt-4.4.36-1.16
+[  189s] [33/108] cumulate libxml2-2.15.1-1.12
+[  189s] [34/108] cumulate libzstd1-1.5.7-1.13
+[  189s] [35/108] cumulate m4-1.4.20-1.2
+[  189s] [36/108] cumulate net-tools-2.0_20121208git-1.12
+[  189s] [37/108] cumulate nspr-4.36-2.3
+[  189s] [38/108] cumulate patch-2.8-1.13
+[  189s] [39/108] cumulate pkg-config-0.29.2-1.13
+[  189s] [40/108] cumulate sed-4.1c-1.13
+[  189s] [41/108] cumulate toybox-0.6.0-1.3
+[  189s] [42/108] cumulate update-alternatives-1.22.21-1.2
+[  189s] [43/108] cumulate which-2.17-1.2
+[  189s] [44/108] cumulate zlib-1.3.1-1.16
+[  189s] [45/108] cumulate app-rootstrap-checker-1.0.0-1.1
+[  189s] [46/108] cumulate build-compare-2023.06.18-1.5
+[  189s] [47/108] cumulate clang-accel-x86_64-armv7l-0.4-2.3
+[  189s] [48/108] cumulate hal-rootstrap-checker-1.0.0-4.1
+[  189s] [49/108] cumulate libstdc++-devel-14.2.0-1.14
+[  189s] [50/108] cumulate qemu-linux-user-x86_64-cross-9.2.3.1-3.5
+[  189s] [51/108] cumulate cpp-14.2.0-1.14
+[  190s] [52/108] cumulate gcc-c++-14.2.0-1.14
+[  190s] [53/108] cumulate binutils-libs-2.43-1.16
+[  190s] [54/108] cumulate coreutils-6.9-14.3
+[  190s] [55/108] cumulate dash-0.5.13.4-1.2
+[  190s] [56/108] cumulate gawk-3.1.5-1.2
+[  190s] [57/108] cumulate grep-2.5.2-1.15
+[  190s] [58/108] cumulate libacl-2.3.2-1.16
+[  190s] [59/108] cumulate libcc1-14.2.0-1.14
+[  190s] [60/108] cumulate libelf-0.189-1.14
+[  190s] [61/108] cumulate liblastlog2-2.41.2-1.8
+[  190s] [62/108] cumulate libmount-2.41.2-1.8
+[  190s] [63/108] cumulate make-4.4.1-1.14
+[  190s] [64/108] cumulate nss-certs-3.109-1.5
+[  190s] [65/108] cumulate smack-1.3.1-1.12
+[  190s] [66/108] cumulate bzip2-1.0.8-1.15
+[  190s] [67/108] cumulate libfdisk-2.41.2-1.8
+[  190s] [68/108] cumulate libmagic-5.46-1.14
+[  190s] [69/108] cumulate xz-5.8.1-1.13
+[  190s] [70/108] cumulate libllvm-22.1.8-4.1
+[  190s] [71/108] cumulate perl-5.42.0-1.14
+[  190s] [72/108] cumulate build-mkbaselibs-20120927-1.1
+[  190s] [73/108] cumulate linux-glibc-devel-6.6-1.16
+[  190s] [74/108] cumulate terminfo-base-full-6.6-1.10
+[  190s] [75/108] cumulate autoconf-2.71-1.16
+[  190s] [76/108] cumulate glibc-locale-2.40-2.5
+[  190s] [77/108] cumulate tar-1.17-2.2
+[  190s] [78/108] cumulate binutils-2.43-1.16
+[  190s] [79/108] cumulate file-5.46-1.14
+[  190s] [80/108] cumulate gzip-1.3.12-1.14
+[  190s] [81/108] cumulate pam-1.1.6-1.10
+[  190s] [82/108] cumulate tzdata-2025b-1.2
+[  190s] [83/108] cumulate libdw-0.189-1.14
+[  190s] [84/108] cumulate gcc-14.2.0-1.14
+[  190s] [85/108] cumulate libarchive-3.8.1-2.5
+[  190s] [86/108] cumulate qemu-accel-x86_64-armv7l-0.4-2.3
+[  190s] [87/108] cumulate automake-1.16.5-1.16
+[  190s] [88/108] cumulate libarchive-tools-3.8.1-2.5
+[  190s] [89/108] cumulate libasm-0.189-1.14
+[  190s] [90/108] cumulate libncurses6-6.6-1.10
+[  190s] [91/108] cumulate rpm-4.14.1.1-1.9
+[  190s] [92/108] cumulate libncurses-6.6-1.10
+[  190s] [93/108] cumulate less-685-1.2
+[  190s] [94/108] cumulate libreadline-5.2-1.14
+[  190s] [95/108] cumulate libtool-2.5.4-1.14
+[  190s] [96/108] cumulate build-20120927-1.1
+[  190s] [97/108] cumulate elfutils-0.189-1.14
+[  190s] [98/108] cumulate util-linux-2.41.2-1.8
+[  190s] [99/108] cumulate util-linux-su-2.41.2-1.8
+[  190s] [100/108] cumulate libxcrypt-devel-4.4.36-1.16
+[  190s] [101/108] cumulate nss-3.109-1.5
+[  190s] [102/108] cumulate llvm-22.1.8-4.1
+[  190s] [103/108] cumulate glibc-devel-2.40-2.5
+[  190s] [104/108] cumulate clang-22.1.8-4.1
+[  190s] [105/108] cumulate libsoftokn3-3.109-1.5
+[  190s] [106/108] cumulate llvm-devel-22.1.8-4.1
+[  190s] [107/108] cumulate lldb-22.1.8-4.1
+[  190s] [108/108] cumulate rpm-build-4.14.1.1-1.9
+[  190s] now installing cumulated packages
+[  190s] Preparing...                          ########################################
+[  190s] Updating / installing...
+[  190s] setup-0.9-2.7                         ###############warning: /etc/profile created as /etc/profile.rpmnew
+[  190s] #########################
+[  190s] filesystem-3.1-1.1                    ########################################
+[  190s] libmagic-data-5.46-1.14               ########################################
+[  190s] glibc-2.40-2.5                        ########################################
+[  191s] libgcc-14.2.0-1.14                    ########################################
+[  191s] bash-3.2.57-1.15                      ########################################
+[  191s] zlib-1.3.1-1.16                       ########################################
+[  191s] libstdc++-14.2.0-1.14                 ########################################
+[  191s] coreutils-6.9-14.3                    ########################################
+[  191s] liblzma-5.8.1-1.13                    ########################################
+[  191s] libelf-0.189-1.14                     ########################################
+[  191s] libbz2-1.0.8-1.15                     ########################################
+[  191s] libdw-0.189-1.14                      ########################################
+[  191s] libxcrypt-4.4.36-1.16                 ########################################
+[  191s] libxml2-2.15.1-1.12                   ########################################
+[  192s] libllvm-22.1.8-4.1                    ########################################
+[  192s] libblkid-2.41.2-1.8                   ########################################
+[  192s] nspr-4.36-2.3                         ########################################
+[  192s] pam-1.1.6-1.10                        ########################################
+[  192s] libmagic-5.46-1.14                    ########################################
+[  192s] libfreebl3-3.109-1.5                  ########################################
+[  192s] libopenssl3-3.5.5-1.14                ########################################
+[  193s] libpopt-1.16-1.13                     ########################################
+[  193s] libsqlite-3.51.0-1.14                 ########################################
+[  193s] libuuid-2.41.2-1.8                    ########################################
+[  193s] linux-glibc-devel-6.6-1.16            ########################################
+[  193s] terminfo-base-full-6.6-1.10           ########################################
+[  193s] libncurses6-6.6-1.10                  ########################################
+[  193s] libreadline-5.2-1.14                  ########################################
+[  194s] clang-22.1.8-4.1                      ########################################
+[  195s] lldb-22.1.8-4.1                       ########################################
+[  196s] llvm-22.1.8-4.1                       ########################################
+[  196s] libfdisk-2.41.2-1.8                   ########################################
+[  196s] liblastlog2-2.41.2-1.8                ########################################
+[  196s] nss-certs-3.109-1.5                   ########################################
+[  196s] libsoftokn3-3.109-1.5                 ########################################
+[  196s] nss-3.109-1.5                         ########################################
+[  197s] libmount-2.41.2-1.8                   ########################################
+[  197s] libasm-0.189-1.14                     ########################################
+[  197s] bzip2-1.0.8-1.15                      ########################################
+[  197s] xz-5.8.1-1.13                         ########################################
+[  197s] gzip-1.3.12-1.14                      ########################################
+[  197s] libcc1-14.2.0-1.14                    ########################################
+[  197s] binutils-libs-2.43-1.16               ########################################
+[  197s] binutils-2.43-1.16                    ########################################
+[  197s] make-4.4.1-1.14                       ########################################
+[  197s] findutils-4.3.8-1.14                  ########################################
+[  197s] gdbm-1.8.3-1.16                       ########################################
+[  198s] perl-5.42.0-1.14                      ########################################
+[  198s] build-mkbaselibs-20120927-1.1         ########################################
+[  198s] libattr-2.5.1-1.16                    ########################################
+[  198s] libacl-2.3.2-1.16                     ########################################
+[  198s] libarchive-3.8.1-2.5                  ########################################
+[  198s] libarchive-tools-3.8.1-2.5            ########################################
+[  198s] libcap-2.73-1.14                      ########################################
+[  198s] libgfortran-14.2.0-1.14               ########################################
+[  198s] libgomp-14.2.0-1.14                   ########################################
+[  198s] libitm-14.2.0-1.14                    ########################################
+[  199s] libltdl-2.5.4-1.14                    ########################################
+[  199s] liblua-5.1.5-1.12                     ########################################
+[  199s] libpcre-8.45-1.14                     ########################################
+[  199s] libsmack-1.3.1-1.12                   ########################################
+[  199s] libsmartcols-2.41.2-1.8               ########################################
+[  199s] libzstd1-1.5.7-1.13                   ########################################
+[  199s] rpm-4.14.1.1-1.9                      ########################################
+[  199s] m4-1.4.20-1.2                         ########################################
+[  200s] autoconf-2.71-1.16                    ########################################
+[  200s] automake-1.16.5-1.16                  ########################################
+[  200s] patch-2.8-1.13                        ########################################
+[  200s] pkg-config-0.29.2-1.13                ########################################
+[  200s] libxcrypt-devel-4.4.36-1.16           ########################################
+[  200s] glibc-devel-2.40-2.5                  ########################################
+[  200s] sed-4.1c-1.13                         ########################################
+[  200s] util-linux-2.41.2-1.8                 ########################################
+[  200s] libatomic-14.2.0-1.14                 ########################################
+[  200s] libtool-2.5.4-1.14                    ########################################
+[  200s] build-20120927-1.1                    ########################################
+[  200s] libncurses-6.6-1.10                   ########################################
+[  200s] libstdc++-devel-14.2.0-1.14           ########################################
+[  200s] app-rootstrap-checker-1.0.0-1.1       ########################################
+[  200s] build-compare-2023.06.18-1.5          ########################################
+[  203s] clang-accel-x86_64-armv7l-0.4-2.3     ########################################
+[  204s] hal-rootstrap-checker-1.0.0-4.1       ########################################
+[  205s] qemu-linux-user-x86_64-cross-9.2.3.1-3########################################
+[  206s] gcc-14.2.0-1.14                       ########################################
+[  208s] qemu-accel-x86_64-armv7l-0.4-2.3      ########################################
+[  209s] util-linux-su-2.41.2-1.8              ########################################
+[  209s] rpm-build-4.14.1.1-1.9                ########################################
+[  209s] smack-1.3.1-1.12                      ########################################
+[  209s] grep-2.5.2-1.15                       ########################################
+[  209s] tar-1.17-2.2                          ########################################
+[  209s] elfutils-0.189-1.14                   ########################################
+[  209s] llvm-devel-22.1.8-4.1                 ########################################
+[  209s] less-685-1.2                          ########################################
+[  209s] file-5.46-1.14                        ########################################
+[  209s] glibc-locale-2.40-2.5                 ########################################
+[  209s] tzdata-2025b-1.2                      ########################################
+[  209s] cpp-14.2.0-1.14                       ########################################
+[  210s] gcc-c++-14.2.0-1.14                   ########################################
+[  210s] dash-0.5.13.4-1.2                     ########################################
+[  210s] gawk-3.1.5-1.2                        ########################################
+[  210s] cpio-2.8-1.2                          ########################################
+[  210s] diffutils-3.10-1.2                    ########################################
+[  210s] hostname-3.23-1.2                     ########################################
+[  210s] net-tools-2.0_20121208git-1.12        ########################################
+[  210s] toybox-0.6.0-1.3                      ########################################
+[  210s] update-alternatives-1.22.21-1.2       ########################################
+[  210s] which-2.17-1.2                        ########################################
+[  210s] removing nis flags from /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS/scratch.armv7l.0/etc/nsswitch.conf...
+[  210s] now finalizing build dir...
+[  211s] -----------------------------------------------------------------
+[  211s] ----- building ffmpeg.spec (user abuild)
+[  211s] -----------------------------------------------------------------
+[  211s] -----------------------------------------------------------------
+[  211s] + exec rpmbuild --define '_smp_mflags -j2' --define 'profile_isa thumb' --define '_srcdefattr (-,root,root)' --nosignature --target=armv7l-tizen-linux --define '_build_create_debug 1' -ba /home/abuild/rpmbuild/SOURCES/ffmpeg.spec
+[  211s] Building target platforms: armv7l-tizen-linux
+[  211s] Building for target armv7l-tizen-linux
+[  211s] Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.yNGaRR
+[  211s] + umask 022
+[  211s] + cd /home/abuild/rpmbuild/BUILD
+[  211s] + cd /home/abuild/rpmbuild/BUILD
+[  211s] + rm -rf ffmpeg-8.0.1
+[  211s] + /bin/gzip -dc /home/abuild/rpmbuild/SOURCES/ffmpeg-8.0.1.tar.gz
+[  211s] + /bin/tar -xof -
+[  211s] + STATUS=0
+[  211s] + '[' 0 -ne 0 ']'
+[  211s] + cd ffmpeg-8.0.1
+[  211s] + /bin/chmod -Rf a+rX,u+w,g-w,o-w .
+[  211s] + cp /home/abuild/rpmbuild/SOURCES/libavcodec.manifest /home/abuild/rpmbuild/SOURCES/libavformat.manifest /home/abuild/rpmbuild/SOURCES/libavutil.manifest /home/abuild/rpmbuild/SOURCES/libavfilter.manifest /home/abuild/rpmbuild/SOURCES/libswscale.manifest /home/abuild/rpmbuild/SOURCES/libswresample.manifest /home/abuild/rpmbuild/SOURCES/ffmpeg-tool.manifest .
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx '
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx '
+[  211s] + CFLAGS='-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))" '
+[  211s] + export CFLAGS
+[  211s] + export 'CFLAGS=-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fdebug-info-for-profiling -funique-internal-linkage-names '
+[  211s] + CFLAGS='-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fdebug-info-for-profiling -funique-internal-linkage-names '
+[  211s] + export 'CFLAGS=-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fdebug-info-for-profiling -funique-internal-linkage-names  -mthumb'
+[  211s] + CFLAGS='-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g -fPIC -DEXPORT_API="__attribute__((visibility(\"default\")))"  -D__TIZEN__ -DTIZEN_FEATURE_LIBAV -fdebug-info-for-profiling -funique-internal-linkage-names  -mthumb'
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx  --enable-thumb '
+[  211s] + export 'CONFIGURE_OPTIONS=--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx  --enable-thumb --extra-cflags=-mfpu=neon'
+[  211s] + CONFIGURE_OPTIONS='--enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping  --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx  --enable-thumb --extra-cflags=-mfpu=neon'
+[  211s] + export AR=llvm-ar RANLIB=llvm-ranlib
+[  211s] + AR=llvm-ar
+[  211s] + RANLIB=llvm-ranlib
+[  211s] + export CC=clang CXX=clang++
+[  211s] + CC=clang
+[  211s] + CXX=clang++
+[  211s] + ./configure --prefix=/usr --libdir=/usr/lib --shlibdir=/usr/lib --datadir=/usr/share/ffmpeg --extra-ldflags=-Wl,--build-id=sha1 --enable-shared --disable-static --disable-devices --disable-version3 --disable-nonfree --disable-gpl --disable-doc --disable-zlib --disable-network --disable-programs --enable-ffmpeg --disable-avdevice --enable-swscale --disable-x86asm --enable-swresample --enable-neon --disable-stripping --disable-parsers --enable-parser=aac --enable-parser=h264 --enable-parser=mpegaudio --enable-parser=h263 --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=hevc --disable-muxers --enable-muxer=mpeg1video --enable-muxer=mpeg2video --enable-muxer=wav --enable-muxer=null --enable-muxer=mp4 --disable-demuxers --enable-demuxer=aac --enable-demuxer=h264 --enable-demuxer=mpegts --enable-demuxer=amr --enable-demuxer=m4v --enable-demuxer=mpegtsraw --enable-demuxer=asf --enable-demuxer=mmf --enable-demuxer=mpegvideo --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=ogg --enable-demuxer=flac --enable-demuxer=mp3 --enable-demuxer=wav --enable-demuxer=h263 --enable-demuxer=mpegps --enable-demuxer=matroska --enable-demuxer=dv --enable-demuxer=flv --enable-demuxer=aiff --enable-demuxer=ape --enable-demuxer=hevc --enable-demuxer=concat --enable-demuxer=rm --disable-decoders --enable-decoder=alac --enable-decoder=h264 --enable-decoder=wmv1 --enable-decoder=flac --enable-decoder=mpeg4 --enable-decoder=wmv2 --enable-decoder=h263 --enable-decoder=mpegvideo --enable-decoder=wmv3 --enable-decoder=vc1 --enable-decoder=flv --enable-decoder=h263i --enable-decoder=theora --enable-decoder=mpeg1video --enable-decoder=mpeg2video --enable-decoder=pcm_alaw --enable-decoder=pcm_mulaw --enable-decoder=msmpeg4v3 --enable-decoder=hevc --enable-decoder=mjpeg --enable-decoder=bmp --enable-decoder=tiff --enable-decoder=mp3 --enable-decoder=amrnb --enable-decoder=ac3 --enable-decoder=aac --enable-decoder=ape --enable-decoder=pcm_s16le --enable-decoder=rv40 --disable-encoders --enable-encoder=h263 --enable-encoder=h263p --enable-encoder=mpeg4 --enable-encoder=bmp --enable-encoder=mpeg1video --enable-encoder=mpeg2video --enable-encoder=aac --enable-encoder=wrapped_avframe --enable-encoder=pcm_s16le --disable-protocols --enable-protocol=file --disable-filters --enable-filter=crop --enable-filter=hflip --enable-filter=lut --enable-filter=lutyuv --enable-filter=lutrgb --enable-filter=overlay --enable-filter=scale --enable-filter=transpose --enable-filter=unsharp --enable-filter=vflip --enable-filter=zoompan --enable-filter=scdet --enable-filter=blackdetect --enable-filter=silencedetect --enable-filter=aresample --disable-bsfs --enable-bsf=h264_mp4toannexb --toolchain=hardened --enable-parser=vp8 --enable-decoder=vp8 --enable-decoder=vp9 --disable-mmx --enable-thumb --extra-cflags=-mfpu=neon
+[  226s] install prefix            /usr
+[  226s] source path               .
+[  226s] C compiler                clang
+[  226s] C library                 glibc
+[  226s] ARCH                      arm (generic)
+[  226s] big-endian                no
+[  226s] runtime cpu detection     yes
+[  226s] ARMv5TE enabled           yes
+[  226s] ARMv6 enabled             yes
+[  226s] ARMv6T2 enabled           yes
+[  226s] VFP enabled               yes
+[  226s] NEON enabled              yes
+[  226s] THUMB enabled             yes
+[  226s] debug symbols             yes
+[  226s] strip symbols             no
+[  226s] optimize for size         no
+[  226s] optimizations             yes
+[  226s] static                    no
+[  226s] shared                    yes
+[  226s] network support           no
+[  226s] threading support         pthreads
+[  226s] safe bitstream reader     yes
+[  226s] texi2html enabled         no
+[  226s] perl enabled              yes
+[  226s] pod2man enabled           yes
+[  226s] makeinfo enabled          no
+[  226s] makeinfo supports HTML    no
+[  226s] xmllint enabled           no
+[  226s] 
+[  226s] External libraries:
+[  226s] iconv
+[  226s] 
+[  226s] External libraries providing hardware acceleration:
+[  226s] v4l2_m2m
+[  226s] 
+[  226s] Libraries:
+[  226s] avcodec                 avformat                swresample
+[  226s] avfilter                avutil                  swscale
+[  226s] 
+[  226s] Programs:
+[  226s] ffmpeg
+[  226s] 
+[  226s] Enabled decoders:
+[  226s] aac                     hevc                    rv40
+[  226s] ac3                     mjpeg                   theora
+[  226s] alac                    mp3                     tiff
+[  226s] amrnb                   mpeg1video              vc1
+[  226s] ape                     mpeg2video              vp3
+[  226s] bmp                     mpeg4                   vp8
+[  226s] flac                    mpegvideo               vp9
+[  226s] flv                     msmpeg4v3               wmv1
+[  226s] h263                    pcm_alaw                wmv2
+[  226s] h263i                   pcm_mulaw               wmv3
+[  226s] h264                    pcm_s16le
+[  226s] 
+[  226s] Enabled encoders:
+[  226s] aac                     h263p                   mpeg4
+[  226s] bmp                     mpeg1video              pcm_s16le
+[  226s] h263                    mpeg2video              wrapped_avframe
+[  226s] 
+[  226s] Enabled hwaccels:
+[  226s] 
+[  226s] Enabled parsers:
+[  226s] aac                     h264                    mpegvideo
+[  226s] ac3                     hevc                    vp8
+[  226s] flac                    mpeg4video              vp9
+[  226s] h263                    mpegaudio
+[  226s] 
+[  226s] Enabled demuxers:
+[  226s] aac                     flv                     mpegps
+[  226s] aiff                    h263                    mpegts
+[  226s] amr                     h264                    mpegtsraw
+[  226s] ape                     hevc                    mpegvideo
+[  226s] asf                     m4v                     ogg
+[  226s] avi                     matroska                rm
+[  226s] concat                  mmf                     wav
+[  226s] dv                      mov
+[  226s] flac                    mp3
+[  226s] 
+[  226s] Enabled muxers:
+[  226s] mov                     mpeg1video              null
+[  226s] mp4                     mpeg2video              wav
+[  226s] 
+[  226s] Enabled protocols:
+[  226s] file
+[  226s] 
+[  226s] Enabled filters:
+[  226s] aformat                 lut                     silencedetect
+[  226s] anull                   lutrgb                  transpose
+[  226s] aresample               lutyuv                  trim
+[  226s] atrim                   null                    unsharp
+[  226s] blackdetect             overlay                 vflip
+[  226s] crop                    rotate                  zoompan
+[  226s] format                  scale
+[  226s] hflip                   scdet
+[  226s] 
+[  226s] Enabled bsfs:
+[  227s] aac_adtstoasc           vp9_superframe
+[  227s] h264_mp4toannexb        vp9_superframe_split
+[  227s] 
+[  227s] Enabled indevs:
+[  227s] 
+[  227s] Enabled outdevs:
+[  227s] 
+[  227s] License: LGPL version 2.1 or later
+[  228s] + exit 0
+[  228s] Executing(%build): /bin/sh -e /var/tmp/rpm-tmp.fxlSie
+[  228s] + umask 022
+[  228s] + cd /home/abuild/rpmbuild/BUILD
+[  228s] + CFLAGS='-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g'
+[  228s] + export CFLAGS
+[  228s] + CXXFLAGS='-Os -ffunction-sections -fdata-sections -fstack-protector -Wno-unused-command-line-argument -Wno-error=unused-but-set-variable -Wno-error=unused-command-line-argument  -g2 -gdwarf-4 -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -Wformat -Wformat-security -fmessage-length=0 -frecord-gcc-switches -march=armv7-a -mtune=cortex-a8 -mlittle-endian -mfpu=neon -mfloat-abi=softfp -mthumb -Wp,-D__SOFTFP__ -D_FILE_OFFSET_BITS=64 -g'
+[  228s] + export CXXFLAGS
+[  228s] + LDFLAGS='-Wl,-z,relro,--as-needed,-O1,--hash-style=gnu,-z,max-page-size=4096 -Wl,--gc-sections'
+[  228s] + export LDFLAGS
+[  228s] + cd ffmpeg-8.0.1
+[  228s] + ref=/usr/lib/rpm
+[  228s] + mints=0
+[  228s] + case $(uname -m) in
+[  228s] ++ uname -m
+[  228s] + for s in guess sub
+[  228s] ++ find -maxdepth 8 -name config.guess
+[  228s] + for s in guess sub
+[  228s] ++ find -maxdepth 8 -name config.sub
+[  228s] + export AR=llvm-ar RANLIB=llvm-ranlib
+[  228s] + AR=llvm-ar
+[  228s] + RANLIB=llvm-ranlib
+[  228s] + export CC=armv7l-tizen-linux-gnueabi-clang CXX=armv7l-tizen-linux-gnueabi-clang++
+[  228s] + CC=armv7l-tizen-linux-gnueabi-clang
+[  228s] + CXX=armv7l-tizen-linux-gnueabi-clang++
+[  228s] + export 'MAKEFLAGS+= -k'
+[  228s] + MAKEFLAGS+=' -k'
+[  228s] + /bin/make -j2
+[  228s] GEN	libavfilter/libavfilter.version
+[  228s] GEN	libavformat/libavformat.version
+[  228s] GEN	libavcodec/libavcodec.version
+[  228s] GEN	libswresample/libswresample.version
+[  228s] GEN	libswscale/libswscale.version
+[  228s] GEN	libavutil/libavutil.version
+[  228s] CC	libavfilter/af_aformat.o
+[  228s] CC	libavfilter/af_anull.o
+[  228s] CC	libavfilter/af_aresample.o
+[  228s] CC	libavfilter/af_silencedetect.o
+[  228s] CC	libavfilter/allfilters.o
+[  228s] CC	libavfilter/audio.o
+[  228s] CC	libavfilter/avfilter.o
+[  228s] CC	libavfilter/avfiltergraph.o
+[  228s] CC	libavfilter/buffersink.o
+[  228s] CC	libavfilter/buffersrc.o
+[  228s] CC	libavfilter/ccfifo.o
+[  228s] CC	libavfilter/colorspace.o
+[  228s] CC	libavfilter/drawutils.o
+[  228s] CC	libavfilter/formats.o
+[  228s] CC	libavfilter/framepool.o
+[  229s] CC	libavfilter/framequeue.o
+[  229s] CC	libavfilter/framesync.o
+[  229s] CC	libavfilter/graphdump.o
+[  229s] CC	libavfilter/graphparser.o
+[  229s] CC	libavfilter/pthread.o
+[  229s] CC	libavfilter/scale_eval.o
+[  229s] CC	libavfilter/scene_sad.o
+[  229s] CC	libavfilter/trim.o
+[  229s] CC	libavfilter/version.o
+[  229s] CC	libavfilter/vf_blackdetect.o
+[  229s] CC	libavfilter/vf_crop.o
+[  229s] CC	libavfilter/vf_format.o
+[  229s] CC	libavfilter/vf_hflip.o
+[  229s] CC	libavfilter/vf_lut.o
+[  229s] CC	libavfilter/vf_null.o
+[  229s] CC	libavfilter/vf_overlay.o
+[  229s] CC	libavfilter/vf_rotate.o
+[  229s] CC	libavfilter/vf_scale.o
+[  229s] CC	libavfilter/vf_scdet.o
+[  229s] CC	libavfilter/vf_transpose.o
+[  230s] CC	libavfilter/vf_unsharp.o
+[  230s] CC	libavfilter/vf_vflip.o
+[  230s] CC	libavfilter/vf_zoompan.o
+[  230s] CC	libavfilter/video.o
+[  230s] CC	libavfilter/log2_tab.o
+[  230s] CC	libswscale/alphablend.o
+[  230s] AS	libswscale/arm/hscale.o
+[  230s] AS	libswscale/arm/output.o
+[  230s] AS	libswscale/arm/rgb2yuv_neon_16.o
+[  230s] AS	libswscale/arm/rgb2yuv_neon_32.o
+[  230s] CC	libswscale/arm/swscale.o
+[  230s] CC	libswscale/arm/swscale_unscaled.o
+[  230s] AS	libswscale/arm/yuv2rgb_neon.o
+[  230s] CC	libswscale/cms.o
+[  230s] CC	libswscale/csputils.o
+[  230s] CC	libswscale/format.o
+[  230s] CC	libswscale/gamma.o
+[  230s] CC	libswscale/graph.o
+[  230s] CC	libswscale/hscale.o
+[  230s] CC	libswscale/hscale_fast_bilinear.o
+[  230s] CC	libswscale/input.o
+[  230s] CC	libswscale/lut3d.o
+[  230s] libswscale/input.c:1271:1: warning: unused function 'planar_rgb16_s12_to_a' [-Wunused-function]
+[  230s]  1271 | shifted_planar_rgb16(12)
+[  230s]       | ^~~~~~~~~~~~~~~~~~~~~~~~
+[  230s] libswscale/input.c:1234:34: note: expanded from macro 'shifted_planar_rgb16'
+[  230s]  1234 |     static av_always_inline void planar_rgb16_s ## rdpx_shift ## _to_a(uint8_t *_dst, const uint8_t *_src[4],  \
+[  230s]       |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[  230s] <scratch space>:13:1: note: expanded from here
+[  230s]    13 | planar_rgb16_s12_to_a
+[  230s]       | ^~~~~~~~~~~~~~~~~~~~~
+[  230s] libswscale/input.c:1272:1: warning: unused function 'planar_rgb16_s10_to_a' [-Wunused-function]
+[  230s]  1272 | shifted_planar_rgb16(10)
+[  230s]       | ^~~~~~~~~~~~~~~~~~~~~~~~
+[  230s] libswscale/input.c:1234:34: note: expanded from macro 'shifted_planar_rgb16'
+[  230s]  1234 |     static av_always_inline void planar_rgb16_s ## rdpx_shift ## _to_a(uint8_t *_dst, const uint8_t *_src[4],  \
+[  230s]       |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[  230s] <scratch space>:54:1: note: expanded from here
+[  230s]    54 | planar_rgb16_s10_to_a
+[  230s]       | ^~~~~~~~~~~~~~~~~~~~~
+[  230s] CC	libswscale/options.o
+[  230s] CC	libswscale/output.o
+[  231s] 2 warnings generated.
+[  231s] CC	libswscale/rgb2rgb.o
+[  232s] CC	libswscale/slice.o
+[  232s] CC	libswscale/swscale.o
+[  232s] CC	libswscale/swscale_unscaled.o
+[  232s] CC	libswscale/utils.o
+[  232s] CC	libswscale/version.o
+[  232s] CC	libswscale/vscale.o
+[  233s] CC	libswscale/yuv2rgb.o
+[  233s] CC	libswscale/half2float.o
+[  233s] CC	libswscale/log2_tab.o
+[  233s] CC	libavutil/adler32.o
+[  233s] CC	libavutil/aes.o
+[  233s] CC	libavutil/aes_ctr.o
+[  233s] CC	libavutil/ambient_viewing_environment.o
+[  233s] CC	libavutil/arm/cpu.o
+[  233s] libavutil/arm/cpu.c:50:9: warning: 'HWCAP_ARM_VFP' macro redefined [-Wmacro-redefined]
+[  233s]    50 | #define HWCAP_ARM_VFP     (1 << 6)
+[  233s]       |         ^
+[  233s] /usr/include/bits/hwcap.h:30:9: note: previous definition is here
+[  233s]    30 | #define HWCAP_ARM_VFP           64
+[  233s]       |         ^
+[  233s] libavutil/arm/cpu.c:51:9: warning: 'HWCAP_ARM_EDSP' macro redefined [-Wmacro-redefined]
+[  233s]    51 | #define HWCAP_ARM_EDSP    (1 << 7)
+[  233s]       |         ^
+[  233s] /usr/include/bits/hwcap.h:31:9: note: previous definition is here
+[  233s]    31 | #define HWCAP_ARM_EDSP          128
+[  233s]       |         ^
+[  233s] libavutil/arm/cpu.c:52:9: warning: 'HWCAP_ARM_THUMBEE' macro redefined [-Wmacro-redefined]
+[  233s]    52 | #define HWCAP_ARM_THUMBEE (1 << 11)
+[  233s]       |         ^
+[  233s] /usr/include/bits/hwcap.h:35:9: note: previous definition is here
+[  233s]    35 | #define HWCAP_ARM_THUMBEE       2048
+[  233s]       |         ^
+[  233s] libavutil/arm/cpu.c:53:9: warning: 'HWCAP_ARM_NEON' macro redefined [-Wmacro-redefined]
+[  233s]    53 | #define HWCAP_ARM_NEON    (1 << 12)
+[  233s]       |         ^
+[  233s] /usr/include/bits/hwcap.h:36:9: note: previous definition is here
+[  233s]    36 | #define HWCAP_ARM_NEON          4096
+[  233s]       |         ^
+[  233s] libavutil/arm/cpu.c:54:9: warning: 'HWCAP_ARM_VFPv3' macro redefined [-Wmacro-redefined]
+[  233s]    54 | #define HWCAP_ARM_VFPv3   (1 << 13)
+[  233s]       |         ^
+[  233s] /usr/include/bits/hwcap.h:37:9: note: previous definition is here
+[  233s]    37 | #define HWCAP_ARM_VFPv3         8192
+[  233s]       |         ^
+[  233s] libavutil/arm/cpu.c:55:9: warning: 'HWCAP_ARM_TLS' macro redefined [-Wmacro-redefined]
+[  233s]    55 | #define HWCAP_ARM_TLS     (1 << 15)
+[  233s]       |         ^
+[  233s] /usr/include/bits/hwcap.h:39:9: note: previous definition is here
+[  233s]    39 | #define HWCAP_ARM_TLS           32768
+[  233s]       |         ^
+[  233s] 6 warnings generated.
+[  233s] CC	libavutil/arm/float_dsp_init_arm.o
+[  233s] CC	libavutil/arm/float_dsp_init_neon.o
+[  233s] CC	libavutil/arm/float_dsp_init_vfp.o
+[  233s] AS	libavutil/arm/float_dsp_neon.o
+[  233s] AS	libavutil/arm/float_dsp_vfp.o
+[  233s] CC	libavutil/audio_fifo.o
+[  234s] CC	libavutil/avsscanf.o
+[  234s] CC	libavutil/avstring.o
+[  234s] CC	libavutil/base64.o
+[  234s] CC	libavutil/blowfish.o
+[  234s] CC	libavutil/bprint.o
+[  234s] CC	libavutil/buffer.o
+[  234s] CC	libavutil/camellia.o
+[  234s] CC	libavutil/cast5.o
+[  234s] CC	libavutil/channel_layout.o
+[  234s] CC	libavutil/container_fifo.o
+[  234s] CC	libavutil/cpu.o
+[  234s] CC	libavutil/crc.o
+[  234s] CC	libavutil/csp.o
+[  234s] CC	libavutil/des.o
+[  234s] CC	libavutil/detection_bbox.o
+[  234s] CC	libavutil/dict.o
+[  234s] CC	libavutil/display.o
+[  234s] CC	libavutil/dovi_meta.o
+[  234s] CC	libavutil/downmix_info.o
+[  234s] CC	libavutil/encryption_info.o
+[  234s] CC	libavutil/error.o
+[  234s] CC	libavutil/eval.o
+[  234s] CC	libavutil/executor.o
+[  234s] CC	libavutil/fifo.o
+[  235s] CC	libavutil/file.o
+[  235s] CC	libavutil/file_open.o
+[  235s] CC	libavutil/film_grain_params.o
+[  235s] CC	libavutil/fixed_dsp.o
+[  235s] CC	libavutil/float_dsp.o
+[  235s] CC	libavutil/float_scalarproduct.o
+[  235s] CC	libavutil/frame.o
+[  235s] CC	libavutil/hash.o
+[  235s] CC	libavutil/hdr_dynamic_metadata.o
+[  235s] CC	libavutil/hdr_dynamic_vivid_metadata.o
+[  235s] CC	libavutil/hmac.o
+[  235s] CC	libavutil/hwcontext.o
+[  235s] CC	libavutil/hwcontext_stub.o
+[  235s] CC	libavutil/iamf.o
+[  235s] CC	libavutil/imgutils.o
+[  235s] CC	libavutil/integer.o
+[  235s] CC	libavutil/intmath.o
+[  235s] CC	libavutil/lfg.o
+[  235s] CC	libavutil/lls.o
+[  235s] CC	libavutil/log.o
+[  235s] CC	libavutil/log2_tab.o
+[  235s] CC	libavutil/lzo.o
+[  235s] CC	libavutil/mastering_display_metadata.o
+[  235s] CC	libavutil/mathematics.o
+[  235s] CC	libavutil/md5.o
+[  235s] CC	libavutil/mem.o
+[  235s] CC	libavutil/murmur3.o
+[  235s] CC	libavutil/opt.o
+[  235s] CC	libavutil/parseutils.o
+[  235s] CC	libavutil/pixdesc.o
+[  236s] CC	libavutil/pixelutils.o
+[  236s] CC	libavutil/random_seed.o
+[  236s] CC	libavutil/rational.o
+[  236s] CC	libavutil/rc4.o
+[  236s] CC	libavutil/refstruct.o
+[  236s] CC	libavutil/reverse.o
+[  236s] CC	libavutil/ripemd.o
+[  236s] CC	libavutil/samplefmt.o
+[  236s] CC	libavutil/sha.o
+[  236s] CC	libavutil/sha512.o
+[  236s] CC	libavutil/side_data.o
+[  236s] CC	libavutil/slicethread.o
+[  236s] CC	libavutil/spherical.o
+[  236s] CC	libavutil/stereo3d.o
+[  236s] CC	libavutil/tdrdi.o
+[  236s] CC	libavutil/tea.o
+[  236s] CC	libavutil/threadmessage.o
+[  236s] CC	libavutil/time.o
+[  236s] CC	libavutil/timecode.o
+[  236s] CC	libavutil/timecode_internal.o
+[  236s] CC	libavutil/timestamp.o
+[  236s] CC	libavutil/tree.o
+[  236s] CC	libavutil/twofish.o
+[  236s] CC	libavutil/tx.o
+[  236s] CC	libavutil/tx_double.o
+[  236s] CC	libavutil/tx_float.o
+[  237s] CC	libavutil/tx_int32.o
+[  237s] CC	libavutil/utils.o
+[  237s] CC	libavutil/uuid.o
+[  237s] CC	libavutil/version.o
+[  237s] CC	libavutil/video_enc_params.o
+[  237s] CC	libavutil/video_hint.o
+[  237s] CC	libavutil/xga_font_data.o
+[  237s] CC	libavutil/xtea.o
+[  237s] CC	libswresample/arm/audio_convert_init.o
+[  237s] AS	libswresample/arm/audio_convert_neon.o
+[  237s] AS	libswresample/arm/resample.o
+[  237s] CC	libswresample/arm/resample_init.o
+[  237s] CC	libswresample/audioconvert.o
+[  237s] CC	libswresample/dither.o
+[  238s] CC	libswresample/options.o
+[  238s] CC	libswresample/rematrix.o
+[  238s] CC	libswresample/resample.o
+[  238s] CC	libswresample/resample_dsp.o
+[  238s] CC	libswresample/swresample.o
+[  238s] CC	libswresample/swresample_frame.o
+[  238s] CC	libswresample/version.o
+[  238s] CC	libswresample/log2_tab.o
+[  238s] GEN	libavfilter/libavfilter.pc
+[  238s] CC	libavformat/aacdec.o
+[  238s] CC	libavformat/aiff.o
+[  238s] CC	libavformat/aiffdec.o
+[  238s] CC	libavformat/allformats.o
+[  238s] CC	libavformat/amr.o
+[  238s] CC	libavformat/ape.o
+[  238s] CC	libavformat/apetag.o
+[  238s] CC	libavformat/apv.o
+[  238s] CC	libavformat/asf.o
+[  238s] CC	libavformat/asf_tags.o
+[  238s] CC	libavformat/asfcrypt.o
+[  238s] CC	libavformat/asfdec_f.o
+[  238s] CC	libavformat/av1.o
+[  238s] libavformat/asfdec_f.c:362:17: warning: unused variable 'fsize' [-Wunused-variable]
+[  238s]   362 |         int64_t fsize = avio_size(pb);
+[  238s]       |                 ^~~~~
+[  238s] CC	libavformat/avc.o
+[  238s] 1 warning generated.
+[  238s] CC	libavformat/avformat.o
+[  238s] CC	libavformat/avidec.o
+[  239s] CC	libavformat/avio.o
+[  239s] CC	libavformat/aviobuf.o
+[  239s] CC	libavformat/avlanguage.o
+[  239s] CC	libavformat/cbs.o
+[  239s] CC	libavformat/cbs_apv.o
+[  239s] CC	libavformat/cbs_av1.o
+[  239s] CC	libavformat/concatdec.o
+[  239s] CC	libavformat/demux.o
+[  239s] CC	libavformat/demux_utils.o
+[  239s] CC	libavformat/dovi_isom.o
+[  239s] CC	libavformat/dump.o
+[  240s] CC	libavformat/dv.o
+[  240s] CC	libavformat/dvdclut.o
+[  240s] CC	libavformat/evc.o
+[  240s] CC	libavformat/file.o
+[  240s] CC	libavformat/flac_picture.o
+[  240s] CC	libavformat/flacdec.o
+[  240s] CC	libavformat/flvdec.o
+[  240s] CC	libavformat/format.o
+[  240s] CC	libavformat/h263dec.o
+[  240s] CC	libavformat/h264dec.o
+[  240s] CC	libavformat/hevc.o
+[  240s] CC	libavformat/hevcdec.o
+[  240s] CC	libavformat/iamf.o
+[  240s] CC	libavformat/iamf_parse.o
+[  240s] CC	libavformat/iamf_reader.o
+[  240s] CC	libavformat/iamf_writer.o
+[  240s] CC	libavformat/id3v1.o
+[  240s] CC	libavformat/id3v2.o
+[  241s] CC	libavformat/img2.o
+[  241s] CC	libavformat/isom.o
+[  241s] CC	libavformat/isom_tags.o
+[  241s] CC	libavformat/m4vdec.o
+[  241s] CC	libavformat/matroska.o
+[  241s] CC	libavformat/matroskadec.o
+[  241s] CC	libavformat/metadata.o
+[  241s] CC	libavformat/mmf.o
+[  241s] CC	libavformat/mov.o
+[  241s] CC	libavformat/mov_chan.o
+[  241s] CC	libavformat/mov_esds.o
+[  241s] CC	libavformat/movenc.o
+[  242s] CC	libavformat/movenc_ttml.o
+[  242s] CC	libavformat/movenccenc.o
+[  242s] CC	libavformat/movenchint.o
+[  242s] CC	libavformat/mp3dec.o
+[  242s] CC	libavformat/mpeg.o
+[  242s] CC	libavformat/mpegts.o
+[  242s] CC	libavformat/mpegvideodec.o
+[  242s] CC	libavformat/mux.o
+[  243s] CC	libavformat/mux_utils.o
+[  243s] CC	libavformat/nal.o
+[  243s] CC	libavformat/nullenc.o
+[  243s] CC	libavformat/oggdec.o
+[  243s] CC	libavformat/oggparsecelt.o
+[  243s] CC	libavformat/oggparsedirac.o
+[  243s] CC	libavformat/oggparseflac.o
+[  243s] CC	libavformat/oggparseogm.o
+[  243s] CC	libavformat/oggparseopus.o
+[  243s] CC	libavformat/oggparseskeleton.o
+[  243s] CC	libavformat/oggparsespeex.o
+[  243s] CC	libavformat/oggparsetheora.o
+[  243s] CC	libavformat/oggparsevorbis.o
+[  243s] CC	libavformat/oggparsevp8.o
+[  243s] CC	libavformat/options.o
+[  243s] CC	libavformat/os_support.o
+[  243s] CC	libavformat/pcm.o
+[  243s] CC	libavformat/protocols.o
+[  243s] CC	libavformat/qtpalette.o
+[  243s] CC	libavformat/rawdec.o
+[  243s] libavformat/rawdec.c:106:12: warning: unused function 'raw_data_read_header' [-Wunused-function]
+[  243s]   106 | static int raw_data_read_header(AVFormatContext *s)
+[  243s]       |            ^~~~~~~~~~~~~~~~~~~~
+[  243s] 1 warning generated.
+[  243s] CC	libavformat/rawenc.o
+[  243s] CC	libavformat/rawutils.o
+[  243s] CC	libavformat/replaygain.o
+[  243s] CC	libavformat/riff.o
+[  243s] CC	libavformat/riffdec.o
+[  243s] CC	libavformat/riffenc.o
+[  244s] CC	libavformat/rm.o
+[  244s] CC	libavformat/rmdec.o
+[  244s] CC	libavformat/rmsipr.o
+[  244s] CC	libavformat/rtp.o
+[  244s] CC	libavformat/rtpenc_chain.o
+[  244s] CC	libavformat/sdp.o
+[  244s] CC	libavformat/seek.o
+[  244s] CC	libavformat/url.o
+[  244s] CC	libavformat/utils.o
+[  244s] CC	libavformat/version.o
+[  244s] CC	libavformat/vorbiscomment.o
+[  244s] CC	libavformat/vpcc.o
+[  244s] CC	libavformat/vvc.o
+[  244s] CC	libavformat/wavdec.o
+[  244s] CC	libavformat/wavenc.o
+[  244s] CC	libavformat/ac3_channel_layout_tab.o
+[  244s] CC	libavformat/golomb_tab.o
+[  244s] CC	libavformat/log2_tab.o
+[  244s] CC	libavformat/mpeg4audio_sample_rates.o
+[  244s] CC	libavformat/mpegaudiotabs.o
+[  244s] CC	libavformat/to_upper4.o
+[  244s] CC	libavcodec/aac/aacdec.o
+[  244s] CC	libavcodec/aac/aacdec_ac.o
+[  244s] CC	libavcodec/aac/aacdec_float.o
+[  245s] CC	libavcodec/aac/aacdec_lpd.o
+[  245s] CC	libavcodec/aac/aacdec_tab.o
+[  245s] CC	libavcodec/aac/aacdec_usac.o
+[  245s] CC	libavcodec/aac_ac3_parser.o
+[  245s] CC	libavcodec/aac_parser.o
+[  245s] CC	libavcodec/aaccoder.o
+[  245s] CC	libavcodec/aacenc.o
+[  245s] CC	libavcodec/aacenc_is.o
+[  245s] CC	libavcodec/aacenc_tns.o
+[  245s] CC	libavcodec/aacenctab.o
+[  245s] CC	libavcodec/aacps_common.o
+[  245s] CC	libavcodec/aacps_float.o
+[  245s] CC	libavcodec/aacpsdsp_float.o
+[  245s] CC	libavcodec/aacpsy.o
+[  246s] CC	libavcodec/aacsbr.o
+[  246s] CC	libavcodec/aactab.o
+[  246s] CC	libavcodec/aandcttab.o
+[  246s] CC	libavcodec/ac3.o
+[  246s] CC	libavcodec/ac3_channel_layout_tab.o
+[  246s] CC	libavcodec/ac3_parser.o
+[  246s] CC	libavcodec/ac3dec_data.o
+[  246s] CC	libavcodec/ac3dec_float.o
+[  246s] CC	libavcodec/ac3dsp.o
+[  246s] In file included from libavcodec/ac3dec_float.c:34:
+[  246s] libavcodec/ac3dec.h:269:12: warning: function 'ff_eac3_parse_header' has internal linkage but is not defined [-Wundefined-internal]
+[  246s]   269 | static int ff_eac3_parse_header(AC3DecodeContext *s, const struct AC3HeaderInfo *hdr);
+[  246s]       |            ^
+[  246s] libavcodec/ac3dec.c:236:16: note: used here
+[  246s]   236 |         return ff_eac3_parse_header(s, &hdr);
+[  246s]       |                ^
+[  246s] In file included from libavcodec/ac3dec_float.c:34:
+[  246s] libavcodec/ac3dec.h:275:13: warning: function 'ff_eac3_decode_transform_coeffs_aht_ch' has internal linkage but is not defined [-Wundefined-internal]
+[  246s]   275 | static void ff_eac3_decode_transform_coeffs_aht_ch(AC3DecodeContext *s, int ch);
+[  246s]       |             ^
+[  246s] libavcodec/ac3dec.c:498:13: note: used here
+[  246s]   498 |             ff_eac3_decode_transform_coeffs_aht_ch(s, ch);
+[  246s]       |             ^
+[  246s] In file included from libavcodec/ac3dec_float.c:34:
+[  246s] libavcodec/ac3dec.h:282:13: warning: function 'ff_eac3_apply_spectral_extension' has internal linkage but is not defined [-Wundefined-internal]
+[  246s]   282 | static void ff_eac3_apply_spectral_extension(AC3DecodeContext *s);
+[  246s]       |             ^
+[  246s] libavcodec/ac3dec.c:1296:9: note: used here
+[  246s]  1296 |         ff_eac3_apply_spectral_extension(s);
+[  246s]       |         ^
+[  246s] CC	libavcodec/ac3tab.o
+[  246s] CC	libavcodec/acelp_filters.o
+[  246s] CC	libavcodec/acelp_pitch_delay.o
+[  246s] CC	libavcodec/acelp_vectors.o
+[  246s] CC	libavcodec/adts_header.o
+[  246s] 3 warnings generated.
+[  246s] CC	libavcodec/adts_parser.o
+[  246s] CC	libavcodec/alac.o
+[  246s] CC	libavcodec/alac_data.o
+[  246s] CC	libavcodec/alacdsp.o
+[  246s] CC	libavcodec/allcodecs.o
+[  246s] CC	libavcodec/amrnbdec.o
+[  246s] CC	libavcodec/aom_film_grain.o
+[  247s] CC	libavcodec/apedec.o
+[  247s] CC	libavcodec/arm/aacpsdsp_init_arm.o
+[  247s] AS	libavcodec/arm/aacpsdsp_neon.o
+[  247s] AS	libavcodec/arm/ac3dsp_arm.o
+[  247s] AS	libavcodec/arm/ac3dsp_armv6.o
+[  247s] CC	libavcodec/arm/ac3dsp_init_arm.o
+[  247s] AS	libavcodec/arm/ac3dsp_neon.o
+[  247s] CC	libavcodec/arm/blockdsp_init_arm.o
+[  247s] CC	libavcodec/arm/blockdsp_init_neon.o
+[  247s] AS	libavcodec/arm/blockdsp_neon.o
+[  247s] AS	libavcodec/arm/flacdsp_arm.o
+[  247s] CC	libavcodec/arm/flacdsp_init_arm.o
+[  247s] CC	libavcodec/arm/fmtconvert_init_arm.o
+[  247s] AS	libavcodec/arm/fmtconvert_neon.o
+[  247s] AS	libavcodec/arm/fmtconvert_vfp.o
+[  247s] CC	libavcodec/arm/h264chroma_init_arm.o
+[  247s] AS	libavcodec/arm/h264cmc_neon.o
+[  247s] CC	libavcodec/arm/h264dsp_init_arm.o
+[  247s] AS	libavcodec/arm/h264dsp_neon.o
+[  247s] AS	libavcodec/arm/h264idct_neon.o
+[  247s] CC	libavcodec/arm/h264pred_init_arm.o
+[  247s] AS	libavcodec/arm/h264pred_neon.o
+[  247s] CC	libavcodec/arm/h264qpel_init_arm.o
+[  247s] AS	libavcodec/arm/h264qpel_neon.o
+[  247s] AS	libavcodec/arm/hevcdsp_deblock_neon.o
+[  247s] AS	libavcodec/arm/hevcdsp_idct_neon.o
+[  247s] CC	libavcodec/arm/hevcdsp_init_arm.o
+[  247s] CC	libavcodec/arm/hevcdsp_init_neon.o
+[  247s] AS	libavcodec/arm/hevcdsp_qpel_neon.o
+[  247s] AS	libavcodec/arm/hevcdsp_sao_neon.o
+[  247s] AS	libavcodec/arm/hpeldsp_arm.o
+[  247s] AS	libavcodec/arm/hpeldsp_armv6.o
+[  247s] CC	libavcodec/arm/hpeldsp_init_arm.o
+[  247s] CC	libavcodec/arm/hpeldsp_init_armv6.o
+[  247s] CC	libavcodec/arm/hpeldsp_init_neon.o
+[  247s] AS	libavcodec/arm/hpeldsp_neon.o
+[  247s] AS	libavcodec/arm/idctdsp_arm.o
+[  247s] AS	libavcodec/arm/idctdsp_armv6.o
+[  247s] CC	libavcodec/arm/idctdsp_init_arm.o
+[  247s] CC	libavcodec/arm/idctdsp_init_armv5te.o
+[  248s] CC	libavcodec/arm/idctdsp_init_armv6.o
+[  248s] CC	libavcodec/arm/idctdsp_init_neon.o
+[  248s] AS	libavcodec/arm/idctdsp_neon.o
+[  248s] AS	libavcodec/arm/jrevdct_arm.o
+[  248s] CC	libavcodec/arm/lossless_audiodsp_init_arm.o
+[  248s] AS	libavcodec/arm/lossless_audiodsp_neon.o
+[  248s] AS	libavcodec/arm/me_cmp_armv6.o
+[  248s] CC	libavcodec/arm/me_cmp_init_arm.o
+[  248s] AS	libavcodec/arm/mpegaudiodsp_fixed_armv6.o
+[  248s] CC	libavcodec/arm/mpegaudiodsp_init_arm.o
+[  248s] CC	libavcodec/arm/mpegvideo_arm.o
+[  248s] CC	libavcodec/arm/mpegvideo_armv5te.o
+[  248s] AS	libavcodec/arm/mpegvideo_armv5te_s.o
+[  248s] AS	libavcodec/arm/mpegvideo_neon.o
+[  248s] AS	libavcodec/arm/mpegvideoencdsp_armv6.o
+[  248s] CC	libavcodec/arm/mpegvideoencdsp_init_arm.o
+[  248s] AS	libavcodec/arm/pixblockdsp_armv6.o
+[  248s] CC	libavcodec/arm/pixblockdsp_init_arm.o
+[  248s] AS	libavcodec/arm/pixblockdsp_neon.o
+[  248s] CC	libavcodec/arm/rv34dsp_init_arm.o
+[  248s] AS	libavcodec/arm/rv34dsp_neon.o
+[  248s] CC	libavcodec/arm/rv40dsp_init_arm.o
+[  248s] AS	libavcodec/arm/rv40dsp_neon.o
+[  248s] CC	libavcodec/arm/sbrdsp_init_arm.o
+[  248s] AS	libavcodec/arm/sbrdsp_neon.o
+[  248s] AS	libavcodec/arm/simple_idct_arm.o
+[  248s] AS	libavcodec/arm/simple_idct_armv5te.o
+[  248s] AS	libavcodec/arm/simple_idct_armv6.o
+[  248s] AS	libavcodec/arm/simple_idct_neon.o
+[  248s] AS	libavcodec/arm/startcode_armv6.o
+[  248s] CC	libavcodec/arm/vc1dsp_init_arm.o
+[  248s] CC	libavcodec/arm/vc1dsp_init_neon.o
+[  248s] AS	libavcodec/arm/vc1dsp_neon.o
+[  248s] AS	libavcodec/arm/videodsp_armv5te.o
+[  248s] CC	libavcodec/arm/videodsp_init_arm.o
+[  248s] CC	libavcodec/arm/videodsp_init_armv5te.o
+[  248s] CC	libavcodec/arm/vp3dsp_init_arm.o
+[  248s] AS	libavcodec/arm/vp3dsp_neon.o
+[  248s] AS	libavcodec/arm/vp8_armv6.o
+[  248s] AS	libavcodec/arm/vp8dsp_armv6.o
+[  248s] CC	libavcodec/arm/vp8dsp_init_arm.o
+[  248s] CC	libavcodec/arm/vp8dsp_init_armv6.o
+[  248s] CC	libavcodec/arm/vp8dsp_init_neon.o
+[  248s] AS	libavcodec/arm/vp8dsp_neon.o
+[  248s] CC	libavcodec/arm/vp9dsp_init_10bpp_arm.o
+[  248s] CC	libavcodec/arm/vp9dsp_init_12bpp_arm.o
+[  248s] CC	libavcodec/arm/vp9dsp_init_arm.o
+[  248s] AS	libavcodec/arm/vp9itxfm_16bpp_neon.o
+[  248s] AS	libavcodec/arm/vp9itxfm_neon.o
+[  248s] AS	libavcodec/arm/vp9lpf_16bpp_neon.o
+[  248s] AS	libavcodec/arm/vp9lpf_neon.o
+[  248s] AS	libavcodec/arm/vp9mc_16bpp_neon.o
+[  248s] AS	libavcodec/arm/vp9mc_neon.o
+[  248s] CC	libavcodec/atsc_a53.o
+[  248s] CC	libavcodec/audio_frame_queue.o
+[  248s] CC	libavcodec/avcodec.o
+[  249s] CC	libavcodec/avdct.o
+[  249s] CC	libavcodec/bitstream.o
+[  249s] CC	libavcodec/bitstream_filters.o
+[  249s] CC	libavcodec/blockdsp.o
+[  249s] CC	libavcodec/bmp.o
+[  249s] CC	libavcodec/bmpenc.o
+[  249s] CC	libavcodec/bsf.o
+[  249s] CC	libavcodec/bsf/aac_adtstoasc.o
+[  249s] CC	libavcodec/bsf/h264_mp4toannexb.o
+[  249s] CC	libavcodec/bsf/vp9_superframe.o
+[  249s] CC	libavcodec/bsf/vp9_superframe_split.o
+[  249s] CC	libavcodec/bswapdsp.o
+[  249s] CC	libavcodec/cabac.o
+[  249s] CC	libavcodec/cbrt_data.o
+[  249s] CC	libavcodec/cbs.o
+[  249s] CC	libavcodec/cbs_bsf.o
+[  249s] CC	libavcodec/cbs_vp9.o
+[  249s] CC	libavcodec/celp_filters.o
+[  249s] CC	libavcodec/celp_math.o
+[  249s] CC	libavcodec/codec_desc.o
+[  249s] CC	libavcodec/codec_par.o
+[  249s] CC	libavcodec/d3d11va.o
+[  249s] CC	libavcodec/dct32_fixed.o
+[  249s] CC	libavcodec/dct32_float.o
+[  249s] CC	libavcodec/decode.o
+[  249s] CC	libavcodec/dirac.o
+[  250s] CC	libavcodec/dovi_rpu.o
+[  250s] CC	libavcodec/dovi_rpudec.o
+[  250s] CC	libavcodec/dv_profile.o
+[  250s] CC	libavcodec/dynamic_hdr_vivid.o
+[  250s] CC	libavcodec/encode.o
+[  250s] CC	libavcodec/error_resilience.o
+[  250s] CC	libavcodec/exif.o
+[  250s] CC	libavcodec/faandct.o
+[  250s] CC	libavcodec/faanidct.o
+[  250s] CC	libavcodec/faxcompr.o
+[  250s] CC	libavcodec/fdctdsp.o
+[  250s] CC	libavcodec/flac.o
+[  250s] CC	libavcodec/flac_parser.o
+[  250s] CC	libavcodec/flacdata.o
+[  250s] CC	libavcodec/flacdec.o
+[  250s] CC	libavcodec/flacdsp.o
+[  250s] CC	libavcodec/flvdec.o
+[  250s] CC	libavcodec/fmtconvert.o
+[  250s] CC	libavcodec/frame_thread_encoder.o
+[  250s] CC	libavcodec/get_buffer.o
+[  251s] CC	libavcodec/golomb.o
+[  251s] CC	libavcodec/h263.o
+[  251s] CC	libavcodec/h263_parser.o
+[  251s] CC	libavcodec/h263data.o
+[  251s] CC	libavcodec/h263dec.o
+[  251s] CC	libavcodec/h263dsp.o
+[  251s] CC	libavcodec/h2645_parse.o
+[  251s] CC	libavcodec/h2645_sei.o
+[  251s] CC	libavcodec/h2645_vui.o
+[  251s] CC	libavcodec/h2645data.o
+[  251s] CC	libavcodec/h264_cabac.o
+[  251s] CC	libavcodec/h264_cavlc.o
+[  251s] CC	libavcodec/h264_direct.o
+[  251s] CC	libavcodec/h264_loopfilter.o
+[  251s] CC	libavcodec/h264_mb.o
+[  252s] CC	libavcodec/h264_parse.o
+[  252s] CC	libavcodec/h264_parser.o
+[  252s] CC	libavcodec/h264_picture.o
+[  252s] CC	libavcodec/h264_ps.o
+[  252s] CC	libavcodec/h264_refs.o
+[  252s] CC	libavcodec/h264_sei.o
+[  252s] CC	libavcodec/h264_slice.o
+[  252s] CC	libavcodec/h264chroma.o
+[  252s] CC	libavcodec/h264data.o
+[  253s] CC	libavcodec/h264dec.o
+[  253s] CC	libavcodec/h264dsp.o
+[  253s] CC	libavcodec/h264idct.o
+[  253s] CC	libavcodec/h264pred.o
+[  253s] CC	libavcodec/h264qpel.o
+[  256s] CC	libavcodec/h274.o
+[  256s] CC	libavcodec/hevc/cabac.o
+[  256s] CC	libavcodec/hevc/data.o
+[  256s] CC	libavcodec/hevc/dsp.o
+[  257s] CC	libavcodec/hevc/filter.o
+[  257s] CC	libavcodec/hevc/hevcdec.o
+[  258s] CC	libavcodec/hevc/mvs.o
+[  258s] CC	libavcodec/hevc/parse.o
+[  258s] CC	libavcodec/hevc/parser.o
+[  258s] CC	libavcodec/hevc/pred.o
+[  258s] CC	libavcodec/hevc/ps.o
+[  259s] CC	libavcodec/hevc/refs.o
+[  259s] CC	libavcodec/hevc/sei.o
+[  259s] CC	libavcodec/hpeldsp.o
+[  259s] CC	libavcodec/idctdsp.o
+[  259s] CC	libavcodec/imgconvert.o
+[  259s] CC	libavcodec/intelh263dec.o
+[  260s] CC	libavcodec/intrax8.o
+[  260s] CC	libavcodec/intrax8dsp.o
+[  260s] CC	libavcodec/ituh263dec.o
+[  260s] CC	libavcodec/ituh263enc.o
+[  260s] CC	libavcodec/jfdctfst.o
+[  260s] CC	libavcodec/jfdctint.o
+[  260s] CC	libavcodec/jni.o
+[  260s] CC	libavcodec/jpegquanttables.o
+[  260s] CC	libavcodec/jpegtables.o
+[  260s] CC	libavcodec/jrevdct.o
+[  260s] CC	libavcodec/kbdwin.o
+[  260s] CC	libavcodec/lcevcdec.o
+[  260s] CC	libavcodec/lossless_audiodsp.o
+[  260s] CC	libavcodec/lpc.o
+[  260s] CC	libavcodec/lsp.o
+[  260s] CC	libavcodec/lzw.o
+[  260s] CC	libavcodec/mathtables.o
+[  260s] CC	libavcodec/me_cmp.o
+[  260s] CC	libavcodec/mediacodec.o
+[  260s] CC	libavcodec/mjpegdec.o
+[  261s] CC	libavcodec/mjpegdec_common.o
+[  261s] CC	libavcodec/motion_est.o
+[  261s] CC	libavcodec/mpeg12.o
+[  261s] CC	libavcodec/mpeg12data.o
+[  261s] CC	libavcodec/mpeg12dec.o
+[  261s] CC	libavcodec/mpeg12enc.o
+[  261s] CC	libavcodec/mpeg12framerate.o
+[  262s] CC	libavcodec/mpeg4audio.o
+[  262s] CC	libavcodec/mpeg4audio_sample_rates.o
+[  262s] CC	libavcodec/mpeg4video.o
+[  262s] CC	libavcodec/mpeg4video_parser.o
+[  262s] CC	libavcodec/mpeg4videodec.o
+[  262s] CC	libavcodec/mpeg4videodsp.o
+[  262s] libavcodec/mpeg4videodec.c:3679:22: warning: variable 'name' is used uninitialized whenever 'if' condition is false [-Wsometimes-uninitialized]
+[  262s]  3679 |             else if (startcode <= 0x1FF)
+[  262s]       |                      ^~~~~~~~~~~~~~~~~~
+[  262s] libavcodec/mpeg4videodec.c:3682:31: note: uninitialized use occurs here
+[  262s]  3682 |                    startcode, name, get_bits_count(gb));
+[  262s]       |                               ^~~~
+[  262s] libavcodec/mpeg4videodec.c:3679:18: note: remove the 'if' if its condition is always true
+[  262s]  3679 |             else if (startcode <= 0x1FF)
+[  262s]       |                  ^~~~~~~~~~~~~~~~~~~~~~~
+[  262s]  3680 |                 name = "System start";
+[  262s] libavcodec/mpeg4videodec.c:3626:29: note: initialize the variable 'name' to silence this warning
+[  262s]  3626 |             const char *name;
+[  262s]       |                             ^
+[  262s]       |                              = NULL
+[  262s] CC	libavcodec/mpeg4videoenc.o
+[  262s] CC	libavcodec/mpeg_er.o
+[  262s] CC	libavcodec/mpegaudio.o
+[  262s] CC	libavcodec/mpegaudio_parser.o
+[  262s] 1 warning generated.
+[  262s] CC	libavcodec/mpegaudiodata.o
+[  262s] CC	libavcodec/mpegaudiodec_common.o
+[  262s] CC	libavcodec/mpegaudiodec_fixed.o
+[  262s] CC	libavcodec/mpegaudiodecheader.o
+[  262s] CC	libavcodec/mpegaudiodsp.o
+[  262s] CC	libavcodec/mpegaudiodsp_data.o
+[  263s] CC	libavcodec/mpegaudiodsp_fixed.o
+[  263s] CC	libavcodec/mpegaudiodsp_float.o
+[  263s] CC	libavcodec/mpegaudiotabs.o
+[  263s] CC	libavcodec/mpegpicture.o
+[  263s] CC	libavcodec/mpegutils.o
+[  263s] CC	libavcodec/mpegvideo.o
+[  263s] CC	libavcodec/mpegvideo_dec.o
+[  263s] CC	libavcodec/mpegvideo_enc.o
+[  263s] CC	libavcodec/mpegvideo_motion.o
+[  263s] CC	libavcodec/mpegvideo_parser.o
+[  263s] CC	libavcodec/mpegvideo_unquantize.o
+[  263s] CC	libavcodec/mpegvideodata.o
+[  263s] CC	libavcodec/mpegvideoencdsp.o
+[  263s] CC	libavcodec/msmpeg4.o
+[  264s] CC	libavcodec/msmpeg4_vc1_data.o
+[  264s] CC	libavcodec/msmpeg4data.o
+[  264s] CC	libavcodec/msmpeg4dec.o
+[  264s] CC	libavcodec/msrledec.o
+[  264s] CC	libavcodec/neon/mpegvideo.o
+[  264s] CC	libavcodec/options.o
+[  264s] CC	libavcodec/packet.o
+[  264s] CC	libavcodec/parser.o
+[  264s] CC	libavcodec/parsers.o
+[  264s] CC	libavcodec/pcm.o
+[  264s] CC	libavcodec/pixblockdsp.o
+[  264s] CC	libavcodec/profiles.o
+[  264s] CC	libavcodec/psymodel.o
+[  264s] CC	libavcodec/pthread.o
+[  264s] CC	libavcodec/pthread_frame.o
+[  264s] CC	libavcodec/pthread_slice.o
+[  264s] CC	libavcodec/qpeldsp.o
+[  264s] CC	libavcodec/qsv_api.o
+[  264s] CC	libavcodec/ratecontrol.o
+[  264s] CC	libavcodec/raw.o
+[  264s] CC	libavcodec/rl.o
+[  265s] CC	libavcodec/rv34.o
+[  265s] CC	libavcodec/rv34dsp.o
+[  265s] CC	libavcodec/rv40.o
+[  265s] CC	libavcodec/rv40dsp.o
+[  265s] CC	libavcodec/sbrdsp.o
+[  265s] CC	libavcodec/simple_idct.o
+[  265s] CC	libavcodec/sinewin.o
+[  265s] CC	libavcodec/startcode.o
+[  265s] CC	libavcodec/threadprogress.o
+[  265s] CC	libavcodec/tiff.o
+[  265s] CC	libavcodec/tiff_common.o
+[  266s] CC	libavcodec/to_upper4.o
+[  266s] CC	libavcodec/utils.o
+[  266s] CC	libavcodec/v4l2_buffers.o
+[  266s] CC	libavcodec/v4l2_context.o
+[  266s] CC	libavcodec/v4l2_fmt.o
+[  266s] CC	libavcodec/v4l2_m2m.o
+[  266s] CC	libavcodec/vc1.o
+[  266s] CC	libavcodec/vc1_block.o
+[  266s] CC	libavcodec/vc1_loopfilter.o
+[  267s] CC	libavcodec/vc1_mc.o
+[  267s] CC	libavcodec/vc1_pred.o
+[  267s] CC	libavcodec/vc1data.o
+[  267s] CC	libavcodec/vc1dec.o
+[  267s] CC	libavcodec/vc1dsp.o
+[  267s] CC	libavcodec/version.o
+[  267s] CC	libavcodec/videodsp.o
+[  267s] CC	libavcodec/vlc.o
+[  267s] CC	libavcodec/vorbis_parser.o
+[  267s] CC	libavcodec/vp3.o
+[  268s] CC	libavcodec/vp3dsp.o
+[  268s] CC	libavcodec/vp8.o
+[  268s] CC	libavcodec/vp8_parser.o
+[  268s] CC	libavcodec/vp8data.o
+[  268s] CC	libavcodec/vp8dsp.o
+[  268s] libavcodec/vp8dsp.c:299:30: warning: unused function 'vp7_filter_common' [-Wunused-function]
+[  268s]   299 | static av_always_inline void vp7_filter_common(uint8_t *p, ptrdiff_t stride,
+[  268s]       |                              ^~~~~~~~~~~~~~~~~
+[  268s] libavcodec/vp8dsp.c:341:1: warning: unused function 'vp7_normal_limit' [-Wunused-function]
+[  268s]   341 | NORMAL_LIMIT(7)
+[  268s]       | ^~~~~~~~~~~~~~~
+[  268s] libavcodec/vp8dsp.c:330:29: note: expanded from macro 'NORMAL_LIMIT'
+[  268s]   330 | static av_always_inline int vp ## vpn ## _normal_limit(uint8_t *p,            \
+[  268s]       |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~
+[  268s] <scratch space>:183:1: note: expanded from here
+[  268s]   183 | vp7_normal_limit
+[  268s]       | ^~~~~~~~~~~~~~~~
+[  268s] 2 warnings generated.
+[  268s] CC	libavcodec/vp9.o
+[  268s] CC	libavcodec/vp9_parser.o
+[  268s] CC	libavcodec/vp9block.o
+[  269s] CC	libavcodec/vp9data.o
+[  269s] CC	libavcodec/vp9dsp.o
+[  269s] CC	libavcodec/vp9dsp_10bpp.o
+[  269s] CC	libavcodec/vp9dsp_12bpp.o
+[  270s] CC	libavcodec/vp9dsp_8bpp.o
+[  271s] CC	libavcodec/vp9lpf.o
+[  271s] CC	libavcodec/vp9mvs.o
+[  271s] CC	libavcodec/vp9prob.o
+[  271s] CC	libavcodec/vp9recon.o
+[  271s] CC	libavcodec/vpx_rac.o
+[  271s] CC	libavcodec/wmv2.o
+[  271s] CC	libavcodec/wmv2data.o
+[  271s] CC	libavcodec/wmv2dec.o
+[  271s] CC	libavcodec/wmv2dsp.o
+[  271s] CC	libavcodec/wrapped_avframe.o
+[  271s] CC	libavcodec/xiph.o
+[  271s] CC	libavcodec/xvididct.o
+[  272s] CC	libavcodec/float_scalarproduct.o
+[  272s] CC	libavcodec/log2_tab.o
+[  272s] CC	libavcodec/reverse.o
+[  272s] CC	libavcodec/timecode_internal.o
+[  272s] GEN	libavformat/libavformat.pc
+[  272s] GEN	libavcodec/libavcodec.pc
+[  272s] GEN	libswresample/libswresample.pc
+[  272s] GEN	libswscale/libswscale.pc
+[  272s] GEN	libavutil/libavutil.pc
+[  272s] CC	fftools/ffmpeg_dec.o
+[  272s] CC	fftools/ffmpeg_demux.o
+[  272s] CC	fftools/ffmpeg_enc.o
+[  272s] CC	fftools/ffmpeg_filter.o
+[  272s] CC	fftools/ffmpeg_hw.o
+[  272s] CC	fftools/ffmpeg_mux.o
+[  273s] CC	fftools/ffmpeg_mux_init.o
+[  273s] CC	fftools/ffmpeg_opt.o
+[  273s] CC	fftools/ffmpeg_sched.o
+[  273s] CC	fftools/graph/graphprint.o
+[  273s] CC	fftools/sync_queue.o
+[  273s] CC	fftools/thread_queue.o
+[  273s] CC	fftools/textformat/avtextformat.o
+[  273s] CC	fftools/textformat/tf_compact.o
+[  273s] CC	fftools/textformat/tf_default.o
+[  273s] CC	fftools/textformat/tf_flat.o
+[  273s] CC	fftools/textformat/tf_ini.o
+[  273s] CC	fftools/textformat/tf_json.o
+[  273s] CC	fftools/textformat/tf_mermaid.o
+[  273s] CC	fftools/textformat/tf_xml.o
+[  273s] CC	fftools/textformat/tw_avio.o
+[  273s] CC	fftools/textformat/tw_buffer.o
+[  273s] CC	fftools/textformat/tw_stdout.o
+[  273s] CC	fftools/resources/resman.o
+[  273s] HOSTCC	ffbuild/bin2c_host.o
+[  273s] SED	fftools/resources/graph.css.min
+[  273s] CC	fftools/cmdutils.o
+[  273s] CC	fftools/opt_common.o
+[  274s] CC	fftools/ffmpeg.o
+[  274s] GEN	libavfilter/libavfilter.ver
+[  274s] GEN	libswscale/libswscale.ver
+[  274s] GEN	libavutil/libavutil.ver
+[  274s] GEN	libswresample/libswresample.ver
+[  274s] GEN	libavformat/libavformat.ver
+[  274s] GEN	libavcodec/libavcodec.ver
+[  274s] HOSTLD	ffbuild/bin2c
+[  274s] LD	libavutil/libavutil.so.60
+[  274s] BIN2C	fftools/resources/graph.html.c
+[  274s] BIN2C	fftools/resources/graph.css.c
+[  274s] CC	fftools/resources/graph.html.o
+[  274s] CC	fftools/resources/graph.css.o
+[  274s] LD	libswscale/libswscale.so.9
+[  274s] LD	libswresample/libswresample.so.6
+[  274s] LD	libavcodec/libavcodec.so.62
+[  274s] LD	libavfilter/libavfilter.so.11
+[  275s] LD	libavformat/libavformat.so.62
+[  275s] LD	ffmpeg_g
+[  275s] CP	ffmpeg
+[  275s] STRIP	ffmpeg
+[  275s] skipping strip ffmpeg
+[  275s] rm fftools/resources/graph.css.min fftools/resources/graph.html.c fftools/resources/graph.css.c
+[  275s] + exit 0
+[  275s] Executing(%install): /bin/sh -e /var/tmp/rpm-tmp.skzhwU
+[  275s] + umask 022
+[  275s] + cd /home/abuild/rpmbuild/BUILD
+[  275s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm
+[  275s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm
+[  275s] + cd ffmpeg-8.0.1
+[  275s] + export AR=llvm-ar RANLIB=llvm-ranlib
+[  275s] + AR=llvm-ar
+[  275s] + RANLIB=llvm-ranlib
+[  275s] + export CC=armv7l-tizen-linux-gnueabi-clang CXX=armv7l-tizen-linux-gnueabi-clang++
+[  275s] + CC=armv7l-tizen-linux-gnueabi-clang
+[  275s] + CXX=armv7l-tizen-linux-gnueabi-clang++
+[  275s] + rm -rf /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm
+[  275s] + /bin/make DESTDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm INSTALL_ROOT=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm install
+[  275s] INSTALL	libavfilter/libavfilter.so
+[  275s] STRIP	install-libavfilter-shared
+[  275s] skipping strip /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavfilter.so.11.4.100
+[  275s] INSTALL	libavformat/libavformat.so
+[  275s] STRIP	install-libavformat-shared
+[  275s] skipping strip /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavformat.so.62.3.100
+[  275s] INSTALL	libavcodec/libavcodec.so
+[  275s] STRIP	install-libavcodec-shared
+[  275s] skipping strip /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100
+[  275s] INSTALL	libswresample/libswresample.so
+[  275s] STRIP	install-libswresample-shared
+[  275s] skipping strip /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswresample.so.6.1.100
+[  275s] INSTALL	libswscale/libswscale.so
+[  275s] STRIP	install-libswscale-shared
+[  275s] skipping strip /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswscale.so.9.1.100
+[  275s] INSTALL	libavutil/libavutil.so
+[  275s] STRIP	install-libavutil-shared
+[  275s] skipping strip /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavutil.so.60.8.100
+[  275s] BIN2C	fftools/resources/graph.html.c
+[  275s] CC	fftools/resources/graph.html.o
+[  275s] SED	fftools/resources/graph.css.min
+[  275s] BIN2C	fftools/resources/graph.css.c
+[  275s] CC	fftools/resources/graph.css.o
+[  275s] LD	ffmpeg_g
+[  276s] CP	ffmpeg
+[  276s] STRIP	ffmpeg
+[  276s] skipping strip ffmpeg
+[  276s] INSTALL	install-progs-yes
+[  276s] INSTALL	ffmpeg
+[  276s] INSTALL	presets/libvpx-1080p.ffpreset
+[  276s] INSTALL	presets/libvpx-1080p50_60.ffpreset
+[  276s] INSTALL	presets/libvpx-360p.ffpreset
+[  276s] INSTALL	presets/libvpx-720p.ffpreset
+[  276s] INSTALL	presets/libvpx-720p50_60.ffpreset
+[  276s] INSTALL	doc/ffprobe.xsd
+[  276s] INSTALL	doc/examples/avio_http_serve_files.c
+[  276s] INSTALL	doc/examples/avio_list_dir.c
+[  276s] INSTALL	doc/examples/avio_read_callback.c
+[  276s] INSTALL	doc/examples/decode_audio.c
+[  276s] INSTALL	doc/examples/decode_filter_audio.c
+[  276s] INSTALL	doc/examples/decode_filter_video.c
+[  276s] INSTALL	doc/examples/decode_video.c
+[  276s] INSTALL	doc/examples/demux_decode.c
+[  276s] INSTALL	doc/examples/encode_audio.c
+[  276s] INSTALL	doc/examples/encode_video.c
+[  276s] INSTALL	doc/examples/extract_mvs.c
+[  276s] INSTALL	doc/examples/filter_audio.c
+[  276s] INSTALL	doc/examples/hw_decode.c
+[  276s] INSTALL	doc/examples/mux.c
+[  276s] INSTALL	doc/examples/qsv_decode.c
+[  276s] INSTALL	doc/examples/qsv_transcode.c
+[  276s] INSTALL	doc/examples/remux.c
+[  276s] INSTALL	doc/examples/resample_audio.c
+[  276s] INSTALL	doc/examples/scale_video.c
+[  276s] INSTALL	doc/examples/show_metadata.c
+[  276s] INSTALL	doc/examples/transcode.c
+[  276s] INSTALL	doc/examples/transcode_aac.c
+[  276s] INSTALL	doc/examples/vaapi_encode.c
+[  276s] INSTALL	doc/examples/vaapi_transcode.c
+[  276s] INSTALL	doc/examples/README
+[  276s] INSTALL	doc/examples/Makefile
+[  276s] INSTALL	doc/examples/avio_http_serve_files.c
+[  276s] INSTALL	doc/examples/avio_list_dir.c
+[  276s] INSTALL	doc/examples/avio_read_callback.c
+[  276s] INSTALL	doc/examples/decode_audio.c
+[  276s] INSTALL	doc/examples/decode_filter_audio.c
+[  276s] INSTALL	doc/examples/decode_filter_video.c
+[  276s] INSTALL	doc/examples/decode_video.c
+[  276s] INSTALL	doc/examples/demux_decode.c
+[  276s] INSTALL	doc/examples/encode_audio.c
+[  276s] INSTALL	doc/examples/encode_video.c
+[  276s] INSTALL	doc/examples/extract_mvs.c
+[  276s] INSTALL	doc/examples/filter_audio.c
+[  276s] INSTALL	doc/examples/hw_decode.c
+[  276s] INSTALL	doc/examples/mux.c
+[  276s] INSTALL	doc/examples/qsv_decode.c
+[  276s] INSTALL	doc/examples/qsv_transcode.c
+[  276s] INSTALL	doc/examples/remux.c
+[  276s] INSTALL	doc/examples/resample_audio.c
+[  276s] INSTALL	doc/examples/scale_video.c
+[  276s] INSTALL	doc/examples/show_metadata.c
+[  276s] INSTALL	doc/examples/transcode.c
+[  276s] INSTALL	doc/examples/transcode_aac.c
+[  276s] INSTALL	doc/examples/vaapi_encode.c
+[  276s] INSTALL	doc/examples/vaapi_transcode.c
+[  276s] INSTALL	doc/examples/README
+[  276s] INSTALL	doc/examples/Makefile
+[  276s] INSTALL	libavfilter/avfilter.h
+[  276s] INSTALL	libavfilter/buffersink.h
+[  276s] INSTALL	libavfilter/buffersrc.h
+[  276s] INSTALL	libavfilter/version.h
+[  276s] INSTALL	libavfilter/version_major.h
+[  276s] INSTALL	libavfilter/libavfilter.pc
+[  276s] INSTALL	libavformat/avformat.h
+[  276s] INSTALL	libavformat/avio.h
+[  276s] INSTALL	libavformat/version.h
+[  276s] INSTALL	libavformat/version_major.h
+[  276s] INSTALL	libavformat/os_support.h
+[  276s] INSTALL	libavformat/internal.h
+[  276s] INSTALL	libavformat/movenc.h
+[  276s] INSTALL	libavformat/movenccenc.h
+[  276s] INSTALL	libavformat/cbs.h
+[  276s] INSTALL	libavformat/libavformat.pc
+[  276s] INSTALL	libavcodec/ac3_parser.h
+[  276s] INSTALL	libavcodec/adts_parser.h
+[  276s] INSTALL	libavcodec/avcodec.h
+[  276s] INSTALL	libavcodec/avdct.h
+[  276s] INSTALL	libavcodec/bsf.h
+[  276s] INSTALL	libavcodec/cbs.h
+[  276s] INSTALL	libavcodec/codec.h
+[  276s] INSTALL	libavcodec/codec_desc.h
+[  276s] INSTALL	libavcodec/codec_id.h
+[  276s] INSTALL	libavcodec/codec_par.h
+[  276s] INSTALL	libavcodec/d3d11va.h
+[  276s] INSTALL	libavcodec/defs.h
+[  276s] INSTALL	libavcodec/dirac.h
+[  276s] INSTALL	libavcodec/dv_profile.h
+[  276s] INSTALL	libavcodec/dxva2.h
+[  276s] INSTALL	libavcodec/jni.h
+[  276s] INSTALL	libavcodec/mediacodec.h
+[  276s] INSTALL	libavcodec/packet.h
+[  276s] INSTALL	libavcodec/qsv.h
+[  276s] INSTALL	libavcodec/smpte_436m.h
+[  276s] INSTALL	libavcodec/vdpau.h
+[  276s] INSTALL	libavcodec/version.h
+[  276s] INSTALL	libavcodec/version_major.h
+[  276s] INSTALL	libavcodec/videotoolbox.h
+[  276s] INSTALL	libavcodec/vorbis_parser.h
+[  276s] INSTALL	libavcodec/packet_internal.h
+[  276s] INSTALL	libavcodec/libavcodec.pc
+[  276s] INSTALL	libswresample/swresample.h
+[  276s] INSTALL	libswresample/version.h
+[  276s] INSTALL	libswresample/version_major.h
+[  276s] INSTALL	libswresample/libswresample.pc
+[  276s] INSTALL	libswscale/swscale.h
+[  276s] INSTALL	libswscale/version.h
+[  276s] INSTALL	libswscale/version_major.h
+[  276s] INSTALL	libswscale/libswscale.pc
+[  276s] INSTALL	libavutil/adler32.h
+[  276s] INSTALL	libavutil/aes.h
+[  276s] INSTALL	libavutil/aes_ctr.h
+[  276s] INSTALL	libavutil/ambient_viewing_environment.h
+[  276s] INSTALL	libavutil/attributes.h
+[  276s] INSTALL	libavutil/audio_fifo.h
+[  276s] INSTALL	libavutil/avassert.h
+[  276s] INSTALL	libavutil/avstring.h
+[  276s] INSTALL	libavutil/avutil.h
+[  276s] INSTALL	libavutil/base64.h
+[  276s] INSTALL	libavutil/blowfish.h
+[  276s] INSTALL	libavutil/bprint.h
+[  276s] INSTALL	libavutil/bswap.h
+[  276s] INSTALL	libavutil/buffer.h
+[  276s] INSTALL	libavutil/cast5.h
+[  276s] INSTALL	libavutil/camellia.h
+[  276s] INSTALL	libavutil/channel_layout.h
+[  276s] INSTALL	libavutil/common.h
+[  276s] INSTALL	libavutil/container_fifo.h
+[  276s] INSTALL	libavutil/cpu.h
+[  276s] INSTALL	libavutil/crc.h
+[  276s] INSTALL	libavutil/csp.h
+[  276s] INSTALL	libavutil/des.h
+[  276s] INSTALL	libavutil/detection_bbox.h
+[  276s] INSTALL	libavutil/dict.h
+[  276s] INSTALL	libavutil/display.h
+[  276s] INSTALL	libavutil/dovi_meta.h
+[  276s] INSTALL	libavutil/downmix_info.h
+[  276s] INSTALL	libavutil/encryption_info.h
+[  276s] INSTALL	libavutil/error.h
+[  276s] INSTALL	libavutil/eval.h
+[  276s] INSTALL	libavutil/executor.h
+[  276s] INSTALL	libavutil/fifo.h
+[  276s] INSTALL	libavutil/file.h
+[  276s] INSTALL	libavutil/film_grain_params.h
+[  276s] INSTALL	libavutil/frame.h
+[  276s] INSTALL	libavutil/hash.h
+[  276s] INSTALL	libavutil/hdr_dynamic_metadata.h
+[  276s] INSTALL	libavutil/hdr_dynamic_vivid_metadata.h
+[  276s] INSTALL	libavutil/hmac.h
+[  276s] INSTALL	libavutil/hwcontext.h
+[  276s] INSTALL	libavutil/hwcontext_cuda.h
+[  276s] INSTALL	libavutil/hwcontext_d3d11va.h
+[  276s] INSTALL	libavutil/hwcontext_d3d12va.h
+[  276s] INSTALL	libavutil/hwcontext_drm.h
+[  276s] INSTALL	libavutil/hwcontext_dxva2.h
+[  276s] INSTALL	libavutil/hwcontext_amf.h
+[  276s] INSTALL	libavutil/hwcontext_qsv.h
+[  276s] INSTALL	libavutil/hwcontext_mediacodec.h
+[  276s] INSTALL	libavutil/hwcontext_opencl.h
+[  276s] INSTALL	libavutil/hwcontext_oh.h
+[  276s] INSTALL	libavutil/hwcontext_vaapi.h
+[  276s] INSTALL	libavutil/hwcontext_videotoolbox.h
+[  276s] INSTALL	libavutil/hwcontext_vdpau.h
+[  276s] INSTALL	libavutil/hwcontext_vulkan.h
+[  276s] INSTALL	libavutil/iamf.h
+[  276s] INSTALL	libavutil/imgutils.h
+[  276s] INSTALL	libavutil/intfloat.h
+[  276s] INSTALL	libavutil/intreadwrite.h
+[  276s] INSTALL	libavutil/lfg.h
+[  276s] INSTALL	libavutil/log.h
+[  276s] INSTALL	libavutil/lzo.h
+[  276s] INSTALL	libavutil/macros.h
+[  276s] INSTALL	libavutil/mathematics.h
+[  276s] INSTALL	libavutil/mastering_display_metadata.h
+[  276s] INSTALL	libavutil/md5.h
+[  276s] INSTALL	libavutil/mem.h
+[  276s] INSTALL	libavutil/motion_vector.h
+[  276s] INSTALL	libavutil/murmur3.h
+[  276s] INSTALL	libavutil/opt.h
+[  276s] INSTALL	libavutil/parseutils.h
+[  276s] INSTALL	libavutil/pixdesc.h
+[  276s] INSTALL	libavutil/pixelutils.h
+[  276s] INSTALL	libavutil/pixfmt.h
+[  276s] INSTALL	libavutil/random_seed.h
+[  276s] INSTALL	libavutil/rc4.h
+[  276s] INSTALL	libavutil/rational.h
+[  276s] INSTALL	libavutil/refstruct.h
+[  276s] INSTALL	libavutil/replaygain.h
+[  276s] INSTALL	libavutil/ripemd.h
+[  276s] INSTALL	libavutil/samplefmt.h
+[  276s] INSTALL	libavutil/sha.h
+[  276s] INSTALL	libavutil/sha512.h
+[  276s] INSTALL	libavutil/spherical.h
+[  276s] INSTALL	libavutil/stereo3d.h
+[  276s] INSTALL	libavutil/tdrdi.h
+[  276s] INSTALL	libavutil/threadmessage.h
+[  276s] INSTALL	libavutil/time.h
+[  276s] INSTALL	libavutil/timecode.h
+[  276s] INSTALL	libavutil/timestamp.h
+[  276s] INSTALL	libavutil/tree.h
+[  276s] INSTALL	libavutil/twofish.h
+[  276s] INSTALL	libavutil/uuid.h
+[  276s] INSTALL	libavutil/version.h
+[  276s] INSTALL	libavutil/video_enc_params.h
+[  276s] INSTALL	libavutil/xtea.h
+[  276s] INSTALL	libavutil/tea.h
+[  276s] INSTALL	libavutil/tx.h
+[  276s] INSTALL	libavutil/video_hint.h
+[  276s] INSTALL	libavutil/avconfig.h
+[  276s] INSTALL	libavutil/ffversion.h
+[  276s] INSTALL	libavutil/libavutil.pc
+[  276s] rm fftools/resources/graph.css.min
+[  276s] + rm -f /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/info/dir
+[  276s] + find /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm -regex '.*\.la$'
+[  276s] + xargs rm -f --
+[  276s] + find /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm -regex '.*\.a$'
+[  276s] + xargs rm -f --
+[  276s] + /usr/lib/rpm/find-debuginfo.sh -j2 --build-id-seed 8.0.1-1 --unique-debug-src-base ffmpeg-8.0.1-1.arm -S debugsourcefiles.list /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1
+[  276s] 1+0 records in
+[  276s] 1+0 records out
+[  276s] 1+0 records in
+[  276s] 1+0 records out
+[  276s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/bin/ffmpeg
+[  276s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100
+[  276s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: Unknown debugging section .debug_line_str
+[  276s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavcodec.so.62.11.100: DWARF version 5 unhandled
+[  276s] 1+0 records in
+[  276s] 1+0 records out
+[  276s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavfilter.so.11.4.100
+[  276s] 1+0 records in
+[  276s] 1+0 records out
+[  276s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavformat.so.62.3.100
+[  277s] 1+0 records in
+[  277s] 1+0 records out
+[  277s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavutil.so.60.8.100
+[  277s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavutil.so.60.8.100: Unknown debugging section .debug_line_str
+[  277s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libavutil.so.60.8.100: DWARF version 5 unhandled
+[  277s] 1+0 records in
+[  277s] 1+0 records out
+[  277s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswresample.so.6.1.100
+[  277s] 1+0 records in
+[  277s] 1+0 records out
+[  277s] extracting debug info from /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswscale.so.9.1.100
+[  277s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswresample.so.6.1.100: Unknown debugging section .debug_line_str
+[  277s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswresample.so.6.1.100: DWARF version 5 unhandled
+[  277s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswscale.so.9.1.100: Unknown debugging section .debug_line_str
+[  277s] /usr/lib/rpm/debugedit: /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/lib/libswscale.so.9.1.100: DWARF version 5 unhandled
+[  277s] 0+0 records in
+[  277s] 0+0 records out
+[  277s] 0+0 records in
+[  277s] 0+0 records out
+[  277s] 15252 blocks
+[  277s] + cp /usr/lib/rpm/debug.manifest /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/ffmpeg-debuginfo.manifest
+[  277s] + cp /usr/lib/rpm/debug.manifest /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/ffmpeg-debugsource.manifest
+[  277s] + /usr/lib/rpm/check-buildroot
+[  277s] + /usr/lib/rpm//brp-compress
+[  277s] + /usr/lib/rpm/brp-strip-static-archive /bin/strip
+[  279s] + /usr/lib/rpm/brp-python-hardlink
+[  279s] + /usr/lib/rpm/tizen/find-docs.sh /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm
+[  279s] + /usr/lib/rpm/tizen/find-isufiles.sh /home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1/isu.list
+[  279s] ~/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm ~/rpmbuild/BUILD/ffmpeg-8.0.1
+[  279s] ~/rpmbuild/BUILD/ffmpeg-8.0.1
+[  279s] + /etc/hal/rootstrap/hal-rootstrap-checker.sh /home/abuild/rpmbuild/SOURCES /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm arm
+[  279s] Package: ffmpeg, Group: Multimedia/Libraries
+[  279s] ##########################################################################################
+[  279s] # SUCCESS: hal-rootstrap-checker done                                                    #
+[  279s] ##########################################################################################
+[  279s] + /etc/app-rootstrap/app-rootstrap-checker.sh /home/abuild/rpmbuild/SOURCES /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm arm
+[  279s] Package: ffmpeg, Group: Multimedia/Libraries
+[  279s] # NOTICE: Config app-rootstrap-checker.yaml skipped                                      #
+[  279s] # NOTICE: Config web-plugin-rootstrap-checker.yaml skipped                               #
+[  279s] ##########################################################################################
+[  279s] # SUCCESS: app-rootstrap-checker done                                                    #
+[  279s] ##########################################################################################
+[  279s] Processing files: ffmpeg-debugsource-8.0.1-1.armv7l
+[  279s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  279s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  279s] 
+[  279s] Provides: ffmpeg-debugsource = 8.0.1-1 ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  279s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  279s] Processing files: libavcodec-8.0.1-1.armv7l
+[  279s] Aptk: PG1hbmlmZXN0PgogICAgICAgIDxyZXF1ZXN0PgogICAgICAgICAgICAgICAgPGRv
+[  279s] bWFpbiBuYW1lPSJfIiAvPgogICAgICAgIDwvcmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  279s] 
+[  279s] Executing(%license): /bin/sh -e /var/tmp/rpm-tmp.2XqlWp
+[  279s] + umask 022
+[  279s] + cd /home/abuild/rpmbuild/BUILD
+[  279s] + cd ffmpeg-8.0.1
+[  279s] + LICENSEDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavcodec
+[  279s] + export LC_ALL=C
+[  279s] + LC_ALL=C
+[  279s] + export LICENSEDIR
+[  279s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavcodec
+[  279s] + cp -pr COPYING.LGPLv2.1 /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavcodec
+[  279s] + exit 0
+[  279s] Provides: libavcodec = 8.0.1-1 libavcodec(armv7l-32) = 8.0.1-1 libavcodec.so.62 libavcodec.so.62(LIBAVCODEC_62)
+[  279s] Requires(interp): /sbin/ldconfig /sbin/ldconfig
+[  279s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  279s] Requires(post): /sbin/ldconfig
+[  279s] Requires(postun): /sbin/ldconfig
+[  279s] Requires: ld-linux.so.3 ld-linux.so.3(GLIBC_2.4) libavutil.so.60 libavutil.so.60(LIBAVUTIL_60) libc.so.6 libc.so.6(GLIBC_2.16) libc.so.6(GLIBC_2.34) libc.so.6(GLIBC_2.4) libc.so.6(GLIBC_2.7) libgcc_s.so.1 libgcc_s.so.1(GCC_3.5) libm.so.6 libm.so.6(GLIBC_2.27) libm.so.6(GLIBC_2.29) libm.so.6(GLIBC_2.35) libm.so.6(GLIBC_2.4) libpthread.so.0 rtld(GNU_HASH)
+[  279s] Processing files: libavcodec-devel-8.0.1-1.armv7l
+[  279s] Provides: libavcodec-devel = 8.0.1-1 libavcodec-devel(armv7l-32) = 8.0.1-1 pkgconfig(libavcodec) = 62.11.100
+[  279s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  279s] Requires: /usr/bin/pkg-config libavcodec.so.62 pkgconfig(libavutil) >= 60.8.100
+[  279s] Processing files: libavformat-8.0.1-1.armv7l
+[  279s] Aptk: PG1hbmlmZXN0PgogICAgICAgIDxyZXF1ZXN0PgogICAgICAgICAgICAgICAgPGRv
+[  279s] bWFpbiBuYW1lPSJfIiAvPgogICAgICAgIDwvcmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  279s] 
+[  279s] Executing(%license): /bin/sh -e /var/tmp/rpm-tmp.zTG0zW
+[  279s] + umask 022
+[  279s] + cd /home/abuild/rpmbuild/BUILD
+[  279s] + cd ffmpeg-8.0.1
+[  279s] + LICENSEDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavformat
+[  279s] + export LC_ALL=C
+[  279s] + LC_ALL=C
+[  279s] + export LICENSEDIR
+[  279s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavformat
+[  279s] + cp -pr COPYING.LGPLv2.1 /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavformat
+[  279s] + exit 0
+[  279s] Provides: libavformat = 8.0.1-1 libavformat(armv7l-32) = 8.0.1-1 libavformat.so.62 libavformat.so.62(LIBAVFORMAT_62)
+[  279s] Requires(interp): /sbin/ldconfig /sbin/ldconfig
+[  279s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  279s] Requires(post): /sbin/ldconfig
+[  279s] Requires(postun): /sbin/ldconfig
+[  279s] Requires: ld-linux.so.3 ld-linux.so.3(GLIBC_2.4) libavcodec.so.62 libavcodec.so.62(LIBAVCODEC_62) libavutil.so.60 libavutil.so.60(LIBAVUTIL_60) libc.so.6 libc.so.6(GLIBC_2.33) libc.so.6(GLIBC_2.4) libc.so.6(GLIBC_2.7) libgcc_s.so.1 libgcc_s.so.1(GCC_3.5) libm.so.6 libm.so.6(GLIBC_2.35) libm.so.6(GLIBC_2.4) libpthread.so.0 rtld(GNU_HASH)
+[  279s] Processing files: libavformat-devel-8.0.1-1.armv7l
+[  279s] Provides: libavformat-devel = 8.0.1-1 libavformat-devel(armv7l-32) = 8.0.1-1 pkgconfig(libavformat) = 62.3.100
+[  279s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  279s] Requires: /usr/bin/pkg-config libavformat.so.62 pkgconfig(libavcodec) >= 62.11.100 pkgconfig(libavutil) >= 60.8.100
+[  279s] Processing files: libavutil-8.0.1-1.armv7l
+[  279s] Aptk: PG1hbmlmZXN0PgogICAgICAgIDxyZXF1ZXN0PgogICAgICAgICAgICAgICAgPGRv
+[  279s] bWFpbiBuYW1lPSJfIiAvPgogICAgICAgIDwvcmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  279s] 
+[  279s] Executing(%license): /bin/sh -e /var/tmp/rpm-tmp.IBT1O1
+[  279s] + umask 022
+[  279s] + cd /home/abuild/rpmbuild/BUILD
+[  279s] + cd ffmpeg-8.0.1
+[  279s] + LICENSEDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavutil
+[  279s] + export LC_ALL=C
+[  279s] + LC_ALL=C
+[  279s] + export LICENSEDIR
+[  279s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavutil
+[  279s] + cp -pr COPYING.LGPLv2.1 /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavutil
+[  279s] + exit 0
+[  279s] Provides: libavutil = 8.0.1-1 libavutil(armv7l-32) = 8.0.1-1 libavutil.so.60 libavutil.so.60(LIBAVUTIL_60)
+[  279s] Requires(interp): /sbin/ldconfig /sbin/ldconfig
+[  279s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  279s] Requires(post): /sbin/ldconfig
+[  279s] Requires(postun): /sbin/ldconfig
+[  279s] Requires: ld-linux.so.3 ld-linux.so.3(GLIBC_2.4) libc.so.6 libc.so.6(GLIBC_2.16) libc.so.6(GLIBC_2.17) libc.so.6(GLIBC_2.28) libc.so.6(GLIBC_2.33) libc.so.6(GLIBC_2.34) libc.so.6(GLIBC_2.4) libc.so.6(GLIBC_2.6) libc.so.6(GLIBC_2.7) libgcc_s.so.1 libgcc_s.so.1(GCC_3.5) libm.so.6 libm.so.6(GLIBC_2.29) libm.so.6(GLIBC_2.35) libm.so.6(GLIBC_2.38) libm.so.6(GLIBC_2.4) libpthread.so.0 rtld(GNU_HASH)
+[  279s] Processing files: libavutil-devel-8.0.1-1.armv7l
+[  280s] Provides: libavutil-devel = 8.0.1-1 libavutil-devel(armv7l-32) = 8.0.1-1 pkgconfig(libavutil) = 60.8.100
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires: /usr/bin/pkg-config libavutil.so.60
+[  280s] Processing files: libavfilter-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogICAgICAgIDxyZXF1ZXN0PgogICAgICAgICAgICAgICAgPGRv
+[  280s] bWFpbiBuYW1lPSJfIiAvPgogICAgICAgIDwvcmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Executing(%license): /bin/sh -e /var/tmp/rpm-tmp.hDR2Tf
+[  280s] + umask 022
+[  280s] + cd /home/abuild/rpmbuild/BUILD
+[  280s] + cd ffmpeg-8.0.1
+[  280s] + LICENSEDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavfilter
+[  280s] + export LC_ALL=C
+[  280s] + LC_ALL=C
+[  280s] + export LICENSEDIR
+[  280s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavfilter
+[  280s] + cp -pr COPYING.LGPLv2.1 /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libavfilter
+[  280s] + exit 0
+[  280s] Provides: libavfilter = 8.0.1-1 libavfilter(armv7l-32) = 8.0.1-1 libavfilter.so.11 libavfilter.so.11(LIBAVFILTER_11)
+[  280s] Requires(interp): /sbin/ldconfig /sbin/ldconfig
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires(post): /sbin/ldconfig
+[  280s] Requires(postun): /sbin/ldconfig
+[  280s] Requires: ld-linux.so.3 ld-linux.so.3(GLIBC_2.4) libavutil.so.60 libavutil.so.60(LIBAVUTIL_60) libc.so.6 libc.so.6(GLIBC_2.4) libgcc_s.so.1 libgcc_s.so.1(GCC_3.5) libm.so.6 libm.so.6(GLIBC_2.29) libm.so.6(GLIBC_2.4) libpthread.so.0 libswresample.so.6 libswresample.so.6(LIBSWRESAMPLE_6) libswscale.so.9 libswscale.so.9(LIBSWSCALE_9) rtld(GNU_HASH)
+[  280s] Processing files: libavfilter-devel-8.0.1-1.armv7l
+[  280s] Provides: libavfilter-devel = 8.0.1-1 libavfilter-devel(armv7l-32) = 8.0.1-1 pkgconfig(libavfilter) = 11.4.100
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires: /usr/bin/pkg-config libavfilter.so.11 pkgconfig(libavutil) >= 60.8.100 pkgconfig(libswresample) >= 6.1.100 pkgconfig(libswscale) >= 9.1.100
+[  280s] Processing files: libswscale-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogICAgICAgIDxyZXF1ZXN0PgogICAgICAgICAgICAgICAgPGRv
+[  280s] bWFpbiBuYW1lPSJfIiAvPgogICAgICAgIDwvcmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Executing(%license): /bin/sh -e /var/tmp/rpm-tmp.EDY3cq
+[  280s] + umask 022
+[  280s] + cd /home/abuild/rpmbuild/BUILD
+[  280s] + cd ffmpeg-8.0.1
+[  280s] + LICENSEDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libswscale
+[  280s] + export LC_ALL=C
+[  280s] + LC_ALL=C
+[  280s] + export LICENSEDIR
+[  280s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libswscale
+[  280s] + cp -pr COPYING.LGPLv2.1 /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libswscale
+[  280s] + exit 0
+[  280s] Provides: libswscale = 8.0.1-1 libswscale(armv7l-32) = 8.0.1-1 libswscale.so.9 libswscale.so.9(LIBSWSCALE_9)
+[  280s] Requires(interp): /sbin/ldconfig /sbin/ldconfig
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires(post): /sbin/ldconfig
+[  280s] Requires(postun): /sbin/ldconfig
+[  280s] Requires: ld-linux.so.3 ld-linux.so.3(GLIBC_2.4) libavutil.so.60 libavutil.so.60(LIBAVUTIL_60) libc.so.6 libc.so.6(GLIBC_2.34) libc.so.6(GLIBC_2.4) libgcc_s.so.1 libgcc_s.so.1(GCC_3.5) libm.so.6 libm.so.6(GLIBC_2.27) libm.so.6(GLIBC_2.29) libm.so.6(GLIBC_2.4) libpthread.so.0 rtld(GNU_HASH)
+[  280s] Processing files: libswscale-devel-8.0.1-1.armv7l
+[  280s] Provides: libswscale-devel = 8.0.1-1 libswscale-devel(armv7l-32) = 8.0.1-1 pkgconfig(libswscale) = 9.1.100
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires: /usr/bin/pkg-config libswscale.so.9 pkgconfig(libavutil) >= 60.8.100
+[  280s] Processing files: libswresample-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgoJPHJlcXVlc3Q+CgkJPGRvbWFpbiBuYW1lPSJfIiAvPgoJPC9y
+[  280s] ZXF1ZXN0Pgo8L21hbmlmZXN0Pgo=
+[  280s] 
+[  280s] Executing(%license): /bin/sh -e /var/tmp/rpm-tmp.zp71h3
+[  280s] + umask 022
+[  280s] + cd /home/abuild/rpmbuild/BUILD
+[  280s] + cd ffmpeg-8.0.1
+[  280s] + LICENSEDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libswresample
+[  280s] + export LC_ALL=C
+[  280s] + LC_ALL=C
+[  280s] + export LICENSEDIR
+[  280s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libswresample
+[  280s] + cp -pr COPYING.LGPLv2.1 /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/libswresample
+[  280s] + exit 0
+[  280s] Provides: libswresample = 8.0.1-1 libswresample(armv7l-32) = 8.0.1-1 libswresample.so.6 libswresample.so.6(LIBSWRESAMPLE_6)
+[  280s] Requires(interp): /sbin/ldconfig /sbin/ldconfig
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires(post): /sbin/ldconfig
+[  280s] Requires(postun): /sbin/ldconfig
+[  280s] Requires: ld-linux.so.3 ld-linux.so.3(GLIBC_2.4) libavutil.so.60 libavutil.so.60(LIBAVUTIL_60) libc.so.6 libc.so.6(GLIBC_2.4) libgcc_s.so.1 libgcc_s.so.1(GCC_3.5) libm.so.6 libm.so.6(GLIBC_2.29) libm.so.6(GLIBC_2.4) libpthread.so.0 rtld(GNU_HASH)
+[  280s] Processing files: libswresample-devel-8.0.1-1.armv7l
+[  280s] Provides: libswresample-devel = 8.0.1-1 libswresample-devel(armv7l-32) = 8.0.1-1 pkgconfig(libswresample) = 6.1.100
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires: /usr/bin/pkg-config libswresample.so.6 pkgconfig(libavutil) >= 60.8.100
+[  280s] Processing files: doc-8.0.1-1.armv7l
+[  280s] Provides: doc = 8.0.1-1 doc(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Processing files: ffmpeg-tool-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogICAgICAgIDxyZXF1ZXN0PgogICAgICAgICAgICAgICAgPGRv
+[  280s] bWFpbiBuYW1lPSJfIiAvPgogICAgICAgIDwvcmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Executing(%license): /bin/sh -e /var/tmp/rpm-tmp.4aX2rv
+[  280s] + umask 022
+[  280s] + cd /home/abuild/rpmbuild/BUILD
+[  280s] + cd ffmpeg-8.0.1
+[  280s] + LICENSEDIR=/home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/ffmpeg-tool
+[  280s] + export LC_ALL=C
+[  280s] + LC_ALL=C
+[  280s] + export LICENSEDIR
+[  280s] + /bin/mkdir -p /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/ffmpeg-tool
+[  280s] + cp -pr COPYING.LGPLv2.1 /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm/usr/share/licenses/ffmpeg-tool
+[  280s] + exit 0
+[  280s] Provides: ffmpeg-tool = 8.0.1-1 ffmpeg-tool(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Requires: ld-linux.so.3 ld-linux.so.3(GLIBC_2.4) libavcodec.so.62 libavcodec.so.62(LIBAVCODEC_62) libavfilter.so.11 libavfilter.so.11(LIBAVFILTER_11) libavformat.so.62 libavformat.so.62(LIBAVFORMAT_62) libavutil.so.60 libavutil.so.60(LIBAVUTIL_60) libc.so.6 libc.so.6(GLIBC_2.34) libc.so.6(GLIBC_2.4) libc.so.6(GLIBC_2.7) libgcc_s.so.1 libgcc_s.so.1(GCC_3.5) libm.so.6 libm.so.6(GLIBC_2.29) libm.so.6(GLIBC_2.4) libpthread.so.0 libswresample.so.6 libswresample.so.6(LIBSWRESAMPLE_6) libswscale.so.9 libswscale.so.9(LIBSWSCALE_9) rtld(GNU_HASH)
+[  280s] Processing files: libavcodec-debuginfo-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  280s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Provides: libavcodec-debuginfo = 8.0.1-1 libavcodec-debuginfo(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Recommends: ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  280s] Processing files: libavformat-debuginfo-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  280s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Provides: libavformat-debuginfo = 8.0.1-1 libavformat-debuginfo(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Recommends: ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  280s] Processing files: libavutil-debuginfo-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  280s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Provides: libavutil-debuginfo = 8.0.1-1 libavutil-debuginfo(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Recommends: ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  280s] Processing files: libavfilter-debuginfo-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  280s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Provides: libavfilter-debuginfo = 8.0.1-1 libavfilter-debuginfo(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Recommends: ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  280s] Processing files: libswscale-debuginfo-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  280s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Provides: libswscale-debuginfo = 8.0.1-1 libswscale-debuginfo(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Recommends: ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  280s] Processing files: libswresample-debuginfo-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  280s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Provides: libswresample-debuginfo = 8.0.1-1 libswresample-debuginfo(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Recommends: ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  280s] Processing files: ffmpeg-tool-debuginfo-8.0.1-1.armv7l
+[  280s] Aptk: PG1hbmlmZXN0PgogPHJlcXVlc3Q+CiAgICA8ZG9tYWluIG5hbWU9Il8iLz4KIDwv
+[  280s] cmVxdWVzdD4KPC9tYW5pZmVzdD4K
+[  280s] 
+[  280s] Provides: ffmpeg-tool-debuginfo = 8.0.1-1 ffmpeg-tool-debuginfo(armv7l-32) = 8.0.1-1
+[  280s] Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+[  280s] Recommends: ffmpeg-debugsource(armv7l-32) = 8.0.1-1
+[  280s] Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm
+[  281s] Wrote: /home/abuild/rpmbuild/SRPMS/ffmpeg-8.0.1-1.src.rpm
+[  282s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/ffmpeg-debugsource-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavcodec-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavcodec-devel-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavformat-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavformat-devel-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavutil-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavutil-devel-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavfilter-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavfilter-devel-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libswscale-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libswscale-devel-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libswresample-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libswresample-devel-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/doc-8.0.1-1.armv7l.rpm
+[  283s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/ffmpeg-tool-8.0.1-1.armv7l.rpm
+[  286s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavcodec-debuginfo-8.0.1-1.armv7l.rpm
+[  287s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavformat-debuginfo-8.0.1-1.armv7l.rpm
+[  287s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavutil-debuginfo-8.0.1-1.armv7l.rpm
+[  287s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libavfilter-debuginfo-8.0.1-1.armv7l.rpm
+[  288s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libswscale-debuginfo-8.0.1-1.armv7l.rpm
+[  288s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/libswresample-debuginfo-8.0.1-1.armv7l.rpm
+[  288s] Wrote: /home/abuild/rpmbuild/RPMS/armv7l/ffmpeg-tool-debuginfo-8.0.1-1.armv7l.rpm
+[  288s] Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.5vBO4H
+[  288s] + umask 022
+[  288s] + cd /home/abuild/rpmbuild/BUILD
+[  288s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm
+[  288s] + cd ffmpeg-8.0.1
+[  288s] + /bin/rm -rf /home/abuild/rpmbuild/BUILDROOT/ffmpeg-8.0.1-1.arm
+[  288s] + exit 0
+[  288s] ... checking for files with abuild user/group
+[  288s] 
+[  288s] linhao-linux finished "build ffmpeg.spec" at Sat Nov 14 14:27:20 UTC 2026.
+[  288s] 
+[32minfo: [0mfinished building ffmpeg
+[32minfo: [0mupdating local repo
+[32minfo: [0m*** Build Status Summary ***
+=== Total succeeded built packages: (1) ===
+[32minfo: [0mgenerated html format report:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/repos/tizen_unified_standard/armv7l/index.html
+[32minfo: [0mgenerated RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/repos/tizen_unified_standard/armv7l/RPMS
+[32minfo: [0mgenerated source RPM packages can be found from local repo:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/repos/tizen_unified_standard/armv7l/SRPMS
+[32minfo: [0mbuild logs can be found in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/repos/tizen_unified_standard/armv7l/logs
+[32minfo: [0mbuild roots located in:
+     /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS/scratch.armv7l.*
+已结束 2026-11-14T06:27:21.812780-08:00 成功 GBS_EXIT 0
+ALL-END 2026-11-14T06:27:21.812831-08:00
+已结束 2026-11-14T06:27:22.120954-08:00 成功 SCOPE_EXIT 0 resource_stop None
+ALL-END 2026-11-14T06:27:22.121059-08:00

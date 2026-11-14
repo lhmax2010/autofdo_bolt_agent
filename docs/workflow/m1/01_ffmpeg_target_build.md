@@ -1,6 +1,6 @@
 # M1 首项交付：FFmpeg目标构建（2026-11-14）
 
-> 最新结果见第8节：获准的两行空格修正已应用；Thumb/A32均进入编译，但因构建命令中的V=1干扰调试包处理而失败。hq未改；RPi5仍等待周一信息。第1–7节保留历史记录。
+> 最新结果见第9节：去掉V=1、-j2及独立资源监督下，Thumb/A32均构建成功，RPM身份与DWARF核对通过；hq已更新，待PM审阅。此前失败记录和证据保留。
 
 ## 1. 停止点
 
@@ -313,3 +313,123 @@ libavutil也有同类DWARF5诊断。后续候选处理是让_smp_mflags只包含
 没有资源门禁暂停或终止；每60秒原始meminfo和resources.jsonl已保存。收尾取证峰值566,599,680 B、退出0，早先检查器退出1原文同时保留。[构建与监督单元全部inactive/dead](evidence/03/units-final.txt)。新worker所需的fix1/gbs-tmp目录在启动后补建，GBS当时仍处于正常导出/元数据阶段；配置指向的原gbs-tmp始终存在，日志没有因此失败，时间顺序不隐瞒。
 
 本轮只修改main报告/STATUS并添加新证据，不改既有证据、设计、原patch/spec/root，不操作任何开发板、不查询RPi5、不推Gerrit、不读profile。hq更新前提未满足，保持498724fed8796da4190a458c01b95b9f65e334d5，未替换hq补丁、未新增配置、未将任何Not verified改为已验证。完成失败取证后停止，等待构建执行器与打包诊断处理指令。
+
+## 9. 周末无人值守J2重建（2026-11-14，成功完成）
+
+### 9.1 历史成功构建的只读核查
+
+未构建前检查temp/eval-prep11/build/ffmpeg-thumb-S.log与ffmpeg-a32-S.log，两份都出现8条debugedit诊断：4条“DWARF version 5 unhandled”及4条“Unknown debugging section .debug_line_str”，涉及libavcodec、libavutil、libswresample、libswscale。两日志最终均GBS_EXIT 0、ALL-END OK，历史报告11也保存了成功RPM；这些诊断当时非致命，不据诊断文本直接推断本次失败。
+
+旧编译命令CFLAGS有-g2、-gdwarf-4及-g；.S采用独立汇编选项-g。只读旧打包libavcodec调试ELF，readelf记录每侧325个DWARF4 CU、52个DWARF5 CU，退出0。没有对旧产物作任何修改，也没有读取profile。[历史日志摘录/原件SHA/命令/DWARF计数](evidence/04/historical-check.json)。
+
+| 工具 | 历史成功构建 | 本轮依赖 | 是否相同 |
+|---|---|---|---|
+| clang包 | 22.1.8-1.6.armv7l | 22.1.8-4.1.armv7l | 上游版本同22.1.8，release不同 |
+| debugedit所属rpm-build | 4.14.1.1-1.9.armv7l（以历史日志为准） | 4.14.1.1-1.9.armv7l | 包版本号相同，包及程序字节不同 |
+
+旧缓存中另有rpm-build的1.8包，不将其当作历史本次日志使用的1.9包。只把指定RPM中的debugedit提取到本任务目录比SHA，没有安装/运行旧工具；旧root/cache只作本步骤取证，不用于新构建。
+
+- 历史1.9 debugedit SHA：dc4b5b156b83034d301e3031bfbdbe53fad480b42bd31264c2f8281b6756e52d。
+- fix1/当前仓库1.9 debugedit SHA：3e19fa64b50dc718f4518b94c8589f29ebe0a2ea48fafcf8004d8bd16e78905f。
+
+[二进制比较](evidence/04/debugedit-binary-comparison.json)。不把同版本号误写为工具相同；本轮实际下载依赖清单见[Thumb](evidence/04/thumb-attempt-0/dependencies.json)、[A32](evidence/04/a32-attempt-0/dependencies.json)。
+
+### 9.2 隔离、资源门禁与实际命令
+
+本任务目录temp/m1-target-20261114/weekend-j2，新检出ffmpeg基线5fe76358596f66e955f005094e6f34ca525ab23d，应用原fix1补丁。patch SHA仍为0c94e54d252ad1ecbc625f629af090b257edba4cd3753d76352fd031486243b6，spec SHA仍为0e611e7eb95ada2c024dbea379821c5b109383f1545bcb0c86ef85f238740c27，复用第8节同SHA实际编译参数核对，不重新引入V=1。
+
+仓库配置仍为Unified20261104.125239 / Base20261030.120529。原ffmpeg-armv7l.conf不动；资源规则优先，派生配置**只修改tmpdir和默认buildroot的路径**，其余字段完全一致，CLI再指定本变体的新root。[配置](evidence/04/ffmpeg-armv7l.conf)、[配置/源码SHA及准备命令](evidence/04/preparation.json)。
+
+GBS独立HOME、TMPDIR/TMP/TEMP、XDG目录、CCACHE_DIR均在weekend-j2内；缓存位于本次独立root。没有使用另一构建或旧root的HOME/tmpdir/缓存进行构建。仅历史核查读取了用户明确要求的旧日志、RPM及ELF。没有kill、调整、停止任何非本任务进程；不执行sudo系统设置、drop_caches、swapoff、sysctl或服务/主机重启。
+
+实际GBS核心命令（分别在本任务ffmpeg检出运行）：
+
+~~~sh
+gbs -c "$WORKDIR/temp/m1-target-20261114/weekend-j2/ffmpeg-armv7l.conf" \
+  build -A armv7l --spec ffmpeg.spec --include-all \
+  --buildroot "$WORKDIR/temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0" \
+  --threads 1 --define '_smp_mflags -j2' --define 'profile_isa thumb'
+
+gbs -c "$WORKDIR/temp/m1-target-20261114/weekend-j2/ffmpeg-armv7l.conf" \
+  build -A armv7l --spec ffmpeg.spec --include-all \
+  --buildroot "$WORKDIR/temp/m1-target-20261114/weekend-j2/roots/a32-attempt-0" \
+  --threads 1 --define '_smp_mflags -j2' --define 'profile_isa a32'
+~~~
+
+独立systemd service串行监督两个scope；每scope MemoryMax=6G、MemoryHigh=5G、CPUQuota=200%，nice19/ionice-c3，_smp_mflags中没有V=1，也清除了继承的V/MAKEFLAGS/MFLAGS。[worker](evidence/04/worker.py)、[supervisor](evidence/04/supervisor.py)、[Thumb实读限额](evidence/04/thumb-attempt-0/effective-limits.json)、[A32实读限额](evidence/04/a32-attempt-0/effective-limits.json)。监督服务本身另限256MiB/25%，不承载编译。
+
+启动条件逐变体核对MemAvailable≥16GiB、load1<nproc×0.6、磁盘≥50GiB；不满足才600秒复查，上限48小时。运行每60秒保存meminfo全文、load、磁盘及memory.current/peak/events；低于6GiB连续两次或磁盘低于20GiB时仅停止本任务对应scope，重新门禁、另起root，最多2次资源性重试。此次**两个启动检查都立即通过，等待0次、资源停止0次、重试0次**。[门禁原文](evidence/04/gate.jsonl)、[策略边界检查](evidence/04/monitor-policy-check.json)。没有刻意制造低内存/磁盘满，也不声称实际停止重试分支已压测。
+
+### 9.3 构建结果与非致命诊断
+
+| 变体 | 开始（本地UTC−08） | 结束 | 墙钟秒 | GBS退出码 | armv7l二进制RPM数 |
+|---|---|---|---:|---:|---:|
+| thumb | 2026-11-14T06:22:18.730309-08:00 | 2026-11-14T06:27:21.812036-08:00 | 303.082 | 0 | 23 |
+| a32 | 2026-11-14T06:27:22.290345-08:00 | 2026-11-14T06:32:36.383456-08:00 | 314.093 | 0 | 23 |
+
+两次墙钟合计617.175秒（约10分17秒），包含各自全新root下载/初始化，串行无交叠。真实GBS退出码、scope退出码均0；worker、scope日志与监督日志均有带时间的ALL-END/已结束记录。[总结束记录](evidence/04/terminal.json)、[Thumb命令与环境](evidence/04/thumb-attempt-0/command.json)、[A32命令与环境](evidence/04/a32-attempt-0/command.json)。
+
+每变体仍有8条debugedit诊断，对4个文件各2条：
+
+- libavcodec.so.62.11.100
+- libavutil.so.60.8.100
+- libswresample.so.6.1.100
+- libswscale.so.9.1.100
+
+原文仍为“DWARF version 5 unhandled”与“Unknown debugging section .debug_line_str”，本次非致命，不加-gdwarf-4、不改spec或补丁绕过。[Thumb逐条诊断](evidence/04/thumb-attempt-0/artifact-validation.json)、[A32逐条诊断](evidence/04/a32-attempt-0/artifact-validation.json)。find-debuginfo.sh实际收到-j2而不含V=1，[Thumb打包摘录](evidence/04/thumb-build-excerpts.json)、[A32打包摘录](evidence/04/a32-build-excerpts.json)。第8节由错误V=1宏引发的打包阻塞，在本次正确命令下消除。
+
+### 9.4 打包ELF与DWARF验收
+
+每变体23个RPM的路径、字节数与SHA见[Thumb RPM清单](evidence/04/thumb-attempt-0/rpms.json)、[A32 RPM清单](evidence/04/a32-attempt-0/rpms.json)。分别提取libavcodec/libavutil与其独立debuginfo子包，使用打包后的文件核对，不使用BUILD中间文件冒充。
+
+| 变体 | 库 | runtime = debug SHA-1 build-id（40个十六进制字符） | 核对 |
+|---|---|---|---|
+| thumb | libavcodec | 805376f248504d2084e3e95470810873ffc3655a | 一致 |
+| thumb | libavutil | bb5b41f743b9b07bb38cc5007f7deb6516256579 | 一致 |
+| a32 | libavcodec | bdc2a972e0bb357ca144d082f72519e7bed19813 | 一致 |
+| a32 | libavutil | 2f63cff726697e7395f75d14c0f96b43e14a6a58 | 一致 |
+
+| 变体 | 文件 | SHA-256 |
+|---|---|---|
+| thumb | libavcodec runtime | 07da98e1c92253c34271ec55d97a112419e8f19bbf59c5d38c33c0af4ad0e742 |
+| thumb | libavcodec debug | a4d351e3a2262c0cda1c2d7958ad2ae3d784d211ef176ec712ff2712f5eadd85 |
+| thumb | libavutil runtime | 6b3abb7faed64f62d9afb293148558eccd39c194b85ac4d842b6005f380c4d44 |
+| thumb | libavutil debug | 75347f751e97064b8c2a61bae264216b15917ce308db36cf2741debf8d69f090 |
+| a32 | libavcodec runtime | 8810ee31a55284a9236c20eaa2e01b4a60b6abffca5cd6b199be321deaf50971 |
+| a32 | libavcodec debug | 76a215bd4e982509389e1da29c008c29fdc4a4b813b75bda242d7b132cc73a48 |
+| a32 | libavutil runtime | 598e06c2a3387a30c1afd940ae68347420a0051518199e9fc97b17273fc8bf91 |
+| a32 | libavutil debug | f8f560a9f4da5b16001891f156e74bbd9143b00bd873fcb56547a0072feef112 |
+
+| 变体 | 调试库 | DWARF4 CU数 | DWARF5 CU数 | readelf info / rawline退出码 | stderr |
+|---|---|---:|---:|---|---|
+| thumb | libavcodec | 313 | 52 | 0 / 0 | 空 |
+| thumb | libavutil | 99 | 2 | 0 / 0 | 空 |
+| a32 | libavcodec | 313 | 52 | 0 / 0 | 空 |
+| a32 | libavutil | 99 | 2 | 0 / 0 | 空 |
+
+两库.debug_info、.debug_line均存在并可读取。所有readelf命令、输出流大小及SHA、原文开头和stderr均保存；大段readelf输出只流式计算SHA，不写入仓库，调试ELF原件留在本任务extracted目录。检查器[verify_artifacts.py](evidence/04/verify_artifacts.py)，[轻量核对结果](evidence/04/verification/terminal.json)。
+
+**局限**：可读与身份相同不等于debugsource完整，也不证明debugedit已正确改写全部DWARF5源码路径。发布llvm-profgen没有本轮已验证的纯加载ELF+DWARF、又不执行采样转换的独立入口，因此按用户允许的分支跳过该可选检查并说明；未构造额外采样、未读取正式profile。AArch64与profile消费构建仍未验证。
+
+### 9.5 资源与安全收尾
+
+[资源摘要](evidence/04/resource-summary.json)及两个attempt目录的60秒原始记录：
+
+- 最低MemAvailable：25,751,736,320 B（约23.98GiB）。
+- 最高1分钟loadavg：2.47216796875，nproc=20，启动门槛为12。
+- 最低WORKDIR磁盘可用：206,662,979,584 B（约192.47GiB）。
+- 最大构建cgroup memory.peak：2,196,312,064 B（约2.05GiB）；Thumb峰值2,196,312,064 B，A32峰值2,180,231,168 B。
+- 两scope的high/max/oom/oom_kill均0；无资源暂停、停止或重试。
+- 两项轻量产物核对串行，合计7.01秒，独立3G/2G高水位/100% scope峰值93,896,704 B；开始前同样通过三项资源门禁，无资源事件。
+
+[所有本任务构建/核对单元已inactive/dead](evidence/04/units-final.txt)。没有操作另一GBS任务、开发板、RPi5、Gerrit或系统设置；不安装宿主软件（只有正常GBS依赖进入本任务新root）、不删除任何旧目录、不改设计或既有证据。GBS日志中的/home/abuild等路径位于WORKDIR内chroot，不是向宿主该路径创建项目文件。systemd运行时单元状态由用户要求的systemd工具管理；项目日志/产物均显式写入WORKDIR。
+
+文档准备曾误读不存在的示例模板文件名，退出1后改为只列examples/gbs文件名确认；未改文件、未触碰保护配置。一次编辑工具脚本发生插值错误，在执行shell前终止，重写后成功，不影响构建或证据。均不冒充GBS失败。
+
+### 9.6 main / hq交付
+
+hq的更新只包含4个授权文件：README.md、examples/ffmpeg/README.md、examples/ffmpeg/profiling.patch、examples/gbs/ffmpeg-target.conf.in。补丁与fix1 SHA相同；配置使用@PROJECT@占位，除路径外与实际配置字段逐项相等。写入-j2命令、实测时长、build-id检查方法、非致命DWARF5诊断与局限；AArch64、profile消费继续Not verified。
+
+hq提交 **2c962454a4186a40ba8e9fabb7df0e5b8ae1cb59** 已普通推送并核验远端，状态为 **待 PM 审阅**（只在main记录）。无force/Gerrit推送。[推送原文](evidence/04/hq-push.json)、[远端核验](evidence/04/hq-result.json)。check_hq.py通过：0违规、0警告、22个链接有效；3个bash代码块bash -n通过，无执行示例中的额外构建。[发布检查](evidence/04/hq-check.json)、[shell语法](evidence/04/hq-shell-checks.json)、[配置等价](evidence/04/hq-template-equivalence.json)。
+
+所有小证据位于evidence/04，单文件<1MB；原始构建日志、RPM、ELF、大文件均留temp/m1-target-20261114/weekend-j2/，完整[原件与SHA索引](evidence/04/source-index.json)。两变体交付验证完成，现停止；剩余事项为PM审阅、周一确认RPi5以及未来消费/性能验证，不自动开始。
