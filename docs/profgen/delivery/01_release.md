@@ -1,5 +1,7 @@
 # llvm-profgen 第一批有限范围发布记录
 
+> 最新状态（2026-11-14，第二次配置准备，见§8）：PM已允许更换固定依赖快照，二进制SHA不要求与补丁9相同，验收以输出回归为准。但新指定Base URL为200、Unified URL为404，未通过启动门禁，本次没有运行GBS。下面§1–7保留第一次尝试的历史记录；“需相同依赖来源”的旧停止条件已由本次PM决定替代。当前仍无发布产物与发布回归结果。
+
 2026-11-14。本轮**发布未完成，停在GBS仓库解析阶段**：已完成基线决定、两个独立树的补丁应用、源码等价核对；固定配置的两个snapshot URL返回HTTP 404，GBS退出1，未产生发布RPM。不得把本报告作为发布产物已验收的证明。
 
 ## 1. 范围、基线与本轮结论
@@ -199,3 +201,68 @@ schema_version=1。先看当前进程退出码和`verdict.conversion`，再查`v
 - 旧开发spec测试改动保留供复现；独立发布spec已干净。未修改设计v1.8或既有验收证据，未删除任何temp目录，未触碰三个受保护本地配置。
 
 本轮保存上述事实后停止，等待固定依赖仓库恢复或新的明确依赖来源决定。不是等待Gerrit推送授权来继续构建；本轮始终不推LLVM/Gerrit。
+
+## 8. 更换固定snapshot的授权与预检停止（2026-11-14）
+
+### 8.1 本轮PM决定及新配置
+
+PM允许用当前可用的固定snapshot重试。发布基线仍为f999，发布树HEAD仍为 `c8942ae1b53099a78a97dca2b64427af6e58432b`，启动前核对工作区干净；不改spec、不重放补丁。编译依赖不同可能导致工具二进制SHA与补丁9不同，这是预期；仍须C1为0差异、IP profile及质量JSON与开发工具逐字节一致（工具路径/SHA等标识差异逐项说明），不得放宽输出回归。
+
+从旧配置复制生成 `temp/gbs/gbs_llvm_x86_release.conf`，只替换两条仓库URL，未改其他字节，原配置保留：
+
+| 项目 | SHA-256 |
+|---|---|
+| 原 `gbs_llvm_x86_baseline.conf` | `9044bdbf6914980e3f5f4af0f5e491632211e15bb05bddbed5b16ee1b95a745a` |
+| 新 `gbs_llvm_x86_release.conf` | `44df6f67a6897a9d0537e931fded5e8bcf3b1e95f8e47ff1afe1d4dd95a270ff` |
+
+[配置diff](evidence/02/config.diff) / [路径与SHA](evidence/02/config.json)。没有使用latest别名，也没有读取根目录受保护的三项配置。
+
+### 8.2 地址预检原文与停止点
+
+2026-11-14 00:53:46–00:53:47 PST（HTTP Date为08:53:46–08:53:47 GMT），每个地址执行一次 `curl --head --location --connect-timeout 10 --max-time 30 --retry 0 --write-out '\nHTTP_STATUS=%{http_code}\n' URL`：
+
+| 仓库 | 固定snapshot | HTTP结果 |
+|---|---|---|
+| Base | `tizen-base-toolchain_20261111.130848` | **200 OK** |
+| Unified | `tizen-unified-toolchain_20261003.102419` | **404 Not Found** |
+
+完整URL：
+
+```text
+https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Base-Toolchain/tizen-base-toolchain_20261111.130848/repos/standard/packages/
+https://download.tizen.org/snapshots/TIZEN/Tizen/Tizen-Unified-Toolchain/tizen-unified-toolchain_20261003.102419/repos/standard/packages/
+```
+
+两次curl进程均退出0，但第二次HTTP失败；不能用curl退出0充当地址可用。完整命令、响应头、stdout/stderr见[snapshot-head.json](evidence/02/snapshot-head.json)。PM此前对Unified可用性的描述与本次实测不同，此处仅记录指定地址结果，不猜测应使用哪个ID或尝试其他组合。
+
+因“构建前两地址均200”未满足，本次**未启动GBS**、未进行依赖解析/编译/打包。GBS退出码与墙钟均为“不适用（未运行）”，不能沿用第一次的1/7.310秒。本次预检执行器因非200断言退出1，结束状态见[preflight-result.json](evidence/02/preflight-result.json)和[带时间ALL-END](evidence/02/end.log)。没有重试、修改spec或用旧依赖缓存绕过。
+
+构建原计划：在独立发布树使用新conf、全新 `temp/GBS-ROOT-LLVM-RELEASE-20261114b`，正常非增量GBS、10G/400%scope、-j4；没有创建该buildroot。本轮仅轻量串行任务，3G/100%scope、nice19/ionice-c3、启动MemAvailable≥4GiB。[内存原文及库存任务peak](evidence/02/inventory-resource.json)；短命令测量不代表完整构建峰值。
+
+### 8.3 旧依赖缓存与版本（只读，未使用）
+
+在 `temp/GBS-ROOT-LLVM-X86/local/cache/` 下保留 **122个RPM文件，总计195,048,240字节（约186.012MiB）**，扫描无权限/读取错误。本轮仅列文件路径和大小，不复制、不用作新构建输入。[完整清单](evidence/02/old-cache.json)。这些是原补丁9构建根现存缓存；“缓存存在”不证明每个文件都参与了补丁9那次构建，也不证明它们足以完成离线正常构建。
+
+通过 `sudo -n /usr/sbin/chroot <旧root> /usr/bin/rpm -q` 只读查询原root，退出0，无密码交互。以下为保留的补丁9构建root当前安装版本；不是本轮解析出的新依赖。没有把该现状凭空当作逐包历史安装日志。
+
+| 工具 | 原补丁9构建root现存名称-版本-release（x86_64） | 新发布依赖 |
+|---|---|---|
+| gcc | gcc-14.2.0-1.6 | 未解析 |
+| binutils | binutils-2.43-1.6 | 未解析 |
+| cmake | cmake-3.31.2-1.6 | 未解析 |
+| python3 | python3-3.14.2-1.6 | 未解析 |
+| ninja | ninja-1.13.1-1.5 | 未解析 |
+
+[原始查询命令与输出](evidence/02/old-dependency-versions.json)。由于新构建未启动，实际解析包清单、逐包来源仓库及新旧差异还不能填写；没有虚构版本一致性。
+
+### 8.4 产物、存档、回归与后续发布
+
+- 没有新RPM、安装产物SHA/build-id或version/help结果；没有运行发布C1或素材/14历史输入重放，不能记为回归通过。
+- 成功后预定存档位置为 `temp/gbs-deps-archive/llvm-release-20261114/`，**本轮未创建依赖存档、未复制任何依赖RPM**，大小不适用。待实际下载依赖齐全后才能生成SHA清单及可核查的本地仓库重建命令；不把旧缓存当作本次存档。
+- 本轮停止，故不执行条件性的Gerrit sandbox推送或hq创建。`sandbox/lhmax2025/afdo_profgen`是本轮用户提及的唯一允许后续目标，不能把它理解为当前已推送。此前“sandbox推送＋hq第一版”指令全文在当前会话/仓库未找到，已请求补充；这不影响本次明确的URL停止结论。
+- 已知局限更新（PM要求原文）：**“Tizen snapshot 会被定期删除；本次构建所用 snapshot ID 如下，被删除后用当前 snapshot 重建，llvm-profgen 为纯源码改动，以工具输出回归为准”。** 本次“所用”ID指§8.2的计划配置，实际未构建；换用当前snapshot仍须固定ID、留存依赖清单并通过完整输出回归，不能自动切latest或跳过门禁。
+- 等待用户提供可用的固定Unified URL或确认服务恢复后再继续；本轮不尝试其他snapshot组合。既有证据、设计v1.8、补丁、原开发树和所有既有temp目录均保留。
+
+本轮证据索引：[evidence/02/index.json](evidence/02/index.json)。
+
+证据容器检查：config.diff的两条空白上下文行保留标准unified diff的单空格前缀，Git将其报告为新增文件尾空白；原始diff不删改。除该证据容器外的本次文件通过diff --check，详见[evidence/02/diff-check.json](evidence/02/diff-check.json)。
