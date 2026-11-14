@@ -26,8 +26,15 @@
 6. 自 2026-11-14 起，PM 与设计由 Claude 接任。开发顺序：llvm-profgen 增强完成后，先做 AutoFDO 与 BOLT 的工作流（workflow），再做 skill（SKILL.md + 脚本），最后做 Agent。
 7. LLVM 代码只推送到 Gerrit 的 sandbox 分支；不推 refs/for 正式评审，不新建其他远端分支；afdo/profgen-enhance 等开发分支只在本地使用；结果仓库不包含 LLVM 源码树；对外文档记录 sandbox 的项目名、分支名与 commit ID。sandbox 分支名与推送人待用户确认，在此之前不推送。本轮不推送任何 Gerrit 分支，包括 sandbox。
 8. 对外发布：以本仓库的 orphan 分支 hq 向总部发布（内容与 README 要求见 workflow 设计 §14）；hq 分支另行指令创建，本轮不建。
+9. 2026-11-14 用户批准 llvm-profgen 第一批有限范围交付，范围与延期事项以[范围决定](profgen/delivery/00_scope_decision.md)为准。CLI不改，workflow采用显式保守策略；统计质量等价与性能收益未验证。设计§10步骤5–7延期不取消；预注册材料保留，未来同对象profile接触按Q.5第17项披露。
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
+
+## 有限范围决定已登记（2026-11-14；等待新tip基线裁决）
+
+- 第一批提交e0beb1bce1a067cc2be0ea9d0817cd7967325155已推送main：长期发布规则、[LLVM分支查询](handover/02_llvm_branch.md)、workflow设计v0.1与reviews目录。
+- [范围决定](profgen/delivery/00_scope_decision.md)照录用户批准的七条规则，索引设计§10步骤5–9、§12、Q.5。本次仅交付补丁1–9用户态DWARF路径的范围获准；显式保守策略不等于CLI默认值已验证，三个门槛仍可选。统计质量等价与性能收益未验证。
+- tizen_base远端tip已前进到61ef5d31ca91025c414c748477bef0c64ddfa67c，按用户门禁第三部分仅完成三.1并停止；发布树、正常非增量GBS、发布产物与回归均未执行，01_release.md未生成。等待PM决定是否在新tip上重放补丁；未修改原开发树，不推LLVM/Gerrit，不建hq。
 
 ## 发布准备入口（2026-11-14；远端tip前进，触发分支门禁）
 
