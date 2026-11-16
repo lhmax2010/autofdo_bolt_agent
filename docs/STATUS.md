@@ -38,6 +38,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow v0.1 评审文件入库（2026-11-16）
+
+评审文件原样入库，未修改内容；本轮仅登记与提交，不处理评审意见。
+
+| 评审方 | 文件 | SHA-256 |
+|---|---|---|
+| Codex | [v0.1_Codex.md](workflow/reviews/v0.1_Codex.md) | `52a4e588356680618097a2a4446897ca5d8ba030354bbb2ec89cff5d2a05d834` |
+| Claude Code | [v0.1_claude_code.md](workflow/reviews/v0.1_claude_code.md) | `1ad4eff0370567bf80b9f1e29e80dc54f7949ed7b3643c1e13709c9c71cfaa91` |
+
 ## M1 手动试跑停止（2026-11-16：RPi4 连接不可用）
 
 - [试跑报告](workflow/m1/02_manual_pilot_rpi4_thumb.md)：已登记端点 192.168.108.26:26101 的 sdb connect 输出 failed to connect（进程退出0），随后 devices 为空。无法比对周六身份，按门禁停止。原始输出与 SHA 在 workflow/m1/evidence/05/。
