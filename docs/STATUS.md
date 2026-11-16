@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 评审终稿第4版归档（2026-11-16）
+
+- **361624评审：终稿第4版，建议补丁v3已验证；未在Gerrit发布。** 指定Downloads原件以mv覆盖[评审文件](reviews/gerrit/361624/autofdo-bolt-agent-review.md)，内容未改；36,285字节，SHA-256 5e3b4ff68725d4a06408dd95b1447f07406866e9fdd0ff3998ff443f9dcc6a63。第2版保留在git历史，Downloads不留副本。
+- 第7.1节patch代码块（原文179–398行）按原始字节提取，cmp退出0，与[已验证v3补丁](reviews/gerrit/361624/suggested-fix/361624-suggested-fix-v3.patch)逐字节相同；9,696字节，SHA-256 81f41716aa2fe1761d1a3f228c83ab86e6559e0f09c7c5defeac762afec5116b。该校验结果同时写入提交说明，不重建。
+- 按本轮明确授权，将上述两文件复制到 /home/linhao/Toolchain/development/llvm-optimize/temp/review-361624/，仅覆盖这两个指定文件；覆盖前原SHA及复制后SHA/大小见[归档收据](reviews/gerrit/361624/evidence/review-v4-archive.json)。这是用户授权的WORKDIR外写入例外；其余外部文件未触碰。
+- 已更新361624/SHA256SUMS；不评论或推送Gerrit、不改hq、不接板。归档完成后停止。
+
 ## Gerrit 361624 v3正常Tizen前置段验收完成（2026-11-16）
 
 - 指定v3补丁原样mv，SHA 81f41716aa2fe1761d1a3f228c83ab86e6559e0f09c7c5defeac762afec5116b；基于da885208干净git am，结果 **bd6dd0d009b4c70e89d1a5730dbc30d3e6c7dce8**。38次只读解析/展开全0：tools包与依赖同v2，llvm.spec仅3行注释；实际root宏与executor-v4取证root相同。
