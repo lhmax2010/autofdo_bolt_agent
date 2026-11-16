@@ -1,0 +1,12 @@
+--- profiling-fix1/packaging/ffmpeg.spec
++++ afdo-diag/packaging/ffmpeg.spec
+@@ -5,6 +5,9 @@
+ %if 0%{?with_autofdo}
+ Source2000: autofdo.extbinary
+ %global profile_use -fprofile-sample-use=%{SOURCE2000}
++%if 0%{?afdo_diag}
++%global profile_use %{profile_use} -fsave-optimization-record=yaml -foptimization-record-passes=sample-profile
++%endif
+ %endif
+ BuildRequires: clang
+ 

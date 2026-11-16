@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/verify_build.py", line 39, in <module>
+    result=consumption.evaluate(['libavcodec','libavutil'],{'libavcodec/':'libavcodec','libavutil/':'libavutil'},remarks,cmd,locked,profile,before,after,profile_option_path='/home/abuild/rpmbuild/SOURCES/autofdo.extbinary')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/workflow/afdo_wf/consumption.py", line 65, in evaluate
+    for r in records(path):
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/workflow/afdo_wf/consumption.py", line 44, in records
+    require(active,'orphan YAML end');r=parse(current,index)
+                                        ^^^^^^^^^^^^^^^^^^^^
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/workflow/afdo_wf/consumption.py", line 32, in parse
+    require(fields.get('Pass')=='sample-profile','unexpected AppliedSamples pass')
+  File "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/workflow/afdo_wf/common.py", line 16, in require
+    raise GateError(message, reason, code)
+afdo_wf.common.GateError: unexpected AppliedSamples pass

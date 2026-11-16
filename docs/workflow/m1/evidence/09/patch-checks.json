@@ -1,0 +1,96 @@
+[
+  {
+    "argv": [
+      "rpmspec",
+      "--parse",
+      "--target",
+      "armv7l",
+      "--define",
+      "profile_isa thumb",
+      "--define",
+      "with_autofdo 0",
+      "--define",
+      "afdo_diag 0",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/ffmpeg/packaging/ffmpeg.spec"
+    ],
+    "exit": 0,
+    "output": "temp/workflow-p1p2-20261116/spec-afdo0-diag0.txt",
+    "sha256": "14c30ba8949c06252d372904acda828cdf9f5f36f74dbbcc29da8ad3515cbc62",
+    "passed": true
+  },
+  {
+    "argv": [
+      "rpmspec",
+      "--parse",
+      "--target",
+      "armv7l",
+      "--define",
+      "profile_isa thumb",
+      "--define",
+      "with_autofdo 0",
+      "--define",
+      "afdo_diag 1",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/ffmpeg/packaging/ffmpeg.spec"
+    ],
+    "exit": 0,
+    "output": "temp/workflow-p1p2-20261116/spec-afdo0-diag1.txt",
+    "sha256": "14c30ba8949c06252d372904acda828cdf9f5f36f74dbbcc29da8ad3515cbc62",
+    "passed": true
+  },
+  {
+    "argv": [
+      "rpmspec",
+      "--parse",
+      "--target",
+      "armv7l",
+      "--define",
+      "profile_isa thumb",
+      "--define",
+      "with_autofdo 1",
+      "--define",
+      "afdo_diag 0",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/ffmpeg/packaging/ffmpeg.spec"
+    ],
+    "exit": 0,
+    "output": "temp/workflow-p1p2-20261116/spec-afdo1-diag0.txt",
+    "sha256": "75ff6bd0b68192a0024d8cdd1c9beb2eb893f3d947a12ee2d54cab911861c8fc",
+    "passed": true
+  },
+  {
+    "argv": [
+      "rpmspec",
+      "--parse",
+      "--target",
+      "armv7l",
+      "--define",
+      "profile_isa thumb",
+      "--define",
+      "with_autofdo 1",
+      "--define",
+      "afdo_diag 1",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/ffmpeg/packaging/ffmpeg.spec"
+    ],
+    "exit": 0,
+    "output": "temp/workflow-p1p2-20261116/spec-afdo1-diag1.txt",
+    "sha256": "9d4b2f60d3b73ba11ca9452ce932ee23b97bb648529704ae72a4447a532cdcb8",
+    "passed": true
+  },
+  {
+    "argv": [
+      "git",
+      "-c",
+      "gc.auto=0",
+      "-c",
+      "maintenance.auto=false",
+      "-C",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/ffmpeg",
+      "apply",
+      "--cached",
+      "--check",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/workflow/packages/ffmpeg/build/profiling.patch"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "passed": true
+  }
+]

@@ -38,6 +38,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow M1 第一、二阶段主机实现（2026-11-16）
+
+- [实现与验收报告](workflow/m1/04_implementation_p1_p2.md)：新增 `workflow/` 的config、receipts、build、buildlock、profgen、consumption、stats、report与CLI；94项合成单元测试通过，12个board/workload脚本通过 `bash --posix -n`，shellcheck未安装。板上命令保留dry-run接口，未接板，不宣称自动化M1全流程验收。
+- 旧15个block只读计时JSON回归复现 **−2.565%、95% CI [−2.859%, −2.256%]**；顺序与种子相同。没有新测量、质量矩阵或修正案3登记。
+- fix1补丁新增afdo_diag；4种rpmspec组合通过。唯一授权Thumb诊断构建 **退出0、118.865秒**，沿用冻结108包，23个RPM；408份目标opt.yaml中libavcodec/libavutil分别有 **1921/51** 条正数AppliedSamples，两个目标消费判定verified、runtime/debug build-id一致、.text不同于BASE且与旧AFDO一致。原锁定profile访问按Q.5#17披露。
+- 构建6G/5G/200%、-j2串行，启动门禁立即通过；构建记录最低MemAvailable **19,599,581,184 B**，最终cgroup memory.peak **1,695,338,496 B**，swap峰值0；无资源停止/重试。证据与SHA索引见 [evidence/09](workflow/m1/evidence/09/index.json)。
+- 后续限制：live board transport与端到端验收尚未启用；“标记率明显不同”需用户固定政策，缺少判定时封顶inconclusive；第二测试片按设计待owner选择。正式实验仍须同新版补丁完成BASE/BASE-r/AFDO完整build lock。未改hq/Gerrit、旧证据或设计，完成后停止。
+
 ## Workflow v0.3 最终设计入库（2026-11-16）
 
 - [v0.3](workflow/01_afdo_bolt_workflow_design_v0.3.md)为最终设计，不再评审，后续变更由用户决定。指定Downloads文件以mv移入、内容未改，移动前后SHA-256均为 `1d8fdfb319a9faf9a1660c7905c2d59a8749ef708afaf8d4b832c1f9fbbe999a`。

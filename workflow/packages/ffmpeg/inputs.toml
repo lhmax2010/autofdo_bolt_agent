@@ -1,0 +1,18 @@
+# Historical pilot inputs; ToS is not a fresh holdout. A second clip remains a
+# user decision before automated M1 acceptance; this phase does not measure.
+[[inputs]]
+id = "bbb-720p-60"
+path = "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4"
+sha256 = "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4"
+start = 0
+duration = 60
+role = "train"
+oracle = { caps = "I420,1280x720,30/1,progressive,1/1", threads = 1, frames = 1800, bytes = 2488320000, digest = "3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814" }
+[[inputs]]
+id = "tos-720p-60"
+path = "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4"
+sha256 = "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1"
+start = 0
+duration = 60
+role = "test"
+oracle = { caps = "I420,1280x720,30/1,progressive,1/1", threads = 1, frames = 1800, bytes = 2488320000, digest = "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e" }

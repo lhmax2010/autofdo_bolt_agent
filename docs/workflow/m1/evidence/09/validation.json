@@ -1,0 +1,145 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "workflow/tests",
+        "-v"
+      ],
+      "exit": 0,
+      "log": "temp/workflow-p1p2-20261116/synthetic-tests.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "workflow/tests/reproduce_pilot.py",
+        "--evidence",
+        "docs/workflow/m1/evidence/08/measurement",
+        "--output",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/pilot-reproduction.json"
+      ],
+      "exit": 0,
+      "log": "temp/workflow-p1p2-20261116/pilot-reproduction.stdout"
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/deploy_verify.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/watchdog.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/collect.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/measure.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/session.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/start_gate.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/common.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/maps.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/observe_maps.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/board/telemetry.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/packages/ffmpeg/workloads/decode.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "--posix",
+        "-n",
+        "workflow/packages/ffmpeg/workloads/timed.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "check": "shellcheck",
+      "status": "unavailable"
+    }
+  ],
+  "seconds": 5.366987846995471,
+  "MemAvailable_kB": 19441040,
+  "memory_peak": 33681408,
+  "python_version": "Python 3.12.3"
+}
