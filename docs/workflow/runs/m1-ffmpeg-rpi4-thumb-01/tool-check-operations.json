@@ -1,0 +1,197 @@
+[
+  {
+    "name": "initial-uid",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf '\\n__RC_890457f7c6774b829dfe51be98b7505a__%s\\n' \"$rc\""
+    ],
+    "start": 1794854584.8048675,
+    "end": 1794854584.9240294,
+    "exit_code": 0,
+    "stdout": "5001\n\n__RC_890457f7c6774b829dfe51be98b7505a__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-governors",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\" || exit; done ); rc=$?; printf '\\n__RC_d95d7eda86e74b02a12a7fc27be3f5ee__%s\\n' \"$rc\""
+    ],
+    "start": 1794854584.9246914,
+    "end": 1794854585.0479767,
+    "exit_code": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__RC_d95d7eda86e74b02a12a7fc27be3f5ee__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "nonroot-dependencies",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( missing=''; for c in cat tr uname sed mkdir sha256sum chmod ldd setsid sleep kill date awk readlink taskset bash sort grep stat find tar wc mkfifo cut head tail tee rm ps gst-launch-1.0; do command -v \"$c\" >/dev/null 2>&1 || missing=\"$missing $c\"; done; printf '%s\\n' \"$missing\"; test -z \"$missing\" ); rc=$?; printf '\\n__RC_efc9499039444ba8bf31600eb2a0266e__%s\\n' \"$rc\""
+    ],
+    "start": 1794854585.0486548,
+    "end": 1794854585.1699603,
+    "exit_code": 0,
+    "stdout": "\n\n__RC_efc9499039444ba8bf31600eb2a0266e__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-on",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "start": 1794854585.1708338,
+    "end": 1794854585.2228112,
+    "exit_code": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-confirm",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf '\\n__RC_552b3ff49b69455aa2f3a7fb9126365f__%s\\n' \"$rc\""
+    ],
+    "start": 1794854585.2231736,
+    "end": 1794854585.343247,
+    "exit_code": 0,
+    "stdout": "0\n\n__RC_552b3ff49b69455aa2f3a7fb9126365f__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "agent-access",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test -d /opt/afdo_agent && test -w /opt/afdo_agent && test -x /opt/afdo_agent ); rc=$?; printf '\\n__RC_cb33c04aa0e74307bbe1071d629aed22__%s\\n' \"$rc\""
+    ],
+    "start": 1794854585.3439708,
+    "end": 1794854585.46008,
+    "exit_code": 0,
+    "stdout": "\n__RC_cb33c04aa0e74307bbe1071d629aed22__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "tool-sha",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/tools/perf ); rc=$?; printf '\\n__RC_34fbb443c4ca45c9ba96f8de3118875a__%s\\n' \"$rc\""
+    ],
+    "start": 1794854585.4840713,
+    "end": 1794854585.650994,
+    "exit_code": 0,
+    "stdout": "41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf\n\n__RC_34fbb443c4ca45c9ba96f8de3118875a__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "tool-sha",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1 ); rc=$?; printf '\\n__RC_0336d9de94d143bb988ccb6ca60f80b4__%s\\n' \"$rc\""
+    ],
+    "start": 1794854585.6517646,
+    "end": 1794854586.2360933,
+    "exit_code": 0,
+    "stdout": "49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1\n\n__RC_0336d9de94d143bb988ccb6ca60f80b4__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "perf-ldd",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( LD_LIBRARY_PATH=/opt/afdo_agent/lib ldd /opt/afdo_agent/tools/perf ); rc=$?; printf '\\n__RC_cc8e2df59c5744589b86f0ca1e05cca4__%s\\n' \"$rc\""
+    ],
+    "start": 1794854586.2368999,
+    "end": 1794854586.3747957,
+    "exit_code": 0,
+    "stdout": "\tlinux-vdso.so.1 (0xbefd4000)\n\tlibunwind.so.8 => /lib/libunwind.so.8 (0xb6b9c000)\n\tlibunwind-arm.so.8 => /lib/libunwind-arm.so.8 (0xb6b78000)\n\tlibpthread.so.0 => /lib/libpthread.so.0 (0xb6ee3000)\n\tlibrt.so.1 => /lib/librt.so.1 (0xb6ee0000)\n\tlibm.so.6 => /lib/libm.so.6 (0xb6b2a000)\n\tlibdl.so.2 => /lib/libdl.so.2 (0xb6b26000)\n\tlibz.so.1 => /lib/libz.so.1 (0xb6b16000)\n\tlibelf.so.1 => /lib/libelf.so.1 (0xb6b06000)\n\tlibdw.so.1 => /lib/libdw.so.1 (0xb6aa7000)\n\tlibcrypto.so.3 => /lib/libcrypto.so.3 (0xb682c000)\n\tlibLLVM.so.22.1 => /opt/afdo_agent/lib/libLLVM.so.22.1 (0xb4790000)\n\tlibstdc++.so.6 => /lib/libstdc++.so.6 (0xb45f2000)\n\tliblzma.so.5 => /lib/liblzma.so.5 (0xb45d4000)\n\tlibgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb45b9000)\n\tlibc.so.6 => /lib/libc.so.6 (0xb4457000)\n\t/lib/ld-linux.so.3 (0xb6eea000)\n\tlibbz2.so.1 => /lib/libbz2.so.1 (0xb444a000)\n\tlibxml2.so.16 => /lib/libxml2.so.16 (0xb4378000)\n\n__RC_cc8e2df59c5744589b86f0ca1e05cca4__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "perf-version",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( LD_LIBRARY_PATH=/opt/afdo_agent/lib /opt/afdo_agent/tools/perf --version ); rc=$?; printf '\\n__RC_411e7bac98c2429ab811249c639d76d9__%s\\n' \"$rc\""
+    ],
+    "start": 1794854586.375618,
+    "end": 1794854586.5399609,
+    "exit_code": 0,
+    "stdout": "perf version 6.12.80\n\n__RC_411e7bac98c2429ab811249c639d76d9__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-restore",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "start": 1794854586.5407765,
+    "end": 1794854586.5921087,
+    "exit_code": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-uid",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf '\\n__RC_ff5918b82559498da1ba993cd077c1cf__%s\\n' \"$rc\""
+    ],
+    "start": 1794854586.592629,
+    "end": 1794854586.7126362,
+    "exit_code": 0,
+    "stdout": "5001\n\n__RC_ff5918b82559498da1ba993cd077c1cf__0\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-governors",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\" || exit; done ); rc=$?; printf '\\n__RC_321a5dec1f204bbba296436b35f94e3a__%s\\n' \"$rc\""
+    ],
+    "start": 1794854586.713455,
+    "end": 1794854586.8361187,
+    "exit_code": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__RC_321a5dec1f204bbba296436b35f94e3a__0\n",
+    "stderr": ""
+  }
+]

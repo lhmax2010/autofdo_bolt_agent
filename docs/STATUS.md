@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow M1第三阶段：S0资源门禁停止（2026-11-16）
+
+- [自动化验收停止报告](workflow/m1/05_m1_board_e2e.md)：实验m1-ffmpeg-rpi4-thumb-01；RPi4已连接，型号/架构/内核/TZ_BUILD_ID与试跑一致。perf/libLLVM SHA、ldd、perf6.12.80及系统PATH依赖预检通过。
+- **S0主机资源门禁失败并停止**：MemAvailable 14.828831GiB < 16GiB；load和磁盘通过。本轮不沿用361624任务的临时豁免。未实施live workflow、未下载Sintel、未构建/采样/测量、未读取profile，不以旧试跑结果充当M1验收。
+- 用户指定“PM decision 2026-11-17”的自动标记失衡规则与Sintel次要测试片决定已在报告登记；package/config/stats及测试尚未修改，后续恢复时须实施。
+- root预检后已恢复uid5001；governor未改变，cleanup_pending=[]；没有本轮板上RUN或采样器。预检墙钟158.311秒，保存的检查scope峰值7,905,280B，无OOM。[原始证据、索引与SHA](workflow/runs/m1-ffmpeg-rpi4-thumb-01/index.json)；已记录ALL-END，停止等待后续指令。不改hq/Gerrit/设计/旧证据。
+
 ## Gerrit 361624 评审终稿第4版归档（2026-11-16）
 
 - **361624评审：终稿第4版，建议补丁v3已验证；未在Gerrit发布。** 指定Downloads原件以mv覆盖[评审文件](reviews/gerrit/361624/autofdo-bolt-agent-review.md)，内容未改；36,285字节，SHA-256 5e3b4ff68725d4a06408dd95b1447f07406866e9fdd0ff3998ff443f9dcc6a63。第2版保留在git历史，Downloads不留副本。
