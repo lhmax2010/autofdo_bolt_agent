@@ -38,6 +38,23 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## hq 纳入 M1 RPi4 Thumb 试跑结果（2026-11-16；待 PM 审阅）
+
+- hq 新提交 **efb6b506d770dafba271b82960c1eb8e04377150** 已推送并核验远端 tip；状态 **待 PM 审阅**。依据[试跑报告第8节](workflow/m1/02_manual_pilot_rpi4_thumb.md)及[独立核查](workflow/m1/03_pilot_independent_check.md)，新增英文试跑报告，明确手动执行取得结果、自动化仍在推进；15个block耗时变化−2.565%，95% CI [−2.859%, −2.256%]，保留13个干净block敏感性结果、单板/单测试片/单线程与遥测缺口，不外推默认值或普遍收益。
+- 更新README、Introduction、workflow overview与FFmpeg示例：按v0.2列出M2a/M2b、冻结依赖与构建锁、独立正确性oracle、成对block四种判定及加载库核验。Thumb消费已验证；A32消费与AArch64仍未验证。记录108包冻结集、698条归一化命令、627条profile选项、运行/debug build-id及本地仓库 `--skip-conf-repos -R -D` 的核对方法。
+- **关闭“下次hq简化命令”待办**：FFmpeg主命令为普通GBS，资源限制单列可选示例；已移除GIT_CONFIG_*、SUDO_ASKPASS、XDG与内部隔离口吻。旧状态段保留为历史记录。
+- 推送前 `tools/hq/check_hq.py` 通过：13个文件、0违规、0警告、34个相对链接目标存在；19个Bash示例块通过 `bash -n`，`git diff --check`通过。hq全树13文件共93,440字节（不含.git）；本次5个文件明细如下。检查输出及逐文件SHA在 `temp/hq-m1-pilot-update-20261116/check.json`、`validation.json`；不包含原始perf/profile或内部证据。
+
+| hq 本次文件 | 字节数 |
+|---|---:|
+| `README.md` | 29799 |
+| `docs/01_introduction.md` | 3612 |
+| `docs/02_design/workflow_design_overview.md` | 11184 |
+| `docs/03_reports/m1_ffmpeg_rpi4_thumb_pilot.md` | 8903 |
+| `examples/ffmpeg/README.md` | 14325 |
+
+- 本轮仅文档更新与静态检查，不接板、不构建、不推Gerrit、不重读profile或重算质量指标；原报告/证据/设计及用户未跟踪文件不变。
+
 ## M1 手动试跑独立核查完成（2026-11-16）
 
 - [独立核查报告](workflow/m1/03_pilot_independent_check.md)：对596d978第8节及证据做只读复核，2628次SHA核对（1754个去重路径）无缺失/差异；独立统计支持faster、−2.56516%及原bootstrap CI。随机取样接口差异已解释，相同浮点索引法复现原CI。
