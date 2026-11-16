@@ -65,7 +65,8 @@ class Cleanup:
     def restore(self,actual_identity,undo):
         require(actual_identity==self.identity,'restore identity mismatch','identity',3)
         errors=[]
-        for action in list(reversed(self.data['cleanup_pending'])):
+        ordered=sorted(reversed(self.data['cleanup_pending']),key=lambda a:{'process':0,'run':1,'governor':2,'root':3}[a['kind']])
+        for action in ordered:
             try:
                 undo(action)
                 self.data['cleanup_pending'].remove(action)

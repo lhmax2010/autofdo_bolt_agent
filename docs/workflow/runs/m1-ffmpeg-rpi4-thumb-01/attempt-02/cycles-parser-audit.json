@@ -1,0 +1,20 @@
+{
+  "raw": "cycles: type: 0 (PERF_TYPE_HARDWARE), size: 136, config: 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq }: 1000003, sample_type: IP|TID|TIME, read_format: ID|LOST, disabled: 1, inherit: 1, mmap: 1, comm: 1, enable_on_exec: 1, task: 1, sample_id_all: 1, exclude_guest: 1, mmap2: 1, comm_exec: 1, ksymbol: 1, bpf_event: 1\n",
+  "implemented_patterns": [
+    "^cycles:",
+    "\\btype\\s+0\\b",
+    "\\bconfig\\s+0\\b"
+  ],
+  "implemented_matches": [
+    true,
+    false,
+    false
+  ],
+  "observed_fields": {
+    "event": "cycles",
+    "type": 0,
+    "config": 0
+  },
+  "conclusion": "Parser defect: colon-separated perf evlist fields were not accepted. No new board query or retry.",
+  "proposed_fix": "Parse the actual event stanza with explicit field separators, require exactly one hardware cycles event, and add real-format plus software-event/other-config synthetic rejection fixtures before another live attempt."
+}

@@ -16,3 +16,13 @@ start = 0
 duration = 60
 role = "test"
 oracle = { caps = "I420,1280x720,30/1,progressive,1/1", threads = 1, frames = 1800, bytes = 2488320000, digest = "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e" }
+
+# PM decision 2026-11-17: ToS primary; Sintel secondary, no multiplicity correction.
+[[inputs]]
+id = "sintel-1080p-60"
+path = "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4"
+sha256 = "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843"
+start = 0
+duration = 60
+role = "test-secondary"
+oracle = { caps = "video/x-raw, format=(string)I420, width=(int)1920, height=(int)1080", threads = 1, frames = 1440, bytes = 4478976000, digest = "91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193" }

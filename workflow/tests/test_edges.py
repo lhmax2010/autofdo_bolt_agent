@@ -66,10 +66,10 @@ class EvidenceEdges(Fixture):
         self.assertEqual(x['classification'],'telemetry_anomaly');self.assertTrue(x['missing'])
     def test_exact_twenty_percent_not_capped(self):
         rows=[dict(id=i,complete=True,control=10,candidate=8,control_flag='telemetry_missing' if i==1 else 'clean') for i in range(1,6)]
-        self.assertEqual(stats.analyze(rows,5,1,clear_flag_imbalance=False,repetitions=100)['primary']['verdict'],'faster')
+        self.assertEqual(stats.analyze(rows,5,1,repetitions=100)['primary']['verdict'],'faster')
     def test_flag_imbalance_cap(self):
-        rows=[dict(id=i,complete=True,control=10,candidate=8) for i in range(1,6)]
-        self.assertEqual(stats.analyze(rows,5,1,clear_flag_imbalance=True,repetitions=100)['primary']['verdict'],'inconclusive')
+        rows=[dict(id=i,complete=True,control=10,candidate=8,candidate_flag='telemetry_missing' if i<=2 else 'clean') for i in range(1,6)]
+        self.assertEqual(stats.analyze(rows,5,1,repetitions=100)['primary']['verdict'],'inconclusive')
     def test_no_board_shell_forbidden_construct(self):
         for p in (ROOT/'workflow/board').glob('*.sh'):
             text=p.read_text();self.assertNotIn('${var,,}',text);self.assertNotIn('timeout ',text)

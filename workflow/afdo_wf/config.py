@@ -114,14 +114,14 @@ def load_inputs(path):
         require(set(x)=={'id','path','sha256','start','duration','role','oracle'},'input fields')
         require(x['id'] not in seen,'duplicate input');seen.add(x['id'])
         require(re.fullmatch('[0-9a-f]{64}',x['sha256']) is not None,'input SHA')
-        require(x['role'] in ['train','pilot','test','tuning','conformance'],'input role')
+        require(x['role'] in ['train','pilot','test','test-secondary','tuning','conformance'],'input role')
         positive(x['start'],'start',zero=True);positive(x['duration'],'duration')
         o=x['oracle'];require(set(o)=={'caps','threads','frames','bytes','digest'},'oracle fields')
         for k in ['threads','frames','bytes']:positive(o[k],k,True)
         require(re.fullmatch('[0-9a-f]{64}',o['digest']) is not None,'oracle digest')
     for a in d['inputs']:
         for b in d['inputs']:
-            if {a['role'],b['role']}=={'train','test'} and a['sha256']==b['sha256']:
+            if a['role']=='train' and b['role'] in ['test','test-secondary'] and a['sha256']==b['sha256']:
                 require(max(a['start'],b['start'])>=min(a['start']+a['duration'],b['start']+b['duration']),'train/test overlap')
     return d['inputs']
 

@@ -1,0 +1,57 @@
+{
+  "status": "stopped_at_S0",
+  "experiment": "m1-ffmpeg-rpi4-thumb-01",
+  "workflow_exit_code": 2,
+  "driver_exit_code": 0,
+  "reason": "hardware cycles parser rejects colon-separated fields; hardware evidence itself is type 0/config 0",
+  "build_count": 0,
+  "build_start_resources": [],
+  "build_wait_seconds": 0,
+  "training_runs": 0,
+  "conversions": 0,
+  "comparisons": {},
+  "acceptance": {
+    "S0": "failed: parser defect",
+    "S1_S7": "not run",
+    "recovery_test": "not reached",
+    "injected_cleanup_test": "not reached",
+    "automatic_flag_policy": "synthetic tests passed",
+    "sintel": "prepared and board SHA verified",
+    "frozen_repository": "108 RPM SHA and BuildRequires passed"
+  },
+  "initial": {
+    "df": "Filesystem         1024-blocks      Used Available Capacity Mounted on\n/dev/mmcblk0p3         1335696    151692   1153924      12% /opt\n",
+    "governors": {
+      "/sys/devices/system/cpu/cpufreq/policy0": "schedutil"
+    },
+    "rpm_count": "1233",
+    "uid": "5001"
+  },
+  "final": {
+    "cleanup_pending": [],
+    "df": "Filesystem         1024-blocks      Used Available Capacity Mounted on\n/dev/mmcblk0p3         1335696    211084   1094532      17% /opt\n",
+    "errors": [],
+    "governors": {
+      "/sys/devices/system/cpu/cpufreq/policy0": "schedutil"
+    },
+    "retries": 0,
+    "rpm_count": "1233",
+    "uid": "5001"
+  },
+  "seconds": 73.49154734611511,
+  "resource_samples": 3,
+  "min_mem_available": 17094287360,
+  "scope_memory_peak": 25735168,
+  "tests": 105,
+  "test_scope_memory_peak": 26259456,
+  "resource_stop": false,
+  "board_state_restore_verified": true,
+  "retained_unverified_run": "/opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/cycles-check",
+  "retained_scripts": "/opt/afdo_agent/tools/workflow-m1-ffmpeg-rpi4-thumb-01",
+  "board_pending_data_note": "S0 failed before verified-pull. perf.data remains on board; not deleted. cleanup_pending=[] in raw journal describes registered state actions only, not full work-directory cleanup.",
+  "boundaries": [
+    "Initial pwd was not scope-wrapped.",
+    "Initial AGENTS filename search mistakenly started at ..; only directory/name metadata was traversed, no matching file content was read. Stopped only that search PID 560992. No outside file was written by it.",
+    "Existing sdb daemon state outside WORKDIR was not inspected; whether sdb updated it is unknown."
+  ]
+}

@@ -38,6 +38,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow M1第三阶段继续：S0 cycles解析缺陷停止（2026-11-16）
+
+- 用户本轮仅对m1-ffmpeg-rpi4-thumb-01取消GBS启动16GiB门槛；load/disk、60秒检查/60分钟超时及运行中6G/5G/200%保护不变。S0只记录主机资源。[报告第6节](workflow/m1/05_m1_board_e2e.md#6-本轮继续门禁澄清准备完成与-s0-解析缺陷停止)保留上一轮停止记录。
+- 自动标记失衡判据、live transport/阶段调度与流式oracle接线已提交，**105项单元测试通过；S1–S7未现场验收**。Sintel官方原片和指定Main/CAVLC片段已完成，1440帧，输入SHA b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843；三个输入板上SHA通过。冻结108RPM逐包SHA及新旧BuildRequires一致。
+- 单命令run在S0退出2：原始evlist是“cycles: type: 0 … config: 0”，新解析器误要求字段后无冒号而拒绝。**不是硬件cycles不可用证据；按门禁失败停止，没有修正后重跑。** 待补实际格式正反例并修复解析器；未构建、未训练/转换/读取profile、未生成任何新比较结果，恢复与计时中断注入测试未到达。
+- root已恢复uid5001、policy0=schedutil，RPM前后1233；只读重试0。原journal cleanup_pending=[]只代表已登记状态动作；S0探测目录 /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/cycles-check 未拉回，保留未删除，后续须先核对处理并补齐S0清理登记。
+- 正式命令及恢复墙钟73.492秒，无GBS启动资源/等待记录；最低采样MemAvailable 17,094,287,360B，driver/test scope峰值分别25,735,168/26,259,456B。早期下载/编码scope峰值未保存，未知；无OOM/资源停止。边界例外如实列于报告6.5。
+- [本轮证据与SHA](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-02/index.json)。已ALL-END，停止等待后续指令，不改hq/Gerrit/设计/旧证据。
+
 ## Workflow M1第三阶段：S0资源门禁停止（2026-11-16）
 
 - [自动化验收停止报告](workflow/m1/05_m1_board_e2e.md)：实验m1-ffmpeg-rpi4-thumb-01；RPi4已连接，型号/架构/内核/TZ_BUILD_ID与试跑一致。perf/libLLVM SHA、ldd、perf6.12.80及系统PATH依赖预检通过。

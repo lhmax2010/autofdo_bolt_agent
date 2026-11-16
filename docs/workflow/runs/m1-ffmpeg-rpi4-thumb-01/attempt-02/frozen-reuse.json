@@ -1,0 +1,58 @@
+{
+  "all_rpm_sha_verified": true,
+  "buildrequires_equal": true,
+  "manifest": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/build/repo-manifest.json",
+  "manifest_sha256": "159786fde18139a5e658dec74a6775c773282b34949e273259058458d4c68f8b",
+  "packages": 108,
+  "queries": [
+    {
+      "argv": [
+        "rpmspec",
+        "-q",
+        "--buildrequires",
+        "--target",
+        "armv7l",
+        "--define",
+        "profile_isa thumb",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/build/ffmpeg/packaging/ffmpeg.spec"
+      ],
+      "exit_code": 0,
+      "name": "pilot",
+      "output_sha256": "542aa76d383f9cc3310eb0ab1a4876787a0a1e82b3f69f837818d68d21a32787"
+    },
+    {
+      "argv": [
+        "rpmspec",
+        "-q",
+        "--buildrequires",
+        "--target",
+        "armv7l",
+        "--define",
+        "profile_isa thumb",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/ffmpeg/packaging/ffmpeg.spec"
+      ],
+      "exit_code": 0,
+      "name": "BASE",
+      "output_sha256": "542aa76d383f9cc3310eb0ab1a4876787a0a1e82b3f69f837818d68d21a32787"
+    },
+    {
+      "argv": [
+        "rpmspec",
+        "-q",
+        "--buildrequires",
+        "--target",
+        "armv7l",
+        "--define",
+        "profile_isa thumb",
+        "--define",
+        "with_autofdo 1",
+        "--define",
+        "afdo_diag 1",
+        "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/ffmpeg/packaging/ffmpeg.spec"
+      ],
+      "exit_code": 0,
+      "name": "AFDO",
+      "output_sha256": "542aa76d383f9cc3310eb0ab1a4876787a0a1e82b3f69f837818d68d21a32787"
+    }
+  ]
+}

@@ -61,3 +61,20 @@ nice -n 19 ionice -c3 ffprobe -v error -select_streams v:0 -show_entries stream=
 ```
 
 未使用 -count_frames 做完整解码计数；nb_frames 为 MP4 流元数据，帧率与 60 秒时长一致。完整工具输出和编码退出码在 temp/rpi4_pmu/，精简证据随探测报告提交。
+
+
+## Sintel secondary test input (PM decision 2026-11-17)
+
+- Source: https://download.blender.org/durian/movies/Sintel.2010.1080p.mkv
+- Attribution: Sintel, Blender Foundation / Durian Open Movie Project.
+- License: Creative Commons Attribution 3.0, https://durian.blender.org/sharing/.
+- Official download is a standalone MKV, not an archive; archive SHA is not applicable.
+- Original: 1,180,090,590 bytes; SHA-256 97f1dbc66231df42ad49bd8c29aa174b8f48933058e47e7157d4ba63d93a8efa.
+- Original stream: 1920×818 at 24 fps. The requested output scales to 1920×1080, preserving 24 fps.
+- Output: temp/media_src/sintel_1080p_h264_60s.mp4; 60,471,233 bytes; SHA-256 b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843.
+- FFmpeg 6.1.1-3ubuntu5; binary SHA-256 ed16af623947494a72e284b6eb8ff225f2da22b38b5d5069c2fd4b4ba3384e41.
+- Command: ffmpeg -nostdin -ss 300 -i temp/media_src/Sintel.2010.1080p.mkv -t 60 -an -vf scale=1920:1080 -c:v libx264 -preset veryfast -profile:v main -x264-params cabac=0 -pix_fmt yuv420p -b:v 8M -maxrate 8M -bufsize 16M -threads 2 -filter_threads 1 -movflags +faststart temp/media_src/sintel_1080p_h264_60s.mp4
+- Validation: ffprobe Main, 1920×1080, 24/1, 1440 decoded frames; every PPS in the complete trace_headers pass has entropy_coding_mode_flag=0 (CAVLC).
+- Host decode expectation: 4,478,976,000 I420 bytes, SHA-256 91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193. This is not a board oracle result: PLAT must generate and verify its own independent oracle before measurement.
+- Raw source, encode, probe, trace and licensing evidence: temp/m1-ffmpeg-rpi4-thumb-01/attempt-02/. Videos and large trace stay outside Git.
+- ToS remains the preselected primary comparison; Sintel is secondary. No multiple-comparison correction.

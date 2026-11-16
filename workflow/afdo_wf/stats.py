@@ -74,7 +74,8 @@ def paired(pairs,seed,epsilon=.01,repetitions=20000):
                 median_ratio_minus_one=st.median(b for a,b in pairs)/st.median(a for a,b in pairs)-1,
                 baseline_CV=st.stdev(a for a,b in pairs)/st.mean(a for a,b in pairs),verdict=verdict(ci,epsilon))
 
-def analyze(blocks,n,seed,epsilon=.01,clear_flag_imbalance=None,repetitions=20000):
+def analyze(blocks,n,seed,epsilon=.01,repetitions=20000):
+    positive(n,"N",True)
     require(len({b['id'] for b in blocks})==len(blocks),'duplicate block')
     require(all(type(b['id']) is int and 1<=b['id']<=n for b in blocks),'block outside plan')
     complete=[b for b in blocks if b.get('complete')];missing=n-len(complete)
@@ -85,10 +86,14 @@ def analyze(blocks,n,seed,epsilon=.01,clear_flag_imbalance=None,repetitions=2000
     caps=[]
     if missing:caps.append('incomplete')
     if (len(flagged)+missing)/n>.2:caps.append('more than 20% flagged/missing')
-    # Design says "differs clearly", without a numeric rule. Require an explicit
-    # assessment; never silently invent a threshold or assert no imbalance.
-    if clear_flag_imbalance is None:caps.append('flag-imbalance assessment unavailable')
-    elif clear_flag_imbalance:caps.append('flag imbalance')
+    # PM decision 2026-11-17: round-count difference, inclusive threshold.
+    counts={v:sum(b.get(v+'_flag','clean')!='clean' for b in complete)
+            for v in ['control','candidate']}
+    threshold=max(2,math.ceil(.1*n))
+    out['flag_imbalance']=dict(counts=counts,threshold=threshold,
+        difference=abs(counts['control']-counts['candidate']),
+        decision='PM decision 2026-11-17')
+    if out['flag_imbalance']['difference']>=threshold:caps.append('flag imbalance')
     if caps:out['primary'].update(verdict='inconclusive',cap_reasons=caps)
     return out
 

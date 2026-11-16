@@ -18,7 +18,7 @@ def resources(workdir):
     return dict(time=time.time(),mem_available=int(re.search(r'MemAvailable:\s+(\d+)',mem)[1])*1024,
                 load1=os.getloadavg()[0],nproc=len(os.sched_getaffinity(0)),disk_free=shutil.disk_usage(workdir).free,meminfo=mem)
 
-def can_start(r):return r['mem_available']>=16*GIB and r['load1']<.6*r['nproc'] and r['disk_free']>=50*GIB
+def can_start(r,experiment=None):return (experiment=='m1-ffmpeg-rpi4-thumb-01' or r['mem_available']>=16*GIB) and r['load1']<.6*r['nproc'] and r['disk_free']>=50*GIB
 
 def stop_needed(r,previous_low):
     low=previous_low+1 if r['mem_available']<6*GIB else 0
@@ -37,7 +37,7 @@ def command(config,source,root,unit,macros,repo=None,buildconf=None,verbose=Fals
     if verbose:argv+=['--define','__make /usr/bin/make V=1']
     return argv
 
-def execute(argv,source,workdir,out,env=None,wait_seconds=172800):
+def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None):
     """No automatic retry. Stop only the unique scope created by this call."""
     workdir=Path(workdir).resolve();out=Path(out).resolve()
     require(out.is_relative_to(workdir),'output outside workdir')
@@ -45,6 +45,8 @@ def execute(argv,source,workdir,out,env=None,wait_seconds=172800):
     lock=(workdir/'temp/workflow-build.lock').open('a')
     try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     except BlockingIOError:raise GateError('another workflow build active','environment')
+    if experiment is not None:require(experiment=='m1-ffmpeg-rpi4-thumb-01','unknown temporary authorization')
+    if experiment:wait_seconds=3600
     events=[];start=time.monotonic();unit='afdo-wf-'+uuid.uuid4().hex+'.scope';p=None;peak=0
     result=dict(status='failed',exit_code=None,unit=unit)
     old={}
@@ -62,9 +64,11 @@ def execute(argv,source,workdir,out,env=None,wait_seconds=172800):
             peak=max(peak,int(r.get('memory.peak',0)))
         events.append(r);save(out/'resources.json',events);return r
     try:
-        while not can_start(sample()):
+        while not can_start(sample(),experiment):
             require(time.monotonic()-start<wait_seconds,'build start gate timeout','environment')
-            time.sleep(min(600,max(1,wait_seconds-(time.monotonic()-start))))
+            time.sleep(min(60 if experiment else 600,max(1,wait_seconds-(time.monotonic()-start))))
+        result.update(start_resources=events[-1],wait_seconds=time.monotonic()-start,
+                      startup_memory_waiver=experiment,authorization='user current round only' if experiment else None)
         launch=['systemd-run','--user','--scope','--unit='+unit,'-p','MemoryMax=6G','-p','MemoryHigh=5G','-p','CPUQuota=200%','nice','-n','19','ionice','-c3',sys.executable,str(Path(__file__).with_name('build_child.py')),str(out/'child-result.json'),*argv]
         save(out/'command.json',dict(argv=launch,cwd=str(source)))
         tick=time.monotonic();low=0

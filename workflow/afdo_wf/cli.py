@@ -62,10 +62,25 @@ def host_stage(stage,package,job,out):
 def main(argv=None):
     p=argparse.ArgumentParser(description='AutoFDO workflow phases 1/2; board stages require --dry-run')
     p.add_argument('stage',choices=[*DAG,'run'])
-    p.add_argument('--package',required=True);p.add_argument('--inputs');p.add_argument('--job',required=True)
-    p.add_argument('--output',required=True);p.add_argument('--receipts',required=True)
+    p.add_argument('--package');p.add_argument('--inputs');p.add_argument('--job',required=True)
+    p.add_argument('--output');p.add_argument('--receipts')
     p.add_argument('--dry-run',action='store_true');p.add_argument('--redo',action='store_true')
-    args=p.parse_args(argv);store=Store(args.receipts)
+    args=p.parse_args(argv)
+    job=json_load(args.job)
+    if job.get('live') and not args.dry_run:
+        from .live import Experiment
+        try:
+            require(args.stage=='run','live experiment starts through run')
+            Experiment(job,args.job).run()
+            return 0
+        except BaseException as e:
+            save(Path(job['output'])/('failure-'+str(__import__('time').time_ns())+'.json'),dict(error=repr(e),reason=getattr(e,'reason','error')))
+            print(str(e),file=sys.stderr);return getattr(e,'code',1)
+    args.package=args.package or job.get('package')
+    args.output=args.output or job.get('output')
+    args.receipts=args.receipts or job.get('receipts')
+    require(args.package and args.output and args.receipts,'package/output/receipts required')
+    store=Store(args.receipts)
     try:
         package=config.load(args.package)
         if args.inputs:config.load_inputs(args.inputs)

@@ -1,0 +1,24 @@
+{
+  "method": "FFmpeg trace_headers: every PPS entropy_coding_mode_flag is 0",
+  "pps": 1,
+  "examples": [
+    "[trace_headers @ 0x61ab28ada740] 10          entropy_coding_mode_flag                                    0 = 0"
+  ],
+  "argv": [
+    "ffmpeg",
+    "-nostdin",
+    "-v",
+    "verbose",
+    "-i",
+    "temp/media_src/sintel_1080p_h264_60s.mp4",
+    "-map",
+    "0:v:0",
+    "-c",
+    "copy",
+    "-bsf:v",
+    "trace_headers",
+    "-f",
+    "null",
+    "-"
+  ]
+}

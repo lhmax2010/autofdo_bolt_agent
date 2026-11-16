@@ -54,8 +54,8 @@ class ConfigTests(Fixture):
         with self.assertRaises(GateError):config.load_inputs(self.file('inputs.toml',t))
     def test_nonoverlapping_segments(self):
         t=(ROOT/'workflow/packages/ffmpeg/inputs.toml').read_text();inp=config.load_inputs(ROOT/'workflow/packages/ffmpeg/inputs.toml')
-        t=t.replace(inp[1]['sha256'],inp[0]['sha256']);pos=t.rfind('start = 0');t=t[:pos]+t[pos:].replace('start = 0','start = 60',1)
-        self.assertEqual(len(config.load_inputs(self.file('inputs.toml',t))),2)
+        t=t.replace(inp[1]['sha256'],inp[0]['sha256']);pos=t.index('start = 0',t.index('[[inputs]]',t.index('[[inputs]]')+1));t=t[:pos]+t[pos:].replace('start = 0','start = 60',1)
+        self.assertEqual(len(config.load_inputs(self.file('inputs.toml',t))),len(inp))
     def test_nonfinite_hook(self):
         with self.assertRaises(GateError):config.hook_result(self.file('x.json','{"metric_value":NaN}'))
     def test_hook_nonjson(self):
@@ -198,13 +198,13 @@ class StatsTests(Fixture):
     def test_t_quantile(self):self.assertAlmostEqual(stats.t975(14),2.144786688,places=7)
     def test_missing_caps(self):
         b=[dict(id=1,complete=True,control=10,candidate=8),dict(id=2,complete=True,control=10,candidate=8)]
-        self.assertEqual(stats.analyze(b,3,1,clear_flag_imbalance=False,repetitions=100)['primary']['verdict'],'inconclusive')
+        self.assertEqual(stats.analyze(b,3,1,repetitions=100)['primary']['verdict'],'inconclusive')
     def test_flag_cap(self):
         b=[dict(id=i,complete=True,control=10,candidate=8,control_flag='telemetry_missing') for i in range(1,6)]
-        self.assertEqual(stats.analyze(b,5,1,clear_flag_imbalance=False,repetitions=100)['primary']['verdict'],'inconclusive')
+        self.assertEqual(stats.analyze(b,5,1,repetitions=100)['primary']['verdict'],'inconclusive')
     def test_unknown_imbalance_not_assumed(self):
         b=[dict(id=i,complete=True,control=10,candidate=8) for i in range(1,4)]
-        self.assertIn('flag-imbalance assessment unavailable',stats.analyze(b,3,1,repetitions=100)['primary']['cap_reasons'])
+        self.assertEqual(stats.analyze(b,3,1,repetitions=100)['flag_imbalance']['difference'],0)
     def test_budget(self):self.assertEqual(stats.budget([10]*10),10)
     def test_telemetry_priority(self):
         cap=dict(frequency=['f'],temperature=['t'],voltage=['v'])
