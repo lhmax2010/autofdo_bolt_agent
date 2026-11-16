@@ -38,6 +38,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 协同评审文件入库（2026-11-16）
+
+两份新增文件原样提交，提交前后核对SHA一致。本轮只记录评审方结论，不裁决两份意见的分歧，不修改评审原稿、设计或实现；不操作Gerrit、不改hq。
+
+| 评审方 | 文件 | 原文结论摘要 | SHA-256 |
+|---|---|---|---|
+| Codex | [review_Codex.md](reviews/gerrit/361624/review_Codex.md) | **需要修改**；严重问题2项：建议补丁无条件指定X86/AArch64会使aarch64构建失败；独立tools包的Release被误用为libllvm提供包Release。另要求修正弱依赖保证、analyzer解释器/资源归属及perf兼容性等表述。 | `1ea46191cc12b94ba982890bd1466f2770ccfa025e2555becaa3a4eb33eee50e` |
+| Claude Code | [review_claude_code.md](reviews/gerrit/361624/review_claude_code.md) | **需要修改（3项）**；R1独立包版本固定写法、R2按架构设置BOLT目标与检查、R3Python依赖的事实前提及方案。具体建议与Codex存在分歧，保留原文交用户/PM裁决。 | `10ddc90402b5b517ebc2fd245baf87145217b82cad190f1a599ab0f502048aa8` |
+
 ## Gerrit 361624 评审第2版入库（2026-11-16）
 
 - **评审第 2 版：按 facts_check.md 修正四项**。[评审文件](reviews/gerrit/361624/autofdo-bolt-agent-review.md)原样mv覆盖入库，旧版保留在git历史；移动前后与指定llvm-optimize副本的SHA-256均为 `bec98591b08534dc0521ef585ab1dac64fbfe2bcdd238ef372d09a583bc159b9`，Downloads不留副本。
