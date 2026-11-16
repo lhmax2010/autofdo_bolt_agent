@@ -1,0 +1,154 @@
+Name:       llvm-tools-subpkgs
+Summary:    Debugging/analysis tool subpackages for the Tizen LLVM toolchain
+Version:    22.1.8
+Release:    1
+License:    NCSA
+Group:      Development/Tools
+Source0:    llvm-22.1.8.tar.gz
+
+
+ExclusiveArch: x86_64 aarch64
+BuildRequires: cmake
+BuildRequires: ninja
+BuildRequires: llvm = 22.1.8
+BuildRequires: llvm-devel = 22.1.8
+
+
+
+BuildRequires: llvm-static-devel = 22.1.8
+
+
+BuildRequires: libomp = 22.1.8
+
+
+BuildRequires: zlib-devel
+BuildRequires: libxml2-devel
+BuildRequires: clang
+BuildRequires: libllvm = 22.1.8
+BuildRequires: compiler-rt
+
+
+
+
+
+
+
+
+%description
+Standalone subpackages for LLVM debugging and analysis tools:
+ - bolt: BOLT post-link binary optimizer, built standalone against the
+   installed LLVM toolchain (no full LLVM rebuild required)
+
+The tools below (scan-build, llvm-xray, llvm-cov, llvm-profgen, llvm-profdata,
+and the analyzer libexec scripts) now ship from the llvm and clang packages,
+because llvm-devel's exports and the clang-analyzer files need them there.
+Changes to this spec only require
+rebuilding this package (minutes), not the multi-hour LLVM build.
+
+%package -n bolt
+Summary: BOLT post-link binary optimizer
+License: NCSA
+
+
+
+Requires: libllvm = 22.1.8
+
+%description -n bolt
+BOLT is a post-link binary optimizer that reorders code in the final
+binary or DSO based on runtime profile data (perf LBR/PT samples, or
+sampled instruction addresses without branch records via perf2bolt -ba)
+to improve instruction cache and TLB utilization.
+
+%prep
+%setup -q -n llvm-22.1.8
+
+# MANDATORY under gbs: gbs builds with _build_create_debug 1, so Tizen's
+# patched rpmbuild injects the debuginfo/debugsource package sections
+# itself; the standard debug_package macro would add them a second time
+# and fail with "package already exists". NOTE: keep percent signs out of
+# this comment -- rpmbuild expands macros even in comment lines.
+# Debuginfo IS still generated (find-debuginfo.sh runs from
+# __debug_install_post): the llvm-tools-subpkgs debuginfo and debugsource
+# packages are produced. The -Wl,--build-id=sha1 linker flags above make the bolt
+# binaries debug-correlatable.
+
+%build
+# ---- A. BOLT built standalone against the installed toolchain ----
+# Standalone detection: CMAKE_SOURCE_DIR == bolt source dir
+# => BOLT_BUILT_STANDALONE=TRUE, find_package(LLVM) finds the installed
+# LLVM CMake package under the architecture libdir.
+# LLVM_LINK_LLVM_DYLIB=ON is mandatory: BOLT must link libLLVM.so (libllvm);
+# llvm-static-devel is installed only because the exported targets are
+# validated at configure time.
+#
+# All LLVM provider packages must come from one LLVM build.
+test "$(llvm-config --version)" = "22.1.8" || exit 1
+llvm_evr=""
+for p in llvm llvm-devel llvm-static-devel libllvm libomp; do
+    e=$(rpm -q --qf '%{VERSION}-%{RELEASE}' "$p") || exit 1
+    if [ -n "$llvm_evr" ] && [ "$e" != "$llvm_evr" ]; then
+        echo "LLVM provider mismatch: $p $e, expected $llvm_evr"
+        exit 1
+    fi
+    llvm_evr=$e
+done
+echo "BOLT is built against LLVM provider $llvm_evr"
+mkdir -p bolt-build
+cd bolt-build
+cmake \
+    -G Ninja \
+    -S ../bolt \
+    -B . \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DLLVM_LIBDIR_SUFFIX=`echo lib | sed s/lib//g` \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_LINK_LLVM_DYLIB=ON \
+    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--build-id=sha1" \
+    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--build-id=sha1" \
+    -DBOLT_INCLUDE_TESTS=OFF \
+    -DBOLT_TARGETS_TO_BUILD="AArch64" \
+    -DLLVM_INCLUDE_TESTS=OFF
+# bolt: driver + tools; bolt_rt: runtime archives (ExternalProject) for the
+# build architecture.
+ninja bolt bolt_rt
+# Target registration check, kept in the build section so it also runs
+# when the check section is skipped. It does not test a rewrite.
+LC_ALL=C ./bin/llvm-bolt --version > bolt-version.txt 2>&1 || { cat bolt-version.txt; exit 1; }
+cat bolt-version.txt
+grep -Eq '^[[:space:]]*aarch64[[:space:]]+-' bolt-version.txt
+
+%install
+# ---- A. bolt: install from the standalone build tree ----
+cd bolt-build
+DESTDIR=/home/linhao/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.i386 ninja install
+# The internal bolt static libs are build artifacts, not shipped content.
+rm -f /home/linhao/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.i386/usr/lib/libLLVMBOLT*.a
+# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead.
+rm -f /home/linhao/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.i386/usr/lib64/libLLVMBOLT*.a
+# perf2bolt and llvm-boltdiff are aliases of llvm-bolt: upstream installs them
+# as symlinks (bolt/tools/driver/CMakeLists.txt), and llvm-bolt selects its
+# mode from the name it is invoked as. Separate copies also collided on
+# build-id in the debuginfo step.
+ln -sf llvm-bolt /home/linhao/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.i386/usr/bin/perf2bolt
+ln -sf llvm-bolt /home/linhao/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.i386/usr/bin/llvm-boltdiff
+# llvm-bat-dump and merge-fdata use add_bolt_executable which carries no
+# install rule; stage them manually from the build tree.
+install -p -m 0755 bin/llvm-bat-dump /home/linhao/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.i386/usr/bin/
+install -p -m 0755 bin/merge-fdata   /home/linhao/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.i386/usr/bin/
+cd ..
+
+%files -n bolt
+%defattr(-,root,root,-)
+/usr/bin/llvm-bolt
+/usr/bin/perf2bolt
+/usr/bin/llvm-boltdiff
+/usr/bin/llvm-bolt-heatmap
+/usr/bin/llvm-bolt-binary-analysis
+/usr/bin/llvm-bat-dump
+/usr/bin/merge-fdata
+/usr/lib/libbolt_rt_instr.a
+/usr/lib/libbolt_rt_hugify.a
+

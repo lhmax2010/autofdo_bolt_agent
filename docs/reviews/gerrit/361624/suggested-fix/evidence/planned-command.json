@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "gbs",
+    "-c",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/gbs.conf",
+    "build",
+    "-A",
+    "x86_64",
+    "--spec",
+    "llvm-tools-subpkgs.spec",
+    "--include-all",
+    "--buildroot",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64",
+    "--threads",
+    "1",
+    "--define",
+    "_smp_mflags -j2",
+    "--define",
+    "__spec_build_pre %{___build_pre} ninja() { command /usr/bin/ninja -j2 \"$@\"; }; export CMAKE_BUILD_PARALLEL_LEVEL=2",
+    "--define",
+    "__spec_install_pre %{___build_pre} ninja() { command /usr/bin/ninja -j2 \"$@\"; }; export CMAKE_BUILD_PARALLEL_LEVEL=2"
+  ],
+  "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/source",
+  "environment": {
+    "HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/home",
+    "TMPDIR": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/tmp",
+    "XDG_CACHE_HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/cache",
+    "XDG_CONFIG_HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/config",
+    "XDG_STATE_HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/state",
+    "CCACHE_DIR": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/cache/ccache",
+    "CMAKE_BUILD_PARALLEL_LEVEL": "2"
+  }
+}

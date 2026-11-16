@@ -1,0 +1,22 @@
+
+/home/abuild/verify-361624/aarch64.bolt:	file format elf64-littleaarch64
+
+Disassembly of section .bolt.org.text:
+
+000000000021017c <.bolt.org.text>:
+  21017c: 94000003     	bl	0x210188 <.bolt.org.text+0xc>
+  210180: d2800ba8     	mov	x8, #0x5d               // =93
+  210184: d4000001     	svc	#0
+  210188: d28000e0     	mov	x0, #0x7                // =7
+  21018c: d65f03c0     	ret
+
+Disassembly of section .text:
+
+0000000000600000 <_start>:
+  600000: 94000003     	bl	0x60000c <answer>
+  600004: d2800ba8     	mov	x8, #0x5d               // =93
+  600008: d4000001     	svc	#0
+
+000000000060000c <answer>:
+  60000c: d28000e0     	mov	x0, #0x7                // =7
+  600010: d65f03c0     	ret

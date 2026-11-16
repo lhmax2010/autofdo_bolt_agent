@@ -1,0 +1,98 @@
+{
+  "llvm-tools-subpkgs.spec-x86_64-after": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "ExclusiveArch: x86_64 aarch64",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib64 | sed s/lib//g` \\",
+      "    -DBOLT_TARGETS_TO_BUILD=\"X86;AArch64\" \\",
+      "# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead."
+    ]
+  },
+  "llvm-tools-subpkgs.spec-aarch64-after": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "ExclusiveArch: x86_64 aarch64",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib64 | sed s/lib//g` \\",
+      "    -DBOLT_TARGETS_TO_BUILD=\"AArch64\" \\",
+      "# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead."
+    ]
+  },
+  "llvm-tools-subpkgs.spec-armv7l-after": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "ExclusiveArch: x86_64 aarch64",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib | sed s/lib//g` \\",
+      "    -DBOLT_TARGETS_TO_BUILD=\"AArch64\" \\",
+      "# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead."
+    ]
+  },
+  "llvm-tools-subpkgs.spec-i586-after": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "ExclusiveArch: x86_64 aarch64",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib | sed s/lib//g` \\",
+      "    -DBOLT_TARGETS_TO_BUILD=\"AArch64\" \\",
+      "# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead."
+    ]
+  },
+  "llvm.spec-x86_64-before": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "    -DLLVM_TARGETS_TO_BUILD='X86;ARM;AArch64;BPF' \\",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib64 | sed s/lib//g` \\"
+    ]
+  },
+  "llvm.spec-x86_64-after": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "    -DLLVM_TARGETS_TO_BUILD='X86;ARM;AArch64;BPF' \\",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib64 | sed s/lib//g` \\"
+    ]
+  },
+  "llvm.spec-armv7l-before": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "    -DLLVM_TARGETS_TO_BUILD='ARM;AArch64;X86;BPF' \\",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib | sed s/lib//g` \\"
+    ]
+  },
+  "llvm.spec-armv7l-after": {
+    "exit": {
+      "expanded": 0,
+      "packages": 0,
+      "buildrequires": 0
+    },
+    "selected_lines": [
+      "    -DLLVM_TARGETS_TO_BUILD='ARM;BPF' \\",
+      "    -DLLVM_LIBDIR_SUFFIX=`echo lib | sed s/lib//g` \\"
+    ]
+  }
+}

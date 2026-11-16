@@ -1,0 +1,592 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Name:      llvm
+Summary:   The LLVM Project is a collection of modular and reusable compiler and toolchain technologies
+Version:   22.1.8
+Release:   1
+Group:     Development/Toolchain
+License:   NCSA
+Source0:   llvm-22.1.8.tar.gz
+Source1001: llvm.manifest
+
+
+
+
+Source1002: mlgo_arm_model.tar.gz
+Source1003: mlgo_aarch_model.tar.gz
+Source1004: mlgo_x86_model.tar.gz
+Source1005: llvm-static-archives-native.py
+
+
+BuildRequires: util-linux
+
+
+
+
+
+BuildRequires: cmake
+BuildRequires: python3
+BuildRequires: python3-devel
+BuildRequires: patchelf
+BuildRequires: binutils-devel
+BuildRequires: libxml2-devel
+
+
+
+BuildRequires: ninja
+
+
+
+
+
+
+
+
+
+Requires: libllvm = 22.1.8-1
+
+
+
+Requires: python3
+
+
+Obsoletes: clang-analyzer <= 22.1.8-1
+Obsoletes: llvm-xray <= 22.1.8-1
+Obsoletes: llvm-prof-tools <= 22.1.8-1
+
+%description
+LLVM is a compiler infrastructure designed for compile-time, link-time, runtime,
+and idle-time optimization of programs from arbitrary programming languages.
+LLVM is written in C++ and has been developed since 2000 at the University of
+Illinois and Apple. It currently supports compilation of C and C++ programs,
+using front-ends derived from GCC 4.0.1. A new front-end for the C family of
+languages is in development. The compiler infrastructure
+includes mirror sets of programming tools as well as libraries with equivalent
+functionality.
+
+
+
+
+
+
+%package debuginfo
+Summary: Debug information for package llvm
+Group: Development/Debug
+AutoReq: 0
+AutoProv: 1
+%description debuginfo
+This package provides debug information for package llvm.
+Debug information is useful when developing applications that use this
+package or when debugging this package.
+%files debuginfo -f debugfiles.list
+
+
+%package debugsource
+Summary: Debug sources for package llvm
+Group: Development/Debug
+AutoReqProv: 0
+%description debugsource
+This package provides debug sources for package llvm.
+Debug sources are useful when developing applications that use this
+package or when debugging this package.
+%files debugsource -f debugsourcefiles.list
+%defattr(-,root,root)
+%manifest llvm-debugsource.manifest 
+
+%package devel
+Summary: Libraries and Header Files for LLVM 22.1.8
+Requires: llvm = 22.1.8
+
+%description devel
+This package contains library and header files needed to develop
+new native programs that use the LLVM infrastructure.
+
+%package static-devel
+Summary: Static libraries for LLVM
+Requires: llvm = 22.1.8
+
+%description static-devel
+This package contains static libraries needed to develop new
+native programs that use the LLVM infrastructure.
+
+%package -n libllvm
+Summary: LLVM shared libraries
+
+%description -n libllvm
+Shared libraries for the LLVM compiler infrastructure.
+
+%package -n clang
+Summary: Clang 22.1.8 (C Language family frontend for LLVM)
+License: NCSA
+Requires: llvm = 22.1.8-1
+Provides: libclang.so.22.1.8
+
+%description -n clang
+A new front-end for the C family of languages is in development.
+
+%package -n clang-devel
+Summary: Clang 22.1.8 Development Library
+Requires: clang = 22.1.8-1
+
+%description -n clang-devel
+This package contains the clang (C language) frontend for LLVM.
+(development files)
+
+%package -n lldb
+Summary: LLDB
+License: NCSA
+
+%description -n lldb
+LLDB is a next generation, high-performance debugger. It is built as a set
+of reusable components which highly leverage existing libraries in the
+larger LLVM Project, such as the Clang expression parser and LLVM
+disassembler.
+
+%package -n lldb-devel
+Summary: Development header files for LLDB
+Requires: lldb = 22.1.8-1
+
+%description -n lldb-devel
+The package contains header files for the LLDB debugger.
+
+%package -n compiler-rt
+Summary: Compiler runtime libraries
+
+%description -n compiler-rt
+Compiler runtime libraries
+
+%package -n libomp
+Summary:    OpenMP runtime
+
+%description -n libomp
+OpenMP runtime.
+
+%package -n libomp-devel
+Summary:    Development files for the OpenMP runtime
+
+%description -n libomp-devel
+Development files for the OpenMP runtime.
+
+%package -n python-clang
+Summary: Python bindings to parts of the Clang library
+
+%description -n python-clang
+Python bindings to parts of the Clang library
+
+%prep
+%setup -q
+mkdir -p mlgo_verify_assets
+tar -C mlgo_verify_assets -xzf /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/SOURCES/mlgo_x86_model.tar.gz
+
+%build
+export AR=llvm-ar RANLIB=llvm-ranlib;
+export CC=x86_64-tizen-linux-gnu-clang CXX=x86_64-tizen-linux-gnu-clang++;
+export MAKEFLAGS+=" -k";
+
+
+cp /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/SOURCES/llvm.manifest .
+
+
+
+# Strip pre-existing optimization flags and remove performance-harming flags, then force -O3 + ThinLTO
+OPTFLAGS_CFLAGS=$(echo "$CFLAGS" | sed \
+    -e 's/\-O[0-9sz]//g' \
+    -e 's/\-Ofast//g' \
+    -e 's/\-fstack-protector-strong//g' \
+    -e 's/\-fstack-protector-all//g' \
+    -e 's/\-fstack-protector//g' \
+    -e 's/\-fno-inline-functions//g' \
+    -e 's/\-fno-omit-frame-pointer//g' \
+    -e 's/\-momit-leaf-frame-pointer//g')
+OPTFLAGS_CXXFLAGS=$(echo "$CXXFLAGS" | sed \
+    -e 's/\-O[0-9sz]//g' \
+    -e 's/\-Ofast//g' \
+    -e 's/\-fstack-protector-strong//g' \
+    -e 's/\-fstack-protector-all//g' \
+    -e 's/\-fstack-protector//g' \
+    -e 's/\-fno-inline-functions//g' \
+    -e 's/\-fno-omit-frame-pointer//g' \
+    -e 's/\-momit-leaf-frame-pointer//g')
+export CFLAGS="$OPTFLAGS_CFLAGS -O3 -flto=thin -fomit-frame-pointer -Wno-unused-command-line-argument"
+export CXXFLAGS="$OPTFLAGS_CXXFLAGS -O3 -flto=thin -fomit-frame-pointer -Wno-unused-command-line-argument"
+
+# Set up MLGO AOT model paths from bundled verify assets
+# Ensure verify assets exist even when %prep is skipped (incremental builds)
+if [ ! -d mlgo_verify_assets ]; then
+    mkdir -p mlgo_verify_assets
+    tar -C mlgo_verify_assets -xzf /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/SOURCES/mlgo_x86_model.tar.gz
+fi
+MLGO_AOT_DIR="$PWD/mlgo_verify_assets"
+MLGO_BUILD_DIR="$PWD/build"
+MLGO_RUNTIME_OBJECTS="${MLGO_AOT_DIR}/xla_runtime_objects/xla_compiled_cpu_function.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/cpu_function_runtime.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/custom_call_status.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/executable_run_options.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/runtime_single_threaded_matmul_f32.cc.o"
+MLGO_REQUIRED_RUNTIME_OBJECTS="xla_compiled_cpu_function.cc.o cpu_function_runtime.cc.o custom_call_status.cc.o executable_run_options.cc.o runtime_single_threaded_matmul_f32.cc.o"
+
+mkdir -p build
+cd build
+cmake \
+    -G Ninja \
+    -DTIZEN=1 \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DLLVM_HOST_TRIPLE=x86_64-tizen-linux-gnu \
+    -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-tizen-linux-gnu \
+    -DLLVM_TARGET_TRIPLE_ENV=x86_64-tizen-linux-gnu \
+    -DCMAKE_ASM_FLAGS="$CFLAGS" \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+    -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld -flto=thin -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,--build-id=sha1" \
+    -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -flto=thin -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,--build-id=sha1" \
+    -DLLVM_USE_LINKER=lld \
+    -DLLVM_ENABLE_LTO=Thin \
+    -DCMAKE_RANLIB=/usr/bin/llvm-ranlib \
+    -DCMAKE_AR=/usr/bin/llvm-ar \
+    -DLLVM_ENABLE_ASSERTIONS=No \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_TARGETS_TO_BUILD='X86;ARM;AArch64;BPF' \
+    -DCLANG_ENABLE_ARCMT=OFF \
+    -DLLVM_BUILD_LLVM_DYLIB=ON \
+    -DCLANG_BUILD_CLANG_DYLIB=ON \
+    -DLLVM_LINK_LLVM_DYLIB=OFF \
+    -DCLANG_LINK_CLANG_DYLIB=OFF \
+    -DLLVM_ENABLE_PROJECTS="clang;lldb;clang-tools-extra;lld;compiler-rt;openmp" \
+    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
+    -DLLVM_BUILD_EXAMPLES=OFF \
+    -DLLVM_INCLUDE_EXAMPLES=OFF \
+    -DLLVM_BUILD_TESTS=OFF \
+    -DLLVM_INCLUDE_TESTS=OFF \
+    -DLLVM_ENABLE_DOXYGEN=OFF \
+    -DLLVM_BUILD_DOCS=OFF \
+    -DLLVM_INCLUDE_DOCS=OFF \
+    -DLLVM_OPTIMIZED_TABLEGEN=ON \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DLLVM_LIBDIR_SUFFIX=`echo lib64 | sed s/lib//g` \
+    -DCLANG_RESOURCE_DIR="../lib64/clang/22" \
+    -DLLVM_BINUTILS_INCDIR=/usr/include \
+    -DLLVM_PARALLEL_COMPILE_JOBS=6 \
+    -DLLVM_PARALLEL_LINK_JOBS=2 \
+    -DTENSORFLOW_AOT_PATH="${MLGO_AOT_DIR}/mlgo_sysroot" \
+    -DLLVM_MLGO_EXPORT_TF_XLA_RUNTIME=OFF \
+    -DLLVM_MLGO_EMBED_TF_XLA_RUNTIME_OBJECTS="${MLGO_RUNTIME_OBJECTS}" \
+    -DLLVM_OVERRIDE_MODEL_HEADER_INLINERSIZEMODEL="${MLGO_AOT_DIR}/InlinerSizeModel.h" \
+    -DLLVM_OVERRIDE_MODEL_OBJECT_INLINERSIZEMODEL="${MLGO_AOT_DIR}/InlinerSizeModel.o" \
+    -DLLVM_OVERRIDE_MODEL_HEADER_REGALLOCEVICTMODEL="${MLGO_AOT_DIR}/RegAllocEvictModel.h" \
+    -DLLVM_OVERRIDE_MODEL_OBJECT_REGALLOCEVICTMODEL="${MLGO_AOT_DIR}/RegAllocEvictModel.o" \
+    ../llvm
+
+
+# Full build using ninja (already in build/ directory after cd build)
+ninja -j 6
+
+
+%install
+export AR=llvm-ar RANLIB=llvm-ranlib;
+export CC=x86_64-tizen-linux-gnu-clang CXX=x86_64-tizen-linux-gnu-clang++;
+
+cd build
+# DESTDIR, not a prefix under buildroot: the openmp install script creates its
+# libgomp/libiomp5 symlinks under $DESTDIR/usr/lib, which is the build
+# environment's /usr/lib when DESTDIR is unset.
+DESTDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64 cmake -DCMAKE_INSTALL_PREFIX=/usr -P cmake_install.cmake
+# Do not ship the GCC-compatible libgomp/libiomp5 links: gcc's libgomp package
+# provides libgomp.so and libgomp.so.1 on the target.
+rm -f /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib64/libgomp.so /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib64/libgomp.so.1 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib64/libiomp5.so
+ln -sf /usr/bin/clang++ /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/clang++-22
+
+ln -sf clang /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/x86_64-tizen-linux-gnu-clang
+ln -sf clang++ /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/x86_64-tizen-linux-gnu-clang++
+# Use host triple and resource dir by default via <lang>.cfg
+cat >> /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64//usr/bin/clang.cfg << EOF
+-target x86_64-tizen-linux-gnu
+-resource-dir /usr/lib64/clang/22
+EOF
+ln -sf clang.cfg /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64//usr/bin/clang++.cfg
+
+# copy lldb for sdk
+mkdir -p /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/home/owner/share/tmp/sdk_tools/lldb/bin
+mkdir -p /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/home/owner/share/tmp/sdk_tools/lldb/lib64
+
+mv /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/lldb /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/home/owner/share/tmp/sdk_tools/lldb/bin
+mv /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/lldb-argdumper /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/home/owner/share/tmp/sdk_tools/lldb/bin
+mv /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/lldb-server /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/home/owner/share/tmp/sdk_tools/lldb/bin
+
+ln -sf /home/owner/share/tmp/sdk_tools/lldb/bin/lldb /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/bin/
+
+cp -P /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib64/liblldb.so* /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/home/owner/share/tmp/sdk_tools/lldb/lib64/
+
+# Install the clang python bits
+mkdir -p /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64%{python3_sitelib}
+cp -a ../clang/bindings/python/clang /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64%{python3_sitelib}/
+
+rm -rf /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib64/debug/*
+rm -rf /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/libear/*
+rm -rf /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64/usr/lib/libscanbuild/*
+
+# Run after compilation has finished; these workers do not overlap build jobs.
+# Preserve the standard RPM post-processing, including archive strip -g.
+rm -rf "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/native-archive-conversion"
+python3 /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/SOURCES/llvm-static-archives-native.py --root "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-22.1.8-1.x86_64" \
+    --build "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build" \
+    --evidence "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/native-archive-conversion" \
+    --arch x86_64 \
+    --compiler "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/clang-22" \
+    --disassembler "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-dis" \
+    --nm "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILD/llvm-22.1.8/build/bin/llvm-nm" \
+    --jobs 4 --address-space-bytes 4294967296 || exit 1
+
+%post -n clang -p /sbin/ldconfig
+%postun -n clang -p /sbin/ldconfig
+
+%post -n lldb
+echo "plugin load /usr/share/dotnet.tizen/netcoreapp/SOS/libsosplugin.so" > /root/.lldbinit
+
+%files
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/bin/analyze-build
+/usr/bin/intercept-build
+/usr/bin/bugpoint
+/usr/bin/clang-linker-wrapper
+/usr/bin/clang-offload-packager
+/usr/bin/clang-repl
+/usr/bin/llc
+/usr/bin/lld
+/usr/bin/ld.lld
+/usr/bin/ld64.lld
+/usr/bin/lld-link
+/usr/bin/wasm-ld
+/usr/bin/lli
+/usr/bin/llvm-ar
+/usr/bin/llvm-as
+/usr/bin/llvm-bcanalyzer
+/usr/bin/llvm-bitcode-strip
+/usr/bin/llvm-c-test
+/usr/bin/llvm-cat
+/usr/bin/llvm-cgdata
+/usr/bin/llvm-ctxprof-util
+/usr/bin/llvm-config
+/usr/bin/llvm-cov
+/usr/bin/llvm-cvtres
+/usr/bin/llvm-cxxdump
+/usr/bin/llvm-cxxfilt
+/usr/bin/llvm-debuginfo-analyzer
+/usr/bin/llvm-debuginfod
+/usr/bin/llvm-debuginfod-find
+/usr/bin/llvm-diff
+/usr/bin/llvm-dis
+/usr/bin/llvm-dlltool
+/usr/bin/llvm-dwarfdump
+/usr/bin/llvm-dwarfutil
+/usr/bin/llvm-dwp
+/usr/bin/llvm-extract
+/usr/bin/llvm-gsymutil
+/usr/bin/llvm-lib
+/usr/bin/llvm-libtool-darwin
+/usr/bin/llvm-link
+/usr/bin/llvm-lto
+/usr/bin/llvm-lto2
+/usr/bin/llvm-mc
+/usr/bin/llvm-ml
+/usr/bin/llvm-ml64
+/usr/bin/llvm-modextract
+/usr/bin/llvm-mt
+/usr/bin/llvm-nm
+/usr/bin/llvm-objdump
+/usr/bin/llvm-opt-report
+/usr/bin/llvm-otool
+/usr/bin/llvm-remarkutil
+/usr/bin/llvm-pdbutil
+/usr/bin/llvm-profdata
+/usr/bin/llvm-profgen
+/usr/bin/llvm-ranlib
+/usr/bin/llvm-readelf
+/usr/bin/llvm-readobj
+/usr/bin/llvm-readtapi
+/usr/bin/llvm-rtdyld
+/usr/bin/llvm-sim
+/usr/bin/llvm-size
+/usr/bin/llvm-split
+/usr/bin/llvm-stress
+/usr/bin/llvm-strings
+/usr/bin/llvm-symbolizer
+/usr/bin/llvm-tblgen
+/usr/bin/llvm-tli-checker
+/usr/bin/llvm-windres
+/usr/bin/llvm-xray
+/usr/bin/offload-arch
+/usr/bin/opt
+/usr/bin/run-clang-tidy
+/usr/bin/sancov
+/usr/bin/sanstats
+/usr/bin/scan-build
+/usr/bin/scan-build-py
+/usr/bin/scan-view
+/usr/bin/verify-uselistorder
+/usr/bin/diagtool
+/usr/bin/dsymutil
+/usr/bin/hmaptool
+/usr/bin/lldb-dap
+/usr/bin/lldb-instr
+/usr/bin/llvm-addr2line
+/usr/bin/llvm-cfi-verify
+/usr/bin/llvm-cxxmap
+/usr/bin/llvm-exegesis
+/usr/bin/llvm-ifs
+/usr/bin/llvm-install-name-tool
+/usr/bin/llvm-jitlink
+/usr/bin/llvm-lipo
+/usr/bin/llvm-mca
+/usr/bin/llvm-objcopy
+/usr/bin/llvm-rc
+/usr/bin/llvm-reduce
+/usr/bin/llvm-strip
+/usr/bin/llvm-undname
+/usr/bin/pp-trace
+/usr/bin/reduce-chunk-list
+/usr/bin/llvm-cas
+/usr/bin/llvm-ir2vec
+/usr/bin/llvm-offload-binary
+/usr/bin/llvm-offload-wrapper
+/usr/bin/yaml2macho-core
+
+%files devel
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/include/lld/*
+/usr/include/llvm/*
+/usr/include/llvm-c/*
+/usr/share/*
+/usr/lib64/cmake/lld/*
+/usr/lib64/cmake/llvm/*
+/usr/lib64/libLTO*.so*
+/usr/lib64/LLVMgold.so
+/usr/lib64/libRemarks.so*
+/usr/bin/amdgpu-arch
+/usr/bin/nvptx-arch
+
+%files static-devel
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/lib64/lib*.a
+
+%files -n libllvm
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/lib64/libLLVM*.so*
+
+%files -n clang
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/bin/clang
+/usr/bin/clang++
+/usr/bin/x86_64-tizen-linux-gnu-clang
+/usr/bin/x86_64-tizen-linux-gnu-clang++
+/usr/bin/clang-22
+/usr/bin/clang++-22
+/usr/bin/clang-apply-replacements
+/usr/bin/clang-change-namespace
+/usr/bin/clang-check
+/usr/bin/clang-cl
+/usr/bin/clang-cpp
+/usr/bin/clang-doc
+/usr/bin/clang-extdef-mapping
+/usr/bin/clang-move
+/usr/bin/clang-refactor
+/usr/bin/clang-scan-deps
+/usr/bin/clang-format
+/usr/libexec/analyze-c++
+/usr/libexec/analyze-cc
+/usr/libexec/c++-analyzer
+/usr/libexec/ccc-analyzer
+/usr/libexec/intercept-c++
+/usr/libexec/intercept-cc
+/usr/bin/clang-include-cleaner
+/usr/bin/clang-include-fixer
+/usr/bin/clang-offload-bundler
+/usr/bin/clang-query
+/usr/bin/clang-sycl-linker
+/usr/bin/clang-reorder-fields
+/usr/bin/clang-tidy
+/usr/bin/clang-installapi
+/usr/bin/clang-nvlink-wrapper
+/usr/bin/clangd
+/usr/bin/git-clang-format
+/usr/bin/find-all-symbols
+/usr/bin/modularize
+/usr/lib64/clang/22/include/*
+/usr/lib64/libclang*.so*
+/usr/lib64/cmake/clang/*
+/usr/bin/clang.cfg
+/usr/bin/clang++.cfg
+
+%files -n clang-devel
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/bin/clang-tblgen
+/usr/include/clang/*
+/usr/include/clang-c/*
+/usr/include/clang-tidy/*
+
+%files -n lldb
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/home/owner/share/tmp/sdk_tools/lldb/bin/lldb
+/usr/bin/lldb
+/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-argdumper
+/home/owner/share/tmp/sdk_tools/lldb/bin/lldb-server
+/home/owner/share/tmp/sdk_tools/lldb/lib64/liblldb*.so*
+/usr/bin/lldb-mcp
+
+%files -n lldb-devel
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/include/lldb/*
+/usr/lib64/liblldb*.so*
+/usr/bin/lldb-tblgen
+
+%files -n compiler-rt
+%manifest llvm.manifest
+%defattr(-,root,root,-)
+/usr/lib64/clang/22/include/sanitizer/*
+/usr/lib64/clang/22/*
+
+%files -n libomp
+/usr/lib64/libomp.so
+/usr/lib64/libompd.so
+/usr/lib64/libarcher.so
+
+%files -n libomp-devel
+/usr/lib64/libarcher_static.a
+/usr/lib64/cmake/openmp/FindOpenMPTarget.cmake
+
+%files -n python-clang
+%{python3_sitelib}/clang

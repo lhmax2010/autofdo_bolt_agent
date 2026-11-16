@@ -38,6 +38,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 建议补丁验证（2026-11-16）
+
+- [验证报告](reviews/gerrit/361624/suggested-fix/verification.md)：用户补丁原样mv入库，SHA `8259a8d4504965b52167baeaf1667570bc6b46ff07682631b78ee8d12ca4b678`；独立树基于da885208干净git am，结果 **ae93ed9b5f98bc7991a1537feac4f5eff61e3e22**。只读spec解析24次最终均0，armv7l/i586查询不强制ExclusiveArch，未据此声称可构建。
+- 固定Base20261030.120529 / Unified20261104.125239，实际LLVM提供包22.1.8-4.1；x86_64 tools GBS构建 **退出0、564.821秒**，3个二进制RPM。bolt含两个runtime静态库，Requires含libllvm=22.1.8与LLVM_22.1，不含compiler-rt；5个runtime/debug build-id一致；ldd/version通过。AArch64/x86_64无profile最小ELF改写均0、relocation模式、反汇编成功；x86前后运行均退出7。
+- **结论：补丁有问题（调试信息缺口），构建与功能验证通过。** llvm-bolt.debug只有glibc启动对象DWARF，没有BOLT源码CU，debugsource RPM为空；Release编译未带-g。spec注释的调试包名也与实际bolt-debuginfo不符。建议由作者补齐调试编译选项并修正注释；本轮未改补丁。aarch64实际构建、完整llvm.spec构建未验证。
+- 16GiB启动门槛等待1183.958秒后用户临时取消该门槛；保留load/disk、6G/5G/200%、-j2及运行中停止保护。第一次执行器资源宏错误导致GBS1/391.114秒，修正执行器后全新root成功，失败原件全部保留。成功构建峰值5,369,208,832 B，最低MemAvailable12,628,295,680 B，MemoryHigh940，max/OOM0；所有本任务构建已结束。
+- 未接板、未操作Gerrit、未改hq/认证/设计/旧证据、未安装主机软件、未删除既有temp目录。本轮完成后停止。
+
 ## Gerrit 361624 协同评审文件入库（2026-11-16）
 
 两份新增文件原样提交，提交前后核对SHA一致。本轮只记录评审方结论，不裁决两份意见的分歧，不修改评审原稿、设计或实现；不操作Gerrit、不改hq。

@@ -1,0 +1,208 @@
+[
+  {
+    "name": "ldd",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/ldd",
+      "/home/abuild/verify-361624/llvm-bolt"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "version",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/home/abuild/verify-361624/llvm-bolt",
+      "--version"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "installed-packages",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/rpm",
+      "-qa",
+      "--qf",
+      "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "aarch64-compile",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/clang",
+      "--target=aarch64-linux-gnu",
+      "-c",
+      "/home/abuild/verify-361624/aarch64.S",
+      "-o",
+      "/home/abuild/verify-361624/aarch64.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "aarch64-link",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/ld.lld",
+      "-static",
+      "--emit-relocs",
+      "--build-id=sha1",
+      "-e",
+      "_start",
+      "/home/abuild/verify-361624/aarch64.o",
+      "-o",
+      "/home/abuild/verify-361624/aarch64.elf"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "aarch64-relocations",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/llvm-readelf",
+      "-r",
+      "/home/abuild/verify-361624/aarch64.elf"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "aarch64-bolt",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/home/abuild/verify-361624/llvm-bolt",
+      "/home/abuild/verify-361624/aarch64.elf",
+      "-o",
+      "/home/abuild/verify-361624/aarch64.bolt",
+      "-reorder-blocks=none",
+      "-reorder-functions=none"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "aarch64-disassembly",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/llvm-objdump",
+      "-d",
+      "/home/abuild/verify-361624/aarch64.bolt"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-compile",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/clang",
+      "--target=x86_64-linux-gnu",
+      "-c",
+      "/home/abuild/verify-361624/x86_64.S",
+      "-o",
+      "/home/abuild/verify-361624/x86_64.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-link",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/ld.lld",
+      "-static",
+      "--emit-relocs",
+      "--build-id=sha1",
+      "-e",
+      "_start",
+      "/home/abuild/verify-361624/x86_64.o",
+      "-o",
+      "/home/abuild/verify-361624/x86_64.elf"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-relocations",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/llvm-readelf",
+      "-r",
+      "/home/abuild/verify-361624/x86_64.elf"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-bolt",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/home/abuild/verify-361624/llvm-bolt",
+      "/home/abuild/verify-361624/x86_64.elf",
+      "-o",
+      "/home/abuild/verify-361624/x86_64.bolt",
+      "-reorder-blocks=none",
+      "-reorder-functions=none"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-disassembly",
+    "argv": [
+      "sudo",
+      "-n",
+      "chroot",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0",
+      "/usr/bin/llvm-objdump",
+      "-d",
+      "/home/abuild/verify-361624/x86_64.bolt"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "x86_64-run-original",
+    "argv": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/verify-361624/x86_64.elf"
+    ],
+    "exit": 7
+  },
+  {
+    "name": "x86_64-run-bolt",
+    "argv": [
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/verify-361624/x86_64.bolt"
+    ],
+    "exit": 7
+  }
+]
