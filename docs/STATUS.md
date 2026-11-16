@@ -38,6 +38,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow 设计 v0.2 入库（2026-11-16）
+
+- [v0.2 设计](workflow/01_afdo_bolt_workflow_design_v0.2.md)取代v0.1，进入一轮确认评审；v0.1文件保留。
+- 用户指定Downloads文件以mv移入，内容未修改，源路径不留副本；移动前、后SHA-256均为 `38b9207fc9adc536d3bfb1e5f21a1e754cc9804b81c99d1c92d6150fcb7b0c1f`。
+- 本轮只更新main，不修改hq、不推送Gerrit，完成后停止。
+
 ## M1 手动试跑重启后停止（2026-11-16：部署目录缺失）
 
 - [试跑报告第6节](workflow/m1/02_manual_pilot_rpi4_thumb.md)：RPi4恢复在线，六项身份与周六全部一致；初始uid5001。root下确认整个/opt/afdo_agent不存在，工具、BBB与ToS输入缺失，按“缺失则停止”门禁停止，未自行补部署。
