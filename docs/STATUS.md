@@ -38,6 +38,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1 手动试跑独立核查完成（2026-11-16）
+
+- [独立核查报告](workflow/m1/03_pilot_independent_check.md)：对596d978第8节及证据做只读复核，2628次SHA核对（1754个去重路径）无缺失/差异；独立统计支持faster、−2.56516%及原bootstrap CI。随机取样接口差异已解释，相同浮点索引法复现原CI。
+- 五root各108包一致；两侧698条编译/链接argv去profile-use后差异0，AFDO带flag627条；两目标.text变化与runtime/debug身份匹配。六次转换及锁定profile逐字节复现，质量JSON仅输出路径参数不同。
+- 12次oracle记录一致；30个正式轮maps/SHA及遥测复核一致，第11/14 AFDO截断标记正确。历史最终uid5001/schedutil/RPM1233/cleanup_pending=[]；本轮不接板、不构建、不改原报告/证据/hq、不推Gerrit。无法恢复的早期SDB原文、固件历史状态等限制保留。复核脚本与重放输出在temp/m1-independent-check-20261116/，本轮profile访问已在新报告披露。
+
 ## M1 RPi4 Thumb AutoFDO 端到端试跑完成（2026-11-16）
 
 - [试跑报告第8节](workflow/m1/02_manual_pilot_rpi4_thumb.md)：3次BBB训练、6次转换均conversion=ok/identity=verified；锁定profile SHA `61f03b59262e3ce7ce758219d65848a33b5a0549131c362a6769ad10386f2cf2`，显式max/none/none/none。采样充分性unknown，默认值未统计验证。
