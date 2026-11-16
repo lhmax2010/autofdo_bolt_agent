@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 建议补丁v2仅注释复核（2026-11-16）
+
+- [验证报告第6节](reviews/gerrit/361624/suggested-fix/verification.md#6-v2仅注释复核)：指定v2补丁原样mv入库，SHA `b0b1a05f67fb50a37c1351e776ff0a92c2dfd1f6e08be65068d1d5be0790f2e9`；基于da885208干净git am，结果 **d509bc12ee2f824025b3e54331257936a8dfc33a**。与v1 ae93ed9b的完整diff仅为debug_package前注释块，v1及旧证据不变。
+- 最终16次rpmspec查询均0；x86_64/aarch64两侧包列表、BuildRequires、bolt Requires、%build/%install/全部%files逐字节相同，-P仅指定注释变化。llvm.spec未变、不重解析。初次比较器段划分误报保留，修正执行器后全量复核通过。
+- **v2 与已验证的 v1 构建等价，补丁通过验证。** x86构建/依赖/身份/两架构改写冒烟沿用v1结果，不重新构建。v2如实说明Release无BOLT源码DWARF、debugsource为空，这些局限未因注释改动而消失；aarch64实际构建与完整llvm.spec仍未验证。
+- 未接板、不操作Gerrit、不改hq、不安装软件；本轮完成后停止。
+
 ## Gerrit 361624 建议补丁验证（2026-11-16）
 
 - [验证报告](reviews/gerrit/361624/suggested-fix/verification.md)：用户补丁原样mv入库，SHA `8259a8d4504965b52167baeaf1667570bc6b46ff07682631b78ee8d12ca4b678`；独立树基于da885208干净git am，结果 **ae93ed9b5f98bc7991a1537feac4f5eff61e3e22**。只读spec解析24次最终均0，armv7l/i586查询不强制ExclusiveArch，未据此声称可构建。

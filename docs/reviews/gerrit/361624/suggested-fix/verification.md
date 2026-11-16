@@ -130,3 +130,70 @@ aarch64 实际构建与 llvm.spec 完整构建按任务范围未执行。
 证据逐文件SHA：[SHA256SUMS](SHA256SUMS)。保留在temp的元数据、执行器、日志与源码RPM索引：[raw-index.json](raw-index.json)。
 
 本轮原件目录：`temp/verify-361624-fix-20261116/`；保护的本地配置未读取或改动。没有板上、Gerrit、hq 操作，没有安装主机软件（GBS只在本任务的新root内安装构建依赖），没有修改已有证据或设计。
+
+## 6. v2（仅注释）复核
+
+日期：2026-11-16。按用户本轮指定的构建等价性验收口径执行；v1补丁和以上验证记录保留不变。本轮不重新GBS构建、不重新冒烟、不操作Gerrit、不改hq、不接板、不安装软件。
+
+### 6.1 入库与应用
+
+指定文件 `361624-suggested-fix-v2.patch` 由Downloads以mv移入本目录；移动前后SHA-256均为 **b0b1a05f67fb50a37c1351e776ff0a92c2dfd1f6e08be65068d1d5be0790f2e9**，Downloads不留副本。[移动收据](evidence/v2/move.json)。
+
+从 `temp/gerrit-361624-ssh` 在基线 `da885208aeb52f55c448ff46873d242346727522` 创建独立工作树 `temp/verify-361624-fix-v2-20261116/source`，git am退出0、干净应用，结果提交 **d509bc12ee2f824025b3e54331257936a8dfc33a**。[工作树记录](evidence/v2/worktree.json)、[应用记录](evidence/v2/apply.json)。v1工作树未修改。
+
+以下为 `git diff ae93ed9b5f98bc7991a1537feac4f5eff61e3e22 d509bc12ee2f824025b3e54331257936a8dfc33a` 完整输出，未过滤文件或上下文；唯一变化是 `%define debug_package` 上方注释，4行删除、7行增加。源文件差异断言见 [source-diff-assertions.json](evidence/v2/source-diff-assertions.json)，原文见 [v1-v2.diff](evidence/v2/v1-v2.diff)。
+
+```diff
+diff --git a/packaging/llvm-tools-subpkgs.spec b/packaging/llvm-tools-subpkgs.spec
+index ee34485360dc..05f346e77c97 100644
+--- a/packaging/llvm-tools-subpkgs.spec
++++ b/packaging/llvm-tools-subpkgs.spec
+@@ -67,10 +67,13 @@ to improve instruction cache and TLB utilization.
+ # itself; the standard debug_package macro would add them a second time
+ # and fail with "package already exists". NOTE: keep percent signs out of
+ # this comment -- rpmbuild expands macros even in comment lines.
+-# Debuginfo IS still generated (find-debuginfo.sh runs from
+-# __debug_install_post): the llvm-tools-subpkgs debuginfo and debugsource
+-# packages are produced. The -Wl,--build-id=sha1 linker flags above make the bolt
+-# binaries debug-correlatable.
++# find-debuginfo.sh still runs from __debug_install_post and moves the
++# separated debug files into bolt-debuginfo, named after the bolt
++# subpackage. BOLT is compiled with the CMake Release flags only, without
++# -g, as llvm.spec does for its release build, so these files hold symbol
++# tables but no source-level DWARF, and llvm-tools-subpkgs-debugsource is
++# empty. The build-id linker flags in the build section tie each debug
++# file to its binary.
+ %define debug_package %{nil}
+ 
+ %build
+```
+
+### 6.2 解析等价性
+
+复用第2节同一发布root的rpmspec、加载器、全部宏路径；RPM_CONFIGDIR与HOME分别指向该root的 `usr/lib/rpm` 和 `home/abuild`，显式 `_build_create_debug=1`。v1/v2 × x86_64/aarch64 × 四种查询，共 **16次最终命令，全部退出0**。bolt Requires查询保存所有包的原始查询输出，再按精确包名bolt选取唯一记录，不以全包依赖代替bolt依赖。
+
+完整执行器：[check_equivalence.py](evidence/v2/check_equivalence.py)；每条argv、环境、退出码和输入SHA：[commands.json](evidence/v2/parse-final/commands.json)；断言及各相同段的SHA：[equivalence.json](evidence/v2/equivalence.json)。
+
+| 核对项 | x86_64 | aarch64 |
+|---|---|---|
+| 包列表 | 逐字节相同 | 逐字节相同 |
+| BuildRequires | 逐字节相同 | 逐字节相同 |
+| bolt Requires | 逐字节相同：libllvm = 22.1.8 | 逐字节相同：libllvm = 22.1.8 |
+| rpmspec -P | 仅指定注释块不同 | 仅指定注释块不同 |
+| %build | 逐字节相同 | 逐字节相同 |
+| %install | 逐字节相同 | 逐字节相同 |
+| 全部3个%files段（含自动调试段） | 逐字节相同 | 逐字节相同 |
+
+解析差异原文：[x86_64](evidence/v2/parse-final/x86_64-expanded.diff)、[aarch64](evidence/v2/parse-final/aarch64-expanded.diff)。断言不仅忽略一般注释，而是确认用源文件中唯一改变的原注释块替换一次后，整个-P输出逐字节等于v2。`llvm.spec` 两树字节相同，按要求未重新解析。
+
+执行器初次比较误把第一个自动生成的%files段至文件末尾当作一个段，包含了%prep下的注释，导致一次`files`比较断言失败；这8次初始查询本身均退出0。修正段边界后重新执行全部16次查询并通过。初次执行器、原始输出保留在本节证据的 `check_equivalence_initial.py`、`parse/`，原因见 [comparison-initial.json](evidence/v2/comparison-initial.json)；未修改补丁/spec。
+
+### 6.3 结论与沿用范围
+
+**v2 与已验证的 v1 构建等价，补丁通过验证。**
+
+x86_64构建与冒烟沿用第4节：GBS退出0、564.821秒，RPM依赖/runtime静态库/运行调试build-id通过；AArch64与x86_64最小ELF改写均退出0、relocation模式，x86原/输出程序均退出7。本轮不重复执行这些步骤。
+
+v2修正的是调试包名称与Release构建局限的注释，不增加BOLT源码级调试信息；第4.3节记载的实际内容（BOLT源码DWARF未生成、debugsource为空）保持真实有效。本轮用户指定的验收是注释改动不改变已验证构建行为，不将其表述为源码级调试能力恢复。aarch64实际构建、完整llvm.spec构建仍未验证。
+
+全程nice19/ionice-c3、串行3G/200% scope；所记录三次MemAvailable最低 **13,087,903,744 B**，最终解析/比较scope的实读memory.peak **11,747,328 B**。资源记录见 [resources.json](evidence/v2/resources.json)；本轮未启动构建。

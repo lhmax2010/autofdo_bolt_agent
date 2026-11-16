@@ -1,0 +1,19 @@
+%files debuginfo -f debugfiles.list
+
+
+%files debugsource -f debugsourcefiles.list
+%defattr(-,root,root)
+%manifest llvm-tools-subpkgs-debugsource.manifest 
+
+%files -n bolt
+%defattr(-,root,root,-)
+/usr/bin/llvm-bolt
+/usr/bin/perf2bolt
+/usr/bin/llvm-boltdiff
+/usr/bin/llvm-bolt-heatmap
+/usr/bin/llvm-bolt-binary-analysis
+/usr/bin/llvm-bat-dump
+/usr/bin/merge-fdata
+/usr/lib64/libbolt_rt_instr.a
+/usr/lib64/libbolt_rt_hugify.a
+

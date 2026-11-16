@@ -1,0 +1,20 @@
+--- aarch64-v1
++++ aarch64-v2
+@@ -96,10 +96,13 @@
+ # itself; the standard debug_package macro would add them a second time
+ # and fail with "package already exists". NOTE: keep percent signs out of
+ # this comment -- rpmbuild expands macros even in comment lines.
+-# Debuginfo IS still generated (find-debuginfo.sh runs from
+-# __debug_install_post): the llvm-tools-subpkgs debuginfo and debugsource
+-# packages are produced. The -Wl,--build-id=sha1 linker flags above make the bolt
+-# binaries debug-correlatable.
++# find-debuginfo.sh still runs from __debug_install_post and moves the
++# separated debug files into bolt-debuginfo, named after the bolt
++# subpackage. BOLT is compiled with the CMake Release flags only, without
++# -g, as llvm.spec does for its release build, so these files hold symbol
++# tables but no source-level DWARF, and llvm-tools-subpkgs-debugsource is
++# empty. The build-id linker flags in the build section tie each debug
++# file to its binary.
+ 
+ %build
+ export AR=llvm-ar RANLIB=llvm-ranlib;

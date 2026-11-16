@@ -1,0 +1,53 @@
+%build
+export AR=llvm-ar RANLIB=llvm-ranlib;
+export CC=x86_64-tizen-linux-gnu-clang CXX=x86_64-tizen-linux-gnu-clang++;
+export MAKEFLAGS+=" -k";
+
+# ---- A. BOLT built standalone against the installed toolchain ----
+# Standalone detection: CMAKE_SOURCE_DIR == bolt source dir
+# => BOLT_BUILT_STANDALONE=TRUE, find_package(LLVM) finds the installed
+# LLVM CMake package under the architecture libdir.
+# LLVM_LINK_LLVM_DYLIB=ON is mandatory: BOLT must link libLLVM.so (libllvm);
+# llvm-static-devel is installed only because the exported targets are
+# validated at configure time.
+#
+# All LLVM provider packages must come from one LLVM build.
+test "$(llvm-config --version)" = "22.1.8" || exit 1
+llvm_evr=""
+for p in llvm llvm-devel llvm-static-devel libllvm libomp; do
+    e=$(rpm -q --qf '%{VERSION}-%{RELEASE}' "$p") || exit 1
+    if [ -n "$llvm_evr" ] && [ "$e" != "$llvm_evr" ]; then
+        echo "LLVM provider mismatch: $p $e, expected $llvm_evr"
+        exit 1
+    fi
+    llvm_evr=$e
+done
+echo "BOLT is built against LLVM provider $llvm_evr"
+mkdir -p bolt-build
+cd bolt-build
+cmake \
+    -G Ninja \
+    -S ../bolt \
+    -B . \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DLLVM_LIBDIR_SUFFIX=`echo lib64 | sed s/lib//g` \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_LINK_LLVM_DYLIB=ON \
+    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--build-id=sha1" \
+    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--build-id=sha1" \
+    -DBOLT_INCLUDE_TESTS=OFF \
+    -DBOLT_TARGETS_TO_BUILD="AArch64" \
+    -DLLVM_INCLUDE_TESTS=OFF
+# bolt: driver + tools; bolt_rt: runtime archives (ExternalProject) for the
+# build architecture.
+ninja bolt bolt_rt
+# Target registration check, kept in the build section so it also runs
+# when the check section is skipped. It does not test a rewrite.
+LC_ALL=C ./bin/llvm-bolt --version > bolt-version.txt 2>&1 || { cat bolt-version.txt; exit 1; }
+cat bolt-version.txt
+grep -Eq '^[[:space:]]*aarch64[[:space:]]+-' bolt-version.txt
+
+

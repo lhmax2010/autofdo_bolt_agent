@@ -1,0 +1,22 @@
+diff --git a/packaging/llvm-tools-subpkgs.spec b/packaging/llvm-tools-subpkgs.spec
+index ee34485360dc..05f346e77c97 100644
+--- a/packaging/llvm-tools-subpkgs.spec
++++ b/packaging/llvm-tools-subpkgs.spec
+@@ -67,10 +67,13 @@ to improve instruction cache and TLB utilization.
+ # itself; the standard debug_package macro would add them a second time
+ # and fail with "package already exists". NOTE: keep percent signs out of
+ # this comment -- rpmbuild expands macros even in comment lines.
+-# Debuginfo IS still generated (find-debuginfo.sh runs from
+-# __debug_install_post): the llvm-tools-subpkgs debuginfo and debugsource
+-# packages are produced. The -Wl,--build-id=sha1 linker flags above make the bolt
+-# binaries debug-correlatable.
++# find-debuginfo.sh still runs from __debug_install_post and moves the
++# separated debug files into bolt-debuginfo, named after the bolt
++# subpackage. BOLT is compiled with the CMake Release flags only, without
++# -g, as llvm.spec does for its release build, so these files hold symbol
++# tables but no source-level DWARF, and llvm-tools-subpkgs-debugsource is
++# empty. The build-id linker flags in the build section tie each debug
++# file to its binary.
+ %define debug_package %{nil}
+ 
+ %build
