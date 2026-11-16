@@ -38,6 +38,11 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 评审第2版入库（2026-11-16）
+
+- **评审第 2 版：按 facts_check.md 修正四项**。[评审文件](reviews/gerrit/361624/autofdo-bolt-agent-review.md)原样mv覆盖入库，旧版保留在git历史；移动前后与指定llvm-optimize副本的SHA-256均为 `bec98591b08534dc0521ef585ab1dac64fbfe2bcdd238ef372d09a583bc159b9`，Downloads不留副本。
+- 本轮只更新评审文件与STATUS，并覆盖用户指定的单一外部副本；第一版SHA清单及事实核查证据保留为当时快照，不改写。不在Gerrit评论或推送，不改hq，完成后停止。
+
 ## Gerrit 361624 patch set 1 只读事实核查（2026-11-16）
 
 - SSH取回并核验 **da885208aeb52f55c448ff46873d242346727522**，父提交61ef5d31ca91025c414c748477bef0c64ddfa67c；[共享文件、原始diff/spec与核查报告](reviews/gerrit/361624/facts_check.md)、[SHA清单](reviews/gerrit/361624/SHA256SUMS)已入库。评审原文SHA `1ab6f4311f60b6b26736286bd1707578f10eca799d804a234f9d4ab27e7fcf39`，从指定Downloads mv后按授权复制一份到llvm-optimize/temp/review-361624，仅写该文件。

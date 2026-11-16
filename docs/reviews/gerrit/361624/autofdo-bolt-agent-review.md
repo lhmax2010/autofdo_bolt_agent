@@ -4,7 +4,8 @@
 |---|---|
 | Change | 361624, patch set 1, commit `da885208aeb5` "packaging: split tool subpackages into a standalone llvm-tools-subpkgs spec" |
 | Reviewed as | A user of the tool packages: the AutoFDO / instrumented PGO / BOLT workflow for Tizen packages (FFmpeg, GStreamer first; Linux kernel as a separate track) on Raspberry Pi 4 (armv7l, Thumb-2/A32) and Raspberry Pi 5 (aarch64), using the enhanced llvm-profgen on `sandbox/lhmax2025/afdo_profgen` |
-| Material | The change's own diff (`packaging/llvm-tools-subpkgs.spec`, `packaging/llvm.spec`, `bolt/**/CMakeLists.txt` and X86 helper sources). Not built or run for this review. |
+| Material | The change's own diff and the complete `llvm.spec` / `llvm-tools-subpkgs.spec` at that commit; read-only facts checked in existing Tizen build roots (package lists, RPM macros, `llvm-devel` file lists). 361624 itself was not built. |
+| Revision | 2 (facts checked: build-root contents, LLVM target lists, debuginfo mechanism, armv7l library paths) |
 | Verdict | **Acceptable for our workflow with changes.** The new standalone `bolt` package is useful and in the right place. Six items should change or be clarified before merge (section 5); none blocks the AutoFDO part of the workflow. |
 
 ## 0. How the workflow uses the toolchain
@@ -29,7 +30,7 @@ The host tools are extracted from the Tizen x86_64 RPMs and identified by SHA-25
 | `libLLVM.so.22.1` | x86_64 host (tools that link it); boards (Tizen `perf` links it) | Runtime library | `libllvm` | OK. See section 4 for pinning and for the armv7l size change. |
 | `clang` with `-fprofile-sample-use`, `-fprofile-generate/-use` | Build root (target armv7l / aarch64) | Consuming builds and instrumented builds | `clang` | OK, unchanged |
 | compiler-rt profile runtime (`libclang_rt.profile-*.a`) | Build root, per target architecture | Linking `-fprofile-generate` builds | `compiler-rt` (target arch) | Unchanged; please confirm the armv7l and aarch64 archives are shipped |
-| `llvm-bolt`, `perf2bolt`, `merge-fdata` | **x86_64 host only** | BOLT for RPi5 aarch64 binaries | new `bolt` (x86_64) | Right package. **Requirement:** the x86_64 build must include the AArch64 BOLT target (section 5, item 2). |
+| `llvm-bolt`, `perf2bolt`, `merge-fdata` | **x86_64 host only** | BOLT for RPi5 aarch64 binaries | new `bolt` (x86_64) | Right package. The x86_64 LLVM is built with `X86;ARM;AArch64;BPF`, so BOLT's default target set (supported targets ∩ installed LLVM targets) includes AArch64. We ask only for an explicit setting and a check to keep it that way (section 5, item 2). |
 | `llvm-bolt-heatmap`, `llvm-bat-dump`, `llvm-boltdiff`, `llvm-bolt-binary-analysis` | x86_64 host, optional | Diagnostics | `bolt` (x86_64) | Fine |
 | `libbolt_rt_instr.a` for **aarch64** | x86_64 host, as input to `llvm-bolt -instrument` | Optional: BOLT instrumentation of RPi5 binaries to get exact edge counts, since the boards have no branch records | `bolt` (aarch64) only | Present in the aarch64 package. An x86_64 host must extract it from the aarch64 RPM and pass `-runtime-instrumentation-lib`; see section 4. |
 | `perf` | Boards (armv7l, aarch64) | Sampling | Not part of this change (kernel tools package) | Must remain available; it depends on `libllvm` (section 4) |
@@ -74,7 +75,9 @@ Workflow consequence (no package change needed): preflight checks that `llvm-pro
    - The x86_64 package's runtime archives are x86_64-only, so instrumenting aarch64 binaries on the x86_64 host needs the aarch64 archive. Either document extracting it from the aarch64 RPM, or ship it for cross use, for example as `/usr/lib/bolt/aarch64/libbolt_rt_instr.a` in the x86_64 package. Both are acceptable to us; a documented path is enough.
 4. **debuginfo and build IDs for the tools.**
    - Welcome: `-Wl,--build-id=sha1` for the LLVM toolchain binaries and for the standalone BOLT build (today's released llvm-profgen has no build ID).
-   - Please confirm that `llvm-debuginfo` (containing llvm-profgen's debug file) and `bolt-debuginfo` are actually produced, given `%define debug_package %{nil}` in the new spec, and that their build IDs match the shipped binaries.
+   - Mechanism (checked): GBS runs `rpmbuild` with `_build_create_debug 1` and injects the debug package when `%package`/`%prep` are parsed; the new spec's `%define debug_package %{nil}` comes after `%package -n bolt` and does not clear it. A macro-level parse lists `llvm-tools-subpkgs-debuginfo` and `-debugsource`; the earlier `llvm` release did produce `llvm-debuginfo`.
+   - Please confirm from a real build that the BOLT binaries' debug files exist (expected in `llvm-tools-subpkgs-debuginfo`, not a package named `bolt-debuginfo`) and that their build IDs match the shipped binaries.
+   - The spec comment says `find-debuginfo.sh` runs in `__os_install_post`; it runs from `__debug_install_post`. Please correct the comment.
 5. **Build IDs for the packages we optimize (not in this change).**
    - Sampled programs and libraries need a linker build ID; today we add `-Wl,--build-id=sha1` through each package's spec.
    - Please build clang with `-DENABLE_LINKER_BUILD_ID=ON`, so every Tizen package gets a build ID by default. This is the single change that most simplifies profiling FFmpeg, GStreamer and later other packages without per-package spec edits.
@@ -84,10 +87,10 @@ Workflow consequence (no package change needed): preflight checks that `llvm-pro
 | # | Item | Effect on us | Request |
 |---|---|---|---|
 | 1 | armv7l BOLT and the armv7l target expansion | Larger armv7l libLLVM on RPi4 images (loaded by perf); longer armv7l builds; no BOLT use on armv7l | Remove both, or name the consumer that needs them |
-| 2 | BOLT targets of the x86_64 standalone build are not stated | Our BOLT step needs AArch64 support in the x86_64 `llvm-bolt`; it is only present if the installed x86_64 LLVM includes AArch64 | Set `-DBOLT_TARGETS_TO_BUILD="X86;AArch64"` explicitly; add a `%check` (or build-time) smoke test that `llvm-bolt --version` lists the aarch64 target |
+| 2 | BOLT targets of the x86_64 standalone build are implicit | Not a defect today: the x86_64 LLVM includes AArch64, so the default BOLT targets include it. But a future change to the LLVM target list would silently remove the AArch64 support our BOLT step needs | Safeguard: set `-DBOLT_TARGETS_TO_BUILD="X86;AArch64"` explicitly and add a `%check` that `llvm-bolt --version` lists the aarch64 target |
 | 3 | `bolt` requires an unversioned `libllvm` | A partial repository update can pair BOLT with a different libLLVM | Exact version-release pinning (section 4.1) |
-| 4 | `llvm` now `Requires: python3` (scan-build/scan-view moved into it) | If `llvm` is part of standard build roots, every package build root gains python3. Some configure scripts change behaviour when python3 is present, and our build-lock gate (identical build-root package lists between baseline and optimized builds) changes across this update. | Keep scan-build/scan-view in a separate subpackage (as `clang-analyzer` was), or confirm `llvm` is not in default build roots |
-| 5 | `LLVM_LIBDIR_SUFFIX=64` is hard-coded in the standalone spec, also for armv7l | armv7l uses `/usr/lib`; wrong-path installs or a failed `find_package(LLVM)` are likely | Derive the suffix from the architecture, or drop the armv7l build (item 1) |
+| 4 | `llvm` now `Requires: python3` (scan-build/scan-view moved into it) | `llvm` is in target-architecture build roots through `clang` and `llvm-devel` (both require it). Our armv7l FFmpeg build root (108 packages) has no python3; after this change it would pull python3 and its dependencies. (The x86_64 LLVM build root already has python3 for LLVM's own build.) Configure scripts may behave differently when python3 is present, and package build roots change across the update. | `Recommends: python3` instead of `Requires`, or keep scan-build/scan-view in a separate subpackage (as `clang-analyzer` was) |
+| 5 | `LLVM_LIBDIR_SUFFIX=64` is hard-coded in the standalone spec, also for armv7l; a spec comment assumes `/usr/lib64/cmake/llvm` | Checked: on armv7l `%{_lib}` is `lib`, `%{_libdir}` is `/usr/lib`, and LLVM's CMake package is in `/usr/lib/cmake/llvm`. The suffix sets BOLT's output library directory, so armv7l output paths would be wrong; whether the build fails was not tested | Derive the suffix from the architecture (§7.1) and fix the comment, or drop the armv7l build (item 1) |
 | 6 | Scope: nine logically separate commits squashed into one change (packaging split, BOLT standalone fixes, armv7l tools, build-id flags, MLGO incremental fix, install changes) | Hard to review and revert piecewise. The build-id part is wanted on its own; the armv7l part is not wanted. | Split into separate changes, at least: (a) build-id linker flags, (b) standalone BOLT package for x86_64/aarch64, (c) package file moves, (d) armv7l changes |
 
 Smaller notes:
@@ -101,12 +104,12 @@ Smaller notes:
 ## 6. Summary of requests to HQ
 
 1. Drop armv7l BOLT and revert the armv7l `LLVM_TARGETS_TO_BUILD` expansion (or justify them).
-2. Build the x86_64 `bolt` package with the AArch64 target explicitly, and verify it.
+2. Keep AArch64 in the x86_64 `bolt` package explicitly (safeguard) and verify it with a `%check`.
 3. Pin `bolt` to `libllvm = %{version}-%{release}` and pin its BuildRequires; tie the tools spec version to `llvm.spec`.
-4. Avoid adding `python3` to every build root through `llvm` (keep scan-build in a subpackage).
+4. Avoid adding `python3` to target-architecture build roots through `llvm` (`Recommends: python3`, or keep scan-build in a subpackage).
 5. Fix the hard-coded `LLVM_LIBDIR_SUFFIX=64` for non-64-bit architectures.
 6. Split the change into reviewable parts; keep the build-id part.
-7. Confirm `llvm-debuginfo` and `bolt-debuginfo` are produced with matching build IDs.
+7. Confirm from a real build that the BOLT debug files (in `llvm-tools-subpkgs-debuginfo`) and `llvm-debuginfo` match the shipped binaries' build IDs; fix the `find-debuginfo.sh` comment.
 8. Document or package the aarch64 `libbolt_rt_instr.a` for use on an x86_64 host.
 9. Separately: enable `ENABLE_LINKER_BUILD_ID` in clang, and plan to take the llvm-profgen IP-sample patch series (sandbox `afdo_profgen`) into a regular LLVM release.
 
@@ -202,11 +205,13 @@ python3 in build roots, two options:
 - **aarch64 BOLT runtime on x86_64 hosts:** document `rpm2cpio bolt-<ver>.aarch64.rpm | cpio -id ./usr/lib64/libbolt_rt_instr.a` and `llvm-bolt -instrument -runtime-instrumentation-lib=<path>`, or ship a copy as `/usr/lib/bolt/aarch64/libbolt_rt_instr.a` in the x86_64 package.
 - **Split** 361624 into: (a) build-id linker flags, (b) standalone BOLT package (x86_64/aarch64), (c) package file moves with Obsoletes, (d) the MLGO incremental-build fix and the `DESTDIR` install change.
 
-### 7.4 Facts to confirm before sending these requests
+### 7.4 Facts checked for revision 2
 
-These statements in this review rest on reading the diff only:
+| Question | Finding | Effect on this review |
+|---|---|---|
+| Is `llvm` in package build roots; is python3 already there? | `llvm` and `clang` are in both checked roots (pulled by `clang`/`llvm-devel`); armv7l FFmpeg root: no python3; x86_64 LLVM root: python3 present | Item 5.4 narrowed to target-architecture roots without python3 |
+| LLVM targets | x86_64 `X86;ARM;AArch64;BPF`; aarch64 `AArch64;BPF` | Item 5.2 is a safeguard, not a defect |
+| debuginfo with `debug_package %{nil}` | GBS injects the debug package before the late `%{nil}`; macro parse lists `llvm-tools-subpkgs-debuginfo`; the real RPM is unverified | Section 4.4 asks for confirmation from a real build and a comment fix |
+| armv7l library paths | `%{_lib}=lib`, `%{_libdir}=/usr/lib`, `/usr/lib/cmake/llvm/LLVMConfig.cmake` | Item 5.5 confirmed for output paths; build failure not claimed |
 
-- whether `llvm` is installed in standard Tizen package build roots (decides how much item 5.4 matters);
-- the x86_64 `LLVM_TARGETS_TO_BUILD` in `llvm.spec` (whether AArch64 is already included, so item 5.2 is only a safeguard);
-- whether `bolt-debuginfo` and `llvm-debuginfo` are produced with `%define debug_package %{nil}`;
-- the armv7l `%{_lib}` value and where the armv7l LLVM CMake package config is installed.
+Still unverified (needs a real build of 361624): the final debuginfo package contents and build-ID pairing, and whether an armv7l build of the standalone spec succeeds.
