@@ -1,0 +1,67 @@
+483: [  250s] Executing(%build): /bin/sh -e /var/tmp/rpm-tmp.Nbt0gE
+484: [  250s] + umask 022
+485: [  250s] + cd /home/abuild/rpmbuild/BUILD
+486: [  250s] + export CMAKE_BUILD_PARALLEL_LEVEL=2
+487: [  250s] + CMAKE_BUILD_PARALLEL_LEVEL=2
+488: [  250s] + cd llvm-22.1.8
+489: [  250s] + ref=/usr/lib/rpm
+490: [  250s] + mints=0
+491: [  250s] + case $(uname -m) in
+492: [  250s] ++ uname -m
+493: [  250s] + for s in guess sub
+494: [  250s] ++ find -maxdepth 8 -name config.guess
+495: [  250s] + for c in '$(find -maxdepth 8 -name "config.$s")'
+496: [  250s] + grep -q config-patches@ ./llvm/cmake/config.guess
+497: [  250s] ++ sed -n '/^timestamp=/{s///;s/[-'\''"]//g;p;q;}' ./llvm/cmake/config.guess
+498: [  250s] ++ tr -d $'\r'
+499: [  251s] + timestamp=20240607
+500: [  251s] + test -n 20240607
+501: [  251s] + test 20240607 -ge 0
+502: [  251s] + for s in guess sub
+503: [  251s] ++ find -maxdepth 8 -name config.sub
+504: [  251s] + export AR=llvm-ar RANLIB=llvm-ranlib
+505: [  251s] + AR=llvm-ar
+506: [  251s] + RANLIB=llvm-ranlib
+507: [  251s] + export CC=x86_64-tizen-linux-gnu-clang CXX=x86_64-tizen-linux-gnu-clang++
+508: [  251s] + CC=x86_64-tizen-linux-gnu-clang
+509: [  251s] + CXX=x86_64-tizen-linux-gnu-clang++
+510: [  251s] + export 'MAKEFLAGS+= -k'
+511: [  251s] + MAKEFLAGS+=' -k'
+512: [  251s] ++ llvm-config --version
+513: [  252s] + test 22.1.8 = 22.1.8
+514: [  252s] + llvm_evr=
+515: [  252s] + for p in llvm llvm-devel llvm-static-devel libllvm libomp
+516: [  252s] ++ rpm -q --qf '%{VERSION}-%{RELEASE}' llvm
+517: [  252s] + e=22.1.8-4.1
+518: [  252s] + '[' -n '' ']'
+519: [  252s] + llvm_evr=22.1.8-4.1
+520: [  252s] + for p in llvm llvm-devel llvm-static-devel libllvm libomp
+521: [  252s] ++ rpm -q --qf '%{VERSION}-%{RELEASE}' llvm-devel
+522: [  252s] + e=22.1.8-4.1
+523: [  252s] + '[' -n 22.1.8-4.1 ']'
+524: [  252s] + '[' 22.1.8-4.1 '!=' 22.1.8-4.1 ']'
+525: [  252s] + llvm_evr=22.1.8-4.1
+526: [  252s] + for p in llvm llvm-devel llvm-static-devel libllvm libomp
+527: [  252s] ++ rpm -q --qf '%{VERSION}-%{RELEASE}' llvm-static-devel
+528: [  252s] + e=22.1.8-4.1
+529: [  252s] + '[' -n 22.1.8-4.1 ']'
+530: [  252s] + '[' 22.1.8-4.1 '!=' 22.1.8-4.1 ']'
+531: [  252s] + llvm_evr=22.1.8-4.1
+532: [  252s] + for p in llvm llvm-devel llvm-static-devel libllvm libomp
+533: [  252s] ++ rpm -q --qf '%{VERSION}-%{RELEASE}' libllvm
+534: [  252s] + e=22.1.8-4.1
+535: [  252s] + '[' -n 22.1.8-4.1 ']'
+536: [  252s] + '[' 22.1.8-4.1 '!=' 22.1.8-4.1 ']'
+537: [  252s] + llvm_evr=22.1.8-4.1
+538: [  252s] + for p in llvm llvm-devel llvm-static-devel libllvm libomp
+539: [  252s] ++ rpm -q --qf '%{VERSION}-%{RELEASE}' libomp
+540: [  252s] + e=22.1.8-4.1
+541: [  252s] + '[' -n 22.1.8-4.1 ']'
+542: [  252s] + '[' 22.1.8-4.1 '!=' 22.1.8-4.1 ']'
+543: [  252s] + llvm_evr=22.1.8-4.1
+544: [  252s] + echo 'BOLT is built against LLVM provider 22.1.8-4.1'
+545: [  252s] BOLT is built against LLVM provider 22.1.8-4.1
+546: [  252s] + mkdir -p bolt-build
+547: [  252s] + cd bolt-build
+548: [  252s] ++ echo lib64
+549: [  252s] ++ sed s/lib//g

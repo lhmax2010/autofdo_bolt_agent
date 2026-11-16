@@ -1,0 +1,27 @@
+{
+  "arguments": [
+    "--define",
+    "__spec_build_pre %{lua:print(string.char(10))}%{___build_pre}%{lua:print(string.char(10))}%{set_build_flags};%{lua:print(string.char(10))}%{nil}%{lua:print(string.char(10))}ninja() { command /usr/bin/ninja -j2 %{lua:print(string.char(34))}%{lua:print(string.char(36))}@%{lua:print(string.char(34))}; }; export CMAKE_BUILD_PARALLEL_LEVEL=2%{lua:print(string.char(10))}",
+    "--define",
+    "__spec_install_pre %{lua:print(string.char(10))}%{___build_pre}%{lua:print(string.char(10))}%{?_enable_binutils_strip:export STRIP_DEFAULT_PACKAGE=%{lua:print(string.char(34))}binutils%{lua:print(string.char(34))}}%{lua:print(string.char(10))}%__rm -rf %{lua:print(string.char(34))}%{lua:print(string.char(36))}RPM_BUILD_ROOT%{lua:print(string.char(34))}%{lua:print(string.char(10))}%__mkdir_p %{lua:print(string.char(34))}%{lua:print(string.char(36))}RPM_BUILD_ROOT%{lua:print(string.char(34))}%{lua:print(string.char(10))}%{nil}%{lua:print(string.char(10))}ninja() { command /usr/bin/ninja -j2 %{lua:print(string.char(34))}%{lua:print(string.char(36))}@%{lua:print(string.char(34))}; }; export CMAKE_BUILD_PARALLEL_LEVEL=2%{lua:print(string.char(10))}"
+  ],
+  "original_bodies": {
+    "build": {
+      "body": "\n%{___build_pre}\n%{set_build_flags};\n%{nil}",
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib/rpm/tizen/macros",
+      "lines": [
+        229,
+        232
+      ]
+    },
+    "install": {
+      "body": "\n%{___build_pre}\n%{?_enable_binutils_strip:export STRIP_DEFAULT_PACKAGE=\"binutils\"}\n%__rm -rf \"$RPM_BUILD_ROOT\"\n%__mkdir_p \"$RPM_BUILD_ROOT\"\n%{nil}",
+      "source": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib/rpm/tizen/macros",
+      "lines": [
+        234,
+        239
+      ]
+    }
+  },
+  "append": "\nninja() { command /usr/bin/ninja -j2 \"$@\"; }; export CMAKE_BUILD_PARALLEL_LEVEL=2\n"
+}

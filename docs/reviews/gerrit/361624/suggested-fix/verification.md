@@ -197,3 +197,73 @@ x86_64构建与冒烟沿用第4节：GBS退出0、564.821秒，RPM依赖/runtime
 v2修正的是调试包名称与Release构建局限的注释，不增加BOLT源码级调试信息；第4.3节记载的实际内容（BOLT源码DWARF未生成、debugsource为空）保持真实有效。本轮用户指定的验收是注释改动不改变已验证构建行为，不将其表述为源码级调试能力恢复。aarch64实际构建、完整llvm.spec构建仍未验证。
 
 全程nice19/ionice-c3、串行3G/200% scope；所记录三次MemAvailable最低 **13,087,903,744 B**，最终解析/比较scope的实读memory.peak **11,747,328 B**。资源记录见 [resources.json](evidence/v2/resources.json)；本轮未启动构建。
+
+## 7. 构建环境缺陷（评审发现）
+
+日期：2026-11-16。本节更正第3–4节及第6节对正常Tizen构建的外推；旧报告和原始证据保留，不改补丁。本轮仅归档评审、展开宏、生成脚本并做断言，**没有启动GBS，也没有执行生成的%build/%install脚本**。
+
+### 7.1 两份评审原样归档
+
+| 评审方 | 文件 | SHA-256 |
+|---|---|---|
+| Codex | [review_Codex.md](review_Codex.md) | `230bc239118b3600bde71cd1e56ff01c8b87c0217eb58f7ff623c73bcc1141da` |
+| Claude Code | [review_claude_code.md](review_claude_code.md) | `ed61d2de826c63ff9dbbc143680f790a4c8306c7f323bf86b551e26d29623a07` |
+
+内容未修改，提交前后核对相同SHA。关于链接参数、支持范围等其他建议只作为评审原文归档，本轮不改spec或补丁。
+
+### 7.2 缺陷与原始证据
+
+**错误来自本次验证执行器，而不是从这次结果可推导出的正常GBS编译行为。** 第3–4节使用的 `--define '__spec_build_pre %{___build_pre}; ninja()…'` 替换了Tizen原有的 `__spec_build_pre`，遗漏 `%{set_build_flags}`，丢失发行版CFLAGS/CXXFLAGS/LDFLAGS导出。安装前置段也被替换，遗漏原有可选STRIP_DEFAULT_PACKAGE分支与buildroot准备动作。
+
+| 证据 | 原文件与行号 | 实测内容 |
+|---|---|---|
+| 旧验证构建 | `evidence/build-executor-retry/build.log` **483–769**（%build段） | 没有 `+ export CFLAGS`、CXXFLAGS、LDFLAGS；只保留了更基础的构建环境 |
+| 旧构建CMake缓存 | `temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILD/llvm-22.1.8/bolt-build/CMakeCache.txt` **66、96、114** | `CMAKE_CXX_FLAGS:STRING=`、`CMAKE_C_FLAGS:STRING=` 均为空；EXE_LINKER_FLAGS仅 `-Wl,--build-id=sha1` |
+| 正常LLVM发布构建 | `temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/repos/tizen_unified_standard/x86_64/logs/success/llvm-22.1.8-1/log.txt` **467–472** | 467赋CFLAGS（含-g2/-gdwarf-4/-g），**468导出CFLAGS、470导出CXXFLAGS、472导出LDFLAGS** |
+| Tizen原始前置段 | 发布root `usr/lib/rpm/tizen/macros`（实际文件 `usr/lib/rpm/tizen_macros`）**229–232、234–239** | build包含set_build_flags；install保留可选strip设置以及删除/创建RPM_BUILD_ROOT |
+| set_build_flags原定义 | 同root `usr/lib/rpm/macros` **1057–1060** | 分别设置并导出CFLAGS、CXXFLAGS、LDFLAGS |
+
+上述文件的SHA与原行号摘录见 [source-evidence.json](evidence/executor-v4/source-evidence.json)、[旧日志](evidence/executor-v4/old-build-prelude.txt)、[发布日志](evidence/executor-v4/release-build-prelude.txt)、[CMakeCache](evidence/executor-v4/cmake-cache-flags.txt)、[Tizen宏](evidence/executor-v4/tizen-preludes.txt)、[set_build_flags](evidence/executor-v4/set-build-flags.txt)。发布root和旧验证root的Tizen宏SHA相同：`f0f991bd97f44b7bf906ac4a7a45cd34b7444c1acce2358261e4a95b3e68ebc8`。
+
+**更正的范围：**
+
+- 第4.1节的RPM/llvm-bolt SHA及5个build-id仅描述那个非标准环境的产物，不代表正常GBS构建。
+- 第4.3节第1条“来自原spec的Release构建方式”及第6节关于正常构建缺少BOLT源码调试信息的外推撤回。原产物确实没有BOLT源码CU且debugsource为空，但不能据此认定正常Tizen构建也是如此。也不能因此要求补丁增加-g：原Tizen前置段本已提供调试选项。
+- 第6节的“通过验证”仅保留v1/v2注释改动的构建等价性结论；正常Tizen环境的产物验收尚未完成，须等待另行授权的修正执行器重建。
+- 包名、依赖、provider检查、--version检查与两项冒烟改写的已记录结论不受影响；冒烟证明的是旧二进制的功能，不能替代将来正常环境产物的验收。
+
+### 7.3 executor-v4：完整保留原前置段
+
+执行器从发布root原始Tizen宏逐条读取**完整宏体**，保留可选安装分支，不再以 `%{___build_pre}` 代替发行版前置段；只在末尾追加：
+
+```bash
+ninja() { command /usr/bin/ninja -j2 "$@"; }; export CMAKE_BUILD_PARALLEL_LEVEL=2
+```
+
+为避免GBS的shell传参提前处理换行、双引号或美元符号，参数将这些字符编码成RPM Lua `string.char`，在RPM展开阶段还原；没有改原宏文件。以下是准备好的**两个完整参数原文**（并非本轮执行的GBS命令）：
+
+```bash
+--define '__spec_build_pre %{lua:print(string.char(10))}%{___build_pre}%{lua:print(string.char(10))}%{set_build_flags};%{lua:print(string.char(10))}%{nil}%{lua:print(string.char(10))}ninja() { command /usr/bin/ninja -j2 %{lua:print(string.char(34))}%{lua:print(string.char(36))}@%{lua:print(string.char(34))}; }; export CMAKE_BUILD_PARALLEL_LEVEL=2%{lua:print(string.char(10))}' \
+  --define '__spec_install_pre %{lua:print(string.char(10))}%{___build_pre}%{lua:print(string.char(10))}%{?_enable_binutils_strip:export STRIP_DEFAULT_PACKAGE=%{lua:print(string.char(34))}binutils%{lua:print(string.char(34))}}%{lua:print(string.char(10))}%__rm -rf %{lua:print(string.char(34))}%{lua:print(string.char(36))}RPM_BUILD_ROOT%{lua:print(string.char(34))}%{lua:print(string.char(10))}%__mkdir_p %{lua:print(string.char(34))}%{lua:print(string.char(36))}RPM_BUILD_ROOT%{lua:print(string.char(34))}%{lua:print(string.char(10))}%{nil}%{lua:print(string.char(10))}ninja() { command /usr/bin/ninja -j2 %{lua:print(string.char(34))}%{lua:print(string.char(36))}@%{lua:print(string.char(34))}; }; export CMAKE_BUILD_PARALLEL_LEVEL=2%{lua:print(string.char(10))}'
+```
+
+机器可读参数和未编码原宏体：[parameters.json](evidence/executor-v4/parameters.json)。执行器与全部命令收据：[check_executor.py](evidence/executor-v4/check_executor.py)、[commands.json](evidence/executor-v4/checks-accepted/commands.json)。未来使用前须再次核对实际root宏；本轮的shell参数往返检查不宣称已经跑过GBS传参。
+
+### 7.4 展开与断言结果
+
+使用发布root的RPM/加载器、相同RPM_CONFIGDIR/HOME、GBS宏和 `_build_create_debug=1`，只作宏展开与rpmspec -P。
+
+| 断言 | 结果 | 证据 |
+|---|---|---|
+| 新build/install前置段 = 未加define的原展开 + 唯一追加内容 | 通过，逐字节比较 | checks-accepted/default-*-original.stdout 与 *-v4.stdout |
+| 可选 `_enable_binutils_strip=1` 时仍完整保留原前置段 | 通过，逐字节比较 | checks-accepted/strip-enabled-*.stdout |
+| CFLAGS/CXXFLAGS/LDFLAGS导出存在，CFLAGS含-g | 通过（含-g2和-g） | default-build-v4.stdout |
+| 完整%build、%install脚本 `bash -n` | 均退出0 | build-full.sh、install-full.sh及syntax收据 |
+| ninja的 `$@` 转发 | 通过：bolt/bolt_rt、install、含空格参数和空参数 | forwarding.sh、forwarding.stdout |
+| 参数经shell往返后逐字节相同 | 通过 | shell-argument-roundtrip.stdout |
+
+完整结果：[result.json](evidence/executor-v4/result.json)。完整脚本由原生RPM template、spec展开后的主体及原生postlude重建，补齐正常spec的name/version/release/buildroot/buildsubdir/docdir上下文；**仅bash -n，不执行**，其中的清理、编译和安装命令均没有运行。转发夹具用合成 `command` 函数打印实参，也没有调用ninja。
+
+准备过程中的三次辅助断言失败已保留：首次误将rpm查询格式中的VERSION/RELEASE视作未展开宏，随后补齐独立模板展开所需docdir与小写name上下文；原输出在checks、checks-final、checks-complete，最终全部通过的是checks-accepted。前置段等价性从首轮起即通过；这些准备过程没有执行构建。RPM不支持macrobody查询的探测及过宽文件名搜索的中止也记入 [setup-notes.json](evidence/executor-v4/setup-notes.json)。
+
+本轮归档和验证在串行nice19/ionice-c3、3G/200% scope中进行；最终断言scope memory.peak **11,018,240 B**。未修改补丁、原评审、旧证据、发行版宏文件或认证；不接板、不操作Gerrit、不改hq、不安装软件。**结论：执行器v4的展开与静态断言通过，正常环境重建尚未执行。**

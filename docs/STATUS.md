@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 v2评审归档与执行器更正（2026-11-16）
+
+- 两份评审原样归档：[Codex](reviews/gerrit/361624/suggested-fix/review_Codex.md)，SHA `230bc239118b3600bde71cd1e56ff01c8b87c0217eb58f7ff623c73bcc1141da`；[Claude Code](reviews/gerrit/361624/suggested-fix/review_claude_code.md)，SHA `ed61d2de826c63ff9dbbc143680f790a4c8306c7f323bf86b551e26d29623a07`。
+- [验证报告第7节](reviews/gerrit/361624/suggested-fix/verification.md#7-构建环境缺陷评审发现)更正已知错误：旧资源宏覆盖Tizen前置段，漏掉set_build_flags，造成CFLAGS/CXXFLAGS/LDFLAGS未导出。旧RPM/工具SHA、5个build-id及调试信息结论不代表正常GBS；撤回将缺少DWARF归因于正常Release构建的外推。原证据保留；包名、依赖、provider、version及旧二进制的两项冒烟结论仍有效。
+- executor-v4按原Tizen完整宏体追加Ninja限制；默认及strip启用分支逐字节前缀相同，三种flags导出与-g、完整脚本bash -n、参数转发及shell往返断言通过。参数、原始定义、行号与SHA见 [evidence/executor-v4](reviews/gerrit/361624/suggested-fix/evidence/executor-v4/result.json)。
+- **未启动GBS，未执行完整build/install脚本；正常环境重建仍待授权。** 未改补丁、旧证据、hq、Gerrit或开发板，完成后停止。旧状态段保留为历史，当前判断以本条和第7节为准。
+
 ## Gerrit 361624 建议补丁v2仅注释复核（2026-11-16）
 
 - [验证报告第6节](reviews/gerrit/361624/suggested-fix/verification.md#6-v2仅注释复核)：指定v2补丁原样mv入库，SHA `b0b1a05f67fb50a37c1351e776ff0a92c2dfd1f6e08be65068d1d5be0790f2e9`；基于da885208干净git am，结果 **d509bc12ee2f824025b3e54331257936a8dfc33a**。与v1 ae93ed9b的完整diff仅为debug_package前注释块，v1及旧证据不变。

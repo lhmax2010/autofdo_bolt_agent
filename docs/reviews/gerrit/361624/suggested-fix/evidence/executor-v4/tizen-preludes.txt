@@ -1,0 +1,11 @@
+229: %__spec_build_pre\
+230: %{___build_pre}\
+231: %{set_build_flags};\
+232: %{nil}
+233: 
+234: %__spec_install_pre\
+235: %{___build_pre}\
+236: %{?_enable_binutils_strip:export STRIP_DEFAULT_PACKAGE="binutils"}\
+237: %__rm -rf "$RPM_BUILD_ROOT"\
+238: %__mkdir_p "$RPM_BUILD_ROOT"\
+239: %{nil}
