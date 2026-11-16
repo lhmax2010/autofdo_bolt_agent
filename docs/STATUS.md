@@ -38,6 +38,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1 手动试跑停止（2026-11-16：RPi4 连接不可用）
+
+- [试跑报告](workflow/m1/02_manual_pilot_rpi4_thumb.md)：已登记端点 192.168.108.26:26101 的 sdb connect 输出 failed to connect（进程退出0），随后 devices 为空。无法比对周六身份，按门禁停止。原始输出与 SHA 在 workflow/m1/evidence/05/。
+- 未执行板上 shell/root/governor/push/perf/删除；root/governor 当前值未知，本轮未改动，无需恢复本轮变更。采集0/3、转换0/6，无锁定profile、AutoFDO构建、正确性或测量结果；未读取正式profile、未登记修正案3。未操作RPi5，未修改hq，未推Gerrit。
+- 等待连接恢复后重做身份核对。下次hq更新待办：FFmpeg构建命令简化为普通gbs命令＋可选资源限制示例，去掉GIT_CONFIG_*、SUDO_ASKPASS、XDG等内部隔离设置与“Do not interfere with other builds”等内部口吻；本轮不改hq。
+
 ## M1周末J2重建完成（2026-11-14；hq待PM审阅）
 
 - [目标报告第9节](workflow/m1/01_ffmpeg_target_build.md)：历史成功日志Thumb/A32各8条DWARF5 debugedit诊断、退出0；本轮去掉V=1，独立HOME/TMPDIR/cache/root、-j2、6G/5G高水位/200% scope串行重建成功，Thumb303.082秒、A32 314.093秒，GBS均0。
