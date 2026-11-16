@@ -1,0 +1,27 @@
+{
+  "time": 1794851319.3297207,
+  "argv": [
+    "systemd-run",
+    "--user",
+    "--unit=verify-361624-v3-authorized-20261116",
+    "--property=Type=exec",
+    "--property=MemoryMax=3G",
+    "--property=CPUQuota=200%",
+    "--property=WorkingDirectory=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+    "--property=StandardOutput=append:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/supervisor-authorized.log",
+    "--property=StandardError=append:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/supervisor-authorized.log",
+    "--setenv=TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp",
+    "--setenv=PYTHONDONTWRITEBYTECODE=1",
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "python3",
+    "-u",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/run_build_authorized.py"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "Running as unit: verify-361624-v3-authorized-20261116.service; invocation ID: f56c943328114e0ca08de8e5ab68c94b\n"
+}

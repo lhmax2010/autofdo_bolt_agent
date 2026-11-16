@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 v3正常Tizen前置段验收完成（2026-11-16）
+
+- 指定v3补丁原样mv，SHA 81f41716aa2fe1761d1a3f228c83ab86e6559e0f09c7c5defeac762afec5116b；基于da885208干净git am，结果 **bd6dd0d009b4c70e89d1a5730dbc30d3e6c7dce8**。38次只读解析/展开全0：tools包与依赖同v2，llvm.spec仅3行注释；实际root宏与executor-v4取证root相同。
+- **v3补丁通过验证。** 正常前置段x86_64 tools GBS退出0、墙钟 **657.953秒**。三种发行版flags导出、CMake缓存/编译规则、provider22.1.8-4.1通过；产出3个二进制RPM与源码RPM。5份debug身份一致，BOLT源码CU与非空debugsource已确认；5个GNU_RELRO/ldd/version通过。两架构relocation改写退出0，x86前后退出7。
+- 开始按16GiB门禁等待944.208秒；随后用户本轮新授权“本轮不用考虑限制”，取消启动内存等待，保留-j2、6G/5G/200%及停止保护。实际构建峰值5,369,176,064 B，最低采样MemAvailable12,783,538,176 B；high2342、max/OOM0，无资源停止/重试。等待与构建分别保留真实结束收据。
+- [报告第8节](reviews/gerrit/361624/suggested-fix/verification.md#8-v3-正常前置段构建验收)、[证据汇总](reviews/gerrit/361624/suggested-fix/evidence/v3/summary.json)、SHA256SUMS已更新。闭合第7节正常环境验收缺口；旧证据保持原样，AArch64主机包/完整llvm.spec仍未实构建。不接板、不操作Gerrit、不改hq、不安装主机软件，所有本任务单元结束后停止。
+
 ## Gerrit 361624 v2评审归档与执行器更正（2026-11-16）
 
 - 两份评审原样归档：[Codex](reviews/gerrit/361624/suggested-fix/review_Codex.md)，SHA `230bc239118b3600bde71cd1e56ff01c8b87c0217eb58f7ff623c73bcc1141da`；[Claude Code](reviews/gerrit/361624/suggested-fix/review_claude_code.md)，SHA `ed61d2de826c63ff9dbbc143680f790a4c8306c7f323bf86b551e26d29623a07`。

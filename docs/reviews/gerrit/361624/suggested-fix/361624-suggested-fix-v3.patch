@@ -1,0 +1,220 @@
+From 941abd8798bc24405151f1fa1df988498b6cb46d Mon Sep 17 00:00:00 2001
+From: AutoFDO workflow review <review@example.invalid>
+Date: Mon, 16 Nov 2026 23:11:16 +0800
+Subject: [PATCH] packaging: suggested follow-up for 361624 (standalone BOLT
+ pinning, per-arch targets, no armv7l BOLT, no python3 Requires)
+
+- llvm-tools-subpkgs: build bolt for x86_64 and aarch64 only; per-arch
+  BOLT targets; pin LLVM providers to the package version and check that
+  they share one Version-Release in the build root; derive the libdir
+  suffix from the architecture; check the registered BOLT targets.
+- Keep the distribution LDFLAGS when adding the build-id linker flag.
+- llvm.spec: armv7l LLVM targets back to ARM;BPF; drop the new runtime
+  Requires: python3 (scan-build is Perl, the python3 analyzer modules are
+  removed in install).
+---
+ packaging/llvm-tools-subpkgs.spec | 98 ++++++++++++++++++++-----------
+ packaging/llvm.spec               |  9 ++-
+ 2 files changed, 69 insertions(+), 38 deletions(-)
+
+diff --git a/packaging/llvm-tools-subpkgs.spec b/packaging/llvm-tools-subpkgs.spec
+index 6ea1035..0978f5f 100644
+--- a/packaging/llvm-tools-subpkgs.spec
++++ b/packaging/llvm-tools-subpkgs.spec
+@@ -5,25 +5,37 @@ Release:    1
+ License:    NCSA
+ Group:      Development/Tools
+ Source0:    llvm-22.1.8.tar.gz
++# Package scope: x86_64 and aarch64 build hosts. armv7l and i586 are
++# excluded. riscv64 is also excluded, as a packaging scope choice and not
++# for lack of upstream BOLT support: it would need its own RISCV target
++# branch below and its own validation. Confirm the consumer matrix first.
++ExclusiveArch: x86_64 aarch64
+ BuildRequires: cmake
+ BuildRequires: ninja
+-BuildRequires: llvm
+-BuildRequires: llvm-devel
++BuildRequires: llvm = %{version}
++BuildRequires: llvm-devel = %{version}
+ # llvm-static-devel: llvm-devel's LLVMExports.cmake validates the static
+ # imported targets (libLLVM*.a) at configure time; without the archives
+ # present, find_package(LLVM) aborts before bolt can link the dylib.
+-BuildRequires: llvm-static-devel
++BuildRequires: llvm-static-devel = %{version}
+ # libomp: the exported target "omp" in LLVMExports-release.cmake references
+ # /usr/lib64/libomp.so; the configure-time existence check aborts without it.
+-BuildRequires: libomp
++BuildRequires: libomp = %{version}
+ # zlib-devel, libxml2-devel: the exported LLVM targets reference ZLIB::ZLIB
+ # and LibXml2::LibXml2 in their link interfaces (bolt standalone build)
+ BuildRequires: zlib-devel
+ BuildRequires: libxml2-devel
+ BuildRequires: clang
+-BuildRequires: libllvm
++BuildRequires: libllvm = %{version}
+ BuildRequires: compiler-rt
+ 
++# BOLT targets per build architecture: each must exist in the installed LLVM.
++%ifarch x86_64
++%global bolt_targets X86;AArch64
++%else
++%global bolt_targets AArch64
++%endif
++
+ %description
+ Standalone subpackages for LLVM debugging and analysis tools:
+  - bolt: BOLT post-link binary optimizer, built standalone against the
+@@ -38,13 +50,17 @@ rebuilding this package (minutes), not the multi-hour LLVM build.
+ %package -n bolt
+ Summary: BOLT post-link binary optimizer
+ License: NCSA
+-Requires: libllvm
+-Requires: compiler-rt
++# Same LLVM version; rpm also generates the libLLVM.so.22.1(LLVM_22.1)
++# dependency. The provider release is intentionally not pinned: this
++# package has its own release number, which must not be used for libllvm.
++# ABI compatibility across libllvm releases stays a provider policy.
++Requires: libllvm = %{version}
+ 
+ %description -n bolt
+ BOLT is a post-link binary optimizer that reorders code in the final
+-binary or DSO based on runtime profile data (perf LBR/PT samples) to
+-improve instruction cache and TLB utilization.
++binary or DSO based on runtime profile data (perf LBR/PT samples, or
++sampled instruction addresses without branch records via perf2bolt -ba)
++to improve instruction cache and TLB utilization.
+ 
+ %prep
+ %setup -q -n llvm-22.1.8
+@@ -54,19 +70,38 @@ improve instruction cache and TLB utilization.
+ # itself; the standard debug_package macro would add them a second time
+ # and fail with "package already exists". NOTE: keep percent signs out of
+ # this comment -- rpmbuild expands macros even in comment lines.
+-# Debuginfo IS still generated (find-debuginfo.sh runs in
+-# __os_install_post): bolt-debuginfo and the debugsource package are
+-# produced. The -Wl,--build-id=sha1 linker flags above make the bolt
+-# binaries debug-correlatable.
++# find-debuginfo.sh still runs from __debug_install_post and moves the
++# separated debug files into bolt-debuginfo, named after the bolt
++# subpackage; sources go to llvm-tools-subpkgs-debugsource. Compiler
++# flags, including the debug options, come from the distribution CFLAGS
++# and CXXFLAGS that the build section exports and CMake reads. The
++# build-id linker flags in the build section tie each debug file to its
++# binary.
+ %define debug_package %{nil}
+ 
+ %build
+ # ---- A. BOLT built standalone against the installed toolchain ----
+ # Standalone detection: CMAKE_SOURCE_DIR == bolt source dir
+-# => BOLT_BUILT_STANDALONE=TRUE, find_package(LLVM) finds /usr/lib64/cmake/llvm.
+-# LLVM_LINK_LLVM_DYLIB=ON is mandatory: Tizen ships libLLVM.so (libllvm) and
+-# only STATIC IMPORTED targets in llvm-devel; the static component archives
+-# live in llvm-static-devel which is not installed here.
++# => BOLT_BUILT_STANDALONE=TRUE, find_package(LLVM) finds the installed
++# LLVM CMake package under the architecture libdir.
++# LLVM_LINK_LLVM_DYLIB=ON is mandatory: BOLT must link libLLVM.so (libllvm);
++# llvm-static-devel is installed only because the exported targets are
++# validated at configure time.
++#
++# Require one provider Version-Release for these packages in this build
++# root; all of them come from llvm.spec (drop libomp here if it ever gets
++# its own source package). This is not a byte-identity check.
++test "$(llvm-config --version)" = "%{version}" || exit 1
++llvm_evr=""
++for p in llvm llvm-devel llvm-static-devel libllvm libomp; do
++    e=$(rpm -q --qf '%%{VERSION}-%%{RELEASE}' "$p") || exit 1
++    if [ -n "$llvm_evr" ] && [ "$e" != "$llvm_evr" ]; then
++        echo "LLVM provider mismatch: $p $e, expected $llvm_evr"
++        exit 1
++    fi
++    llvm_evr=$e
++done
++echo "LLVM provider Version-Release consistency check passed: $llvm_evr"
+ mkdir -p bolt-build
+ cd bolt-build
+ cmake \
+@@ -77,23 +112,24 @@ cmake \
+     -DCMAKE_C_COMPILER=clang \
+     -DCMAKE_CXX_COMPILER=clang++ \
+     -DCMAKE_INSTALL_PREFIX=/usr \
+-    -DLLVM_LIBDIR_SUFFIX=64 \
++    -DLLVM_LIBDIR_SUFFIX=`echo %{_lib} | sed s/lib//g` \
+     -DLLVM_ENABLE_RTTI=ON \
+     -DLLVM_LINK_LLVM_DYLIB=ON \
+-    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--build-id=sha1" \
+-    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--build-id=sha1" \
++    -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -Wl,--build-id=sha1" \
++    -DCMAKE_SHARED_LINKER_FLAGS="$LDFLAGS -Wl,--build-id=sha1" \
+     -DBOLT_INCLUDE_TESTS=OFF \
+-%ifarch armv7l
+-    -DBOLT_ENABLE_RUNTIME=OFF \
+-%endif
++    -DBOLT_TARGETS_TO_BUILD="%{bolt_targets}" \
+     -DLLVM_INCLUDE_TESTS=OFF
+-# bolt: driver + tools; bolt_rt: runtime archives (ExternalProject).
+-# CMake enables the runtime only on x86_64/aarch64/riscv64 hosts, so armv7l
+-# builds just the driver. The runtime is for instrumenting x86/aarch64 targets.
+-%ifarch armv7l
+-ninja bolt
+-%else
++# bolt: driver + tools; bolt_rt: runtime archives (ExternalProject) for the
++# build architecture.
+ ninja bolt bolt_rt
++# Target registration check, kept in the build section so it also runs
++# when the check section is skipped. It does not test a rewrite.
++LC_ALL=C ./bin/llvm-bolt --version > bolt-version.txt 2>&1 || { cat bolt-version.txt; exit 1; }
++cat bolt-version.txt
++grep -Eq '^[[:space:]]*aarch64[[:space:]]+-' bolt-version.txt
++%ifarch x86_64
++grep -Eq '^[[:space:]]*x86-64[[:space:]]+-' bolt-version.txt
+ %endif
+ 
+ %install
+@@ -102,8 +138,6 @@ cd bolt-build
+ DESTDIR=%{buildroot} ninja install
+ # The internal bolt static libs are build artifacts, not shipped content.
+ rm -f %{buildroot}%{_libdir}/libLLVMBOLT*.a
+-# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead.
+-rm -f %{buildroot}%{_prefix}/lib64/libLLVMBOLT*.a
+ # perf2bolt and llvm-boltdiff are aliases of llvm-bolt: upstream installs them
+ # as symlinks (bolt/tools/driver/CMakeLists.txt), and llvm-bolt selects its
+ # mode from the name it is invoked as. Separate copies also collided on
+@@ -125,8 +159,6 @@ cd ..
+ %{_prefix}/bin/llvm-bolt-binary-analysis
+ %{_prefix}/bin/llvm-bat-dump
+ %{_prefix}/bin/merge-fdata
+-%ifnarch armv7l
+ %{_libdir}/libbolt_rt_instr.a
+ %{_libdir}/libbolt_rt_hugify.a
+-%endif
+ 
+diff --git a/packaging/llvm.spec b/packaging/llvm.spec
+index 14cdea4..ee17a9e 100644
+--- a/packaging/llvm.spec
++++ b/packaging/llvm.spec
+@@ -73,10 +73,9 @@ BuildRequires: clang, llvm, libllvm
+ 
+ 
+ Requires: libllvm = %{version}-%{release}
+-# scan-build and scan-view are Python scripts (formerly in clang-analyzer)
+-# scan-build also needs clang installed at runtime; llvm does not require it
+-# (requiring clang here would make llvm and clang depend on each other)
+-Requires: python3
++# scan-build (Perl) also needs clang installed at runtime; llvm does not
++# require it (requiring clang here would make llvm and clang depend on
++# each other)
+ # clang-analyzer, llvm-xray and llvm-prof-tools used to be separate
+ # subpackages (llvm-tools-subpkgs.spec) that owned these files; llvm takes them over
+ Obsoletes: clang-analyzer <= %{version}-%{release}
+@@ -285,7 +284,7 @@ cmake \
+ %endif
+ %ifarch armv7l
+     -DCMAKE_BUILD_TYPE=MinSizeRel \
+-    -DLLVM_TARGETS_TO_BUILD='ARM;AArch64;X86;BPF' \
++    -DLLVM_TARGETS_TO_BUILD='ARM;BPF' \
+     -DLLVM_TARGET_ARCH="ARM" \
+ %endif
+ %ifarch aarch64
+-- 
+2.43.0
+

@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "gbs",
+    "-c",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/gbs.conf",
+    "build",
+    "-A",
+    "x86_64",
+    "--spec",
+    "llvm-tools-subpkgs.spec",
+    "--include-all",
+    "--buildroot",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/root-x86_64",
+    "--threads",
+    "1",
+    "--define",
+    "_smp_mflags -j2",
+    "--define",
+    "__spec_build_pre %{lua:print(string.char(10))}%{___build_pre}%{lua:print(string.char(10))}%{set_build_flags};%{lua:print(string.char(10))}%{nil}%{lua:print(string.char(10))}ninja() { command /usr/bin/ninja -j2 %{lua:print(string.char(34))}%{lua:print(string.char(36))}@%{lua:print(string.char(34))}; }; export CMAKE_BUILD_PARALLEL_LEVEL=2%{lua:print(string.char(10))}",
+    "--define",
+    "__spec_install_pre %{lua:print(string.char(10))}%{___build_pre}%{lua:print(string.char(10))}%{?_enable_binutils_strip:export STRIP_DEFAULT_PACKAGE=%{lua:print(string.char(34))}binutils%{lua:print(string.char(34))}}%{lua:print(string.char(10))}%__rm -rf %{lua:print(string.char(34))}%{lua:print(string.char(36))}RPM_BUILD_ROOT%{lua:print(string.char(34))}%{lua:print(string.char(10))}%__mkdir_p %{lua:print(string.char(34))}%{lua:print(string.char(36))}RPM_BUILD_ROOT%{lua:print(string.char(34))}%{lua:print(string.char(10))}%{nil}%{lua:print(string.char(10))}ninja() { command /usr/bin/ninja -j2 %{lua:print(string.char(34))}%{lua:print(string.char(36))}@%{lua:print(string.char(34))}; }; export CMAKE_BUILD_PARALLEL_LEVEL=2%{lua:print(string.char(10))}"
+  ],
+  "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/source",
+  "environment": {
+    "HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/home",
+    "TMPDIR": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/tmp",
+    "XDG_CACHE_HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/cache",
+    "XDG_CONFIG_HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/config",
+    "XDG_STATE_HOME": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/state",
+    "CCACHE_DIR": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/verify-361624-fix-v3-20261116/cache/ccache",
+    "CMAKE_BUILD_PARALLEL_LEVEL": "2"
+  },
+  "gate": {
+    "mem_available_min_gib": 16,
+    "load_per_cpu_max": 0.6,
+    "disk_free_min_gib": 50,
+    "timeout_seconds": 1800
+  },
+  "resource": {
+    "MemoryMax": "6G",
+    "MemoryHigh": "5G",
+    "CPUQuota": "200%",
+    "ninja_jobs": 2
+  }
+}

@@ -1,0 +1,100 @@
+diff --git a/packaging/llvm-tools-subpkgs.spec b/packaging/llvm-tools-subpkgs.spec
+index 05f346e77c97..0978f5f438be 100644
+--- a/packaging/llvm-tools-subpkgs.spec
++++ b/packaging/llvm-tools-subpkgs.spec
+@@ -5,8 +5,10 @@ Release:    1
+ License:    NCSA
+ Group:      Development/Tools
+ Source0:    llvm-22.1.8.tar.gz
+-# BOLT runs on the build host and rewrites 64-bit ELF files only; it cannot
+-# optimize 32-bit ARM. Building it for 32-bit hosts is not supported here.
++# Package scope: x86_64 and aarch64 build hosts. armv7l and i586 are
++# excluded. riscv64 is also excluded, as a packaging scope choice and not
++# for lack of upstream BOLT support: it would need its own RISCV target
++# branch below and its own validation. Confirm the consumer matrix first.
+ ExclusiveArch: x86_64 aarch64
+ BuildRequires: cmake
+ BuildRequires: ninja
+@@ -49,8 +51,9 @@ rebuilding this package (minutes), not the multi-hour LLVM build.
+ Summary: BOLT post-link binary optimizer
+ License: NCSA
+ # Same LLVM version; rpm also generates the libLLVM.so.22.1(LLVM_22.1)
+-# dependency. The tools package has its own release number, so the
+-# release of libllvm cannot be expressed with this spec's own macros.
++# dependency. The provider release is intentionally not pinned: this
++# package has its own release number, which must not be used for libllvm.
++# ABI compatibility across libllvm releases stays a provider policy.
+ Requires: libllvm = %{version}
+ 
+ %description -n bolt
+@@ -69,11 +72,11 @@ to improve instruction cache and TLB utilization.
+ # this comment -- rpmbuild expands macros even in comment lines.
+ # find-debuginfo.sh still runs from __debug_install_post and moves the
+ # separated debug files into bolt-debuginfo, named after the bolt
+-# subpackage. BOLT is compiled with the CMake Release flags only, without
+-# -g, as llvm.spec does for its release build, so these files hold symbol
+-# tables but no source-level DWARF, and llvm-tools-subpkgs-debugsource is
+-# empty. The build-id linker flags in the build section tie each debug
+-# file to its binary.
++# subpackage; sources go to llvm-tools-subpkgs-debugsource. Compiler
++# flags, including the debug options, come from the distribution CFLAGS
++# and CXXFLAGS that the build section exports and CMake reads. The
++# build-id linker flags in the build section tie each debug file to its
++# binary.
+ %define debug_package %{nil}
+ 
+ %build
+@@ -85,7 +88,9 @@ to improve instruction cache and TLB utilization.
+ # llvm-static-devel is installed only because the exported targets are
+ # validated at configure time.
+ #
+-# All LLVM provider packages must come from one LLVM build.
++# Require one provider Version-Release for these packages in this build
++# root; all of them come from llvm.spec (drop libomp here if it ever gets
++# its own source package). This is not a byte-identity check.
+ test "$(llvm-config --version)" = "%{version}" || exit 1
+ llvm_evr=""
+ for p in llvm llvm-devel llvm-static-devel libllvm libomp; do
+@@ -96,7 +101,7 @@ for p in llvm llvm-devel llvm-static-devel libllvm libomp; do
+     fi
+     llvm_evr=$e
+ done
+-echo "BOLT is built against LLVM provider $llvm_evr"
++echo "LLVM provider Version-Release consistency check passed: $llvm_evr"
+ mkdir -p bolt-build
+ cd bolt-build
+ cmake \
+@@ -110,8 +115,8 @@ cmake \
+     -DLLVM_LIBDIR_SUFFIX=`echo %{_lib} | sed s/lib//g` \
+     -DLLVM_ENABLE_RTTI=ON \
+     -DLLVM_LINK_LLVM_DYLIB=ON \
+-    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--build-id=sha1" \
+-    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--build-id=sha1" \
++    -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -Wl,--build-id=sha1" \
++    -DCMAKE_SHARED_LINKER_FLAGS="$LDFLAGS -Wl,--build-id=sha1" \
+     -DBOLT_INCLUDE_TESTS=OFF \
+     -DBOLT_TARGETS_TO_BUILD="%{bolt_targets}" \
+     -DLLVM_INCLUDE_TESTS=OFF
+@@ -133,8 +138,6 @@ cd bolt-build
+ DESTDIR=%{buildroot} ninja install
+ # The internal bolt static libs are build artifacts, not shipped content.
+ rm -f %{buildroot}%{_libdir}/libLLVMBOLT*.a
+-# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead.
+-rm -f %{buildroot}%{_prefix}/lib64/libLLVMBOLT*.a
+ # perf2bolt and llvm-boltdiff are aliases of llvm-bolt: upstream installs them
+ # as symlinks (bolt/tools/driver/CMakeLists.txt), and llvm-bolt selects its
+ # mode from the name it is invoked as. Separate copies also collided on
+diff --git a/packaging/llvm.spec b/packaging/llvm.spec
+index 376e9a0e47fa..ee17a9e4dd82 100644
+--- a/packaging/llvm.spec
++++ b/packaging/llvm.spec
+@@ -73,6 +73,9 @@ BuildRequires: clang, llvm, libllvm
+ 
+ 
+ Requires: libllvm = %{version}-%{release}
++# scan-build (Perl) also needs clang installed at runtime; llvm does not
++# require it (requiring clang here would make llvm and clang depend on
++# each other)
+ # clang-analyzer, llvm-xray and llvm-prof-tools used to be separate
+ # subpackages (llvm-tools-subpkgs.spec) that owned these files; llvm takes them over
+ Obsoletes: clang-analyzer <= %{version}-%{release}

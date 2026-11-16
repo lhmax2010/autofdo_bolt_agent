@@ -1,0 +1,24 @@
+
+/home/abuild/verify-361624-v3/x86_64.bolt:	file format elf64-x86-64
+
+Disassembly of section .bolt.org.text:
+
+000000000020117c <.bolt.org.text>:
+  20117c: e8 09 00 00 00               	callq	0x20118a <.bolt.org.text+0xe>
+  201181: 89 c7                        	movl	%eax, %edi
+  201183: b8 3c 00 00 00               	movl	$0x3c, %eax
+  201188: 0f 05                        	syscall
+  20118a: b8 07 00 00 00               	movl	$0x7, %eax
+  20118f: c3                           	retq
+
+Disassembly of section .text:
+
+0000000000600000 <_start>:
+  600000: e8 09 00 00 00               	callq	0x60000e <answer>
+  600005: 89 c7                        	movl	%eax, %edi
+  600007: b8 3c 00 00 00               	movl	$0x3c, %eax
+  60000c: 0f 05                        	syscall
+
+000000000060000e <answer>:
+  60000e: b8 07 00 00 00               	movl	$0x7, %eax
+  600013: c3                           	retq

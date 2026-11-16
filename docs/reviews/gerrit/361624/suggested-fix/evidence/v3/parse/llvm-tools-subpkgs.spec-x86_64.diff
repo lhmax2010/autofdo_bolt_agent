@@ -1,0 +1,76 @@
+--- 
++++ 
+@@ -5,6 +5,8 @@
+ License:    NCSA
+ Group:      Development/Tools
+ Source0:    llvm-22.1.8.tar.gz
++
++
+ 
+ 
+ ExclusiveArch: x86_64 aarch64
+@@ -80,6 +82,7 @@
+ 
+ 
+ 
++
+ Requires: libllvm = 22.1.8
+ 
+ %description -n bolt
+@@ -98,11 +101,11 @@
+ # this comment -- rpmbuild expands macros even in comment lines.
+ # find-debuginfo.sh still runs from __debug_install_post and moves the
+ # separated debug files into bolt-debuginfo, named after the bolt
+-# subpackage. BOLT is compiled with the CMake Release flags only, without
+-# -g, as llvm.spec does for its release build, so these files hold symbol
+-# tables but no source-level DWARF, and llvm-tools-subpkgs-debugsource is
+-# empty. The build-id linker flags in the build section tie each debug
+-# file to its binary.
++# subpackage; sources go to llvm-tools-subpkgs-debugsource. Compiler
++# flags, including the debug options, come from the distribution CFLAGS
++# and CXXFLAGS that the build section exports and CMake reads. The
++# build-id linker flags in the build section tie each debug file to its
++# binary.
+ 
+ %build
+ export AR=llvm-ar RANLIB=llvm-ranlib;
+@@ -117,7 +120,9 @@
+ # llvm-static-devel is installed only because the exported targets are
+ # validated at configure time.
+ #
+-# All LLVM provider packages must come from one LLVM build.
++# Require one provider Version-Release for these packages in this build
++# root; all of them come from llvm.spec (drop libomp here if it ever gets
++# its own source package). This is not a byte-identity check.
+ test "$(llvm-config --version)" = "22.1.8" || exit 1
+ llvm_evr=""
+ for p in llvm llvm-devel llvm-static-devel libllvm libomp; do
+@@ -128,7 +133,7 @@
+     fi
+     llvm_evr=$e
+ done
+-echo "BOLT is built against LLVM provider $llvm_evr"
++echo "LLVM provider Version-Release consistency check passed: $llvm_evr"
+ mkdir -p bolt-build
+ cd bolt-build
+ cmake \
+@@ -142,8 +147,8 @@
+     -DLLVM_LIBDIR_SUFFIX=`echo lib64 | sed s/lib//g` \
+     -DLLVM_ENABLE_RTTI=ON \
+     -DLLVM_LINK_LLVM_DYLIB=ON \
+-    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--build-id=sha1" \
+-    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--build-id=sha1" \
++    -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -Wl,--build-id=sha1" \
++    -DCMAKE_SHARED_LINKER_FLAGS="$LDFLAGS -Wl,--build-id=sha1" \
+     -DBOLT_INCLUDE_TESTS=OFF \
+     -DBOLT_TARGETS_TO_BUILD="X86;AArch64" \
+     -DLLVM_INCLUDE_TESTS=OFF
+@@ -166,8 +171,6 @@
+ cd bolt-build
+ DESTDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.x86_64 ninja install
+ # The internal bolt static libs are build artifacts, not shipped content.
+-rm -f /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.x86_64/usr/lib64/libLLVMBOLT*.a
+-# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead.
+ rm -f /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/home/abuild/rpmbuild/BUILDROOT/llvm-tools-subpkgs-22.1.8-1.x86_64/usr/lib64/libLLVMBOLT*.a
+ # perf2bolt and llvm-boltdiff are aliases of llvm-bolt: upstream installs them
+ # as symlinks (bolt/tools/driver/CMakeLists.txt), and llvm-bolt selects its

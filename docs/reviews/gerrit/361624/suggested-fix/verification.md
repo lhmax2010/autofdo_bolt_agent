@@ -267,3 +267,74 @@ ninja() { command /usr/bin/ninja -j2 "$@"; }; export CMAKE_BUILD_PARALLEL_LEVEL=
 准备过程中的三次辅助断言失败已保留：首次误将rpm查询格式中的VERSION/RELEASE视作未展开宏，随后补齐独立模板展开所需docdir与小写name上下文；原输出在checks、checks-final、checks-complete，最终全部通过的是checks-accepted。前置段等价性从首轮起即通过；这些准备过程没有执行构建。RPM不支持macrobody查询的探测及过宽文件名搜索的中止也记入 [setup-notes.json](evidence/executor-v4/setup-notes.json)。
 
 本轮归档和验证在串行nice19/ionice-c3、3G/200% scope中进行；最终断言scope memory.peak **11,018,240 B**。未修改补丁、原评审、旧证据、发行版宏文件或认证；不接板、不操作Gerrit、不改hq、不安装软件。**结论：执行器v4的展开与静态断言通过，正常环境重建尚未执行。**
+
+## 8. v3 正常前置段构建验收
+
+日期：2026-11-16。v1、v2补丁及旧证据保留，本轮只对指定v3验证。没有Gerrit评论/推送、hq改动、板上操作或主机软件安装。
+
+### 8.1 入库、应用与解析
+
+- 指定Downloads文件mv入库，前后SHA均为 **81f41716aa2fe1761d1a3f228c83ab86e6559e0f09c7c5defeac762afec5116b**；[移动收据](evidence/v3/move.json)。
+- 基于 da885208aeb52f55c448ff46873d242346727522，独立工作树 temp/verify-361624-fix-v3-20261116/source git am退出0，结果 **bd6dd0d009b4c70e89d1a5730dbc30d3e6c7dce8**；[应用收据](evidence/v3/apply.json)。
+- [完整v2→v3 diff](evidence/v3/v2-v3.diff)：tools spec保留发行版LDFLAGS、更新provider日志和说明、删除重复rm；llvm.spec只增加3行注释。
+- 最终 **38 次** 只读解析/展开命令均0。tools x86_64/aarch64的包列表、BuildRequires、bolt Requires与v2逐字节相同；armv7l/i586仍不在ExclusiveArch。llvm.spec x86_64/armv7l的包列表及Requires/BuildRequires相同，源文件仅3行注释增加，RPM展开为3个空行。
+- 同第2节的发布root、加载器、RPM_CONFIGDIR、HOME与GBS宏，_build_create_debug=1。命令、环境、退出码及原文见 [parse-final/commands.json](evidence/v3/parse-final/commands.json)，断言见 [preflight-result.json](evidence/v3/preflight-result.json)。辅助执行器准备过程见 [preparation-notes.json](evidence/v3/preparation-notes.json)。
+
+### 8.2 执行器与资源门禁
+
+本轮严格使用 [executor-v4已验收参数](evidence/v3/executor-parameters.json)，并再次用发布root的rpmspec --eval验证：原Tizen前置段逐字节保留，只在末尾追加ninja函数与CMAKE_BUILD_PARALLEL_LEVEL；CFLAGS/CXXFLAGS/LDFLAGS导出齐全且含-g2、-gdwarf-4。没有用基础___build_pre替换发行版前置段。
+
+固定Base20261030.120529 / Unified20261104.125239；全新buildroot temp/verify-361624-fix-v3-20261116/root-x86_64；[GBS配置](evidence/v3/gbs.conf)、[完整计划argv](evidence/v3/planned-command.json)、[监督器](evidence/v3/run_build.py)。独立HOME/TMPDIR/cache，-j2、threads1、MemoryMax6G/MemoryHigh5G/CPUQuota200%、nice19/ionice-c3。
+
+最初按本轮指令恢复MemAvailable≥16GiB、load1<0.6×nproc、磁盘≥50GiB、最多1800秒的门禁，未沿用旧授权。等待944.208秒后，用户在本会话新授权“本轮不用考虑限制”。据此停止**尚未启动GBS的等待监督器**，取消本次16GiB等待，保留负载/磁盘检查、-j2、6G/5G/200%与运行中停止保护。不是构建失败重试；该root在真正启动前不存在。两次监督器收据分别保留在build/（signal 15、GBS退出码null）与build-authorized/（实际构建）。
+
+最新实际[完整argv](evidence/v3/planned-command-authorized.json)、[授权及停止等待收据](evidence/v3/gate-waiver-stop.json)、[执行器](evidence/v3/run_build_authorized.py)。每60秒采样；连续两次MemAvailable<6GiB、磁盘<20GiB或max/oom事件停止本任务，未提高6G上限或并行度。实际新root的两份RPM宏与前置解析root逐字节相同，见[actual-root-macros.json](evidence/v3/actual-root-macros.json)。
+
+### 8.3 构建与四.1–四.9验收结果
+
+**GBS退出0，v3补丁通过验证。** 仅构建x86_64的llvm-tools-subpkgs.spec，不是完整llvm.spec或AArch64主机构建。
+
+| 用户项 | 结果 | 原始证据与行号 |
+|---|---|---|
+| 四.1 Tizen导出flags | 通过：CFLAGS/CXXFLAGS含-g2 -gdwarf-4，三者均export | build-authorized/build.log 486–491；flags/result.json |
+| 四.2 CMakeCache | 通过：C/CXX与各自导出值逐字节相同；EXE/SHARED链接flags等于LDFLAGS加-Wl,--build-id=sha1 | flags/bolt-CMakeCache.txt 66、96、114、240；flags/result.json |
+| 四.3 编译规则 | 通过：BOLT保留完整发行版flags及-g2，之后-O3 -DNDEBUG；bolt_rt的C/CXX缓存为空 | flags/bolt-rule.txt（原build.ninja 418起）；flags/bolt-rt-rule.txt（原52起）；flags/bolt-rt-CMakeCache.txt 43、70 |
+| 四.4 provider/targets | 通过：Version-Release一致22.1.8-4.1；aarch64与x86-64均在版本表，两个grep通过 | build-authorized/build.log 550–551、773–774；verification/bolt-version.txt；flags/result.json |
+| 四.5 RPM/依赖 | 通过：3个二进制包+1个源码包；bolt含两份lib64 runtime归档，依赖libllvm=22.1.8和LLVM_22.1(64bit)，无compiler-rt运行依赖 | verification/all-rpms.json；rpm-list-0/1/2.stdout、source-rpm-0.stdout；bolt-requires.stdout 2、11 |
+| 四.6 调试信息 | 通过：5份.debug与对应运行文件build-id一致；有BinaryFunction.cpp编译单元；debugsource非空且含BOLT源码 | verification/result.json；llvm-bolt-dwarf.stdout 1265；rpm-list-2.stdout 138 |
+| 四.7 链接与运行 | 通过：5个ELF均GNU_RELRO，逐个ldd无缺失、--version退出0 | verification/relro-*.stdout（llvm-bolt第21行）；ldd-*.stdout、version-*.stdout；commands.json |
+| 四.8 两项冒烟 | 通过：两架构均relocation模式、改写退出0、objdump退出0；x86输入/输出均退出7 | verification/aarch64-bolt.stdout、x86_64-bolt.stdout第5行；commands.json、result.json；smoke-equivalence.json |
+| 四.9 资源 | 构建成功；high回收事件2342，max/oom/oom_kill均0，未触发停止或重试 | build-authorized/resources.json、child-result.json、result.json、end.log |
+
+以上相对证据路径均位于[evidence/v3](evidence/v3/summary.json)。实际执行的[flags断言](evidence/v3/verify_flags.py)与[产物/冒烟检查器](evidence/v3/verify_artifacts.py)已归档；不把检查器存在当作结果，结果由各命令真实退出码与[验收JSON](evidence/v3/verification/result.json)支持。两项冒烟源码与旧素材逐字节相同；除新root与测试目录外，编译、链接、BOLT与objdump参数相同（smoke-equivalence.json）。
+
+实际GBS墙钟 **657.953秒**（子进程收据657.767秒）；开始约2026-11-16T17:48:39.469043+00:00，结束2026-11-16T17:59:37.421727+00:00。此前等待 **944.208秒** 单列，不计入构建墙钟。构建cgroup实读memory.peak **5,369,176,064 B（5.0004 GiB）**，每60秒采样的最低MemAvailable **12,783,538,176 B（11.9056 GiB）**；MemoryHigh=2342、max=0、oom=0、oom_kill=0、oom_group_kill=0。产物轻量检查scope峰值705,003,520 B，无max/OOM；本任务全部监督单元已结束。
+
+### 8.4 产物清单与身份
+
+| RPM | 字节数 | SHA-256 |
+|---|---:|---|
+| bolt-22.1.8-1.x86_64.rpm | 1699990 | 15f4302b1fe63c00e785ab9a706b3dfe0dd49d31c88fc08c11e3fac4bb210926 |
+| bolt-debuginfo-22.1.8-1.x86_64.rpm | 43475370 | 0d40557304c512ea31f57966e0dc0ecacfcca65902e35daa7d50695f3ca62664 |
+| llvm-tools-subpkgs-debugsource-22.1.8-1.x86_64.rpm | 1934530 | 24f002e9d60ab1e08f91d7aa6271248dbdc776d9db65b23306843d5666948a04 |
+| llvm-tools-subpkgs-22.1.8-1.src.rpm | 340890079 | 7a61b4caec79c2dcce5c0393fa584129224832583f47c5d752299780c273bfd9 |
+
+完整文件清单见verification/rpm-list-0.stdout（bolt）、rpm-list-1.stdout（bolt-debuginfo）、rpm-list-2.stdout（debugsource）、source-rpm-0.stdout（源码RPM）。源码RPM和二进制只留temp，不进Git。
+
+| 运行文件 | runtime/.debug一致的build-id |
+|---|---|
+| llvm-bolt | d41669d23f1fae816f89f69d1b35b29dd2e3959f |
+| llvm-bolt-binary-analysis | 5e7cbfbaa7b7fe21202d6ea460f800bae4215824 |
+| merge-fdata | 2a3da2ef3af0caed498769e33c7410a32cbedc00 |
+| llvm-bolt-heatmap | 224740f0542fb2b077b34d1e384844f75c3bb867 |
+| llvm-bat-dump | 37a77096799348a071e32b003092495b43d333b8 |
+
+llvm-bolt SHA-256：bfcf86f1a76f4b3645655a5417816eeb42866e50254b3c92014b5dc0a9abc5f8。每个运行文件与.debug的SHA均见verification/result.json。两个runtime归档为/usr/lib64/libbolt_rt_instr.a、/usr/lib64/libbolt_rt_hugify.a。
+
+### 8.5 结论与边界
+
+**v3 补丁通过验证。** 这次在完整Tizen前置段下实际构建并验证了BOLT源码DWARF和debugsource，闭合第7节指出的正常环境验收缺口。旧错误环境的产物与结论保留为历史，不覆盖或复用其调试身份。
+
+AArch64只完成spec解析和x86_64工具改写AArch64 ELF冒烟，没有实际构建AArch64主机包；完整llvm.spec构建未执行。两项无profile最小程序冒烟不代表真实工作负载优化收益。
+
+原件和大产物保存在temp/verify-361624-fix-v3-20261116/；[raw-index.json](evidence/v3/raw-index.json)记录路径、SHA、大小。原补丁/v1/v2证据未改，未删除任何既有temp目录；未操作开发板、Gerrit或hq，未安装主机软件。GBS只在本任务独立root安装依赖，自动生成的HOME/.gbs.conf位于本任务temp内；没有新增WORKDIR外项目产物。完成后停止。
