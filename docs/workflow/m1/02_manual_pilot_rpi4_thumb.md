@@ -60,3 +60,47 @@ stderr: （空）
 等待 RPi4 连接恢复后重新从身份门禁开始，核对与周六记录一致，才能继续部署与采集。不得复用本次失败连接作为身份验收。
 
 按用户要求登记下次 hq 更新待办（本轮不修改 hq）：examples/ffmpeg/README.md 构建命令简化为普通 gbs 命令与可选资源限制示例，去掉 GIT_CONFIG_*、SUDO_ASKPASS、XDG 等内部隔离设置，以及 “Do not interfere with other builds” 等内部口吻。
+
+## 6. 重新开始后的检查（2026-11-16 00:42–00:45 PST）：部署前提缺失，停止
+
+本节保留第1–5节连接失败记录。本轮 SDB 已列出原端点 192.168.108.26:26101；未尝试其他端点或 RPi5。
+
+### 6.1 身份与权限
+
+[六项身份原文及逐项比较](evidence/06/identity.json)：model、uname -m/-r/-v、tizen-release 与 tizen-build.conf 均与周六相同，6/6通过。型号 Raspberry Pi 4 Model B Rev 1.5，armv7l，6.12.80-arm-rpi4-v7l，镜像 tizen-unified-toolchain_20261104.160709_tizen-headed-armv7l。
+
+[初始权限与系统命令预检](evidence/06/initial-preflight.json)：uid=5001(owner)，RPM计数1233；所列系统命令均能通过command -v。df /opt/afdo_agent 报 No such file or directory。该复合查询末尾退出标记为0，仅代表最后一项命令，不代表df成功；按原始诊断识别了失败。
+
+为排除非root权限导致不可见，记录初始状态后按用户授权执行一次sdb root on，再只读检查部署目录和文件。没有设置performance，没有执行任何perf命令。
+
+### 6.2 root 下部署检查与停止原因
+
+[原始检查](evidence/06/root-preflight.json)显示uid=0，并逐项返回：
+
+```text
+MISSING /opt/afdo_agent
+MISSING /opt/afdo_agent/inputs
+MISSING /opt/afdo_agent/tools/perf
+MISSING /opt/afdo_agent/lib/libLLVM.so.22.1
+MISSING /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4
+MISSING /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4
+```
+
+整个父目录不存在，因此不是仅凭ToS文件名判断缺失。没有搜索其他路径作为替代，没有补传工具或视频，没有创建目录。本轮任务第一部分第2条规定视频“缺失或不一致则停止”，因此停止；无法取得工具/视频SHA或进行cycles验证。
+
+hq记录的预期输入SHA：BBB `b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4`；ToS60秒段 `280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1`。这些是既有记录，不是本轮板上校验结果。不推断目录缺失的原因；镜像标识相同不能证明部署数据仍然存在。
+
+### 6.3 退出恢复及资源
+
+- [root on](evidence/06/root-on.json)与[root off](evidence/06/root-off.json)均返回明确切换结果，未重试；finally路径执行恢复。
+- [恢复后身份、RPM与df](evidence/06/restored-id.json)：uid=5001(owner)，与初始状态相同；RPM计数仍1233。
+- governor前值为policy0=schedutil，未写入过；[最后复读](evidence/06/final-governor.json)仍为schedutil。
+- /opt可用1,256,748 KiB，恢复前后相同。没有部署、创建或删除本轮板上work目录，无variants新增。
+- 仅运行串行轻量scope（3G/200%、nice19、ionice-c3），没有启动构建，也没有影响其他构建。初次free显示MemAvailable15656 MiB；[结束资源原文](evidence/06/meminfo.txt)与[scope峰值](evidence/06/resources.json)单独保存。较早短scope峰值未保存，不声称为完整全轮峰值。没有资源暂停、终止或重试。
+- 所有远端读取均收到真实退出码标记；只读重试0次，状态命令重试0次。没有安装、挂载、重启或修改sysctl。
+
+### 6.4 产出与披露
+
+训练0/3，profile转换0/6；无锁定profile SHA，无AutoFDO构建及警告统计，无正确性或测量结果。本轮未生成或打开任何真实profile（Q.5第17项访问集合为空），未做质量矩阵、未登记修正案3。baseline RPM提取及运行树准备尚未开始。
+
+证据索引与SHA：[evidence/06/sha256.json](evidence/06/sha256.json)。原始工作目录：temp/m1-pilot-rpi4-20261116/restart-01/。仅更新main报告与STATUS；hq和Gerrit均不变。继续前需要恢复已验证工具与两个视频输入的部署前提；本轮不自行越过缺失停止条件。

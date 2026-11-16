@@ -38,6 +38,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1 手动试跑重启后停止（2026-11-16：部署目录缺失）
+
+- [试跑报告第6节](workflow/m1/02_manual_pilot_rpi4_thumb.md)：RPi4恢复在线，六项身份与周六全部一致；初始uid5001。root下确认整个/opt/afdo_agent不存在，工具、BBB与ToS输入缺失，按“缺失则停止”门禁停止，未自行补部署。
+- root已恢复off/uid5001；policy0 governor未改动，最后复读仍schedutil；RPM前后均1233，/opt可用1,256,748 KiB不变。无采集、profile生成或读取、AutoFDO构建、正确性及测量结果；锁定profile SHA不存在。证据workflow/m1/evidence/06/，保留此前连接失败记录。
+- 等待部署前提恢复或用户后续指令；未操作RPi5、未改hq、未推Gerrit。下次hq简化命令待办保留。
+
 ## Workflow v0.1 评审文件入库（2026-11-16）
 
 评审文件原样入库，未修改内容；本轮仅登记与提交，不处理评审意见。

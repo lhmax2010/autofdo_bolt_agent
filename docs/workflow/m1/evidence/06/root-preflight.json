@@ -1,0 +1,13 @@
+{
+  "time": "2026-11-16T00:43:58.155226-08:00",
+  "argv": [
+    "sdb",
+    "-s",
+    "192.168.108.26:26101",
+    "shell",
+    "id; for f in /opt/afdo_agent /opt/afdo_agent/inputs /opt/afdo_agent/tools/perf /opt/afdo_agent/lib/libLLVM.so.22.1 /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4; do if test -e \"$f\"; then printf \"PRESENT %s\\n\" \"$f\"; else printf \"MISSING %s\\n\" \"$f\"; fi; done; df -Pk /opt; for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s \" \"$p\"; cat \"$p\"; done; printf \"__M1_RC__=%s\\n\" \"$?\""
+  ],
+  "transport_exit": 0,
+  "stdout": "uid=0(root) gid=0(root) groups=0(root),29(audio),44(video),201(display),1901(log),6505(pulse-access),6506(pulse-rt),6525(usb_device),10001(priv_externalstorage),10013(priv_tee_client),10014(priv_peripheralio),10212(priv_platform),10501(priv_camera),10502(priv_mediastorage),10503(priv_recorder),10704(priv_internet),10705(priv_network_get),10711(priv_tethering_admin),10901(priv_email),10903(priv_message_read),11103(priv_mapservice),11201(priv_appdebugging) context=\"User::Shell\"\nMISSING /opt/afdo_agent\nMISSING /opt/afdo_agent/inputs\nMISSING /opt/afdo_agent/tools/perf\nMISSING /opt/afdo_agent/lib/libLLVM.so.22.1\nMISSING /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4\nMISSING /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4\nFilesystem         1024-blocks      Used Available Capacity Mounted on\n/dev/mmcblk0p3         1335696     48868   1256748       4% /opt\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor schedutil\n__M1_RC__=0\n",
+  "stderr": ""
+}

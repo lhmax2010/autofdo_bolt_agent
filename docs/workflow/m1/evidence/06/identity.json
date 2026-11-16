@@ -1,0 +1,92 @@
+[
+  {
+    "time": "2026-11-16T00:43:17.159329-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "cat /proc/device-tree/model; rc=$?; printf \"\\n__M1_RC__=%s\\n\" \"$rc\""
+    ],
+    "transport_exit": 0,
+    "stdout": "Raspberry Pi 4 Model B Rev 1.5\u0000\n__M1_RC__=0\n",
+    "stderr": "",
+    "expected": "Raspberry Pi 4 Model B Rev 1.5\u0000",
+    "matches_saturday": true
+  },
+  {
+    "time": "2026-11-16T00:43:17.274650-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "uname -m; rc=$?; printf \"\\n__M1_RC__=%s\\n\" \"$rc\""
+    ],
+    "transport_exit": 0,
+    "stdout": "armv7l\n\n__M1_RC__=0\n",
+    "stderr": "",
+    "expected": "armv7l\r\n",
+    "matches_saturday": true
+  },
+  {
+    "time": "2026-11-16T00:43:17.388962-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "uname -r; rc=$?; printf \"\\n__M1_RC__=%s\\n\" \"$rc\""
+    ],
+    "transport_exit": 0,
+    "stdout": "6.12.80-arm-rpi4-v7l\n\n__M1_RC__=0\n",
+    "stderr": "",
+    "expected": "6.12.80-arm-rpi4-v7l\r\n",
+    "matches_saturday": true
+  },
+  {
+    "time": "2026-11-16T00:43:17.502937-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "uname -v; rc=$?; printf \"\\n__M1_RC__=%s\\n\" \"$rc\""
+    ],
+    "transport_exit": 0,
+    "stdout": "#1 SMP Wed Nov  4 17:05:36 UTC 2026\n\n__M1_RC__=0\n",
+    "stderr": "",
+    "expected": "#1 SMP Wed Nov  4 17:05:36 UTC 2026\r\n",
+    "matches_saturday": true
+  },
+  {
+    "time": "2026-11-16T00:43:17.621390-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "cat /etc/tizen-release; rc=$?; printf \"\\n__M1_RC__=%s\\n\" \"$rc\""
+    ],
+    "transport_exit": 0,
+    "stdout": "Tizen11.0/Unified 11.0.0 (arm)\nVERSION = 11.0.0\nCODENAME = TELEVEN\nBUILD_ID=tizen-unified-toolchain_20261104.160709_tizen-headed-armv7l\n\n__M1_RC__=0\n",
+    "stderr": "",
+    "expected": "Tizen11.0/Unified 11.0.0 (arm)\r\nVERSION = 11.0.0\r\nCODENAME = TELEVEN\r\nBUILD_ID=tizen-unified-toolchain_20261104.160709_tizen-headed-armv7l\r\n",
+    "matches_saturday": true
+  },
+  {
+    "time": "2026-11-16T00:43:17.737400-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "cat /etc/tizen-build.conf; rc=$?; printf \"\\n__M1_RC__=%s\\n\" \"$rc\""
+    ],
+    "transport_exit": 0,
+    "stdout": "TZ_BUILD_RELEASE_NAME=\"Tizen11.0/Unified\"\nTZ_BUILD_VERSION=11.0\nTZ_BUILD_FULLVER=11.0.0\nTZ_BUILD_RELEASE_TYPE=eng\nTZ_BUILD_VARIANT=NONE\n\nTZ_BUILD_PROFILE=common\nTZ_BUILD_PROJECT=Tizen-Unified-Toolchain\n\nTZ_BUILD_VENDOR=tizen\nTZ_BUILD_REPO=standard\nTZ_BUILD_ARCH=arm\n\nTZ_BUILD_ID=tizen-unified-toolchain_20261104.160709\nTZ_BUILD_DATE=20261104.160709\nTZ_BUILD_TIME=21:19:04\nTZ_BUILD_TS=1793827144\n\nTZ_BUILD_URL=http://download.tizen.org\nTZ_BUILD_SNAPSHOT_URL=${TZ_BUILD_URL}/snapshots/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_DAILY_URL=${TZ_BUILD_URL}/releases/daily/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_WEEKLY_URL=${TZ_BUILD_URL}/releases/weekly/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_MILESTONE_URL=${TZ_BUILD_URL}/releases/milestone/TIZEN/Tizen/Tizen-Unified/\n\nTZ_BUILD_WITH_MESA=1\nTZ_BUILD_WITH_WAYLAND=1\nTZ_BUILD_WITH_RDP=1\nTZ_BUILD_WITH_X=\n\n\n__M1_RC__=0\n",
+    "stderr": "",
+    "expected": "TZ_BUILD_RELEASE_NAME=\"Tizen11.0/Unified\"\r\nTZ_BUILD_VERSION=11.0\r\nTZ_BUILD_FULLVER=11.0.0\r\nTZ_BUILD_RELEASE_TYPE=eng\r\nTZ_BUILD_VARIANT=NONE\r\n\r\nTZ_BUILD_PROFILE=common\r\nTZ_BUILD_PROJECT=Tizen-Unified-Toolchain\r\n\r\nTZ_BUILD_VENDOR=tizen\r\nTZ_BUILD_REPO=standard\r\nTZ_BUILD_ARCH=arm\r\n\r\nTZ_BUILD_ID=tizen-unified-toolchain_20261104.160709\r\nTZ_BUILD_DATE=20261104.160709\r\nTZ_BUILD_TIME=21:19:04\r\nTZ_BUILD_TS=1793827144\r\n\r\nTZ_BUILD_URL=http://download.tizen.org\r\nTZ_BUILD_SNAPSHOT_URL=${TZ_BUILD_URL}/snapshots/TIZEN/Tizen/Tizen-Unified/\r\nTZ_BUILD_DAILY_URL=${TZ_BUILD_URL}/releases/daily/TIZEN/Tizen/Tizen-Unified/\r\nTZ_BUILD_WEEKLY_URL=${TZ_BUILD_URL}/releases/weekly/TIZEN/Tizen/Tizen-Unified/\r\nTZ_BUILD_MILESTONE_URL=${TZ_BUILD_URL}/releases/milestone/TIZEN/Tizen/Tizen-Unified/\r\n\r\nTZ_BUILD_WITH_MESA=1\r\nTZ_BUILD_WITH_WAYLAND=1\r\nTZ_BUILD_WITH_RDP=1\r\nTZ_BUILD_WITH_X=\r\n\r\n",
+    "matches_saturday": true
+  }
+]
