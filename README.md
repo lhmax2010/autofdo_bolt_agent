@@ -42,7 +42,7 @@ For this documentation revision, the already verified release source/build artif
 | Component | Status |
 |---|---|
 | llvm-profgen IP mode | Delivered (limited scope): user-space AArch64 and ARMv7 Thumb-2/A32 |
-| Optimization workflow | Planned / Not implemented |
+| Optimization workflow (M1) | First measured result: FFmpeg AutoFDO on RPi4 Thumb, 2.6% faster (manual run of the workflow steps); workflow automation in progress |
 | BOLT on RPi5 | Planned / Not implemented |
 | Skill and Agent | Planned / Not implemented |
 | Kernel | Separate track; method to be decided |
@@ -50,19 +50,22 @@ For this documentation revision, the already verified release source/build artif
 | Component / milestone | Sequence and acceptance | Status |
 |---|---|---|
 | llvm-profgen IP mode | User-space DWARF IP on AArch64 and ARMv7 Thumb-2/A32; functional release checks passed | Delivered (limited scope) |
-| M1 | FFmpeg on RPi4: reproducible collection, identity checks, conversion, rebuild, correctness and timed comparison | Planned / Not implemented |
-| M2 | FFmpeg on RPi5, plus instrumented PGO on both boards; equivalent artifact and result contracts | Planned / Not implemented |
+| M1 | FFmpeg on RPi4: reproducible collection, identity checks, conversion, rebuild, correctness and timed comparison | First measured result: FFmpeg AutoFDO on RPi4 Thumb, 2.6% faster (manual run of the workflow steps); workflow automation in progress |
+| M2a | FFmpeg AutoFDO on RPi5 (AArch64), with board-specific telemetry and the same artifact/result contracts | Planned; not implemented |
+| M2b | Instrumented PGO for FFmpeg on RPi4 and RPi5, after M2a | Planned; not implemented |
 | M3 | GStreamer package profiles and multi-library collection/rebuild | Planned / Not implemented |
 | M4 | BOLT on RPi5 only; relocation/identity checks, host conversion and correctness/timing | Planned / Not implemented |
 | M5 Skill | Reusable SKILL.md instructions plus scripts that run workflow stages and interpret results | Planned / Not implemented |
 | Agent | After the skill: select packages, run the workflow through the skill, report results; builds on both layers | Planned / Not implemented |
 | Kernel | Separate track; method to be decided; current llvm-profgen delivery has no kernel support | Planned / Not implemented |
 
+The first manual FFmpeg AutoFDO pilot on RPi4 Thumb reduced test-video elapsed time by **2.565%**, with a paired-block 95% confidence interval of **[-2.859%, -2.256%]**. The result passed the predefined faster threshold and correctness checks on both declared videos. It covers one board and one test input; workflow automation is still in progress. Read the [pilot report](docs/03_reports/m1_ffmpeg_rpi4_thumb_pilot.md) for all 15 blocks, controls and limitations.
+
 Package owners provide benchmark and data-collection methods through package profiles.
 
 Validated: normal release build, strict input/address/identity/failure behavior, prior integration checks, fixed C1 output regression, IP profile/JSON preservation and the host demo.
 
-Not validated: statistical quality equivalence, optimal defaults, performance gains, the proposed workflow automation, BOLT, skill or Agent. Explicit max/none/none/none is a conservative calling policy; it is not a claim that defaults were statistically validated.
+Not validated: statistical quality equivalence, optimal defaults, general performance gains beyond the reported pilot, the proposed workflow automation, BOLT, skill or Agent. Explicit max/none/none/none is a conservative calling policy; it is not a claim that defaults were statistically validated.
 
 [Introduction](docs/01_introduction.md) | [IP design](docs/02_design/llvm_profgen_ip_mode_design_summary.md) | [Workflow plan](docs/02_design/workflow_design_overview.md) | [Delivery report](docs/03_reports/llvm_profgen_delivery.md)
 
@@ -264,7 +267,25 @@ Use effective cooling, record frequency/temperature during runs and preserve fir
 
 ## 8. End-to-end manual AutoFDO: FFmpeg
 
-**Performance gains not yet validated.** The [FFmpeg example](examples/ffmpeg/README.md) supplies a spec patch and exact fixed source revision in Gerrit platform/upstream/ffmpeg. It appends profiling DWARF/unique-name flags, selects Thumb/A32, adds SHA-1 build-ID and optionally consumes a sample profile inside the build root. ARMv7 Thumb and A32 baseline builds are verified using the [target GBS configuration](examples/gbs/ffmpeg-target.conf.in): Unified 20261104.125239 / Base 20261030.120529, clang 22.1.8-4.1, fresh roots, -j2, exits 0. Measured times were 303.08 and 314.09 seconds. The example gives exact commands and runtime/debug build-ID checks; packaged libavcodec/libavutil identities match and their DWARF/line tables are readable. AArch64 and profile-consuming builds remain **Not verified**.
+The [manual RPi4 Thumb pilot](docs/03_reports/m1_ffmpeg_rpi4_thumb_pilot.md) completed sampling, profile generation, a consuming rebuild, correctness checks and 15 paired measurement blocks: **2.6% faster**, with the scope and uncertainty documented in that report. Workflow automation remains in progress.
+
+The [FFmpeg example](examples/ffmpeg/README.md) provides the fixed source revision, profiling patch, ordinary GBS commands and [target configuration](examples/gbs/ffmpeg-target.conf.in). ARMv7 Thumb and A32 baseline builds are verified with Unified 20261104.125239 / Base 20261030.120529 and Clang 22.1.8-4.1. Fresh online-build times were 303.08 and 314.09 seconds. **Thumb profile consumption is Verified** using the same frozen 108-package dependency set as its control. **A32 profile consumption and AArch64 builds/profile consumption are Not verified**.
+
+### Building from an archived dependency set
+
+Preserve the actual downloaded dependency RPMs, their SHA manifest and the resolved buildconf from the first baseline build. Generate local metadata with createrepo_c, then build BASE-r and AFDO in fresh roots using only that directory:
+
+```bash
+cd "$PROJECT/ffmpeg"
+gbs -c "$TARGET_CONF" build -A armv7l --spec ffmpeg.spec --include-all \
+  --skip-conf-repos -R "$FROZEN" -D "$FROZEN/tizen_unified_standard.conf" \
+  --buildroot "$PROJECT/build/ffmpeg-afdo-frozen" --threads 1 \
+  --define '_smp_mflags -j2' --define 'profile_isa thumb' --define 'with_autofdo 1'
+```
+
+Set TARGET_CONF and FROZEN and install the locked Source2000 profile as shown in the [complete archive and consumption recipe](examples/ffmpeg/README.md#building-from-an-archived-dependency-set). The validated local-directory entry uses --skip-conf-repos, -R and -D together; a file:// URL alone did not resolve the required build metadata. The pilot's frozen BASE-r and AFDO builds took 120.02 and 124.34 seconds. Optional resource limits are shown separately in the example.
+
+The archive permits reuse after a snapshot disappears, provided the complete dependency set and buildconf were retained. Verify package lists, compiler/linker arguments, source paths and packaged identities; a changed repository creates a new experiment, not a continuation with old controls. The two target build IDs changed for AFDO while each runtime/debug pair still matched; [exact IDs and consumption checks](examples/ffmpeg/README.md#profile-consumption-thumb-verified) are recorded in the example.
 
 ### Training and test media
 
@@ -312,7 +333,7 @@ Check the actual resulting directory layout and full SHA manifest. For RPi4 set 
 set -euo pipefail
 RUN=/opt/afdo_agent/work/collect-new
 mkdir -p "$RUN/buildid" "$RUN/cache"
-export LC_ALL=C HOME="$RUN" TMPDIR="$RUN" XDG_CACHE_HOME="$RUN/cache"
+export LC_ALL=C HOME="$RUN" TMPDIR="$RUN"
 export GST_REGISTRY="$RUN/registry.bin"
 export LD_LIBRARY_PATH=/opt/afdo_agent/variants/baseline/usr/lib:/opt/afdo_agent/lib
 P=/opt/afdo_agent/tools/perf
@@ -351,9 +372,11 @@ Adjust the exact regex and event to the captured path/name; use usr/lib64 for AA
 
 ### Rebuild and compare
 
-Follow the example patch's Source2000 procedure to rebuild with -fprofile-sample-use. Preserve source-relative paths, architecture and base flags. Verify packaged runtime/debug identities and keep both variants.
+Follow the example patch's Source2000 procedure to rebuild with -fprofile-sample-use from the frozen dependency set. Preserve source-relative paths, architecture and base flags. Compare the exact installed package list and normalized compiler/linker commands. Verify packaged runtime/debug identities and keep both variants. For multiple target libraries, merge the training runs per library, check cross-library profile keys, then merge the package profile as in the pilot.
 
-First compare decoded-output SHA for baseline and optimized libraries using an I420 filesink output (or a FIFO hashed concurrently). Then time otherwise identical pipelines with /usr/bin/time and alternate the LD_LIBRARY_PATH of baseline and optimized variants. Exclude fixed warmups, run at least ten interleaved rounds, retain every round and its correctness/thermal/frequency data. Use the planned [measurement method](docs/02_design/workflow_design_overview.md) for intervals and interpretation. Exact timed runner automation and FFmpeg profile-consuming performance results are **Not verified**. Performance gains not yet validated.
+Use the board's system decoder as an independent oracle, then require baseline and optimized output SHA, frame count, byte count and caps to match on each declared video before and after timing. Use an untimed I420 filesink or FIFO for correctness, and fakesink sync=false for timing. Verify the actual target libraries in every timed process's maps, with file checksums and build IDs tied to the variant manifest.
+
+Fix the warmups, paired-block count, balanced AB/BA order, seed and tolerance before timing. Analyze paired log time ratios with a 20000-resample block bootstrap; retain flagged blocks in the primary analysis and report clean-block sensitivity. The [workflow overview](docs/02_design/workflow_design_overview.md#measurement) defines faster, slower, equivalent and inconclusive. The manual pilot used 15 blocks and Bash time around perf stat. General timed-runner automation is **Planned; not implemented**.
 
 ## 9. Read the result
 
@@ -422,6 +445,7 @@ Failures preserve an old profile. Non-path-conflict failures atomically replace 
 - Avg, zero filling and prev-inst need usable mapping symbols and provable boundaries.
 - ARMv7 pseudo-probe compilation has a known crash; pseudo-probe, IP perf.data input and kernel profiles are outside delivery.
 - BOLT is planned for RPi5 only and is not provided by the delivered tool package.
-- Current board condition, a fresh host provisioning recipe, standalone lit recipe and full consumption of the new FFmpeg example are not verified as detailed above.
+- The reported Thumb consuming build and two-video correctness check are verified. A32 consumption, AArch64 builds/consumption, a fresh host provisioning recipe and a standalone lit recipe remain Not verified or Not documented yet as described above. Board condition must be checked anew for each experiment.
+- The 2.6% manual pilot result is limited to one board, one test video and single-threaded decode. The video was previously used in tool development, firmware throttle history was unreadable, and two telemetry records were incomplete. See the [pilot limitations](docs/03_reports/m1_ffmpeg_rpi4_thumb_pilot.md#limitations-and-verification).
 - FFmpeg ARMv7 packaging emitted eight nonfatal debugedit DWARF 5 diagnostics per variant. Runtime/debug IDs and readable sections passed for libavcodec/libavutil; complete debugsource/path rewriting is not established. See the [FFmpeg limitations](examples/ffmpeg/README.md#known-limitations).
 - Detailed raw evidence is retained by the project team.
