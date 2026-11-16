@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "sudo",
+    "-n",
+    "chroot",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0",
+    "/usr/bin/rpm",
+    "--eval",
+    "_lib=%{_lib}\n_libdir=%{_libdir}\n_build_create_debug=%{?_build_create_debug}\n__os_install_post=%{__os_install_post}\n__debug_install_post=%{__debug_install_post}"
+  ],
+  "exit": 0,
+  "stdout": "_lib=lib64\n_libdir=/usr/lib64\n_build_create_debug=\n__os_install_post=\n    /usr/lib/rpm//brp-compress \n    \n    /usr/lib/rpm/brp-strip /bin/strip \n    /usr/lib/rpm/brp-strip-static-archive /bin/strip \n#    /usr/lib/rpm/brp-strip-comment-note /bin/strip /bin/objdump \n\n    /usr/lib/rpm/brp-python-hardlink \n    /usr/lib/rpm/tizen/find-docs.sh /usr/src/packages/BUILDROOT/%{NAME}-%{VERSION}-%{RELEASE}.x86_64 \n\n__debug_install_post=\n    /usr/lib/rpm/find-debuginfo.sh \\\n    -j40 \\\n     \\\n     \\\n     \\\n     \\\n    --build-id-seed \"%{VERSION}-%{RELEASE}\" \\\n     \\\n    --unique-debug-src-base \"%{name}-%{VERSION}-%{RELEASE}.x86_64\" \\\n     \\\n     \\\n     \\\n     \\\n    -S debugsourcefiles.list \\\n    \"/usr/src/packages/BUILD/\"\\\n    \n   cp /usr/lib/rpm/debug.manifest /usr/src/packages/BUILD//%{name}-debuginfo.manifest \n   cp /usr/lib/rpm/debug.manifest /usr/src/packages/BUILD//%{name}-debugsource.manifest \n \n\n",
+  "stderr": ""
+}

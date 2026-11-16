@@ -1,0 +1,71 @@
+Source: temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS/scratch.x86_64.0/usr/lib/rpm/macros
+SHA-256: f2f13c69904e872a8196011d0f8e3dcc6feee4edf53380418c78ea737b44593a
+
+178: %_find_debuginfo_opts %{?_rpm_strip_disable:--strip-disable}
+179: %_find_debuginfo_strip_opts %{?_rpm_strip_option:\'--strip-option=%{_rpm_strip_option}\'}
+180: %_find_debuginfo_ko_strip_opts %{?_rpm_ko_strip_option:\'--strip-ko-option=%{_rpm_ko_strip_option}\'}
+181: 
+182: %__debug_install_post   \
+183:     %{_rpmconfigdir}/find-debuginfo.sh \\\
+184:     %{?_smp_mflags} \\\
+185:     %{?_missing_build_ids_terminate_build:--strict-build-id} \\\
+186:     %{?_no_recompute_build_ids:-n} \\\
+187:     %{?_include_minidebuginfo:-m} \\\
+188:     %{?_include_gdb_index:-i} \\\
+189:     %{?_unique_build_ids:--build-id-seed "%{VERSION}-%{RELEASE}"} \\\
+190:     %{?_unique_debug_names:--unique-debug-suffix "-%{VERSION}-%{RELEASE}.%{_arch}"} \\\
+191:     %{?_unique_debug_srcs:--unique-debug-src-base "%{name}-%{VERSION}-%{RELEASE}.%{_arch}"} \\\
+192:     %{?_find_debuginfo_dwz_opts} \\\
+193:     %{?_find_debuginfo_opts} \\\
+194:     %{?_find_debuginfo_strip_opts} \\\
+195:     %{?_find_debuginfo_ko_strip_opts} \\\
+196:     %{?_debugsource_packages:-S debugsourcefiles.list} \\\
+197:     "%{_builddir}/%{?buildsubdir}"\\\
+198:     %{?_install_debug_manifest} \
+199: %{nil}
+200: 
+
+229: %debug_package \
+230: %ifnarch noarch\
+231: %global __debug_package 1\
+232: %_debuginfo_template\
+233: %{?_debugsource_packages:%_debugsource_template}\
+234: %endif\
+235: %{nil}
+236: 
+237: %_defaultdocdir		%{_datadir}/doc/packages
+238: %_docdir_fmt		%%{NAME}
+239: %_defaultlicensedir	%{_datadir}/licenses
+240: 
+241: # Following macros for filtering auto deps must not be used in spec files.
+242: # Their purpouse is to set up global filtering for all packages. If you need
+243: # to set up specific filtering for your package use %__requires_exclude_from
+244: # and %__provides_exclude_from instead.
+245: %__global_requires_exclude_from		%{?_docdir:%{_docdir}}
+246: %__global_provides_exclude_from		%{?_docdir:%{_docdir}}
+247: 
+248: #	The path to the gzip executable (legacy, use %{__gzip} instead).
+249: %_gzipbin		%{__gzip}
+250: 
+
+888: 
+889: #%{__spec_build_body}\
+890: #%{__spec_build_post}\
+891: #%{nil}
+892: 
+893: %__spec_install_shell	%{___build_shell}
+894: %__spec_install_args	%{___build_args}
+895: %__spec_install_cmd	%{___build_cmd}
+896: %__spec_install_pre	%{___build_pre}
+897: %__spec_install_body	%{___build_body}
+898: %__spec_install_post\
+899: %{?__debug_package:%{__debug_install_post}}\
+900: %{__arch_install_post}\
+901: %{__os_install_post}\
+902: %{nil}
+903: %__spec_install_template	#!%{__spec_install_shell}\
+904: %{__spec_install_pre}\
+905: %{nil}
+906: 
+907: #%{__spec_install_body}\
+

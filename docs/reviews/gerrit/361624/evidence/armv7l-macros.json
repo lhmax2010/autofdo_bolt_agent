@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "sudo",
+    "-n",
+    "chroot",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/workflow-p1p2-20261116/root-afdo-diag/local/BUILD-ROOTS/scratch.armv7l.0",
+    "/usr/bin/rpm",
+    "--eval",
+    "_lib=%{_lib}\n_libdir=%{_libdir}\n_build_create_debug=%{?_build_create_debug}\n__os_install_post=%{__os_install_post}\n__debug_install_post=%{__debug_install_post}"
+  ],
+  "exit": 0,
+  "stdout": "_lib=lib\n_libdir=/usr/lib\n_build_create_debug=\n__os_install_post=\n    /usr/lib/rpm//brp-compress \n    \n    /usr/lib/rpm/brp-strip /bin/strip \n    /usr/lib/rpm/brp-strip-static-archive /bin/strip \n#    /usr/lib/rpm/brp-strip-comment-note /bin/strip /bin/objdump \n\n    /usr/lib/rpm/brp-python-hardlink \n    /usr/lib/rpm/tizen/find-docs.sh /usr/src/packages/BUILDROOT/%{NAME}-%{VERSION}-%{RELEASE}.arm \n\n__debug_install_post=\n    /usr/lib/rpm/find-debuginfo.sh \\\n    -j40 \\\n     \\\n     \\\n     \\\n     \\\n    --build-id-seed \"%{VERSION}-%{RELEASE}\" \\\n     \\\n    --unique-debug-src-base \"%{name}-%{VERSION}-%{RELEASE}.arm\" \\\n     \\\n     \\\n     \\\n     \\\n    -S debugsourcefiles.list \\\n    \"/usr/src/packages/BUILD/\"\\\n    \n   cp /usr/lib/rpm/debug.manifest /usr/src/packages/BUILD//%{name}-debuginfo.manifest \n   cp /usr/lib/rpm/debug.manifest /usr/src/packages/BUILD//%{name}-debugsource.manifest \n \n\n",
+  "stderr": ""
+}

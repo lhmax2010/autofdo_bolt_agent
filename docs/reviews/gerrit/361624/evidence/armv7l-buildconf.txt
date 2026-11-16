@@ -1,0 +1,140 @@
+Source: temp/m1-pilot-v02-20261116/build/repo/tizen_unified_standard.conf
+SHA-256: 4f9f17e1e3aa7d97b4018c7925491502882c3c1b767735e7b8bb3df1b9d4d489
+
+1: %define _project Tizen-Unified-Toolchain
+2: 
+3: Macros:
+4: %vendor Tizen
+5: %_project Tizen-Unified-Toolchain
+6: :Macros
+7: 
+8: %define _project Tizen-Unified-Toolchain
+9: 
+10: Macros:
+11: %vendor Tizen
+12: %_project Tizen-Unified-Toolchain
+13: :Macros
+14: 
+15: 
+16: ### from Tizen-Base-Toolchain
+17: %define _repository standard
+18: 
+19: Macros:
+20: 
+21: 
+22: %_project Tizen-Unified-Toolchain
+23: 
+24: ### from Tizen-Base-Toolchain
+25: 
+26: %_repository standard
+27: :Macros
+28: 
+29: ################################################################################
+30: # Project config for Tizen-Base-Toolchain
+31: #
+32: # RE contacts:
+33: #
+34: #
+35: # vim: set syntax=spec:
+36: ################################################################################
+37: 
+38: Patterntype: rpm-md comps
+39: Release: <CI_CNT>.<B_CNT>
+40: Support: build
+41: Support: build-compare build-mkbaselibs
+42: # Support: rpmlint-mini rpmlint-tizen
+43: 
+44: # new cycle handling (gbs version >= 0.25.29)
+45: BuildFlags: genmetaalgo:1
+46: 
+47: ############################# conflicts resolution #############################
+48: 
+49: Prefer: util-linux
+50: Prefer: toybox
+
+175: export AR=%{__ar} RANLIB=%{__ranlib};\
+176: %{nil}
+177: 
+178: %build %%build\
+179: export AR=%{__ar} RANLIB=%{__ranlib};\
+180: export CC=%{__cc} CXX=%{__cxx};\
+181: %{nil}
+182: 
+183: %install %{?_enable_debug_packages:%{?buildsubdir:%{debug_package}}}\
+184: %%install\
+185: export AR=%{__ar} RANLIB=%{__ranlib};\
+186: export CC=%{__cc} CXX=%{__cxx};\
+187: %{nil}
+
+280: 
+281: ########## buildroot config ##########
+282: 
+283: # Bootstrap stage: Optimal order for bash → dash /bin/sh transition
+284: # Timeline: filesystem → bash (/bin/sh=bash) → setup → dash (/bin/sh=dash)
+285: 
+286: Preinstall: filesystem
+287: Preinstall: bash
+288: RunScripts: setup
+289: Preinstall: dash
+290: Preinstall: bzip2 coreutils toybox diffutils grep rpm
+291: Preinstall: glibc libacl libattr libxcrypt
+292: Preinstall: libcap
+293: Preinstall: libgcc
+294: Preinstall: libpopt sed tar libarchive-tools zlib
+295: Preinstall: libncurses libreadline
+296: Preinstall: libelf libbz2
+297: Preinstall: liblzma
+298: Preinstall: libopenssl3
+299: Preinstall: nss nspr libfreebl3 libsoftokn3
+300: Preinstall: libmagic
+301: Preinstall: liblua
+302: Preinstall: smack libsmack libxml2 libmagic  libmagic-data
+303: Preinstall: libsqlite
+304: #Preinstall: rpm-security-plugin
+305: Preinstall: util-linux util-linux-su
+306: Preinstall: libzstd1
+307: 
+308: VMinstall: perl libmount libblkid libext2fs libuuid  grep libpcre util-linux libsmartcols procps-ng
+309: 
+310: Required: binutils glibc rpm-build libtool
+311: 
+312: Support: gcc gcc-c++
+313: Support: clang llvm-devel
+314: Support: glibc-locale
+315: Support: perl
+316: Support: hostname
+317: Support: cpio findutils
+318: Support: file findutils zlib bzip2
+319: Support: gzip hostname net-tools
+320: Support: make  patch sed  gawk tar libarchive-tools grep coreutils toybox pkg-config
+321: Support: m4  tzdata
+322: Support: util-linux
+323: Support: less
+324: Support: which  elfutils
+325: Support: update-alternatives
+326: Support: libstdc++-devel
+327: Support: cpp
+328: Support: libatomic
+329: Support: libgomp
+330: Support: libitm
+331: Support: hal-rootstrap-checker
+332: Support: app-rootstrap-checker
+333: 
+334: Keep: libstdc++-devel
+335: Keep: cpp gcc libstdc++
+336: Keep: pam
+337: Keep: binutils cpp  libmagic-data file findutils gawk gcc  gcc-c++
+338: Keep: gdbm gzip libada libunwind  glibc-devel libpcre xz-lzma-compat
+339: Keep: make  gmp libcap groff cpio
+340: Keep: patch rpm-build  nss nspr elfutils python grep libgcc gcc-c++
+341: Keep: kernel-headers  perl-libs perl
+342: Keep: pkgconfig glib2 tizen-rpm-config
+343: Keep: libmpc libmpfr libppl libgmp libppl_c
+344: Keep: libcloog libppl libgmpxx
+345: Keep: nss-softokn-freebl libmagic libmagic-data
+346: Keep: setup
+347: Keep: update-alternatives
+348: Keep: clang llvm libllvm llvm-devel
+349: Keep: gcc-c++
+350: Keep: libatomic
+

@@ -38,6 +38,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Gerrit 361624 patch set 1 只读事实核查（2026-11-16）
+
+- SSH取回并核验 **da885208aeb52f55c448ff46873d242346727522**，父提交61ef5d31ca91025c414c748477bef0c64ddfa67c；[共享文件、原始diff/spec与核查报告](reviews/gerrit/361624/facts_check.md)、[SHA清单](reviews/gerrit/361624/SHA256SUMS)已入库。评审原文SHA `1ab6f4311f60b6b26736286bd1707578f10eca799d804a234f9d4ab27e7fcf39`，从指定Downloads mv后按授权复制一份到llvm-optimize/temp/review-361624，仅写该文件。
+- 两已有root均含llvm/clang：FFmpeg armv7l 108包无python3，LLVM x86_64 122包已有python3。buildconf Support为clang/llvm-devel，通过依赖引入llvm；不能泛称每个root都首次新增Python。
+- 完整spec明确x86_64目标为X86/ARM/AArch64/BPF，aarch64为AArch64/BPF；BOLT默认取安装LLVM目标与支持集的交集，不能仅因未显式设置BOLT_TARGETS_TO_BUILD便断言缺AArch64。
+- GBS宏与只读rpmspec解析证明debug_package nil不能单独判定缺调试包；旧发布实产llvm-debuginfo，但新361624 bolt/llvm最终RPM与build-id仍未验证。armv7l的_lib=lib、_libdir=/usr/lib，llvm-devel安装LLVMConfig于/usr/lib/cmake/llvm，均已查证。
+- 未接板、未构建、未评论或推送Gerrit、未改hq/认证/旧证据；两次初始解析错误保留，最终root RPM加载器只读解析成功。完成后停止。
+
 ## Workflow M1 第一、二阶段主机实现（2026-11-16）
 
 - [实现与验收报告](workflow/m1/04_implementation_p1_p2.md)：新增 `workflow/` 的config、receipts、build、buildlock、profgen、consumption、stats、report与CLI；94项合成单元测试通过，12个board/workload脚本通过 `bash --posix -n`，shellcheck未安装。板上命令保留dry-run接口，未接板，不宣称自动化M1全流程验收。

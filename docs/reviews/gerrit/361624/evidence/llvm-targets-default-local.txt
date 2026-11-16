@@ -1,0 +1,48 @@
+Source: src/llvm/llvm/CMakeLists.txt
+SHA-256: 1c5e125ed2a6d7e18178b75fe97abf2ccf5d83a1b991b0afbbd0059a08f4c46d
+
+518: set(LLVM_ALL_TARGETS
+519:   AArch64
+520:   AMDGPU
+521:   ARM
+522:   AVR
+523:   BPF
+524:   Hexagon
+525:   Lanai
+526:   LoongArch
+527:   Mips
+528:   MSP430
+529:   NVPTX
+530:   PowerPC
+531:   RISCV
+532:   Sparc
+533:   SPIRV
+534:   SystemZ
+535:   VE
+536:   WebAssembly
+537:   X86
+538:   XCore
+539:   )
+540: 
+541: set(LLVM_ALL_EXPERIMENTAL_TARGETS
+542:   ARC
+543:   CSKY
+544:   DirectX
+545:   M68k
+546:   Xtensa
+547: )
+548: 
+549: # List of targets with JIT support:
+550: set(LLVM_TARGETS_WITH_JIT X86 PowerPC AArch64 ARM Mips SystemZ)
+551: 
+552: set(LLVM_TARGETS_TO_BUILD "all"
+553:     CACHE STRING "Semicolon-separated list of targets to build, or \"all\".")
+554: 
+555: set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD ""
+
+649: if( LLVM_TARGETS_TO_BUILD STREQUAL "all" )
+650:   set( LLVM_TARGETS_TO_BUILD ${LLVM_ALL_TARGETS} )
+651: endif()
+652: 
+653: if(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD STREQUAL "all")
+

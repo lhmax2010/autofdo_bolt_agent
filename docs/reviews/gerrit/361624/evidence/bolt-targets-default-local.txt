@@ -1,0 +1,30 @@
+Source: src/llvm/bolt/CMakeLists.txt
+SHA-256: cc11c0c511d034a4d8b921c77f1c55fcfd350ca9eb469b1c6d82bfe03ca4fa6a
+
+39:   list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR}")
+40: 
+41:   set(LLVM_MAIN_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm" CACHE PATH "Path to LLVM source tree")
+42:   find_program(LLVM_TABLEGEN_EXE "llvm-tblgen" ${LLVM_TOOLS_BINARY_DIR}
+
+63: # Determine default set of targets to build -- the intersection of
+64: # those BOLT supports and those LLVM is targeting.
+65: set(BOLT_TARGETS_TO_BUILD_all "AArch64;X86;RISCV")
+66: set(BOLT_TARGETS_TO_BUILD_default)
+67: foreach (tgt ${BOLT_TARGETS_TO_BUILD_all})
+68:   if (tgt IN_LIST LLVM_TARGETS_TO_BUILD)
+69:     list(APPEND BOLT_TARGETS_TO_BUILD_default ${tgt})
+70:   endif()
+71: endforeach()
+72: 
+73: # Allow the user to specify the BOLT targets, and then check that LLVM
+74: # is indeed targeting those.
+75: set(BOLT_TARGETS_TO_BUILD "${BOLT_TARGETS_TO_BUILD_default}"
+76:   CACHE STRING "Targets for BOLT to support.")
+77: if (NOT BOLT_TARGETS_TO_BUILD)
+78:   message(FATAL_ERROR "BOLT enabled but BOLT_TARGETS_TO_BUILD is empty")
+79: endif()
+80: foreach (tgt ${BOLT_TARGETS_TO_BUILD})
+81:   if (NOT tgt IN_LIST LLVM_TARGETS_TO_BUILD)
+82:     message(FATAL_ERROR "BOLT target '${tgt}' is not in LLVM_TARGETS_TO_BUILD")
+83:   endif()
+

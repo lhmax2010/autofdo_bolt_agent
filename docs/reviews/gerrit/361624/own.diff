@@ -1,0 +1,905 @@
+commit da885208aeb52f55c448ff46873d242346727522
+Author: Dongkyun Son <dongkyun.s@samsung.com>
+Date:   Sat Nov 14 15:25:55 2026 +0900
+
+    packaging: split tool subpackages into a standalone llvm-tools-subpkgs spec
+    
+    * 3a5189033a1f - packaging: move tool subpackages to a standalone llvm-tools-subpkgs spec
+    * d364b338759a - bolt: create ZLIB/LibXml2 targets in standalone build
+    * 28e72ec6b05d - bolt: mirror X86 mnemonic tables and helpers for standalone build
+    * 1b9c1ce174de - packaging: add --build-id=sha1 to toolchain linker flags
+    * 0cc528da035e - bolt: standalone build fixes for LLVM_LINK_LLVM_DYLIB=ON
+    * 3abe328e2c30 - packaging: build profiling tools and BOLT for armv7l (Tizen)
+    * d3f74e4f484d - packaging: add Obsoletes and python3 Requires to llvm; tidy tools subpackages
+    * c7edd8f43c66 - packaging: note that scan-build needs clang at runtime
+    * 67304f964043 - packaging: install with DESTDIR and do not ship libgomp/libiomp5 links
+    
+    Change-Id: Ie2c1d45cea6703a0caef72187397275a03e66468
+    Signed-off-by: Dongkyun Son <dongkyun.s@samsung.com>
+    Signed-off-by: Pareek Eshaan <e.pareek@samsung.com>
+    Co-Authored-By: Cline SR
+
+diff --git a/bolt/CMakeLists.txt b/bolt/CMakeLists.txt
+index 5c7d51e1e398..ce08094e25ba 100644
+--- a/bolt/CMakeLists.txt
++++ b/bolt/CMakeLists.txt
+@@ -38,6 +38,12 @@ if(BOLT_BUILT_STANDALONE)
+   find_package(LLVM REQUIRED HINTS "${LLVM_CMAKE_DIR}")
+   list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR}")
+ 
++  # The exported LLVM targets (e.g. LLVMSupport) reference ZLIB::ZLIB and
++  # LibXml2::LibXml2 in their link interfaces; create these targets up front
++  # or CMake's generate step fails with "target was not found".
++  find_package(ZLIB REQUIRED)
++  find_package(LibXml2 REQUIRED)
++
+   set(LLVM_MAIN_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../llvm" CACHE PATH "Path to LLVM source tree")
+   find_program(LLVM_TABLEGEN_EXE "llvm-tblgen" ${LLVM_TOOLS_BINARY_DIR}
+     NO_DEFAULT_PATH)
+@@ -159,6 +165,12 @@ if (BOLT_ENABLE_RUNTIME)
+                -DLLVM_LIBDIR_SUFFIX=${LLVM_LIBDIR_SUFFIX}
+                -DLLVM_LIBRARY_DIR=${LLVM_LIBRARY_DIR}
+                -DBOLT_BUILT_STANDALONE=${BOLT_BUILT_STANDALONE}
++               # The runtime is freestanding and adds its own ISA flags
++               # (-mgeneral-regs-only etc.); distro optflags inherited from
++               # the environment conflict with them (e.g. -msse4.2 with
++               # -mgeneral-regs-only), so start from clean flag sets.
++               -DCMAKE_C_FLAGS=
++               -DCMAKE_CXX_FLAGS=
+                ${extra_args}
+     INSTALL_COMMAND ""
+     BUILD_ALWAYS True
+diff --git a/bolt/lib/Core/CMakeLists.txt b/bolt/lib/Core/CMakeLists.txt
+index 58cfcab370f1..69937353e7fe 100644
+--- a/bolt/lib/Core/CMakeLists.txt
++++ b/bolt/lib/Core/CMakeLists.txt
+@@ -38,7 +38,6 @@ add_llvm_library(LLVMBOLTCore
+   Relocation.cpp
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   LINK_LIBS
+   ${LLVM_PTHREAD_LIB}
+   )
+diff --git a/bolt/lib/Passes/CMakeLists.txt b/bolt/lib/Passes/CMakeLists.txt
+index ec012f05cc49..303f1fbcdae8 100644
+--- a/bolt/lib/Passes/CMakeLists.txt
++++ b/bolt/lib/Passes/CMakeLists.txt
+@@ -50,7 +50,6 @@ add_llvm_library(LLVMBOLTPasses
+   RetpolineInsertion.cpp
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   LINK_LIBS
+   ${LLVM_PTHREAD_LIB}
+diff --git a/bolt/lib/Profile/CMakeLists.txt b/bolt/lib/Profile/CMakeLists.txt
+index a2bb4aa074c7..d2ec75dacb7f 100644
+--- a/bolt/lib/Profile/CMakeLists.txt
++++ b/bolt/lib/Profile/CMakeLists.txt
+@@ -8,7 +8,6 @@ add_llvm_library(LLVMBOLTProfile
+   YAMLProfileWriter.cpp
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   LINK_COMPONENTS
+   Demangle
+diff --git a/bolt/lib/Rewrite/CMakeLists.txt b/bolt/lib/Rewrite/CMakeLists.txt
+index bc1b2ed3c2e3..e45bef86d4cf 100644
+--- a/bolt/lib/Rewrite/CMakeLists.txt
++++ b/bolt/lib/Rewrite/CMakeLists.txt
+@@ -29,7 +29,6 @@ add_llvm_library(LLVMBOLTRewrite
+   GNUPropertyRewriter.cpp
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   LINK_LIBS
+   ${LLVM_PTHREAD_LIB}
+diff --git a/bolt/lib/RuntimeLibs/CMakeLists.txt b/bolt/lib/RuntimeLibs/CMakeLists.txt
+index b8db7e4a1553..e89043036394 100644
+--- a/bolt/lib/RuntimeLibs/CMakeLists.txt
++++ b/bolt/lib/RuntimeLibs/CMakeLists.txt
+@@ -12,7 +12,6 @@ add_llvm_library(LLVMBOLTRuntimeLibs
+   InstrumentationRuntimeLibrary.cpp
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ target_link_libraries(LLVMBOLTRuntimeLibs
+diff --git a/bolt/lib/Target/AArch64/CMakeLists.txt b/bolt/lib/Target/AArch64/CMakeLists.txt
+index 53554e75de15..54c2755234a2 100644
+--- a/bolt/lib/Target/AArch64/CMakeLists.txt
++++ b/bolt/lib/Target/AArch64/CMakeLists.txt
+@@ -22,7 +22,6 @@ add_llvm_library(LLVMBOLTTargetAArch64
+   AArch64MCSymbolizer.cpp
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   DEPENDS
+   AArch64CommonTableGen
+diff --git a/bolt/lib/Target/RISCV/CMakeLists.txt b/bolt/lib/Target/RISCV/CMakeLists.txt
+index 6c3a196f8a1f..93c97effd31e 100644
+--- a/bolt/lib/Target/RISCV/CMakeLists.txt
++++ b/bolt/lib/Target/RISCV/CMakeLists.txt
+@@ -21,7 +21,6 @@ add_llvm_library(LLVMBOLTTargetRISCV
+   RISCVMCPlusBuilder.cpp
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   DEPENDS
+   RISCVCommonTableGen
+diff --git a/bolt/lib/Target/X86/CMakeLists.txt b/bolt/lib/Target/X86/CMakeLists.txt
+index 6d1accb5e815..baaabab1c1e8 100644
+--- a/bolt/lib/Target/X86/CMakeLists.txt
++++ b/bolt/lib/Target/X86/CMakeLists.txt
+@@ -17,17 +17,33 @@ if(BOLT_BUILT_STANDALONE)
+   include_directories(${CMAKE_CURRENT_BINARY_DIR})
+ endif()
+ 
+-add_llvm_library(LLVMBOLTTargetX86
++set(LLVMBOLT_TARGET_X86_SOURCES
+   X86MCPlusBuilder.cpp
+   X86MCSymbolizer.cpp
++  )
++# The standalone mirror TU needs generated .inc files that only exist when
++# this bolt is configured standalone (see tablegen() calls above); upstream
++# LLVMX86Desc already provides these symbols in whole-LLVM builds.
++if(BOLT_BUILT_STANDALONE)
++  list(APPEND LLVMBOLT_TARGET_X86_SOURCES X86BoltMnemonicTables.cpp)
++endif()
++
++add_llvm_library(LLVMBOLTTargetX86
++  ${LLVMBOLT_TARGET_X86_SOURCES}
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   DEPENDS
+   X86CommonTableGen
+   )
+ 
++# The installed LLVM may not provide llvm::X86::isNOP & friends (they are
++# compiled into LLVMX86Desc upstream); build them into this target instead.
++# Must run after add_llvm_library().
++if(BOLT_BUILT_STANDALONE)
++  target_compile_definitions(LLVMBOLTTargetX86 PRIVATE BOLT_STANDALONE_X86_TABLES=1)
++endif()
++
+ target_link_libraries(LLVMBOLTTargetX86 PRIVATE LLVMBOLTCore LLVMBOLTUtils)
+ 
+ include_directories(
+diff --git a/bolt/lib/Target/X86/X86BoltMnemonicTables.cpp b/bolt/lib/Target/X86/X86BoltMnemonicTables.cpp
+new file mode 100644
+index 000000000000..9ef03f65284d
+--- /dev/null
++++ b/bolt/lib/Target/X86/X86BoltMnemonicTables.cpp
+@@ -0,0 +1,97 @@
++//===-- X86BoltMnemonicTables.cpp - X86 tables & helpers for BOLT -*- C++ -*-=//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++//
++// Upstream compiles X86GenMnemonicTables.inc (llvm::X86::isNOP/isADD/...)
++// and the X86 target-internal helpers below into LLVMX86Desc. Standalone
++// BOLT links a reduced LLVM that neither exports them from libLLVM.so nor
++// ships linkable static archives, so mirror them here. The generated code
++// must be included at global scope (like llvm's X86MnemonicTables.cpp) to
++// resolve opcode enums, hence this standalone TU. Keep in sync with
++// upstream when rebasing.
++//
++//===----------------------------------------------------------------------===//
++
++#include "MCTargetDesc/X86BaseInfo.h"
++#include "MCTargetDesc/X86EncodingOptimization.h"
++#include "MCTargetDesc/X86MCTargetDesc.h"
++#include "llvm/MC/MCInst.h"
++#include "llvm/MC/MCRegister.h"
++#include "llvm/MC/MCRegisterInfo.h"
++#include "llvm/MC/MCSubtargetInfo.h"
++
++#ifdef BOLT_STANDALONE_X86_TABLES
++
++#define GET_REGINFO_MC_DESC
++#include "X86GenRegisterInfo.inc"
++
++#define GET_X86_MNEMONIC_TABLES_CPP
++#include "X86GenMnemonicTables.inc"
++
++namespace llvm {
++
++unsigned X86::getOpcodeForShortImmediateForm(unsigned Opcode) {
++#define ENTRY(LONG, SHORT)                                                     \
++  case X86::LONG:                                                              \
++    return X86::SHORT;
++  switch (Opcode) {
++  default:
++    return Opcode;
++#include "MCTargetDesc/X86EncodingOptimizationForImmediate.def"
++  }
++}
++
++MCRegister getX86SubSuperRegister(MCRegister Reg, unsigned Size, bool High) {
++#include "X86GenSubSuperRegisterBody.inc"
++}
++
++namespace X86_MC {
++
++static bool isMemOperand(const MCInst &MI, unsigned Op, unsigned RegClassID) {
++  const MCOperand &Base = MI.getOperand(Op + X86::AddrBaseReg);
++  const MCOperand &Index = MI.getOperand(Op + X86::AddrIndexReg);
++  const MCRegisterClass &RC = X86MCRegisterClasses[RegClassID];
++
++  return (Base.isReg() && Base.getReg() && RC.contains(Base.getReg())) ||
++         (Index.isReg() && Index.getReg() && RC.contains(Index.getReg()));
++}
++
++bool is16BitMemOperand(const MCInst &MI, unsigned Op,
++                              const MCSubtargetInfo &STI) {
++  const MCOperand &Base = MI.getOperand(Op + X86::AddrBaseReg);
++  const MCOperand &Index = MI.getOperand(Op + X86::AddrIndexReg);
++
++  if (STI.hasFeature(X86::Is16Bit) && Base.isReg() && !Base.getReg() &&
++      Index.isReg() && !Index.getReg())
++    return true;
++  return isMemOperand(MI, Op, X86::GR16RegClassID);
++}
++
++bool is32BitMemOperand(const MCInst &MI, unsigned Op) {
++  const MCOperand &Base = MI.getOperand(Op + X86::AddrBaseReg);
++  const MCOperand &Index = MI.getOperand(Op + X86::AddrIndexReg);
++  if (Base.isReg() && Base.getReg() == X86::EIP) {
++    assert(Index.isReg() && !Index.getReg() && "Invalid eip-based address");
++    return true;
++  }
++  if (Index.isReg() && Index.getReg() == X86::EIZ)
++    return true;
++  return isMemOperand(MI, Op, X86::GR32RegClassID);
++}
++
++bool is64BitMemOperand(const MCInst &MI, unsigned Op) {
++  return isMemOperand(MI, Op, X86::GR64RegClassID);
++}
++
++bool needsAddressSizeOverride(const MCInst &MI, const MCSubtargetInfo &STI,
++                              int MemoryOperand, uint64_t TSFlags) {
++#include "X86GenNeedsAddressSizeOverrideBody.inc"
++}
++
++} // namespace X86_MC
++} // namespace llvm
++#endif
+diff --git a/bolt/lib/Target/X86/X86GenNeedsAddressSizeOverrideBody.inc b/bolt/lib/Target/X86/X86GenNeedsAddressSizeOverrideBody.inc
+new file mode 100644
+index 000000000000..342d9216064b
+--- /dev/null
++++ b/bolt/lib/Target/X86/X86GenNeedsAddressSizeOverrideBody.inc
+@@ -0,0 +1,51 @@
++// Body mirrored from llvm/lib/Target/X86/MCTargetDesc/X86MCTargetDesc.cpp
++{
++  uint64_t AdSize = TSFlags & X86II::AdSizeMask;
++  bool Is16BitMode = STI.hasFeature(X86::Is16Bit);
++  bool Is32BitMode = STI.hasFeature(X86::Is32Bit);
++  bool Is64BitMode = STI.hasFeature(X86::Is64Bit);
++  if ((Is16BitMode && AdSize == X86II::AdSize32) ||
++      (Is32BitMode && AdSize == X86II::AdSize16) ||
++      (Is64BitMode && AdSize == X86II::AdSize32))
++    return true;
++  uint64_t Form = TSFlags & X86II::FormMask;
++  switch (Form) {
++  default:
++    break;
++  case X86II::RawFrmDstSrc: {
++    MCRegister siReg = MI.getOperand(1).getReg();
++    assert(((siReg == X86::SI && MI.getOperand(0).getReg() == X86::DI) ||
++            (siReg == X86::ESI && MI.getOperand(0).getReg() == X86::EDI) ||
++            (siReg == X86::RSI && MI.getOperand(0).getReg() == X86::RDI)) &&
++           "SI and DI register sizes do not match");
++    return (!Is32BitMode && siReg == X86::ESI) ||
++           (Is32BitMode && siReg == X86::SI);
++  }
++  case X86II::RawFrmSrc: {
++    MCRegister siReg = MI.getOperand(0).getReg();
++    return (!Is32BitMode && siReg == X86::ESI) ||
++           (Is32BitMode && siReg == X86::SI);
++  }
++  case X86II::RawFrmDst: {
++    MCRegister siReg = MI.getOperand(0).getReg();
++    return (!Is32BitMode && siReg == X86::EDI) ||
++           (Is32BitMode && siReg == X86::DI);
++  }
++  }
++
++  // Determine where the memory operand starts, if present.
++  if (MemoryOperand < 0)
++    return false;
++
++  if (STI.hasFeature(X86::Is64Bit)) {
++    assert(!is16BitMemOperand(MI, MemoryOperand, STI));
++    return is32BitMemOperand(MI, MemoryOperand);
++  }
++  if (STI.hasFeature(X86::Is32Bit)) {
++    assert(!is64BitMemOperand(MI, MemoryOperand));
++    return is16BitMemOperand(MI, MemoryOperand, STI);
++  }
++  assert(STI.hasFeature(X86::Is16Bit));
++  assert(!is64BitMemOperand(MI, MemoryOperand));
++  return !is16BitMemOperand(MI, MemoryOperand, STI);
++}
+diff --git a/bolt/lib/Target/X86/X86GenSubSuperRegisterBody.inc b/bolt/lib/Target/X86/X86GenSubSuperRegisterBody.inc
+new file mode 100644
+index 000000000000..f8326079c340
+--- /dev/null
++++ b/bolt/lib/Target/X86/X86GenSubSuperRegisterBody.inc
+@@ -0,0 +1,192 @@
++// Body mirrored from llvm/lib/Target/X86/MCTargetDesc/X86MCTargetDesc.cpp
++{
++#define DEFAULT_NOREG                                                          \
++  default:                                                                     \
++    return X86::NoRegister;
++#define SUB_SUPER(R1, R2, R3, R4, R)                                           \
++  case X86::R1:                                                                \
++  case X86::R2:                                                                \
++  case X86::R3:                                                                \
++  case X86::R4:                                                                \
++    return X86::R;
++#define A_SUB_SUPER(R)                                                         \
++  case X86::AH:                                                                \
++    SUB_SUPER(AL, AX, EAX, RAX, R)
++#define D_SUB_SUPER(R)                                                         \
++  case X86::DH:                                                                \
++    SUB_SUPER(DL, DX, EDX, RDX, R)
++#define C_SUB_SUPER(R)                                                         \
++  case X86::CH:                                                                \
++    SUB_SUPER(CL, CX, ECX, RCX, R)
++#define B_SUB_SUPER(R)                                                         \
++  case X86::BH:                                                                \
++    SUB_SUPER(BL, BX, EBX, RBX, R)
++#define SI_SUB_SUPER(R) SUB_SUPER(SIL, SI, ESI, RSI, R)
++#define DI_SUB_SUPER(R) SUB_SUPER(DIL, DI, EDI, RDI, R)
++#define BP_SUB_SUPER(R) SUB_SUPER(BPL, BP, EBP, RBP, R)
++#define SP_SUB_SUPER(R) SUB_SUPER(SPL, SP, ESP, RSP, R)
++#define NO_SUB_SUPER(NO, REG)                                                  \
++  SUB_SUPER(R##NO##B, R##NO##W, R##NO##D, R##NO, REG)
++#define NO_SUB_SUPER_B(NO) NO_SUB_SUPER(NO, R##NO##B)
++#define NO_SUB_SUPER_W(NO) NO_SUB_SUPER(NO, R##NO##W)
++#define NO_SUB_SUPER_D(NO) NO_SUB_SUPER(NO, R##NO##D)
++#define NO_SUB_SUPER_Q(NO) NO_SUB_SUPER(NO, R##NO)
++  switch (Size) {
++  default:
++    llvm_unreachable("illegal register size");
++  case 8:
++    if (High) {
++      switch (Reg.id()) {
++        DEFAULT_NOREG
++        A_SUB_SUPER(AH)
++        D_SUB_SUPER(DH)
++        C_SUB_SUPER(CH)
++        B_SUB_SUPER(BH)
++      }
++    } else {
++      switch (Reg.id()) {
++        DEFAULT_NOREG
++        A_SUB_SUPER(AL)
++        D_SUB_SUPER(DL)
++        C_SUB_SUPER(CL)
++        B_SUB_SUPER(BL)
++        SI_SUB_SUPER(SIL)
++        DI_SUB_SUPER(DIL)
++        BP_SUB_SUPER(BPL)
++        SP_SUB_SUPER(SPL)
++        NO_SUB_SUPER_B(8)
++        NO_SUB_SUPER_B(9)
++        NO_SUB_SUPER_B(10)
++        NO_SUB_SUPER_B(11)
++        NO_SUB_SUPER_B(12)
++        NO_SUB_SUPER_B(13)
++        NO_SUB_SUPER_B(14)
++        NO_SUB_SUPER_B(15)
++        NO_SUB_SUPER_B(16)
++        NO_SUB_SUPER_B(17)
++        NO_SUB_SUPER_B(18)
++        NO_SUB_SUPER_B(19)
++        NO_SUB_SUPER_B(20)
++        NO_SUB_SUPER_B(21)
++        NO_SUB_SUPER_B(22)
++        NO_SUB_SUPER_B(23)
++        NO_SUB_SUPER_B(24)
++        NO_SUB_SUPER_B(25)
++        NO_SUB_SUPER_B(26)
++        NO_SUB_SUPER_B(27)
++        NO_SUB_SUPER_B(28)
++        NO_SUB_SUPER_B(29)
++        NO_SUB_SUPER_B(30)
++        NO_SUB_SUPER_B(31)
++      }
++    }
++  case 16:
++    switch (Reg.id()) {
++      DEFAULT_NOREG
++      A_SUB_SUPER(AX)
++      D_SUB_SUPER(DX)
++      C_SUB_SUPER(CX)
++      B_SUB_SUPER(BX)
++      SI_SUB_SUPER(SI)
++      DI_SUB_SUPER(DI)
++      BP_SUB_SUPER(BP)
++      SP_SUB_SUPER(SP)
++      NO_SUB_SUPER_W(8)
++      NO_SUB_SUPER_W(9)
++      NO_SUB_SUPER_W(10)
++      NO_SUB_SUPER_W(11)
++      NO_SUB_SUPER_W(12)
++      NO_SUB_SUPER_W(13)
++      NO_SUB_SUPER_W(14)
++      NO_SUB_SUPER_W(15)
++      NO_SUB_SUPER_W(16)
++      NO_SUB_SUPER_W(17)
++      NO_SUB_SUPER_W(18)
++      NO_SUB_SUPER_W(19)
++      NO_SUB_SUPER_W(20)
++      NO_SUB_SUPER_W(21)
++      NO_SUB_SUPER_W(22)
++      NO_SUB_SUPER_W(23)
++      NO_SUB_SUPER_W(24)
++      NO_SUB_SUPER_W(25)
++      NO_SUB_SUPER_W(26)
++      NO_SUB_SUPER_W(27)
++      NO_SUB_SUPER_W(28)
++      NO_SUB_SUPER_W(29)
++      NO_SUB_SUPER_W(30)
++      NO_SUB_SUPER_W(31)
++    }
++  case 32:
++    switch (Reg.id()) {
++      DEFAULT_NOREG
++      A_SUB_SUPER(EAX)
++      D_SUB_SUPER(EDX)
++      C_SUB_SUPER(ECX)
++      B_SUB_SUPER(EBX)
++      SI_SUB_SUPER(ESI)
++      DI_SUB_SUPER(EDI)
++      BP_SUB_SUPER(EBP)
++      SP_SUB_SUPER(ESP)
++      NO_SUB_SUPER_D(8)
++      NO_SUB_SUPER_D(9)
++      NO_SUB_SUPER_D(10)
++      NO_SUB_SUPER_D(11)
++      NO_SUB_SUPER_D(12)
++      NO_SUB_SUPER_D(13)
++      NO_SUB_SUPER_D(14)
++      NO_SUB_SUPER_D(15)
++      NO_SUB_SUPER_D(16)
++      NO_SUB_SUPER_D(17)
++      NO_SUB_SUPER_D(18)
++      NO_SUB_SUPER_D(19)
++      NO_SUB_SUPER_D(20)
++      NO_SUB_SUPER_D(21)
++      NO_SUB_SUPER_D(22)
++      NO_SUB_SUPER_D(23)
++      NO_SUB_SUPER_D(24)
++      NO_SUB_SUPER_D(25)
++      NO_SUB_SUPER_D(26)
++      NO_SUB_SUPER_D(27)
++      NO_SUB_SUPER_D(28)
++      NO_SUB_SUPER_D(29)
++      NO_SUB_SUPER_D(30)
++      NO_SUB_SUPER_D(31)
++    }
++  case 64:
++    switch (Reg.id()) {
++      DEFAULT_NOREG
++      A_SUB_SUPER(RAX)
++      D_SUB_SUPER(RDX)
++      C_SUB_SUPER(RCX)
++      B_SUB_SUPER(RBX)
++      SI_SUB_SUPER(RSI)
++      DI_SUB_SUPER(RDI)
++      BP_SUB_SUPER(RBP)
++      SP_SUB_SUPER(RSP)
++      NO_SUB_SUPER_Q(8)
++      NO_SUB_SUPER_Q(9)
++      NO_SUB_SUPER_Q(10)
++      NO_SUB_SUPER_Q(11)
++      NO_SUB_SUPER_Q(12)
++      NO_SUB_SUPER_Q(13)
++      NO_SUB_SUPER_Q(14)
++      NO_SUB_SUPER_Q(15)
++      NO_SUB_SUPER_Q(16)
++      NO_SUB_SUPER_Q(17)
++      NO_SUB_SUPER_Q(18)
++      NO_SUB_SUPER_Q(19)
++      NO_SUB_SUPER_Q(20)
++      NO_SUB_SUPER_Q(21)
++      NO_SUB_SUPER_Q(22)
++      NO_SUB_SUPER_Q(23)
++      NO_SUB_SUPER_Q(24)
++      NO_SUB_SUPER_Q(25)
++      NO_SUB_SUPER_Q(26)
++      NO_SUB_SUPER_Q(27)
++      NO_SUB_SUPER_Q(28)
++      NO_SUB_SUPER_Q(29)
++      NO_SUB_SUPER_Q(30)
++      NO_SUB_SUPER_Q(31)
++    }
++  }
++}
+diff --git a/bolt/lib/Utils/CMakeLists.txt b/bolt/lib/Utils/CMakeLists.txt
+index 94933644ef5e..36d3d67f21ea 100644
+--- a/bolt/lib/Utils/CMakeLists.txt
++++ b/bolt/lib/Utils/CMakeLists.txt
+@@ -44,7 +44,6 @@ add_llvm_library(LLVMBOLTUtils
+   ${version_inc}
+ 
+   NO_EXPORT
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   LINK_LIBS
+   ${LLVM_PTHREAD_LIB}
+diff --git a/bolt/tools/bat-dump/CMakeLists.txt b/bolt/tools/bat-dump/CMakeLists.txt
+index 037b7d2662ae..857e8d017069 100644
+--- a/bolt/tools/bat-dump/CMakeLists.txt
++++ b/bolt/tools/bat-dump/CMakeLists.txt
+@@ -6,7 +6,6 @@ set(LLVM_LINK_COMPONENTS
+ add_bolt_executable(llvm-bat-dump
+   bat-dump.cpp
+ 
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ target_link_libraries(llvm-bat-dump
+diff --git a/bolt/tools/binary-analysis/CMakeLists.txt b/bolt/tools/binary-analysis/CMakeLists.txt
+index 29f224e0f66f..d999762b562f 100644
+--- a/bolt/tools/binary-analysis/CMakeLists.txt
++++ b/bolt/tools/binary-analysis/CMakeLists.txt
+@@ -7,7 +7,6 @@ set(LLVM_LINK_COMPONENTS
+ 
+ add_bolt_tool(llvm-bolt-binary-analysis
+   binary-analysis.cpp
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ target_link_libraries(llvm-bolt-binary-analysis
+diff --git a/bolt/tools/driver/CMakeLists.txt b/bolt/tools/driver/CMakeLists.txt
+index 4b3c7416de97..95b09be3236a 100644
+--- a/bolt/tools/driver/CMakeLists.txt
++++ b/bolt/tools/driver/CMakeLists.txt
+@@ -14,7 +14,6 @@ endif()
+ add_bolt_tool(llvm-bolt
+   llvm-bolt.cpp
+ 
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   DEPENDS
+   ${BOLT_DRIVER_DEPS}
+diff --git a/bolt/tools/heatmap/CMakeLists.txt b/bolt/tools/heatmap/CMakeLists.txt
+index c5d3f6741392..27094622fabf 100644
+--- a/bolt/tools/heatmap/CMakeLists.txt
++++ b/bolt/tools/heatmap/CMakeLists.txt
+@@ -7,7 +7,6 @@ set(LLVM_LINK_COMPONENTS
+ 
+ add_bolt_tool(llvm-bolt-heatmap
+   heatmap.cpp
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ target_link_libraries(llvm-bolt-heatmap
+diff --git a/bolt/tools/llvm-bolt-fuzzer/CMakeLists.txt b/bolt/tools/llvm-bolt-fuzzer/CMakeLists.txt
+index 7eaacb74a9da..138918b706a9 100644
+--- a/bolt/tools/llvm-bolt-fuzzer/CMakeLists.txt
++++ b/bolt/tools/llvm-bolt-fuzzer/CMakeLists.txt
+@@ -5,7 +5,6 @@ set(LLVM_LINK_COMPONENTS
+ add_llvm_fuzzer(llvm-bolt-fuzzer
+   llvm-bolt-fuzzer.cpp
+ 
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ if (TARGET llvm-bolt-fuzzer)
+diff --git a/bolt/tools/merge-fdata/CMakeLists.txt b/bolt/tools/merge-fdata/CMakeLists.txt
+index f6a87a226898..3202b94ac8f3 100644
+--- a/bolt/tools/merge-fdata/CMakeLists.txt
++++ b/bolt/tools/merge-fdata/CMakeLists.txt
+@@ -3,7 +3,6 @@ set(LLVM_LINK_COMPONENTS Support)
+ add_bolt_tool(merge-fdata
+   merge-fdata.cpp
+ 
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+ 
+   DEPENDS
+   intrinsics_gen
+diff --git a/bolt/unittests/Core/CMakeLists.txt b/bolt/unittests/Core/CMakeLists.txt
+index 297dec744920..61ddae38e002 100644
+--- a/bolt/unittests/Core/CMakeLists.txt
++++ b/bolt/unittests/Core/CMakeLists.txt
+@@ -17,7 +17,6 @@ add_bolt_unittest(CoreTests
+   #       dynamic LLVM library when LLVM_LINK_LLVM_DYLIB is ON.
+   ${LLVM_MAIN_SRC_DIR}/lib/Testing/Support/Error.cpp
+ 
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ target_link_libraries(CoreTests
+diff --git a/bolt/unittests/Passes/CMakeLists.txt b/bolt/unittests/Passes/CMakeLists.txt
+index 17ae8802f695..f2c213e092a3 100644
+--- a/bolt/unittests/Passes/CMakeLists.txt
++++ b/bolt/unittests/Passes/CMakeLists.txt
+@@ -8,7 +8,6 @@ set(LLVM_LINK_COMPONENTS
+ add_bolt_unittest(PassTests
+   PointerAuthCFIFixup.cpp
+ 
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ target_link_libraries(PassTests
+diff --git a/bolt/unittests/Profile/CMakeLists.txt b/bolt/unittests/Profile/CMakeLists.txt
+index 7b3cbd2cad72..829e9ce135e1 100644
+--- a/bolt/unittests/Profile/CMakeLists.txt
++++ b/bolt/unittests/Profile/CMakeLists.txt
+@@ -8,7 +8,6 @@ add_bolt_unittest(ProfileTests
+   DataAggregator.cpp
+   PerfSpeEvents.cpp
+ 
+-  DISABLE_LLVM_LINK_LLVM_DYLIB
+   )
+ 
+ target_link_libraries(ProfileTests
+diff --git a/packaging/llvm-tools-subpkgs.spec b/packaging/llvm-tools-subpkgs.spec
+new file mode 100644
+index 000000000000..6ea1035197a5
+--- /dev/null
++++ b/packaging/llvm-tools-subpkgs.spec
+@@ -0,0 +1,132 @@
++Name:       llvm-tools-subpkgs
++Summary:    Debugging/analysis tool subpackages for the Tizen LLVM toolchain
++Version:    22.1.8
++Release:    1
++License:    NCSA
++Group:      Development/Tools
++Source0:    llvm-22.1.8.tar.gz
++BuildRequires: cmake
++BuildRequires: ninja
++BuildRequires: llvm
++BuildRequires: llvm-devel
++# llvm-static-devel: llvm-devel's LLVMExports.cmake validates the static
++# imported targets (libLLVM*.a) at configure time; without the archives
++# present, find_package(LLVM) aborts before bolt can link the dylib.
++BuildRequires: llvm-static-devel
++# libomp: the exported target "omp" in LLVMExports-release.cmake references
++# /usr/lib64/libomp.so; the configure-time existence check aborts without it.
++BuildRequires: libomp
++# zlib-devel, libxml2-devel: the exported LLVM targets reference ZLIB::ZLIB
++# and LibXml2::LibXml2 in their link interfaces (bolt standalone build)
++BuildRequires: zlib-devel
++BuildRequires: libxml2-devel
++BuildRequires: clang
++BuildRequires: libllvm
++BuildRequires: compiler-rt
++
++%description
++Standalone subpackages for LLVM debugging and analysis tools:
++ - bolt: BOLT post-link binary optimizer, built standalone against the
++   installed LLVM toolchain (no full LLVM rebuild required)
++
++The tools below (scan-build, llvm-xray, llvm-cov, llvm-profgen, llvm-profdata,
++and the analyzer libexec scripts) now ship from the llvm and clang packages,
++because llvm-devel's exports and the clang-analyzer files need them there.
++Changes to this spec only require
++rebuilding this package (minutes), not the multi-hour LLVM build.
++
++%package -n bolt
++Summary: BOLT post-link binary optimizer
++License: NCSA
++Requires: libllvm
++Requires: compiler-rt
++
++%description -n bolt
++BOLT is a post-link binary optimizer that reorders code in the final
++binary or DSO based on runtime profile data (perf LBR/PT samples) to
++improve instruction cache and TLB utilization.
++
++%prep
++%setup -q -n llvm-22.1.8
++
++# MANDATORY under gbs: gbs builds with _build_create_debug 1, so Tizen's
++# patched rpmbuild injects the debuginfo/debugsource package sections
++# itself; the standard debug_package macro would add them a second time
++# and fail with "package already exists". NOTE: keep percent signs out of
++# this comment -- rpmbuild expands macros even in comment lines.
++# Debuginfo IS still generated (find-debuginfo.sh runs in
++# __os_install_post): bolt-debuginfo and the debugsource package are
++# produced. The -Wl,--build-id=sha1 linker flags above make the bolt
++# binaries debug-correlatable.
++%define debug_package %{nil}
++
++%build
++# ---- A. BOLT built standalone against the installed toolchain ----
++# Standalone detection: CMAKE_SOURCE_DIR == bolt source dir
++# => BOLT_BUILT_STANDALONE=TRUE, find_package(LLVM) finds /usr/lib64/cmake/llvm.
++# LLVM_LINK_LLVM_DYLIB=ON is mandatory: Tizen ships libLLVM.so (libllvm) and
++# only STATIC IMPORTED targets in llvm-devel; the static component archives
++# live in llvm-static-devel which is not installed here.
++mkdir -p bolt-build
++cd bolt-build
++cmake \
++    -G Ninja \
++    -S ../bolt \
++    -B . \
++    -DCMAKE_BUILD_TYPE=Release \
++    -DCMAKE_C_COMPILER=clang \
++    -DCMAKE_CXX_COMPILER=clang++ \
++    -DCMAKE_INSTALL_PREFIX=/usr \
++    -DLLVM_LIBDIR_SUFFIX=64 \
++    -DLLVM_ENABLE_RTTI=ON \
++    -DLLVM_LINK_LLVM_DYLIB=ON \
++    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--build-id=sha1" \
++    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--build-id=sha1" \
++    -DBOLT_INCLUDE_TESTS=OFF \
++%ifarch armv7l
++    -DBOLT_ENABLE_RUNTIME=OFF \
++%endif
++    -DLLVM_INCLUDE_TESTS=OFF
++# bolt: driver + tools; bolt_rt: runtime archives (ExternalProject).
++# CMake enables the runtime only on x86_64/aarch64/riscv64 hosts, so armv7l
++# builds just the driver. The runtime is for instrumenting x86/aarch64 targets.
++%ifarch armv7l
++ninja bolt
++%else
++ninja bolt bolt_rt
++%endif
++
++%install
++# ---- A. bolt: install from the standalone build tree ----
++cd bolt-build
++DESTDIR=%{buildroot} ninja install
++# The internal bolt static libs are build artifacts, not shipped content.
++rm -f %{buildroot}%{_libdir}/libLLVMBOLT*.a
++# LLVM_LIBDIR_SUFFIX=64 installs the internal archives to lib64 instead.
++rm -f %{buildroot}%{_prefix}/lib64/libLLVMBOLT*.a
++# perf2bolt and llvm-boltdiff are aliases of llvm-bolt: upstream installs them
++# as symlinks (bolt/tools/driver/CMakeLists.txt), and llvm-bolt selects its
++# mode from the name it is invoked as. Separate copies also collided on
++# build-id in the debuginfo step.
++ln -sf llvm-bolt %{buildroot}%{_prefix}/bin/perf2bolt
++ln -sf llvm-bolt %{buildroot}%{_prefix}/bin/llvm-boltdiff
++# llvm-bat-dump and merge-fdata use add_bolt_executable which carries no
++# install rule; stage them manually from the build tree.
++install -p -m 0755 bin/llvm-bat-dump %{buildroot}%{_prefix}/bin/
++install -p -m 0755 bin/merge-fdata   %{buildroot}%{_prefix}/bin/
++cd ..
++
++%files -n bolt
++%defattr(-,root,root,-)
++%{_prefix}/bin/llvm-bolt
++%{_prefix}/bin/perf2bolt
++%{_prefix}/bin/llvm-boltdiff
++%{_prefix}/bin/llvm-bolt-heatmap
++%{_prefix}/bin/llvm-bolt-binary-analysis
++%{_prefix}/bin/llvm-bat-dump
++%{_prefix}/bin/merge-fdata
++%ifnarch armv7l
++%{_libdir}/libbolt_rt_instr.a
++%{_libdir}/libbolt_rt_hugify.a
++%endif
++
+diff --git a/packaging/llvm.spec b/packaging/llvm.spec
+index 8240282641a3..14cdea48c253 100644
+--- a/packaging/llvm.spec
++++ b/packaging/llvm.spec
+@@ -73,6 +73,15 @@ BuildRequires: clang, llvm, libllvm
+ 
+ 
+ Requires: libllvm = %{version}-%{release}
++# scan-build and scan-view are Python scripts (formerly in clang-analyzer)
++# scan-build also needs clang installed at runtime; llvm does not require it
++# (requiring clang here would make llvm and clang depend on each other)
++Requires: python3
++# clang-analyzer, llvm-xray and llvm-prof-tools used to be separate
++# subpackages (llvm-tools-subpkgs.spec) that owned these files; llvm takes them over
++Obsoletes: clang-analyzer <= %{version}-%{release}
++Obsoletes: llvm-xray <= %{version}-%{release}
++Obsoletes: llvm-prof-tools <= %{version}-%{release}
+ 
+ %description
+ LLVM is a compiler infrastructure designed for compile-time, link-time, runtime,
+@@ -223,6 +232,19 @@ export CXXFLAGS="$OPTFLAGS_CXXFLAGS -O3 -flto=thin -fomit-frame-pointer -Wno-unu
+ 
+ # Set up MLGO AOT model paths from bundled verify assets
+ %if %{with mlgo}
++# Ensure verify assets exist even when %%prep is skipped (incremental builds)
++if [ ! -d mlgo_verify_assets ]; then
++    mkdir -p mlgo_verify_assets
++%ifarch armv7l
++    tar -C mlgo_verify_assets -xzf %{SOURCE1002}
++%endif
++%ifarch aarch64
++    tar -C mlgo_verify_assets -xzf %{SOURCE1003}
++%endif
++%ifarch x86_64
++    tar -C mlgo_verify_assets -xzf %{SOURCE1004}
++%endif
++fi
+ MLGO_AOT_DIR="$PWD/mlgo_verify_assets"
+ MLGO_BUILD_DIR="$PWD/build"
+ MLGO_RUNTIME_OBJECTS="${MLGO_AOT_DIR}/xla_runtime_objects/xla_compiled_cpu_function.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/cpu_function_runtime.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/custom_call_status.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/executable_run_options.cc.o;${MLGO_AOT_DIR}/xla_runtime_objects/runtime_single_threaded_matmul_f32.cc.o"
+@@ -248,8 +270,8 @@ cmake \
+     -DCMAKE_C_FLAGS="$CFLAGS" \
+     -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+ %if %{defined _toolchain}
+-    -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld -flto=thin -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+-    -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -flto=thin -ffunction-sections -fdata-sections -Wl,--gc-sections" \
++    -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld -flto=thin -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,--build-id=sha1" \
++    -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -flto=thin -ffunction-sections -fdata-sections -Wl,--gc-sections -Wl,--build-id=sha1" \
+     -DLLVM_USE_LINKER=lld \
+     -DLLVM_ENABLE_LTO=Thin \
+     -DCMAKE_RANLIB=%{_bindir}/llvm-ranlib \
+@@ -263,7 +285,7 @@ cmake \
+ %endif
+ %ifarch armv7l
+     -DCMAKE_BUILD_TYPE=MinSizeRel \
+-    -DLLVM_TARGETS_TO_BUILD='ARM;BPF' \
++    -DLLVM_TARGETS_TO_BUILD='ARM;AArch64;X86;BPF' \
+     -DLLVM_TARGET_ARCH="ARM" \
+ %endif
+ %ifarch aarch64
+@@ -394,7 +416,13 @@ ninja -j %{mlgo_build_jobs}
+ 
+ %install
+ cd build
+-cmake -DCMAKE_INSTALL_PREFIX=%{buildroot}/usr -P cmake_install.cmake
++# DESTDIR, not a prefix under buildroot: the openmp install script creates its
++# libgomp/libiomp5 symlinks under $DESTDIR/usr/lib, which is the build
++# environment's /usr/lib when DESTDIR is unset.
++DESTDIR=%{buildroot} cmake -DCMAKE_INSTALL_PREFIX=/usr -P cmake_install.cmake
++# Do not ship the GCC-compatible libgomp/libiomp5 links: gcc's libgomp package
++# provides libgomp.so and libgomp.so.1 on the target.
++rm -f %{buildroot}%{_libdir}/libgomp.so %{buildroot}%{_libdir}/libgomp.so.1 %{buildroot}%{_libdir}/libiomp5.so
+ ln -sf %{_prefix}/bin/clang++ %{buildroot}%{_prefix}/bin/clang++-%{llvm_version}
+ 
+ ln -sf clang %{buildroot}%{_prefix}/bin/%{_host}-clang
+@@ -450,11 +478,11 @@ echo "plugin load /usr/share/dotnet.tizen/netcoreapp/SOS/libsosplugin.so" > /roo
+ %manifest %{name}.manifest
+ %defattr(-,root,root,-)
+ %{_prefix}/bin/analyze-build
++%{_prefix}/bin/intercept-build
+ %{_prefix}/bin/bugpoint
+ %{_prefix}/bin/clang-linker-wrapper
+ %{_prefix}/bin/clang-offload-packager
+ %{_prefix}/bin/clang-repl
+-%{_prefix}/bin/intercept-build
+ %{_prefix}/bin/llc
+ %{_prefix}/bin/lld
+ %{_prefix}/bin/ld.lld
+@@ -600,6 +628,12 @@ echo "plugin load /usr/share/dotnet.tizen/netcoreapp/SOS/libsosplugin.so" > /roo
+ %{_prefix}/bin/clang-refactor
+ %{_prefix}/bin/clang-scan-deps
+ %{_prefix}/bin/clang-format
++%{_prefix}/libexec/analyze-c++
++%{_prefix}/libexec/analyze-cc
++%{_prefix}/libexec/c++-analyzer
++%{_prefix}/libexec/ccc-analyzer
++%{_prefix}/libexec/intercept-c++
++%{_prefix}/libexec/intercept-cc
+ %{_prefix}/bin/clang-include-cleaner
+ %{_prefix}/bin/clang-include-fixer
+ %{_prefix}/bin/clang-offload-bundler
+@@ -616,12 +650,6 @@ echo "plugin load /usr/share/dotnet.tizen/netcoreapp/SOS/libsosplugin.so" > /roo
+ %{_libdir}/clang/%{llvm_version}/include/*
+ %{_libdir}/libclang*.so*
+ %{_libdir}/cmake/clang/*
+-%{_prefix}/libexec/analyze-c++
+-%{_prefix}/libexec/analyze-cc
+-%{_prefix}/libexec/c++-analyzer
+-%{_prefix}/libexec/ccc-analyzer
+-%{_prefix}/libexec/intercept-c++
+-%{_prefix}/libexec/intercept-cc
+ %{_prefix}/bin/clang.cfg
+ %{_prefix}/bin/clang++.cfg
+ 

@@ -1,0 +1,46 @@
+commit da885208aeb52f55c448ff46873d242346727522
+Author: Dongkyun Son <dongkyun.s@samsung.com>
+Date:   Sat Nov 14 15:25:55 2026 +0900
+
+    packaging: split tool subpackages into a standalone llvm-tools-subpkgs spec
+    
+    * 3a5189033a1f - packaging: move tool subpackages to a standalone llvm-tools-subpkgs spec
+    * d364b338759a - bolt: create ZLIB/LibXml2 targets in standalone build
+    * 28e72ec6b05d - bolt: mirror X86 mnemonic tables and helpers for standalone build
+    * 1b9c1ce174de - packaging: add --build-id=sha1 to toolchain linker flags
+    * 0cc528da035e - bolt: standalone build fixes for LLVM_LINK_LLVM_DYLIB=ON
+    * 3abe328e2c30 - packaging: build profiling tools and BOLT for armv7l (Tizen)
+    * d3f74e4f484d - packaging: add Obsoletes and python3 Requires to llvm; tidy tools subpackages
+    * c7edd8f43c66 - packaging: note that scan-build needs clang at runtime
+    * 67304f964043 - packaging: install with DESTDIR and do not ship libgomp/libiomp5 links
+    
+    Change-Id: Ie2c1d45cea6703a0caef72187397275a03e66468
+    Signed-off-by: Dongkyun Son <dongkyun.s@samsung.com>
+    Signed-off-by: Pareek Eshaan <e.pareek@samsung.com>
+    Co-Authored-By: Cline SR
+
+ bolt/CMakeLists.txt                                |  12 ++
+ bolt/lib/Core/CMakeLists.txt                       |   1 -
+ bolt/lib/Passes/CMakeLists.txt                     |   1 -
+ bolt/lib/Profile/CMakeLists.txt                    |   1 -
+ bolt/lib/Rewrite/CMakeLists.txt                    |   1 -
+ bolt/lib/RuntimeLibs/CMakeLists.txt                |   1 -
+ bolt/lib/Target/AArch64/CMakeLists.txt             |   1 -
+ bolt/lib/Target/RISCV/CMakeLists.txt               |   1 -
+ bolt/lib/Target/X86/CMakeLists.txt                 |  20 ++-
+ bolt/lib/Target/X86/X86BoltMnemonicTables.cpp      |  97 +++++++++++
+ .../X86/X86GenNeedsAddressSizeOverrideBody.inc     |  51 ++++++
+ bolt/lib/Target/X86/X86GenSubSuperRegisterBody.inc | 192 +++++++++++++++++++++
+ bolt/lib/Utils/CMakeLists.txt                      |   1 -
+ bolt/tools/bat-dump/CMakeLists.txt                 |   1 -
+ bolt/tools/binary-analysis/CMakeLists.txt          |   1 -
+ bolt/tools/driver/CMakeLists.txt                   |   1 -
+ bolt/tools/heatmap/CMakeLists.txt                  |   1 -
+ bolt/tools/llvm-bolt-fuzzer/CMakeLists.txt         |   1 -
+ bolt/tools/merge-fdata/CMakeLists.txt              |   1 -
+ bolt/unittests/Core/CMakeLists.txt                 |   1 -
+ bolt/unittests/Passes/CMakeLists.txt               |   1 -
+ bolt/unittests/Profile/CMakeLists.txt              |   1 -
+ packaging/llvm-tools-subpkgs.spec                  | 132 ++++++++++++++
+ packaging/llvm.spec                                |  50 ++++--
+ 24 files changed, 541 insertions(+), 30 deletions(-)
