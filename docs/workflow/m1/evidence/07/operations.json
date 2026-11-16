@@ -1,0 +1,440 @@
+[
+  {
+    "name": "identity-0",
+    "time": "2026-11-16T00:51:51.305390-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /proc/device-tree/model ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "Raspberry Pi 4 Model B Rev 1.5\u0000\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "identity-1",
+    "time": "2026-11-16T00:51:51.421181-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -m ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "armv7l\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "identity-2",
+    "time": "2026-11-16T00:51:51.537163-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -r ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "6.12.80-arm-rpi4-v7l\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "identity-3",
+    "time": "2026-11-16T00:51:51.652078-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uname -v ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "#1 SMP Wed Nov  4 17:05:36 UTC 2026\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "identity-4",
+    "time": "2026-11-16T00:51:51.765914-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /etc/tizen-release ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "Tizen11.0/Unified 11.0.0 (arm)\nVERSION = 11.0.0\nCODENAME = TELEVEN\nBUILD_ID=tizen-unified-toolchain_20261104.160709_tizen-headed-armv7l\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "identity-5",
+    "time": "2026-11-16T00:51:51.882467-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /etc/tizen-build.conf ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "TZ_BUILD_RELEASE_NAME=\"Tizen11.0/Unified\"\nTZ_BUILD_VERSION=11.0\nTZ_BUILD_FULLVER=11.0.0\nTZ_BUILD_RELEASE_TYPE=eng\nTZ_BUILD_VARIANT=NONE\n\nTZ_BUILD_PROFILE=common\nTZ_BUILD_PROJECT=Tizen-Unified-Toolchain\n\nTZ_BUILD_VENDOR=tizen\nTZ_BUILD_REPO=standard\nTZ_BUILD_ARCH=arm\n\nTZ_BUILD_ID=tizen-unified-toolchain_20261104.160709\nTZ_BUILD_DATE=20261104.160709\nTZ_BUILD_TIME=21:19:04\nTZ_BUILD_TS=1793827144\n\nTZ_BUILD_URL=http://download.tizen.org\nTZ_BUILD_SNAPSHOT_URL=${TZ_BUILD_URL}/snapshots/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_DAILY_URL=${TZ_BUILD_URL}/releases/daily/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_WEEKLY_URL=${TZ_BUILD_URL}/releases/weekly/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_MILESTONE_URL=${TZ_BUILD_URL}/releases/milestone/TIZEN/Tizen/Tizen-Unified/\n\nTZ_BUILD_WITH_MESA=1\nTZ_BUILD_WITH_WAYLAND=1\nTZ_BUILD_WITH_RDP=1\nTZ_BUILD_WITH_X=\n\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-uid",
+    "time": "2026-11-16T00:51:52.004997-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "dependencies",
+    "time": "2026-11-16T00:51:52.118951-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for c in cat uptime mount df stat sha256sum mkdir chmod ldd id rpm wc; do command -v \"$c\" || exit 2; done ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/usr/bin/cat\n/usr/bin/uptime\n/usr/bin/mount\n/usr/bin/df\n/usr/bin/stat\n/usr/bin/sha256sum\n/usr/bin/mkdir\n/usr/bin/chmod\n/usr/bin/ldd\n/usr/bin/id\n/usr/bin/rpm\n/usr/bin/wc\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-governors",
+    "time": "2026-11-16T00:51:52.235809-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\" || exit 2; done ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "rpm-before",
+    "time": "2026-11-16T00:51:52.703584-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( rpm -qa | wc -l ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "1233\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-on",
+    "time": "2026-11-16T00:51:52.751528-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-uid",
+    "time": "2026-11-16T00:51:52.865633-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "0\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "cause-readonly",
+    "time": "2026-11-16T00:51:53.015954-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( uptime; mount; df -Pk /opt; if test -e /opt/afdo_agent; then df -Pk /opt/afdo_agent; else printf \"AFDO_DIRECTORY_ABSENT\\n\"; fi; cat /etc/tizen-build.conf; stat /etc/tizen-build.conf /etc/tizen-release /opt; if test -e /opt/afdo_agent; then stat /opt/afdo_agent; fi; true ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": " 17:52:10 up 34 min,  1 user,  load average: 1.08, 1.03, 0.97\ndevtmpfs on /dev type devtmpfs (rw,nosuid,size=1816204k,nr_inodes=91975,mode=755)\nsysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)\nproc on /proc type proc (rw,nosuid,nodev,noexec,relatime)\n/dev/mmcblk0p6 on /usr/lib/modules type ext4 (ro,relatime)\n/dev/mmcblk0p2 on / type ext4 (ro,relatime)\n/dev/mmcblk0p3 on /opt type ext4 (rw,relatime)\n/dev/mmcblk0p10 on /hal type ext4 (ro,relatime)\nsmackfs on /sys/fs/smackfs type smackfs (rw,nosuid,nodev,noexec,relatime)\ntmpfs on /dev/shm type tmpfs (rw,nosuid,nodev,noexec)\ndevpts on /dev/pts type devpts (rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000)\ntmpfs on /run type tmpfs (rw,nosuid,nodev,noexec,mode=755)\ntmpfs on /sys/fs/cgroup type tmpfs (ro,nosuid,nodev,noexec,mode=755)\ncgroup on /sys/fs/cgroup/systemd type cgroup (rw,nosuid,nodev,noexec,relatime,xattr,release_agent=/usr/lib/systemd/systemd-cgroups-agent,name=systemd)\nkdbusfs on /sys/fs/kdbus type kdbusfs (rw,nosuid,nodev,noexec,relatime)\nbpf on /sys/fs/bpf type bpf (rw,nosuid,nodev,noexec,relatime,mode=700)\ncgroup on /sys/fs/cgroup/cpuset type cgroup (rw,nosuid,nodev,noexec,relatime,cpuset)\ncgroup on /sys/fs/cgroup/cpu,cpuacct type cgroup (rw,nosuid,nodev,noexec,relatime,cpu,cpuacct)\ncgroup on /sys/fs/cgroup/freezer type cgroup (rw,nosuid,nodev,noexec,relatime,freezer)\ncgroup on /sys/fs/cgroup/net_cls type cgroup (rw,nosuid,nodev,noexec,relatime,net_cls,release_agent=/usr/bin/net-cls-release)\ncgroup on /sys/fs/cgroup/devices type cgroup (rw,nosuid,nodev,noexec,relatime,devices)\ncgroup on /sys/fs/cgroup/memory type cgroup (rw,nosuid,nodev,noexec,relatime,memory)\ncgroup on /sys/fs/cgroup/blkio type cgroup (rw,nosuid,nodev,noexec,relatime,blkio)\nsystemd-1 on /proc/sys/fs/binfmt_misc type autofs (rw,relatime,fd=25,pgrp=1,timeout=0,minproto=5,maxproto=5,direct)\nmqueue on /dev/mqueue type mqueue (rw,nosuid,nodev,noexec,relatime)\nconfigfs on /sys/kernel/config type configfs (rw,nosuid,nodev,noexec,relatime)\ndebugfs on /sys/kernel/debug type debugfs (rw,nosuid,nodev,noexec,relatime)\ntmpfs on /tmp type tmpfs (rw,nosuid,nodev,noexec)\n/dev/mmcblk0p9 on /mnt/inform type ext4 (rw,relatime)\n/dev/mmcblk0p5 on /opt/usr type f2fs (rw,relatime,lazytime,background_gc=on,nogc_merge,discard,discard_unit=block,user_xattr,inline_xattr,acl,inline_data,inline_dentry,flush_merge,barrier,extent_cache,mode=adaptive,active_logs=6,alloc_mode=default,checkpoint_merge,fsync_mode=posix,memory=normal,errors=continue)\ntracefs on /sys/kernel/debug/tracing type tracefs (rw,nosuid,nodev,noexec,relatime)\nfusectl on /sys/fs/fuse/connections type fusectl (rw,nosuid,nodev,noexec,relatime)\n/dev/loop0 on /opt/usr/home/owner/subsession/__templ_acct_fix__ type ext4 (rw,relatime,loop)\ncgroup on /sys/fs/cgroup/watchdog type cgroup (rw,nosuid,nodev,noexec,relatime,release_agent=/usr/bin/resourced-watchdog-handler.sh,name=watchdog)\n/dev/loop1 on /opt/usr/home/owner/subsession/__templ_prof_fix__ type ext4 (rw,relatime,loop)\ntmpfs on /opt/media type tmpfs (rw,relatime)\n/dev/mmcblk0p5 on /opt/usr/home/owner/media type f2fs (rw,relatime,lazytime,background_gc=on,nogc_merge,discard,discard_unit=block,user_xattr,inline_xattr,acl,inline_data,inline_dentry,flush_merge,barrier,extent_cache,mode=adaptive,active_logs=6,alloc_mode=default,checkpoint_merge,fsync_mode=posix,memory=normal,errors=continue)\nsdb.default on /dev/usb-funcs/sdb/default type functionfs (rw,relatime)\nmtp.default on /dev/usb-funcs/mtp/default type functionfs (rw,relatime)\nFilesystem         1024-blocks      Used Available Capacity Mounted on\n/dev/mmcblk0p3         1335696     49308   1256308       4% /opt\nAFDO_DIRECTORY_ABSENT\nTZ_BUILD_RELEASE_NAME=\"Tizen11.0/Unified\"\nTZ_BUILD_VERSION=11.0\nTZ_BUILD_FULLVER=11.0.0\nTZ_BUILD_RELEASE_TYPE=eng\nTZ_BUILD_VARIANT=NONE\n\nTZ_BUILD_PROFILE=common\nTZ_BUILD_PROJECT=Tizen-Unified-Toolchain\n\nTZ_BUILD_VENDOR=tizen\nTZ_BUILD_REPO=standard\nTZ_BUILD_ARCH=arm\n\nTZ_BUILD_ID=tizen-unified-toolchain_20261104.160709\nTZ_BUILD_DATE=20261104.160709\nTZ_BUILD_TIME=21:19:04\nTZ_BUILD_TS=1793827144\n\nTZ_BUILD_URL=http://download.tizen.org\nTZ_BUILD_SNAPSHOT_URL=${TZ_BUILD_URL}/snapshots/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_DAILY_URL=${TZ_BUILD_URL}/releases/daily/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_WEEKLY_URL=${TZ_BUILD_URL}/releases/weekly/TIZEN/Tizen/Tizen-Unified/\nTZ_BUILD_MILESTONE_URL=${TZ_BUILD_URL}/releases/milestone/TIZEN/Tizen/Tizen-Unified/\n\nTZ_BUILD_WITH_MESA=1\nTZ_BUILD_WITH_WAYLAND=1\nTZ_BUILD_WITH_RDP=1\nTZ_BUILD_WITH_X=\n\n  File: `/etc/tizen-build.conf'\n  Size: 835       \tBlocks: 8          IO Block: 4096   regular file\nDevice: b302h/45826d\tInode: 39          Links: 1\nAccess: (0444/-r--r--r--)  Uid: (    0/    root)   Gid: (    0/    root)\nAccess: 2026-11-10 17:51:30.629999708 +0900\nModify: 2026-11-05 06:19:04.217315814 +0900\nChange: 2026-11-05 06:19:04.218315806 +0900\n  File: `/etc/tizen-release'\n  Size: 136       \tBlocks: 8          IO Block: 4096   regular file\nDevice: b302h/45826d\tInode: 2417        Links: 1\nAccess: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)\nAccess: 2026-11-05 01:13:38.000000000 +0900\nModify: 2026-11-05 06:27:45.167148576 +0900\nChange: 2026-11-05 06:27:45.167148576 +0900\n  File: `/opt'\n  Size: 4096      \tBlocks: 8          IO Block: 4096   directory\nDevice: b303h/45827d\tInode: 2           Links: 16\nAccess: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)\nAccess: 2026-11-05 06:06:50.000000000 +0900\nModify: 1970-01-01 09:00:22.049999986 +0900\nChange: 1970-01-01 09:00:22.049999986 +0900\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "space",
+    "time": "2026-11-16T00:51:53.131042-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( df -Pk /opt | awk \"END {print \\$4}\" ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "1256308\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "mkdir",
+    "time": "2026-11-16T00:51:53.248122-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( mkdir -p /opt/afdo_agent/tools /opt/afdo_agent/lib /opt/afdo_agent/variants /opt/afdo_agent/inputs /opt/afdo_agent/work ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-0",
+    "time": "2026-11-16T00:51:53.787914-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "temp/rpms/perf-extract/usr/bin/perf",
+      "/opt/afdo_agent/tools/perf"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                           perf\t  0%\t      0KB\t    0KB/s\npushed                           perf\t100%\t   2922KB\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\ntemp/rpms/perf-extract/usr/bin/perf   5525KB/s (2992296 bytes in 0.528s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "sha-0",
+    "time": "2026-11-16T00:51:53.983822-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/tools/perf ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-1",
+    "time": "2026-11-16T00:51:58.379129-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1",
+      "/opt/afdo_agent/lib/libLLVM.so.22.1"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                libLLVM.so.22.1\t  0%\t      0MB\t    0KB/s\npushed                libLLVM.so.22.1\t 36%\t     11MB\t11012KB/s\npushed                libLLVM.so.22.1\t 64%\t     20MB\t10220KB/s\npushed                libLLVM.so.22.1\t 94%\t     30MB\t 9727KB/s\npushed                libLLVM.so.22.1\t100%\t     32MB\t 9727KB/s\n1 file(s) pushed. 0 file(s) skipped.\ntemp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1   7595KB/s (33641876 bytes in 4.325s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "sha-1",
+    "time": "2026-11-16T00:51:59.249436-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1 ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-2",
+    "time": "2026-11-16T00:52:03.237175-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "media/bbb_720p_h264_60s.mp4",
+      "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed          bbb_720p_h264_60s.mp4\t  0%\t      0MB\t    0KB/s\npushed          bbb_720p_h264_60s.mp4\t 41%\t     11MB\t12095KB/s\npushed          bbb_720p_h264_60s.mp4\t 73%\t     20MB\t 9343KB/s\npushed          bbb_720p_h264_60s.mp4\t100%\t     28MB\t 9678KB/s\n1 file(s) pushed. 0 file(s) skipped.\nmedia/bbb_720p_h264_60s.mp4      7605KB/s (30023879 bytes in 3.855s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "sha-2",
+    "time": "2026-11-16T00:52:04.028454-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4  /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-3",
+    "time": "2026-11-16T00:52:07.811110-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "temp/board-round1/tos_720p_h264_60s.mp4",
+      "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed          tos_720p_h264_60s.mp4\t  0%\t      0MB\t    0KB/s\npushed          tos_720p_h264_60s.mp4\t 40%\t     11MB\t11774KB/s\npushed          tos_720p_h264_60s.mp4\t 72%\t     20MB\t 9534KB/s\npushed          tos_720p_h264_60s.mp4\t100%\t     28MB\t 9645KB/s\n1 file(s) pushed. 0 file(s) skipped.\ntemp/board-round1/tos_720p_h264_60s.mp4   7780KB/s (29964461 bytes in 3.760s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "sha-3",
+    "time": "2026-11-16T00:52:08.592925-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1  /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "chmod-perf",
+    "time": "2026-11-16T00:52:08.707394-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( chmod 755 /opt/afdo_agent/tools/perf ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "ldd-perf",
+    "time": "2026-11-16T00:52:08.851404-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( LD_LIBRARY_PATH=/opt/afdo_agent/lib ldd /opt/afdo_agent/tools/perf ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\tlinux-vdso.so.1 (0xbee05000)\n\tlibunwind.so.8 => /lib/libunwind.so.8 (0xb6c8b000)\n\tlibunwind-arm.so.8 => /lib/libunwind-arm.so.8 (0xb6c67000)\n\tlibpthread.so.0 => /lib/libpthread.so.0 (0xb6c63000)\n\tlibrt.so.1 => /lib/librt.so.1 (0xb6c60000)\n\tlibm.so.6 => /lib/libm.so.6 (0xb6c12000)\n\tlibdl.so.2 => /lib/libdl.so.2 (0xb6c0e000)\n\tlibz.so.1 => /lib/libz.so.1 (0xb6bfe000)\n\tlibelf.so.1 => /lib/libelf.so.1 (0xb6bee000)\n\tlibdw.so.1 => /lib/libdw.so.1 (0xb6b8d000)\n\tlibcrypto.so.3 => /lib/libcrypto.so.3 (0xb6912000)\n\tlibLLVM.so.22.1 => /opt/afdo_agent/lib/libLLVM.so.22.1 (0xb4870000)\n\tlibstdc++.so.6 => /lib/libstdc++.so.6 (0xb46d2000)\n\tliblzma.so.5 => /lib/liblzma.so.5 (0xb46b4000)\n\tlibgcc_s.so.1 => /lib/libgcc_s.so.1 (0xb4699000)\n\tlibc.so.6 => /lib/libc.so.6 (0xb4537000)\n\t/lib/ld-linux.so.3 (0xb6fd0000)\n\tlibbz2.so.1 => /lib/libbz2.so.1 (0xb6905000)\n\tlibxml2.so.16 => /lib/libxml2.so.16 (0xb4465000)\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "perf-version",
+    "time": "2026-11-16T00:52:09.013812-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( LD_LIBRARY_PATH=/opt/afdo_agent/lib HOME=/opt/afdo_agent/work TMPDIR=/opt/afdo_agent/work PERF_CONFIG=/opt/afdo_agent/work/perf.conf /opt/afdo_agent/tools/perf --buildid-dir /opt/afdo_agent/work/buildid --version ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "perf version 6.12.80\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-off",
+    "time": "2026-11-16T00:52:09.063260-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-uid",
+    "time": "2026-11-16T00:52:09.178982-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-governors",
+    "time": "2026-11-16T00:52:09.298649-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\" || exit 2; done ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "rpm-after",
+    "time": "2026-11-16T00:52:09.770133-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( rpm -qa | wc -l ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "1233\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "df-after",
+    "time": "2026-11-16T00:52:09.886094-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( df -Pk /opt ); rc=$?; printf \"\\n__RESTORE_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "Filesystem         1024-blocks      Used Available Capacity Mounted on\n/dev/mmcblk0p3         1335696    143780   1161836      12% /opt\n\n__RESTORE_RC__=0\n",
+    "stderr": ""
+  }
+]

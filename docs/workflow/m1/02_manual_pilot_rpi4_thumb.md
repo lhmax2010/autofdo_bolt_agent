@@ -104,3 +104,46 @@ hq记录的预期输入SHA：BBB `b5e116b9d01cec8e7f697041c53575d36bd96a5928e40f
 训练0/3，profile转换0/6；无锁定profile SHA，无AutoFDO构建及警告统计，无正确性或测量结果。本轮未生成或打开任何真实profile（Q.5第17项访问集合为空），未做质量矩阵、未登记修正案3。baseline RPM提取及运行树准备尚未开始。
 
 证据索引与SHA：[evidence/06/sha256.json](evidence/06/sha256.json)。原始工作目录：temp/m1-pilot-rpi4-20261116/restart-01/。仅更新main报告与STATUS；hq和Gerrit均不变。继续前需要恢复已验证工具与两个视频输入的部署前提；本轮不自行越过缺失停止条件。
+
+## 7. 环境恢复完成（2026-11-16；等待 v0.2 试跑指令）
+
+用户新授权重新建立 `/opt/afdo_agent/{tools,lib,variants,inputs,work}`，仅使用 WORKDIR 内已有且SHA匹配的副本。本节不覆盖先前停止记录。
+
+### 7.1 缺失原因核查
+
+[完整命令、时间、退出码及原文](evidence/07/operations.json)中 `cause-readonly`：
+
+- uptime约34分钟；板上时钟17:52:10（主机记录为00:51–00:52 PST，时区不同）。本轮未重启板子。
+- `/`为 `/dev/mmcblk0p2`，ext4、ro；`/opt`为 `/dev/mmcblk0p3`，ext4、rw；恢复前 `/opt/afdo_agent`不存在，因此没有该子目录的独立挂载可核对。`mount`只列出现有挂载，没有执行挂载操作。
+- model、uname、镜像文件内容六项与周六一致。`/etc/tizen-build.conf`记录Unified20261104.160709；mtime为2026-11-05 06:19:04 +0900，`/etc/tizen-release`mtime为2026-11-05 06:27:45 +0900。没有本轮烧录日志或镜像包可用于证明实际烧录时间。
+- `/opt`目录mtime/ctime为1970-01-01 09:00:22 +0900，不能据此推断清理时间。与上次检查相比，仍为同一设备路径与挂载点；仅路径一致也不能排除重新格式化或换回同一镜像。
+- **缺失原因：未知。** 现有证据不能在重新烧录、人工清理、此前挂载变化之间确定原因；uptime只证明当前启动持续时间，不证明重启造成文件丢失。按指令，此不确定性不阻塞已授权恢复。
+
+### 7.2 来源与逐文件SHA核对
+
+此前[部署操作](../../profgen/impl/evidence/12/08_operations.json)及[部署清单](../../profgen/impl/evidence/12/18_resume2_deployment.json)中，perf随附的 `/opt/afdo_agent/lib/` 文件只有libLLVM；没有额外库需要从其他来源替代。BBB来源见[媒体清单11](../../profgen/impl/evidence/11/09_media.json)，ToS来源见[媒体清单12](../../profgen/impl/evidence/12/09_media.json)。
+
+| 板上路径 | 主机与板上相同的SHA-256 | 主机已有副本 |
+|---|---|---|
+| `/opt/afdo_agent/tools/perf` | `41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138` | `temp/rpms/perf-extract/usr/bin/perf` |
+| `/opt/afdo_agent/lib/libLLVM.so.22.1` | `49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e` | `temp/rpms/llvm-extract/usr/lib/libLLVM.so.22.1` |
+| `/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4` | `b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4` | `media/bbb_720p_h264_60s.mp4` |
+| `/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4` | `280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1` | `temp/board-round1/tos_720p_h264_60s.mp4` |
+
+[主机核验清单](evidence/07/host-manifest.json)、[部署后清单](evidence/07/deployment.json)记录路径、字节数与来源证据。四文件共96,622,512字节；传输前重哈希，逐个push后板上sha256sum再核对，4/4一致。没有下载、重建或安装。
+
+### 7.3 运行与恢复验证
+
+- 新建tools、lib、variants、inputs、work五个目录。仅恢复上述四文件；variants目前没有部署FFmpeg变体。
+- `chmod 755 /opt/afdo_agent/tools/perf`成功。
+- `LD_LIBRARY_PATH=/opt/afdo_agent/lib ldd /opt/afdo_agent/tools/perf`退出0、没有`not found`；libLLVM来自部署目录，其余依赖（包括libxml2.so.16）来自现有系统库。没有替换系统库。
+- 将HOME、TMPDIR、PERF_CONFIG与build-id目录指向 `/opt/afdo_agent/work`，执行`perf --version`输出`perf version 6.12.80`、远端退出0。这里只执行版本检查，没有record/stat/evlist或工作负载。
+- 初始uid5001；仅部署需要时root on，finally恢复root off，结束复读uid5001。policy0 governor初始与结束均schedutil，期间没有写governor，因此无需切回。RPM前后均1233。
+- `/opt`可用空间从1,256,308 KiB变为1,161,836 KiB；部署前通过`2×文件总量+200 MB`空间检查。没有删除任何旧目录。
+- 执行段18.749秒；串行轻量scope3G/200%、nice19/ionice-c3。起止采样最低MemAvailable15,925,891,072字节，cgroup memory.peak20,234,240字节；不足60秒没有中途60秒采样。没有资源暂停/终止/重试。见[结果](evidence/07/result.json)。
+
+### 7.4 后续边界与披露
+
+环境恢复通过，原“部署目录缺失”阻塞已解除。当前消息尚未附带“M1手动试跑（按设计v0.2规则）”全文，已请求补发；不自行把旧版规则当作v0.2规则。等待期间root已恢复初始状态。
+
+未采集、未生成或打开任何真实profile；Q.5第17项本轮profile访问集合为空。没有AutoFDO构建、正确性或性能测量。未改hq、未推Gerrit。证据SHA见[索引](evidence/07/sha256.json)。

@@ -38,6 +38,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## RPi4 环境恢复通过（2026-11-16；等待v0.2试跑指令）
+
+- [试跑报告第7节](workflow/m1/02_manual_pilot_rpi4_thumb.md)：按新授权恢复/opt/afdo_agent的tools/lib/variants/inputs/work。已有perf、libLLVM、BBB、ToS四份副本主机与板上SHA均匹配；ldd无缺失，perf版本6.12.80。
+- 缺失原因未知：uptime约34分钟，镜像标识与周六一致，当前/opt仍为mmcblk0p3 ext4/rw；无证据确定烧录、清理或挂载变化。原文/清单/SHA见workflow/m1/evidence/07/。
+- root恢复uid5001，governor未改动、前后schedutil，RPM前后1233；/opt结束可用1,161,836 KiB。未采集、未生成/读取profile、未构建、未测量。用户所称随后附带的v0.2试跑全文尚未收到，已请求补发；等待期间不套用旧规则，hq/Gerrit不变。
+
 ## Workflow 设计 v0.2 入库（2026-11-16）
 
 - [v0.2 设计](workflow/01_afdo_bolt_workflow_design_v0.2.md)取代v0.1，进入一轮确认评审；v0.1文件保留。
