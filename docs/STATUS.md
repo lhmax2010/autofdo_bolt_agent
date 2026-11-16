@@ -38,6 +38,13 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## M1 RPi4 Thumb AutoFDO 端到端试跑完成（2026-11-16）
+
+- [试跑报告第8节](workflow/m1/02_manual_pilot_rpi4_thumb.md)：3次BBB训练、6次转换均conversion=ok/identity=verified；锁定profile SHA `61f03b59262e3ce7ce758219d65848a33b5a0549131c362a6769ad10386f2cf2`，显式max/none/none/none。采样充分性unknown，默认值未统计验证。
+- 原BASE、BASE-r、AFDO的108条包/SHA256HEADER相同；独立V=1取证各698条命令去掉profile参数后相同，取证产物与主构建一致。BASE-r与BASE相同，仍用BASE作对照；AFDO两目标代码/build-id不同，runtime/debug匹配，消费profile SHA一致。
+- PLAT/BASE/AFDO在两片上的前后正确性全部通过。固定15个AB/BA block，标记2、缺失0；主判定 **faster**，耗时变化 **-2.565%**，bootstrap 95% CI **[-2.859%, -2.256%]**。有效频率差-0.000220%，无>0.5%混杂标记。仅对本pilot解释，不外推默认值或普遍收益。
+- root恢复uid5001、policy0=schedutil，cleanup_pending为空；本轮work已校验拉回后删除，BASE/AFDO variants保留。Q.5#17对象/时间/用途及原始测量、遥测、命令、配置失败与执行器更正均归档evidence/08。早期SDB日志覆盖和取证峰值缺口已披露，关键SHA重核通过。未操作RPi5、hq、Gerrit，未改patch/spec。
+
 ## RPi4 环境恢复通过（2026-11-16；等待v0.2试跑指令）
 
 - [试跑报告第7节](workflow/m1/02_manual_pilot_rpi4_thumb.md)：按新授权恢复/opt/afdo_agent的tools/lib/variants/inputs/work。已有perf、libLLVM、BBB、ToS四份副本主机与板上SHA均匹配；ldd无缺失，perf版本6.12.80。

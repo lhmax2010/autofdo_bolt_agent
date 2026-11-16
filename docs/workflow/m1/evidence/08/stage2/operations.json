@@ -1,0 +1,245 @@
+[
+  {
+    "name": "initial-uid",
+    "time": "2026-11-16T00:56:28.491077-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-governors",
+    "time": "2026-11-16T00:56:29.349647-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\"; done ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-on",
+    "time": "2026-11-16T00:56:29.591468-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "telemetry-capability",
+    "time": "2026-11-16T00:56:29.683212-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( set -e; for p in /sys/devices/system/cpu/cpufreq/policy*; do for f in scaling_governor scaling_cur_freq cpuinfo_cur_freq scaling_min_freq scaling_max_freq; do printf \"%s=\" \"$p/$f\"; cat \"$p/$f\"; done; done; for z in /sys/class/thermal/thermal_zone*; do printf \"%s \" \"$z\"; cat \"$z/type\" \"$z/temp\"; done; for h in /sys/class/hwmon/hwmon*; do printf \"%s \" \"$h\"; cat \"$h/name\"; if test -e \"$h/in0_lcrit_alarm\"; then cat \"$h/in0_lcrit_alarm\"; fi; done ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq=1500000\n/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_cur_freq=1500000\n/sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq=600000\n/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq=1500000\n/sys/class/thermal/thermal_zone0 cpu-thermal\n57939\n/sys/class/hwmon/hwmon0 rpi_volt\n0\n/sys/class/hwmon/hwmon1 cpu_thermal\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/oracle.sh",
+    "time": "2026-11-16T00:56:30.375268-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/oracle.sh",
+      "/opt/afdo_agent/work/m1p-v02-20261116/oracle.sh"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                      oracle.sh\t  0%\t      0 B\t    0KB/s\npushed                      oracle.sh\t100%\t   1562 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/oracle.sh   8KB/s (1562 bytes in 0.173s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "oracle-plat-bbb",
+    "time": "2026-11-16T00:56:31.266923-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/oracle.sh plat-bbb /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 PLAT ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814  /opt/afdo_agent/work/m1p-v02-20261116/plat-bbb/hash.pipe\n2488320000\n1800\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "pull-plat-bbb",
+    "time": "2026-11-16T00:57:37.738664-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/m1p-v02-20261116/plat-bbb",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/stage2/plat-bbb"
+    ],
+    "exit": 0,
+    "stdout": "\npulled                   decoder.maps\t  0%\t      0 B\t    0KB/s\npulled                   decoder.maps\t100%\t   8759 B\t    0KB/s\n\npulled                 decoded.sha256\t  0%\t      0 B\t    0KB/s\npulled                 decoded.sha256\t100%\t    123 B\t    0KB/s\n\npulled                   registry.bin\t  0%\t      0KB\t    0KB/s\npulled                   registry.bin\t100%\t    370KB\t    0KB/s\n\npulled                        gst.log\t  0%\t      0KB\t    0KB/s\npulled                        gst.log\t100%\t    461KB\t    0KB/s\n\npulled                  decoded.bytes\t  0%\t      0 B\t    0KB/s\npulled                  decoded.bytes\t100%\t     11 B\t    0KB/s\n\npulled      frame-notifications.count\t  0%\t      0 B\t    0KB/s\npulled      frame-notifications.count\t100%\t      5 B\t    0KB/s\n6 file(s) pulled. 0 file(s) skipped.\n/opt/afdo_agent/work/m1p-v02-20261116/plat-bbb   1312KB/s (860554 bytes in 0.640s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "oracle-plat-tos",
+    "time": "2026-11-16T00:57:38.555501-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/oracle.sh plat-tos /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4 PLAT ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e  /opt/afdo_agent/work/m1p-v02-20261116/plat-tos/hash.pipe\n2488320000\n1800\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "pull-plat-tos",
+    "time": "2026-11-16T00:58:45.999727-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/m1p-v02-20261116/plat-tos",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/stage2/plat-tos"
+    ],
+    "exit": 0,
+    "stdout": "\npulled                   decoder.maps\t  0%\t      0 B\t    0KB/s\npulled                   decoder.maps\t100%\t   8800 B\t    0KB/s\n\npulled                 decoded.sha256\t  0%\t      0 B\t    0KB/s\npulled                 decoded.sha256\t100%\t    123 B\t    0KB/s\n\npulled                   registry.bin\t  0%\t      0KB\t    0KB/s\npulled                   registry.bin\t100%\t    370KB\t    0KB/s\n\npulled                        gst.log\t  0%\t      0KB\t    0KB/s\npulled                        gst.log\t100%\t    460KB\t    0KB/s\n\npulled                  decoded.bytes\t  0%\t      0 B\t    0KB/s\npulled                  decoded.bytes\t100%\t     11 B\t    0KB/s\n\npulled      frame-notifications.count\t  0%\t      0 B\t    0KB/s\npulled      frame-notifications.count\t100%\t      5 B\t    0KB/s\n6 file(s) pulled. 0 file(s) skipped.\n/opt/afdo_agent/work/m1p-v02-20261116/plat-tos   1101KB/s (860101 bytes in 0.762s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "oracle-base-bbb",
+    "time": "2026-11-16T00:58:46.947461-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/oracle.sh base-bbb /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 BASE ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814  /opt/afdo_agent/work/m1p-v02-20261116/base-bbb/hash.pipe\n2488320000\n1800\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "pull-base-bbb",
+    "time": "2026-11-16T00:59:51.609912-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/m1p-v02-20261116/base-bbb",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/stage2/base-bbb"
+    ],
+    "exit": 0,
+    "stdout": "\npulled                   decoder.maps\t  0%\t      0 B\t    0KB/s\npulled                   decoder.maps\t100%\t   9322 B\t    0KB/s\n\npulled                 decoded.sha256\t  0%\t      0 B\t    0KB/s\npulled                 decoded.sha256\t100%\t    123 B\t    0KB/s\n\npulled                   registry.bin\t  0%\t      0KB\t    0KB/s\npulled                   registry.bin\t100%\t    370KB\t    0KB/s\n\npulled                        gst.log\t  0%\t      0KB\t    0KB/s\npulled                        gst.log\t100%\t    461KB\t    0KB/s\n\npulled                  decoded.bytes\t  0%\t      0 B\t    0KB/s\npulled                  decoded.bytes\t100%\t     11 B\t    0KB/s\n\npulled      frame-notifications.count\t  0%\t      0 B\t    0KB/s\npulled      frame-notifications.count\t100%\t      5 B\t    0KB/s\n6 file(s) pulled. 0 file(s) skipped.\n/opt/afdo_agent/work/m1p-v02-20261116/base-bbb   1283KB/s (861117 bytes in 0.654s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "oracle-base-tos",
+    "time": "2026-11-16T00:59:52.418375-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/oracle.sh base-tos /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4 BASE ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e  /opt/afdo_agent/work/m1p-v02-20261116/base-tos/hash.pipe\n2488320000\n1800\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "pull-base-tos",
+    "time": "2026-11-16T01:01:01.516222-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/m1p-v02-20261116/base-tos",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/stage2/base-tos"
+    ],
+    "exit": 0,
+    "stdout": "\npulled                   decoder.maps\t  0%\t      0 B\t    0KB/s\npulled                   decoder.maps\t100%\t   9322 B\t    0KB/s\n\npulled                 decoded.sha256\t  0%\t      0 B\t    0KB/s\npulled                 decoded.sha256\t100%\t    123 B\t    0KB/s\n\npulled                   registry.bin\t  0%\t      0KB\t    0KB/s\npulled                   registry.bin\t100%\t    370KB\t    0KB/s\n\npulled                        gst.log\t  0%\t      0KB\t    0KB/s\npulled                        gst.log\t100%\t    460KB\t    0KB/s\n\npulled                  decoded.bytes\t  0%\t      0 B\t    0KB/s\npulled                  decoded.bytes\t100%\t     11 B\t    0KB/s\n\npulled      frame-notifications.count\t  0%\t      0 B\t    0KB/s\npulled      frame-notifications.count\t100%\t      5 B\t    0KB/s\n6 file(s) pulled. 0 file(s) skipped.\n/opt/afdo_agent/work/m1p-v02-20261116/base-tos   1395KB/s (860623 bytes in 0.602s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-governor",
+    "time": "2026-11-16T01:01:02.249779-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-uid",
+    "time": "2026-11-16T01:01:02.416621-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "0\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-restore",
+    "time": "2026-11-16T01:01:02.583447-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-uid",
+    "time": "2026-11-16T01:01:02.691907-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  }
+]

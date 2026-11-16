@@ -1,0 +1,30 @@
+[
+  {
+    "name": "initial-uid",
+    "time": "2026-11-16T00:56:28.491077-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-governors",
+    "time": "2026-11-16T00:56:29.349647-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\"; done ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,399 @@
+[
+  {
+    "name": "initial-uid",
+    "time": "2026-11-16T01:19:04.640404-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-governors",
+    "time": "2026-11-16T01:19:04.822686-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\"; done ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-on",
+    "time": "2026-11-16T01:19:05.106215-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "dependencies",
+    "time": "2026-11-16T01:19:05.264767-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( command -v bash && command -v taskset && command -v sleep ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/usr/bin/bash\n/usr/bin/taskset\n/usr/bin/sleep\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/watchdog.sh",
+    "time": "2026-11-16T01:19:05.448321-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/watchdog.sh",
+      "/opt/afdo_agent/work/m1p-v02-20261116/watchdog.sh"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                    watchdog.sh\t  0%\t      0 B\t    0KB/s\npushed                    watchdog.sh\t100%\t    518 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/watchdog.sh   2KB/s (518 bytes in 0.170s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "watchdog-negative",
+    "time": "2026-11-16T01:19:05.748333-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/watchdog.sh 1 bash -c 'sleep 10'; code=$?; test \"$code\" = 143 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "WATCHDOG_TIMEOUT 1\n[1]-  Terminated              \"$@\"\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "tar-afdo",
+    "time": "2026-11-16T01:19:06.961224-08:00",
+    "argv": [
+      "tar",
+      "-C",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measurement/m1p-afdo",
+      "-cf",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measurement/afdo.tar",
+      "."
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "push-/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measurement/afdo.tar",
+    "time": "2026-11-16T01:19:07.057406-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measurement/afdo.tar",
+      "/opt/afdo_agent/work/m1p-v02-20261116/afdo.tar"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                       afdo.tar\t  0%\t      0KB\t    0KB/s\npushed                       afdo.tar\t100%\t   6030KB\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measurement/afdo.tar   6530KB/s (6174720 bytes in 0.923s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "deploy-afdo",
+    "time": "2026-11-16T01:19:08.040940-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( test ! -e /opt/afdo_agent/variants/m1p-afdo && mkdir /opt/afdo_agent/variants/m1p-afdo && tar -xf /opt/afdo_agent/work/m1p-v02-20261116/afdo.tar -C /opt/afdo_agent/variants/m1p-afdo ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:08.400067-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavcodec.so.62 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "9916230691c67062c8786a8742712bbfa138cde20160a7d6bf28e87e02668803  /opt/afdo_agent/variants/m1p-afdo/lib/libavcodec.so.62\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:08.666405-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavcodec.so.62.11.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "9916230691c67062c8786a8742712bbfa138cde20160a7d6bf28e87e02668803  /opt/afdo_agent/variants/m1p-afdo/lib/libavcodec.so.62.11.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:08.883067-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavfilter.so.11 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "bc3a37d5002d48bd31cb12fa90b44b858f599d88674f59c9f263c5196983bb50  /opt/afdo_agent/variants/m1p-afdo/lib/libavfilter.so.11\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:09.091589-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavfilter.so.11.4.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "bc3a37d5002d48bd31cb12fa90b44b858f599d88674f59c9f263c5196983bb50  /opt/afdo_agent/variants/m1p-afdo/lib/libavfilter.so.11.4.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:09.283414-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavformat.so.62 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "85eb9c1733019772dea40bb83987264e7245a5c892643757d3cd3940110b909e  /opt/afdo_agent/variants/m1p-afdo/lib/libavformat.so.62\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:09.466878-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavformat.so.62.3.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "85eb9c1733019772dea40bb83987264e7245a5c892643757d3cd3940110b909e  /opt/afdo_agent/variants/m1p-afdo/lib/libavformat.so.62.3.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:09.641976-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavutil.so.60 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "bf53d0eb9dba6d5c06cbe934e23c50b7f0623615532745b7041cdb529c12af0e  /opt/afdo_agent/variants/m1p-afdo/lib/libavutil.so.60\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:09.817128-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libavutil.so.60.8.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "bf53d0eb9dba6d5c06cbe934e23c50b7f0623615532745b7041cdb529c12af0e  /opt/afdo_agent/variants/m1p-afdo/lib/libavutil.so.60.8.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:09.993134-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libswresample.so.6 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "8f0ffa3171700b7e7f985306681582a83a6fbe6965c2955c36bfc0ef96e3b450  /opt/afdo_agent/variants/m1p-afdo/lib/libswresample.so.6\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:10.126886-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libswresample.so.6.1.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "8f0ffa3171700b7e7f985306681582a83a6fbe6965c2955c36bfc0ef96e3b450  /opt/afdo_agent/variants/m1p-afdo/lib/libswresample.so.6.1.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:10.310482-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libswscale.so.9 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "6eaa2622ca9b7fd2486886fe1c7d3035943dfb0e403e15d2e27166df6bb07f79  /opt/afdo_agent/variants/m1p-afdo/lib/libswscale.so.9\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "afdo-sha",
+    "time": "2026-11-16T01:19:10.485748-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-afdo/lib/libswscale.so.9.1.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "6eaa2622ca9b7fd2486886fe1c7d3035943dfb0e403e15d2e27166df6bb07f79  /opt/afdo_agent/variants/m1p-afdo/lib/libswscale.so.9.1.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/oracle-variants.sh",
+    "time": "2026-11-16T01:19:10.652591-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/oracle-variants.sh",
+      "/opt/afdo_agent/work/m1p-v02-20261116/oracle-variants.sh"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed             oracle-variants.sh\t  0%\t      0 B\t    0KB/s\npushed             oracle-variants.sh\t100%\t   1570 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/oracle-variants.sh   8KB/s (1570 bytes in 0.181s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measure.sh",
+    "time": "2026-11-16T01:19:10.894412-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measure.sh",
+      "/opt/afdo_agent/work/m1p-v02-20261116/measure.sh"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                     measure.sh\t  0%\t      0 B\t    0KB/s\npushed                     measure.sh\t100%\t   3073 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/measure.sh   17KB/s (3073 bytes in 0.169s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "oracle-pre-afdo-bbb",
+    "time": "2026-11-16T01:19:11.111143-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/watchdog.sh 600 bash /opt/afdo_agent/work/m1p-v02-20261116/oracle-variants.sh pre-afdo-bbb /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 AFDO ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/opt/afdo_agent/work/m1p-v02-20261116/oracle-variants.sh: line 8: LD_LIBRARY_PATH=/opt/afdo_agent/variants/m1p-${variant,,}/lib: bad substitution\n\n__M1P_RC__=1\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-governor",
+    "time": "2026-11-16T01:19:11.303139-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-uid",
+    "time": "2026-11-16T01:19:11.494897-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "0\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-restore",
+    "time": "2026-11-16T01:19:11.694948-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-uid",
+    "time": "2026-11-16T01:19:11.761724-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  }
+]

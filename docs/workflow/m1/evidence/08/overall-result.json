@@ -1,0 +1,122 @@
+{
+  "completed": true,
+  "time": "2026-11-16T01:56:39.361948-08:00",
+  "scope": "M1 FFmpeg RPi4 Thumb pilot, workflow v0.2 plus user-specific rules",
+  "profile": {
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/conversion/autofdo.extbinary",
+    "sha256": "61f03b59262e3ce7ce758219d65848a33b5a0549131c362a6769ad10386f2cf2",
+    "time": "2026-11-16T01:03:14.239441-08:00"
+  },
+  "build_gates": {
+    "passed": true,
+    "control": "BASE",
+    "packages": 108,
+    "commands": {
+      "base-r": 698,
+      "afdo": 698
+    },
+    "afdo_profile_flag_commands": 627,
+    "forensic_artifacts_equal_primary": true,
+    "base_r_equal_base": true,
+    "target_code_changed": true
+  },
+  "measurement": {
+    "success": true,
+    "final_uid": "5001",
+    "cleanup_pending": []
+  },
+  "statistics": {
+    "primary": {
+      "n": 15,
+      "log_ratios": [
+        -0.016576861909193736,
+        -0.026048501227849553,
+        -0.028341113670140656,
+        -0.02285719833550312,
+        -0.035360446496805156,
+        -0.02849852716545186,
+        -0.025845320441475885,
+        -0.017755926860640925,
+        -0.031108953023906594,
+        -0.02749484218699765,
+        -0.02462351602789799,
+        -0.03528252682339069,
+        -0.025300360175048907,
+        -0.031045349459473914,
+        -0.013655314924724042
+      ],
+      "estimate": -0.025651578715200025,
+      "bootstrap_CI95": [
+        -0.028591365952332876,
+        -0.022562991794702208
+      ],
+      "t_CI95": [
+        -0.029060418664809372,
+        -0.022230770781150214
+      ],
+      "median_ratio_minus_one": -0.027737273581543098,
+      "verdict": "faster"
+    },
+    "clean_sensitivity": {
+      "n": 13,
+      "log_ratios": [
+        -0.016576861909193736,
+        -0.026048501227849553,
+        -0.028341113670140656,
+        -0.02285719833550312,
+        -0.035360446496805156,
+        -0.02849852716545186,
+        -0.025845320441475885,
+        -0.017755926860640925,
+        -0.031108953023906594,
+        -0.02749484218699765,
+        -0.03528252682339069,
+        -0.025300360175048907,
+        -0.013655314924724042
+      ],
+      "estimate": -0.025374507263983125,
+      "bootstrap_CI95": [
+        -0.028677686939855125,
+        -0.02193959061569267
+      ],
+      "t_CI95": [
+        -0.029288973397013945,
+        -0.021444255748189867
+      ],
+      "median_ratio_minus_one": -0.02721881986973851,
+      "verdict": "faster"
+    },
+    "flagged_blocks": [
+      11,
+      14
+    ],
+    "missing_blocks": [],
+    "bootstrap_seed": 2026111601,
+    "epsilon": 0.01,
+    "effective_frequency_MHz": {
+      "base": 1499.8039375207823,
+      "afdo": 1499.800640535988
+    },
+    "effective_frequency_relative_difference": -2.1982771960527003e-06,
+    "confounding_risk": false,
+    "baseline_CV": 0.003656354238454075
+  },
+  "cleanup": {
+    "work_removed": true,
+    "retained_variants": "22ab3b6b67873f50c7de0e7e17a02b9714f87fd3f306df6437bce074c8839fc3  /opt/afdo_agent/variants/m1p-base/lib/libavformat.so.62.3.100\na88f476c4628efaf883db47c10310f39698b9a54d5aef106e3ec295fa00d5845  /opt/afdo_agent/variants/m1p-base/lib/libswresample.so.6.1.100\n6b3abb7faed64f62d9afb293148558eccd39c194b85ac4d842b6005f380c4d44  /opt/afdo_agent/variants/m1p-base/lib/libavutil.so.60.8.100\n07da98e1c92253c34271ec55d97a112419e8f19bbf59c5d38c33c0af4ad0e742  /opt/afdo_agent/variants/m1p-base/lib/libavcodec.so.62.11.100\n1b5a779f9eb504235fcf43f6637746694f4003acf6fe2c0087232b7d571a51e5  /opt/afdo_agent/variants/m1p-base/lib/libswscale.so.9.1.100\n7693492f87e0986a64d77924a3830dfa7081489128804a5f467781d342a286d8  /opt/afdo_agent/variants/m1p-base/lib/libavfilter.so.11.4.100\n85eb9c1733019772dea40bb83987264e7245a5c892643757d3cd3940110b909e  /opt/afdo_agent/variants/m1p-afdo/lib/libavformat.so.62.3.100\n8f0ffa3171700b7e7f985306681582a83a6fbe6965c2955c36bfc0ef96e3b450  /opt/afdo_agent/variants/m1p-afdo/lib/libswresample.so.6.1.100\nbf53d0eb9dba6d5c06cbe934e23c50b7f0623615532745b7041cdb529c12af0e  /opt/afdo_agent/variants/m1p-afdo/lib/libavutil.so.60.8.100\n9916230691c67062c8786a8742712bbfa138cde20160a7d6bf28e87e02668803  /opt/afdo_agent/variants/m1p-afdo/lib/libavcodec.so.62.11.100\n6eaa2622ca9b7fd2486886fe1c7d3035943dfb0e403e15d2e27166df6bb07f79  /opt/afdo_agent/variants/m1p-afdo/lib/libswscale.so.9.1.100\nbc3a37d5002d48bd31cb12fa90b44b858f599d88674f59c9f263c5196983bb50  /opt/afdo_agent/variants/m1p-afdo/lib/libavfilter.so.11.4.100",
+    "rpm_count": "1233",
+    "success": true,
+    "final_uid": "5001",
+    "cleanup_pending": [],
+    "final_governors": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil"
+  },
+  "remaining_blockers": [],
+  "limitations": [
+    "sampling_adequacy unknown; conservative strategy defaults not statistically validated",
+    "libavutil target samples sparse (325 total)",
+    "Two AFDO telemetry records truncated at sampler termination; blocks retained in primary analysis",
+    "Early SDB operation log filename reuse lost some initial stdout; key identities/SHA rechecked",
+    "Forensic build final cgroup peak not recorded",
+    "Sampler overhead not measured separately"
+  ]
+}

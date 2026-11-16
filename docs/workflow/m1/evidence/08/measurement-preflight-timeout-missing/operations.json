@@ -1,0 +1,114 @@
+[
+  {
+    "name": "initial-uid",
+    "time": "2026-11-16T01:17:54.941058-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-governors",
+    "time": "2026-11-16T01:17:55.113063-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\"; done ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-on",
+    "time": "2026-11-16T01:17:55.354903-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "dependencies",
+    "time": "2026-11-16T01:17:55.446682-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( command -v timeout && command -v taskset ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=1\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-governor",
+    "time": "2026-11-16T01:17:55.605087-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-uid",
+    "time": "2026-11-16T01:17:55.788614-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "0\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-restore",
+    "time": "2026-11-16T01:17:55.972001-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-uid",
+    "time": "2026-11-16T01:17:56.063602-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  }
+]

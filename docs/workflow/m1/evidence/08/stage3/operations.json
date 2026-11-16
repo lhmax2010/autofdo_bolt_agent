@@ -1,0 +1,580 @@
+[
+  {
+    "name": "initial-uid",
+    "time": "2026-11-16T01:01:12.591586-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "initial-governors",
+    "time": "2026-11-16T01:01:12.810222-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do printf \"%s=\" \"$p\"; cat \"$p\"; done ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "/sys/devices/system/cpu/cpufreq/policy0/scaling_governor=schedutil\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-on",
+    "time": "2026-11-16T01:01:13.051778-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "on"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'root' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "prerequisite-sha",
+    "time": "2026-11-16T01:01:13.160700-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/tools/perf ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138  /opt/afdo_agent/tools/perf\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "prerequisite-sha",
+    "time": "2026-11-16T01:01:13.385555-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/lib/libLLVM.so.22.1 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "49fcc90da72ac2eabd7bbdb0a71566ea2284a532f98730ca46496782f30fb69e  /opt/afdo_agent/lib/libLLVM.so.22.1\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "prerequisite-sha",
+    "time": "2026-11-16T01:01:14.018857-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4  /opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "prerequisite-sha",
+    "time": "2026-11-16T01:01:14.644263-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1  /opt/afdo_agent/inputs/tos_720p_h264_60s.mp4\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:15.278739-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavcodec.so.62 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "07da98e1c92253c34271ec55d97a112419e8f19bbf59c5d38c33c0af4ad0e742  /opt/afdo_agent/variants/m1p-base/lib/libavcodec.so.62\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:15.536243-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavcodec.so.62.11.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "07da98e1c92253c34271ec55d97a112419e8f19bbf59c5d38c33c0af4ad0e742  /opt/afdo_agent/variants/m1p-base/lib/libavcodec.so.62.11.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:15.753014-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavfilter.so.11 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "7693492f87e0986a64d77924a3830dfa7081489128804a5f467781d342a286d8  /opt/afdo_agent/variants/m1p-base/lib/libavfilter.so.11\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:15.944759-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavfilter.so.11.4.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "7693492f87e0986a64d77924a3830dfa7081489128804a5f467781d342a286d8  /opt/afdo_agent/variants/m1p-base/lib/libavfilter.so.11.4.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:16.128433-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavformat.so.62 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "22ab3b6b67873f50c7de0e7e17a02b9714f87fd3f306df6437bce074c8839fc3  /opt/afdo_agent/variants/m1p-base/lib/libavformat.so.62\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:16.303425-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavformat.so.62.3.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "22ab3b6b67873f50c7de0e7e17a02b9714f87fd3f306df6437bce074c8839fc3  /opt/afdo_agent/variants/m1p-base/lib/libavformat.so.62.3.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:16.470424-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavutil.so.60 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "6b3abb7faed64f62d9afb293148558eccd39c194b85ac4d842b6005f380c4d44  /opt/afdo_agent/variants/m1p-base/lib/libavutil.so.60\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:16.637201-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libavutil.so.60.8.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "6b3abb7faed64f62d9afb293148558eccd39c194b85ac4d842b6005f380c4d44  /opt/afdo_agent/variants/m1p-base/lib/libavutil.so.60.8.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:16.812033-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libswresample.so.6 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "a88f476c4628efaf883db47c10310f39698b9a54d5aef106e3ec295fa00d5845  /opt/afdo_agent/variants/m1p-base/lib/libswresample.so.6\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:16.995595-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libswresample.so.6.1.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "a88f476c4628efaf883db47c10310f39698b9a54d5aef106e3ec295fa00d5845  /opt/afdo_agent/variants/m1p-base/lib/libswresample.so.6.1.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:17.154280-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libswscale.so.9 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "1b5a779f9eb504235fcf43f6637746694f4003acf6fe2c0087232b7d571a51e5  /opt/afdo_agent/variants/m1p-base/lib/libswscale.so.9\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "base-sha",
+    "time": "2026-11-16T01:01:17.354579-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( sha256sum /opt/afdo_agent/variants/m1p-base/lib/libswscale.so.9.1.100 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "1b5a779f9eb504235fcf43f6637746694f4003acf6fe2c0087232b7d571a51e5  /opt/afdo_agent/variants/m1p-base/lib/libswscale.so.9.1.100\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "performance",
+    "time": "2026-11-16T01:01:17.529638-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "push-/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/collect.sh",
+    "time": "2026-11-16T01:01:17.788198-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "push",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/collect.sh",
+      "/opt/afdo_agent/work/m1p-v02-20261116/collect.sh"
+    ],
+    "exit": 0,
+    "stdout": "WARNING: Your data are to be sent over an unencrypted connection and could be read by others.\n\npushed                     collect.sh\t  0%\t      0 B\t    0KB/s\npushed                     collect.sh\t100%\t   3224 B\t    0KB/s\n1 file(s) pushed. 0 file(s) skipped.\n/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/collect.sh   18KB/s (3224 bytes in 0.169s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "collect-1",
+    "time": "2026-11-16T01:01:18.013306-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/collect.sh 1 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "manifest-1",
+    "time": "2026-11-16T01:01:49.041965-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cd /opt/afdo_agent/work/m1p-v02-20261116/train-1 && find . -type f -exec sha256sum {} \\; ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "95d514da7a668b7e5a50a7b02d2fc7f63a017bd2d7dc19baf4babdac3a90a45f  ./record.stderr\n4d053e0cdda48a6887b68edebfa2cf9f7792dfba6b5fecddc9ce158ec320bee4  ./gst.pid\n71879d5025daeab543edc335b2391f9c5a4b796ea8f4c18103d2ea1be094ddc8  ./perfscript.txt\n4332d0f1a329a4c466f03951006ac5b9054b522033c8a2c383c35d684225cda5  ./gst.log\n9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./exit\na5a01b12913a36560fdb8c57bc72f0aa0ee73ba052500ac626120994ac90f3cf  ./maps/18209.loaded\ne9c279765822d226cef638d4b790700d1e5eafbacf82f24480ce0c96e04bb6e0  ./maps/18209.current\n9932441811549b310b29fedb43cafadb0aa551474f51e1b91ecfef99cfb0b88d  ./maps/18209.cmdline\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./buildid-list.stderr\n9d57fa977c942eacb61530cbc78b7d1fcf57901a1d3e4562c62c6d07dca845fe  ./perf.data\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./evlist.stderr\n427ff1af1820d4bbdc6bccc9a8ca833bd9381df5d7b416039493e82fdabb3b1f  ./registry.bin\nbbe8ca0ed4a72fadb86ad6f3dd2f38e97ce5d8edcc5567d1ee1551afdcba0118  ./buildid-list.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./telemetry.stderr\nc856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372  ./evlist.txt\n37e817b4a21f5a0df5de9c2eadad95c3c382e4e3d90ff85c2d0cfcbc843e01e0  ./runtime.sha256\n9e7b7c6960585879553a854ae24dfa97daa80230d4024e3cc2c181041f2bcc6f  ./telemetry.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./perfscript.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stdout\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "pull-1",
+    "time": "2026-11-16T01:01:50.324843-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/m1p-v02-20261116/train-1",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/stage3/train-1"
+    ],
+    "exit": 0,
+    "stdout": "\npulled              maps-watch.stdout\t100%\t      0 B\t    0KB/s\npulled              maps-watch.stdout\t100%\t      0 B\t    0KB/s\n\npulled              perfscript.stderr\t100%\t      0 B\t    0KB/s\npulled              perfscript.stderr\t100%\t      0 B\t    0KB/s\n\npulled                  telemetry.txt\t  0%\t      0 B\t    0KB/s\npulled                  telemetry.txt\t100%\t   6496 B\t    0KB/s\n\npulled                 runtime.sha256\t  0%\t      0 B\t    0KB/s\npulled                 runtime.sha256\t100%\t   1493 B\t    0KB/s\n\npulled                     evlist.txt\t  0%\t      0 B\t    0KB/s\npulled                     evlist.txt\t100%\t    345 B\t    0KB/s\n\npulled               telemetry.stderr\t100%\t      0 B\t    0KB/s\npulled               telemetry.stderr\t100%\t      0 B\t    0KB/s\n\npulled              maps-watch.stderr\t100%\t      0 B\t    0KB/s\npulled              maps-watch.stderr\t100%\t      0 B\t    0KB/s\n\npulled               buildid-list.txt\t  0%\t      0 B\t    0KB/s\npulled               buildid-list.txt\t100%\t   1191 B\t    0KB/s\n\npulled                   registry.bin\t  0%\t      0KB\t    0KB/s\npulled                   registry.bin\t100%\t    370KB\t    0KB/s\n\npulled                  evlist.stderr\t100%\t      0 B\t    0KB/s\npulled                  evlist.stderr\t100%\t      0 B\t    0KB/s\n\npulled                      perf.data\t  0%\t      0KB\t    0KB/s\npulled                      perf.data\t100%\t   1316KB\t    0KB/s\n\npulled            buildid-list.stderr\t100%\t      0 B\t    0KB/s\npulled            buildid-list.stderr\t100%\t      0 B\t    0KB/s\n\npulled                           exit\t  0%\t      0 B\t    0KB/s\npulled                           exit\t100%\t      2 B\t    0KB/s\n\npulled                        gst.log\t  0%\t      0 B\t    0KB/s\npulled                        gst.log\t100%\t   3815 B\t    0KB/s\n\npulled                 perfscript.txt\t  0%\t      0KB\t    0KB/s\npulled                 perfscript.txt\t100%\t   4968KB\t 9123KB/s\n\npulled                        gst.pid\t  0%\t      0 B\t    0KB/s\npulled                        gst.pid\t100%\t      6 B\t    0KB/s\n\npulled                  record.stderr\t  0%\t      0 B\t    0KB/s\npulled                  record.stderr\t100%\t    149 B\t    0KB/s\n\npulled                  18209.cmdline\t  0%\t      0 B\t    0KB/s\npulled                  18209.cmdline\t100%\t    177 B\t    0KB/s\n\npulled                  18209.current\t  0%\t      0 B\t    0KB/s\npulled                  18209.current\t100%\t   9363 B\t    0KB/s\n\npulled                   18209.loaded\t  0%\t      0 B\t    0KB/s\npulled                   18209.loaded\t100%\t   9281 B\t    0KB/s\n20 file(s) pulled. 0 file(s) skipped.\n/opt/afdo_agent/work/m1p-v02-20261116/train-1   3561KB/s (6847231 bytes in 1.877s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "manifest-recheck-1",
+    "time": "2026-11-16T01:01:52.384027-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cd /opt/afdo_agent/work/m1p-v02-20261116/train-1 && find . -type f -exec sha256sum {} \\; ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "95d514da7a668b7e5a50a7b02d2fc7f63a017bd2d7dc19baf4babdac3a90a45f  ./record.stderr\n4d053e0cdda48a6887b68edebfa2cf9f7792dfba6b5fecddc9ce158ec320bee4  ./gst.pid\n71879d5025daeab543edc335b2391f9c5a4b796ea8f4c18103d2ea1be094ddc8  ./perfscript.txt\n4332d0f1a329a4c466f03951006ac5b9054b522033c8a2c383c35d684225cda5  ./gst.log\n9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./exit\na5a01b12913a36560fdb8c57bc72f0aa0ee73ba052500ac626120994ac90f3cf  ./maps/18209.loaded\ne9c279765822d226cef638d4b790700d1e5eafbacf82f24480ce0c96e04bb6e0  ./maps/18209.current\n9932441811549b310b29fedb43cafadb0aa551474f51e1b91ecfef99cfb0b88d  ./maps/18209.cmdline\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./buildid-list.stderr\n9d57fa977c942eacb61530cbc78b7d1fcf57901a1d3e4562c62c6d07dca845fe  ./perf.data\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./evlist.stderr\n427ff1af1820d4bbdc6bccc9a8ca833bd9381df5d7b416039493e82fdabb3b1f  ./registry.bin\nbbe8ca0ed4a72fadb86ad6f3dd2f38e97ce5d8edcc5567d1ee1551afdcba0118  ./buildid-list.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./telemetry.stderr\nc856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372  ./evlist.txt\n37e817b4a21f5a0df5de9c2eadad95c3c382e4e3d90ff85c2d0cfcbc843e01e0  ./runtime.sha256\n9e7b7c6960585879553a854ae24dfa97daa80230d4024e3cc2c181041f2bcc6f  ./telemetry.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./perfscript.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stdout\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "delete-verified-run-1",
+    "time": "2026-11-16T01:01:52.959040-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( rm -rf -- /opt/afdo_agent/work/m1p-v02-20261116/train-1 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "collect-2",
+    "time": "2026-11-16T01:01:53.559896-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/collect.sh 2 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "manifest-2",
+    "time": "2026-11-16T01:02:24.562263-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cd /opt/afdo_agent/work/m1p-v02-20261116/train-2 && find . -type f -exec sha256sum {} \\; ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "b2df172b9555edab734e5a3c602328313e9d928cec26aaf4a3f89455d91be1d8  ./record.stderr\n2f92615931117c3e722f1a8647f94a2ef7c6f458d560d7c66d41a7870cc55050  ./gst.pid\n856f9b5b4dfb82c4bec9a6e06035310f112ec5b6859b3f04e52885e49144afa8  ./perfscript.txt\na4d7de6aad13c0a606ffcbe606c61394c999eba7428ea251a9f9a06f9cfafdc8  ./gst.log\n9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./exit\nc621b71a6356e436f666854b56d4235a1a4a9e880d7a353ea49bfeebe8f6bcb1  ./maps/20110.current\n9932441811549b310b29fedb43cafadb0aa551474f51e1b91ecfef99cfb0b88d  ./maps/20110.cmdline\n3a82fecbdac4122a74f78b968ae28b49f4864228fa4a8e76fb4c4fbad020f8d1  ./maps/20110.loaded\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./buildid-list.stderr\nb23d69a16cd7418eacca3fb9dc4468b223d6c91f628cb3c546081715b7d059c4  ./perf.data\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./evlist.stderr\n427ff1af1820d4bbdc6bccc9a8ca833bd9381df5d7b416039493e82fdabb3b1f  ./registry.bin\n69d9b759537c9f306e61dc593f611a17c24d82b1c84ce1123515ee555efcfc86  ./buildid-list.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./telemetry.stderr\nc856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372  ./evlist.txt\n37e817b4a21f5a0df5de9c2eadad95c3c382e4e3d90ff85c2d0cfcbc843e01e0  ./runtime.sha256\nb90fff98f1c871647bcb15c9e356899f23ca637e2f02d47280fd8ef0c93cd2ac  ./telemetry.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./perfscript.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stdout\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "pull-2",
+    "time": "2026-11-16T01:02:24.904421-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/m1p-v02-20261116/train-2",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/stage3/train-2"
+    ],
+    "exit": 0,
+    "stdout": "\npulled              maps-watch.stdout\t100%\t      0 B\t    0KB/s\npulled              maps-watch.stdout\t100%\t      0 B\t    0KB/s\n\npulled              perfscript.stderr\t100%\t      0 B\t    0KB/s\npulled              perfscript.stderr\t100%\t      0 B\t    0KB/s\n\npulled                  telemetry.txt\t  0%\t      0 B\t    0KB/s\npulled                  telemetry.txt\t100%\t   6496 B\t    0KB/s\n\npulled                 runtime.sha256\t  0%\t      0 B\t    0KB/s\npulled                 runtime.sha256\t100%\t   1493 B\t    0KB/s\n\npulled                     evlist.txt\t  0%\t      0 B\t    0KB/s\npulled                     evlist.txt\t100%\t    345 B\t    0KB/s\n\npulled               telemetry.stderr\t100%\t      0 B\t    0KB/s\npulled               telemetry.stderr\t100%\t      0 B\t    0KB/s\n\npulled              maps-watch.stderr\t100%\t      0 B\t    0KB/s\npulled              maps-watch.stderr\t100%\t      0 B\t    0KB/s\n\npulled               buildid-list.txt\t  0%\t      0 B\t    0KB/s\npulled               buildid-list.txt\t100%\t   1246 B\t    0KB/s\n\npulled                   registry.bin\t  0%\t      0KB\t    0KB/s\npulled                   registry.bin\t100%\t    370KB\t    0KB/s\n\npulled                  evlist.stderr\t100%\t      0 B\t    0KB/s\npulled                  evlist.stderr\t100%\t      0 B\t    0KB/s\n\npulled                      perf.data\t  0%\t      0KB\t    0KB/s\npulled                      perf.data\t100%\t   1308KB\t    0KB/s\n\npulled            buildid-list.stderr\t100%\t      0 B\t    0KB/s\npulled            buildid-list.stderr\t100%\t      0 B\t    0KB/s\n\npulled                           exit\t  0%\t      0 B\t    0KB/s\npulled                           exit\t100%\t      2 B\t    0KB/s\n\npulled                        gst.log\t  0%\t      0 B\t    0KB/s\npulled                        gst.log\t100%\t   3815 B\t    0KB/s\n\npulled                 perfscript.txt\t  0%\t      0KB\t    0KB/s\npulled                 perfscript.txt\t100%\t   4936KB\t 7789KB/s\n\npulled                        gst.pid\t  0%\t      0 B\t    0KB/s\npulled                        gst.pid\t100%\t      6 B\t    0KB/s\n\npulled                  record.stderr\t  0%\t      0 B\t    0KB/s\npulled                  record.stderr\t100%\t    149 B\t    0KB/s\n\npulled                   20110.loaded\t  0%\t      0 B\t    0KB/s\npulled                   20110.loaded\t100%\t   9322 B\t    0KB/s\n\npulled                  20110.cmdline\t  0%\t      0 B\t    0KB/s\npulled                  20110.cmdline\t100%\t    177 B\t    0KB/s\n\npulled                  20110.current\t  0%\t      0 B\t    0KB/s\npulled                  20110.current\t100%\t   9404 B\t    0KB/s\n20 file(s) pulled. 0 file(s) skipped.\n/opt/afdo_agent/work/m1p-v02-20261116/train-2   3372KB/s (6806432 bytes in 1.970s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "manifest-recheck-2",
+    "time": "2026-11-16T01:02:27.021321-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cd /opt/afdo_agent/work/m1p-v02-20261116/train-2 && find . -type f -exec sha256sum {} \\; ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "b2df172b9555edab734e5a3c602328313e9d928cec26aaf4a3f89455d91be1d8  ./record.stderr\n2f92615931117c3e722f1a8647f94a2ef7c6f458d560d7c66d41a7870cc55050  ./gst.pid\n856f9b5b4dfb82c4bec9a6e06035310f112ec5b6859b3f04e52885e49144afa8  ./perfscript.txt\na4d7de6aad13c0a606ffcbe606c61394c999eba7428ea251a9f9a06f9cfafdc8  ./gst.log\n9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./exit\nc621b71a6356e436f666854b56d4235a1a4a9e880d7a353ea49bfeebe8f6bcb1  ./maps/20110.current\n9932441811549b310b29fedb43cafadb0aa551474f51e1b91ecfef99cfb0b88d  ./maps/20110.cmdline\n3a82fecbdac4122a74f78b968ae28b49f4864228fa4a8e76fb4c4fbad020f8d1  ./maps/20110.loaded\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./buildid-list.stderr\nb23d69a16cd7418eacca3fb9dc4468b223d6c91f628cb3c546081715b7d059c4  ./perf.data\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./evlist.stderr\n427ff1af1820d4bbdc6bccc9a8ca833bd9381df5d7b416039493e82fdabb3b1f  ./registry.bin\n69d9b759537c9f306e61dc593f611a17c24d82b1c84ce1123515ee555efcfc86  ./buildid-list.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./telemetry.stderr\nc856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372  ./evlist.txt\n37e817b4a21f5a0df5de9c2eadad95c3c382e4e3d90ff85c2d0cfcbc843e01e0  ./runtime.sha256\nb90fff98f1c871647bcb15c9e356899f23ca637e2f02d47280fd8ef0c93cd2ac  ./telemetry.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./perfscript.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stdout\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "delete-verified-run-2",
+    "time": "2026-11-16T01:02:27.371541-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( rm -rf -- /opt/afdo_agent/work/m1p-v02-20261116/train-2 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "collect-3",
+    "time": "2026-11-16T01:02:27.621798-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( bash /opt/afdo_agent/work/m1p-v02-20261116/collect.sh 3 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "manifest-3",
+    "time": "2026-11-16T01:02:58.590746-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cd /opt/afdo_agent/work/m1p-v02-20261116/train-3 && find . -type f -exec sha256sum {} \\; ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "b76c643bdaf0f0a20eec38bb663ca7e7fcc4b6419dc9323fc14e6214b6dd4804  ./record.stderr\naf77ca5bb341fad7efea75f77d62ab7eece5408f4f51002c6e2c65bebc8aff6f  ./gst.pid\n59a2b0219991ddd2aea7fb6ac5fef0d958e60e30d3a2d8135b3f9f0c1ee94920  ./perfscript.txt\nf9a366f7110ca0d04f8841575ccee1812e06e636adbf39f9c51c7885c4034187  ./gst.log\n9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./exit\n9932441811549b310b29fedb43cafadb0aa551474f51e1b91ecfef99cfb0b88d  ./maps/21997.cmdline\ncb4d782f5a9dc034190d36098bba8ee0eb0ae8f9470b511c0b4b09cfe45a25e3  ./maps/21997.current\n36492661b6f0eace364621e5078dc7cd3ef0002f80603a21c22f9535b1bbe225  ./maps/21997.loaded\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./buildid-list.stderr\n5433c8e5bdb2e9e1d120cda18758b8bb2e40815bd86fb5ca01a2b692583fecbe  ./perf.data\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./evlist.stderr\n427ff1af1820d4bbdc6bccc9a8ca833bd9381df5d7b416039493e82fdabb3b1f  ./registry.bin\nbbe8ca0ed4a72fadb86ad6f3dd2f38e97ce5d8edcc5567d1ee1551afdcba0118  ./buildid-list.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./telemetry.stderr\nc856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372  ./evlist.txt\n37e817b4a21f5a0df5de9c2eadad95c3c382e4e3d90ff85c2d0cfcbc843e01e0  ./runtime.sha256\n193deb40bd1e6fbed51cdb2a2cd544ea11917de197d1c87d0f40da488f9812ce  ./telemetry.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./perfscript.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stdout\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "pull-3",
+    "time": "2026-11-16T01:02:58.974090-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "pull",
+      "/opt/afdo_agent/work/m1p-v02-20261116/train-3",
+      "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-pilot-v02-20261116/stage3/train-3"
+    ],
+    "exit": 0,
+    "stdout": "\npulled              maps-watch.stdout\t100%\t      0 B\t    0KB/s\npulled              maps-watch.stdout\t100%\t      0 B\t    0KB/s\n\npulled              perfscript.stderr\t100%\t      0 B\t    0KB/s\npulled              perfscript.stderr\t100%\t      0 B\t    0KB/s\n\npulled                  telemetry.txt\t  0%\t      0 B\t    0KB/s\npulled                  telemetry.txt\t100%\t   6496 B\t    0KB/s\n\npulled                 runtime.sha256\t  0%\t      0 B\t    0KB/s\npulled                 runtime.sha256\t100%\t   1493 B\t    0KB/s\n\npulled                     evlist.txt\t  0%\t      0 B\t    0KB/s\npulled                     evlist.txt\t100%\t    345 B\t    0KB/s\n\npulled               telemetry.stderr\t100%\t      0 B\t    0KB/s\npulled               telemetry.stderr\t100%\t      0 B\t    0KB/s\n\npulled              maps-watch.stderr\t100%\t      0 B\t    0KB/s\npulled              maps-watch.stderr\t100%\t      0 B\t    0KB/s\n\npulled               buildid-list.txt\t  0%\t      0 B\t    0KB/s\npulled               buildid-list.txt\t100%\t   1191 B\t    0KB/s\n\npulled                   registry.bin\t  0%\t      0KB\t    0KB/s\npulled                   registry.bin\t100%\t    370KB\t    0KB/s\n\npulled                  evlist.stderr\t100%\t      0 B\t    0KB/s\npulled                  evlist.stderr\t100%\t      0 B\t    0KB/s\n\npulled                      perf.data\t  0%\t      0KB\t    0KB/s\npulled                      perf.data\t100%\t   1309KB\t    0KB/s\n\npulled            buildid-list.stderr\t100%\t      0 B\t    0KB/s\npulled            buildid-list.stderr\t100%\t      0 B\t    0KB/s\n\npulled                           exit\t  0%\t      0 B\t    0KB/s\npulled                           exit\t100%\t      2 B\t    0KB/s\n\npulled                        gst.log\t  0%\t      0 B\t    0KB/s\npulled                        gst.log\t100%\t   3815 B\t    0KB/s\n\npulled                 perfscript.txt\t  0%\t      0KB\t    0KB/s\npulled                 perfscript.txt\t100%\t   4941KB\t 7714KB/s\n\npulled                        gst.pid\t  0%\t      0 B\t    0KB/s\npulled                        gst.pid\t100%\t      6 B\t    0KB/s\n\npulled                  record.stderr\t  0%\t      0 B\t    0KB/s\npulled                  record.stderr\t100%\t    149 B\t    0KB/s\n\npulled                   21997.loaded\t  0%\t      0 B\t    0KB/s\npulled                   21997.loaded\t100%\t   9322 B\t    0KB/s\n\npulled                  21997.current\t  0%\t      0 B\t    0KB/s\npulled                  21997.current\t100%\t   9404 B\t    0KB/s\n\npulled                  21997.cmdline\t  0%\t      0 B\t    0KB/s\npulled                  21997.cmdline\t100%\t    177 B\t    0KB/s\n20 file(s) pulled. 0 file(s) skipped.\n/opt/afdo_agent/work/m1p-v02-20261116/train-3   3358KB/s (6813122 bytes in 1.981s)\n",
+    "stderr": ""
+  },
+  {
+    "name": "manifest-recheck-3",
+    "time": "2026-11-16T01:03:01.125976-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cd /opt/afdo_agent/work/m1p-v02-20261116/train-3 && find . -type f -exec sha256sum {} \\; ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "b76c643bdaf0f0a20eec38bb663ca7e7fcc4b6419dc9323fc14e6214b6dd4804  ./record.stderr\naf77ca5bb341fad7efea75f77d62ab7eece5408f4f51002c6e2c65bebc8aff6f  ./gst.pid\n59a2b0219991ddd2aea7fb6ac5fef0d958e60e30d3a2d8135b3f9f0c1ee94920  ./perfscript.txt\nf9a366f7110ca0d04f8841575ccee1812e06e636adbf39f9c51c7885c4034187  ./gst.log\n9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  ./exit\n9932441811549b310b29fedb43cafadb0aa551474f51e1b91ecfef99cfb0b88d  ./maps/21997.cmdline\ncb4d782f5a9dc034190d36098bba8ee0eb0ae8f9470b511c0b4b09cfe45a25e3  ./maps/21997.current\n36492661b6f0eace364621e5078dc7cd3ef0002f80603a21c22f9535b1bbe225  ./maps/21997.loaded\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./buildid-list.stderr\n5433c8e5bdb2e9e1d120cda18758b8bb2e40815bd86fb5ca01a2b692583fecbe  ./perf.data\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./evlist.stderr\n427ff1af1820d4bbdc6bccc9a8ca833bd9381df5d7b416039493e82fdabb3b1f  ./registry.bin\nbbe8ca0ed4a72fadb86ad6f3dd2f38e97ce5d8edcc5567d1ee1551afdcba0118  ./buildid-list.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./telemetry.stderr\nc856e93a8dbf977d083e04c87f19af9db8768559ce0d9b3f4179f9585556e372  ./evlist.txt\n37e817b4a21f5a0df5de9c2eadad95c3c382e4e3d90ff85c2d0cfcbc843e01e0  ./runtime.sha256\n193deb40bd1e6fbed51cdb2a2cd544ea11917de197d1c87d0f40da488f9812ce  ./telemetry.txt\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./perfscript.stderr\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./maps-watch.stdout\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "delete-verified-run-3",
+    "time": "2026-11-16T01:03:01.501236-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( rm -rf -- /opt/afdo_agent/work/m1p-v02-20261116/train-3 ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-governor",
+    "time": "2026-11-16T01:03:01.743218-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "performance\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-governor",
+    "time": "2026-11-16T01:03:01.901634-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( printf %s schedutil > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "restore-read-uid",
+    "time": "2026-11-16T01:03:02.060173-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "0\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  },
+  {
+    "name": "root-restore",
+    "time": "2026-11-16T01:03:02.268718-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "root",
+      "off"
+    ],
+    "exit": 0,
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "stderr": ""
+  },
+  {
+    "name": "final-uid",
+    "time": "2026-11-16T01:03:02.360692-08:00",
+    "argv": [
+      "sdb",
+      "-s",
+      "192.168.108.26:26101",
+      "shell",
+      "( id -u ); rc=$?; printf \"\\n__M1P_RC__=%s\\n\" \"$rc\""
+    ],
+    "exit": 0,
+    "stdout": "5001\n\n__M1P_RC__=0\n",
+    "stderr": ""
+  }
+]
