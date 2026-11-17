@@ -48,6 +48,15 @@
 - K0 只读源码评估完成：[可行性评估](kernel/autofdo/00_feasibility.md)与[基于 K 的回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已补齐。`0fac5de6` 增量 fetch 首次成功、重试 0 次；K=B+2（force_reclaim 修正、PMUv3），K/C 分叉。37 项独立/29 项累计检查，累计 18 干净、11 失败（其中 2 项已有等价修复）；冲突未手工解决。结论仍 conditional go（ARM32/A32、非 LTO/MFS），旧样本 build-id 未配对；未构建、未接板。首轮 SSH 失败记录保留。
 - K1 在 M1 完成后开始；刷写另须用户确认。
 
+## Workflow M1：attempt-11自动化端到端验收完成（2026-11-17任务）
+
+- [报告13.5–13.8](workflow/m1/05_m1_board_e2e.md)：单命令S0–S7完成，S4真实SIGTERM退出143后同命令恢复退出0，S0–S3收据复验复用；独立计时中断清理与新ID三轮非正式检查3/3 clean通过。八项成功收据、最终S7 report.json/report.md、固定声明句齐全；30个运行模块SHA不变。
+- ToS主比较21/21 block：估计 **−1.917156%**，95% CI **[−2.348800%, −1.449261%]**，faster。Sintel次比较10/10：**−1.489203%**，CI **[−1.862452%, −1.189055%]**，faster。62个接受round全clean，无失衡/20%封顶；不做多重比较校正。Sintel第5 block缺可信SDB退出标记，整block唯一重试成功，原件保留。
+- BASE/BASE-r/AFDO构建均0，两套build-lock通过，BASE-r字节一致，选BASE；两目标正数AppliedSamples1959/70。全部三输入计时前后oracle一致，90轮maps检查通过。锁定profile `bab0130ccf4b72952092cfbdcd0c19b820bb2e85cb7843d9ecff667225be8485`，本轮用途与SHA按Q.5第17项披露；不登记修正案3、不做质量矩阵。
+- 58°C冷却目标可达，设计60/80°C不改；正式窗口起跑最高59.400°C、最高温65.244°C，观察器最大间隔0.90秒。最终uid5001/root off、schedutil、RPM1233、pending/errors=[]；服务MainPID0、inactive/dead。自身缺陷次数3/3，没有新增workflow修补。
+- attempt-11墙钟14821.311秒，三次GBS合计351.595秒。正式最低MemAvailable21,333,422,080B，含前置降温诊断最低16,296,251,392B。构建峰值1,833,254,912B且high/max/OOM0；监督服务峰值3,232,858,112B、max9868/OOM0，限制未提高。主流程结束后的证据封存曾发生一次导出scope交叠，精确时长/合计峰值未知；已如实登记并串行复核SHA，不声称全程串行。
+- [attempt-11索引](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/run-index.json)、[验收汇总](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/run/acceptance-summary.json)、[封存校验](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/export-validation.json)、[收尾与偏差](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/finalization/index.json)。182测试及15脚本语法已在运行前通过。与checkpoint c5d607配套；提交前pull --rebase已同步，无index.lock，保留其他会话内容。不改设计/hq/Gerrit，不操作.13；ALL-END，完成后停止。
+
 ## Workflow M1：58°C冷却余量与清理修正；attempt-11准备（2026-11-17任务）
 
 - [报告第13节](workflow/m1/05_m1_board_e2e.md)：空闲10分钟末温57.939°C；BASE负载后约50秒降到≤58°C，10分钟最低56.478°C，未到56°C。58°C目标可达；只改变冷却等待，设计60°C/80°C判据不变。

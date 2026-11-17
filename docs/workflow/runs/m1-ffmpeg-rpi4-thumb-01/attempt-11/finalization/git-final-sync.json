@@ -1,0 +1,44 @@
+[
+  {
+    "argv": [
+      "stash",
+      "push",
+      "-m",
+      "m1-attempt11-final-sync-preserve-tracked",
+      "--",
+      "docs/STATUS.md",
+      "docs/workflow/m1/05_m1_board_e2e.md"
+    ],
+    "exit_code": 0,
+    "stdout": "Saved working directory and index state On main: m1-attempt11-final-sync-preserve-tracked\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "rev-parse",
+      "stash@{0}"
+    ],
+    "exit_code": 0,
+    "stdout": "ab2c2cdf8323b3e1e6aa01816c79aa149f98324a\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "pull",
+      "--rebase"
+    ],
+    "exit_code": 0,
+    "stdout": "Already up to date.\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "stash",
+      "apply",
+      "ab2c2cdf8323b3e1e6aa01816c79aa149f98324a"
+    ],
+    "exit_code": 0,
+    "stdout": "On branch main\nYour branch is up to date with 'origin/main'.\n\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n\tmodified:   docs/STATUS.md\n\tmodified:   docs/workflow/m1/05_m1_board_e2e.md\n\nUntracked files:\n  (use \"git add <file>...\" to include in what will be committed)\n\tconfig/\n\tdocs/kernel/10_kernel_afdo_arm32_research_design_v0.1.md\n\tdocs/workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/export-validation.json\n\tdocs/workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/run-index.json\n\tdocs/workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/run/\n\tgbs_gcc.conf\n\tgbs_llvm.conf\n\nno changes added to commit (use \"git add\" and/or \"git commit -a\")\n",
+    "stderr": ""
+  }
+]

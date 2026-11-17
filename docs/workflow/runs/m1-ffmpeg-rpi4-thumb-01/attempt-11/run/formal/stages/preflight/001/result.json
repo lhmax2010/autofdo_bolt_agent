@@ -1,0 +1,77 @@
+{
+  "capabilities": {
+    "frequency": [
+      "/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq",
+      "/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_cur_freq"
+    ],
+    "temperature": [
+      "/sys/class/thermal/thermal_zone0/temp"
+    ],
+    "voltage": [
+      "/sys/class/hwmon/hwmon0/in0_lcrit_alarm"
+    ]
+  },
+  "fixed_khz": 1500000,
+  "host_resources": {
+    "disk_free": 187354173440,
+    "load1": 0.75927734375,
+    "mem_available": 21725208576,
+    "meminfo": "MemTotal:       32297772 kB\nMemFree:         2693792 kB\nMemAvailable:   21216024 kB\nBuffers:          359828 kB\nCached:         15528120 kB\nSwapCached:        23940 kB\nActive:          6637760 kB\nInactive:       17789648 kB\nActive(anon):    5051700 kB\nInactive(anon):  3965064 kB\nActive(file):    1586060 kB\nInactive(file): 13824584 kB\nUnevictable:      274656 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:        1326988 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:              1960 kB\nWriteback:             0 kB\nAnonPages:       8792848 kB\nMapped:           555916 kB\nShmem:            477204 kB\nKReclaimable:    3580156 kB\nSlab:            4473024 kB\nSReclaimable:    3580156 kB\nSUnreclaim:       892868 kB\nKernelStack:       28032 kB\nPageTables:       144804 kB\nSecPageTables:     11580 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343184 kB\nCommitted_AS:   38993508 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       69836 kB\nVmallocChunk:          0 kB\nPercpu:            27520 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   225280 kB\nShmemPmdMapped:        0 kB\nFileHugePages:    528384 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      318596 kB\nDirectMap2M:    10645504 kB\nDirectMap1G:    23068672 kB\n",
+    "nproc": 20,
+    "time": 1794940197.785599
+  },
+  "identity": {
+    "arch": "armv7l",
+    "build_id": "tizen-unified-toolchain_20261104.160709",
+    "kernel": "6.12.80-arm-rpi4-v7l",
+    "model": "Raspberry Pi 4 Model B Rev 1.5"
+  },
+  "inputs": [
+    {
+      "duration": 60,
+      "id": "bbb-720p-60",
+      "oracle": {
+        "bytes": 2488320000,
+        "caps": "I420,1280x720,30/1,progressive,1/1",
+        "digest": "3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814",
+        "frames": 1800,
+        "threads": 1
+      },
+      "path": "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4",
+      "role": "train",
+      "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4",
+      "start": 0
+    },
+    {
+      "duration": 60,
+      "id": "tos-720p-60",
+      "oracle": {
+        "bytes": 2488320000,
+        "caps": "I420,1280x720,30/1,progressive,1/1",
+        "digest": "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e",
+        "frames": 1800,
+        "threads": 1
+      },
+      "path": "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4",
+      "role": "test",
+      "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1",
+      "start": 0
+    },
+    {
+      "duration": 60,
+      "id": "sintel-1080p-60",
+      "oracle": {
+        "bytes": 4478976000,
+        "caps": "video/x-raw, format=(string)I420, width=(int)1920, height=(int)1080",
+        "digest": "91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193",
+        "frames": 1440,
+        "threads": 1
+      },
+      "path": "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4",
+      "role": "test-secondary",
+      "sha256": "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843",
+      "start": 0
+    }
+  ],
+  "throttle_history": "unknown"
+}
