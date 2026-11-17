@@ -4,7 +4,12 @@ set -eu
 here=${0%/*}; . "$here/common.sh"; . "$here/proc_tree.sh"
 root=$1; out=$2; manifest=$3
 safe_path "$out"; safe_path "$manifest"; mkdir -p "$out"
+mkdir -p "$out/hash-queue"
+hasher=''
+finish() { printf 'done\n' > "$out/observer.done"; if test -n "$hasher"; then wait "$hasher" || :; fi; }
+trap finish EXIT
 trap 'exit 0' TERM INT
+bash "$here/hash_maps.sh" "$out" "$root" & hasher=$!
 sequence=0
 while kill -0 "$root" 2>/dev/null; do
     sequence=$((sequence+1))
@@ -12,6 +17,7 @@ while kill -0 "$root" 2>/dev/null; do
     printf '%s %s\n' "$sequence" "$stamp" >> "$out/samples.tsv"
     proc_table /proc "$out/tree-$sequence.tsv" "$out/enumeration-errors.log"
     proc_descendants "$root" "$out/tree-$sequence.tsv" > "$out/selected-$sequence.tsv"
+    : > "$out/hash-queue/$sequence.pending"
     while read -r pid ppid pgid sid start; do
         snap="$out/$sequence-$pid"
         mkdir -p "$snap"
@@ -26,12 +32,12 @@ while kill -0 "$root" 2>/dev/null; do
             read -r line < "$snap/stat-after.txt"; tail=${line##*) }; set -- $tail
             if test "$#" -lt 20 || test "${20}" != "$start"; then ok=0; printf 'PID identity changed\n' >> "$snap/errors.log"; fi
         else ok=0; printf 'process exited during snapshot\n' >> "$snap/errors.log"; fi
-        awk 'NF>=6 && $6 ~ /^\/opt\/afdo_agent\// {print $6}' "$snap/maps.txt" | sort -u > "$snap/mapped-paths.txt"
-        : > "$snap/mapped-sha256.txt"
-        while IFS= read -r path; do
-            if sha256sum "$path" >> "$snap/mapped-sha256.txt" 2>> "$snap/errors.log"; then :; else ok=0; fi
-        done < "$snap/mapped-paths.txt"
+        awk 'NF>=6 && $6 ~ /^\/opt\/afdo_agent\// {print $4, $5, $6}' "$snap/maps.txt" | sort -u > "$snap/mapped-identities.tsv"
+        while read -r dev inode path; do
+            printf '%s %s %s %s %s\n' "$pid" "$start" "$dev" "$inode" "$path" >> "$out/hash-queue/$sequence.pending"
+        done < "$snap/mapped-identities.tsv"
         printf '%s\n' "$ok" > "$snap/complete"
     done < "$out/selected-$sequence.tsv"
+    mv "$out/hash-queue/$sequence.pending" "$out/hash-queue/$sequence.ready"
     sleep .1
 done

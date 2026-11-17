@@ -12,7 +12,7 @@ import subprocess
 import tarfile
 import time
 from . import build,buildlock,config,profgen,consumption,stats,board,scheduler
-from .common import StopRequested,require,save,sha256,json_load,GateError
+from .common import TechnicalFailure,StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
 from .transport import SDB,q,board_path
 
@@ -85,10 +85,6 @@ def capability_text(text):
     return text.rstrip('\n')+'\n'
 
 
-class TechnicalFailure(GateError):
-    def __init__(self,message):super().__init__(message,'environment')
-
-
 def paired_block(order,run,failed):
     """Retry only predeclared technical failures, once, preserving the whole pair."""
     for attempt in range(2):
@@ -145,7 +141,7 @@ class Experiment:
         require(any(line.startswith(self.serial+'\t') or line.startswith(self.serial+' ') for line in devices.splitlines()),'configured RPi4 is not online','environment')
         require(t.identity()==self.job['identity'],'board identity mismatch','identity',3)
         # Check all PATH tools before root; root-only deployed files are checked next.
-        deps=['bash','cat','tr','uname','sed','mkdir','sha256sum','chmod','ldd','setsid','sleep','kill','date','awk','readlink','taskset','sort','grep','stat','find','tar','wc','mkfifo','cut','head','tail','tee','rm','ps','gst-launch-1.0','rpm','df']
+        deps=['bash','cat','tr','uname','sed','mkdir','sha256sum','chmod','ldd','setsid','sleep','kill','date','awk','readlink','taskset','sort','grep','stat','mv','find','tar','wc','mkfifo','cut','head','tail','tee','rm','ps','gst-launch-1.0','rpm','df']
         t.shell('missing=0; for c in '+shlex.join(deps)+'; do command -v "$c" || missing=1; done; test "$missing" -eq 0',True)
         errors=self.cleanup.restore(t.identity(),t.undo);require(not errors,'pending cleanup failed: '+str(errors))
         self.initial=self.state();save(self.d/('initial-'+str(time.time_ns())+'.json'),self.initial)
@@ -465,7 +461,21 @@ class Experiment:
             remarks.extend((str(p.relative_to(src)),str(p)) for p in (src/prefix).rglob('*.opt.yaml'))
         option_path=consumed_profile_path(candidate['lock']['commands'])
         staged=Path(candidate['scratch'])/option_path.lstrip('/')
-        c=consumption.evaluate(list(base['artifacts']),self.package['consumption']['object_to_target'],remarks,candidate['lock']['commands'],
+        dependency_records=[];dependency_evidence=[]
+        gcc=Path(candidate['scratch'])/'usr/lib/gcc'
+        for dependency in sorted(gcc.rglob('*')):
+            if dependency.name not in ['libgcc.a','libgcc_eh.a','crtbeginS.o','crtendS.o']:continue
+            captured=self.host(['readelf','-p','.GCC.command.line',dependency],out)
+            require(captured.returncode==0,'dependency command evidence failed')
+            rows=buildlock.recorded_switches(captured.stdout.decode())
+            dependency_records.extend(rows)
+            dependency_evidence.append(dict(path=str(dependency),sha256=sha256(dependency),records=rows))
+        source_commands,excluded=consumption.target_source_commands(candidate['lock']['commands'],
+            self.package['consumption']['object_to_target'],dependency_records)
+        save(out/'consumption-command-provenance.json',dict(dependencies=dependency_evidence,
+            excluded_support_records=excluded,source_command_counts={k:len(v) for k,v in source_commands.items()},
+            build_lock_unmodified=True))
+        c=consumption.evaluate(list(base['artifacts']),self.package['consumption']['object_to_target'],remarks,source_commands,
             converted['lock']['sha256'],staged,base['text'],candidate['text'],option_path)
         save(out/'consumption.json',c);require(c['passed'],'consumption gate failed')
         return dict(base_repeat=repeat,candidate=candidate,control=control,buildlock=comparisons,consumption=c,offline_reproducible=True)
@@ -599,7 +609,7 @@ class Experiment:
             self.ensure_work()
             self.host_artifact(self.scripts,{},True)
             self.transport.shell('mkdir -p '+q(self.scripts))
-            for f in (self.w/'workflow/board').glob('*.sh'):self.transporself.push_owned(f,self.scripts+'/'+f.name)
+            for f in (self.w/'workflow/board').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
             self.push_owned(Path(self.job['package']).parent/'workloads/timed.sh',self.scripts+'/timed.sh')
             cap=out/'capabilities.tsv';cap.write_text(''.join(k+'\t'+p+'\n' for k,v in data['preflight']['capabilities'].items() for p in v))
             self.push_owned(cap,self.scripts+'/capabilities.tsv')

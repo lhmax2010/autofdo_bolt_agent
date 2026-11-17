@@ -24,7 +24,7 @@ awk '{print $1}' /proc/uptime > "$run/start.monotonic"
 export WF_WALL_FILE="$run/wall.txt"
 set +e
 bash "$here/watchdog.sh" "$limit" "$perf" stat -x ';' -o "$run/perf-stat.csv" -e task-clock,cycles,instructions -- taskset -c "$cpu" "$@" & worker=$!
-bash "$here/observe_maps.sh" "$worker" "$run/maps" "$DEPLOY_MANIFEST" & observer=$!
+taskset -c "$observer_cpu" bash "$here/observe_maps.sh" "$worker" "$run/maps" "$DEPLOY_MANIFEST" & observer=$!
 wait "$worker"; rc=$?
 worker=''
 kill "$observer" 2>/dev/null || :; wait "$observer" 2>/dev/null || :; observer=''

@@ -25,8 +25,8 @@ class ProcessTreeTests(unittest.TestCase):
   return d
  def check(self):return board.decoder_maps(self.d,self.manifest,['libavcodec','libavutil'],['libav*.so*'],self.rule,'/opt/afdo_agent/inputs/test')
  def test_short_decoder_present_only_one_sample(self):
-  self.snapshot(1,10,False);self.snapshot(2,10,False);self.snapshot(2,30);self.snapshot(3,10,False)
-  self.assertEqual(self.check(),1)
+  self.snapshot(1,10,False);self.snapshot(2,10,False);self.snapshot(2,30);self.snapshot(3,10,False);self.snapshot(3,30)
+  self.assertEqual(self.check(),2)
  def test_only_root_fails(self):
   self.snapshot(1,10,False)
   with self.assertRaises(GateError):self.check()
@@ -68,15 +68,15 @@ class ProcessTreeTests(unittest.TestCase):
   self.assertEqual(len(board.check_perf_buildids(good,a,self.manifest)),2)
   with self.assertRaises(GateError):board.check_perf_buildids(good.replace('abc','def',1),a,self.manifest)
 
- def test_cadence_exact_half_second_and_excess(self):
-  (self.d/'samples.tsv').write_text('1 0.0\n2 0.5\n')
-  self.assertEqual(board.observer_cadence(self.d)['max_gap_seconds'],.5)
-  (self.d/'samples.tsv').write_text('1 0.0\n2 0.51\n')
+ def test_cadence_exact_five_seconds_and_excess(self):
+  (self.d/'samples.tsv').write_text('1 0.0\n2 5.0\n')
+  self.assertEqual(board.observer_cadence(self.d)['max_gap_seconds'],5.)
+  (self.d/'samples.tsv').write_text('1 0.0\n2 5.01\n')
   with self.assertRaises(GateError):board.observer_cadence(self.d)
- def test_real_attempt06_cadence_rejected(self):
+ def test_real_attempt06_cadence_now_allowed(self):
   # Frozen numeric gap from the original samples.tsv; synthetic test copy.
   (self.d/'samples.tsv').write_text('1 0.00\n2 1.16\n')
-  with self.assertRaises(GateError):board.observer_cadence(self.d)
+  self.assertEqual(board.observer_cadence(self.d)['max_gap_seconds'],1.16)
  def test_signal_stop_not_swallowed_by_communicate(self):
   source="""import os,signal,subprocess,sys
 from afdo_wf.common import StopRequested
@@ -97,3 +97,10 @@ finally:
   old=subprocess.run(['python3','-c',source,'old'],capture_output=True,text=True,check=True)
   new=subprocess.run(['python3','-c',source,'new'],capture_output=True,text=True,check=True)
   self.assertEqual(old.stdout.strip(),'continued');self.assertEqual(new.stdout.strip(),'stopped')
+
+ def test_single_full_snapshot_is_insufficient(self):
+  self.snapshot(1,30)
+  with self.assertRaises(GateError):self.check()
+ def test_non_decoder_foreign_library_rejected(self):
+  self.snapshot(1,10,decoder=False,wrong=True);self.snapshot(1,30);self.snapshot(2,30)
+  with self.assertRaises(GateError):self.check()

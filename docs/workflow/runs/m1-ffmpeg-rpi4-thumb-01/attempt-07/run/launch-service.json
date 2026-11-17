@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "systemd-run",
+    "--user",
+    "--unit=afdo-m1-attempt07-driver",
+    "--service-type=exec",
+    "-p",
+    "MemoryMax=3G",
+    "-p",
+    "CPUQuota=200%",
+    "-p",
+    "WorkingDirectory=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+    "-p",
+    "StandardOutput=append:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-07/service.log",
+    "-p",
+    "StandardError=append:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-07/service.log",
+    "--setenv=TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp",
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "python3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-07/driver.py"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "Running as unit: afdo-m1-attempt07-driver.service; invocation ID: 5f87a21ccf954b0aaf4db5be5f90673b\n",
+  "time": 1794912861.6315567
+}

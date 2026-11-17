@@ -40,6 +40,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow M1：观察器新判据已验收，attempt-08测量预试进行中（2026-11-17任务）
+
+- PM撤销旧0.5秒硬断言；共同判据改为唯一解码器、至少两份完整must-load快照、全快照deploy-set身份一致、有限递增时间且间隔≤5秒。SHA按(path,dev,inode)一次缓存，注入路径拼写已修正。150项初始测试通过，attempt-06真实证据按新判据通过，原件不改。
+- [报告第11节](workflow/m1/05_m1_board_e2e.md)：attempt-07三次训练身份通过，S4实际SIGTERM退出143并完整恢复，同命令复用S0–S3。BASE/BASE-r/AFDO均构建成功，build-lock通过；consumption误把冻结支持库GNU producer记录当成目标源码命令而停止，失败证据保留于[attempt-07索引](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-07/run-index.json)。
+- 自身缺陷第2/3次（继承上一轮1/3）：用libgcc/crt原始记录证明来源，只在消费检查中区分支持库记录与目标源码命令；build-lock仍比较全部记录，未知记录或目标源码缺sample-use仍拒绝。155项测试通过，未改设计/门槛/补丁/spec。
+- 新attempt-08从S0重做：三输入PLAT/BASE一致，三次训练观察间隔最大0.74/0.78/0.69秒；S4真实中断清理与同命令恢复再次通过。六次转换锁定profile `a5b867326dcf0c6dc85a4899034812e3f986e3855d063d47ab4be6e2a0d0a4b2`。S5两套build-lock及离线重建通过，选择BASE；两目标AppliedSamples正数记录1966/54，消费verified。独立1block中断清理通过，最终uid5001/schedutil/RPM1233、pending/errors为空后继续正式会话。
+- **进行中，非M1完成结论**：当前ToS BASE预试5/10完成，正式block为0，Sintel比较未开始。attempt-08原件保留在 `temp/m1-ffmpeg-rpi4-thumb-01/attempt-08/`；本检查点尚未封存活动证据。实际结果与最终恢复须后续收尾补齐。仅本实验本轮豁免GBS启动16GiB；load/磁盘/运行保护保留，不操作其他设备、hq或Gerrit。
+
 ## Workflow M1第三阶段attempt-06：进程树捕获通过，采样间隔超限停止（2026-11-17任务）
 
 - [M1报告第10节](workflow/m1/05_m1_board_e2e.md)：PM授权完整stat/PPID后代树、逐进程快照/错误原文、workload完整argv唯一匹配、S3/S6共用maps门禁与S3 build-id交叉检查。运行前140测试通过；停止后加入实测间隔硬断言与安全停止修正，最终143测试通过。

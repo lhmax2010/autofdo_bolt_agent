@@ -18,6 +18,10 @@ class GateError(ValueError):
         super().__init__(message)
         self.reason, self.code = reason, code
 
+class TechnicalFailure(GateError):
+    def __init__(self,message):super().__init__(message,'environment')
+
+
 def require(condition, message, reason='gate', code=2):
     if not condition:
         raise GateError(message, reason, code)

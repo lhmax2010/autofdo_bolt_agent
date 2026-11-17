@@ -567,3 +567,27 @@ BASE构建墙钟140.946741秒、退出0，启动等待0.074606秒；启动MemAva
 静态阅读另发现未到达的注入路径仍有 `self.transporself.push_owned` 拼写错误；本轮未执行或修改该路径，不宣称注入验收通过，后续需修复并测试。资源与平台状态仅按证据报告；系统工具自身的系统级元数据写入未作完整审计。未触碰受保护的三个untracked配置，未操作WORKDIR外项目、hq、Gerrit或设计。
 
 **本轮已结束：完整进程树可取证，0.5秒采样要求未通过。停止等待后续处理，不继续质量/性能推断。** 证据索引：[attempt-06](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-06/run-index.json)；实际相对位置为 `docs/workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-06/`，大原件留同名temp目录并记录SHA。
+
+
+## 11. PM观察器判据更正、SHA去重与attempt-07（2026-11-17任务）
+
+### 11.1 本轮裁决与实现
+
+PM明确：上一轮0.5秒上限并非设计v0.3门禁，本轮作废；旧记录保留。新S3/S6共同判据为：完整管线唯一识别解码进程；至少两份完整must-load快照；任何快照中的deploy-set DSO均须来自正确变体且SHA一致；采样时间有限、严格递增，相邻间隔>5秒为技术失败，按既有block技术重试规则处理。实际最小/中位/最大间隔仍记录。不修改设计v0.3文件。
+
+采样循环保留stat/PPID完整后代树与逐进程原始快照，maps同时保存path/dev/inode。独立hash队列按唯一三元组去重，首次哈希前后核对文件dev/inode，且本round根进程须仍存在；SHA结果供所有相同身份的快照引用。采样循环不再逐快照SHA；观察器和hash子进程置于CPU0，负载仍CPU3。观察器退出时等待hash队列结束，保留失败日志。兼容旧attempt-06逐快照SHA原件仅用于历史复核，不改原件。
+
+`self.transporself.push_owned`已修正为`self.push_owned`；新增不连板的合成路径测试，实际执行独立injected_run的脚本/能力/manifest部署调用与会话finally。运行前150项测试通过：原规则测试按PM新门槛更新，新增实际attempt-06全量身份复验（26份成功快照、最大1.16秒，通过新规则）、根进程/外部库/单份快照拒绝、>5秒技术失败、有限递增时间、SHA只计算一次及注入路径测试。
+
+本轮PM授权修正不计自身缺陷次数；继承上轮停止信号修复1/3。新attempt-07使用相同实验ID、输入、冻结仓库、策略和种子；新source/output隔离目录，代码变更从S0开始。当前实验本轮继续豁免16GiB构建启动门槛，load/磁盘/运行中保护不变。运行记录将在收尾补齐。
+
+
+### 11.2 attempt-07：观察器通过、S4真实恢复通过，S5记录来源缺陷
+
+三个训练RUN的完整解码器快照为56/56/57份，间隔最大0.70/0.69/0.69秒；每轮8个唯一(path,dev,inode)，实际SHA调用8次。无旧0.5秒断言。原始树/maps仍在temp，收据摘要与索引归档于本节证据。
+
+S4实际运行时SIGTERM：第一次run退出143，`StopRequested`未被吞掉；finally恢复uid5001、schedutil、RPM1233、cleanup_pending=[]。同一命令第二次验证并复用S0–S3，collect收据SHA不变，从convert/002继续。6次转换成功，锁定profile SHA `ecd606489690ab92cf0b883ac2cd6978b845f031f28a11f733bc223f9245e35b`，跨DSO冲突为空。
+
+BASE、BASE-r、AFDO三个GBS均退出0，墙钟129.919/122.747/119.783秒。两套build-lock均通过。S5在consumption停止：libavcodec/libavutil分别有1947/62条正数AppliedSamples，实际目标源码311/97条Clang命令都带准确sample-use，但程序把合并进ELF的3条GNU支持库producer记录也当成目标源码命令，误报missing sample-use。冻结root的libgcc.a与crtbeginS.o/crtendS.o原始readelf记录逐字证明其来源（`attempt-07/consumption-diagnosis/`）。两个目标.text已变化、chroot profile SHA正确；失败原件不改。
+
+按用户自身缺陷规则本轮使用第2/3次（继承上轮1/3）：保持build-lock全部记录不变；消费检查将实际`-c/-o`目标源码命令与有冻结依赖原文证明的GNU/libgcc记录分开。未知记录仍拒绝，目标源码缺sample-use仍拒绝。真实失败先复现，新增来源缺失、错误目标、源码缺选项不可被排除等测试；总155项通过。修复后新attempt-08使用同一实验配置，从S0重做，未改设计/阈值/补丁/spec。attempt-07结束总墙钟2047.209秒，恢复无错误；没有计时结果，注入计时清理测试尚未到达。

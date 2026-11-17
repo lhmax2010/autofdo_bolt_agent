@@ -20,7 +20,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 set +e
 bash "$here/watchdog.sh" "$limit" "$perf" --buildid-dir "$run/buildid" record --buildid-mmap -e cycles -c "$period" -o "$run/perf.data" -- taskset -c "$cpu" "$@" & worker=$!
-bash "$here/observe_maps.sh" "$worker" "$run/maps" "$DEPLOY_MANIFEST" & observer=$!
+taskset -c 0 bash "$here/observe_maps.sh" "$worker" "$run/maps" "$DEPLOY_MANIFEST" & observer=$!
 wait "$worker"; rc=$?
 worker=''
 kill "$observer" 2>/dev/null || :; wait "$observer" 2>/dev/null || :; observer=''

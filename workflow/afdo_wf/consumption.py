@@ -81,3 +81,27 @@ def evaluate(targets,mapping,remark_files,commands,locked_sha,staged_profile,tex
         if not text_before.get(t) or not text_after.get(t) or text_before[t]==text_after[t]:reasons.append('no target text change')
         output[t]=dict(status='unverified' if reasons else 'verified',reasons=reasons,positive_records=counts[t],examples=found[t])
     return dict(passed=all(x['status']=='verified' for x in output.values()),targets=output,staged_sha256=locked_sha)
+
+
+def target_source_commands(commands, mapping, dependency_records):
+    """Separate source argv from proven linked GCC support-object producer records.
+
+    Keep every record in the build lock. Only the consumption source-command
+    check uses this partition; unknown records fail closed.
+    """
+    sources={};excluded={}
+    proof={tuple(r) for r in dependency_records}
+    for target, rows in commands.items():
+        sources[target]=[];excluded[target]=[]
+        for argv in rows:
+            if '-c' in argv:
+                require(argv.count('-o')==1 and argv.index('-o')+1<len(argv),'missing compile output')
+                obj=argv[argv.index('-o')+1]
+                require(target_for_object(obj,mapping)==target,'compile target mismatch')
+                sources[target].append(argv)
+            else:
+                require(argv[:1]==['GNU'] and '-fbuilding-libgcc' in argv and tuple(argv) in proof,
+                        'unclassified recorded command')
+                excluded[target].append(argv)
+        require(sources[target],'no target source commands')
+    return sources,excluded

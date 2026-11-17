@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import fnmatch
 import signal
 from pathlib import PurePosixPath
-from .common import StopRequested,require
+from .common import TechnicalFailure,StopRequested,require
 from .receipts import Cleanup
 
 def check_maps(text,manifest,must_load,deploy_patterns,observed_sha):
@@ -62,33 +62,59 @@ def session(transport,expected_identity,journal):
 def observer_cadence(directory):
     from pathlib import Path
     from decimal import Decimal, InvalidOperation
+    from statistics import median
     from .common import save
     root=Path(directory);path=root/'samples.tsv'
-    require(path.is_file(),'observer cadence evidence missing','identity',3)
+    def valid(ok,message):
+        if not ok:raise TechnicalFailure(message)
+    valid(path.is_file(),'observer cadence evidence missing')
     try:
         rows=[line.split() for line in path.read_text().splitlines()]
-        require(rows and all(len(x)==2 for x in rows),'invalid observer cadence evidence','identity',3)
+        valid(bool(rows) and all(len(x)==2 for x in rows),'invalid observer cadence evidence')
         times=[Decimal(x[1]) for x in rows]
-        require(all(x.is_finite() for x in times),'nonfinite observer timestamp','identity',3)
+        valid(all(x.is_finite() for x in times),'nonfinite observer timestamp')
         gaps=[b-a for a,b in zip(times,times[1:])]
-    except InvalidOperation:
-        require(False,'invalid observer timestamp','identity',3)
-    evidence=dict(samples=len(rows),max_gap_seconds=float(max(gaps,default=Decimal(0))),
-                  intervals_over_limit=[dict(after_sample=rows[i][0],seconds=float(g)) for i,g in enumerate(gaps) if g>Decimal('0.5')])
+    except InvalidOperation:raise TechnicalFailure('invalid observer timestamp')
+    evidence=dict(samples=len(rows),min_gap_seconds=float(min(gaps,default=Decimal(0))),
+                  median_gap_seconds=float(median(gaps)) if gaps else 0.,max_gap_seconds=float(max(gaps,default=Decimal(0))),
+                  intervals_over_limit=[dict(after_sample=rows[i][0],seconds=float(g)) for i,g in enumerate(gaps) if g>Decimal('5')])
     save(root/'cadence-check.json',evidence)
-    require(all(Decimal(0)<g<=Decimal('0.5') for g in gaps),'observer cadence exceeds 0.5 seconds or is nonmonotonic','identity',3)
+    valid(all(Decimal(0)<g<=Decimal('5') for g in gaps),'observer cadence exceeds 5 seconds or is nonmonotonic')
     return evidence
 
 
 def decoder_maps(directory, manifest, must_load, deploy_patterns, rule, input_path):
-    """Unique declared workload process, exact argv, complete procfs snapshots."""
+    """Unique declared decoder, >=2 full observations; SHA keyed by mapped file identity."""
     from pathlib import Path
     from .common import save
-    root=Path(directory); observer_cadence(root)
-    candidates={}; invalid=[]; observations=[]
+    root=Path(directory);cadence=observer_cadence(root)
+    candidates={};invalid=[];observations=[];cache={}
+    cachefile=root/'sha-cache.tsv'
+    if cachefile.exists():
+        for line in cachefile.read_text().splitlines():
+            fields=line.split('\t');require(len(fields)==8,'invalid SHA cache record','identity',3)
+            dev,inode,path,digest,pid,start,before,after=fields
+            key=(path,dev,inode);require(key not in cache,'duplicate SHA cache identity','identity',3)
+            cache[key]=digest
     expected=[arg.replace('{input}',input_path) for arg in rule['argv']]
     for snapshot in sorted(root.glob('*-*')):
         if not snapshot.is_dir():continue
+        mp=snapshot/'maps.txt'
+        text=mp.read_text() if mp.exists() else ''
+        hashes={}
+        if cachefile.exists():
+            for line in text.splitlines():
+                fields=line.split(None,5)
+                if len(fields)==6 and fields[5].startswith('/'):
+                    path=fields[5];key=(path,fields[3],fields[4])
+                    belongs=PurePosixPath(path).name in manifest or any(fnmatch.fnmatch(PurePosixPath(path).name,PurePosixPath(g).name) for g in deploy_patterns)
+                    if belongs:require(key in cache,'mapped file identity has no verified SHA: '+str(key),'identity',3)
+                    if key in cache:hashes[path]=cache[key]
+        elif (snapshot/'mapped-sha256.txt').exists():
+            # Immutable attempt-06 legacy evidence had per-snapshot hashes.
+            hashes={line.split(None,1)[1].strip():line.split()[0] for line in (snapshot/'mapped-sha256.txt').read_text().splitlines()}
+        # Never ignore a foreign deploy-set DSO, even in a non-decoder/partial snapshot.
+        mapped=check_maps(text,manifest,[],deploy_patterns,hashes)
         cp=snapshot/'cmdline.txt'
         if not cp.exists():continue
         argv=[x.decode('utf-8',errors='strict') for x in cp.read_bytes().split(b'\0') if x]
@@ -99,17 +125,12 @@ def decoder_maps(directory, manifest, must_load, deploy_patterns, rule, input_pa
         key=(ident[0],ident[4]);candidates.setdefault(key,[]).append(str(snapshot))
         if not (snapshot/'complete').exists() or (snapshot/'complete').read_text().strip()!='1':
             invalid.append(str(snapshot));continue
-        text=(snapshot/'maps.txt').read_text()
-        hashes={line.split(None,1)[1].strip():line.split()[0] for line in (snapshot/'mapped-sha256.txt').read_text().splitlines()}
-        # Check any deployed DSO even during dynamic-loader startup. Only a
-        # complete must-load set counts as a successful identity observation.
-        mapped=check_maps(text,manifest,[],deploy_patterns,hashes)
         seen={manifest[name]['id'] for name in mapped}
         if set(must_load)<=seen:observations.append(dict(snapshot=str(snapshot),mapped=mapped))
-    evidence=dict(candidates=[dict(pid=k[0],starttime=k[1],snapshots=v) for k,v in candidates.items()],incomplete_snapshots=invalid,observations=observations)
+    evidence=dict(candidates=[dict(pid=k[0],starttime=k[1],snapshots=v) for k,v in candidates.items()],incomplete_snapshots=invalid,observations=observations,cadence=cadence,sha_cache_entries=len(cache),minimum_full_snapshots=2)
     save(root/'decoder-check.json',evidence)
     require(len(candidates)==1,'expected one decoder process; found '+str(len(candidates)),'identity',3)
-    require(observations,'no decoder loaded-library evidence','identity',3)
+    require(len(observations)>=2,'fewer than two complete decoder loaded-library snapshots','identity',3)
     return len(observations)
 
 
