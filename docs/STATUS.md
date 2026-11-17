@@ -40,6 +40,16 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow M1第三阶段attempt-05：前台修正通过真实负载，S3缺解码进程maps停止（2026-11-17任务）
+
+- [M1报告第9节](workflow/m1/05_m1_board_e2e.md#9-pm-授权前台启动部署物清理与-attempt-052026-11-17任务)：setsid/nohup/前台各3次探测均正常完成；不能据此认定sdb会话退出必然杀子进程。按PM决定全部负载改前台，transport=脚本预算+120秒，异常与整block一次技术重试有合成测试；host来源物按SHA、板上生成物按verified-pull分别清理并在创建前登记。
+- 旧BASE variant/tools已核SHA/链接后删除；新单命令S0通过、BASE两次GBS退出0（177.342/271.503秒）。自身缺陷使用2/3次：登记caps简写解析错误、能力文件多余空行致sampler提前退出；保留原文、真实夹具先失败后通过，不改判据，130测试通过。按收据DAG归档失效后同一job重启；PM启动/清理修正不计次数。
+- 修复后S2三个输入PLAT/BASE共六项oracle全部通过；**S3 train-1虽采集/导出退出0，但30份maps均为watchdog Bash、无解码进程目标库映射，workflow退出3停止。** 原文不能证明该次身份条件成立，未用旧oracle或perf信息代替，不进行第三次自动修复放行、不重采。采集原件1份保留，接受训练0/3；未转换sample profile、未到S4恢复注入/BASE-r/AFDO/consumption/1block清理注入/测量。ToS与Sintel无估计、CI或判定。
+- 最终只读复核：uid5001/root off、schedutil、RPM1233、cleanup_pending=[]、errors=[]；本实验work、BASE variant、workflow tools均不存在；通用工具与三个既有输入保留。只读SHA清单缺退出标记重试1次，正文一致且真实退出0后继续；状态改动无重试。两个driver终态MainPID=0，不碰192.168.108.13。
+- GBS启动等待0.108/0.134秒，内存启动门槛仅本轮实验豁免；load/disk与运行中6G/5G/200%、-j2/threads1保护保留。GBS实读峰值1,531,699,200B，driver峰值230,383,616B，M1最低MemAvailable9,229,725,696B；high/max/oom事件0，无资源停止。两次driver合计1345.407秒；GBS合计448.844秒。清理审计最终峰值未完整保存，观测值与缺口另报。
+- [磁盘第三轮](maintenance/disk_cleanup_2026-11-17.md)：删除三个干净361624源码工作树（7,792,844,800B分配块）；可用104,390,893,568→111,846,215,680B。18个chroot核查通过，RPM/日志已保留，但sudo -n不可用，未删除。用户执行脚本 `temp/disk-cleanup-20261117/sudo-delete.sh`，SHA `2a9d494c1ef2254fb4cfa084945f6d37dd06f150ffd2b44ff6a1b85a8aea26c6`；无需再决定删除范围，须由具备权限者执行。两个LLVM root与当前实验、冻结仓库、所有原始证据保留。
+- [运行证据](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-05/run-index.json)、[探测与遗留清理](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-05/launch-probe/index.json)、[磁盘证据](maintenance/evidence/2026-11-17-round3/index.json)。ALL-END；M1未验收完成，待处理子进程枚举/身份取证缺口。未改hq、Gerrit、设计或旧证据。
+
 ## Workflow M1第三阶段attempt-04：清理完成，S2远端启动无完成证据停止（2026-11-17任务）
 
 - [磁盘第二轮](maintenance/disk_cleanup_2026-11-17.md)：按ps/mount/12小时/真实路径/引用五项判据删除23个确切路径；删除前分配块合计6,470,066,176B（非净回收），可用108,855,418,880→109,025,251,328B。693个去重缓存文件已存档并核SHA；local/repos RPM/日志、冻结repo、当前实验与发布工具保留。chroot权限、被引用和提交未证明保留项逐项列为待PM决定；无sudo/卸载/其他项目清理。

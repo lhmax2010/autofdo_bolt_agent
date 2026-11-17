@@ -5,7 +5,7 @@ seconds=$1; shift
 case "$seconds" in ''|*[!0-9]*|0) exit 2;; esac
 child='';watch=''
 cleanup() {
-    if test -n "$watch"; then kill "$watch" 2>/dev/null || :; wait "$watch" 2>/dev/null || :; fi
+    if test -n "$watch"; then kill -TERM -- "-$watch" 2>/dev/null || :; wait "$watch" 2>/dev/null || :; fi
     if test -n "$child"; then
         kill -TERM -- "-$child" 2>/dev/null || :
         sleep 1
@@ -18,12 +18,13 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 run_group() {
 setsid "$@" & child=$!
-(
+setsid bash -c '
+    seconds=$1; child=$2
     sleep "$seconds"
     kill -TERM -- "-$child" 2>/dev/null || exit 0
     sleep 1
     kill -KILL -- "-$child" 2>/dev/null || :
-) & watch=$!
+' watchdog-timer "$seconds" "$child" & watch=$!
 wait "$child"
 }
 set +e

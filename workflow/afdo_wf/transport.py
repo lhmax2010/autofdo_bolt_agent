@@ -5,6 +5,7 @@ import shlex
 import subprocess
 import time
 import uuid
+import json
 from .common import require, save, sha256
 from .receipts import verified_pull, delete_pulled
 
@@ -18,18 +19,39 @@ def board_path(path,work=False):
 class SDB:
     def __init__(self,serial,logs,runner=subprocess.run):
         self.serial=serial;self.logs=Path(logs);self.logs.mkdir(parents=True,exist_ok=True)
-        self.runner=runner;self.sequence=len(list(self.logs.glob("*.json")));self.retries=0
+        self.runner=runner;self.sequence=len(list(self.logs.glob("*.json")));self.retries=0;self.wait_hook=None
     def invoke(self,args,timeout=900):
         self.sequence+=1;stem=self.logs/("%06d"%self.sequence)
         argv=["sdb","-s",self.serial,*args];start=time.time()
         try:
-            r=self.runner(argv,capture_output=True,timeout=timeout)
+            if self.wait_hook is None:
+                r=self.runner(argv,capture_output=True,timeout=timeout)
+            else:
+                hook=self.wait_hook;self.wait_hook=None
+                child=subprocess.Popen(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                try:
+                    while True:
+                        remaining=timeout-(time.time()-start)
+                        if remaining<=0:raise subprocess.TimeoutExpired(argv,timeout)
+                        try:
+                            stdout,stderr=child.communicate(timeout=min(1,remaining));break
+                        except subprocess.TimeoutExpired:hook()
+                    r=subprocess.CompletedProcess(argv,child.returncode,stdout,stderr)
+                except BaseException:
+                    child.terminate()
+                    try:stdout,stderr=child.communicate(timeout=5)
+                    except subprocess.TimeoutExpired:child.kill();stdout,stderr=child.communicate()
+                    stem.with_suffix('.stdout').write_bytes(stdout);stem.with_suffix('.stderr').write_bytes(stderr)
+                    raise
+                finally:self.wait_hook=hook
             stdout=r.stdout.decode(errors="replace") if isinstance(r.stdout,bytes) else r.stdout
             stderr=r.stderr.decode(errors="replace") if isinstance(r.stderr,bytes) else r.stderr
             stem.with_suffix(".stdout").write_text(stdout);stem.with_suffix(".stderr").write_text(stderr)
             save(stem.with_suffix(".json"),dict(argv=argv,start=start,end=time.time(),exit_code=r.returncode))
             return r.returncode,stdout,stderr
         except BaseException as e:
+            for suffix,raw in [('stdout',getattr(e,'stdout',None)),('stderr',getattr(e,'stderr',None))]:
+                if raw is not None:stem.with_suffix('.'+suffix).write_bytes(raw if isinstance(raw,bytes) else raw.encode())
             save(stem.with_suffix(".json"),dict(argv=argv,start=start,end=time.time(),error=repr(e)))
             raise
     def shell(self,command,readonly=False,timeout=900):
@@ -73,10 +95,33 @@ class SDB:
         rc,out,err=self.invoke(["push",str(local),remote])
         require(rc==0,"push failed: "+out+err)
         require(self.shell("sha256sum "+q(remote),True).split()[0]==sha256(local),"deployment SHA mismatch","identity",3)
+    def remove_host_artifact(self,action):
+        remote=action['remote'];board_path(remote)
+        exists=self.shell('if test -e '+q(remote)+' || test -L '+q(remote)+'; then printf yes; else printf no; fi',True)
+        if exists=='no':return
+        expected=action['members']
+        if action['directory']:
+            raw=self.shell('cd '+q(remote)+" && find . -mindepth 1 -printf '%y\\t%P\\n' | sort",True)
+            actual={line.split('\t',1)[1]:line.split('\t',1)[0] for line in raw.splitlines()}
+        else:actual={'': 'f'}
+        for rel,kind in actual.items():
+            if kind=='d':
+                require(any(k.startswith(rel+'/') for k in expected),'unexpected deployment directory '+rel);continue
+            require(rel in expected,'unexpected deployment member '+rel)
+            member=expected[rel];path=remote+('/'+rel if rel else '')
+            if kind=='l':require(member['kind']=='link' and self.shell('readlink '+q(path),True).strip()==member['target'],'deployment link changed '+path)
+            else:
+                require(kind=='f' and member['kind']=='file','deployment member type changed '+path)
+                require(sha256(member['source'])==member['sha256'],'host original changed '+path)
+                require(self.shell('sha256sum '+q(path),True).split()[0]==member['sha256'],'deployment SHA changed '+path)
+        save(action['verification'],dict(remote=remote,actual=actual,expected=expected,status='verified'))
+        self.shell('rm -rf -- '+board_path(remote))
+
     def undo(self,action):
         kind=action['kind']
         if kind=='root':self.root(action['previous'])
         elif kind=='governor':self.governor(action['policy'],action['previous'])
+        elif kind=='host_artifact':self.remove_host_artifact(action)
         elif kind=='run':
             receipt=Path(action['receipt'])
             # Unpulled data is never discarded during exception cleanup.
@@ -89,7 +134,7 @@ class SDB:
             delete_pulled(receipt,lambda path:self.shell("rm -rf -- "+board_path(path,True)))
         elif kind=='process':
             pidfile=action['pidfile'];board_path(pidfile,True)
-            self.shell("if test -f "+q(pidfile)+"; then p=$(cat "+q(pidfile)+"); case \"$p\" in ''|*[!0-9]*) exit 2;; esac; if test -r /proc/$p/cmdline; then tr '\\000' ' ' < /proc/$p/cmdline | grep -F -- "+q(action['command_token'])+" >/dev/null || exit 3; kill -TERM -- -$p; i=0; while kill -0 \"$p\" 2>/dev/null; do sleep 1; i=$((i+1)); test \"$i\" -lt 15 || exit 4; done; fi; fi")
+            self.shell("if test -f "+q(pidfile)+"; then p=$(cat "+q(pidfile)+"); case \"$p\" in ''|*[!0-9]*) exit 2;; esac; if test -r /proc/$p/cmdline; then tr '\\000' ' ' < /proc/$p/cmdline | grep -F -- "+q(action['command_token'])+" >/dev/null || exit 3; kill -TERM -- "+("$p" if action.get('single_pid') else "-$p")+"; i=0; while kill -0 \"$p\" 2>/dev/null; do sleep 1; i=$((i+1)); test \"$i\" -lt 15 || exit 4; done; fi; fi")
         else:require(False,"unknown cleanup action")
     def pull(self,remote,local,receipt):
         board_path(remote,True);local=Path(local);require(not local.exists(),"pull destination already exists")
@@ -113,6 +158,6 @@ class SDB:
             local=nested
         require(set(actual)==set(manifest),"pull has missing or extra files")
         require(self.shell(command,True)==manifest_text,"remote changed during pull")
-        verified_pull(receipt,local,manifest,remote)
+        verified_pull(receipt,local,manifest,remote,verified_empty=not manifest)
         delete_pulled(receipt,lambda path:self.shell("rm -rf -- "+board_path(path,True)))
         return dict(files=manifest,local_root=str(local))

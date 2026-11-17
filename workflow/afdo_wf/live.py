@@ -59,6 +59,60 @@ def consumed_profile_path(commands):
     require(Path(path).is_absolute() and '..' not in Path(path).parts and Path(path).name=='autofdo.extbinary','unsafe staged profile path')
     return path
 
+def caps_fields(text):
+    """Interpret declared compact caps and GStreamer typed caps without dropping fields."""
+    compact=re.fullmatch(r'([^,]+),(\d+)x(\d+),(\d+/\d+),([^,]+),(\d+/\d+)',text.strip())
+    if compact:
+        return dict(zip(['format','width','height','framerate','interlace-mode','pixel-aspect-ratio'],compact.groups()))
+    parts=[x.strip() for x in text.split(',')]
+    require(parts[0]=='video/x-raw','oracle caps media type mismatch')
+    result={}
+    for part in parts[1:]:
+        match=re.fullmatch(r'([a-zA-Z0-9_-]+)=(?:\([^)]*\))?([^,; ]+)',part)
+        require(match and match[1] not in result,'invalid or duplicate oracle caps field')
+        result[match[1]]=match[2]
+    require(all(k in result for k in ['format','width','height']),'required oracle caps fields missing')
+    return result
+
+
+def check_caps(expected,actual):
+    a=caps_fields(actual);e=caps_fields(expected)
+    for key,value in e.items():require(a.get(key)==value,'oracle caps mismatch '+key)
+    return True
+
+
+def capability_text(text):
+    return text.rstrip('\n')+'\n'
+
+
+class TechnicalFailure(GateError):
+    def __init__(self,message):super().__init__(message,'environment')
+
+
+def paired_block(order,run,failed):
+    """Retry only predeclared technical failures, once, preserving the whole pair."""
+    for attempt in range(2):
+        pair={}
+        try:
+            for label in order:pair[label]=run(label,attempt)
+            return pair
+        except TechnicalFailure as e:
+            failed(attempt,pair,e)
+            if attempt:raise
+
+
+def foreground_script(control,argv,env=None):
+    """Wrapper records load status even on TERM; child scripts own their samplers."""
+    return ('#!/bin/bash\nset -u\nchild=\nsampler=\n'
+            'finish() { rc=$?; trap - EXIT; if test -n "$child"; then kill -TERM "$child" 2>/dev/null || :; wait "$child" 2>/dev/null || :; fi; '
+            'if test -n "$sampler"; then kill -TERM "$sampler" 2>/dev/null || :; wait "$sampler" 2>/dev/null || :; fi; '
+            'printf "%s\\n" "$rc" > '+q(control+'/exit')+'; }\n'
+            'trap finish EXIT\ntrap "exit 143" TERM\ntrap "exit 130" INT\n'
+            'printf "%s\\n" "$$" > '+q(control+'/pid')+'\n'+
+            ''.join('export '+k+'='+q(v)+'\n' for k,v in (env or {}).items())+
+            'if test -n "${WF_STANDALONE_SAMPLER:-}"; then taskset -c 0 bash "$WF_STANDALONE_SAMPLER" '+q(control+'/telemetry.tsv')+' "$WF_CAPABILITIES" & sampler=$!; sleep 1; fi\n'+
+            shlex.join(list(map(str,argv)))+' & child=$!\nwait "$child"; rc=$?\nchild=\nif test -n "$sampler"; then sleep 2; fi\nexit "$rc"\n')
+
 class Experiment:
     def __init__(self,job,job_path):
         self.job=job;self.job_path=Path(job_path).resolve();self.w=Path(job['workdir']).resolve()
@@ -120,8 +174,53 @@ class Experiment:
                 require(not errors and final['uid']==self.initial['uid'] and final['governors']==self.initial['governors'] and final['rpm_count']==self.initial['rpm_count'],'cleanup verification failed')
             finally:
                 for s,h in old.items():signal.signal(s,h)
-    def launch(self,name,argv,out,env=None,timeout=900):
-        """Detached, exclusively owned process group with durable PID/exit records."""
+    def host_artifact(self,remote,members,directory=False):
+        """Seal host originals and journal ownership before remote creation/push."""
+        board_path(remote)
+        records=self.d/'host-artifacts.json'
+        registry=json_load(records) if records.exists() else {}
+        if remote not in registry:
+            self.transport.shell('test ! -e '+q(remote)+' && test ! -L '+q(remote),True)
+        action=registry.get(remote,dict(kind='host_artifact',remote=remote,directory=directory,members={},
+            verification=str(self.d/'host-cleanup'/ (hashlib.sha256(remote.encode()).hexdigest()+'.json'))))
+        for name,member in members.items():
+            require(name not in action['members'] or action['members'][name]==member,'host artifact changed: '+remote+'/'+name)
+            action['members'][name]=member
+        registry[remote]=action;save(records,registry)
+        pending=next((x for x in self.cleanup.data['cleanup_pending'] if x.get('kind')=='host_artifact' and x['remote']==remote),None)
+        if pending:pending.update(action);save(self.cleanup.path,self.cleanup.data)
+        else:self.cleanup.register(action)
+        return action
+
+    def push_owned(self,local,remote):
+        local=Path(local).resolve()
+        if remote.startswith(self.scripts+'/'):
+            self.host_artifact(self.scripts,{remote[len(self.scripts)+1:]:dict(kind='file',source=str(local),sha256=sha256(local))},True)
+        else:self.host_artifact(remote,{'':dict(kind='file',source=str(local),sha256=sha256(local))})
+        self.transport.push(local,remote)
+
+    def ensure_work(self):
+        self.register_run(self.remote,self.d/('remaining-work-'+str(time.time_ns())))
+        self.transport.shell('mkdir -p '+q(self.remote))
+
+    def restore_host_artifacts(self):
+        """Rehydrate verified host artifacts after cleanup, without rerunning S0–S3."""
+        records=self.d/'host-artifacts.json'
+        if not records.exists():return
+        for remote,action in json_load(records).items():
+            self.transport.shell('test ! -e '+q(remote)+' && test ! -L '+q(remote),True)
+            self.host_artifact(remote,action['members'],action['directory'])
+            self.transport.shell('mkdir -p '+q(remote if action['directory'] else str(Path(remote).parent)))
+            for name,item in action['members'].items():
+                target=remote+('/'+name if name else '')
+                if action['directory']:self.transport.shell('mkdir -p '+q(str(Path(target).parent)))
+                if item['kind']=='file':
+                    require(sha256(item['source'])==item['sha256'],'restore source changed')
+                    self.transport.push(item['source'],target)
+                else:self.transport.shell('test ! -e '+q(target)+' && test ! -L '+q(target)+' && ln -s '+q(item['target'])+' '+q(target))
+
+    def launch(self,name,argv,out,env=None,timeout=600):
+        """One foreground SDB shell owns the complete round, including cleanup."""
         free=int(self.transport.shell("df -Pk /opt/afdo_agent | tail -1 | awk '{print $4}'",True).strip())*1024
         require(free>=2*64*1024**2+200*1024**2,'board space gate failed')
         t=self.transport;control=self.remote+'/control-'+name;board_path(control,True)
@@ -130,27 +229,29 @@ class Experiment:
             self.cleanup.register(dict(kind='run',remote=remote,local=str(local),receipt=str(receipt)))
         t.shell('test ! -e '+q(control)+' && mkdir -p '+q(control))
         script=Path(out)/(name+'-launch.sh')
-        script.write_text('#!/bin/bash\nset -u\n'+''.join('export '+k+'='+q(v)+'\n' for k,v in (env or {}).items())+
-                          shlex.join(list(map(str,argv)))+'\nrc=$?\nprintf "%s\\n" "$rc" > '+q(control+'/exit')+'\nexit "$rc"\n')
+        load_env=dict(env or {})
+        if self.scripts+'/measure.sh' not in argv:
+            load_env.update(WF_STANDALONE_SAMPLER=self.scripts+'/telemetry.sh',WF_CAPABILITIES=self.scripts+'/capabilities.tsv')
+        script.write_text(foreground_script(control,argv,load_env))
         t.push(script,control+'/launch.sh')
-        action=dict(kind='process',pidfile=control+'/pid',command_token=control+'/launch.sh')
+        action=dict(kind='process',pidfile=control+'/pid',command_token=control+'/launch.sh',single_pid=True)
         self.cleanup.register(action)
-        t.shell('setsid bash '+q(control+'/launch.sh')+' > '+q(control+'/stdout')+' 2> '+q(control+'/stderr')+' < /dev/null & p=$!; printf "%s\\n" "$p" > '+q(control+'/pid'))
-        start=time.monotonic()
-        while True:
-            result=t.shell('if test -f '+q(control+'/exit')+'; then cat '+q(control+'/exit')+'; else printf "running"; fi',True)
-            if result.strip()!='running':break
-            require(time.monotonic()-start<timeout,'remote task exceeded watchdog','environment')
+        def observer():
             if 'injection' in self.job:
                 active=t.shell('ps -eo pid,args | grep -F '+q(remote_token(self.remote,name))+' | grep "[p]erf stat" || test "$?" -eq 1',True)
                 if active.strip():save(self.d/'injection-active.json',dict(active=True,processes=active,time=time.time()))
-            time.sleep(1)
-        require(result.strip().isdigit(),'remote task missing exit code')
+        old_hook=t.wait_hook;t.wait_hook=observer
+        try:
+            # No background operator: sdb remains attached until the entire script exits.
+            t.shell('bash '+q(control+'/launch.sh')+' > '+q(control+'/stdout')+' 2> '+q(control+'/stderr')+' < /dev/null; _load_rc=$?; test -f '+q(control+'/exit'),timeout=timeout+120)
+        except subprocess.TimeoutExpired as e:raise TechnicalFailure('foreground transport timeout: '+str(e)) from e
+        except GateError as e:raise TechnicalFailure('foreground transport interrupted or missing exit: '+str(e)) from e
+        finally:t.wait_hook=old_hook
+        result=t.shell('cat '+q(control+'/exit'),True).strip()
+        require(result.isdigit(),'remote task missing exit code')
         self.cleanup.data['cleanup_pending'].remove(action);save(self.cleanup.path,self.cleanup.data)
-        receipt=Path(out)/(name+'-control-pull.json')
-        self.cleanup.register(dict(kind='run',receipt=str(receipt)))
-        t.pull(control,Path(out)/(name+'-control'),receipt)
-        require(int(result.strip())==0,'board task failed '+name+' exit '+result.strip(),'environment')
+        t.pull(control,Path(out)/(name+'-control'),Path(out)/(name+'-control-pull.json'))
+        if int(result)!=0:raise TechnicalFailure('board task failed '+name+' exit '+result)
     def register_run(self,remote,local):
         """Journal the exact pull destination before any remote mkdir or probe."""
         board_path(remote,True)
@@ -168,13 +269,17 @@ class Experiment:
         t=self.transport
         resources=build.resources(self.w);save(out/'host-resources.json',resources)
         for name,x in self.job['tools'].items():require(sha256(x['path'])==x['sha256'],'tool SHA '+name)
-        t.shell('test -d '+q(self.b)+' && test -w '+q(self.b)+' && mkdir -p '+q(self.remote)+' '+q(self.scripts))
-        for f in (self.w/'workflow/board').glob('*.sh'):t.push(f,self.scripts+'/'+f.name)
-        for f in (Path(self.job['package']).parent/'workloads').glob('*.sh'):t.push(f,self.scripts+'/'+f.name)
+        self.ensure_work()
+        self.host_artifact(self.scripts,{},True)
+        t.shell('test -d '+q(self.b)+' && test -w '+q(self.b)+' && mkdir -p '+q(self.scripts))
+        for f in (self.w/'workflow/board').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
+        for f in (Path(self.job['package']).parent/'workloads').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
         for x in self.inputs:
             src=self.job['media'][x['id']]
             require(sha256(src)==x['sha256'],'input source SHA mismatch')
-            t.push(src,x['path'])
+            existing=t.shell('if test -f '+q(x['path'])+'; then sha256sum '+q(x['path'])+'; else printf absent; fi',True)
+            if existing=='absent':self.push_owned(src,x['path'])
+            else:require(existing.split()[0]==x['sha256'],'existing input SHA mismatch')
         # Executability check and actual hardware-event probe after performance governor.
         t.shell('bash '+q(self.scripts+'/common.sh'))
         perf=self.b+'/tools/perf';remote=self.remote+'/cycles-check'
@@ -189,7 +294,7 @@ class Experiment:
         for line in text.splitlines():
             k,p=line.split();cap[k].append(p)
         require(cap['frequency'] and cap['temperature'],'telemetry frequency/temperature unavailable')
-        cf=out/'capabilities.tsv';cf.write_text(text+'\n');t.push(cf,self.scripts+'/capabilities.tsv')
+        cf=out/'capabilities.tsv';cf.write_text(capability_text(text));self.push_owned(cf,self.scripts+'/capabilities.tsv')
         values={p:int(t.shell('cat '+q(p),True)) for p in cap['frequency']}
         require(len(set(values.values()))==1,'fixed frequency differs between sources')
         return dict(identity=t.identity(),host_resources=resources,capabilities=cap,fixed_khz=next(iter(values.values())),throttle_history='unknown',inputs=self.inputs)
@@ -250,12 +355,16 @@ class Experiment:
         archive=Path(out)/(variant+'.tar')
         with tarfile.open(archive,'w') as tar:
             for p in sorted((root/'usr/lib').glob('*.so*')):tar.add(p,arcname=str(p.relative_to(root)),recursive=False)
-        self.transport.push(archive,self.remote+'/'+variant+'.tar')
+        self.push_owned(archive,self.remote+'/'+variant+'.tar')
+        members={}
+        for p in sorted((root/'usr/lib').glob('*.so*')):
+            members[str(p.relative_to(root))]=(dict(kind='link',target=os.readlink(p)) if p.is_symlink() else dict(kind='file',source=str(p.resolve()),sha256=sha256(p)))
+        self.host_artifact(remote,members,True)
         self.transport.shell('test ! -e '+q(remote)+' && mkdir -p '+q(remote)+' && tar -xf '+q(self.remote+'/'+variant+'.tar')+' -C '+q(remote))
         for item in manifest.values():
             require(self.transport.shell('sha256sum '+q(item['board_path']),True).split()[0]==item['sha256'],'deployed library SHA mismatch')
         mf=Path(out)/(variant+'-manifest.json');save(mf,manifest)
-        self.transport.push(mf,self.scripts+'/'+variant+'-manifest.json')
+        self.push_owned(mf,self.scripts+'/'+variant+'-manifest.json')
         return dict(remote=remote,manifest=manifest)
     def verify_maps(self,local,deployment):
         manifest=deployment['manifest'];observations=[]
@@ -282,10 +391,8 @@ class Experiment:
             bytes=int((local/'decoded.bytes').read_text()),digest=(local/'decoded.sha256').read_text().split()[0],
             caps=caps[-1],threads=1)
         expected=x['oracle']
-        # Compare canonical fields; preserve complete negotiated caps as raw evidence.
-        for key in ['format','width','height']:
-            rx=key+r'=\([^)]*\)([^,; ]+)'
-            require(re.search(rx,actual['caps']) and re.search(rx,expected['caps']) and re.search(rx,actual['caps'])[1]==re.search(rx,expected['caps'])[1],'oracle caps mismatch '+key)
+        actual['raw_caps']=actual['caps']
+        check_caps(expected['caps'],actual['caps'])
         actual['caps']=expected['caps']
         board.oracle_check(expected,actual)
         if deployment:actual['maps_checked']=self.verify_maps(local,deployment)
@@ -368,7 +475,7 @@ class Experiment:
                  DEPLOY_MANIFEST=self.scripts+'/'+deployment['variant']+'-manifest.json')
         self.launch(name,['bash',self.scripts+'/measure.sh',remote,self.b+'/tools/perf',
             str(self.package['runtime']['cpu_affinity']),'0',self.scripts+'/capabilities.tsv','600',
-            'bash',self.scripts+'/timed.sh',x['role'],deployment['remote'],x['path'],remote+'/result'],out,env,timeout=1300)
+            'bash',self.scripts+'/timed.sh',x['role'],deployment['remote'],x['path'],remote+'/result'],out,env,timeout=1200)
         local=self.pull_run(remote,Path(out)/name)
         require(int((local/'measure.exit').read_text())==0,'timed exit')
         require('Got EOS' in (local/'measure.log').read_text(),'timed EOS absent')
@@ -419,11 +526,20 @@ class Experiment:
                     self.timed('warm-'+x['id']+'-'+str(warm)+'-'+label,x,dep,out,preflight)
             blocks=[]
             for i,order in enumerate(plan['order'],1):
-                pair={}
-                for label in order:
+                checkpoint=list(self.cleanup.data['cleanup_pending'])
+                def one(label,attempt):
                     dep=deployment if label=='BASE' else candidate
-                    row=self.timed('formal-'+x['id']+'-'+str(i)+'-'+label,x,dep,out,preflight)
-                    row.update(block=i,input=x['id']);rows.append(row);save(out/'rounds.json',rows);pair[label]=row
+                    row=self.timed('formal-'+x['id']+'-'+str(i)+'-try'+str(attempt)+'-'+label,x,dep,out,preflight)
+                    row.update(block=i,input=x['id'],attempt=attempt)
+                    return row
+                def failed(attempt,pair,error):
+                    save(out/(x['id']+'-'+str(i)+'-failed-'+str(attempt)+'.json'),dict(attempt=attempt,partial=pair,error=str(error)))
+                    require(self.transport.identity()==self.job['identity'],'identity changed during technical cleanup','identity',3)
+                    actions=[a for a in self.cleanup.data['cleanup_pending'] if a not in checkpoint]
+                    for a in sorted(reversed(actions),key=lambda a:0 if a['kind']=='process' else 1):
+                        self.transport.undo(a);self.cleanup.data['cleanup_pending'].remove(a);save(self.cleanup.path,self.cleanup.data)
+                pair=paired_block(order,one,failed)
+                rows.extend(pair.values());save(out/'rounds.json',rows)
                 blocks.append(dict(id=i,complete=True,correctness=True,control=pair['BASE']['wall_seconds'],candidate=pair['AFDO']['wall_seconds'],
                     control_flag=pair['BASE']['telemetry']['classification'],candidate_flag=pair['AFDO']['telemetry']['classification']))
                 save(out/(x['id']+'-blocks.json'),blocks)
@@ -439,8 +555,13 @@ class Experiment:
         return dict(comparisons=comparisons,oracles=oracles,rounds=rows,injection=injection)
     def failure_cleanup_test(self,out,preflight,deployment):
         """A separate live process/session, never part of formal result receipts."""
-        errors=self.cleanup.restore(self.transport.identity(),self.transport.undo)
-        require(not errors,'cannot restore before independent cleanup test')
+        errors=[]
+        for action in list(reversed(self.cleanup.data['cleanup_pending'])):
+            if action['kind'] in ['root','governor']:
+                try:
+                    self.transport.undo(action);self.cleanup.data['cleanup_pending'].remove(action);save(self.cleanup.path,self.cleanup.data)
+                except Exception as e:errors.append(str(e))
+        require(not errors,'cannot restore state before independent cleanup test')
         child=dict(self.job)
         child.update(experiment=self.job['experiment']+'-cleanup-test',output=str(out/'injected-job'),
                      injection=dict(preflight=preflight,deployment=deployment,
@@ -475,13 +596,15 @@ class Experiment:
     def injected_run(self):
         data=self.job['injection'];out=self.d/'injection';out.mkdir(exist_ok=False)
         with self.session():
-            self.transport.shell('mkdir -p '+q(self.remote)+' '+q(self.scripts))
-            for f in (self.w/'workflow/board').glob('*.sh'):self.transport.push(f,self.scripts+'/'+f.name)
-            self.transport.push(Path(self.job['package']).parent/'workloads/timed.sh',self.scripts+'/timed.sh')
+            self.ensure_work()
+            self.host_artifact(self.scripts,{},True)
+            self.transport.shell('mkdir -p '+q(self.scripts))
+            for f in (self.w/'workflow/board').glob('*.sh'):self.transporself.push_owned(f,self.scripts+'/'+f.name)
+            self.push_owned(Path(self.job['package']).parent/'workloads/timed.sh',self.scripts+'/timed.sh')
             cap=out/'capabilities.tsv';cap.write_text(''.join(k+'\t'+p+'\n' for k,v in data['preflight']['capabilities'].items() for p in v))
-            self.transport.push(cap,self.scripts+'/capabilities.tsv')
+            self.push_owned(cap,self.scripts+'/capabilities.tsv')
             mf=out/'manifest.json';save(mf,data['deployment']['manifest'])
-            self.transport.push(mf,self.scripts+'/'+data['deployment']['variant']+'-manifest.json')
+            self.push_owned(mf,self.scripts+'/'+data['deployment']['variant']+'-manifest.json')
             self.timed('injected-round',data['input'],data['deployment'],out,data['preflight'])
         require(False,'injection round completed without expected signal')
     def report(self,out,store):
@@ -510,6 +633,10 @@ class Experiment:
         result={'status':'failed','start':time.time()}
         try:
             with self.session():
+                if (self.d/'receipts/preflight.json').exists():
+                    from .receipts import Store
+                    Store(self.d/'receipts').verify('preflight')
+                    self.ensure_work();self.restore_host_artifacts()
                 result['stages']=scheduler.execute([s for s in handlers if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
             result['stages']+=scheduler.execute(['report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
             result['status']='complete'

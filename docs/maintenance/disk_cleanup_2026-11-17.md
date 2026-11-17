@@ -279,3 +279,55 @@ GBS chroot保留原因含内部root/、var/cache/ldconfig等目录不可读，�
 llvm-profgen-enh/build仍被STATUS引用；发布root的加载器/库被当前job引用，不能迁移后假称配置不变。profgen-patch9/prebuild-tool含旧工具及原验收记录，本轮保留而不把旧验收副本当发布工具。未删除任何采集、profile、quality、收据或验证日志。当前实验内的失败克隆按“当前实验全部内容保留”保守保留。
 
 资源说明：盘点/删除串行、nice19/ionice-c3与3G/200% scope；resource-samples.jsonl为实际取得的抽样（不是完整60秒连续序列），没有补造缺失峰值。内核提交可达性遍历耗时较长。WORKDIR外目录未遍历、未清理。
+
+
+## 第三轮：PM 放宽 chroot 可读 mtime 判据与指定源码清理
+
+本轮按用户 2026-11-17 指令执行，全部在 M1 attempt-05 构建启动前结束。未卸载挂载、未停止其他进程、未修改 sudo；WORKDIR 外无删除。两个 LLVM root 与发布工具、当前实验、冻结 repo、原始采集与证据全部保留。
+
+文件系统可用空间：104,390,889,472 → 111,846,211,584 B（净变化 +7,455,322,112 B；受同时发生的系统写入影响，不等于删除块数）。
+
+### 源码删除
+
+三份工作树均以 git status 验证无改动；HEAD 的唯一父提交为 da885208aeb52f55c448ff46873d242346727522（该对象仍在保留的裸仓库），提交 patch-id 与已登记 v1/v2/v3 补丁一致，补丁 SHA 与原记录一致。删除前再次记录 ps 与 findmnt，路径真实位于 WORKDIR、非符号链接；使用 rm -rf --one-file-system -- 确切路径，未执行 Git prune。
+
+| 路径 | 删除前 du 分配字节 | rm 退出码 | 删除后存在 |
+|---|---:|---:|---|
+| temp/verify-361624-fix-20261116/source | 2597568512 | 0 | False |
+| temp/verify-361624-fix-v2-20261116/source | 2597642240 | 0 | False |
+| temp/verify-361624-fix-v3-20261116/source | 2597634048 | 0 | False |
+
+删除前块数合计 7,792,844,800 B。
+
+### chroot 核查与待执行脚本
+
+sudo -n true 退出 1（原始 stderr 已保存），未尝试密码。18 个 chroot 的顶层及可读部分 mtime 均超过12小时，存在结束收据或构建日志，ps无引用、无子挂载、真实路径在WORKDIR。不可读的 root 子目录逐项记录，不再将其 mtime 不可读视为不满足。
+
+删除前已枚举 home/abuild/rpmbuild/RPMS、SRPMS：每个 RPM 均有相同 SHA 的保留副本；缺副本的先复制到同一 root 的 kept-from-chroot 并复核。可读 .log 同样复制保存。完整记录见 audit-final.json 的 rpms/copied/completion_logs；原有321份RPM清单重新核SHA。
+
+| 路径 | 可读分配字节（下界） | 状态 |
+|---|---:|---|
+| temp/GBS-ROOT-FFMPEG-M1-A32-20261114/local/BUILD-ROOTS | 1347866624 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/GBS-ROOT-FFMPEG-M1-A32-20261114-FIX1/local/BUILD-ROOTS | 1496559616 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/BUILD-ROOTS | 1217822720 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114-FIX1/local/BUILD-ROOTS | 1489059840 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/GBS-ROOT-RPI4-PMUV3/local/BUILD-ROOTS | 8903147520 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS | 1305878528 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS | 1915437056 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS | 1600098304 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/m1-pilot-v02-20261116/build/forensic/roots/afdo-localpath/local/BUILD-ROOTS | 1468973056 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/m1-pilot-v02-20261116/build/forensic/roots/base-r-localpath/local/BUILD-ROOTS | 1468030976 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/m1-pilot-v02-20261116/build/roots/afdo-localpath/local/BUILD-ROOTS | 1468952576 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/m1-pilot-v02-20261116/build/roots/base-r-localpath/local/BUILD-ROOTS | 1468030976 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/m1-target-20261114/weekend-j2/roots/a32-attempt-0/local/BUILD-ROOTS | 1482575872 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS | 1477144576 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/verify-361624-fix-20261116/root-x86_64/local/BUILD-ROOTS | 4563800064 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS | 5007843328 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/verify-361624-fix-v3-20261116/root-x86_64/local/BUILD-ROOTS | 5833494528 | 待用户执行 sudo 脚本；本轮未删 |
+| temp/workflow-p1p2-20261116/root-afdo-diag/local/BUILD-ROOTS | 1471459328 | 待用户执行 sudo 脚本；本轮未删 |
+
+用户执行脚本：`temp/disk-cleanup-20261117/sudo-delete.sh`，SHA-256 `2a9d494c1ef2254fb4cfa084945f6d37dd06f150ffd2b44ff6a1b85a8aea26c6`。脚本只含 set -eu、注释及18条绝对确切路径 rm -rf --one-file-system；需要以 root 身份执行。本轮没有执行它，待清理可读分配块合计 44,986,175,488 B。没有其他待 PM 决定目录；本轮明确要求保留的目录不列作可删除。
+
+### 证据与资源
+
+[证据索引](evidence/2026-11-17-round3/index.json)保存前后 df、判据、RPM/日志保留SHA、源码提交与补丁核查、删除结果、sudo失败原文与脚本。大的原件保留temp。资源使用 nice19/ionice-c3、3G/200% scopes；审计/源码核查的运行中观测 memory.peak 分别为952,541,184与262,725,632 B，未保留这两个scope终止前的最终值，不能声称是整个任务的绝对峰值。无GBS与删除并行；未发现OOM记录。

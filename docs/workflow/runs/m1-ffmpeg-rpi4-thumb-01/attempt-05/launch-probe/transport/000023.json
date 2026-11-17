@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "sdb",
+    "-s",
+    "192.168.108.26:26101",
+    "shell",
+    "( for f in start end exit pid launched-pid; do if test -f /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/launch-probe/setsid-3/$f; then printf \"%s=\" \"$f\"; cat /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/launch-probe/setsid-3/$f; fi; done; if test -f /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/launch-probe/setsid-3/launched-pid; then p=$(cat /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/launch-probe/setsid-3/launched-pid); if kill -0 \"$p\" 2>/dev/null; then printf \"alive=yes\\n\"; else printf \"alive=no\\n\"; fi; fi ); _wf_rc=$?; printf '\n__WF_RC_c1755caf055246beb2f66ce220d71026__%s\n' \"$_wf_rc\""
+  ],
+  "end": 1794903656.2478106,
+  "exit_code": 0,
+  "start": 1794903656.11332
+}

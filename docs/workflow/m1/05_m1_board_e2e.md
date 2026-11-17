@@ -398,3 +398,92 @@ Q.5#17：本轮没有进入训练转换阶段，没有生成/查看真实sample 
 
 本轮停止。后续需先查明远端启动没有完成收据的原因，并补齐部署tar的清理登记，再继续M1；不修改判据或以旧手动结果替代。
 [本轮证据索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/index.json)含原命令、失败原文、收据、资源和temp大文件SHA；ALL-END已写。
+
+
+## 9. PM 授权前台启动、部署物清理与 attempt-05（2026-11-17任务）
+
+### 9.1 边界与探测
+
+仅操作192.168.108.26:26101；devices列表中的192.168.108.13未操作。身份仍为RPi4 Model B Rev1.5 / armv7l / 6.12.80-arm-rpi4-v7l / tizen-unified-toolchain_20261104.160709。初始uid5001、schedutil、RPM1233。探测前持久登记launch-probe目录，root变更也先登记；未改governor。
+
+最小脚本写start、sleep20、end及exit=0。每种3次；后台方式同一命令保存PID、/proc/PID/cgroup和ps的PID/PGID/SID，返回后2秒、25秒检查。实际命令原文保存在transport索引，PID存入launched-pid文件。
+
+| 方式 | 次数 | sdb墙钟秒 | 2秒状态 | 25秒／前台返回状态 |
+|---|---:|---:|---|---|
+| setsid | 1 | 0.183 | PID存活、start存在 | end存在、exit=0；PID已退出 |
+| setsid | 2 | 0.250 | PID存活、start存在 | end存在、exit=0；PID已退出 |
+| setsid | 3 | 0.200 | PID存活、start存在 | end存在、exit=0；PID已退出 |
+| nohup | 1 | 0.208 | PID存活、start存在 | end存在、exit=0；PID已退出 |
+| nohup | 2 | 0.242 | PID存活、start存在 | end存在、exit=0；PID已退出 |
+| nohup | 3 | 0.225 | PID存活、start存在 | end存在、exit=0；PID已退出 |
+| foreground | 1 | 20.203 | 前台阻塞 | end存在、exit=0；脚本完成后返回 |
+| foreground | 2 | 20.287 | 前台阻塞 | end存在、exit=0；脚本完成后返回 |
+| foreground | 3 | 20.279 | 前台阻塞 | end存在、exit=0；脚本完成后返回 |
+
+setsid与nohup setsid均3/3正常完成；PID=PGID=SID，memory/devices/systemd cgroup仍为/system.slice/sdbd.service。**这些结果不支持“sdb退出必然杀死其子进程”的结论；上一轮负载消失的具体原因仍未证实。** 按PM决定，正式路径仍统一改为前台阻塞，不选用后台方式。全部探测文件SHA拉回核对后删除确切launch-probe目录；root恢复off、schedutil不变，pending=[]。
+
+### 9.2 实现与测试
+
+- launch现在使用前台`bash launch.sh`，sdb连接一直阻塞到完整round退出；脚本内部管理负载、遥测采样器和退出文件。Oracle/采集使用600秒负载预算，计时脚本含最长600秒温度门禁和600秒负载预算，整体1200秒；transport分别为预算+120秒。成功、异常退出、超时和SIGTERM均有清理路径。watchdog计时器使用自己新建的进程组，退出只停止该组及其负载组。
+- S6预先列明的技术失败由整个block最多重试一次，保留失败尝试及部分round原件；正确性、身份门禁不按技术失败重试。
+- host_artifact与run分开登记：主机来源tar、variants、workflow tools及新创建输入先登记后创建，核对主机原件SHA、远端SHA/符号链接与树成员后删除；未完成push的不同SHA不会被删除，保持pending。已存在的三份相同输入只读核验并复用，不取得其清理所有权。板上生成目录先verified-pull后删除；空目录也需远端前后清单一致。实验work父目录同样登记。
+- S4中断后的恢复先复验收据，再从封存的主机来源重新部署，不重新执行已完成S0–S3的负载。独立注入测试只暂时恢复主会话root/governor，借用已验证主变体，不取得其所有权；子实验的脚本/work独立登记。
+- 旧BASE变体与workflow工具目录已按attempt-04部署来源核对全部regular文件和符号链接后删除。旧脚本原文从e3b8409取证，未拿本轮修改后的脚本冒充旧原件；清理成功、root恢复off。
+- PM实现修正不计自身缺陷次数。新增14个合成测试，原114个保留，128项通过；14份脚本（含生成示例）bash --posix -n通过。测试包含前台阻塞成功、负载非零、超时、transport中断、采样器异常清理、整block重试一次、正确性不可重试、创建前登记、部分push失败、SHA/额外成员拒删、拒绝已有非本任务路径。
+
+### 9.3 自身缺陷修复记录（本轮上限3次）
+
+首个正式命令通过S0、BASE GBS退出0（177.342秒），首次PLAT/BBB前台脚本退出0，但S2因`oracle caps mismatch format`停止，完整失败收据与原文保留。
+
+1. 已登记BBB/ToS的caps是`I420,1280x720,30/1,progressive,1/1`简写，原解析器却对登记值要求GStreamer typed语法；实际原文为I420/1280/720/30/1/progressive/1/1，1800帧、2,488,320,000字节、SHA 3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814均吻合。修正仅解析两种表示，比较全部登记字段，保留raw_caps；格式/帧率/扫描方式/像素比例反例仍拒绝。
+2. capability文件生成时在已有末尾换行上再加换行，空行被严格的board sampler拒绝，原始遥测只有一个未闭合SAMPLE。修正生成器为恰好一个末尾换行，保留相同四个能力条目；不放宽采样器、频率/温度/电压或窗口判据。
+
+真实原文夹具分别证明旧代码失败、新代码通过。累计130测试通过。使用2/3次；未将这两项混入PM豁免。初次失败finally已恢复root off、schedutil、RPM1233，variants/tools/work全部核验清理，pending=[]。S0及后代收据按DAG归档失效，旧host-artifacts登记封存SHA后移除活动指针；同一job/同一命令启动修复后的第二次执行，BASE重建正常。
+
+
+### 9.4 最终停止点与验收表
+
+修复后第二次执行S0、S1、S2通过：三个输入PLAT/BASE共六份oracle均与登记的帧数、字节数、SHA和caps一致，BASE的加载库核对通过。S2前台启动缺口已跨真实负载验证。
+
+**停在S3身份门禁，workflow退出3：`no decoder loaded-library evidence`。** train-1的perf record与三份导出退出0，EOS完整，perf.data约1.328MB；拉回清单SHA逐项一致。保存的30份maps快照全部属于PID20061的`bash …/watchdog.sh 600 …perf record…`，没有任何一份包含libavcodec/libavutil。原件与逐份SHA、cmdline见`maps-gate-failure.json`。观察器当时没有保存子进程枚举读取结果，无法仅凭现有证据确定为何只遍历根进程。
+
+不能拿之前的oracle maps、预设LD_LIBRARY_PATH或采集成功替代本次解码进程身份核查。此处属于证据缺失，原文不能证明门禁条件已成立，因此不作为第三次自动修复放行，也未重采或替换原件。未执行profgen转换或查看sample profile。一个训练原件完整保留，但正式接受训练RUN为0/3。
+
+| 验收项 | 本轮结论 |
+|---|---|
+| 启动探测、前台负载 | 9次探测通过；真实oracle及首次训练负载前台退出0 |
+| S0身份、工具、cycles、三输入SHA | 通过，两次执行均有收据 |
+| S1 BASE构建与冻结108包、成对build-id | 两次构建退出0，构建后核对通过 |
+| S2三个输入PLAT/BASE oracle | 修复后六项全部通过 |
+| S3训练及加载库身份 | train-1采集/导出成功，但缺decoder maps证据；停止，不接受 |
+| S4转换、锁定profile | 未到达；未产生新sample profile |
+| S3后S4 SIGTERM恢复 | 未到达，不计前述正常失败finally为此测试通过 |
+| BASE-r、AFDO、build-lock三项、consumption | 未到达 |
+| 独立1block中断清理测试 | 未到达 |
+| 预试、预登记、正式计时、S7报告 | 未到达 |
+
+| 比较 | 估计 | 95% CI | 判定 |
+|---|---|---|---|
+| ToS（primary） | 未计算 | 未计算 | 未测量 |
+| Sintel（secondary） | 未计算 | 未计算 | 未测量 |
+
+普通失败finally清理现场核验通过，但不代替两项指定的中断验收。最终uid5001/root off、policy0=schedutil、RPM1233，cleanup_pending=[]、errors=[]。本实验work、BASE variant及workflow tools目录均确认不存在；三个既有输入与通用perf/libLLVM不属于本轮新增物，保留。两个driver service均MainPID=0、failed终态（退出2、3），没有本任务负载残留。
+
+只读重试1次：PLAT/BBB control SHA清单首读没有退出码标记；重试的正文完全一致且真实退出码0后继续，原始stdout/stderr/时间全部保留。状态改动命令未重试，未kill-server或操作另一设备。
+
+### 9.5 构建资源、清理与边界
+
+每次构建均记录本实验本轮16GiB启动内存门槛豁免；load<12（20核）、磁盘≥50GiB保留，运行中6G/5G/200%、-j2/threads1、nice19/ionice-c3与60秒记录不变。
+
+| BASE执行 | 启动MemAvailable B | load1 | 启动磁盘可用 B | 等待秒 | GBS秒 | 退出 | memory.peak B |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 10175823872 | 3.015625 | 111838666752 | 0.108 | 177.342 | 0 | 1531699200 |
+| 2 | 10178826240 | 4.32666015625 | 110067023872 | 0.134 | 271.503 | 0 | 1152229376 |
+
+两个driver墙钟分别322.942、1022.465秒，合计1345.407秒；GBS合计448.844秒。driver实读峰值230,383,616B，M1最低采样MemAvailable 9,229,725,696B；所有构建memory.events的high/max/oom/oom_kill均0，无资源停止或重试。普通scope测试130项通过；清理核查只保存了运行中观测峰值，最终峰值缺口在磁盘报告中明示，不以M1峰值冒充全任务峰值。
+
+[磁盘第三轮](../../maintenance/disk_cleanup_2026-11-17.md)已在构建前结束：删除三个干净361624源码工作树，分配块合计7,792,844,800B；可用空间104,390,893,568→111,846,215,680B。18个chroot因sudo -n不可用尚未删除；RPM与日志保留证据、待用户执行的确切路径脚本及SHA见该报告。后续M1构建自身占用不计为清理收益。
+
+本轮自身缺陷计数2/3；PM授权启动/清理修正不计数。没有改变设计v0.3、补丁、门槛、hq、Gerrit或既有证据；不安装软件、不触碰其他构建/其他项目。项目文件均写WORKDIR；板上文件只写/opt/afdo_agent，root/governor按授权操作并恢复。系统命令读取/proc、/sys、systemd/dbus运行元数据属于资源及状态核查；systemd/sdb自身的系统服务元数据或日志由系统维护，未对系统外部文件逐一作写入审计，不能声称完全无系统侧写入。首个cwd只读探测未套资源scope，其余主机任务按nice/ionice与scope/service限制执行。
+
+证据：[本轮运行索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-05/run-index.json)、[启动探测及遗留清理](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-05/launch-probe/index.json)。大原件保留`temp/m1-ffmpeg-rpi4-thumb-01/attempt-05/`；未删除旧attempt。ALL-END，停止等待对解码进程枚举/身份取证缺口的处理决定，不进入后续测量。

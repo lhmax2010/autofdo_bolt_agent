@@ -60,12 +60,12 @@ class Cleanup:
         self.data=json_load(path) if self.path.exists() else dict(identity=identity,cleanup_pending=[])
         require(self.data['identity']==identity,'board changed before restore','identity',3)
     def register(self,action):
-        require(action.get('kind') in ['root','governor','process','run'],'unknown cleanup action')
+        require(action.get('kind') in ['root','governor','process','run','host_artifact'],'unknown cleanup action')
         self.data['cleanup_pending'].append(action);save(self.path,self.data)
     def restore(self,actual_identity,undo):
         require(actual_identity==self.identity,'restore identity mismatch','identity',3)
         errors=[]
-        ordered=sorted(reversed(self.data['cleanup_pending']),key=lambda a:{'process':0,'run':1,'governor':2,'root':3}[a['kind']])
+        ordered=sorted(reversed(self.data['cleanup_pending']),key=lambda a:{'process':0,'run':2,'host_artifact':1,'governor':3,'root':4}[a['kind']])
         for action in ordered:
             try:
                 undo(action)
@@ -74,10 +74,10 @@ class Cleanup:
             except Exception as e: errors.append(str(e))
         return errors
 
-def verified_pull(receipt,local_root,manifest,remote_dir):
+def verified_pull(receipt,local_root,manifest,remote_dir,verified_empty=False):
     root=Path(local_root).resolve()
     require(remote_dir.startswith('/opt/afdo_agent/work/') and '..' not in Path(remote_dir).parts,'unsafe remote delete')
-    require(manifest,'empty pull manifest')
+    require(manifest or verified_empty,'empty pull manifest')
     for rel,digest in manifest.items():
         p=(root/rel).resolve();require(p.is_relative_to(root) and p.is_file() and sha256(p)==digest,'pull verification failed: '+rel)
     save(receipt,dict(status='verified',remote_dir=remote_dir,local_root=str(root),files=manifest))
