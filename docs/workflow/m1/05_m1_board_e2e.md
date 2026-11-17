@@ -579,7 +579,7 @@ PM明确：上一轮0.5秒上限并非设计v0.3门禁，本轮作废；旧记�
 
 `self.transporself.push_owned`已修正为`self.push_owned`；新增不连板的合成路径测试，实际执行独立injected_run的脚本/能力/manifest部署调用与会话finally。运行前150项测试通过：原规则测试按PM新门槛更新，新增实际attempt-06全量身份复验（26份成功快照、最大1.16秒，通过新规则）、根进程/外部库/单份快照拒绝、>5秒技术失败、有限递增时间、SHA只计算一次及注入路径测试。
 
-本轮PM授权修正不计自身缺陷次数；继承上轮停止信号修复1/3。新attempt-07使用相同实验ID、输入、冻结仓库、策略和种子；新source/output隔离目录，代码变更从S0开始。当前实验本轮继续豁免16GiB构建启动门槛，load/磁盘/运行中保护不变。运行记录将在收尾补齐。
+本轮PM授权修正不计自身缺陷次数；继承上轮停止信号修复1/3。新attempt-07使用相同实验ID、输入、冻结仓库、策略和种子；新source/output隔离目录，代码变更从S0开始。当前实验本轮继续豁免16GiB构建启动门槛，load/磁盘/运行中保护不变。完整收尾见11.3–11.7。
 
 
 ### 11.2 attempt-07：观察器通过、S4真实恢复通过，S5记录来源缺陷
@@ -591,3 +591,97 @@ S4实际运行时SIGTERM：第一次run退出143，`StopRequested`未被吞掉�
 BASE、BASE-r、AFDO三个GBS均退出0，墙钟129.919/122.747/119.783秒。两套build-lock均通过。S5在consumption停止：libavcodec/libavutil分别有1947/62条正数AppliedSamples，实际目标源码311/97条Clang命令都带准确sample-use，但程序把合并进ELF的3条GNU支持库producer记录也当成目标源码命令，误报missing sample-use。冻结root的libgcc.a与crtbeginS.o/crtendS.o原始readelf记录逐字证明其来源（`attempt-07/consumption-diagnosis/`）。两个目标.text已变化、chroot profile SHA正确；失败原件不改。
 
 按用户自身缺陷规则本轮使用第2/3次（继承上轮1/3）：保持build-lock全部记录不变；消费检查将实际`-c/-o`目标源码命令与有冻结依赖原文证明的GNU/libgcc记录分开。未知记录仍拒绝，目标源码缺sample-use仍拒绝。真实失败先复现，新增来源缺失、错误目标、源码缺选项不可被排除等测试；总155项通过。修复后新attempt-08使用同一实验配置，从S0重做，未改设计/阈值/补丁/spec。attempt-07结束总墙钟2047.209秒，恢复无错误；没有计时结果，注入计时清理测试尚未到达。
+
+### 11.3 attempt-08：S0–S5与恢复验收，S6拉回失败停止
+
+**M1未完成；停止，不再启动负载或修改代码。** 本轮代码与attempt-07检查点已提交并推送 `5b4af659819776c9b4132325626486ee835dba31`。attempt-08使用同一job配置、不同输出目录，由单条 `python3 -m afdo_wf run --job <attempt-08/job.json>` 调度；S4中断后重复同一命令。原始命令、运行/恢复日志和文件SHA见 [attempt-08证据索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-08/run-index.json)，下文证据路径均相对该索引的 `run/`（大原件位于同结构temp目录，由raw-index定位）。运行代码的最终SHA复核全相同，见 `code-sha-final-check.json`。
+
+| 验收项 | 本轮结果 | 证据 |
+|---|---|---|
+| S0身份、硬件cycles、输入SHA、能力清单 | 通过；RPi4 Model B Rev1.5，armv7l，6.12.80-arm-rpi4-v7l，TZ_BUILD_ID=tizen-unified-toolchain_20261104.160709；仅操作192.168.108.26:26101 | formal/stages/preflight/001/、host-artifacts/transport索引 |
+| S1 BASE构建与S2部署/PLAT oracle | 通过；冻结108包，三个输入PLAT/BASE输出一致 | formal/stages/build/001/、formal/stages/deploy/001/ |
+| S3训练与maps/build-id | 3/3通过；唯一解码器、重复完整快照、正确部署DSO，perf build-id交叉证据通过 | formal/stages/collect/001/train-{1,2,3}/ |
+| S4真实SIGTERM、收据恢复 | 通过；第一次退出143，StopRequested未被subprocess吞掉；恢复复用S0–S3，convert/002重新转换 | recovery-interruption.json、recovery-verification.json、workflow-run-{1,2}.log |
+| S5 build-lock与BASE-r | 两套三项门禁通过；BASE-r产物逐字节相同，选BASE作对照 | formal/stages/rebuild/001/buildlock.json、result.json |
+| 两目标consumption | verified；libavcodec/libavutil正数AppliedSamples记录1966/54，目标源码命令311/97、chroot profile SHA、.text差异通过 | formal/stages/rebuild/001/consumption.json、consumption-provenance-summary.json |
+| 计时前正确性 | BASE/AFDO × BBB/ToS/Sintel六项通过，和PLAT oracle一致 | formal/stages/measure/001/pre-*-oracle.json |
+| 独立1 block计时中断清理 | 通过；在独立cleanup-test的watchdog/perf运行中SIGTERM，finally清理、root/governor恢复、pending/errors均空 | formal/stages/measure/001/injected-job/injection-active.json、final-1794918640181146896.json、injection-driver.log |
+| ToS预登记/正式测量 | 10次BASE预试、4次预热完成；正式2/10 block完整，第3个block首轮拉回失败 | formal/stages/measure/001/tos-720p-60-plan*.json、rounds.json、tos-720p-60-blocks.json、failure.json |
+| 全部计时进程maps门禁 | 已接收4个正式round全部通过；第3 block未完成拉回，未作为通过/有效数据计入 | 各formal-*/maps/decoder-check.json、stop-summary.json |
+| Sintel测量、计时后正确性、敏感性/失衡终判 | 未到达；Sintel的计时前正确性通过不等于测量通过 | measure失败收据 |
+| S7 report.json/report.md | 未生成；本节为停止报告，不是完整S7验收报告 | service-final.txt、driver-end.json |
+
+S4中断时间为epoch 1794917093.0250928；第一次finally文件 `formal/final-1794917168597233604.json` 记录uid5001、schedutil、RPM1233、cleanup_pending/errors为空。collect收据SHA `24edc588b87c3dc106fe85f476e125688cef333b4cefbc485f7448c9d1f2d0ea` 在恢复前后不变；preflight/build/deploy/collect各仅001，转换失败原件001保留、成功结果002。继承的StopRequested修正在本轮两次真实S4中断均按143退出并执行清理。
+
+独立计时注入在epoch 1794918558.536644记录watchdog16494/perf16496，SIGTERM与最终恢复证据分别保存；不含正式结果，未替换正式block。它证明本轮拼写修正实际走到了该路径。此成功不掩盖下述正式拉回失败时的清理日志缺口。
+
+### 11.4 实际观察器间隔、转换与profile披露
+
+| 训练RUN | 完整must-load快照 | 起点样本数 | 最小/中位/最大间隔（秒） | 唯一SHA三元组/实际SHA调用 |
+|---|---:|---:|---|---|
+| train-1 | 57 | 64 | 0.29/0.50/0.74 | 8/8 |
+| train-2 | 56 | 63 | 0.29/0.50/0.78 | 8/8 |
+| train-3 | 57 | 64 | 0.29/0.50/0.69 | 8/8 |
+
+已验收的训练、ToS预试、预热与4个正式round共21份decoder-check，采样间隔全局最小0.26秒、最大0.94秒；各轮中位数0.49–0.50秒（逐项原值见stop-summary），均无>5秒。每轮均8个唯一三元组、8次SHA调用。最后未接受的第3 block不在这个统计内，不以回收原件补判身份或计时有效。
+
+六次转换退出0，conversion=ok、identity=verified；三个可选质量门槛未设置，sampling_adequacy=unknown，不称质量矩阵已通过。跨DSO顶层键冲突为空，合并锁定profile SHA：`a5b867326dcf0c6dc85a4899034812e3f986e3855d063d47ab4be6e2a0d0a4b2`。
+
+| RUN/DSO | 目标样本 | usable | in_func_no_line | outside_dwarf_func | unmapped_in_target |
+|---|---:|---:|---:|---:|---:|
+| train-1-libavcodec | 40296 | 23939 | 4296 | 12061 | 0 |
+| train-1-libavutil | 113 | 93 | 5 | 15 | 0 |
+| train-2-libavcodec | 40376 | 23977 | 4204 | 12195 | 0 |
+| train-2-libavutil | 116 | 90 | 10 | 16 | 0 |
+| train-3-libavcodec | 40459 | 23824 | 4241 | 12394 | 0 |
+| train-3-libavutil | 118 | 88 | 10 | 20 | 0 |
+
+outside_dwarf_func的no_cu/in_cu_no_subprogram/plt子项详见stop-summary与原quality；它们不是额外互斥顶层桶，不能重复求和。本轮未计算5.8质量指标。
+
+Q.5第17项披露：attempt-07/08的本次FFmpeg训练perf script各3份，用于各DSO显式max/none/none/none、period=1000003转换及消费构建；convert/001为中断尝试、convert/002各6份成功profile及一个锁定合并profile，文件路径、SHA、命令/时间与用途保存在各convert目录的披露/命令记录与raw-index。既有正式质量评估sample profile未打开；本次训练profile已生成、查看质量JSON并用于AFDO重建，将来登记须保留此披露。锁定profile不进Git，大原件只留temp。
+
+### 11.5 ToS未完成数据与停止原因
+
+ToS BASE十次预试墙钟：33.348、33.348、33.497、33.605、33.448、33.701、33.405、33.316、33.382、33.690秒；CV=0.4300324582%，锁定N=10。4轮clean、6轮telemetry_missing（missing window edge）；保持原标签，未补点、删轮或替换。计划于epoch1794920963.8707333写入，先于预热与正式计时，order_seed=2026111701，bootstrap_seed=2026111702，epsilon=1%，每变体预热2轮；主比较ToS，Sintel次要且不做多重比较校正。
+
+| 已完成block | BASE秒 | AFDO秒 | BASE标签 | AFDO标签 |
+|---|---:|---:|---|---|
+| 1 | 33.352 | 32.775 | telemetry_missing | telemetry_missing |
+| 2 | 33.480 | 32.780 | clean | telemetry_missing |
+
+**ToS：inconclusive (incomplete)，估计与CI为null；Sintel：未开始，估计/CI/判定均无。** 只展示已完成原值，不以2个block计算完整N计划的结论。20%/标记失衡与敏感性终判未执行；不把不完整数据包装成faster/slower。计时后oracle未到达，旧手动试跑−2.565%不作为此次自动化结果。
+
+第3 block首个BASE round的SDB拉回客户端退出 **-13（SIGPIPE）**：`formal/transport-1794917170396570931/000487.json`，epoch1794922882.077030至1794922936.5084164。stderr空，stdout只有部分文件复制进度。现有证据不能确定网络断连或SIGPIPE根因。负载产生物保留，不把本轮认定有效，也未启动第二次block或Sintel。
+
+当前SDB.pull非零退出沿普通GateError退出，未归入TechnicalFailure，因此没有执行设计§8.3的整block一次技术重试。**这是尚未闭合的错误分类/恢复实现缺口，不是重试已通过。** 本轮未以自身缺陷规则绕过板上操作失败，没有继续改代码重跑；需PM处理。自身缺陷累计2/3（上轮StopRequested 1次，本轮消费来源判据实现1次）；PM观察器与拼写授权修正不计次数。
+
+### 11.6 失败原件保全与最终恢复
+
+最终自动finally文件 `formal/final-1794923529579839541.json` 记录root off/uid5001、schedutil、RPM1233；只读重试0。**cleanup_pending仍为2，errors为2**：`unverified run has no cleanup metadata`、`pull destination already exists`。它们均对应第3 block部分拉回目录：一条重复登记缺元数据，另一条因本地部分拉回目录已存在而拒绝。原final、cleanup.json和失败收据未改写，不称自动清理日志闭合。
+
+随后自动父目录兜底拉回成功：`formal/remaining-work-1794917175605086440.pull.json`，3152文件全部属于失败round，板上/本机SHA一致后才删除父work确切目录；收据SHA `99e10f3c7ca797371a5834906b1ff2424d06739067a8d68cfe14b45af0812208`。父目录拉回已保全完整原件，但子目录待办未随父目录删除核销。
+
+停止后独立只读核对（`post-stop-readonly/`、`post-stop-reconciliation.json`）逐文件再验这3152份本地原件，全部一致；确认实验work、失败round子目录、BASE/AFDO variants、专用workflow tools、cleanup-test work/tools七个确切路径均不存在；身份未变、uid5001、schedutil、RPM1233。没有再次删除、重试负载或修改原journal。**板上物理目录清理得到独立证据，自动收据仍有2条过期待办；两者分别报告。** 通用perf/libLLVM/三个输入按原计划保留，不声称板上整个afdo目录为空。
+
+服务已结束（ExecMainStatus=2、ActiveState/ SubState=failed），不是后台继续运行；结束记录为driver-end.json及ALL-END.log。本次失败未达到M1全验收。
+
+### 11.7 资源、等待、边界与封存
+
+各构建仍使用6G/5G/200%、nice19/ionice-c3、-j2、threads1串行，只有本实验本轮的启动MemAvailable≥16GiB条件豁免；load<12（20CPU）和磁盘≥50GiB检查均通过。全部启动资源为实读，不从豁免推断可无限用内存。
+
+| attempt/构建 | 退出 | 墙钟秒 | 等待秒 | 启动MemAvailable B | load1 | 启动可用磁盘B | cgroup peak B |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| attempt-07/BASE | 0 | 129.919 | 0.066 | 17449410560 | 1.659 | 241765801984 | 2140409856 |
+| attempt-07/AFDO | 0 | 119.783 | 0.041 | 19764240384 | 2.627 | 232043118592 | 1854152704 |
+| attempt-07/BASE-r | 0 | 122.747 | 0.054 | 19530309632 | 2.244 | 233560002560 | 1904500736 |
+| attempt-08/BASE | 0 | 133.656 | 0.041 | 19124776960 | 2.896 | 229983764480 | 2054737920 |
+| attempt-08/AFDO | 0 | 226.342 | 0.087 | 18964172800 | 3.566 | 219005349888 | 1661124608 |
+| attempt-08/BASE-r | 0 | 338.967 | 0.056 | 18792701952 | 2.831 | 220951310336 | 1940631552 |
+
+六次GBS合计1071.415秒，high/max/oom/oom_kill均0，没有资源停止/重试。attempt-07 driver墙钟2047.209秒，attempt-08为8345.505秒，合计10392.714秒（2小时53分12.7秒；不含阶段间代码修改、报告封存时间）。长期driver采样最低MemAvailable **15,040,495,616B（14.008GiB）**；构建峰值 **2,140,409,856B（1.993GiB）**；driver峰值 **778,166,272B**，最低可用磁盘210,372,747,264B。每60秒原始meminfo与cgroup采样、各构建启动/结束在driver-resources与execution资源记录；短诊断/测试/收尾scope没有完整峰值封存，不把长期采样峰值宣称整轮所有进程绝对峰值。
+
+运行期间不改设计v0.3、hq、Gerrit、既有原件或补丁/spec；未安装软件、不kill sdb服务、不碰.13与其他构建。板上仅本实验/授权afdo目录的文件操作，加已授权root/governor临时切换；finally恢复原状态。主机产物都在WORKDIR；系统服务（SDB/systemd/GBS系统日志）的外部元数据写入未做全机审计，不能证明完全为零，未为审计而读取其他项目或修改系统状态。受保护config/及两GBS配置未读未动。本轮未增加磁盘清理操作。
+
+证据封存：小文件及分片全部<1MB；raw-index对已有verified-pull的原始maps明确标注sha256_basis=verified_pull_receipt及收据SHA，其余与入库小文件重新计算SHA。仅终止并重启过本轮归档辅助脚本以避免重复磁盘读取（第一次退出143），未重启正式workflow；原件不改。原perf/profile/RPM/maps大集合留temp，由run-index→manifest-sha/copied-index/raw-index给出SHA。成功结果、失败原件、中断收据、父目录保全及后续只读核验并存。本轮停止，待PM决定SDB拉回技术失败分类与清理收据核销后再授权恢复；不自行补测或放宽条件。
+
+封存核对通过：74,334项原件索引，其中69,127项引用23份verified-pull收据、5,207项归档时重算；归档含1,231份小文件副本及47份transport分片。导出文件1,409个、83,056,038字节（不含随后写入的核对记录），全部<1MB；所有入库文件SHA与清单一致。见 [export-validation.json](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-08/export-validation.json)。

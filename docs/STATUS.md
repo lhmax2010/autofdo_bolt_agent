@@ -40,13 +40,14 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
-## Workflow M1：观察器新判据已验收，attempt-08测量预试进行中（2026-11-17任务）
+## Workflow M1：观察器/恢复通过，attempt-08在SDB拉回失败后停止（2026-11-17任务）
 
-- PM撤销旧0.5秒硬断言；共同判据改为唯一解码器、至少两份完整must-load快照、全快照deploy-set身份一致、有限递增时间且间隔≤5秒。SHA按(path,dev,inode)一次缓存，注入路径拼写已修正。150项初始测试通过，attempt-06真实证据按新判据通过，原件不改。
-- [报告第11节](workflow/m1/05_m1_board_e2e.md)：attempt-07三次训练身份通过，S4实际SIGTERM退出143并完整恢复，同命令复用S0–S3。BASE/BASE-r/AFDO均构建成功，build-lock通过；consumption误把冻结支持库GNU producer记录当成目标源码命令而停止，失败证据保留于[attempt-07索引](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-07/run-index.json)。
-- 自身缺陷第2/3次（继承上一轮1/3）：用libgcc/crt原始记录证明来源，只在消费检查中区分支持库记录与目标源码命令；build-lock仍比较全部记录，未知记录或目标源码缺sample-use仍拒绝。155项测试通过，未改设计/门槛/补丁/spec。
-- 新attempt-08从S0重做：三输入PLAT/BASE一致，三次训练观察间隔最大0.74/0.78/0.69秒；S4真实中断清理与同命令恢复再次通过。六次转换锁定profile `a5b867326dcf0c6dc85a4899034812e3f986e3855d063d47ab4be6e2a0d0a4b2`。S5两套build-lock及离线重建通过，选择BASE；两目标AppliedSamples正数记录1966/54，消费verified。独立1block中断清理通过，最终uid5001/schedutil/RPM1233、pending/errors为空后继续正式会话。
-- **进行中，非M1完成结论**：当前ToS BASE预试5/10完成，正式block为0，Sintel比较未开始。attempt-08原件保留在 `temp/m1-ffmpeg-rpi4-thumb-01/attempt-08/`；本检查点尚未封存活动证据。实际结果与最终恢复须后续收尾补齐。仅本实验本轮豁免GBS启动16GiB；load/磁盘/运行保护保留，不操作其他设备、hq或Gerrit。
+- [报告第11节](workflow/m1/05_m1_board_e2e.md)：PM新观察器判据、SHA三元组一次缓存与注入路径修正完成；实际attempt-06夹具通过。最终155项测试与15脚本语法检查通过。代码/attempt-07检查点已推送 `5b4af659819776c9b4132325626486ee835dba31`。
+- 自身缺陷累计2/3：继承StopRequested修复1次，本轮以冻结libgcc/crt原文修复consumption目标源码/支持库记录混淆1次；build-lock仍比较全部记录，未改设计、门槛、patch/spec。[attempt-07证据](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-07/run-index.json)保留原失败。
+- attempt-08 S0–S5通过：训练3/3，间隔最大0.74/0.78/0.69秒、每轮8个唯一DSO身份仅8次SHA；六次转换identity verified，锁定profile `a5b867326dcf0c6dc85a4899034812e3f986e3855d063d47ab4be6e2a0d0a4b2`。BASE-r逐字节相同，选BASE；两套build-lock通过，两目标AppliedSamples正数记录1966/54。三输入PLAT/BASE及计时前BASE/AFDO oracle一致。
+- S4真实SIGTERM退出143且恢复完成，同命令复用S0–S3、从S4继续；独立1block计时中断清理通过。**正式ToS仅2/10 block完整，第3 block拉回客户端-13(SIGPIPE)后退出2停止；inconclusive (incomplete)，无估计/CI。Sintel测量未开始、计时后oracle与S7未到达，M1未完成。** 未归入TechnicalFailure导致没有整block一次重试，分类缺口保留待PM处理，未修改代码继续运行。
+- 自动finally恢复uid5001/root off、schedutil、RPM1233，但raw cleanup_pending/errors各2（部分拉回目录与重复登记）。父work的3152文件已完整verified-pull后删除；[停止后只读核查](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-08/run/post-stop-reconciliation.json)再次核SHA并确认work、BASE/AFDO variants、专用tools、注入测试目录均不存在。物理清理已证实；原journal两条过期待办不改写，不能称自动清理完全通过。
+- 六次GBS均0、合计1071.415秒；两attempt driver合计10392.714秒。最低采样MemAvailable15,040,495,616B，构建峰值2,140,409,856B，driver峰值778,166,272B；high/max/oom全0，无资源终止。各构建启动资源/等待见报告；16GiB豁免仅本轮，其他保护保留。服务已结束，ALL-END。[attempt-08封存索引](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-08/run-index.json)。不改hq/Gerrit/设计，不操作.13；待PM指令。
 
 ## Workflow M1第三阶段attempt-06：进程树捕获通过，采样间隔超限停止（2026-11-17任务）
 
