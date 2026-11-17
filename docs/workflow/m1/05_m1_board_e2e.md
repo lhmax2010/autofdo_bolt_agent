@@ -778,3 +778,13 @@ Q.5第17项披露：本轮新采集3份BBB训练perf script，按两个DSO生成
 
 
 封存核对：19542项原件索引、916份小文件副本、5份transport分片；956个清单文件共27907313字节，全部<1MB，副本与来源SHA复核通过（export-validation.json）。提交前发现遗留空index.lock，复查无本仓库Git进程与可见持有者后移入attempt-09/stale-index.lock保留，见独立记录；没有删除其他工作线文件。
+
+### 12.6 共享Git索引与同步补记（用户后续指令）
+
+用户确认K0会话也在本仓库工作，并指定新的锁流程：按ps及/proc/PID/cwd检查WORKDIR内Git；有进程先等待；无进程且空锁mtime经间隔5分钟复查仍未变化才删除，随后git status；提交前先git pull --rebase。
+
+如实区分时序：本轮此前空锁已在epoch1794932762移到temp/m1-ffmpeg-rpi4-thumb-01/attempt-09/stale-index.lock留证，当时没有执行后来指定的“5分钟间隔复查”，不声称符合该新增流程。此次复查epoch1794935212已无锁、无WORKDIR内Git进程，所以未再删除任何锁。此前dc59c88推送因远端前进被拒，原输出保留。
+
+按授权pull --rebase取得K0提交1b096d2后，21个同名未跟踪文件阻挡checkout；逐字节比较全部等于远端，先移到本轮git-reconcile/kernel-autofdo-preserved留存，Git随后从远端恢复的21文件SHA全部相同。STATUS暂存于有名stash和本轮快照，仅解决相邻新增段冲突，保留K0远端记录与M1段。M1提交rebase为92ecc97b2d9b6d57ca7d3170a977e9ccd4a4b999，原代码/测试/证据内容不变。未提交的K0设计状态段恢复在工作区、不纳入本次提交；对应未跟踪设计文件及config/、gbs_gcc.conf、gbs_llvm.conf未读未改。保留stash与temp副本供并行会话核对。
+
+本次只做Git同步与文档登记。真实温度停止条件仍有效，没有恢复M1负载或追加测量。检查、SHA对照、rebase与推送输出位于temp/m1-ffmpeg-rpi4-thumb-01/attempt-09/git-reconcile/。
