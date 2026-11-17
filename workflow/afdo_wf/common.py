@@ -6,6 +6,13 @@ import os
 from pathlib import Path
 import tempfile
 
+class StopRequested(BaseException):
+    """A control-flow stop, never an OSError/EINTR that I/O may retry."""
+    def __init__(self, signum):
+        super().__init__('signal '+str(signum))
+        self.code=128+signum
+        self.reason='interrupted'
+
 class GateError(ValueError):
     def __init__(self, message, reason='gate', code=2):
         super().__init__(message)

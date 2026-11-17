@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "sdb",
+    "-s",
+    "192.168.108.26:26101",
+    "shell",
+    "( if test -f /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/control-train-2/pid; then p=$(cat /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/control-train-2/pid); case \"$p\" in ''|*[!0-9]*) exit 2;; esac; if test -r /proc/$p/cmdline; then tr '\\000' ' ' < /proc/$p/cmdline | grep -F -- /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/control-train-2/launch.sh >/dev/null || exit 3; kill -TERM -- $p; i=0; while kill -0 \"$p\" 2>/dev/null; do sleep 1; i=$((i+1)); test \"$i\" -lt 15 || exit 4; done; fi; fi ); _wf_rc=$?; printf '\n__WF_RC_694e3a5a34a143788f0f6b5f5ec0ca26__%s\n' \"$_wf_rc\""
+  ],
+  "end": 1794909528.4799159,
+  "exit_code": 0,
+  "start": 1794909528.3525631
+}

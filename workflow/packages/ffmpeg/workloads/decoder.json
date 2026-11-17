@@ -1,0 +1,20 @@
+{
+  "executable": "gst-launch-1.0",
+  "argv": [
+    "-e",
+    "filesrc",
+    "location={input}",
+    "!",
+    "qtdemux",
+    "!",
+    "h264parse",
+    "!",
+    "avdec_h264",
+    "max-threads=1",
+    "!",
+    "video/x-raw,format=I420",
+    "!",
+    "fakesink",
+    "sync=false"
+  ]
+}

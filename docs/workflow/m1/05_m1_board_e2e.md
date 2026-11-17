@@ -487,3 +487,83 @@ setsid与nohup setsid均3/3正常完成；PID=PGID=SID，memory/devices/systemd 
 本轮自身缺陷计数2/3；PM授权启动/清理修正不计数。没有改变设计v0.3、补丁、门槛、hq、Gerrit或既有证据；不安装软件、不触碰其他构建/其他项目。项目文件均写WORKDIR；板上文件只写/opt/afdo_agent，root/governor按授权操作并恢复。系统命令读取/proc、/sys、systemd/dbus运行元数据属于资源及状态核查；systemd/sdb自身的系统服务元数据或日志由系统维护，未对系统外部文件逐一作写入审计，不能声称完全无系统侧写入。首个cwd只读探测未套资源scope，其余主机任务按nice/ionice与scope/service限制执行。
 
 证据：[本轮运行索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-05/run-index.json)、[启动探测及遗留清理](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-05/launch-probe/index.json)。大原件保留`temp/m1-ffmpeg-rpi4-thumb-01/attempt-05/`；未删除旧attempt。ALL-END，停止等待对解码进程枚举/身份取证缺口的处理决定，不进入后续测量。
+
+
+## 10. 完整进程树观察与 attempt-06：间隔超限停止（2026-11-17任务）
+
+### 10.1 范围、实现与测试
+
+本轮 PM 授权修正 S3/S6 观察器，不占自身缺陷计数；设计 v0.3、hq、Gerrit 与旧证据不改。仅操作 RPi4 `192.168.108.26:26101`，身份仍为 Raspberry Pi 4 Model B Rev 1.5 / armv7l / `6.12.80-arm-rpi4-v7l` / `tizen-unified-toolchain_20261104.160709`。未操作 `.13`。
+
+旧 `observe_maps.sh` 依赖 `/proc/<pid>/task/<pid>/children`，sleep 为1秒；新 `proc_tree.sh` 从 `/proc/*/stat` 提取 PPID，并计算根PID的完整后代闭包，不依赖 pgrep 或 children 文件。stat 的 comm 按最后一个右括号切分，保留 PID、PPID、PGID、SID、starttime；每次保存完整枚举表、选中表与采样时间。每个后代保存 stat/comm/cmdline/maps、结束时 stat 与 complete 标志；读取失败原文保留，PID复用或未完成快照不作为成功证据。
+
+解码进程规则由 `workflow/packages/ffmpeg/workloads/decoder.json` 声明：可执行名与完整 argv（本 round 输入路径替换）精确匹配，不在通用判定逻辑中硬编码 gst-launch。S3/S6 共用 `board.decoder_maps`：唯一 PID/starttime、完整快照、全部 must-load、deploy-set 路径与 SHA。动态加载初期尚未包含完整 must-load 的快照不计成功；任一已出现的部署 DSO 路径/SHA 不符即失败。PLAT oracle 仍按其自身系统库定义，其他 oracle 直接记录自身 gst 子进程。
+
+S3 增加 `check_perf_buildids`，两目标 build-id 必须与 S1 一致，但绝不代替 maps。workload JSON 纳入收据输入 SHA 链。
+
+运行前140项测试通过（原130项保留），12个board shell语法检查通过。新增10项覆盖三层树、短暂存在的解码进程单次快照、只见根进程、/usr误加载、多个候选、读取失败原文、错误管线、attempt-05全部30份真实maps、build-id交叉证据。attempt-05 cmdline从保留原件提取到 `workflow/tests/fixtures/attempt05-root-cmdlines.json`，逐条记录来源与SHA；旧结果仍被拒绝。第一次测试因cmdline原件不在Git导出目录而失败，原日志保留；修正夹具来源后通过，未改旧证据。
+
+**实际结果不满足本轮观察间隔要求。** 新循环虽设 `sleep .1`，但枚举、快照、逐路径 SHA 均串行发生在循环内，不能把 sleep 当作实际采样周期。停止后补上 `observer_cadence` 主机硬断言：时间必须有限且递增，每段间隔≤0.5秒，缺证据也拒绝。没有提高上限，没有重新采集。运行时版本与停止后版本分别由 `code-sha.json`、`final-code-sha.json`封存。
+
+### 10.2 单命令运行与真实观察结果
+
+新目录 `temp/m1-ffmpeg-rpi4-thumb-01/attempt-06/`，同一实验ID/job设置；仅隔离 source/output、更新本轮授权文字。源码独立clone、同一基线与patch；运行入口：
+
+```sh
+PYTHONPATH="$WORKDIR/workflow" python3 -m afdo_wf run --job "$WORKDIR/temp/m1-ffmpeg-rpi4-thumb-01/attempt-06/job.json"
+```
+
+实际独立systemd service与完整argv见 `launch-service.json`；所有主机命令 nice19/ionice-c3，控制任务3G/200%，GBS独立6G/MemoryHigh5G/200%、-j2、threads1。driver原计划在S3收据完成后、S4运行中SIGTERM再以同命令恢复；本轮未到达该触发点。
+
+S0、BASE构建、S2全部通过。108包冻结清单校验通过；完整候选/对照build-lock与BASE-r仍未执行。
+
+| 输入 | PLAT/BASE帧数 | 两侧输出SHA-256（相同） |
+|---|---:|---|
+| BBB | 1800 | `3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814` |
+| ToS | 1800 | `4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e` |
+| Sintel | 1440 | `91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193` |
+
+S3 train-1的采集/导出退出0，完整SHA拉回。真实树包含 watchdog Bash PID16762 → perf PID16764 → gst-launch PID16801，另有timer/sleep及短暂子进程，总计7个PID。唯一解码候选16801，26份完整快照通过完整管线与两目标库SHA/maps核对；5份其他进程读取失败快照保留原文，不计成功。build-id交叉证据：
+
+| 目标 | S1与perf buildid-list共同值 |
+|---|---|
+| libavcodec | `805376f248504d2084e3e95470810873ffc3655a` |
+| libavutil | `bb5b41f743b9b07bb38cc5007f7deb6516256579` |
+
+但32个采样起点的31个间隔中，**28段>0.5秒**；最小0.26秒、中位1.08秒、最大1.16秒。完整树捕获修复成立，观察器实时性验收失败；train-1不能接受。证据：`process-observation-summary.json`、原 `maps/samples.tsv` 与 `cadence-stop.json`。串行取证耗时是实现上可见的风险，但没有逐操作计时，不能把超时精确归因于某一个命令。后续须降低采样关键路径耗时并重新验收，不能仅进一步缩短sleep。
+
+### 10.3 停止缺陷、原件保全与恢复
+
+发现间隔超限后，对核实属于本job的run PID732068发送SIGTERM。原信号处理器抛 `InterruptedError`，在 subprocess communicate/select 等待中被当作可重试的中断，未退出；原文显示拉回后还执行了train-1正确性检查并短暂启动train-2。**这是停止处理失效的边界例外，不是授权追加训练，也不计成功。**
+
+随后再次核实PID命令行，只对本任务run发SIGKILL、对其自身SDB客户端发SIGTERM；未kill SDB服务、未停止其他进程/单元。driver记录子进程-9，服务ExecMainStatus247；本轮不是S4恢复测试通过。使用现有清理日志和身份核对执行手动restore。
+
+首次train-2拉回期间，`collect.log` 与 `perf.data` 的SHA发生变化，按原门禁不接受该单独拉回、不直接删除该目录，原错误和前后清单保留。随后父work目录完整拉回并核对，收据包含206个文件，其中204个属于train-2；主机再次逐个SHA核对通过，父目录才按收据删除。原train-2失败副本也保留。最后只读确认远端目录已不存在，以父目录verified收据为依据核销冗余子目录cleanup条目；没有盲目重试删除。见 `manual-restore-final.json`、`cleanup-pull-change.json`、`cleanup-pending-before-reconcile.json`、`cleanup-reconcile.json`。
+
+最终uid5001/root off、schedutil、RPM1233；work、BASE variant、workflow tools全部不存在，未发现遗留负载（ps匹配仅查询自身；随后按starttime核查两次训练捕获的13个PID，全部不存在，见final-pid-check.json）；通用工具与既有inputs保留；cleanup_pending=[]、最终reconcile errors=[]。首次restore错误仍保留，不能将其描述为自动finally清理一次通过。
+
+自身缺陷修复 **1/3**：停止后以合成子进程证明旧 `InterruptedError` 在communicate期间被吞后继续，而新的非OSError控制流异常 `StopRequested` 立即退出并执行finally。应用到live与board session，不改变门禁。另补0.5秒边界/超限测试；最终**143项测试通过**。未恢复正式实验。准备heredoc最初有缺括号的SyntaxError，未执行任何语句，修正后才启动；记录在 preparation-diagnostic.txt。
+
+### 10.4 M1验收与资源
+
+| 验收项 | 本轮结论 |
+|---|---|
+| S0身份/cycles/工具/输入SHA | 通过 |
+| S1 BASE及108包冻结核对 | 通过 |
+| 完整build-lock三项、BASE-r | 未到达 |
+| PLAT/BASE三个输入oracle | 六项通过；AFDO/计时后检查未到达 |
+| S3解码进程maps与build-id | train-1身份取证通过，但间隔超限，采集整体不接受 |
+| 有效训练 | 0/3；完整原件1份，中断原件1份 |
+| S4转换、锁定profile、S5 consumption | 未到达；新profile生成/打开0 |
+| S4 SIGTERM恢复、独立1block注入清理 | 未到达，不以本轮手动恢复替代 |
+| S6/S7 | 未到达 |
+| ToS估计/CI/判定 | 未测量 |
+| Sintel估计/CI/判定 | 未测量 |
+
+BASE构建墙钟140.946741秒、退出0，启动等待0.074606秒；启动MemAvailable9,929,777,152B、load1=1.7412109375（nproc20）、可用磁盘248,596,525,056B。仅本次实验豁免16GiB启动内存门槛，load<12与磁盘≥50GiB、运行中保护均保留。构建memory.peak=2,034,958,336B，最低MemAvailable9,855,733,760B；driver峰值229,380,096B。high/max/oom事件0，无资源性停止。driver墙钟1016.952434秒；手动restore另计46.829秒。运行前测试scope峰值33,546,240B；短命令及停止后测试的最终cgroup峰值未逐条封存，不宣称全会话全覆盖峰值。
+
+磁盘：只读核查原18路径全部已不存在，可用248,767,696,896B；本轮删除0，未执行sudo脚本，无额外清理。见清理报告第三轮后续小节。
+
+静态阅读另发现未到达的注入路径仍有 `self.transporself.push_owned` 拼写错误；本轮未执行或修改该路径，不宣称注入验收通过，后续需修复并测试。资源与平台状态仅按证据报告；系统工具自身的系统级元数据写入未作完整审计。未触碰受保护的三个untracked配置，未操作WORKDIR外项目、hq、Gerrit或设计。
+
+**本轮已结束：完整进程树可取证，0.5秒采样要求未通过。停止等待后续处理，不继续质量/性能推断。** 证据索引：[attempt-06](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-06/run-index.json)；实际相对位置为 `docs/workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-06/`，大原件留同名temp目录并记录SHA。

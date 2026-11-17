@@ -247,7 +247,7 @@ class BoardTests(Fixture):
             def root_state(self):return True
             def governors(self):return {}
             def undo(self,a):pass
-        with self.assertRaises(InterruptedError):
+        with self.assertRaises(board.StopRequested):
             with board.session(T(),{},self.d/'c'):signal.raise_signal(signal.SIGTERM)
     def test_watchdog_negative(self):
         # Host synthetic child only; no board commands or sysfs access.

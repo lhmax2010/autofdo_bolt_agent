@@ -40,6 +40,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow M1第三阶段attempt-06：进程树捕获通过，采样间隔超限停止（2026-11-17任务）
+
+- [M1报告第10节](workflow/m1/05_m1_board_e2e.md)：PM授权完整stat/PPID后代树、逐进程快照/错误原文、workload完整argv唯一匹配、S3/S6共用maps门禁与S3 build-id交叉检查。运行前140测试通过；停止后加入实测间隔硬断言与安全停止修正，最终143测试通过。
+- S0/S1/S2通过；BASE GBS退出0、140.947秒，108包一致；PLAT/BASE三个输入六项oracle通过。train-1捕获watchdog→perf→gst，唯一解码进程26份成功maps，两目标build-id匹配；但32起点/31间隔中28段>0.5秒（中位1.08、最大1.16），**观察频率失败，训练有效0/3，停止**。新profile0，S4/S5/S6/S7与指定恢复/注入测试均未到达；ToS/Sintel无估计、CI或判定。
+- 停止处理缺陷1/3：SIGTERM所抛InterruptedError被subprocess等待吞掉，额外启动了train-2；只终止核实的本任务run和SDB客户端，未kill服务。修正为StopRequested并以旧失败/新通过合成测试证明，未重启正式运行。完整原件1份、中断原件1份保留；首次train-2拉回发生变化，父目录后续206文件verified-pull（204个train-2文件）核SHA保全后删除，原失败记录保留。
+- 最终root off/uid5001、schedutil、RPM1233；实验work/BASE variant/workflow tools均不存在，无遗留负载；cleanup_pending=[]。这是手动journal恢复并核销后的结果，非自动finally或指定恢复测试通过。静态发现注入路径旧拼写错误self.transporself，未到达未改，待后续修复。
+- 启动等待0.075秒，启动MemAvailable9.93GB/load1=1.74/磁盘248.60GB；只豁免本轮16GiB启动门槛。构建峰值2,034,958,336B、driver峰值229,380,096B、最低采样MemAvailable9,855,733,760B；high/max/oom均0，无资源停止。driver1016.952秒；短命令峰值记录缺口见报告。
+- [清理复核](maintenance/disk_cleanup_2026-11-17.md)：原sudo脚本18路径均已不存在，本轮删除0；可用248,767,696,896B，不把跨轮差值当本轮回收量。[运行证据](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-06/run-index.json)。ALL-END，M1未完成；不改hq/Gerrit/设计，三项受保护配置不读不动。
+
 ## Workflow M1第三阶段attempt-05：前台修正通过真实负载，S3缺解码进程maps停止（2026-11-17任务）
 
 - [M1报告第9节](workflow/m1/05_m1_board_e2e.md#9-pm-授权前台启动部署物清理与-attempt-052026-11-17任务)：setsid/nohup/前台各3次探测均正常完成；不能据此认定sdb会话退出必然杀子进程。按PM决定全部负载改前台，transport=脚本预算+120秒，异常与整block一次技术重试有合成测试；host来源物按SHA、板上生成物按verified-pull分别清理并在创建前登记。

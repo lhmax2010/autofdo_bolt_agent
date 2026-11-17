@@ -12,7 +12,7 @@ import subprocess
 import tarfile
 import time
 from . import build,buildlock,config,profgen,consumption,stats,board,scheduler
-from .common import require,save,sha256,json_load,GateError
+from .common import StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
 from .transport import SDB,q,board_path
 
@@ -150,7 +150,7 @@ class Experiment:
         errors=self.cleanup.restore(t.identity(),t.undo);require(not errors,'pending cleanup failed: '+str(errors))
         self.initial=self.state();save(self.d/('initial-'+str(time.time_ns())+'.json'),self.initial)
         old={}
-        def stop(signum,frame):raise InterruptedError('signal '+str(signum))
+        def stop(signum,frame):raise StopRequested(signum)
         try:
             for s in [signal.SIGTERM,signal.SIGINT]:old[s]=signal.signal(s,stop)
             if self.initial['uid']!='0':
@@ -366,19 +366,17 @@ class Experiment:
         mf=Path(out)/(variant+'-manifest.json');save(mf,manifest)
         self.push_owned(mf,self.scripts+'/'+variant+'-manifest.json')
         return dict(remote=remote,manifest=manifest)
-    def verify_maps(self,local,deployment):
-        manifest=deployment['manifest'];observations=[]
-        files=list((local/'maps').glob('*/maps.txt')) if (local/'maps').exists() else [local/'decoder.maps']
-        for f in files:
-            if not f.exists():continue
-            text=f.read_text()
-            # Every snapshot containing a target must contain both targets.
-            if 'libavcodec.so' not in text and 'libavutil.so' not in text:continue
-            sf=f.parent/'mapped-sha256.txt' if f.name=='maps.txt' else local/'mapped-sha256.txt'
-            hashes={line.split(None,1)[1].strip():line.split()[0] for line in sf.read_text().splitlines()}
-            observations.append(board.check_maps(text,manifest,self.package['runtime']['must_load'],self.package['runtime']['deploy_set'],hashes))
-        require(observations,'no decoder loaded-library evidence','identity',3)
-        return len(observations)
+    def verify_maps(self,local,deployment,input_path=None):
+        manifest=deployment['manifest']
+        if (local/'maps').exists():
+            require(input_path is not None,'round input missing for decoder identity','identity',3)
+            rule=json_load(Path(self.job['package']).parent/'workloads/decoder.json')
+            return board.decoder_maps(local/'maps',manifest,self.package['runtime']['must_load'],self.package['runtime']['deploy_set'],rule,input_path)
+        # Oracle directly records its own gst child; PLAT is checked separately.
+        text=(local/'decoder.maps').read_text()
+        hashes={line.split(None,1)[1].strip():line.split()[0] for line in (local/'mapped-sha256.txt').read_text().splitlines()}
+        board.check_maps(text,manifest,self.package['runtime']['must_load'],self.package['runtime']['deploy_set'],hashes)
+        return 1
     def oracle(self,name,x,deployment,out):
         remote=self.remote+'/'+name
         variant='PLAT' if deployment is None else deployment['remote']
@@ -421,7 +419,9 @@ class Experiment:
             local=self.pull_run(remote,Path(out)/name)
             require(int((local/'collect.exit').read_text())==0,'collection exit')
             require('Got EOS' in (local/'collect.log').read_text(),'training EOS absent')
-            self.verify_maps(local,deployment)
+            self.verify_maps(local,deployment,x['path'])
+            cross=board.check_perf_buildids((local/'buildid-list.txt').read_text(),self.details(store,'build')['artifacts'],deployment['manifest'])
+            save(local/'perf-buildid-check.json',cross)
             # Independently repeat untimed correctness; timed/perf run remains fakesink.
             self.oracle(name+'-correctness',x,deployment,out)
             rows.append(dict(id=name,local=str(local)))
@@ -479,7 +479,7 @@ class Experiment:
         local=self.pull_run(remote,Path(out)/name)
         require(int((local/'measure.exit').read_text())==0,'timed exit')
         require('Got EOS' in (local/'measure.log').read_text(),'timed EOS absent')
-        maps=self.verify_maps(local,deployment)
+        maps=self.verify_maps(local,deployment,x['path'])
         # Bash time writes a final numeric line after any perf diagnostics.
         wall=(local/'wall.txt').read_text().splitlines()
         require(wall and re.fullmatch(r'[0-9]+\.[0-9]+',wall[-1]),'wall timing missing')
@@ -625,7 +625,7 @@ class Experiment:
         if 'injection' in self.job:return self.injected_run()
         inputs=[self.job_path,self.job['package'],self.job['inputs'],self.job['patch']]
         inputs+=list((self.w/'workflow/afdo_wf').glob('*.py'))+list((self.w/'workflow/board').glob('*.sh'))
-        inputs+=list((Path(self.job['package']).parent/'workloads').glob('*.sh'))
+        inputs+=list((Path(self.job['package']).parent/'workloads').glob('*'))
         handlers=dict(preflight=self.preflight,build=self.build_base,deploy=self.deploy,collect=self.collect,
                       convert=self.convert,rebuild=self.rebuild,measure=self.measure,report=self.report)
         def progress(stage,status):
