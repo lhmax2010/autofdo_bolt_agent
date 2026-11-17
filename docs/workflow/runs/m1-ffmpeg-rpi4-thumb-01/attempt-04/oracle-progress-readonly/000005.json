@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "sdb",
+    "-s",
+    "192.168.108.26:26101",
+    "shell",
+    "( p=$(cat /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/control-PLAT-bbb-720p-60/pid); printf 'pid=%s\\n' \"$p\"; if test -d /proc/\"$p\"; then cat /proc/\"$p\"/status; cat /proc/\"$p\"/stat; tr '\\000' ' ' < /proc/\"$p\"/cmdline; else printf 'process_absent\\n'; fi; ls -l /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/control-PLAT-bbb-720p-60 ); _wf_rc=$?; printf '\n__WF_RC_35a7536468744ffeace5d72d3d412493__%s\n' \"$_wf_rc\""
+  ],
+  "end": 1794901878.2128417,
+  "exit_code": 0,
+  "start": 1794901878.084303
+}

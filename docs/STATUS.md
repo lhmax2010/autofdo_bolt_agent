@@ -40,6 +40,15 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## Workflow M1第三阶段attempt-04：清理完成，S2远端启动无完成证据停止（2026-11-17任务）
+
+- [磁盘第二轮](maintenance/disk_cleanup_2026-11-17.md)：按ps/mount/12小时/真实路径/引用五项判据删除23个确切路径；删除前分配块合计6,470,066,176B（非净回收），可用108,855,418,880→109,025,251,328B。693个去重缓存文件已存档并核SHA；local/repos RPM/日志、冻结repo、当前实验与发布工具保留。chroot权限、被引用和提交未证明保留项逐项列为待PM决定；无sudo/卸载/其他项目清理。
+- [M1报告第8节](workflow/m1/05_m1_board_e2e.md)：指定RPi4显式connect通过，重试0；旧cycles-check全部SHA拉回后删除。新attempt单命令S0通过，BASE两次GBS退出0（138.258/129.604秒）。首次后处理硬编码旧RPM布局失败；按自身缺陷规则修复1/3次，真实日志夹具先失败后通过，114测试通过；收据按DAG归档失效，同一job重验，第二次BASE产物/108包/成对build-id通过。
+- **停在S2**：首次PLAT BBB启动PID9973消失，stdout/stderr空、无退出文件，原因未确定；不是oracle通过或不一致证据。不重试板上负载；只SIGTERM本任务run并finally恢复。训练/转换/测量均0，ToS/Sintel无估计或CI；S3恢复与1block注入测试、BASE-r/AFDO/build-lock/consumption未到达。
+- 最终uid5001/root off、schedutil、RPM1233；自动journal无待清理项，但额外发现BASE.tar未登记。已临时root校验拉回该tar、删除本实验work并再次恢复；BASE variant保留。自动清理覆盖缺口和远端启动原因须后续处理，不宣称M1验收完成。
+- 两次driver合计779.031秒，GBS合计267.862秒；构建峰值2,108,694,528B、driver峰值257,687,552B，M1最低采样MemAvailable9,389,166,592B；启动等待0.066/0.074秒，启动资源及本轮内存豁免均在收据，无资源停止/OOM。清理资源非连续采样缺口已注明。
+- [attempt-04证据](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/index.json)保留失败原文、修复、拉回收据及大文件SHA；ALL-END。未改hq/Gerrit/设计；未生成或查看真实sample profile。本轮停止。
+
 ## Workflow M1第三阶段：磁盘核查及S0修正完成，SDB端点不可见停止（2026-11-17任务）
 
 - [磁盘报告](maintenance/disk_cleanup_2026-11-17.md)：可用113,591,267,328→113,576,747,008B（约105.8GiB）；删除0B。du权限不足，/proc979项不可读，无法完整证明B候选无人使用，按保守规则跳过；C清单含大小和代价，A类/其他项目不碰。空间非阻塞项。

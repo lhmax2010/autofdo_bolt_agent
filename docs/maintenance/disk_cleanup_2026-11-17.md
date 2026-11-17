@@ -199,3 +199,83 @@ classification.json逐目录记录真实路径、符号链接、当前挂载和�
 两次du的硬链接计数次序及扫描期间变化可能造成同一路径数值不同；保留两份原文，不把目录相加或差值算作清理收益。
 清理前Available=113,591,267,328 B，后=113,576,747,008 B；本次没有删除，约13.85MiB变化不归因于清理。
 提交证据位于 [evidence/disk-cleanup-20261117](evidence/disk-cleanup-20261117/index.json)。
+
+## 第二轮：按PM逐项判据清理（2026-11-17任务）
+
+本轮按新判据使用ps命令行占用，不再要求读取他人fd；每项还检查挂载、全树12小时修改时间、真实路径与引用。只删除全部满足的确切路径；没有卸载、sudo操作、其他进程调整或WORKDIR外写入。
+
+可用空间：108,855,418,880 B（101.380 GiB）→109,025,251,328 B（101.538 GiB）。删除23项，逐目录删除前分配块合计6,470,066,176 B（6.026 GiB）；这是路径计数，不是净回收量。硬链接、保留存档与共享文件系统并发活动使之不能等同df变化。
+
+缓存中的1728条文件记录已逐一保存并SHA验证，去重后693文件、2,294,814,761字节，位置temp/gbs-deps-archive/disk-cleanup-20261117-round2/。保留local/repos等处321条RPM/日志SHA；冻结repo原路径未改，当前job所需发布工具/加载器/库SHA重验通过。完整清单见[evidence第二轮](evidence/disk-cleanup-20261117-round2/)。
+
+### 逐项删除结果
+
+| 路径 | 删除前分配字节 | 结果 |
+|---|---:|---|
+| temp/GBS-ROOT-FFMPEG-M1-A32-20261114-FIX1/local/cache | 273203200 | rm --one-file-system退出0、路径消失 |
+| temp/GBS-ROOT-FFMPEG-M1-A32-20261114/local/cache | 273207296 | rm --one-file-system退出0、路径消失 |
+| temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114-FIX1/local/cache | 273211392 | rm --one-file-system退出0、路径消失 |
+| temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/cache | 273203200 | rm --one-file-system退出0、路径消失 |
+| temp/GBS-ROOT-RPI4-PMUV3/local/cache | 290779136 | rm --one-file-system退出0、路径消失 |
+| temp/GBS-ROOT-RPI4-SPIKE/local/cache | 566046720 | rm --one-file-system退出0、路径消失 |
+| temp/GBS-ROOT-RPI5-SPIKE/local/cache | 310743040 | rm --one-file-system退出0、路径消失 |
+| temp/GBS-ROOT-V04-FFMPEG/local/cache | 1166172160 | rm --one-file-system退出0、路径消失 |
+| temp/linux-rpi-pmuv3-gerrit | 1728737280 | rm --one-file-system退出0、路径消失 |
+| temp/m1-target-20261114/weekend-j2/roots/a32-attempt-0/local/cache | 273207296 | rm --one-file-system退出0、路径消失 |
+| temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/cache | 273207296 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/hpeldsp_init_arm-3cc9a2.c | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/libLLVM-88d1da.cpp | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/libLLVM-c82b88.cpp | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/libLLVM-fd308d.cpp | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/probe-44e1e2.cpp | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/probe-bc0f59.cpp | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/symbolize-raw-fd001f.cpp | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/test-448cdc.S | 0 | rm --one-file-system退出0、路径消失 |
+| temp/tmp/test-8fd20b.S | 0 | rm --one-file-system退出0、路径消失 |
+| temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/cache | 256114688 | rm --one-file-system退出0、路径消失 |
+| temp/verify-361624-fix-20261116/root-x86_64/local/cache | 256118784 | rm --one-file-system退出0、路径消失 |
+| temp/verify-361624-fix-v3-20261116/root-x86_64/local/cache | 256114688 | rm --one-file-system退出0、路径消失 |
+
+### 判据证据与保留项
+
+引用输入含workflow TOML/JSON/conf、当前全部job、STATUS、delivery与origin/hq文档/示例，均登记SHA；每次删除前重核其SHA不变，并重跑ps、findmnt、修改时间与真实路径检查。原始逐次predelete记录保留temp并在raw-index.json登记SHA。所有源码判断记录HEAD/分支与保留仓库可达性，受Git跟踪的源码测试素材不误当本次证据；只有通过证明且工作区干净的副本删除。
+
+GBS chroot保留原因含内部root/、var/cache/ldconfig等目录不可读，无法完整证明12小时条件及无证据遗漏；没有把新的进程判据误用为免除时间/证据检查。缓存中的文件经过存档后才允许删除。
+
+### 待PM决定（本轮保留，不阻塞M1）
+
+| 路径 | GiB（可读下界） | 原因/用途与重建条件 |
+|---|---:|---|
+| temp/GBS-ROOT-FFMPEG-M1-A32-20261114-FIX1/local/BUILD-ROOTS | 1.370 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-FFMPEG-M1-A32-20261114/local/BUILD-ROOTS | 1.231 | mtime_or_evidence_scan_incomplete；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114-FIX1/local/BUILD-ROOTS | 1.363 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-FFMPEG-M1-THUMB-20261114/local/BUILD-ROOTS | 1.110 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-LLVM-RELEASE-20261114c/local/BUILD-ROOTS | 25.930 | referenced; mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-LLVM-X86/local/BUILD-ROOTS | 2.001 | referenced; mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-RPI4-PMUV3/local/BUILD-ROOTS | 8.261 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-RPI4-SPIKE/local/BUILD-ROOTS | 1.194 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-RPI5-SPIKE/local/BUILD-ROOTS | 1.753 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/GBS-ROOT-V04-FFMPEG/local/BUILD-ROOTS | 1.468 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/linux-rpi-pmuv3-am-check | 1.610 | commit_not_proven_preserved；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/llvm-profgen-enh/build | 20.650 | referenced; contains_RPM_log_or_data_preserve; tool_evidence_and_runtime_dependencies_preserved_pending_review；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/llvm-profgen-forward-20261114 | 6.961 | referenced; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/llvm-profgen-release | 6.961 | referenced; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/llvm-profgen-sandbox-verify-20261114 | 2.789 | referenced; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/m1-pilot-v02-20261116/build/forensic/roots/afdo-localpath/local/BUILD-ROOTS | 1.344 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/m1-pilot-v02-20261116/build/forensic/roots/base-r-localpath/local/BUILD-ROOTS | 1.343 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/m1-pilot-v02-20261116/build/roots/afdo-localpath/local/BUILD-ROOTS | 1.344 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/m1-pilot-v02-20261116/build/roots/base-r-localpath/local/BUILD-ROOTS | 1.343 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/m1-target-20261114/weekend-j2/roots/a32-attempt-0/local/BUILD-ROOTS | 1.357 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/m1-target-20261114/weekend-j2/roots/thumb-attempt-0/local/BUILD-ROOTS | 1.351 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/profgen-patch9/prebuild-tool | 1.085 | tool_evidence_and_runtime_dependencies_preserved_pending_review；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/verify-361624-fix-20261116/root-x86_64-retry-executor/local/BUILD-ROOTS | 4.634 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/verify-361624-fix-20261116/root-x86_64/local/BUILD-ROOTS | 4.220 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/verify-361624-fix-20261116/source | 2.419 | commit_not_proven_preserved；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/verify-361624-fix-v2-20261116/source | 2.419 | commit_not_proven_preserved；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/verify-361624-fix-v3-20261116/root-x86_64/local/BUILD-ROOTS | 5.403 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/verify-361624-fix-v3-20261116/source | 2.419 | commit_not_proven_preserved；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+| temp/workflow-p1p2-20261116/root-afdo-diag/local/BUILD-ROOTS | 1.346 | mtime_or_evidence_scan_incomplete; contains_RPM_log_or_data_preserve；源码/工具/旧root可重建，但需保留提交、原日志和依赖；引用路径不得直接删除 |
+
+llvm-profgen-enh/build仍被STATUS引用；发布root的加载器/库被当前job引用，不能迁移后假称配置不变。profgen-patch9/prebuild-tool含旧工具及原验收记录，本轮保留而不把旧验收副本当发布工具。未删除任何采集、profile、quality、收据或验证日志。当前实验内的失败克隆按“当前实验全部内容保留”保守保留。
+
+资源说明：盘点/删除串行、nice19/ionice-c3与3G/200% scope；resource-samples.jsonl为实际取得的抽样（不是完整60秒连续序列），没有补造缺失峰值。内核提交可达性遍历耗时较长。WORKDIR外目录未遍历、未清理。

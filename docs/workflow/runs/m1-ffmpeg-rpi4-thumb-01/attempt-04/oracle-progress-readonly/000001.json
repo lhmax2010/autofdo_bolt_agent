@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "sdb",
+    "-s",
+    "192.168.108.26:26101",
+    "shell",
+    "( ps -eo pid,ppid,stat,args | grep -E 'oracle.sh|gst-launch|sha256sum|tee|wc -c' | grep -v grep; for f in /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/PLAT-bbb-720p-60/gst.log /opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/control-PLAT-bbb-720p-60/stderr; do test ! -r \"$f\" || tail -3 \"$f\"; done ); _wf_rc=$?; printf '\n__WF_RC_412c0e49eeb64cb5b1f0de2e75f552b0__%s\n' \"$_wf_rc\""
+  ],
+  "end": 1794901732.1901896,
+  "exit_code": 0,
+  "start": 1794901731.9736574
+}

@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "systemd-run",
+    "--user",
+    "--unit=afdo-m1-attempt04-repair1",
+    "--service-type=exec",
+    "-p",
+    "MemoryMax=3G",
+    "-p",
+    "CPUQuota=200%",
+    "-p",
+    "WorkingDirectory=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent",
+    "-p",
+    "StandardOutput=append:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-04/service-repair1.log",
+    "-p",
+    "StandardError=append:/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-04/service-repair1.log",
+    "--setenv=TMPDIR=/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/tmp",
+    "nice",
+    "-n",
+    "19",
+    "ionice",
+    "-c3",
+    "python3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-04/driver-repair1.py"
+  ],
+  "rc": 0,
+  "stdout": "",
+  "stderr": "Running as unit: afdo-m1-attempt04-repair1.service; invocation ID: 47fe02fcef4f4c5780defda7fd30ca77\n"
+}

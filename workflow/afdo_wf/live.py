@@ -35,6 +35,30 @@ def parse_cycles_event(text):
     require(fields==dict(type=0,config=0),'hardware cycles type/config assertions failed')
     return dict(name='cycles',**fields)
 
+def locate_build_source(scratch,log):
+    """Resolve the source from the successful RPM trace, not a fixed RPM topdir."""
+    roots=set(re.findall(r'^\[\s*[0-9]+s\] \+ cd (/[^\s]+/BUILD)$',log,re.M))
+    require(len(roots)==1,'ambiguous or missing traced RPM build directory')
+    directory=next(iter(roots));root=Path(scratch).resolve()
+    path=(root/directory.lstrip('/')).resolve()
+    require(path.is_relative_to(root) and '..' not in Path(directory).parts,'RPM build path escapes root')
+    sources=[p for p in path.glob('ffmpeg-*') if p.is_dir() and (p/'ffbuild/config.mak').is_file()]
+    require(len(sources)==1,'ambiguous build source')
+    require(sources[0].resolve().is_relative_to(root),'build source escapes root')
+    return sources[0]
+
+def consumed_profile_path(commands):
+    paths=set()
+    for rows in commands.values():
+        for argv in rows:
+            for i,arg in enumerate(argv):
+                if arg.startswith('-fprofile-sample-use='):paths.add(arg.split('=',1)[1])
+                elif arg=='-fprofile-sample-use' and i+1<len(argv):paths.add(argv[i+1])
+    require(len(paths)==1,'ambiguous or missing staged profile option')
+    path=next(iter(paths))
+    require(Path(path).is_absolute() and '..' not in Path(path).parts and Path(path).name=='autofdo.extbinary','unsafe staged profile path')
+    return path
+
 class Experiment:
     def __init__(self,job,job_path):
         self.job=job;self.job_path=Path(job_path).resolve();self.w=Path(job['workdir']).resolve()
@@ -194,12 +218,11 @@ class Experiment:
             artifacts[target['id']]=build.elf_manifest(runtime,str(debug)+'.debug',unit['isa'])
         scratch=root/'local/BUILD-ROOTS/scratch.armv7l.0';packages=build.rpm_manifest(scratch)
         require(packages==j['frozen_packages'],'frozen installed package/header list differs')
-        sources=list((scratch/'usr/src/packages/BUILD').glob('ffmpeg-*'))
-        require(len(sources)==1,'ambiguous build source');src=sources[0]
+        src=locate_build_source(scratch,(out/'execution/build.log').read_text(errors='replace'))
         settings=buildlock.make_settings((src/'ffbuild/config.mak').read_text())
         commands={t:buildlock.recorded_switches(self.host(['readelf','-p','.GCC.command.line',a['debug_path']],out).stdout.decode()) for t,a in artifacts.items()}
         lock=dict(source_commit=self.package['package']['source']['commit'],patch_sha=sha256(j['patch']),
-            spec_sha=sha256(Path(j['source'])/unit['spec']),source_layout='/usr/src/packages/BUILD/'+src.name,
+            spec_sha=sha256(Path(j['source'])/unit['spec']),source_layout='/'+str(src.relative_to(scratch)),
             frozen_repo_id=j['repo_id'],resolved_buildconf_sha=sha256(j['buildconf']),
             gbs_version=self.host(['gbs','--version'],out).stdout.decode().strip(),packages=packages,
             capture_method=self.package['command_capture']['method'],commands=commands,settings=settings,macros=macros,gbs_config_sha=sha256(j['config']))
@@ -333,9 +356,10 @@ class Experiment:
         src=Path(candidate['build_source']);remarks=[]
         for prefix in self.package['consumption']['object_to_target']:
             remarks.extend((str(p.relative_to(src)),str(p)) for p in (src/prefix).rglob('*.opt.yaml'))
-        staged=Path(candidate['scratch'])/'usr/src/packages/SOURCES/autofdo.extbinary'
+        option_path=consumed_profile_path(candidate['lock']['commands'])
+        staged=Path(candidate['scratch'])/option_path.lstrip('/')
         c=consumption.evaluate(list(base['artifacts']),self.package['consumption']['object_to_target'],remarks,candidate['lock']['commands'],
-            converted['lock']['sha256'],staged,base['text'],candidate['text'],'/usr/src/packages/SOURCES/autofdo.extbinary')
+            converted['lock']['sha256'],staged,base['text'],candidate['text'],option_path)
         save(out/'consumption.json',c);require(c['passed'],'consumption gate failed')
         return dict(base_repeat=repeat,candidate=candidate,control=control,buildlock=comparisons,consumption=c,offline_reproducible=True)
     def timed(self,name,x,deployment,out,preflight):

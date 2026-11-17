@@ -288,3 +288,113 @@ SDB使用已有服务；其是否更新WORKDIR外的内部状态未知。
 未改设计/hq/Gerrit、未安装软件、未读或修改受保护配置、未打开真实sample profile。
 [本轮索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/index.json)保存失败原文与SHA，ALL-END已记录。
 本轮停止，待指定端点恢复可见后继续。
+
+## 8. PM清理判据第二轮、M1 attempt-04与S2启动无完成证据停止
+
+基于28cdd4f；执行顺序为清理→显式sdb connect→遗留目录校验清理→同一job单命令M1。
+本轮**未完成M1验收**：S0与BASE构建/产物核对通过，S2首次PLAT/BBB oracle的远端启动进程消失且没有退出文件，停止。
+不能把此前手动试跑的结果填作本轮ToS/Sintel结果。
+
+### 8.1 磁盘清理
+
+[第二轮清理报告](../../maintenance/disk_cleanup_2026-11-17.md#第二轮按pm逐项判据清理2026-11-17任务)记录五项判据和逐次删除证据。
+不再以他人fd不可读作为前提；仍保留不能完整核实全树修改时间、含未保留原件、被指定文件引用或提交可达性未证实的目录。
+
+可用空间108,855,418,880→109,025,251,328 B（101.380→101.538 GiB）。删除23个确切路径，删除前分配块合计6,470,066,176 B（6.026 GiB），不能等同净释放：缓存保留副本、硬链接与文件系统并发变化均影响df。保留693份去重缓存文件、2,294,814,761字节，逐个SHA通过；local/repos等处321条RPM/日志SHA记录保留。没有sudo、卸载、软件安装或其他项目清理。
+
+待PM决定项及大小详见清理表：旧chroot内部权限阻止完整mtime检查；发布root/工具树及若干源码被引用；am-check和361624源码副本的提交未证明由保留refs覆盖。原始perf/profile/quality/收据、三个输入、冻结repo、当前实验全部保留。
+
+### 8.2 连接与遗留cycles-check
+
+显式sdb connect 192.168.108.26:26101退出0，提示already connected；sdb devices列出目标RPi4与另一端点192.168.108.13:26101。本轮仅访问指定RPi4；连接重试0，远端只读重试0，没有kill-server或重启服务。
+身份仍为Raspberry Pi 4 Model B Rev 1.5 / armv7l / 6.12.80-arm-rpi4-v7l / tizen-unified-toolchain_20261104.160709。
+
+遗留目录唯一文件perf.data的SHA为8ed24e55c8c53d8afc80039c0b9132a9d566e98e082c3297a9499e52d300d047。
+两次远端SHA清单与本地落盘一致、verified-pull收据保存后删除该确切目录。
+原件在temp/m1-ffmpeg-rpi4-thumb-01/attempt-04/legacy-recovery/pulled/；未打开分析该perf数据。
+root按必要性临时开启并恢复，governor未改变；RPM1233不变。
+证据：[legacy-recovery](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/legacy-recovery/result.json)。
+
+### 8.3 正式命令与自身缺陷修复（本轮1/3）
+
+命令（两次一致）：
+
+    PYTHONPATH=WORKDIR/workflow python3 -m afdo_wf run --job WORKDIR/temp/m1-ffmpeg-rpi4-thumb-01/attempt-04/job.json
+
+主机监督为独立user service（nice19/ionice-c3，driver 3G/200%），GBS使用独立6G/5G/200% scope、-j2、threads1。
+新源码检出5fe76358并应用原workflow profiling.patch；spec SHA与attempt-02一致；发布工具SHA重验通过；冻结108RPM逐包SHA重验通过，新旧BuildRequires引用已封存且相同spec的attempt-02证据。
+
+首次GBS退出0，但后处理错误ambiguous build source。原始日志335/336等行表明实际BUILD是/home/abuild/rpmbuild/BUILD，旧硬编码/usr/src/packages/BUILD为空。
+这是实际构建成功且源码位置可证的实现错误，没有修改spec、补丁、依赖或门槛。
+修正：从成功RPM跟踪日志提取唯一BUILD路径，再要求唯一含ffbuild/config.mak的FFmpeg目录；构建锁记录实际chroot布局；消费profile路径从唯一实际编译选项取得，不再硬编码旧SOURCES路径。
+
+夹具保留实际cd原文，证明旧glob为空、新路径解析通过，并覆盖歧义拒绝和唯一消费路径；**114项测试通过**。
+原失败收据、原live.py、原文与SHA见[defects/01-build-layout](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/defects/01-build-layout/evidence.json)。
+代码是阶段收据的输入，因此显式redo将旧preflight收据归档再失效；不伪造代码SHA、不宣称跨代码变更复用收据，用同一job从S0重验并重新构建。
+这是本轮唯一自身缺陷修复；S2启动消失的原因未证实，未占用剩余次数去猜测修补或重试负载。
+
+### 8.4 两次BASE构建与启动资源
+
+本实验本次仅取消MemAvailable≥16GiB启动门槛；load1<0.6×20=12及磁盘≥50GiB保留，最多60分钟等待；运行中低内存/磁盘停止保护保持。
+
+| 执行 | GBS退出 | GBS墙钟秒 | 启动MemAvailable GiB | load1 | 启动可用盘 GiB | 等待秒 | cgroup峰值字节 | 后处理 |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| BASE-1 | 0 | 138.258 | 10.548 | 2.430 | 100.720 | 0.066 | 2108694528 | 旧路径错误 |
+| BASE-2 | 0 | 129.604 | 10.249 | 3.271 | 99.173 | 0.074 | 1924259840 | 通过，S1收据完成 |
+
+第二次22个二进制RPM清单/SHA已保存；已安装108包及header SHA与冻结清单相同。
+两个目标runtime/debug SHA-1 build-id成对一致：
+
+| 目标 | build-id |
+|---|---|
+| libavcodec | 805376f248504d2084e3e95470810873ffc3655a |
+| libavutil | bb5b41f743b9b07bb38cc5007f7deb6516256579 |
+
+RPM、源树与完整build.log保留temp；[build/002/result.json](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/formal/stages/build/002/result.json)记录真实路径、SHA、命令集合和构建锁。这里只通过单个BASE证据，不能宣称BASE/BASE-r/AFDO三方build-lock或consumption已经通过。
+
+### 8.5 S2远端启动消失：停止事实与未知原因
+
+BASE部署逐文件SHA通过后，首次PLAT BBB oracle启动命令为setsid bash .../control-PLAT-bbb-720p-60/launch.sh。
+启动命令的主机/远端标记为0并写PID9973，但后续只读查询证明/proc/9973不存在；无oracle/gst进程、无exit文件，stdout/stderr均空，输出oracle目录未形成。
+当时uid仍0，SDB连接未中断。这些事实不能证明oracle成功，也不能确定是SDB会话寿命、信号还是其他启动问题；**不把猜测作为实现修复依据**。
+证据：[launch-raw](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/launch-raw/)、[逐次只读诊断](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/oracle-progress-readonly/)。
+
+在缺少远端完成证据时，不重试负载、不替换原件；核对本任务run PID及完整argv后只发SIGTERM给该run，触发finally。
+[停止收据](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/operation-failure-stop.json)明确这不是要求的S3恢复测试，也不是独立1block计时注入测试。
+本次第二个workflow进程退出1来自signal15；远端负载真实退出码**未知**，不能写成远端退出1。
+
+### 8.6 恢复、残留及验收表
+
+finally完成：uid5001、policy0=schedutil、RPM1233、cleanup_pending=[]、errors=[]。
+控制目录全部SHA校验拉回后删除。
+额外核查发现BASE.tar不在自动清理日志内：非root读取Permission denied原文保留；随后记录状态、临时开root，全量SHA拉回到final-work-cleanup-root/pulled并写收据后，只删除本实验work目录，再恢复root off与schedutil。
+BASE.tar SHA=37a94a03be8f4cade489b9205cd547c105ab7a8ac0c4a786989abe177e5db852。
+**自动清理没有覆盖该tar是已知缺口**；此次最终清理依靠额外的verified-pull收尾，不能以cleanup_pending=[]声称自动清理验收通过。
+variants/m1-ffmpeg-rpi4-thumb-01-BASE与tools/workflow-m1-ffmpeg-rpi4-thumb-01保留；没有AFDO变体。
+
+| M1验收项 | 本轮结果 |
+|---|---|
+| S0身份、perf/libLLVM、硬件cycles、三输入SHA | 通过；唯一cycles/type0/config0；1.5GHz；温度/频率/电压告警来源已登记，固件历史unknown |
+| 冻结108依赖、BASE构建与产物身份 | 通过（第二次BASE） |
+| BASE/BASE-r/AFDO三项build-lock与离线重建 | 未到达，只有BASE锁 |
+| PLAT三个输入oracle、BASE对照正确性 | 未完成；首次PLAT启动无完成证据 |
+| must-load与全部deploy-set计时进程核验 | 未到达；仅BASE部署SHA已核对 |
+| R=3训练、六次profile转换、锁定profile | 均0；未产生/读取真实sample profile |
+| 两个目标AppliedSamples消费判定 | 未到达 |
+| ToS估计/CI/判定 | 未计算 / 未计算 / 未执行 |
+| Sintel估计/CI/判定 | 未计算 / 未计算 / 未执行 |
+| S3后SIGTERM恢复复用 | 未到达 |
+| 独立1block中断清理验收 | 未到达；本轮故障停止不冒充验收 |
+| S7 report.json/report.md | 未到达；本停止报告不等同S7成功报告 |
+| 最终root/governor/RPM与work残留 | root off、schedutil、1233；work全部verified-pull后删除，variants保留 |
+
+### 8.7 资源、边界与后续
+
+两次driver墙钟合计779.031秒（186.669+592.362，不含前期磁盘核查）；两次GBS合计267.862秒。构建峰值2,108,694,528 B，driver峰值257,687,552 B；M1已记录样本的最低MemAvailable 9,389,166,592 B（8.744 GiB）。无运行中资源停止/OOM。清理阶段只有实际抽样记录，缺少完整连续峰值，不补造。
+
+没有改设计v0.3、hq、Gerrit、认证或其他项目；未安装软件；只停止本任务run；板上项目文件只写/opt/afdo_agent，root/governor变更按任务授权并恢复。
+SDB已有服务可能自行更新WORKDIR外内部状态，未取得可列出的实际写入路径，不能声称已证实无此行为。其余未发现主动WORKDIR外项目文件读写。
+Q.5#17：本轮没有进入训练转换阶段，没有生成/查看真实sample profile；仅SHA保存遗留与S0探测perf数据，没有分析其内容。
+
+本轮停止。后续需先查明远端启动没有完成收据的原因，并补齐部署tar的清理登记，再继续M1；不修改判据或以旧手动结果替代。
+[本轮证据索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-04/index.json)含原命令、失败原文、收据、资源和temp大文件SHA；ALL-END已写。

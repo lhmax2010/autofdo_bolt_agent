@@ -128,3 +128,19 @@ class LiveTests(unittest.TestCase):
                 calls.extend(['verified','delete-exact'])
             t.pull=verified_pull;t.undo(action)
             self.assertEqual(calls,['pull','verified','delete-exact'])
+
+    def test_build_layout_real_trace_old_failure_new_pass(self):
+        from afdo_wf.live import locate_build_source
+        raw=(Path(__file__).parent/'fixtures/gbs-build-layout.log').read_text()
+        with tempfile.TemporaryDirectory(dir=os.environ['TMPDIR']) as td:
+            root=Path(td);src=root/'home/abuild/rpmbuild/BUILD/ffmpeg-8.0.1'
+            (src/'ffbuild').mkdir(parents=True);(src/'ffbuild/config.mak').write_text('synthetic')
+            self.assertEqual(list((root/'usr/src/packages/BUILD').glob('ffmpeg-*')),[])
+            self.assertEqual(locate_build_source(root,raw),src)
+            with self.assertRaises(GateError):locate_build_source(root,raw+'[ 1s] + cd /other/BUILD\n')
+    def test_staged_profile_uses_actual_unique_option(self):
+        from afdo_wf.live import consumed_profile_path
+        p='/home/abuild/rpmbuild/SOURCES/autofdo.extbinary'
+        self.assertEqual(consumed_profile_path({'codec':[['clang','-fprofile-sample-use='+p]]}),p)
+        with self.assertRaises(GateError):consumed_profile_path({'codec':[['clang']]})
+        with self.assertRaises(GateError):consumed_profile_path({'codec':[['-fprofile-sample-use='+p,'-fprofile-sample-use=/different/autofdo.extbinary']]})
