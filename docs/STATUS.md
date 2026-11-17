@@ -46,6 +46,13 @@
 - K0 进行中：[可行性评估](kernel/autofdo/00_feasibility.md)与[回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已完成本轮事实整理；conditional go（ARM32/A32、非 LTO/MFS）。linux-rpi SSH 克隆失败后按规则停止，`0fac5de6` 精确基线与回移植未验证，K0 尚未关闭；resourced 指定提交已核实。未构建、未接板。
 - K1 在 M1 完成后开始；刷写另须用户确认。
 
+## Workflow M1：attempt-09非正式温度门禁停止（2026-11-17任务）
+
+- [第12节停止报告](workflow/m1/05_m1_board_e2e.md#12-pm授权单文件拉回技术失败分类与遥测握手2026-11-17任务)：TechnicalFailure整block一次重试、单tar双层SHA、首尾遥测握手、父拉回核销均实现；171项测试与15脚本语法通过。attempt-08缺左10–30ms、个别缺右20ms，原数据原标签保留。
+- attempt-09从S0重跑，S0–S5/build-lock/consumption通过；S4真实SIGTERM恢复与独立计时注入清理通过。非正式BASE第1轮clean，第2轮首样本60.374°C（>60°C）温度异常，两轮均无缺边；按三轮全clean门禁立即停止，第3轮及正式ToS/Sintel测量、S7未开始，无估计/CI。自身缺陷次数仍2/3。
+- 父自动finally留下5条清理待办；独立post-stop-cleanup核验并清理成功：uid5001、schedutil、RPM1233、pending/errors均空，原final/journal保留。停止路径root提前恢复的清理缺口待后续修正，不伪称自动清理通过。
+- 证据：[attempt-09索引](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-09/run-index.json)。总运行2487.070秒；最低MemAvailable14,664,486,912B，构建峰值2,133,442,560B，未触发资源终止；本实验启动内存豁免不扩展。等待PM指令，不自行补测。
+
 ## Workflow M1：观察器/恢复通过，attempt-08在SDB拉回失败后停止（2026-11-17任务）
 
 - [报告第11节](workflow/m1/05_m1_board_e2e.md)：PM新观察器判据、SHA三元组一次缓存与注入路径修正完成；实际attempt-06夹具通过。最终155项测试与15脚本语法检查通过。代码/attempt-07检查点已推送 `5b4af659819776c9b4132325626486ee835dba31`。

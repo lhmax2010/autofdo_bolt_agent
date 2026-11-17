@@ -62,17 +62,39 @@ class Cleanup:
     def register(self,action):
         require(action.get('kind') in ['root','governor','process','run','host_artifact'],'unknown cleanup action')
         self.data['cleanup_pending'].append(action);save(self.path,self.data)
+    def reconcile_parent(self,receipt):
+        r=json_load(receipt)
+        if r.get('status')!='verified' or not r.get('deleted'):return []
+        parent=r['remote_dir'].rstrip('/')+'/'
+        closed=[]
+        for action in list(self.data['cleanup_pending']):
+            if action.get('kind')!='run':continue
+            remote=action.get('remote')
+            if not remote and Path(action['receipt']).exists():remote=json_load(action['receipt']).get('remote_dir')
+            if not remote or not remote.startswith(parent):continue
+            prefix=remote[len(parent):].rstrip('/')+'/'
+            covered={k:v for k,v in r['files'].items() if k.startswith(prefix)}
+            for rel,digest in covered.items():require(sha256(Path(r['local_root'])/rel)==digest,'parent evidence changed')
+            closed.append(dict(action=action,covered_files=len(covered)))
+            self.data['cleanup_pending'].remove(action)
+        if closed:
+            evidence=self.path.parent/'cleanup-resolutions'/(sha256(receipt)+'.json')
+            save(evidence,dict(parent_receipt=str(receipt),parent_sha256=sha256(receipt),closed=closed))
+            save(self.path,self.data)
+        return closed
     def restore(self,actual_identity,undo):
         require(actual_identity==self.identity,'restore identity mismatch','identity',3)
-        errors=[]
+        failures=[]
         ordered=sorted(reversed(self.data['cleanup_pending']),key=lambda a:{'process':0,'run':2,'host_artifact':1,'governor':3,'root':4}[a['kind']])
         for action in ordered:
+            if action not in self.data['cleanup_pending']:continue
             try:
                 undo(action)
-                self.data['cleanup_pending'].remove(action)
+                if action in self.data['cleanup_pending']:self.data['cleanup_pending'].remove(action)
                 save(self.path,self.data)
-            except Exception as e: errors.append(str(e))
-        return errors
+                if action['kind']=='run' and Path(action['receipt']).exists():self.reconcile_parent(action['receipt'])
+            except Exception as e:failures.append((action,str(e)))
+        return [error for action,error in failures if action in self.data['cleanup_pending']]
 
 def verified_pull(receipt,local_root,manifest,remote_dir,verified_empty=False):
     root=Path(local_root).resolve()

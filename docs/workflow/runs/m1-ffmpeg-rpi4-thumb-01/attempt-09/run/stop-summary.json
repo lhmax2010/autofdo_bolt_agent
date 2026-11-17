@@ -1,0 +1,125 @@
+{
+  "status": "stopped_nonformal_temperature_gate",
+  "formal_comparisons": {
+    "ToS": "not_started",
+    "Sintel": "not_started"
+  },
+  "tests": 171,
+  "own_defects_used": "2/3",
+  "driver": {
+    "end": 1794932352.4601648,
+    "results": [
+      {
+        "attempt": 1,
+        "end": 1794931222.01115,
+        "exit_code": 143,
+        "interrupted_for_test": true
+      },
+      {
+        "attempt": 2,
+        "end": 1794932352.329095,
+        "exit_code": 2,
+        "interrupted_for_test": false
+      }
+    ],
+    "seconds": 2487.069974899292,
+    "start": 1794929865.3901904
+  },
+  "builds": [
+    {
+      "path": "temp/m1-ffmpeg-rpi4-thumb-01/attempt-09/formal/stages/build/001/execution/result.json",
+      "exit_code": 0,
+      "build_seconds": 153.34175924101146,
+      "wait_seconds": 0.06627969403052703,
+      "memory_peak": 1538895872,
+      "min_mem_available": 14664486912,
+      "start": {
+        "mem_available": 15575924736,
+        "load1": 1.7607421875,
+        "disk_free": 203843014656
+      },
+      "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+    },
+    {
+      "path": "temp/m1-ffmpeg-rpi4-thumb-01/attempt-09/formal/stages/rebuild/001/AFDO/execution/result.json",
+      "exit_code": 0,
+      "build_seconds": 127.45342040801188,
+      "wait_seconds": 0.06370502797653899,
+      "memory_peak": 1837764608,
+      "min_mem_available": 17285955584,
+      "start": {
+        "mem_available": 17964785664,
+        "load1": 2.51953125,
+        "disk_free": 202999140352
+      },
+      "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+    },
+    {
+      "path": "temp/m1-ffmpeg-rpi4-thumb-01/attempt-09/formal/stages/rebuild/001/BASE-r/execution/result.json",
+      "exit_code": 0,
+      "build_seconds": 134.65759945398895,
+      "wait_seconds": 0.16862320399377495,
+      "memory_peak": 2133442560,
+      "min_mem_available": 17647431680,
+      "start": {
+        "mem_available": 17946271744,
+        "load1": 2.52490234375,
+        "disk_free": 204519030784
+      },
+      "events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+    }
+  ],
+  "checks": [
+    {
+      "round": 0,
+      "start": 115168.99,
+      "end": 115203.08,
+      "first": 115167.89,
+      "last": 115204.81,
+      "left_covered": true,
+      "right_covered": true,
+      "max_gap": 1.1900000000023283,
+      "start_gate": "1794932213\t/sys/class/thermal/thermal_zone0/temp\t59400\n",
+      "temperature_min": 58913,
+      "temperature_max": 66218,
+      "prestart_violations": []
+    },
+    {
+      "round": 1,
+      "start": 115243.25,
+      "end": 115277.65,
+      "first": 115242.25,
+      "last": 115278.94,
+      "left_covered": true,
+      "right_covered": true,
+      "max_gap": 1.1900000000023283,
+      "start_gate": "1794932287\t/sys/class/thermal/thermal_zone0/temp\t59887\n",
+      "temperature_min": 60374,
+      "temperature_max": 65244,
+      "prestart_violations": [
+        {
+          "time": 115242.25,
+          "mC": 60374,
+          "path": "/sys/class/thermal/thermal_zone0/temp"
+        }
+      ]
+    }
+  ],
+  "third_check": "not_run",
+  "min_mem_available": 14664486912,
+  "build_peak": 2133442560,
+  "driver_peak": 576937984,
+  "min_disk": 201037434880,
+  "technical_block_retries": 0,
+  "cleanup": {
+    "errors": [],
+    "governors": {
+      "/sys/devices/system/cpu/cpufreq/policy0": "schedutil"
+    },
+    "pending": [],
+    "rpm_count": "1233",
+    "uid": "5001"
+  },
+  "collect_receipt_sha256": "f38a89f77f114f5dec34ca28a26fce3669ed88a7ab9182c4221082d6e885a15f",
+  "collect_before_interrupt": "f38a89f77f114f5dec34ca28a26fce3669ed88a7ab9182c4221082d6e885a15f"
+}

@@ -120,6 +120,7 @@ class Experiment:
         self.scripts=self.b+'/tools/workflow-'+job['experiment']
         self.transport=SDB(self.serial,self.d/('transport-'+str(time.time_ns())))
         self.cleanup=Cleanup(self.d/'cleanup.json',job['identity'])
+        self.transport.journal=self.cleanup
         self.ops=0
     def host(self,argv,out,check=True,cwd=None,env=None):
         self.ops+=1;out=Path(out);out.mkdir(parents=True,exist_ok=True);base=out/('host-%04d'%self.ops)
@@ -258,8 +259,10 @@ class Experiment:
 
     def pull_run(self,remote,out):
         receipt=Path(str(out)+'.pull.json')
-        self.cleanup.register(dict(kind='run',receipt=str(receipt)))
+        if not any(a.get('kind')=='run' and a.get('receipt')==str(receipt) for a in self.cleanup.data['cleanup_pending']):
+            self.cleanup.register(dict(kind='run',remote=remote,local=str(out),receipt=str(receipt)))
         result=self.transport.pull(remote,out,receipt)
+        self.cleanup.reconcile_parent(receipt)
         return Path(result['local_root'])
     def preflight(self,out,store):
         t=self.transport
@@ -507,6 +510,8 @@ class Experiment:
         save(Path(out)/(name+'-row.json'),row)
         return row
     def measure(self,out,store):
+        with self.transport.technical_operations():return self.measure_impl(out,store)
+    def measure_impl(self,out,store):
         rebuilt=self.details(store,'rebuild');base=self.details(store,'build');preflight=self.details(store,'preflight')
         deployment=self.details(store,'deploy')['deployment'];deployment['variant']='BASE'
         candidate=self.deploy_variant(rebuilt['candidate'],out);candidate['variant']='AFDO'
@@ -518,6 +523,7 @@ class Experiment:
         # Failure cleanup acceptance is an independent job and must finish before
         # this function creates any formal comparison plan.
         injection=self.failure_cleanup_test(out,preflight,deployment)
+        check=self.telemetry_check_test(out,preflight,deployment)
         tests=sorted((x for x in self.inputs if x['role'] in ['test','test-secondary']),key=lambda x:x['role']!='test')
         for ix,x in enumerate(tests):
             pilots=[]
@@ -543,11 +549,22 @@ class Experiment:
                     row.update(block=i,input=x['id'],attempt=attempt)
                     return row
                 def failed(attempt,pair,error):
-                    save(out/(x['id']+'-'+str(i)+'-failed-'+str(attempt)+'.json'),dict(attempt=attempt,partial=pair,error=str(error)))
+                    failed_dir=out/(x['id']+'-block-'+str(i))/('failed-attempt-'+str(attempt))
+                    archived=preserve_partial(out,'formal-'+x['id']+'-'+str(i)+'-try'+str(attempt)+'-',failed_dir)
+                    save(failed_dir/'failure.json',dict(attempt=attempt,partial=pair,error=str(error),archived=archived))
+                    save(out/(x['id']+'-'+str(i)+'-failed-'+str(attempt)+'.json'),dict(attempt=attempt,partial=pair,error=str(error),archive=str(failed_dir)))
+                    for action in self.cleanup.data['cleanup_pending']:
+                        if action.get('local') in archived:
+                            action['local']=str(failed_dir/('recovery-'+Path(action['local']).name))
+                    save(self.cleanup.path,self.cleanup.data)
                     require(self.transport.identity()==self.job['identity'],'identity changed during technical cleanup','identity',3)
                     actions=[a for a in self.cleanup.data['cleanup_pending'] if a not in checkpoint]
                     for a in sorted(reversed(actions),key=lambda a:0 if a['kind']=='process' else 1):
-                        self.transport.undo(a);self.cleanup.data['cleanup_pending'].remove(a);save(self.cleanup.path,self.cleanup.data)
+                        if a not in self.cleanup.data['cleanup_pending']:continue
+                        self.transport.undo(a)
+                        if a in self.cleanup.data['cleanup_pending']:self.cleanup.data['cleanup_pending'].remove(a)
+                        save(self.cleanup.path,self.cleanup.data)
+                        if a['kind']=='run' and Path(a['receipt']).exists():self.cleanup.reconcile_parent(a['receipt'])
                 pair=paired_block(order,one,failed)
                 rows.extend(pair.values());save(out/'rounds.json',rows)
                 blocks.append(dict(id=i,complete=True,correctness=True,control=pair['BASE']['wall_seconds'],candidate=pair['AFDO']['wall_seconds'],
@@ -562,7 +579,7 @@ class Experiment:
             save(out/'comparisons.json',comparisons)
         for label,dep in [('control',deployment),('candidate',candidate)]:
             for x in self.inputs:oracles['post-'+label+'-'+x['id']]=self.oracle('post-'+label+'-'+x['id'],x,dep,out)
-        return dict(comparisons=comparisons,oracles=oracles,rounds=rows,injection=injection)
+        return dict(comparisons=comparisons,oracles=oracles,rounds=rows,injection=injection,telemetry_check=check)
     def failure_cleanup_test(self,out,preflight,deployment):
         """A separate live process/session, never part of formal result receipts."""
         errors=[]
@@ -603,8 +620,34 @@ class Experiment:
         for policy,value in self.initial['governors'].items():
             self.cleanup.register(dict(kind='governor',policy=policy,previous=value));self.transport.governor(policy,'performance')
         return dict(passed=True,exit_code=rc,final=final,job_sha256=sha256(childfile),separate_experiment=child['experiment'])
+    def telemetry_check_test(self,out,preflight,deployment):
+        """A separate live process/session, never part of formal result receipts."""
+        errors=[]
+        for action in list(reversed(self.cleanup.data['cleanup_pending'])):
+            if action['kind'] in ['root','governor']:
+                try:
+                    self.transport.undo(action);self.cleanup.data['cleanup_pending'].remove(action);save(self.cleanup.path,self.cleanup.data)
+                except Exception as e:errors.append(str(e))
+        require(not errors,'cannot restore state before independent cleanup test')
+        child=dict(self.job)
+        child.update(experiment=self.job['experiment']+'-telemetry-check',output=str(out/'telemetry-check-job'),
+                     telemetry_check=dict(preflight=preflight,deployment=deployment,
+                         input=next(x for x in self.inputs if x['role']=='test')))
+        childfile=out/'telemetry-check-job.json';save(childfile,child)
+        with (out/'telemetry-check-driver.log').open('w') as log:
+            rc=subprocess.run([os.sys.executable,'-m','afdo_wf','run','--job',str(childfile)],stdout=log,stderr=subprocess.STDOUT).returncode
+        finals=sorted(Path(child['output']).glob('final-*.json'));require(finals,'nonformal final evidence missing')
+        final=json_load(finals[-1]);require(not final['cleanup_pending'] and not final['errors'],'nonformal cleanup incomplete')
+        require(rc==0,'three-round nonformal check failed: '+str(rc))
+        check=json_load(Path(child['output'])/'check-result.json')
+        require(check['passed'] and len(check['rounds'])==3 and all(r['telemetry']['classification']=='clean' for r in check['rounds']),'nonformal rounds not all clean')
+        if self.initial['uid']!='0':
+            self.cleanup.register(dict(kind='root',previous=False));self.transport.root(True)
+        for policy,value in self.initial['governors'].items():
+            self.cleanup.register(dict(kind='governor',policy=policy,previous=value));self.transport.governor(policy,'performance')
+        return dict(passed=True,exit_code=rc,final=final,job_sha256=sha256(childfile),separate_experiment=child['experiment'],rounds=check['rounds'])
     def injected_run(self):
-        data=self.job['injection'];out=self.d/'injection';out.mkdir(exist_ok=False)
+        data=self.job.get('telemetry_check') or self.job['injection'];out=self.d/'injection';out.mkdir(exist_ok=False)
         with self.session():
             self.ensure_work()
             self.host_artifact(self.scripts,{},True)
@@ -615,8 +658,16 @@ class Experiment:
             self.push_owned(cap,self.scripts+'/capabilities.tsv')
             mf=out/'manifest.json';save(mf,data['deployment']['manifest'])
             self.push_owned(mf,self.scripts+'/'+data['deployment']['variant']+'-manifest.json')
-            self.timed('injected-round',data['input'],data['deployment'],out,data['preflight'])
-        require(False,'injection round completed without expected signal')
+            if 'telemetry_check' in self.job:
+                rows=[]
+                with self.transport.technical_operations():
+                    for i in range(3):
+                        row=self.timed('check-'+str(i),data['input'],data['deployment'],out,data['preflight']);rows.append(row)
+                        save(self.d/'check-rows.json',rows)
+                        require(row['telemetry']['classification']=='clean','nonformal telemetry check not clean')
+                save(self.d/'check-result.json',dict(passed=True,rounds=rows,formal=False))
+            else:self.timed('injected-round',data['input'],data['deployment'],out,data['preflight'])
+        if 'telemetry_check' not in self.job:require(False,'injection round completed without expected signal')
     def report(self,out,store):
         from . import report
         measured=self.details(store,'measure');rebuilt=self.details(store,'rebuild');converted=self.details(store,'convert')
@@ -632,7 +683,7 @@ class Experiment:
             cleanup_pending=[])
         return report.write(out,payload)
     def run(self):
-        if 'injection' in self.job:return self.injected_run()
+        if 'injection' in self.job or 'telemetry_check' in self.job:return self.injected_run()
         inputs=[self.job_path,self.job['package'],self.job['inputs'],self.job['patch']]
         inputs+=list((self.w/'workflow/afdo_wf').glob('*.py'))+list((self.w/'workflow/board').glob('*.sh'))
         inputs+=list((Path(self.job['package']).parent/'workloads').glob('*'))
@@ -657,3 +708,14 @@ class Experiment:
             save(self.d/('run-end-'+str(time.time_ns())+'.json'),result)
 
 def remote_token(base,name):return base+'/'+name+'/'
+
+def preserve_partial(out,prefix,failed_dir):
+    """Move only unverified local directories; successful receipts remain immutable."""
+    out=Path(out);failed_dir=Path(failed_dir);failed_dir.mkdir(parents=True,exist_ok=False);moved={}
+    for source in sorted(out.glob(prefix+'*')):
+        if not source.is_dir() or source.is_symlink():continue
+        receipts=[Path(str(source)+'.pull.json'),source.with_name(source.name+'-pull.json')]
+        if any(p.exists() and json_load(p).get('status')=='verified' for p in receipts):continue
+        target=failed_dir/source.name;require(not target.exists(),'failed archive would overwrite')
+        source.rename(target);moved[str(source)]=str(target)
+    return moved

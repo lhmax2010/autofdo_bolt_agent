@@ -18,8 +18,13 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-taskset -c "$observer_cpu" bash "$here/telemetry.sh" "$run/telemetry.tsv" "$capabilities" & sampler=$!
-sleep 1
+taskset -c "$observer_cpu" bash "$here/telemetry.sh" "$run/telemetry.tsv" "$capabilities" "$run/telemetry.ready" "$run/telemetry.request" "$run/telemetry.done" & sampler=$!
+checks=0
+while test ! -s "$run/telemetry.ready"; do
+    kill -0 "$sampler"; sleep 0.1; checks=$((checks+1)); test "$checks" -lt 100
+done
+# Preserve the design's start-1 / end+1 window, not merely the load interval.
+while ! awk -v first="$(cat "$run/telemetry.ready")" '{exit !($1 >= first+1)}' /proc/uptime; do sleep 0.1; done
 awk '{print $1}' /proc/uptime > "$run/start.monotonic"
 export WF_WALL_FILE="$run/wall.txt"
 set +e
@@ -30,6 +35,12 @@ worker=''
 kill "$observer" 2>/dev/null || :; wait "$observer" 2>/dev/null || :; observer=''
 set -e
 awk '{print $1}' /proc/uptime > "$run/end.monotonic"
-sleep 2
+awk '{printf "%.2f\n", $1+1}' "$run/end.monotonic" > "$run/telemetry.request.tmp"
+mv "$run/telemetry.request.tmp" "$run/telemetry.request"
+checks=0
+while test ! -s "$run/telemetry.done"; do
+    kill -0 "$sampler"; sleep 0.1; checks=$((checks+1)); test "$checks" -lt 100
+done
+wait "$sampler"; sampler=''
 printf '%s\n' "$rc" > "$run/measure.exit"
 exit "$rc"

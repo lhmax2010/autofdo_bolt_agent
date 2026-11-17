@@ -6,7 +6,10 @@ import subprocess
 import time
 import uuid
 import json
-from .common import require, save, sha256
+import contextlib
+import tarfile
+import shutil
+from .common import require, save, sha256, TechnicalFailure, GateError
 from .receipts import verified_pull, delete_pulled
 
 q=shlex.quote
@@ -20,6 +23,14 @@ class SDB:
     def __init__(self,serial,logs,runner=subprocess.run):
         self.serial=serial;self.logs=Path(logs);self.logs.mkdir(parents=True,exist_ok=True)
         self.runner=runner;self.sequence=len(list(self.logs.glob("*.json")));self.retries=0;self.wait_hook=None
+    @contextlib.contextmanager
+    def technical_operations(self):
+        old=getattr(self,'technical',False);self.technical=True
+        try:yield
+        finally:self.technical=old
+    def transport_ok(self,ok,message):
+        if not ok and getattr(self,'technical',False):raise TechnicalFailure(message)
+        require(ok,message,'environment')
     def invoke(self,args,timeout=900):
         self.sequence+=1;stem=self.logs/("%06d"%self.sequence)
         argv=["sdb","-s",self.serial,*args];start=time.time()
@@ -48,11 +59,16 @@ class SDB:
             stderr=r.stderr.decode(errors="replace") if isinstance(r.stderr,bytes) else r.stderr
             stem.with_suffix(".stdout").write_text(stdout);stem.with_suffix(".stderr").write_text(stderr)
             save(stem.with_suffix(".json"),dict(argv=argv,start=start,end=time.time(),exit_code=r.returncode))
+            if getattr(self,'technical',False) and args[0] in ['push','pull','shell'] and r.returncode!=0:
+                raise TechnicalFailure('sdb '+args[0]+' exit '+str(r.returncode)+': '+str(stem))
             return r.returncode,stdout,stderr
         except BaseException as e:
             for suffix,raw in [('stdout',getattr(e,'stdout',None)),('stderr',getattr(e,'stderr',None))]:
                 if raw is not None:stem.with_suffix('.'+suffix).write_bytes(raw if isinstance(raw,bytes) else raw.encode())
-            save(stem.with_suffix(".json"),dict(argv=argv,start=start,end=time.time(),error=repr(e)))
+            meta=json.loads(stem.with_suffix('.json').read_text()) if stem.with_suffix('.json').exists() else dict(argv=argv,start=start,end=time.time())
+            meta['error']=repr(e);save(stem.with_suffix('.json'),meta)
+            if getattr(self,'technical',False) and isinstance(e,(subprocess.TimeoutExpired,OSError)):
+                raise TechnicalFailure('sdb transport: '+repr(e)) from e
             raise
     def shell(self,command,readonly=False,timeout=900):
         previous=None
@@ -64,8 +80,9 @@ class SDB:
             body=text[:matches[-1].start()] if matches else text.rstrip("\n")
             if matches and rc==0:
                 if previous is not None:require(body.rstrip("\n")==previous,"read-only retry changed output")
-                require(int(matches[-1][1])==0,"remote command failed: "+body+err,"environment")
+                self.transport_ok(int(matches[-1][1])==0,"remote command failed: "+body+err)
                 return body
+            if getattr(self,'technical',False):raise TechnicalFailure('sdb shell missing trusted exit status')
             require(readonly,"mutating command has no trusted exit status; no retry","environment")
             if previous is not None:require(body.rstrip("\n")==previous,"inconsistent read-only retries")
             previous=body.rstrip("\n")
@@ -93,7 +110,7 @@ class SDB:
     def push(self,local,remote):
         board_path(remote)
         rc,out,err=self.invoke(["push",str(local),remote])
-        require(rc==0,"push failed: "+out+err)
+        self.transport_ok(rc==0,"push failed: "+out+err)
         require(self.shell("sha256sum "+q(remote),True).split()[0]==sha256(local),"deployment SHA mismatch","identity",3)
     def remove_host_artifact(self,action):
         remote=action['remote'];board_path(remote)
@@ -129,14 +146,17 @@ class SDB:
                 if 'remote' not in action:require(False,'unverified run has no cleanup metadata')
                 exists=self.shell('if test -d '+board_path(action['remote'],True)+'; then printf yes; else printf no; fi',True)
                 if exists=='no':return
-                self.pull(action['remote'],action['local'],receipt)
+                local=Path(action['local'])
+                if local.exists():local=local.with_name(local.name+'-cleanup-'+uuid.uuid4().hex)
+                if action.get('transfer_bundle'):self.pull_legacy(action['remote'],local,receipt)
+                else:self.pull(action['remote'],local,receipt)
                 return
             delete_pulled(receipt,lambda path:self.shell("rm -rf -- "+board_path(path,True)))
         elif kind=='process':
             pidfile=action['pidfile'];board_path(pidfile,True)
             self.shell("if test -f "+q(pidfile)+"; then p=$(cat "+q(pidfile)+"); case \"$p\" in ''|*[!0-9]*) exit 2;; esac; if test -r /proc/$p/cmdline; then tr '\\000' ' ' < /proc/$p/cmdline | grep -F -- "+q(action['command_token'])+" >/dev/null || exit 3; kill -TERM -- "+("$p" if action.get('single_pid') else "-$p")+"; i=0; while kill -0 \"$p\" 2>/dev/null; do sleep 1; i=$((i+1)); test \"$i\" -lt 15 || exit 4; done; fi; fi")
         else:require(False,"unknown cleanup action")
-    def pull(self,remote,local,receipt):
+    def pull_legacy(self,remote,local,receipt):
         board_path(remote,True);local=Path(local);require(not local.exists(),"pull destination already exists")
         command="cd "+q(remote)+" && find . -type f -exec sha256sum {} \\; | sort"
         manifest_text=self.shell(command,True);manifest={}
@@ -161,3 +181,70 @@ class SDB:
         verified_pull(receipt,local,manifest,remote,verified_empty=not manifest)
         delete_pulled(receipt,lambda path:self.shell("rm -rf -- "+board_path(path,True)))
         return dict(files=manifest,local_root=str(local))
+
+    def pull(self,remote,local,receipt):
+        """One uncompressed archive; no board deletion before two-level SHA proof."""
+        board_path(remote,True);local=Path(local);require(not local.exists(),'pull destination already exists')
+        token=uuid.uuid4().hex
+        bundle=remote+'.transfer-'+token
+        transfer=local.with_name(local.name+'.transfer-'+token)
+        bundle_receipt=Path(str(transfer)+'.pull.json')
+        if hasattr(self,'journal'):
+            self.journal.register(dict(kind='run',remote=bundle,local=str(transfer)+'-cleanup',receipt=str(bundle_receipt),transfer_bundle=True))
+        self.shell('test ! -e '+q(bundle)+' && mkdir '+q(bundle))
+        command='cd '+q(remote)+" && find . -type f -exec sha256sum {} \; | sort"
+        self.shell('('+command+') > '+q(bundle+'/members.sha256')+' && tar -cf '+q(bundle+'/round.tar')+' -C '+q(remote)+' . && cd '+q(bundle)+' && sha256sum round.tar members.sha256 > archive.sha256')
+        transfer.mkdir(parents=True)
+        for name in ['archive.sha256','members.sha256','round.tar']:
+            rc,out,err=self.invoke(['pull',bundle+'/'+name,str(transfer/name)])
+            if rc:raise TechnicalFailure('archive pull exit '+str(rc)+': '+out+err)
+        try:
+            archive_manifest=parse_manifest((transfer/'archive.sha256').read_text(),dot=False)
+            require(set(archive_manifest)=={'round.tar','members.sha256'},'invalid archive SHA manifest')
+            for name,digest in archive_manifest.items():require(sha256(transfer/name)==digest,'archive SHA mismatch '+name)
+            manifest=parse_manifest((transfer/'members.sha256').read_text())
+            extract_verified(transfer/'round.tar',local,manifest)
+            require(self.shell(command,True).strip()==(transfer/'members.sha256').read_text().strip(),'remote changed during archive pull')
+            verified_pull(receipt,local,manifest,remote,verified_empty=not manifest)
+            bundle_files={name:sha256(transfer/name) for name in ['archive.sha256','members.sha256','round.tar']}
+            verified_pull(bundle_receipt,transfer,bundle_files,bundle)
+        except (GateError,OSError,tarfile.TarError,ValueError) as e:
+            raise TechnicalFailure('archive verification: '+str(e)) from e
+        delete_pulled(receipt,lambda path:self.shell('rm -rf -- '+board_path(path,True)))
+        delete_pulled(bundle_receipt,lambda path:self.shell('rm -rf -- '+board_path(path,True)))
+        if hasattr(self,'journal'):
+            self.journal.reconcile_parent(receipt)
+            self.journal.data['cleanup_pending']=[a for a in self.journal.data['cleanup_pending'] if a.get('receipt') not in [str(bundle_receipt),str(receipt)]]
+            save(self.journal.path,self.journal.data)
+        return dict(files=manifest,local_root=str(local),bundle_receipt=str(bundle_receipt))
+
+def parse_manifest(text,dot=True):
+    result={}
+    for line in text.splitlines():
+        digest,name=line.split(None,1);name=name.lstrip(' *')
+        if dot:
+            require(name.startswith('./'),'invalid member name');name=name[2:]
+        require(re.fullmatch('[0-9a-f]{64}',digest) and name not in result,'invalid/duplicate SHA record')
+        require(name and not Path(name).is_absolute() and '..' not in Path(name).parts,'unsafe archive member')
+        result[name]=digest
+    return result
+
+def extract_verified(archive,destination,manifest):
+    """Reject links/devices/duplicate paths, then verify every regular member."""
+    destination=Path(destination)
+    try:
+        destination.mkdir(parents=True,exist_ok=False);seen=set()
+        with tarfile.open(archive,'r:') as tar:
+            for member in tar:
+                name=member.name
+                if name in ['.','./'] and member.isdir():continue
+                if name.startswith('./'):name=name[2:]
+                require(name and not Path(name).is_absolute() and '..' not in Path(name).parts,'unsafe tar path')
+                target=destination/name
+                if member.isdir():target.mkdir(parents=True,exist_ok=True);continue
+                require(member.isfile() and name in manifest and name not in seen,'unexpected tar member '+name)
+                target.parent.mkdir(parents=True,exist_ok=True)
+                with tar.extractfile(member) as source,target.open('xb') as output:shutil.copyfileobj(source,output)
+                require(sha256(target)==manifest[name],'member SHA mismatch '+name);seen.add(name)
+        require(seen==set(manifest),'missing tar members')
+    except (GateError,OSError,tarfile.TarError,ValueError) as e:raise TechnicalFailure('extract failed: '+str(e)) from e

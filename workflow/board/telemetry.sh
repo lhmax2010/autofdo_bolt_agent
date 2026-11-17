@@ -2,6 +2,8 @@
 set -eu
 here=${0%/*}; . "$here/common.sh"
 out=$1; capabilities=$2
+ready=${3:-}; request=${4:-}; done_file=${5:-}
+if test -n "$ready"; then safe_path "$ready"; safe_path "$request"; safe_path "$done_file"; fi
 safe_path "$out"; safe_path "$capabilities"; test ! -e "$out"
 # capabilities TSV: frequency|temperature|voltage<TAB>read-only sysfs path.
 # Each SAMPLE/END envelope permits detection of a truncated final line.
@@ -18,5 +20,11 @@ while :; do
         fi
     done < "$capabilities"
     printf 'END\t%s\n' "$stamp" >> "$out"
+    if test -n "$ready"; then
+        if test ! -e "$ready"; then printf '%s\n' "$stamp" > "$ready.tmp"; mv "$ready.tmp" "$ready"; fi
+        if test -s "$request" && awk -v now="$stamp" -v until="$(cat "$request")" 'BEGIN { exit !(now >= until) }'; then
+            printf '%s\n' "$stamp" > "$done_file"; exit 0
+        fi
+    fi
     sleep 1
 done
