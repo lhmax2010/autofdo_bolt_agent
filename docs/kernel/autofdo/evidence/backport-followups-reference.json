@@ -1,0 +1,167 @@
+[
+  {
+    "sha": "3f65aa8ede2377c47c11f1c38b44226b8ca60477",
+    "title": "Documentation: dev-tools: Fix a typo in autofdo documentation",
+    "date": "2025-09-03T15:44:14.000-06:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch Documentation/dev-tools/autofdo.rst...\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "1ba9f8979426590367406c70c1c821f5b943f993",
+    "title": "vmlinux.lds: Unify TEXT_MAIN, DATA_MAIN, and related macros",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n#define ALIGN_FUNCTION()  . = ALIGN(CONFIG_FUNCTION_ALIGNMENT)\n\n/*\n * LD_DEAD_CODE_DATA_ELIMINATION option enables -fdata-sections, which\n * generates .data.identifier sections, which need to be pulled in with\n * .data. We don't want to pull in .data..other sections, which Linux\n * has defined. Same for text and bss.\n *\n * With LTO_CLANG, the linker also splits sections by default, so we need\n * these macros to combine the sections during the final link.\n *\n * With AUTOFDO_CLANG and PROPELLER_CLANG, by default, the linker splits\n * text sections and regroups functions into subsections.\n *\n * RODATA_MAIN is not used because existing code already defines .rodata.x\n * sections to be brought in with rodata.\n */\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG) || \\\ndefined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n#else\n#define TEXT_MAIN .text\n#endif\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG)\n#define DATA_MAIN .data .data.[0-9a-zA-Z_]* .data.rel.* .data..L* .data..compoundliteral* .data.$__unnamed_* .data.$L*\n#define SDATA_MAIN .sdata .sdata.[0-9a-zA-Z_]*\n#define RODATA_MAIN .rodata .rodata.[0-9a-zA-Z_]* .rodata..L*\n#define BSS_MAIN .bss .bss.[0-9a-zA-Z_]* .bss..L* .bss..compoundliteral*\n#define SBSS_MAIN .sbss .sbss.[0-9a-zA-Z_]*\n#else\n#define DATA_MAIN .data .data.rel .data.rel.local\n#define SDATA_MAIN .sdata\n#define RODATA_MAIN .rodata\n#define BSS_MAIN .bss\n#define SBSS_MAIN .sbss\n#endif\n\n/*\n * GCC 4.5 and later have a 32 bytes section alignment for structures.\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:87\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch scripts/module.lds.S...\nHunk #1 succeeded at 36 (offset -2 lines).\nerror: while searching for:\n\t\t*(.rodata .rodata.[0-9a-zA-Z_]*)\n\t\t*(.rodata..L*)\n\t}\n#endif\n\tMOD_SEPARATE_CODETAG_SECTIONS()\n}\n\n\nerror: patch failed: scripts/module.lds.S:58\nerror: scripts/module.lds.S: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "6568f14cb5ae68cd6c612604ca0c89301cf3a0d0",
+    "title": "vmlinux.lds: Exclude .text.startup and .text.exit from TEXT_MAIN",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\n/*\n * Support -ffunction-sections by matching .text and .text.*,\n * but exclude '.text..*'.\n *\n * Special .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n * TEXT_MAIN.\n */\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n\n/*\n * Support -fdata-sections by matching .data, .data.*, and others,\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:88\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "f6a8919d61484ae9ca6b1855035fcfb2ba6e2af9",
+    "title": "vmlinux.lds: Fix TEXT_MAIN to include .text.start and friends",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * Support -ffunction-sections by matching .text and .text.*,\n * but exclude '.text..*', .text.startup[.*], and .text.exit[.*].\n *\n * .text.startup and .text.startup.* are matched later by INIT_TEXT.\n * .text.exit and .text.exit.* are matched later by EXIT_TEXT.\n *\n * Other .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:90\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "56255fa96871d3bd0d924a53585cdf5594262891",
+    "title": "media: atomisp: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "date": "2025-11-13T08:03:09.000+01:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch drivers/staging/media/atomisp/i2c/atomisp-ov2722.c...\nHunk #1 succeeded at 610 (offset 10 lines).\nHunk #2 succeeded at 672 (offset 10 lines).\nHunk #3 succeeded at 687 (offset 10 lines).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "0330b7fbbf313b35470306a492b9e7a703b5af56",
+    "title": "drivers/xen/xenbus: Fix namespace collision and split() section placement with AutoFDO",
+    "date": "2025-11-13T08:03:10.000+01:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch drivers/xen/xenbus/xenbus_xs.c...\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "9c7dc1dd897a1cdcade9566ea4664b03fbabf4a4",
+    "title": "objtool: Warn on functions with ambiguous -ffunction-sections section names",
+    "date": "2025-11-13T08:03:10.000+01:00",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * Other .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n * TEXT_MAIN.\n */\n#define TEXT_MAIN\t\t\t\t\t\t\t\\\n\t.text\t\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:97\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch tools/objtool/Documentation/objtool.txt...\nerror: while searching for:\n    these special names and does not use module_init() / module_exit()\n    macros to create them.\n\n\nIf the error doesn't seem to make sense, it could be a bug in objtool.\nFeel free to ask objtool maintainers for help.\n\nerror: patch failed: tools/objtool/Documentation/objtool.txt:456\nerror: tools/objtool/Documentation/objtool.txt: patch does not apply\nChecking patch tools/objtool/check.c...\nHunk #1 succeeded at 2725 (offset 62 lines).\nerror: while searching for:\n\tif (!nr_insns)\n\t\tgoto out;\n\n\tif (opts.retpoline)\n\t\twarnings += validate_retpoline(file);\n\n\nerror: patch failed: tools/objtool/check.c:4932\nerror: tools/objtool/check.c: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "024020e2b6adb4e568fb80f624b5e20d8943f107",
+    "title": "objtool: Support Clang AUTOFDO .cold functions",
+    "date": "2025-11-21T10:04:07.000+01:00",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch tools/objtool/elf.c...\nerror: while searching for:\n\tif (strstarts(sym->name, \".klp.sym\"))\n\t\tsym->klp = 1;\n\n\tif (!sym->klp && is_func_sym(sym) && strstr(sym->name, \".cold\"))\n\t\tsym->cold = 1;\n\tsym->pfunc = sym->cfunc = sym;\n\n\tsym->demangled_name = demangle_name(sym);\n\nerror: patch failed: tools/objtool/elf.c:502\nerror: tools/objtool/elf.c: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "2c2acca2eabf53a954ed5aacef987bbf909b9f12",
+    "title": "objtool: Fix .cold function detection for duplicate symbols",
+    "date": "2025-11-21T10:04:07.000+01:00",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch tools/objtool/elf.c...\nerror: while searching for:\n\treturn NULL;\n}\n\nstruct symbol *find_global_symbol_by_name(const struct elf *elf, const char *name)\n{\n\tstruct symbol *sym;\n\nerror: patch failed: tools/objtool/elf.c:288\nerror: tools/objtool/elf.c: patch does not apply\nChecking patch tools/objtool/include/objtool/elf.h...\nHunk #1 succeeded at 57 (offset -12 lines).\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "2c715c9de293b6c05bcdff1c22a7626f3bb42492",
+    "title": "media: atomisp: gc2235: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "date": "2025-11-21T10:04:09.000+01:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch drivers/staging/media/atomisp/i2c/atomisp-gc2235.c...\nHunk #1 succeeded at 501 (offset 10 lines).\nHunk #2 succeeded at 566 (offset 10 lines).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "845c09e4744f111eae894ad3b67a369bb43d50fb",
+    "title": "tty: amiserial: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "date": "2025-11-21T10:04:09.000+01:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch drivers/tty/amiserial.c...\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "da6202139aef11c3c5881176e6e3184d88d8a0d9",
+    "title": "serial: icom: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "date": "2025-11-21T10:04:09.000+01:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch drivers/tty/serial/icom.c...\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "31863337138a0482d614f1090727dac87c936959",
+    "title": "tty: synclink_gt: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "date": "2025-11-21T10:04:10.000+01:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch drivers/tty/synclink_gt.c...\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "93863f3f859a626347ce2ec18947b11357b4ca14",
+    "title": "kbuild: Check for functions with ambiguous -ffunction-sections section names",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * .text.startup could be __attribute__((constructor)) code in a *non*\n * ffunction-sections object, which should be placed in .init.text; or it could\n * be an actual function named startup() in an ffunction-sections object, which\n * should be placed in .text.  Objtool will detect and complain about any such\n * ambiguously named functions.\n */\n#define TEXT_MAIN\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:110\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch scripts/Makefile.vmlinux_o...\nHunk #1 succeeded at 56 (offset -7 lines).\nChecking patch scripts/check-function-names.sh...\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "a960c2cdb19e237f284a3b96eb8a0359abcf0e63",
+    "title": "kbuild: rust: add AutoFDO support",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch scripts/Makefile.autofdo...\nChecking patch scripts/Makefile.lib...\nHunk #1 succeeded at 218 (offset 95 lines).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "de0bf1e138fcd6efdb4ddac764eb9f3487122535",
+    "title": "arch/Kconfig: Remove tautological condition from AUTOFDO_CLANG",
+    "date": "2026-05-27T15:20:04.000-07:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch arch/Kconfig...\nHunk #1 succeeded at 818 (offset -48 lines).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "e88b2fe8b9993c9cae856019b1c31c14b63cad7a",
+    "title": "kconfig: Remove the architecture specific config for AutoFDO",
+    "date": "2026-06-05T21:12:08.000-07:00",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch Documentation/dev-tools/autofdo.rst...\nChecking patch arch/Kconfig...\nerror: while searching for:\n\t  module-specific compiler options, and simplifies debugging.\nendchoice\n\nconfig ARCH_SUPPORTS_AUTOFDO_CLANG\n\tbool\n\nconfig AUTOFDO_CLANG\n\tbool \"Enable Clang's AutoFDO build (EXPERIMENTAL)\"\n\tdepends on ARCH_SUPPORTS_AUTOFDO_CLANG\n\tdepends on CC_IS_CLANG\n\thelp\n\t  This option enables Clang\u2019s AutoFDO build. When\n\nerror: patch failed: arch/Kconfig:879\nerror: arch/Kconfig: patch does not apply\nChecking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_SUPPORTS_AUTOFDO_CLANG\n\tselect ARCH_SUPPORTS_PROPELLER_CLANG    if X86_64\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CX8\n\nerror: patch failed: arch/x86/Kconfig:130\nerror: arch/x86/Kconfig: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "2566fa7b2f2402a77dae6a5e9b28a1bae1c20793",
+    "title": "kconfig: Remove the architecture specific config for Propeller",
+    "date": "2026-06-05T21:12:08.000-07:00",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch Documentation/dev-tools/propeller.rst...\nChecking patch arch/Kconfig...\nHunk #1 succeeded at 832 (offset -63 lines).\nChecking patch arch/arm64/kernel/vmlinux.lds.S...\nerror: while searching for:\n\n\tSTABS_DEBUG\n\tDWARF_DEBUG\n\tMODINFO\n\tELF_DETAILS\n\n\nerror: patch failed: arch/arm64/kernel/vmlinux.lds.S:368\nerror: arch/arm64/kernel/vmlinux.lds.S: patch does not apply\nChecking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_SUPPORTS_PROPELLER_CLANG    if X86_64\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CX8\n\tselect ARCH_USE_MEMTEST\n\nerror: patch failed: arch/x86/Kconfig:130\nerror: arch/x86/Kconfig: patch does not apply\nChecking patch arch/x86/kernel/vmlinux.lds.S...\nerror: while searching for:\n\n\tSTABS_DEBUG\n\tDWARF_DEBUG\n#ifdef CONFIG_PROPELLER_CLANG\n\t.llvm_bb_addr_map : { *(.llvm_bb_addr_map) }\n#endif\n\n\tMODINFO\n\tELF_DETAILS\n\n\nerror: patch failed: arch/x86/kernel/vmlinux.lds.S:423\nerror: arch/x86/kernel/vmlinux.lds.S: patch does not apply\nChecking patch include/asm-generic/vmlinux.lds.h...\nHunk #1 succeeded at 990 (offset -21 lines).\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "7594302d9ddd9f198173a658250e7b7debc6ed76",
+    "title": "kbuild: rust: rename flag to `-Zdebuginfo-for-profiling` for Rust >= 1.98",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch scripts/Makefile.autofdo...\n",
+    "apply_exit": 0
+  }
+]

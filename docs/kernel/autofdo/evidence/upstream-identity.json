@@ -1,0 +1,32 @@
+{
+  "rev-parse HEAD": {
+    "exit": 0,
+    "stdout": "988117cc1bb17338c586a4e21ade88b5397eac33\n",
+    "stderr": ""
+  },
+  "describe --tags --exact-match": {
+    "exit": 0,
+    "stdout": "v7.3.5\n",
+    "stderr": ""
+  },
+  "rev-parse --is-shallow-repository": {
+    "exit": 0,
+    "stdout": "true\n",
+    "stderr": ""
+  },
+  "grep -n ARCH_SUPPORTS_AUTOFDO_CLANG\\|ARCH_SUPPORTS_PROPELLER_CLANG HEAD -- arch": {
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "ls-tree HEAD kernel/pgo": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "grep -n CONFIG_PGO_CLANG HEAD -- kernel arch Makefile": {
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  }
+}

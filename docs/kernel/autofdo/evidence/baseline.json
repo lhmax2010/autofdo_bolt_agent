@@ -1,0 +1,93 @@
+[
+  {
+    "command": [
+      "git",
+      "-C",
+      "src/linux-rpi",
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "42aeefac58edeb081aff440f0b60be71cbe49755\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "src/linux-rpi",
+      "merge-base",
+      "HEAD",
+      "c27f160de761bb55f64672ceac642698a6e93684"
+    ],
+    "exit": 0,
+    "stdout": "21645b17c0d913e2ba7e10fbc9c993d286b3f57d\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "src/linux-rpi",
+      "log",
+      "--format=%H %s",
+      "c27f160de761..HEAD"
+    ],
+    "exit": 0,
+    "stdout": "42aeefac58edeb081aff440f0b60be71cbe49755 drivers: media: pci: hailo: Port Hailo accelerator driver to v4.22.0\nd5ef43b342dcbcbddb464bc20deae6ced6ed7193 configs: packaging: modularize defconfig with RT and LSM fragments\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "src/linux-rpi",
+      "log",
+      "--format=%H %s",
+      "HEAD..c27f160de761"
+    ],
+    "exit": 0,
+    "stdout": "c27f160de761bb55f64672ceac642698a6e93684 ARM: enable PMUv3 for the RPi4 Tizen defconfig\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "src/linux-rpi",
+      "show",
+      "--format=fuller",
+      "c27f160de761",
+      "--",
+      "arch/arm/configs/tizen_bcm2711_defconfig"
+    ],
+    "exit": 0,
+    "stdout": "commit c27f160de761bb55f64672ceac642698a6e93684\nAuthor:     Hao Lin <hao.lin@samsung.com>\nAuthorDate: Tue Oct 27 20:14:51 2026 +0800\nCommit:     Hao Lin <hao.lin@samsung.com>\nCommitDate: Tue Oct 27 20:14:51 2026 +0800\n\n    ARM: enable PMUv3 for the RPi4 Tizen defconfig\n    \n    Add CONFIG_ARM_PMUV3=y next to CONFIG_PROFILING. Cortex-A72 uses the\n    arm_pmuv3 driver, but ARM_PMUV3 defaults to ARM64 so the 32-bit defconfig\n    omits it, leaving the A72 PMU unbound and hardware perf events absent.\n    \n    Evidence: drivers/perf/Kconfig:146 (default ARM64),\n    drivers/perf/arm_pmuv3.c:1383 (arm,cortex-a72-pmu), and\n    drivers/perf/arm_v7_pmu.c:1947-1959 (match table without Cortex-A72).\n    Only the normal ARM defconfig is changed; ARM64 and RT are unchanged.\n    \n    Change-Id: I39255cc161e0b1664c761bb3d7ed384a4120870e\n\ndiff --git a/arch/arm/configs/tizen_bcm2711_defconfig b/arch/arm/configs/tizen_bcm2711_defconfig\nindex bf97a71b2c3d..abdbb93e1765 100644\n--- a/arch/arm/configs/tizen_bcm2711_defconfig\n+++ b/arch/arm/configs/tizen_bcm2711_defconfig\n@@ -31,6 +31,7 @@ CONFIG_SCHED_AUTOGROUP=y\n CONFIG_BLK_DEV_INITRD=y\n CONFIG_EXPERT=y\n CONFIG_PROFILING=y\n+CONFIG_ARM_PMUV3=y\n CONFIG_ARCH_BCM=y\n CONFIG_ARCH_BCM2835=y\n CONFIG_ARM_LPAE=y\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "src/linux-rpi",
+      "cat-file",
+      "-t",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 128,
+    "stdout": "",
+    "stderr": "fatal: git cat-file: could not get object info\n"
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "temp/kernel-afdo-k0/resourced",
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "94d346c306233803661e8eab8557596549d82be4\n",
+    "stderr": ""
+  }
+]

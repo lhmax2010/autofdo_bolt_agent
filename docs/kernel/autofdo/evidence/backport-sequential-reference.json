@@ -1,0 +1,76 @@
+[
+  {
+    "sha": "315ad8780a129e82e2c5c65ee6e970d91a577acb",
+    "title": "kbuild: Add AutoFDO support for Clang build",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch Documentation/dev-tools/autofdo.rst...\nChecking patch Documentation/dev-tools/index.rst...\nChecking patch MAINTAINERS...\nHunk #1 succeeded at 3682 (offset 17 lines).\nChecking patch Makefile...\nHunk #1 succeeded at 1028 (offset 5 lines).\nChecking patch arch/Kconfig...\nHunk #1 succeeded at 812 (offset 1 line).\nChecking patch arch/x86/Kconfig...\nChecking patch scripts/Makefile.autofdo...\nChecking patch scripts/Makefile.lib...\nHunk #1 succeeded at 210 (offset 19 lines).\nChecking patch tools/objtool/check.c...\nHunk #1 succeeded at 4586 (offset 29 lines).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "0043ecea2399ffc8bfd99ed9dbbe766e7c79293c",
+    "title": "vmlinux.lds.h: Adjust symbol ordering in text output section",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch arch/sparc/kernel/vmlinux.lds.S...\nChecking patch include/asm-generic/vmlinux.lds.h...\nHunk #1 succeeded at 554 (offset 1 line).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "db0b2991ae1aac5ca985ec6fd8ff9bd9b2126c9b",
+    "title": "vmlinux.lds.h: Add markers for text_unlikely and text_hot sections",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nHunk #1 succeeded at 550 (offset 1 line).\nHunk #2 succeeded at 576 (offset 1 line).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "0847420f5e499a7ab518942fff71482179290163",
+    "title": "AutoFDO: Enable -ffunction-sections for the AutoFDO build",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nChecking patch scripts/Makefile.autofdo...\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "2fd65f7afd5a73b685a1651cb651ade120b53e15",
+    "title": "AutoFDO: Enable machine function split optimization for AutoFDO",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nHunk #1 succeeded at 557 (offset 1 line).\nHunk #2 succeeded at 588 (offset 1 line).\nHunk #3 succeeded at 596 (offset 1 line).\nChecking patch scripts/Makefile.autofdo...\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "d5dc95836147f2e25b134c0ca3a0bc1a5867ea29",
+    "title": "kbuild: Add Propeller configuration for kernel build",
+    "date": "2024-11-27T09:38:27.000+09:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch Documentation/dev-tools/index.rst...\nChecking patch Documentation/dev-tools/propeller.rst...\nChecking patch MAINTAINERS...\nHunk #1 succeeded at 18536 (offset 33 lines).\nChecking patch Makefile...\nHunk #1 succeeded at 1029 (offset 5 lines).\nChecking patch arch/Kconfig...\nHunk #1 succeeded at 832 (offset 1 line).\nChecking patch arch/x86/Kconfig...\nChecking patch arch/x86/kernel/vmlinux.lds.S...\nChecking patch include/asm-generic/vmlinux.lds.h...\nChecking patch scripts/Makefile.lib...\nHunk #1 succeeded at 220 (offset 19 lines).\nChecking patch scripts/Makefile.propeller...\nChecking patch tools/objtool/check.c...\nHunk #1 succeeded at 4587 (offset 29 lines).\n",
+    "apply_exit": 0
+  },
+  {
+    "sha": "bb43a59944f45e89aa158740b8a16ba8f0b0fa2b",
+    "title": "Rename .data.unlikely to .data..unlikely",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t*(.data..decrypted)\t\t\t\t\t\t\\\n\t*(.ref.data)\t\t\t\t\t\t\t\\\n\t*(.data..shared_aligned) /* percpu related */\t\t\t\\\n\t*(.data.unlikely)\t\t\t\t\t\t\\\n\t__start_once = .;\t\t\t\t\t\t\\\n\t*(.data.once)\t\t\t\t\t\t\t\\\n\t__end_once = .;\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:357\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch include/linux/rcupdate.h...\nerror: while searching for:\n */\n#define RCU_LOCKDEP_WARN(c, s)\t\t\t\t\t\t\\\n\tdo {\t\t\t\t\t\t\t\t\\\n\t\tstatic bool __section(\".data.unlikely\") __warned;\t\\\n\t\tif (debug_lockdep_rcu_enabled() && (c) &&\t\t\\\n\t\t    debug_lockdep_rcu_enabled() && !__warned) {\t\t\\\n\t\t\t__warned = true;\t\t\t\t\\\n\nerror: patch failed: include/linux/rcupdate.h:401\nerror: include/linux/rcupdate.h: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "dbefa1f31a91670c9e7dac9b559625336206466f",
+    "title": "Rename .data.once to .data..once to fix resetting WARN*_ONCE",
+    "check_exit": 1,
+    "stdout": "",
+    "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t*(.data..shared_aligned) /* percpu related */\t\t\t\\\n\t*(.data..unlikely)\t\t\t\t\t\t\\\n\t__start_once = .;\t\t\t\t\t\t\\\n\t*(.data.once)\t\t\t\t\t\t\t\\\n\t__end_once = .;\t\t\t\t\t\t\t\\\n\tSTRUCT_ALIGN();\t\t\t\t\t\t\t\\\n\t*(__tracepoints)\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:359\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch include/linux/mmdebug.h...\nerror: while searching for:\n\t\t}\t\t\t\t\t\t\t\\\n\t} while (0)\n#define VM_WARN_ON_ONCE_PAGE(cond, page)\t({\t\t\t\\\n\tstatic bool __section(\".data.once\") __warned;\t\t\t\\\n\tint __ret_warn_once = !!(cond);\t\t\t\t\t\\\n\t\t\t\t\t\t\t\t\t\\\n\tif (unlikely(__ret_warn_once && !__warned)) {\t\t\t\\\n\nerror: patch failed: include/linux/mmdebug.h:46\nerror: include/linux/mmdebug.h: patch does not apply\nChecking patch include/linux/once.h...\nerror: while searching for:\n#define DO_ONCE(func, ...)\t\t\t\t\t\t     \\\n\t({\t\t\t\t\t\t\t\t     \\\n\t\tbool ___ret = false;\t\t\t\t\t     \\\n\t\tstatic bool __section(\".data.once\") ___done = false;\t     \\\n\t\tstatic DEFINE_STATIC_KEY_TRUE(___once_key);\t\t     \\\n\t\tif (static_branch_unlikely(&___once_key)) {\t\t     \\\n\t\t\tunsigned long ___flags;\t\t\t\t     \\\n\nerror: patch failed: include/linux/once.h:46\nerror: include/linux/once.h: patch does not apply\nChecking patch include/linux/once_lite.h...\nerror: while searching for:\n\n#define __ONCE_LITE_IF(condition)\t\t\t\t\t\\\n\t({\t\t\t\t\t\t\t\t\\\n\t\tstatic bool __section(\".data.once\") __already_done;\t\\\n\t\tbool __ret_cond = !!(condition);\t\t\t\\\n\t\tbool __ret_once = false;\t\t\t\t\\\n\t\t\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/linux/once_lite.h:12\nerror: include/linux/once_lite.h: patch does not apply\nChecking patch include/net/net_debug.h...\nerror: while searching for:\n\n#define netdev_level_once(level, dev, fmt, ...)\t\t\t\\\ndo {\t\t\t\t\t\t\t\t\\\n\tstatic bool __section(\".data.once\") __print_once;\t\\\n\t\t\t\t\t\t\t\t\\\n\tif (!__print_once) {\t\t\t\t\t\\\n\t\t__print_once = true;\t\t\t\t\\\n\nerror: patch failed: include/net/net_debug.h:27\nerror: include/net/net_debug.h: patch does not apply\nChecking patch mm/internal.h...\nerror: while searching for:\n * when we specify __GFP_NOWARN.\n */\n#define WARN_ON_ONCE_GFP(cond, gfp)\t({\t\t\t\t\\\n\tstatic bool __section(\".data.once\") __warned;\t\t\t\\\n\tint __ret_warn_once = !!(cond);\t\t\t\t\t\\\n\t\t\t\t\t\t\t\t\t\\\n\tif (unlikely(!(gfp & __GFP_NOWARN) && __ret_warn_once && !__warned)) { \\\n\nerror: patch failed: mm/internal.h:48\nerror: mm/internal.h: patch does not apply\n",
+    "apply_exit": null
+  },
+  {
+    "sha": "d63b852430be7fa2b6d7c550ea67e94b6681d0b5",
+    "title": "kbuild: Fix Propeller build option",
+    "date": "2024-11-27T09:38:27.000+09:00",
+    "check_exit": 0,
+    "stdout": "",
+    "stderr": "Checking patch scripts/Makefile.propeller...\n",
+    "apply_exit": 0
+  }
+]

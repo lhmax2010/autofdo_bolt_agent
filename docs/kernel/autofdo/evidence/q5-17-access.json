@@ -1,0 +1,47 @@
+{
+  "task": "kernel AutoFDO K0; Q.5 item 17 disclosure",
+  "time_precision": "Session interval only; no per-read timestamp log. This is a retrospective disclosure, not a preregistration.",
+  "task_start_file_mtime_utc": "2026-11-17T15:29:15.108875+00:00",
+  "statistics_output_mtime_utc": "2026-11-17T15:32:45.915954+00:00",
+  "disclosure_written_utc": "2026-11-17T16:01:17.182550+00:00",
+  "raw_text_reads": [
+    {
+      "path": "temp/board-round1-retry/extras-fixed/module/perfscript.txt",
+      "sha256": "52c0329cd044264bfd6a8b46064d37f6428ea293bfd66d277fab03cf63447abd"
+    },
+    {
+      "path": "temp/board-round1-retry/extras-fixed/lost-bounded/perfscript.txt",
+      "sha256": "c95baff492d91ff9b410bf39dd9c4cc4e6fc9702933c65a071bc8ceb785e9e5e"
+    },
+    {
+      "path": "temp/board-round1-retry/extras-system/system-pressure/perfscript.txt",
+      "sha256": "0baa064b0a35a8b1bb7d20493d0564adc60b56476b6f252c2a69fad01b131e82"
+    }
+  ],
+  "purpose": "Kernel/module sample fractions, kernel mmap/build-id, top IP/PID, existing LOST/background context; no profile generation or M1 tuning.",
+  "known_information": "Kernel fractions and hot addresses from the same FFmpeg software object are now known; subsequent blinded evaluation must inherit this exposure.",
+  "related_metadata_reads": [
+    "docs/profgen/impl/evidence/12/60_module.json",
+    "docs/profgen/impl/evidence/12/60_lost-bounded.json",
+    "docs/profgen/impl/evidence/12/60_system-pressure.json",
+    "temp/board-round1-retry/extras-fixed/lost-bounded/report.txt",
+    "temp/board-round1-retry/extras-system/system-pressure/report.txt",
+    "docs/probe/evidence/05/01_environment_hardware.txt",
+    "docs/probe/evidence/17_rpi5_sampling.txt",
+    "docs/probe/evidence/02_rpi4.txt",
+    "docs/probe/evidence/15_rpi5_environment.txt",
+    "docs/profgen/impl/12_board_round1.md"
+  ],
+  "not_opened": [
+    "temp/m1-*",
+    "workflow runtime directories",
+    "formal matrix perf.data",
+    "real sample profile bodies"
+  ],
+  "not_changed": [
+    "M1 thresholds",
+    "M1 success criteria",
+    "profile conversion settings",
+    "Q.5 existing files"
+  ]
+}

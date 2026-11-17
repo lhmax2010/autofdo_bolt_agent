@@ -40,6 +40,12 @@
 
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
 
+## 内核 AutoFDO 轨道（与 workflow 并列）
+
+- [能力增强方案 v0.1](kernel/autofdo/01_arm_profile_capability_proposal_v0.1.md) 已原样 mv 入库；SHA-256 `be164e5f1372863abc5c0fb80046da13a1a4eb5e37201ee633ebac34869a87b3`；待 Kimi/Codex 评审。
+- K0 进行中：[可行性评估](kernel/autofdo/00_feasibility.md)与[回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已完成本轮事实整理；conditional go（ARM32/A32、非 LTO/MFS）。linux-rpi SSH 克隆失败后按规则停止，`0fac5de6` 精确基线与回移植未验证，K0 尚未关闭；resourced 指定提交已核实。未构建、未接板。
+- K1 在 M1 完成后开始；刷写另须用户确认。
+
 ## Workflow M1：观察器/恢复通过，attempt-08在SDB拉回失败后停止（2026-11-17任务）
 
 - [报告第11节](workflow/m1/05_m1_board_e2e.md)：PM新观察器判据、SHA三元组一次缓存与注入路径修正完成；实际attempt-06夹具通过。最终155项测试与15脚本语法检查通过。代码/attempt-07检查点已推送 `5b4af659819776c9b4132325626486ee835dba31`。
