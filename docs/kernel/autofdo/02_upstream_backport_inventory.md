@@ -1,4 +1,67 @@
-# 上游提交与参考树逐项检查
+# 上游提交与 K 基线逐项检查
+
+**当前检查基线为 K `0fac5de6a63091d141ad1cd3ed9d9e92b8dde708`。** 首轮 B 检查保留在后半部分作为历史。K 已增量取得，传输一次成功、重试 0 次；此处取代首轮“K 未取得”的未验证结论。
+
+## 1. K 的方法与结果
+
+独立 worktree：`temp/kernel-afdo-k0/backport-k-check`，detached HEAD=K；使用 sparse checkout 纳入全部 patch 涉及路径及源码分析路径，不构建。对旧清单 37 项（含别名和明确不属于 K1 前置的项目）逐一核验原 patch SHA 并执行 `git apply --check --verbose`，失败时做 reverse-check。此阶段开始前工作区干净。
+
+随后按原核心/后续顺序累计检查 29 项。只有 check 成功项才临时 apply，供下一个依赖检查；失败项不解决、不半应用、不提交。JSON 的 prior_applied 给出每一步精确前置集合，避免把“裸 K 缺文件”和“已有前置仍冲突”混为一谈。未构建、未运行最终链接/启动验证。
+
+**结果：37 项独立检查中 10 项干净、4 项 reverse 干净、23 项缺前置或上下文不匹配；29 项累计中 18 项干净、11 项失败。七项核心均累计干净。** 11 个失败中，两项数据节改名已在 K 以稳定树提交存在；另外九项需要适配或补依赖。4 个 reverse 干净条目含 i915 的 topic/主线别名，只代表两组修正，不能计作四项新功能。
+
+“干净”只表示补丁文本可应用；ARM32 仍须禁用 MFS/Propeller，ThinLTO 未由 Kconfig 放行。架构门禁移除/Rust/新编译器兼容项属于选配检查，不等于 ARM32 K1 必须全部回移。源码可行性评估完成，产品回移植尚未实施。
+
+| 提交 | K 独立检查 | K 累计检查 | 冲突文件 / 原因或处理 |
+|---|---|---|---|
+| [315ad8780a12](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=315ad8780a129e82e2c5c65ee6e970d91a577acb) kbuild: Add AutoFDO support for Clang build | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [d5dc95836147](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d5dc95836147f2e25b134c0ca3a0bc1a5867ea29) kbuild: Add Propeller configuration for kernel build | 上下文不匹配（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [0847420f5e49](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=0847420f5e499a7ab518942fff71482179290163) AutoFDO: Enable -ffunction-sections for the AutoFDO build | 缺前置文件（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [2fd65f7afd5a](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2fd65f7afd5a73b685a1651cb651ade120b53e15) AutoFDO: Enable machine function split optimization for AutoFDO | 缺前置文件（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [c53e14f1ea4a](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c53e14f1ea4a8f8ddd9b2cd850fcbc0d934b79f5) perf: Extend per event callchain limit to branch stack | 干净 | 未累计：非前置/别名/开发线 | 已逐项独立检查；是否纳入及全部改动文件见下方历史清单。 |
+| [686d773186bf](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=686d773186bf72b739bab7e12eb8665d914676ee) drm/i915/pmu: Fix build error with GCOV and AutoFDO enabled | reverse 干净：已含等价改动 | 未累计：非前置/别名/开发线 | i915 等价稳定修正已在 K；无需重复应用。 |
+| [a7137b1825b5](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=a7137b1825b535eb7258b25beeb0d5425e0037d2) drm/i915/pmu: Fix build error with GCOV and AutoFDO enabled | reverse 干净：已含等价改动 | 未累计：非前置/别名/开发线 | i915 等价稳定修正已在 K；无需重复应用。 |
+| [ef69f9dd1cd7](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=ef69f9dd1cd7301cdf04ba326ed28152a3affcf6) drm/i915: fix build error some more | reverse 干净：已含等价改动 | 未累计：非前置/别名/开发线 | i915 等价稳定修正已在 K；无需重复应用。 |
+| [d02b2103a08b](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d02b2103a08b6d6908f1d3d8e8783d3f342555ac) drm/i915: fix build error some more | reverse 干净：已含等价改动 | 未累计：非前置/别名/开发线 | i915 等价稳定修正已在 K；无需重复应用。 |
+| [3f65aa8ede23](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=3f65aa8ede2377c47c11f1c38b44226b8ca60477) Documentation: dev-tools: Fix a typo in autofdo documentation | 缺前置文件（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [56255fa96871](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=56255fa96871d3bd0d924a53585cdf5594262891) media: atomisp: Fix namespace collision and startup() section placement with -ffunction-sections | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [0330b7fbbf31](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=0330b7fbbf313b35470306a492b9e7a703b5af56) drivers/xen/xenbus: Fix namespace collision and split() section placement with AutoFDO | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [9c7dc1dd897a](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=9c7dc1dd897a1cdcade9566ea4664b03fbabf4a4) objtool: Warn on functions with ambiguous -ffunction-sections section names | 上下文不匹配（另见累计） | 失败，未应用 | `include/asm-generic/vmlinux.lds.h`<br>`tools/objtool/Documentation/objtool.txt`<br>`tools/objtool/check.c`<br>依赖与上下文冲突：前述 TEXT_MAIN 重构未进入；objtool 文档和 check.c 已在上游演进。 |
+| [024020e2b6ad](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=024020e2b6adb4e568fb80f624b5e20d8943f107) objtool: Support Clang AUTOFDO .cold functions | 上下文不匹配（另见累计） | 失败，未应用 | `tools/objtool/elf.c`<br>上下文冲突：补丁基于较新 elf_add_symbol/klp/cold 识别实现，K 的 ELF 解析布局不同。 |
+| [2c2acca2eabf](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2c2acca2eabf53a954ed5aacef987bbf909b9f12) objtool: Fix .cold function detection for duplicate symbols | 上下文不匹配（另见累计） | 失败，未应用 | `tools/objtool/elf.c`<br>依赖与上下文冲突：0240 未进入，且 K 的符号查找/read_symbols 与新 STT_FILE 关联逻辑上下文不同。 |
+| [2c715c9de293](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2c715c9de293b6c05bcdff1c22a7626f3bb42492) media: atomisp: gc2235: Fix namespace collision and startup() section placement with -ffunction-sections | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [845c09e4744f](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=845c09e4744f111eae894ad3b67a369bb43d50fb) tty: amiserial: Fix namespace collision and startup() section placement with -ffunction-sections | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [da6202139aef](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=da6202139aef11c3c5881176e6e3184d88d8a0d9) serial: icom: Fix namespace collision and startup() section placement with -ffunction-sections | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [31863337138a](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=31863337138a0482d614f1090727dac87c936959) tty: synclink_gt: Fix namespace collision and startup() section placement with -ffunction-sections | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [a960c2cdb19e](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=a960c2cdb19e237f284a3b96eb8a0359abcf0e63) kbuild: rust: add AutoFDO support | 缺前置文件（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [de0bf1e138fc](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=de0bf1e138fcd6efdb4ddac764eb9f3487122535) arch/Kconfig: Remove tautological condition from AUTOFDO_CLANG | 上下文不匹配（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [e88b2fe8b999](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=e88b2fe8b9993c9cae856019b1c31c14b63cad7a) kconfig: Remove the architecture specific config for AutoFDO | 缺前置文件（另见累计） | 失败，未应用 | `arch/Kconfig`<br>`arch/x86/Kconfig`<br>上下文冲突：K 没有补丁所围绕的 LTO_CLANG_THIN_DIST 段，x86 邻接 select 条件仍为旧形态。 |
+| [2780860eddec](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2780860eddecba9ffe210bb9436eee3cf22bfcdd) include/linux/list.h: mark list_add and __list_add as __always_inline | 干净 | 未累计：非前置/别名/开发线 | 已逐项独立检查；是否纳入及全部改动文件见下方历史清单。 |
+| [2b358510d5cc](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2b358510d5cc56164f83110ca1499c95a5a352cd) kbuild: AutoFDO: Update split machine function argument for upstream rename | 缺前置文件（另见累计） | 未累计：非前置/别名/开发线 | 对应稳定别名 ac7f472073dc 已累计检查干净；不重复应用同一改动。 |
+| [1178120c3bed](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=1178120c3bed1733aea1c465200a6b42f8a7105d) kbuild: rust: support stabilized flag `-Cprofile-sample-use` for Rust >= 1.100 | 缺前置文件（另见累计） | 未累计：非前置/别名/开发线 | 已逐项独立检查；是否纳入及全部改动文件见下方历史清单。 |
+| [d63b852430be](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d63b852430be7fa2b6d7c550ea67e94b6681d0b5) kbuild: Fix Propeller build option | 缺前置文件（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [2566fa7b2f24](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2566fa7b2f2402a77dae6a5e9b28a1bae1c20793) kconfig: Remove the architecture specific config for Propeller | 缺前置文件（另见累计） | 失败，未应用 | `arch/arm64/kernel/vmlinux.lds.S`<br>`arch/x86/Kconfig`<br>`arch/x86/kernel/vmlinux.lds.S`<br>依赖与上下文冲突：e88b 未进入；arm64/x86 链接脚本缺新版 MODINFO/ELF_DETAILS 邻接布局，x86 select 上下文不同。 |
+| [f6a8919d6148](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f6a8919d61484ae9ca6b1855035fcfb2ba6e2af9) vmlinux.lds: Fix TEXT_MAIN to include .text.start and friends | 上下文不匹配（另见累计） | 失败，未应用 | `include/asm-generic/vmlinux.lds.h`<br>依赖缺失：6568 的 startup/exit 排除模式未建立，无法补其短名模式。 |
+| [6568f14cb5ae](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=6568f14cb5ae68cd6c612604ca0c89301cf3a0d0) vmlinux.lds: Exclude .text.startup and .text.exit from TEXT_MAIN | 上下文不匹配（另见累计） | 失败，未应用 | `include/asm-generic/vmlinux.lds.h`<br>依赖缺失：1ba9 未应用，TEXT_MAIN 尚未统一；当前宏上下文不匹配。 |
+| [1ba9f8979426](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=1ba9f8979426590367406c70c1c821f5b943f993) vmlinux.lds: Unify TEXT_MAIN, DATA_MAIN, and related macros | 上下文不匹配（另见累计） | 失败，未应用 | `include/asm-generic/vmlinux.lds.h`<br>`scripts/module.lds.S`<br>上下文冲突：K 的 DATA_MAIN 缺补丁上下文中的 .data.rel.* 等扩展，module.lds.S 也仍是较旧条件结构。 |
+| [dbefa1f31a91](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=dbefa1f31a91670c9e7dac9b559625336206466f) Rename .data.once to .data..once to fix resetting WARN*_ONCE | 上下文不匹配（另见累计） | 失败，未应用 | `include/asm-generic/vmlinux.lds.h`<br>`include/linux/mmdebug.h`<br>`include/linux/once.h`<br>`include/linux/once_lite.h`<br>`include/net/net_debug.h`<br>`mm/internal.h`<br>K 已含 48dd6c71976b；data..once 已改名且后续宏变化；不重复套用。 |
+| [bb43a59944f4](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=bb43a59944f45e89aa158740b8a16ba8f0b0fa2b) Rename .data.unlikely to .data..unlikely | 上下文不匹配（另见累计） | 失败，未应用 | `include/asm-generic/vmlinux.lds.h`<br>`include/linux/rcupdate.h`<br>K 已含 cc7d10339d95；data..unlikely 已改名，后续上下文不同；不重复套用。 |
+| [db0b2991ae1a](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=db0b2991ae1aac5ca985ec6fd8ff9bd9b2126c9b) vmlinux.lds.h: Add markers for text_unlikely and text_hot sections | 上下文不匹配（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [0043ecea2399](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=0043ecea2399ffc8bfd99ed9dbbe766e7c79293c) vmlinux.lds.h: Adjust symbol ordering in text output section | 干净 | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [7594302d9ddd](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=7594302d9ddd9f198173a658250e7b7debc6ed76) kbuild: rust: rename flag to `-Zdebuginfo-for-profiling` for Rust >= 1.98 | 缺前置文件（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+| [93863f3f859a](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=93863f3f859a626347ce2ec18947b11357b4ca14) kbuild: Check for functions with ambiguous -ffunction-sections section names | 上下文不匹配（另见累计） | 失败，未应用 | `include/asm-generic/vmlinux.lds.h`<br>依赖缺失：新 TEXT_MAIN/歧义约束注释尚未进入，通用链接头 hunk 失败；新增检查脚本未部分应用。 |
+| [ac7f472073dc](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/?id=ac7f472073dca70f8417914cf4771c95a5603ec1) kbuild: AutoFDO: Update split machine function argument for upstream rename | 缺前置文件（另见累计） | 干净，临时应用 | 依赖已满足；临时应用不代表编译/运行通过。 |
+
+累计顺序：`315ad8780a12 → 0043ecea2399 → db0b2991ae1a → 0847420f5e49 → 2fd65f7afd5a → d5dc95836147 → bb43a59944f4 → dbefa1f31a91 → d63b852430be → 3f65aa8ede23 → 1ba9f8979426 → 6568f14cb5ae → f6a8919d6148 → 56255fa96871 → 0330b7fbbf31 → 9c7dc1dd897a → 024020e2b6ad → 2c2acca2eabf → 2c715c9de293 → 845c09e4744f → da6202139aef → 31863337138a → 93863f3f859a → a960c2cdb19e → de0bf1e138fc → e88b2fe8b999 → 2566fa7b2f24 → 7594302d9ddd → ac7f472073dc`。
+
+已有修复的祖先关系已直接验证：`cc7d10339d95bf6bdff1a56666fce6a556b0d500`、`48dd6c71976bc8c1b665731749522a7e42df3bbe`、`adadba7530d2752eb6fdf2dfa8cf6d7345cdc775`、`fcc95344aa1c419d54f46c19011219363f05c593`、`18ec560e3e9b476e63c671514dcb8b9163a578a2` 均是 K 的祖先。data 改名原 patch 正向/reverse 都失败，不应误诊为“缺修复”；提交祖先与源码语义才是判断依据。
+
+K 证据：[独立 37 项](evidence/backport-independent-k.json)、[累计 29 项](evidence/backport-sequential-k.json)、[计数/错误摘要](evidence/k-backport-summary.json)、[已有修复祖先关系](evidence/k-existing-fixes.json)、[sparse 路径清单](evidence/k-worktree-sparse-paths.txt)。所有冲突的原始 stderr 均保留；没有手工解决冲突。
+
+## 2. 首轮 B 参考结果（历史，1b096d2）
+
+以下原记录保留，用于区分首轮预测与本轮 K 实测；其中“K 未取得”等语句仅描述首轮状态。
+### 首轮记录：上游提交与参考树逐项检查
 
 检查对象为 **B `42aeefac58ed`，不是用户指定 K `0fac5de6`**。K 的全部 apply 检查因 SSH 克隆失败均未执行。此附表只提供依赖与冲突预估，不作 K 验收。
 

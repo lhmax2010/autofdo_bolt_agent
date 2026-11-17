@@ -45,7 +45,7 @@
 ## 内核 AutoFDO 轨道（与 workflow 并列）
 
 - [能力增强方案 v0.1](kernel/autofdo/01_arm_profile_capability_proposal_v0.1.md) 已原样 mv 入库；SHA-256 `be164e5f1372863abc5c0fb80046da13a1a4eb5e37201ee633ebac34869a87b3`；待 Kimi/Codex 评审。
-- K0 进行中：[可行性评估](kernel/autofdo/00_feasibility.md)与[回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已完成本轮事实整理；conditional go（ARM32/A32、非 LTO/MFS）。linux-rpi SSH 克隆失败后按规则停止，`0fac5de6` 精确基线与回移植未验证，K0 尚未关闭；resourced 指定提交已核实。未构建、未接板。
+- K0 只读源码评估完成：[可行性评估](kernel/autofdo/00_feasibility.md)与[基于 K 的回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已补齐。`0fac5de6` 增量 fetch 首次成功、重试 0 次；K=B+2（force_reclaim 修正、PMUv3），K/C 分叉。37 项独立/29 项累计检查，累计 18 干净、11 失败（其中 2 项已有等价修复）；冲突未手工解决。结论仍 conditional go（ARM32/A32、非 LTO/MFS），旧样本 build-id 未配对；未构建、未接板。首轮 SSH 失败记录保留。
 - K1 在 M1 完成后开始；刷写另须用户确认。
 
 ## Workflow M1：attempt-09非正式温度门禁停止（2026-11-17任务）

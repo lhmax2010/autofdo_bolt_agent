@@ -1,0 +1,707 @@
+[
+  {
+    "sha": "315ad8780a129e82e2c5c65ee6e970d91a577acb",
+    "title": "kbuild: Add AutoFDO support for Clang build",
+    "files": [
+      "Documentation/dev-tools/autofdo.rst",
+      "Documentation/dev-tools/index.rst",
+      "MAINTAINERS",
+      "Makefile",
+      "arch/Kconfig",
+      "arch/x86/Kconfig",
+      "scripts/Makefile.autofdo",
+      "scripts/Makefile.lib",
+      "tools/objtool/check.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "42843ff94792642ca94198f1996d8640e6b0e76d7b35b30254bf061ea84f50df",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch Documentation/dev-tools/autofdo.rst...\nChecking patch Documentation/dev-tools/index.rst...\nChecking patch MAINTAINERS...\nHunk #1 succeeded at 3682 (offset 17 lines).\nChecking patch Makefile...\nHunk #1 succeeded at 1028 (offset 5 lines).\nChecking patch arch/Kconfig...\nHunk #1 succeeded at 812 (offset 1 line).\nChecking patch arch/x86/Kconfig...\nChecking patch scripts/Makefile.autofdo...\nChecking patch scripts/Makefile.lib...\nHunk #1 succeeded at 210 (offset 19 lines).\nChecking patch tools/objtool/check.c...\nHunk #1 succeeded at 4586 (offset 29 lines).\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "d5dc95836147f2e25b134c0ca3a0bc1a5867ea29",
+    "title": "kbuild: Add Propeller configuration for kernel build",
+    "files": [
+      "Documentation/dev-tools/index.rst",
+      "Documentation/dev-tools/propeller.rst",
+      "MAINTAINERS",
+      "Makefile",
+      "arch/Kconfig",
+      "arch/x86/Kconfig",
+      "arch/x86/kernel/vmlinux.lds.S",
+      "include/asm-generic/vmlinux.lds.h",
+      "scripts/Makefile.lib",
+      "scripts/Makefile.propeller",
+      "tools/objtool/check.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "68dbe42bf8c1cb0fc951a8f1507e78648a3611f88310e1b9c2a33601b4160ea5",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch Documentation/dev-tools/index.rst...\nerror: while searching for:\n   checkuapi\n   gpio-sloppy-logic-analyzer\n   autofdo\n\n\n.. only::  subproject and html\n\nerror: patch failed: Documentation/dev-tools/index.rst:35\nerror: Documentation/dev-tools/index.rst: patch does not apply\nChecking patch Documentation/dev-tools/propeller.rst...\nChecking patch MAINTAINERS...\nHunk #1 succeeded at 18529 (offset 26 lines).\nChecking patch Makefile...\nerror: while searching for:\ninclude-$(CONFIG_KCOV)\t\t+= scripts/Makefile.kcov\ninclude-$(CONFIG_RANDSTRUCT)\t+= scripts/Makefile.randstruct\ninclude-$(CONFIG_AUTOFDO_CLANG)\t+= scripts/Makefile.autofdo\ninclude-$(CONFIG_GCC_PLUGINS)\t+= scripts/Makefile.gcc-plugins\n\ninclude $(addprefix $(srctree)/, $(include-y))\n\nerror: patch failed: Makefile:1024\nerror: Makefile: patch does not apply\nChecking patch arch/Kconfig...\nerror: while searching for:\n\n\t  If unsure, say N.\n\nconfig ARCH_SUPPORTS_CFI_CLANG\n\tbool\n\thelp\n\nerror: patch failed: arch/Kconfig:831\nerror: arch/Kconfig: patch does not apply\nChecking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_SUPPORTS_AUTOFDO_CLANG\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CMPXCHG64\n\tselect ARCH_USE_MEMTEST\n\nerror: patch failed: arch/x86/Kconfig:127\nerror: arch/x86/Kconfig: patch does not apply\nChecking patch arch/x86/kernel/vmlinux.lds.S...\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * With LTO_CLANG, the linker also splits sections by default, so we need\n * these macros to combine the sections during the final link.\n *\n * With AUTOFDO_CLANG, by default, the linker splits text sections and\n * regroups functions into subsections.\n *\n * RODATA_MAIN is not used because existing code already defines .rodata.x\n * sections to be brought in with rodata.\n */\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG) || \\\ndefined(CONFIG_AUTOFDO_CLANG)\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n#else\n#define TEXT_MAIN .text\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:95\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch scripts/Makefile.lib...\nerror: while searching for:\n\t$(CFLAGS_AUTOFDO_CLANG))\nendif\n\n# $(src) for including checkin headers from generated source files\n# $(obj) for including generated headers from checkin source files\nifeq ($(KBUILD_EXTMOD),)\n\nerror: patch failed: scripts/Makefile.lib:201\nerror: scripts/Makefile.lib: patch does not apply\nChecking patch scripts/Makefile.propeller...\nChecking patch tools/objtool/check.c...\nerror: while searching for:\n\t\t    !strcmp(sec->name, \"__mcount_loc\")\t\t\t||\n\t\t    !strcmp(sec->name, \".kcfi_traps\")\t\t\t||\n\t\t    !strcmp(sec->name, \".llvm.call-graph-profile\")\t||\n\t\t    strstr(sec->name, \"__patchable_function_entries\"))\n\t\t\tcontinue;\n\n\nerror: patch failed: tools/objtool/check.c:4558\nerror: tools/objtool/check.c: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch tools/objtool/check.c...\nerror: while searching for:\n\t\t    !strcmp(sec->name, \"__mcount_loc\")\t\t\t||\n\t\t    !strcmp(sec->name, \".kcfi_traps\")\t\t\t||\n\t\t    !strcmp(sec->name, \".llvm.call-graph-profile\")\t||\n\t\t    !strcmp(sec->name, \".llvm_bb_addr_map\")\t\t||\n\t\t    strstr(sec->name, \"__patchable_function_entries\"))\n\t\t\tcontinue;\n\n\nerror: patch failed: tools/objtool/check.c:4558\nerror: tools/objtool/check.c: patch does not apply\nChecking patch scripts/Makefile.propeller...\nerror: scripts/Makefile.propeller: No such file or directory\nChecking patch scripts/Makefile.lib...\nerror: while searching for:\n\t$(CFLAGS_AUTOFDO_CLANG))\nendif\n\n#\n# Enable Propeller build flags except some files or directories we don't want to\n# enable (depends on variables AUTOFDO_PROPELLER_obj.o and PROPELLER_PROFILE).\n#\nifdef CONFIG_PROPELLER_CLANG\n_c_flags += $(if $(patsubst n%,, \\\n\t$(AUTOFDO_PROFILE_$(target-stem).o)$(AUTOFDO_PROFILE)$(PROPELLER_PROFILE))$(is-kernel-object), \\\n\t$(CFLAGS_PROPELLER_CLANG))\nendif\n\n# $(src) for including checkin headers from generated source files\n# $(obj) for including generated headers from checkin source files\nifeq ($(KBUILD_EXTMOD),)\n\nerror: patch failed: scripts/Makefile.lib:201\nerror: scripts/Makefile.lib: patch does not apply\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * With LTO_CLANG, the linker also splits sections by default, so we need\n * these macros to combine the sections during the final link.\n *\n * With AUTOFDO_CLANG and PROPELLER_CLANG, by default, the linker splits\n * text sections and regroups functions into subsections.\n *\n * RODATA_MAIN is not used because existing code already defines .rodata.x\n * sections to be brought in with rodata.\n */\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG) || \\\ndefined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n#else\n#define TEXT_MAIN .text\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:95\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch arch/x86/kernel/vmlinux.lds.S...\nerror: while searching for:\n\n\tSTABS_DEBUG\n\tDWARF_DEBUG\n#ifdef CONFIG_PROPELLER_CLANG\n\t.llvm_bb_addr_map : { *(.llvm_bb_addr_map) }\n#endif\n\n\tELF_DETAILS\n\n\tDISCARDS\n\nerror: patch failed: arch/x86/kernel/vmlinux.lds.S:443\nerror: arch/x86/kernel/vmlinux.lds.S: patch does not apply\nChecking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_SUPPORTS_AUTOFDO_CLANG\n\tselect ARCH_SUPPORTS_PROPELLER_CLANG    if X86_64\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CMPXCHG64\n\tselect ARCH_USE_MEMTEST\n\nerror: patch failed: arch/x86/Kconfig:127\nerror: arch/x86/Kconfig: patch does not apply\nChecking patch arch/Kconfig...\nerror: while searching for:\n\n\t  If unsure, say N.\n\nconfig ARCH_SUPPORTS_PROPELLER_CLANG\n\tbool\n\nconfig PROPELLER_CLANG\n\tbool \"Enable Clang's Propeller build\"\n\tdepends on ARCH_SUPPORTS_PROPELLER_CLANG\n\tdepends on CC_IS_CLANG && CLANG_VERSION >= 190000\n\thelp\n\t  This option enables Clang\u2019s Propeller build. When the Propeller\n\t  profiles is specified in variable CLANG_PROPELLER_PROFILE_PREFIX\n\t  during the build process, Clang uses the profiles to optimize\n\t  the kernel.\n\n\t  If no profile is specified, Propeller options are still passed\n\t  to Clang to facilitate the collection of perf data for creating\n\t  the Propeller profiles in subsequent builds.\n\n\t  If unsure, say N.\n\nconfig ARCH_SUPPORTS_CFI_CLANG\n\tbool\n\thelp\n\nerror: patch failed: arch/Kconfig:831\nerror: arch/Kconfig: patch does not apply\nChecking patch Makefile...\nerror: while searching for:\ninclude-$(CONFIG_KCOV)\t\t+= scripts/Makefile.kcov\ninclude-$(CONFIG_RANDSTRUCT)\t+= scripts/Makefile.randstruct\ninclude-$(CONFIG_AUTOFDO_CLANG)\t+= scripts/Makefile.autofdo\ninclude-$(CONFIG_PROPELLER_CLANG)\t+= scripts/Makefile.propeller\ninclude-$(CONFIG_GCC_PLUGINS)\t+= scripts/Makefile.gcc-plugins\n\ninclude $(addprefix $(srctree)/, $(include-y))\n\nerror: patch failed: Makefile:1024\nerror: Makefile: patch does not apply\nChecking patch MAINTAINERS...\nerror: while searching for:\nF:\tinclude/linux/psi*\nF:\tkernel/sched/psi.c\n\nPROPELLER BUILD\nM:\tRong Xu <xur@google.com>\nM:\tHan Shen <shenhan@google.com>\nS:\tSupported\nF:\tDocumentation/dev-tools/propeller.rst\nF:\tscripts/Makefile.propeller\n\nPRINTK\nM:\tPetr Mladek <pmladek@suse.com>\nR:\tSteven Rostedt <rostedt@goodmis.org>\n\nerror: patch failed: MAINTAINERS:18503\nerror: MAINTAINERS: patch does not apply\nChecking patch Documentation/dev-tools/propeller.rst...\nerror: Documentation/dev-tools/propeller.rst: No such file or directory\nChecking patch Documentation/dev-tools/index.rst...\nerror: while searching for:\n   checkuapi\n   gpio-sloppy-logic-analyzer\n   autofdo\n   propeller\n\n\n.. only::  subproject and html\n\nerror: patch failed: Documentation/dev-tools/index.rst:35\nerror: Documentation/dev-tools/index.rst: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "0847420f5e499a7ab518942fff71482179290163",
+    "title": "AutoFDO: Enable -ffunction-sections for the AutoFDO build",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h",
+      "scripts/Makefile.autofdo"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "b0b0a75299e781e094809235651b421920d8cf610a449d1840f1bcc0a1dc9596",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nChecking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * With LTO_CLANG, the linker also splits sections by default, so we need\n * these macros to combine the sections during the final link.\n *\n * With AUTOFDO_CLANG, by default, the linker splits text sections and\n * regroups functions into subsections.\n *\n * RODATA_MAIN is not used because existing code already defines .rodata.x\n * sections to be brought in with rodata.\n */\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG) || \\\ndefined(CONFIG_AUTOFDO_CLANG)\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n#else\n#define TEXT_MAIN .text\n#endif\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG)\n#define DATA_MAIN .data .data.[0-9a-zA-Z_]* .data..L* .data..compoundliteral* .data.$__unnamed_* .data.$L*\n#define SDATA_MAIN .sdata .sdata.[0-9a-zA-Z_]*\n#define RODATA_MAIN .rodata .rodata.[0-9a-zA-Z_]* .rodata..L*\n#define BSS_MAIN .bss .bss.[0-9a-zA-Z_]* .bss..L* .bss..compoundliteral*\n#define SBSS_MAIN .sbss .sbss.[0-9a-zA-Z_]*\n#else\n#define DATA_MAIN .data\n#define SDATA_MAIN .sdata\n#define RODATA_MAIN .rodata\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:95\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "2fd65f7afd5a73b685a1651cb651ade120b53e15",
+    "title": "AutoFDO: Enable machine function split optimization for AutoFDO",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h",
+      "scripts/Makefile.autofdo"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "effc5d6682121f633f3f300695b7156519e0028aac11b550eb1b7f3a675cb421",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t\t__cpuidle_text_end = .;\t\t\t\t\t\\\n\t\t__noinstr_text_end = .;\n\n#define TEXT_UNLIKELY\t\t\t\t\t\t\t\\\n\t\t__unlikely_text_start = .;\t\t\t\t\\\n\t\t*(.text.unlikely .text.unlikely.*)\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:556\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t\t__cpuidle_text_end = .;\t\t\t\t\t\\\n\t\t__noinstr_text_end = .;\n\n#define TEXT_SPLIT\t\t\t\t\t\t\t\\\n\t\t__split_text_start = .;\t\t\t\t\t\\\n\t\t*(.text.split .text.split.[0-9a-zA-Z_]*)\t\t\\\n\t\t__split_text_end = .;\n\n#define TEXT_UNLIKELY\t\t\t\t\t\t\t\\\n\t\t__unlikely_text_start = .;\t\t\t\t\\\n\t\t*(.text.unlikely .text.unlikely.*)\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:556\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "c53e14f1ea4a8f8ddd9b2cd850fcbc0d934b79f5",
+    "title": "perf: Extend per event callchain limit to branch stack",
+    "files": [
+      "include/linux/perf_event.h",
+      "include/uapi/linux/perf_event.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "5bb69074017d9128bcf79d59c599b03bac9286efb3a23fffee0dd87b24f930e2",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch include/linux/perf_event.h...\nHunk #1 succeeded at 1331 (offset -16 lines).\nChecking patch include/uapi/linux/perf_event.h...\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "686d773186bf72b739bab7e12eb8665d914676ee",
+    "title": "drm/i915/pmu: Fix build error with GCOV and AutoFDO enabled",
+    "files": [
+      "drivers/gpu/drm/i915/i915_pmu.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "7062ee4c6feaff9a497608861557707c723fdf86c529fa81b257ac53fe343071",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nerror: while searching for:\n{\n\tunsigned int bit = config_bit(config);\n\n\tif (__builtin_constant_p(config))\n\t\tBUILD_BUG_ON(bit >\n\t\t\t     BITS_PER_TYPE(typeof_member(struct i915_pmu,\n\t\t\t\t\t\t\t enable)) - 1);\n\nerror: patch failed: drivers/gpu/drm/i915/i915_pmu.c:112\nerror: drivers/gpu/drm/i915/i915_pmu.c: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nHunk #1 succeeded at 115 (offset -3 lines).\nHunk #2 succeeded at 124 (offset -3 lines).\n"
+    }
+  },
+  {
+    "sha": "a7137b1825b535eb7258b25beeb0d5425e0037d2",
+    "title": "drm/i915/pmu: Fix build error with GCOV and AutoFDO enabled",
+    "files": [
+      "drivers/gpu/drm/i915/i915_pmu.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "a6235c40b57ec8a9dd58f43b6142be1303ba4df3bd87b4ad36b6032cdc2a055e",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nerror: while searching for:\n{\n\tunsigned int bit = config_bit(config);\n\n\tif (__builtin_constant_p(config))\n\t\tBUILD_BUG_ON(bit >\n\t\t\t     BITS_PER_TYPE(typeof_member(struct i915_pmu,\n\t\t\t\t\t\t\t enable)) - 1);\n\nerror: patch failed: drivers/gpu/drm/i915/i915_pmu.c:112\nerror: drivers/gpu/drm/i915/i915_pmu.c: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nHunk #1 succeeded at 115 (offset -3 lines).\nHunk #2 succeeded at 124 (offset -3 lines).\n"
+    }
+  },
+  {
+    "sha": "ef69f9dd1cd7301cdf04ba326ed28152a3affcf6",
+    "title": "drm/i915: fix build error some more",
+    "files": [
+      "drivers/gpu/drm/i915/i915_pmu.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "236191897d01518c4465fbb0efd41f1e7f93da0552e82981950748d2f8238c18",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nerror: while searching for:\n\t\treturn other_bit(config);\n}\n\nstatic u32 config_mask(const u64 config)\n{\n\tunsigned int bit = config_bit(config);\n\n\nerror: patch failed: drivers/gpu/drm/i915/i915_pmu.c:108\nerror: drivers/gpu/drm/i915/i915_pmu.c: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nHunk #1 succeeded at 111 (offset -3 lines).\n"
+    }
+  },
+  {
+    "sha": "d02b2103a08b6d6908f1d3d8e8783d3f342555ac",
+    "title": "drm/i915: fix build error some more",
+    "files": [
+      "drivers/gpu/drm/i915/i915_pmu.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "2e1ba7de9426159beaa6c7dc28d9026a814d6ae05166cdb1ce886c56f9191691",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nerror: while searching for:\n\t\treturn other_bit(config);\n}\n\nstatic u32 config_mask(const u64 config)\n{\n\tunsigned int bit = config_bit(config);\n\n\nerror: patch failed: drivers/gpu/drm/i915/i915_pmu.c:108\nerror: drivers/gpu/drm/i915/i915_pmu.c: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/gpu/drm/i915/i915_pmu.c...\nHunk #1 succeeded at 111 (offset -3 lines).\n"
+    }
+  },
+  {
+    "sha": "3f65aa8ede2377c47c11f1c38b44226b8ca60477",
+    "title": "Documentation: dev-tools: Fix a typo in autofdo documentation",
+    "files": [
+      "Documentation/dev-tools/autofdo.rst"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "08f165c5bbf3cc1969353bd0fd755b27b232737a31cf3c3a85e7347a907487fd",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch Documentation/dev-tools/autofdo.rst...\nerror: Documentation/dev-tools/autofdo.rst: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch Documentation/dev-tools/autofdo.rst...\nerror: Documentation/dev-tools/autofdo.rst: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "56255fa96871d3bd0d924a53585cdf5594262891",
+    "title": "media: atomisp: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "files": [
+      "drivers/staging/media/atomisp/i2c/atomisp-ov2722.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "29ab46b6b9c2283ebd652ac3d484c647130c22fb84f397f4bca5fc753709f4e2",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/staging/media/atomisp/i2c/atomisp-ov2722.c...\nHunk #1 succeeded at 610 (offset 10 lines).\nHunk #2 succeeded at 672 (offset 10 lines).\nHunk #3 succeeded at 687 (offset 10 lines).\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "0330b7fbbf313b35470306a492b9e7a703b5af56",
+    "title": "drivers/xen/xenbus: Fix namespace collision and split() section placement with AutoFDO",
+    "files": [
+      "drivers/xen/xenbus/xenbus_xs.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "ff135181ba02540305f4004d8e62f6137d54e7dd1726a947162cf2c2e9d97424",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/xen/xenbus/xenbus_xs.c...\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "9c7dc1dd897a1cdcade9566ea4664b03fbabf4a4",
+    "title": "objtool: Warn on functions with ambiguous -ffunction-sections section names",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h",
+      "tools/objtool/Documentation/objtool.txt",
+      "tools/objtool/check.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "cb2ba69bd1fec5542d67e511701984a27c2e1ed5c13182804921163c50b38009",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * Other .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n * TEXT_MAIN.\n */\n#define TEXT_MAIN\t\t\t\t\t\t\t\\\n\t.text\t\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:97\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch tools/objtool/Documentation/objtool.txt...\nerror: while searching for:\n    these special names and does not use module_init() / module_exit()\n    macros to create them.\n\n\nIf the error doesn't seem to make sense, it could be a bug in objtool.\nFeel free to ask objtool maintainers for help.\n\nerror: patch failed: tools/objtool/Documentation/objtool.txt:456\nerror: tools/objtool/Documentation/objtool.txt: patch does not apply\nChecking patch tools/objtool/check.c...\nHunk #1 succeeded at 2725 (offset 62 lines).\nerror: while searching for:\n\tif (!nr_insns)\n\t\tgoto out;\n\n\tif (opts.retpoline)\n\t\twarnings += validate_retpoline(file);\n\n\nerror: patch failed: tools/objtool/check.c:4932\nerror: tools/objtool/check.c: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch tools/objtool/check.c...\nerror: while searching for:\n\treturn 0;\n}\n\n/*\n * Certain function names are disallowed due to section name ambiguities\n * introduced by -ffunction-sections.\n *\n * See the comment above TEXT_MAIN in include/asm-generic/vmlinux.lds.h.\n */\nstatic int validate_function_names(struct objtool_file *file)\n{\n\tstruct symbol *func;\n\tint warnings = 0;\n\n\tfor_each_sym(file->elf, func) {\n\t\tif (!is_func_sym(func))\n\t\t\tcontinue;\n\n\t\tif (!strcmp(func->name, \"startup\")\t|| strstarts(func->name, \"startup.\")\t||\n\t\t    !strcmp(func->name, \"exit\")\t\t|| strstarts(func->name, \"exit.\")\t||\n\t\t    !strcmp(func->name, \"split\")\t|| strstarts(func->name, \"split.\")\t||\n\t\t    !strcmp(func->name, \"unlikely\")\t|| strstarts(func->name, \"unlikely.\")\t||\n\t\t    !strcmp(func->name, \"hot\")\t\t|| strstarts(func->name, \"hot.\")\t||\n\t\t    !strcmp(func->name, \"unknown\")\t|| strstarts(func->name, \"unknown.\")) {\n\n\t\t\tWARN(\"%s() function name creates ambiguity with -ffunction-sections\",\n\t\t\t     func->name);\n\t\t\twarnings++;\n\t\t}\n\t}\n\n\treturn warnings;\n}\n\nstatic bool is_special_call(struct instruction *insn)\n{\n\tif (insn->type == INSN_CALL) {\n\nerror: patch failed: tools/objtool/check.c:2663\nerror: tools/objtool/check.c: patch does not apply\nChecking patch tools/objtool/Documentation/objtool.txt...\nerror: while searching for:\n    these special names and does not use module_init() / module_exit()\n    macros to create them.\n\n13. file.o: warning: func() function name creates ambiguity with -ffunctions-sections\n\n    Functions named startup(), exit(), split(), unlikely(), hot(), and\n    unknown() are not allowed due to the ambiguity of their section\n    names when compiled with -ffunction-sections.  For more information,\n    see the comment above TEXT_MAIN in include/asm-generic/vmlinux.lds.h.\n\n\nIf the error doesn't seem to make sense, it could be a bug in objtool.\nFeel free to ask objtool maintainers for help.\n\nerror: patch failed: tools/objtool/Documentation/objtool.txt:456\nerror: tools/objtool/Documentation/objtool.txt: patch does not apply\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * Other .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n * TEXT_MAIN.\n *\n * NOTE: builds *with* and *without* -ffunction-sections are both supported by\n * this single macro.  Even with -ffunction-sections, there may be some objects\n * NOT compiled with the flag due to the use of a specific Makefile override\n * like cflags-y or AUTOFDO_PROFILE_foo.o.  So this single catchall rule is\n * needed to support mixed object builds.\n *\n * One implication is that functions named startup(), exit(), split(),\n * unlikely(), hot(), and unknown() are not allowed in the kernel due to the\n * ambiguity of their section names with -ffunction-sections.  For example,\n * .text.startup could be __attribute__((constructor)) code in a *non*\n * ffunction-sections object, which should be placed in .init.text; or it could\n * be an actual function named startup() in an ffunction-sections object, which\n * should be placed in .text.  Objtool will detect and complain about any such\n * ambiguously named functions.\n */\n#define TEXT_MAIN\t\t\t\t\t\t\t\\\n\t.text\t\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:97\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "024020e2b6adb4e568fb80f624b5e20d8943f107",
+    "title": "objtool: Support Clang AUTOFDO .cold functions",
+    "files": [
+      "tools/objtool/elf.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "fa5e05f047be13a69e720fadec23c10ee5d08a56006670b642bb15547dc0fe3f",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch tools/objtool/elf.c...\nerror: while searching for:\n\tif (strstarts(sym->name, \".klp.sym\"))\n\t\tsym->klp = 1;\n\n\tif (!sym->klp && is_func_sym(sym) && strstr(sym->name, \".cold\"))\n\t\tsym->cold = 1;\n\tsym->pfunc = sym->cfunc = sym;\n\n\tsym->demangled_name = demangle_name(sym);\n\nerror: patch failed: tools/objtool/elf.c:502\nerror: tools/objtool/elf.c: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch tools/objtool/elf.c...\nerror: while searching for:\n\tif (strstarts(sym->name, \".klp.sym\"))\n\t\tsym->klp = 1;\n\n\tif (!sym->klp && !is_sec_sym(sym) && strstr(sym->name, \".cold\")) {\n\t\tsym->cold = 1;\n\n\t\t/*\n\t\t * Clang doesn't mark cold subfunctions as STT_FUNC, which\n\t\t * breaks several objtool assumptions.  Fake it.\n\t\t */\n\t\tsym->type = STT_FUNC;\n\t}\n\n\tsym->pfunc = sym->cfunc = sym;\n\n\tsym->demangled_name = demangle_name(sym);\n\nerror: patch failed: tools/objtool/elf.c:502\nerror: tools/objtool/elf.c: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "2c2acca2eabf53a954ed5aacef987bbf909b9f12",
+    "title": "objtool: Fix .cold function detection for duplicate symbols",
+    "files": [
+      "tools/objtool/elf.c",
+      "tools/objtool/include/objtool/elf.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "3d6377229eaf565f4ff706eee8b7515966347a17f781239a64a2c2b75d1475cd",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch tools/objtool/elf.c...\nerror: while searching for:\n\treturn NULL;\n}\n\nstruct symbol *find_global_symbol_by_name(const struct elf *elf, const char *name)\n{\n\tstruct symbol *sym;\n\nerror: patch failed: tools/objtool/elf.c:288\nerror: tools/objtool/elf.c: patch does not apply\nChecking patch tools/objtool/include/objtool/elf.h...\nHunk #1 succeeded at 57 (offset -12 lines).\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch tools/objtool/include/objtool/elf.h...\nerror: while searching for:\n\tunsigned int idx, len;\n\tunsigned long offset;\n\tunsigned long __subtree_last;\n\tstruct symbol *pfunc, *cfunc, *alias, *file;\n\tunsigned char bind, type;\n\tu8 uaccess_safe      : 1;\n\tu8 static_call_tramp : 1;\n\nerror: patch failed: tools/objtool/include/objtool/elf.h:69\nerror: tools/objtool/include/objtool/elf.h: patch does not apply\nChecking patch tools/objtool/elf.c...\nerror: while searching for:\n\treturn NULL;\n}\n\n/* Find local symbol with matching STT_FILE */\nstatic struct symbol *find_local_symbol_by_file_and_name(const struct elf *elf,\n\t\t\t\t\t\t\t struct symbol *file,\n\t\t\t\t\t\t\t const char *name)\n{\n\tstruct symbol *sym;\n\n\telf_hash_for_each_possible(symbol_name, sym, name_hash, str_hash(name)) {\n\t\tif (sym->bind == STB_LOCAL && sym->file == file &&\n\t\t    !strcmp(sym->name, name)) {\n\t\t\treturn sym;\n\t\t}\n\t}\n\n\treturn NULL;\n}\n\nstruct symbol *find_global_symbol_by_name(const struct elf *elf, const char *name)\n{\n\tstruct symbol *sym;\n\nerror: patch failed: tools/objtool/elf.c:288\nerror: tools/objtool/elf.c: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "2c715c9de293b6c05bcdff1c22a7626f3bb42492",
+    "title": "media: atomisp: gc2235: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "files": [
+      "drivers/staging/media/atomisp/i2c/atomisp-gc2235.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "7cd929d2fd88193fea79b13c2ae51c8d76ab026b21c84aff405059ab246f14cb",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/staging/media/atomisp/i2c/atomisp-gc2235.c...\nHunk #1 succeeded at 501 (offset 10 lines).\nHunk #2 succeeded at 566 (offset 10 lines).\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "845c09e4744f111eae894ad3b67a369bb43d50fb",
+    "title": "tty: amiserial: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "files": [
+      "drivers/tty/amiserial.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "04c9c57a485f9ca02f5ed5a6562dd8d3c07eca335e53f86c1b20463199c3f9f4",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/tty/amiserial.c...\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "da6202139aef11c3c5881176e6e3184d88d8a0d9",
+    "title": "serial: icom: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "files": [
+      "drivers/tty/serial/icom.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "6010446957385b5a0b513d64fb561c3764fe9946844db111227d2a316e96561a",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/tty/serial/icom.c...\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "31863337138a0482d614f1090727dac87c936959",
+    "title": "tty: synclink_gt: Fix namespace collision and startup() section placement with -ffunction-sections",
+    "files": [
+      "drivers/tty/synclink_gt.c"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "69b8ee0886306790a45603e5522cbb0f30b4be8e64a5768216a1021c9db2cdd0",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch drivers/tty/synclink_gt.c...\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "a960c2cdb19e237f284a3b96eb8a0359abcf0e63",
+    "title": "kbuild: rust: add AutoFDO support",
+    "files": [
+      "scripts/Makefile.autofdo",
+      "scripts/Makefile.lib"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "4dc72e6ac0419c349176e9775b4e2d218645f6386979f03baab90f5f904bc571",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\nChecking patch scripts/Makefile.lib...\nerror: while searching for:\n_c_flags += $(if $(patsubst n%,, \\\n\t$(AUTOFDO_PROFILE_$(target-stem).o)$(AUTOFDO_PROFILE)$(is-kernel-object)), \\\n\t$(CFLAGS_AUTOFDO_CLANG))\nendif\n\n#\n\nerror: patch failed: scripts/Makefile.lib:123\nerror: scripts/Makefile.lib: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.lib...\nerror: while searching for:\n_c_flags += $(if $(patsubst n%,, \\\n\t$(AUTOFDO_PROFILE_$(target-stem).o)$(AUTOFDO_PROFILE)$(is-kernel-object)), \\\n\t$(CFLAGS_AUTOFDO_CLANG))\n_rust_flags += $(if $(patsubst n%,, \\\n\t$(AUTOFDO_PROFILE_$(target-stem).o)$(AUTOFDO_PROFILE)$(is-kernel-object)), \\\n\t$(RUSTFLAGS_AUTOFDO_CLANG))\nendif\n\n#\n\nerror: patch failed: scripts/Makefile.lib:123\nerror: scripts/Makefile.lib: patch does not apply\nChecking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "de0bf1e138fcd6efdb4ddac764eb9f3487122535",
+    "title": "arch/Kconfig: Remove tautological condition from AUTOFDO_CLANG",
+    "files": [
+      "arch/Kconfig"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "ff36bfcdafccb533327f862a6b18986612178fa66adaf995cb680770a4d18ee5",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch arch/Kconfig...\nerror: while searching for:\nconfig AUTOFDO_CLANG\n\tbool \"Enable Clang's AutoFDO build (EXPERIMENTAL)\"\n\tdepends on ARCH_SUPPORTS_AUTOFDO_CLANG\n\tdepends on CC_IS_CLANG && CLANG_VERSION >= 170000\n\thelp\n\t  This option enables Clang\u2019s AutoFDO build. When\n\t  an AutoFDO profile is specified in variable\n\nerror: patch failed: arch/Kconfig:866\nerror: arch/Kconfig: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch arch/Kconfig...\nerror: while searching for:\nconfig AUTOFDO_CLANG\n\tbool \"Enable Clang's AutoFDO build (EXPERIMENTAL)\"\n\tdepends on ARCH_SUPPORTS_AUTOFDO_CLANG\n\tdepends on CC_IS_CLANG\n\thelp\n\t  This option enables Clang\u2019s AutoFDO build. When\n\t  an AutoFDO profile is specified in variable\n\nerror: patch failed: arch/Kconfig:866\nerror: arch/Kconfig: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "e88b2fe8b9993c9cae856019b1c31c14b63cad7a",
+    "title": "kconfig: Remove the architecture specific config for AutoFDO",
+    "files": [
+      "Documentation/dev-tools/autofdo.rst",
+      "arch/Kconfig",
+      "arch/x86/Kconfig"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "b95e7767e58dfa6803a9c120237863bb0c242903bbc1d7fc312242d241bfba12",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch Documentation/dev-tools/autofdo.rst...\nerror: Documentation/dev-tools/autofdo.rst: No such file or directory\nChecking patch arch/Kconfig...\nerror: while searching for:\n\t  module-specific compiler options, and simplifies debugging.\nendchoice\n\nconfig ARCH_SUPPORTS_AUTOFDO_CLANG\n\tbool\n\nconfig AUTOFDO_CLANG\n\tbool \"Enable Clang's AutoFDO build (EXPERIMENTAL)\"\n\tdepends on ARCH_SUPPORTS_AUTOFDO_CLANG\n\tdepends on CC_IS_CLANG\n\thelp\n\t  This option enables Clang\u2019s AutoFDO build. When\n\nerror: patch failed: arch/Kconfig:879\nerror: arch/Kconfig: patch does not apply\nChecking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_SUPPORTS_AUTOFDO_CLANG\n\tselect ARCH_SUPPORTS_PROPELLER_CLANG    if X86_64\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CX8\n\nerror: patch failed: arch/x86/Kconfig:130\nerror: arch/x86/Kconfig: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_SUPPORTS_PROPELLER_CLANG    if X86_64\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CX8\n\nerror: patch failed: arch/x86/Kconfig:130\nerror: arch/x86/Kconfig: patch does not apply\nChecking patch arch/Kconfig...\nerror: while searching for:\n\t  module-specific compiler options, and simplifies debugging.\nendchoice\n\nconfig AUTOFDO_CLANG\n\tbool \"Enable Clang's AutoFDO build (EXPERIMENTAL)\"\n\tdepends on CC_IS_CLANG\n\thelp\n\t  This option enables Clang\u2019s AutoFDO build. When\n\nerror: patch failed: arch/Kconfig:879\nerror: arch/Kconfig: patch does not apply\nChecking patch Documentation/dev-tools/autofdo.rst...\nerror: Documentation/dev-tools/autofdo.rst: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "2780860eddecba9ffe210bb9436eee3cf22bfcdd",
+    "title": "include/linux/list.h: mark list_add and __list_add as __always_inline",
+    "files": [
+      "include/linux/list.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "d0ae0a09b9077e9a56c2e212701fc2b732a4cd0706664f07a9537dad34128d82",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch include/linux/list.h...\nHunk #1 succeeded at 142 (offset -8 lines).\nHunk #2 succeeded at 166 (offset -8 lines).\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "2b358510d5cc56164f83110ca1499c95a5a352cd",
+    "title": "kbuild: AutoFDO: Update split machine function argument for upstream rename",
+    "files": [
+      "scripts/Makefile.autofdo"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "fb0f0c6cf08292f2be439f4e81677532fc9c66dc447478cbd1837850344ade8b",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "1178120c3bed1733aea1c465200a6b42f8a7105d",
+    "title": "kbuild: rust: support stabilized flag `-Cprofile-sample-use` for Rust >= 1.100",
+    "files": [
+      "scripts/Makefile.autofdo"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "792b47759eec85a5402245d2fb392ae71acc91ca881db91fed8484c9ed7a4844",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "d63b852430be7fa2b6d7c550ea67e94b6681d0b5",
+    "title": "kbuild: Fix Propeller build option",
+    "files": [
+      "scripts/Makefile.propeller"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "fc938dab51bafadcffa1562d0fc0e5cf143e440bd784e33557c97298f10adbc9",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.propeller...\nerror: scripts/Makefile.propeller: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.propeller...\nerror: scripts/Makefile.propeller: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "2566fa7b2f2402a77dae6a5e9b28a1bae1c20793",
+    "title": "kconfig: Remove the architecture specific config for Propeller",
+    "files": [
+      "Documentation/dev-tools/propeller.rst",
+      "arch/Kconfig",
+      "arch/arm64/kernel/vmlinux.lds.S",
+      "arch/x86/Kconfig",
+      "arch/x86/kernel/vmlinux.lds.S",
+      "include/asm-generic/vmlinux.lds.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "a05ba8291a2abb0d133ad1031415489f826494e99aa8ecab210a6a0e3e8a99ed",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch Documentation/dev-tools/propeller.rst...\nerror: Documentation/dev-tools/propeller.rst: No such file or directory\nChecking patch arch/Kconfig...\nerror: while searching for:\n\n\t  If unsure, say N.\n\nconfig ARCH_SUPPORTS_PROPELLER_CLANG\n\tbool\n\nconfig PROPELLER_CLANG\n\tbool \"Enable Clang's Propeller build\"\n\tdepends on ARCH_SUPPORTS_PROPELLER_CLANG\n\tdepends on CC_IS_CLANG && CLANG_VERSION >= 190000\n\thelp\n\t  This option enables Clang\u2019s Propeller build. When the Propeller\n\t  profiles is specified in variable CLANG_PROPELLER_PROFILE_PREFIX\n\nerror: patch failed: arch/Kconfig:895\nerror: arch/Kconfig: patch does not apply\nChecking patch arch/arm64/kernel/vmlinux.lds.S...\nerror: while searching for:\n\n\tSTABS_DEBUG\n\tDWARF_DEBUG\n\tMODINFO\n\tELF_DETAILS\n\n\nerror: patch failed: arch/arm64/kernel/vmlinux.lds.S:368\nerror: arch/arm64/kernel/vmlinux.lds.S: patch does not apply\nChecking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_SUPPORTS_PROPELLER_CLANG    if X86_64\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CX8\n\tselect ARCH_USE_MEMTEST\n\nerror: patch failed: arch/x86/Kconfig:130\nerror: arch/x86/Kconfig: patch does not apply\nChecking patch arch/x86/kernel/vmlinux.lds.S...\nerror: while searching for:\n\n\tSTABS_DEBUG\n\tDWARF_DEBUG\n#ifdef CONFIG_PROPELLER_CLANG\n\t.llvm_bb_addr_map : { *(.llvm_bb_addr_map) }\n#endif\n\n\tMODINFO\n\tELF_DETAILS\n\n\nerror: patch failed: arch/x86/kernel/vmlinux.lds.S:423\nerror: arch/x86/kernel/vmlinux.lds.S: patch does not apply\nChecking patch include/asm-generic/vmlinux.lds.h...\nHunk #1 succeeded at 963 (offset -48 lines).\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n#define PERCPU_DECRYPTED_SECTION\n#endif\n\n#ifdef CONFIG_PROPELLER_CLANG\n#define PROPELLER_DATA                                                     \\\n\t.llvm_bb_addr_map : { *(.llvm_bb_addr_map) }\n#else\n#define PROPELLER_DATA\n#endif\n\n/*\n * Default discarded sections.\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:1011\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch arch/x86/kernel/vmlinux.lds.S...\nerror: while searching for:\n\n\tSTABS_DEBUG\n\tDWARF_DEBUG\n\tPROPELLER_DATA\n\tMODINFO\n\tELF_DETAILS\n\n\nerror: patch failed: arch/x86/kernel/vmlinux.lds.S:423\nerror: arch/x86/kernel/vmlinux.lds.S: patch does not apply\nChecking patch arch/x86/Kconfig...\nerror: while searching for:\n\tselect ARCH_SUPPORTS_LTO_CLANG\n\tselect ARCH_SUPPORTS_LTO_CLANG_THIN\n\tselect ARCH_SUPPORTS_RT\n\tselect ARCH_USE_BUILTIN_BSWAP\n\tselect ARCH_USE_CMPXCHG_LOCKREF\t\tif X86_CX8\n\tselect ARCH_USE_MEMTEST\n\nerror: patch failed: arch/x86/Kconfig:130\nerror: arch/x86/Kconfig: patch does not apply\nChecking patch arch/arm64/kernel/vmlinux.lds.S...\nerror: while searching for:\n\n\tSTABS_DEBUG\n\tDWARF_DEBUG\n\tPROPELLER_DATA\n\tMODINFO\n\tELF_DETAILS\n\n\nerror: patch failed: arch/arm64/kernel/vmlinux.lds.S:368\nerror: arch/arm64/kernel/vmlinux.lds.S: patch does not apply\nChecking patch arch/Kconfig...\nerror: while searching for:\n\n\t  If unsure, say N.\n\nconfig PROPELLER_CLANG\n\tbool \"Enable Clang's Propeller build\"\n\tdepends on CC_IS_CLANG && CLANG_VERSION >= 190000\n\tdepends on $(cc-option,-fbasic-block-sections=list=/dev/null)\n\thelp\n\t  This option enables Clang\u2019s Propeller build. When the Propeller\n\t  profiles is specified in variable CLANG_PROPELLER_PROFILE_PREFIX\n\nerror: patch failed: arch/Kconfig:895\nerror: arch/Kconfig: patch does not apply\nChecking patch Documentation/dev-tools/propeller.rst...\nerror: Documentation/dev-tools/propeller.rst: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "f6a8919d61484ae9ca6b1855035fcfb2ba6e2af9",
+    "title": "vmlinux.lds: Fix TEXT_MAIN to include .text.start and friends",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "bc204848b474a21402956eb3058ebca82d96a5c0ebecbb6e7e67e80c8b6e9f73",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * Support -ffunction-sections by matching .text and .text.*,\n * but exclude '.text..*', .text.startup[.*], and .text.exit[.*].\n *\n * .text.startup and .text.startup.* are matched later by INIT_TEXT.\n * .text.exit and .text.exit.* are matched later by EXIT_TEXT.\n *\n * Other .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:90\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * Support -ffunction-sections by matching .text and .text.*,\n * but exclude '.text..*', .text.startup[.*], and .text.exit[.*].\n *\n * .text.startup and .text.startup.* are matched later by INIT_TEXT, and\n * .text.exit and .text.exit.* are matched later by EXIT_TEXT, so they must be\n * explicitly excluded here.\n *\n * Other .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:90\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "6568f14cb5ae68cd6c612604ca0c89301cf3a0d0",
+    "title": "vmlinux.lds: Exclude .text.startup and .text.exit from TEXT_MAIN",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "9b820c1e146ce2db17ea2d65ac9e855bbc2af114bf77d7801621b6d6bc6b1b9f",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\n/*\n * Support -ffunction-sections by matching .text and .text.*,\n * but exclude '.text..*'.\n *\n * Special .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n * TEXT_MAIN.\n */\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n\n/*\n * Support -fdata-sections by matching .data, .data.*, and others,\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:88\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\n/*\n * Support -ffunction-sections by matching .text and .text.*,\n * but exclude '.text..*', .text.startup[.*], and .text.exit[.*].\n *\n * .text.startup and .text.startup.* are matched later by INIT_TEXT.\n * .text.exit and .text.exit.* are matched later by EXIT_TEXT.\n *\n * Other .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n * TEXT_MAIN.\n */\n#define TEXT_MAIN\t\t\t\t\t\t\t\\\n\t.text\t\t\t\t\t\t\t\t\\\n\t.text.[_0-9A-Za-df-rt-z]*\t\t\t\t\t\\\n\t.text.s[_0-9A-Za-su-z]*\t\t\t\t\t\t\\\n\t.text.st[_0-9A-Zb-z]*\t\t\t\t\t\t\\\n\t.text.sta[_0-9A-Za-qs-z]*\t\t\t\t\t\\\n\t.text.star[_0-9A-Za-su-z]*\t\t\t\t\t\\\n\t.text.start[_0-9A-Za-tv-z]*\t\t\t\t\t\\\n\t.text.startu[_0-9A-Za-oq-z]*\t\t\t\t\t\\\n\t.text.startup[_0-9A-Za-z]*\t\t\t\t\t\\\n\t.text.e[_0-9A-Za-wy-z]*\t\t\t\t\t\t\\\n\t.text.ex[_0-9A-Za-hj-z]*\t\t\t\t\t\\\n\t.text.exi[_0-9A-Za-su-z]*\t\t\t\t\t\\\n\t.text.exit[_0-9A-Za-z]*\n\n/*\n * Support -fdata-sections by matching .data, .data.*, and others,\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:88\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "1ba9f8979426590367406c70c1c821f5b943f993",
+    "title": "vmlinux.lds: Unify TEXT_MAIN, DATA_MAIN, and related macros",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h",
+      "scripts/module.lds.S"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "eff622c35c53f3037895c381b7e6a13a1a0a178ec8c9cffe0b5278385fa2738a",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n#define ALIGN_FUNCTION()  . = ALIGN(CONFIG_FUNCTION_ALIGNMENT)\n\n/*\n * LD_DEAD_CODE_DATA_ELIMINATION option enables -fdata-sections, which\n * generates .data.identifier sections, which need to be pulled in with\n * .data. We don't want to pull in .data..other sections, which Linux\n * has defined. Same for text and bss.\n *\n * With LTO_CLANG, the linker also splits sections by default, so we need\n * these macros to combine the sections during the final link.\n *\n * With AUTOFDO_CLANG and PROPELLER_CLANG, by default, the linker splits\n * text sections and regroups functions into subsections.\n *\n * RODATA_MAIN is not used because existing code already defines .rodata.x\n * sections to be brought in with rodata.\n */\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG) || \\\ndefined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n#else\n#define TEXT_MAIN .text\n#endif\n#if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG)\n#define DATA_MAIN .data .data.[0-9a-zA-Z_]* .data.rel.* .data..L* .data..compoundliteral* .data.$__unnamed_* .data.$L*\n#define SDATA_MAIN .sdata .sdata.[0-9a-zA-Z_]*\n#define RODATA_MAIN .rodata .rodata.[0-9a-zA-Z_]* .rodata..L*\n#define BSS_MAIN .bss .bss.[0-9a-zA-Z_]* .bss..L* .bss..compoundliteral*\n#define SBSS_MAIN .sbss .sbss.[0-9a-zA-Z_]*\n#else\n#define DATA_MAIN .data .data.rel .data.rel.local\n#define SDATA_MAIN .sdata\n#define RODATA_MAIN .rodata\n#define BSS_MAIN .bss\n#define SBSS_MAIN .sbss\n#endif\n\n/*\n * GCC 4.5 and later have a 32 bytes section alignment for structures.\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:87\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch scripts/module.lds.S...\nHunk #1 succeeded at 36 (offset -2 lines).\nerror: while searching for:\n\t\t*(.rodata .rodata.[0-9a-zA-Z_]*)\n\t\t*(.rodata..L*)\n\t}\n#endif\n\tMOD_SEPARATE_CODETAG_SECTIONS()\n}\n\n\nerror: patch failed: scripts/module.lds.S:58\nerror: scripts/module.lds.S: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/module.lds.S...\nerror: while searching for:\n\t__kcfi_traps \t\t: { KEEP(*(.kcfi_traps)) }\n#endif\n\n\t.text : {\n\t\t*(.text .text.[0-9a-zA-Z_]*)\n\t}\n\n\t.bss : {\n\t\t*(.bss .bss.[0-9a-zA-Z_]*)\n\t\t*(.bss..L*)\n\nerror: patch failed: scripts/module.lds.S:38\nerror: scripts/module.lds.S: patch does not apply\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n#define ALIGN_FUNCTION()  . = ALIGN(CONFIG_FUNCTION_ALIGNMENT)\n\n/*\n * Support -ffunction-sections by matching .text and .text.*,\n * but exclude '.text..*'.\n *\n * Special .text.* sections that are typically grouped separately, such as\n * .text.unlikely or .text.hot, must be matched explicitly before using\n * TEXT_MAIN.\n */\n#define TEXT_MAIN .text .text.[0-9a-zA-Z_]*\n\n/*\n * Support -fdata-sections by matching .data, .data.*, and others,\n * but exclude '.data..*'.\n */\n#define DATA_MAIN .data .data.[0-9a-zA-Z_]* .data.rel.* .data..L* .data..compoundliteral* .data.$__unnamed_* .data.$L*\n#define SDATA_MAIN .sdata .sdata.[0-9a-zA-Z_]*\n#define RODATA_MAIN .rodata .rodata.[0-9a-zA-Z_]* .rodata..L*\n#define BSS_MAIN .bss .bss.[0-9a-zA-Z_]* .bss..L* .bss..compoundliteral*\n#define SBSS_MAIN .sbss .sbss.[0-9a-zA-Z_]*\n\n/*\n * GCC 4.5 and later have a 32 bytes section alignment for structures.\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:87\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "dbefa1f31a91670c9e7dac9b559625336206466f",
+    "title": "Rename .data.once to .data..once to fix resetting WARN*_ONCE",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h",
+      "include/linux/mmdebug.h",
+      "include/linux/once.h",
+      "include/linux/once_lite.h",
+      "include/net/net_debug.h",
+      "mm/internal.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "72975d6451c98b662ba6503e9fc69cf7ce9df282b9f59abb6dd86b535535897e",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t*(.data..shared_aligned) /* percpu related */\t\t\t\\\n\t*(.data..unlikely)\t\t\t\t\t\t\\\n\t__start_once = .;\t\t\t\t\t\t\\\n\t*(.data.once)\t\t\t\t\t\t\t\\\n\t__end_once = .;\t\t\t\t\t\t\t\\\n\tSTRUCT_ALIGN();\t\t\t\t\t\t\t\\\n\t*(__tracepoints)\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:359\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch include/linux/mmdebug.h...\nerror: while searching for:\n\t\t}\t\t\t\t\t\t\t\\\n\t} while (0)\n#define VM_WARN_ON_ONCE_PAGE(cond, page)\t({\t\t\t\\\n\tstatic bool __section(\".data.once\") __warned;\t\t\t\\\n\tint __ret_warn_once = !!(cond);\t\t\t\t\t\\\n\t\t\t\t\t\t\t\t\t\\\n\tif (unlikely(__ret_warn_once && !__warned)) {\t\t\t\\\n\nerror: patch failed: include/linux/mmdebug.h:46\nerror: include/linux/mmdebug.h: patch does not apply\nChecking patch include/linux/once.h...\nerror: while searching for:\n#define DO_ONCE(func, ...)\t\t\t\t\t\t     \\\n\t({\t\t\t\t\t\t\t\t     \\\n\t\tbool ___ret = false;\t\t\t\t\t     \\\n\t\tstatic bool __section(\".data.once\") ___done = false;\t     \\\n\t\tstatic DEFINE_STATIC_KEY_TRUE(___once_key);\t\t     \\\n\t\tif (static_branch_unlikely(&___once_key)) {\t\t     \\\n\t\t\tunsigned long ___flags;\t\t\t\t     \\\n\nerror: patch failed: include/linux/once.h:46\nerror: include/linux/once.h: patch does not apply\nChecking patch include/linux/once_lite.h...\nerror: while searching for:\n\n#define __ONCE_LITE_IF(condition)\t\t\t\t\t\\\n\t({\t\t\t\t\t\t\t\t\\\n\t\tstatic bool __section(\".data.once\") __already_done;\t\\\n\t\tbool __ret_cond = !!(condition);\t\t\t\\\n\t\tbool __ret_once = false;\t\t\t\t\\\n\t\t\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/linux/once_lite.h:12\nerror: include/linux/once_lite.h: patch does not apply\nChecking patch include/net/net_debug.h...\nerror: while searching for:\n\n#define netdev_level_once(level, dev, fmt, ...)\t\t\t\\\ndo {\t\t\t\t\t\t\t\t\\\n\tstatic bool __section(\".data.once\") __print_once;\t\\\n\t\t\t\t\t\t\t\t\\\n\tif (!__print_once) {\t\t\t\t\t\\\n\t\t__print_once = true;\t\t\t\t\\\n\nerror: patch failed: include/net/net_debug.h:27\nerror: include/net/net_debug.h: patch does not apply\nChecking patch mm/internal.h...\nerror: while searching for:\n * when we specify __GFP_NOWARN.\n */\n#define WARN_ON_ONCE_GFP(cond, gfp)\t({\t\t\t\t\\\n\tstatic bool __section(\".data.once\") __warned;\t\t\t\\\n\tint __ret_warn_once = !!(cond);\t\t\t\t\t\\\n\t\t\t\t\t\t\t\t\t\\\n\tif (unlikely(!(gfp & __GFP_NOWARN) && __ret_warn_once && !__warned)) { \\\n\nerror: patch failed: mm/internal.h:48\nerror: mm/internal.h: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch mm/internal.h...\nChecking patch include/net/net_debug.h...\nChecking patch include/linux/once_lite.h...\nChecking patch include/linux/once.h...\nerror: while searching for:\n#define DO_ONCE(func, ...)\t\t\t\t\t\t     \\\n\t({\t\t\t\t\t\t\t\t     \\\n\t\tbool ___ret = false;\t\t\t\t\t     \\\n\t\tstatic bool __section(\".data..once\") ___done = false;\t     \\\n\t\tstatic DEFINE_STATIC_KEY_TRUE(___once_key);\t\t     \\\n\t\tif (static_branch_unlikely(&___once_key)) {\t\t     \\\n\t\t\tunsigned long ___flags;\t\t\t\t     \\\n\nerror: patch failed: include/linux/once.h:46\nerror: include/linux/once.h: patch does not apply\nChecking patch include/linux/mmdebug.h...\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t*(.data..shared_aligned) /* percpu related */\t\t\t\\\n\t*(.data..unlikely)\t\t\t\t\t\t\\\n\t__start_once = .;\t\t\t\t\t\t\\\n\t*(.data..once)\t\t\t\t\t\t\t\\\n\t__end_once = .;\t\t\t\t\t\t\t\\\n\tSTRUCT_ALIGN();\t\t\t\t\t\t\t\\\n\t*(__tracepoints)\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:359\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "bb43a59944f45e89aa158740b8a16ba8f0b0fa2b",
+    "title": "Rename .data.unlikely to .data..unlikely",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h",
+      "include/linux/rcupdate.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "dda443bee088c2a29a45de640dc3d1d723cbe5bd93b1680cfc29d11c7706656c",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t*(.data..decrypted)\t\t\t\t\t\t\\\n\t*(.ref.data)\t\t\t\t\t\t\t\\\n\t*(.data..shared_aligned) /* percpu related */\t\t\t\\\n\t*(.data.unlikely)\t\t\t\t\t\t\\\n\t__start_once = .;\t\t\t\t\t\t\\\n\t*(.data.once)\t\t\t\t\t\t\t\\\n\t__end_once = .;\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:357\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch include/linux/rcupdate.h...\nerror: while searching for:\n */\n#define RCU_LOCKDEP_WARN(c, s)\t\t\t\t\t\t\\\n\tdo {\t\t\t\t\t\t\t\t\\\n\t\tstatic bool __section(\".data.unlikely\") __warned;\t\\\n\t\tif (debug_lockdep_rcu_enabled() && (c) &&\t\t\\\n\t\t    debug_lockdep_rcu_enabled() && !__warned) {\t\t\\\n\t\t\t__warned = true;\t\t\t\t\\\n\nerror: patch failed: include/linux/rcupdate.h:401\nerror: include/linux/rcupdate.h: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/linux/rcupdate.h...\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t*(.data..decrypted)\t\t\t\t\t\t\\\n\t*(.ref.data)\t\t\t\t\t\t\t\\\n\t*(.data..shared_aligned) /* percpu related */\t\t\t\\\n\t*(.data..unlikely)\t\t\t\t\t\t\\\n\t__start_once = .;\t\t\t\t\t\t\\\n\t*(.data.once)\t\t\t\t\t\t\t\\\n\t__end_once = .;\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:357\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "db0b2991ae1aac5ca985ec6fd8ff9bd9b2126c9b",
+    "title": "vmlinux.lds.h: Add markers for text_unlikely and text_hot sections",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "09b6bbb464b7476b413f52d94881cda485d1f2035bc6884446e70966ef054f17",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nHunk #1 succeeded at 550 (offset 1 line).\nerror: while searching for:\n\t\tALIGN_FUNCTION();\t\t\t\t\t\\\n\t\t*(.text.asan.* .text.tsan.*)\t\t\t\t\\\n\t\t*(.text.unknown .text.unknown.*)\t\t\t\\\n\t\t*(.text.unlikely .text.unlikely.*)\t\t\t\\\n\t\t. = ALIGN(PAGE_SIZE);\t\t\t\t\t\\\n\t\t*(.text.hot .text.hot.*)\t\t\t\t\\\n\t\t*(TEXT_MAIN .text.fixup)\t\t\t\t\\\n\t\tNOINSTR_TEXT\t\t\t\t\t\t\\\n\t\t*(.ref.text)\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:565\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n\t\t__cpuidle_text_end = .;\t\t\t\t\t\\\n\t\t__noinstr_text_end = .;\n\n#define TEXT_UNLIKELY\t\t\t\t\t\t\t\\\n\t\t__unlikely_text_start = .;\t\t\t\t\\\n\t\t*(.text.unlikely .text.unlikely.*)\t\t\t\\\n\t\t__unlikely_text_end = .;\n\n#define TEXT_HOT\t\t\t\t\t\t\t\\\n\t\t__hot_text_start = .;\t\t\t\t\t\\\n\t\t*(.text.hot .text.hot.*)\t\t\t\t\\\n\t\t__hot_text_end = .;\n\n/*\n * .text section. Map to function alignment to avoid address changes\n * during second ld run in second ld pass when generating System.map\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:549\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "0043ecea2399ffc8bfd99ed9dbbe766e7c79293c",
+    "title": "vmlinux.lds.h: Adjust symbol ordering in text output section",
+    "files": [
+      "arch/sparc/kernel/vmlinux.lds.S",
+      "include/asm-generic/vmlinux.lds.h"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "4adbaca92e59787b6044f0bb61456effc94a61498692a72e768c62928f14d089",
+    "check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Checking patch arch/sparc/kernel/vmlinux.lds.S...\nChecking patch include/asm-generic/vmlinux.lds.h...\nHunk #1 succeeded at 554 (offset 1 line).\n"
+    },
+    "reverse_check": null
+  },
+  {
+    "sha": "7594302d9ddd9f198173a658250e7b7debc6ed76",
+    "title": "kbuild: rust: rename flag to `-Zdebuginfo-for-profiling` for Rust >= 1.98",
+    "files": [
+      "scripts/Makefile.autofdo"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "61b6ac745596abe9c34175912a2f2f12749dc116cec6bd1c0a7c8808acfb743e",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    }
+  },
+  {
+    "sha": "93863f3f859a626347ce2ec18947b11357b4ca14",
+    "title": "kbuild: Check for functions with ambiguous -ffunction-sections section names",
+    "files": [
+      "include/asm-generic/vmlinux.lds.h",
+      "scripts/Makefile.vmlinux_o",
+      "scripts/check-function-names.sh"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "3494d6cb97c820f70aa779413e055b7d06b85778c29be6f41e3fe608444c67ec",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * .text.startup could be __attribute__((constructor)) code in a *non*\n * ffunction-sections object, which should be placed in .init.text; or it could\n * be an actual function named startup() in an ffunction-sections object, which\n * should be placed in .text.  Objtool will detect and complain about any such\n * ambiguously named functions.\n */\n#define TEXT_MAIN\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:110\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\nChecking patch scripts/Makefile.vmlinux_o...\nHunk #1 succeeded at 56 (offset -7 lines).\nChecking patch scripts/check-function-names.sh...\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/check-function-names.sh...\nerror: scripts/check-function-names.sh: No such file or directory\nChecking patch scripts/Makefile.vmlinux_o...\nerror: while searching for:\n\t--start-group $(KBUILD_VMLINUX_LIBS) --end-group \\\n\t$(cmd_objtool)\n\ncmd_check_function_names = $(srctree)/scripts/check-function-names.sh $@\n\ndefine rule_ld_vmlinux.o\n\t$(call cmd_and_savecmd,ld_vmlinux.o)\n\t$(call cmd,gen_objtooldep)\n\t$(call cmd,check_function_names)\nendef\n\n\nvmlinux.o: $(initcalls-lds) vmlinux.a $(KBUILD_VMLINUX_LIBS) FORCE\n\t$(call if_changed_rule,ld_vmlinux.o)\n\n\nerror: patch failed: scripts/Makefile.vmlinux_o:63\nerror: scripts/Makefile.vmlinux_o: patch does not apply\nChecking patch include/asm-generic/vmlinux.lds.h...\nerror: while searching for:\n * .text.startup could be __attribute__((constructor)) code in a *non*\n * ffunction-sections object, which should be placed in .init.text; or it could\n * be an actual function named startup() in an ffunction-sections object, which\n * should be placed in .text.  The build will detect and complain about any such\n * ambiguously named functions.\n */\n#define TEXT_MAIN\t\t\t\t\t\t\t\\\n\nerror: patch failed: include/asm-generic/vmlinux.lds.h:110\nerror: include/asm-generic/vmlinux.lds.h: patch does not apply\n"
+    }
+  },
+  {
+    "sha": "ac7f472073dca70f8417914cf4771c95a5603ec1",
+    "title": "kbuild: AutoFDO: Update split machine function argument for upstream rename",
+    "files": [
+      "scripts/Makefile.autofdo"
+    ],
+    "baseline": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+    "patch_sha256": "52d8413d61bd98eb59fef581aa7e53829a0728152e38e043ddf7d63df50d0ee1",
+    "check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    },
+    "reverse_check": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Checking patch scripts/Makefile.autofdo...\nerror: scripts/Makefile.autofdo: No such file or directory\n"
+    }
+  }
+]

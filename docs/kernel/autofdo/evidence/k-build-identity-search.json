@@ -1,0 +1,24 @@
+{
+  "commit": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+  "old_sample_build_id": "395733b9c917cb98309b39cc3ec379c03ac36b3f",
+  "search": {
+    "args": [
+      "grep",
+      "-n",
+      "-F",
+      "395733b9c917cb98309b39cc3ec379c03ac36b3f",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+      "--",
+      "packaging",
+      "arch/arm/configs",
+      "Makefile"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "tracked_named_build_artifacts": [],
+  "new_commit_messages_contain_build_id": false,
+  "new_commit_messages": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708\nARM: configs: tizen_bcm2711: enable ARM_PMUV3\n\nThe BCM2711 Cortex-A72 PMU is matched by arm_pmuv3 through the\narm,cortex-a72-pmu entry in drivers/perf/arm_pmuv3.c. The arm_v7_pmu\nmatch table has no Cortex-A72 entry. ARM_PMUV3 defaults to ARM64 in\ndrivers/perf/Kconfig, leaving the driver disabled in the 32-bit build.\nThe current armv7l image consequently has no hardware perf events\nand its device-tree PMU node has no bound driver.\n\nEnable ARM_PMUV3 in the 32-bit BCM2711 defconfig. The RT variant is\ngenerated from the same defconfig plus kernel/configs/rt.config, so\nit inherits this option. Leave the arm64 configuration unchanged.\n\nAn ordinary kernel was previously built from the running image's\nsource baseline, 21645b17c0d913e2ba7e10fbc9c993d286b3f57d. Comparing\nall 5649 configuration values with that image's devel RPM found only\nCONFIG_ARM_PMUV3 changing from disabled to y.\nThis patch on the latest tizen baseline has not been built or booted.\n\nChange-Id: I2f00e4cca847dae70fb9e99f3948ed3df699f05f\nSigned-off-by: Hao Lin <hao.lin@samsung.com>\n\nf240c28093027707f5e09f8a9cbbed16a43ebb1a\nmm: restore vendor reclaim semantics for force_reclaim\n\nThe vendor memory.force_reclaim interface retained a boolean true after\nthe reclaim API changed to option bits. Pass MEMCG_RECLAIM_MAY_SWAP so\nanonymous pages can be swapped out again, without adding proactive\nreclaim semantics.\n\nHonor the write_u64 callback contract by returning zero on success.\nReject requests larger than ULONG_MAX, skip zero requests, request only\nthe remaining target on each pass, and stop after two consecutive passes\nwithout progress. Keep the existing reclaim diagnostic. Reclaim batching\nmay still overshoot the target; this is not a strict page cap.\n\n[lko: split from a9cc39b8dd1d; zram defconfig part evaluated separately]\n\n",
+  "result": "No matching build manifest or ELF found in the searched K metadata/config paths or tracked artifact names. Source identity does not establish ELF build-id. No other System.map paired."
+}

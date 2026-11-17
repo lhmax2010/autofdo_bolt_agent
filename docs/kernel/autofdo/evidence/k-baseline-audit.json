@@ -1,0 +1,389 @@
+[
+  {
+    "args": [
+      "cat-file",
+      "-t",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "commit\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "show",
+      "--format=fuller",
+      "--stat",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "commit 0fac5de6a63091d141ad1cd3ed9d9e92b8dde708\nAuthor:     Hao Lin <hao.lin@samsung.com>\nAuthorDate: Wed Oct 28 16:13:43 2026 +0800\nCommit:     Hao Lin <hao.lin@samsung.com>\nCommitDate: Wed Oct 28 17:56:15 2026 +0800\n\n    ARM: configs: tizen_bcm2711: enable ARM_PMUV3\n    \n    The BCM2711 Cortex-A72 PMU is matched by arm_pmuv3 through the\n    arm,cortex-a72-pmu entry in drivers/perf/arm_pmuv3.c. The arm_v7_pmu\n    match table has no Cortex-A72 entry. ARM_PMUV3 defaults to ARM64 in\n    drivers/perf/Kconfig, leaving the driver disabled in the 32-bit build.\n    The current armv7l image consequently has no hardware perf events\n    and its device-tree PMU node has no bound driver.\n    \n    Enable ARM_PMUV3 in the 32-bit BCM2711 defconfig. The RT variant is\n    generated from the same defconfig plus kernel/configs/rt.config, so\n    it inherits this option. Leave the arm64 configuration unchanged.\n    \n    An ordinary kernel was previously built from the running image's\n    source baseline, 21645b17c0d913e2ba7e10fbc9c993d286b3f57d. Comparing\n    all 5649 configuration values with that image's devel RPM found only\n    CONFIG_ARM_PMUV3 changing from disabled to y.\n    This patch on the latest tizen baseline has not been built or booted.\n    \n    Change-Id: I2f00e4cca847dae70fb9e99f3948ed3df699f05f\n    Signed-off-by: Hao Lin <hao.lin@samsung.com>\n\n arch/arm/configs/tizen_bcm2711_defconfig | 1 +\n 1 file changed, 1 insertion(+)\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "show",
+      "--format=fuller",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "commit 0fac5de6a63091d141ad1cd3ed9d9e92b8dde708\nAuthor:     Hao Lin <hao.lin@samsung.com>\nAuthorDate: Wed Oct 28 16:13:43 2026 +0800\nCommit:     Hao Lin <hao.lin@samsung.com>\nCommitDate: Wed Oct 28 17:56:15 2026 +0800\n\n    ARM: configs: tizen_bcm2711: enable ARM_PMUV3\n    \n    The BCM2711 Cortex-A72 PMU is matched by arm_pmuv3 through the\n    arm,cortex-a72-pmu entry in drivers/perf/arm_pmuv3.c. The arm_v7_pmu\n    match table has no Cortex-A72 entry. ARM_PMUV3 defaults to ARM64 in\n    drivers/perf/Kconfig, leaving the driver disabled in the 32-bit build.\n    The current armv7l image consequently has no hardware perf events\n    and its device-tree PMU node has no bound driver.\n    \n    Enable ARM_PMUV3 in the 32-bit BCM2711 defconfig. The RT variant is\n    generated from the same defconfig plus kernel/configs/rt.config, so\n    it inherits this option. Leave the arm64 configuration unchanged.\n    \n    An ordinary kernel was previously built from the running image's\n    source baseline, 21645b17c0d913e2ba7e10fbc9c993d286b3f57d. Comparing\n    all 5649 configuration values with that image's devel RPM found only\n    CONFIG_ARM_PMUV3 changing from disabled to y.\n    This patch on the latest tizen baseline has not been built or booted.\n    \n    Change-Id: I2f00e4cca847dae70fb9e99f3948ed3df699f05f\n    Signed-off-by: Hao Lin <hao.lin@samsung.com>\n\ndiff --git a/arch/arm/configs/tizen_bcm2711_defconfig b/arch/arm/configs/tizen_bcm2711_defconfig\nindex bf97a71b2c3d..e8bb00b4a8b3 100644\n--- a/arch/arm/configs/tizen_bcm2711_defconfig\n+++ b/arch/arm/configs/tizen_bcm2711_defconfig\n@@ -466,6 +466,7 @@ CONFIG_RASPBERRYPI_POWER=y\n CONFIG_PWM=y\n CONFIG_PWM_BCM2835=y\n CONFIG_GENERIC_PHY=y\n+CONFIG_ARM_PMUV3=y\n CONFIG_ANDROID_BINDER_IPC=y\n CONFIG_ANDROID_BINDERFS=y\n CONFIG_DAX=y\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "42aeefac58edeb081aff440f0b60be71cbe49755",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "42aeefac58edeb081aff440f0b60be71cbe49755\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "42aeefac58edeb081aff440f0b60be71cbe49755",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+      "42aeefac58edeb081aff440f0b60be71cbe49755"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "rev-list",
+      "--left-right",
+      "--count",
+      "42aeefac58edeb081aff440f0b60be71cbe49755...0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "0\t2\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "log",
+      "--format=%H %s",
+      "42aeefac58edeb081aff440f0b60be71cbe49755..0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708 ARM: configs: tizen_bcm2711: enable ARM_PMUV3\nf240c28093027707f5e09f8a9cbbed16a43ebb1a mm: restore vendor reclaim semantics for force_reclaim\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "log",
+      "--format=%H %s",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708..42aeefac58edeb081aff440f0b60be71cbe49755"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "c27f160de761bb55f64672ceac642698a6e93684",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "21645b17c0d913e2ba7e10fbc9c993d286b3f57d\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "c27f160de761bb55f64672ceac642698a6e93684",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+      "c27f160de761bb55f64672ceac642698a6e93684"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "rev-list",
+      "--left-right",
+      "--count",
+      "c27f160de761bb55f64672ceac642698a6e93684...0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "1\t4\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "log",
+      "--format=%H %s",
+      "c27f160de761bb55f64672ceac642698a6e93684..0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708 ARM: configs: tizen_bcm2711: enable ARM_PMUV3\nf240c28093027707f5e09f8a9cbbed16a43ebb1a mm: restore vendor reclaim semantics for force_reclaim\n42aeefac58edeb081aff440f0b60be71cbe49755 drivers: media: pci: hailo: Port Hailo accelerator driver to v4.22.0\nd5ef43b342dcbcbddb464bc20deae6ced6ed7193 configs: packaging: modularize defconfig with RT and LSM fragments\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "log",
+      "--format=%H %s",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708..c27f160de761bb55f64672ceac642698a6e93684"
+    ],
+    "exit": 0,
+    "stdout": "c27f160de761bb55f64672ceac642698a6e93684 ARM: enable PMUv3 for the RPi4 Tizen defconfig\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "42aeefac58edeb081aff440f0b60be71cbe49755",
+      "c27f160de761bb55f64672ceac642698a6e93684"
+    ],
+    "exit": 0,
+    "stdout": "21645b17c0d913e2ba7e10fbc9c993d286b3f57d\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "42aeefac58edeb081aff440f0b60be71cbe49755",
+      "c27f160de761bb55f64672ceac642698a6e93684"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "c27f160de761bb55f64672ceac642698a6e93684",
+      "42aeefac58edeb081aff440f0b60be71cbe49755"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "rev-list",
+      "--left-right",
+      "--count",
+      "42aeefac58edeb081aff440f0b60be71cbe49755...c27f160de761bb55f64672ceac642698a6e93684"
+    ],
+    "exit": 0,
+    "stdout": "2\t1\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "log",
+      "--format=%H %s",
+      "42aeefac58edeb081aff440f0b60be71cbe49755..c27f160de761bb55f64672ceac642698a6e93684"
+    ],
+    "exit": 0,
+    "stdout": "c27f160de761bb55f64672ceac642698a6e93684 ARM: enable PMUv3 for the RPi4 Tizen defconfig\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "log",
+      "--format=%H %s",
+      "c27f160de761bb55f64672ceac642698a6e93684..42aeefac58edeb081aff440f0b60be71cbe49755"
+    ],
+    "exit": 0,
+    "stdout": "42aeefac58edeb081aff440f0b60be71cbe49755 drivers: media: pci: hailo: Port Hailo accelerator driver to v4.22.0\nd5ef43b342dcbcbddb464bc20deae6ced6ed7193 configs: packaging: modularize defconfig with RT and LSM fragments\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "diff",
+      "--stat",
+      "42aeefac58edeb081aff440f0b60be71cbe49755",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": " arch/arm/configs/tizen_bcm2711_defconfig |  1 +\n mm/memcontrol-v1.c                       | 29 ++++++++++++++++++++++-------\n 2 files changed, 23 insertions(+), 7 deletions(-)\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "diff",
+      "42aeefac58edeb081aff440f0b60be71cbe49755",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708",
+      "--",
+      "packaging",
+      "arch/arm/configs/tizen_bcm2711_defconfig"
+    ],
+    "exit": 0,
+    "stdout": "diff --git a/arch/arm/configs/tizen_bcm2711_defconfig b/arch/arm/configs/tizen_bcm2711_defconfig\nindex bf97a71b2c3d..e8bb00b4a8b3 100644\n--- a/arch/arm/configs/tizen_bcm2711_defconfig\n+++ b/arch/arm/configs/tizen_bcm2711_defconfig\n@@ -466,6 +466,7 @@ CONFIG_RASPBERRYPI_POWER=y\n CONFIG_PWM=y\n CONFIG_PWM_BCM2835=y\n CONFIG_GENERIC_PHY=y\n+CONFIG_ARM_PMUV3=y\n CONFIG_ANDROID_BINDER_IPC=y\n CONFIG_ANDROID_BINDERFS=y\n CONFIG_DAX=y\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "diff",
+      "--stat",
+      "c27f160de761bb55f64672ceac642698a6e93684",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708"
+    ],
+    "exit": 0,
+    "stdout": " arch/arm/configs/tizen_bcm2711_defconfig           |    2 +-\n arch/arm/configs/tizen_bcm2711_rt_defconfig        |  542 -------\n arch/arm64/configs/tizen_bcm2711_rt_defconfig      |  551 -------\n build-rpi.sh                                       |  112 +-\n drivers/media/pci/Kconfig                          |    1 +\n drivers/media/pci/Makefile                         |    3 +-\n drivers/media/pci/hailo/Kconfig                    |    6 +\n drivers/media/pci/hailo/Makefile                   |   34 +\n drivers/media/pci/hailo/common/fw_operation.c      |  147 ++\n drivers/media/pci/hailo/common/fw_operation.h      |   29 +\n drivers/media/pci/hailo/common/fw_validation.c     |  117 ++\n drivers/media/pci/hailo/common/fw_validation.h     |   59 +\n .../media/pci/hailo/common/hailo_ioctl_common.h    |  708 +++++++++\n drivers/media/pci/hailo/common/hailo_resource.c    |  141 ++\n drivers/media/pci/hailo/common/hailo_resource.h    |   39 +\n drivers/media/pci/hailo/common/pcie_common.c       |  977 ++++++++++++\n drivers/media/pci/hailo/common/pcie_common.h       |  191 +++\n drivers/media/pci/hailo/common/soc_structs.h       |   88 ++\n drivers/media/pci/hailo/common/utils.h             |   82 +\n drivers/media/pci/hailo/common/vdma_common.c       |  963 ++++++++++++\n drivers/media/pci/hailo/common/vdma_common.h       |  318 ++++\n drivers/media/pci/hailo/src/fops.c                 |  570 +++++++\n drivers/media/pci/hailo/src/fops.h                 |   23 +\n drivers/media/pci/hailo/src/nnc.c                  |  299 ++++\n drivers/media/pci/hailo/src/nnc.h                  |   22 +\n drivers/media/pci/hailo/src/pcie.c                 | 1559 ++++++++++++++++++++\n drivers/media/pci/hailo/src/pcie.h                 |  130 ++\n drivers/media/pci/hailo/src/soc.c                  |  279 ++++\n drivers/media/pci/hailo/src/soc.h                  |   28 +\n drivers/media/pci/hailo/src/sysfs.c                |   45 +\n drivers/media/pci/hailo/src/sysfs.h                |   13 +\n drivers/media/pci/hailo/src/utils.h                |   21 +\n drivers/media/pci/hailo/utils/compact.h            |  161 ++\n drivers/media/pci/hailo/utils/fw_common.h          |   19 +\n .../media/pci/hailo/utils/integrated_nnc_utils.c   |  109 ++\n .../media/pci/hailo/utils/integrated_nnc_utils.h   |   30 +\n drivers/media/pci/hailo/utils/logs.c               |    8 +\n drivers/media/pci/hailo/utils/logs.h               |   45 +\n drivers/media/pci/hailo/vdma/ioctl.c               |  719 +++++++++\n drivers/media/pci/hailo/vdma/ioctl.h               |   37 +\n drivers/media/pci/hailo/vdma/memory.c              |  788 ++++++++++\n drivers/media/pci/hailo/vdma/memory.h              |   57 +\n drivers/media/pci/hailo/vdma/vdma.c                |  313 ++++\n drivers/media/pci/hailo/vdma/vdma.h                |  168 +++\n kernel/configs/nosmack.config                      |    8 +\n kernel/configs/rt.config                           |    2 +\n kernel/configs/selinux.config                      |   16 +\n mm/memcontrol-v1.c                                 |   29 +-\n packaging/linux-rpi.spec                           |   40 +-\n 49 files changed, 9489 insertions(+), 1159 deletions(-)\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:packaging/linux-rpi.spec"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "03cc402251ff955763eea39a653e6cd986a9b06d85950236d3eeee958c9d30ff",
+    "stdout_bytes": 11986,
+    "snapshot": "k-source-snapshot/packaging/linux-rpi.spec"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:arch/arm/configs/tizen_bcm2711_defconfig"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "8b028bc13db383c97eb01d0897206ef8d23e767d6bbd7cee34bc79b7234ab55d",
+    "stdout_bytes": 13602,
+    "snapshot": "k-source-snapshot/arch/arm/configs/tizen_bcm2711_defconfig"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:arch/arm/Kconfig"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "2706e5fc4c8b47721d5611ba23a1b779c2809e02bdfeae467b434452838c4686",
+    "stdout_bytes": 59700,
+    "snapshot": "k-source-snapshot/arch/arm/Kconfig"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:arch/arm64/Kconfig"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "698eca5636d3c65962cae943610d5127b2cfff7199b2a6fd832e59dcd00bbc52",
+    "stdout_bytes": 86290,
+    "snapshot": "k-source-snapshot/arch/arm64/Kconfig"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:arch/Kconfig"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "df5790d9a620f6c657578b57400271c786640cb43d98c6e562bad119f5150d33",
+    "stdout_bytes": 51761,
+    "snapshot": "k-source-snapshot/arch/Kconfig"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:init/Kconfig"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "14f13926c4afa5e6d50cc3641380aa9f8382fd3d5281462633cbf4e4a002165c",
+    "stdout_bytes": 67148,
+    "snapshot": "k-source-snapshot/init/Kconfig"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:include/asm-generic/vmlinux.lds.h"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "579b651feaa2f7bb3e626a37dfcece2cb62ce443853bbd090582e3ec9719a213",
+    "stdout_bytes": 33482,
+    "snapshot": "k-source-snapshot/include/asm-generic/vmlinux.lds.h"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:arch/arm/kernel/vmlinux.lds.S"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "ce98ea0ce24faa32c7e93d951195c4e95e996dbb63690e312ef8b3a4faee8f60",
+    "stdout_bytes": 3507,
+    "snapshot": "k-source-snapshot/arch/arm/kernel/vmlinux.lds.S"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:arch/arm/include/asm/vmlinux.lds.h"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "5ee8ef8799180d268ad6a916cfce67f821964b3968865e5149d4f6714953ec66",
+    "stdout_bytes": 4624,
+    "snapshot": "k-source-snapshot/arch/arm/include/asm/vmlinux.lds.h"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:drivers/hwtracing/coresight/Kconfig"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "581539ac420f47799417df912d32479d2bdfac8579c99fdbb5def286918dbb0f",
+    "stdout_bytes": 9879,
+    "snapshot": "k-source-snapshot/drivers/hwtracing/coresight/Kconfig"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:drivers/perf/arm_pmuv3.c"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "ae2ee258d8d87e00d9b4f678888585c822c9d4b4b6269020dfdc2bd95afe1165",
+    "stdout_bytes": 48248,
+    "snapshot": "k-source-snapshot/drivers/perf/arm_pmuv3.c"
+  },
+  {
+    "args": [
+      "show",
+      "0fac5de6a63091d141ad1cd3ed9d9e92b8dde708:include/linux/perf/arm_pmuv3.h"
+    ],
+    "exit": 0,
+    "stderr": "",
+    "stdout_sha256": "42954d1bbfcc60b13e3b4d52340b6ded1da211095d19396325945f09e34c9948",
+    "stdout_bytes": 12989,
+    "snapshot": "k-source-snapshot/include/linux/perf/arm_pmuv3.h"
+  }
+]
