@@ -36,7 +36,17 @@
 14. README须为总部工程师提供详细的从零环境、操作与复现测试指南；没有证据的步骤明确标注Not documented yet或Not verified，不编造。需要说明原始证据时使用“Detailed raw evidence is retained by the project team”。
 15. 今后hq提交信息用中性描述，不提main、GitHub、AI或PM；已有提交不改写，禁止force push。自动检查的误报仅允许精确到完整单行的白名单并写明理由；推送前检查必须通过。
 
+16. 自本轮起，workflow自身缺陷的处理：若门禁失败但原文证明设计v0.3条件实际成立，保留失败收据与原文，修正解析/格式/路径等实现，以原文作夹具先失败后通过，再用同一命令恢复；每轮最多3次并逐次报告。不得改变门槛或删除条件。真实违反仍立即停止；SDB等板上操作失败按§8.3/§13处理，不计入此规则。
+
 推送仍失败时：原样记录报错后停下，不索要令牌，不修改任何认证配置。
+
+## Workflow M1第三阶段：磁盘核查及S0修正完成，SDB端点不可见停止（2026-11-17任务）
+
+- [磁盘报告](maintenance/disk_cleanup_2026-11-17.md)：可用113,591,267,328→113,576,747,008B（约105.8GiB）；删除0B。du权限不足，/proc979项不可读，无法完整证明B候选无人使用，按保守规则跳过；C清单含大小和代价，A类/其他项目不碰。空间非阻塞项。
+- [M1报告第7节](workflow/m1/05_m1_board_e2e.md#7-磁盘盘点s0修正与sdb端点不可见停止2026-11-17任务)：cycles按完整字段解析冒号/等号/十六进制，单事件/type0/config0条件不变；真实原文夹具先证旧代码失败再证新代码通过。S0探测目录创建前登记、verified-pull后删除；112测试和13脚本语法检查通过。Sintel纵向拉伸说明已补充，未重编码。
+- 处理遗留cycles-check前，model只读查询首次及两次重试均退出1：target not found / serial number wrong；sdb devices为空。**本轮停止，未拉回/删除遗留目录，未启动正式run/GBS/训练/测量，未改root/governor。** 当前板上状态未知，不能引用旧uid作为本轮核实结果。
+- 已登记本轮起适用的自身缺陷修复政策（最多3次、保留原文、先失败后通过、不改变门槛）。本次已知S0修复1次；运行中自动恢复0次；SDB失败不按代码缺陷绕过。
+- 构建启动资源列表为空、等待0秒；测试scope峰值28,700,672B，最低采样MemAvailable12,163,461,120B。无资源终止/OOM。证据见[attempt-03索引](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/index.json)；已ALL-END。不改hq/Gerrit/设计/旧证据。
 
 ## Workflow M1第三阶段继续：S0 cycles解析缺陷停止（2026-11-16）
 

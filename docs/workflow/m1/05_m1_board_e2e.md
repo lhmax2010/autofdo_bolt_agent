@@ -192,3 +192,99 @@ S0在拉回前失败，板上
   [索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-02/index.json)和
   [本地主件清单](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-02/large-and-local-index.json)。
 - **本轮停止，等待解析缺陷与S0目录清理缺口的后续处理指令；不宣称M1通过。**
+
+
+## 7. 磁盘盘点、S0修正与SDB端点不可见停止（2026-11-17任务）
+
+本轮以606ae8f为起点，先做磁盘盘点，再修正代码，之后尝试处理遗留探测目录。
+**停止原因是当前SDB中没有192.168.108.26:26101；未启动第三部分的正式run。**
+本轮未把该连接问题当作可忽略的实现缺陷，也没有改用其他端点、扫描地址或修改认证。
+
+### 7.1 清理核查
+
+[清理报告](../../maintenance/disk_cleanup_2026-11-17.md)及其SHA索引记录所有≥200MiB目录、
+修改时间、任务归属、符号链接/真实路径、可见挂载和进程占用。
+两次du用时358.437秒和273.825秒，均因部分root目录权限不足退出1，原文保留；
+目录大小是可读部分下界，祖先/后代及硬链接的计数不可相加。
+
+可用空间从 **113,591,267,328 B（105.790 GiB）**
+到 **113,576,747,008 B（105.777 GiB）**。
+删除 **0 B**：/proc有979项读取被拒，未能完整证明B候选不被进程使用；
+按照“拿不准保留”跳过，未扩大sudo权限、未卸载、未触碰其他构建。
+C项仅是可进一步划定可重建部分的候选，内含RPM/日志/冻结仓库等A项仍须保留。
+空间已高于50GiB，**磁盘与内存不是本轮停止原因**。
+
+### 7.2 解析与探测目录修正
+
+- 新parse_cycles_event只接受一行/一个事件、事件名cycles；
+  逗号分字段，精确type/config字段名，支持冒号或等号、int(value,0)与0x0，
+  忽略括号说明；必须type=0且config=0，不能用config1/config2/bp_type/sample_type替代。
+- attempt-02的cycles.evlist逐字节复制为
+  workflow/tests/fixtures/rpi4-cycles.evlist；测试明确证明旧正则对该原文为False、新解析为True。
+- 正例：本板真实原文、旧等号格式、十六进制；反例：cpu-clock软件事件、非零config、
+  两事件、只有相似字段而缺type/config。没有更改事件门槛。
+- cycles-check在创建前通过register_run登记remote/local/receipt；异常清理调用已有verified-pull，
+  比对全量SHA并持久化收据后才删除确切路径。合成测试覆盖探测失败仍有日志、
+  SHA失败不删除、校验成功才删除；旧拉回负对照继续通过。
+- Sintel说明已补充：1920×818按PM要求缩放到1920×1080，纵向拉伸；
+  仅用于解码性能/正确性，不影响其用途。没有重新编码，视频SHA不变。
+- **112项测试全部通过，0失败/0错误；13个shell脚本bash --posix -n通过。**
+  证据：[tests-monitored.log](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/tests-monitored.log)、
+  [fixture-sha.json](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/fixture-sha.json)。
+
+### 7.3 遗留cycles-check拉回尝试与停止
+
+在任何root/governor变更之前先只读确认身份。指定端点的model查询首次及两次允许重试均为
+真实主机退出码1，stderr原文：
+
+    error: target not found
+    error: serial number '192.168.108.26:26101' wrong
+
+后续只读sdb devices诊断退出0，设备列表为空。它只能证明当前SDB没有该端点，
+**不能据此断言板子断电、镜像变化或内核变化**。
+[三次命令、时间、stdout/stderr](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/legacy-recovery/transport/)、
+[结果](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/legacy-recovery/result.json)、
+[sdb devices](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/sdb-devices.stdout)。
+
+未读取旧perf.data、未获取远端SHA、未拉回或删除旧目录；
+/opt/afdo_agent/work/m1-ffmpeg-rpi4-thumb-01/cycles-check仍记为**待核实拉回/清理**，
+不能报告已清理。没有执行root on、修改governor、部署、采样或新探测。
+因此本轮没有自身待恢复的板上状态；当前uid/governor均未知，不能用上一轮的恢复结果冒充本轮读取。
+
+### 7.4 M1验收与自身缺陷处理记录
+
+| 项目 | 本轮结果 |
+|---|---|
+| 磁盘盘点与分类 | 完成；未充分证明可删的B均跳过；删除0B |
+| cycles解析/目录清理修正 | 合成测试通过，现场重测未进行 |
+| 遗留目录拉回及删除 | 未完成：身份查询前即SDB端点不可见 |
+| 新attempt单命令run | 未启动（先行恢复步骤失败） |
+| S0新硬件事件/遥测能力/输入SHA | 未执行 |
+| BASE、AFDO、BASE-r，build-lock及消费证据 | 未执行 |
+| 三输入oracle、must-load/deploy-set、计时前后正确性 | 未执行 |
+| ToS primary估计/CI/判定 | 未计算/未计算/未执行 |
+| Sintel secondary估计/CI/判定 | 未计算/未计算/未执行 |
+| S3后SIGTERM恢复测试 | 未到达 |
+| 独立1block注入失败清理 | 未到达 |
+| 本轮GBS启动资源与等待 | 构建0次，记录为空，等待0秒 |
+| 运行中资源保护触发 | 无构建，无资源停止/OOM |
+
+自身缺陷政策已写入STATUS长期规则。本轮预先指定的cycles解析缺陷修正计1次，
+原文/原因/改动/先失败后通过见7.2；正式运行中的自动修复/恢复次数为0。
+SDB失败不属于该政策，不消耗/绕过实现缺陷次数，也没有修改判据。
+探测目录日志补齐是同一已知S0修复的配套工作。后续仍需先处理遗留目录，
+再用新attempt单命令运行；本次不伪造成功收据或统计结果。
+
+### 7.5 资源与边界
+
+测试scope实读memory.peak **28,700,672 B**，
+测试前后采样最低MemAvailable **12,163,461,120 B**。
+没有GBS，因此没有任何构建启动内存、load、磁盘或等待时间记录。
+保留本实验本轮的16GiB启动门槛豁免，其余load/disk及运行中保护未改动。
+
+主机命令nice19/ionice-c3、3G/200% scope；仅检查本项目及/proc、findmnt等系统元数据。
+WORKDIR外仅观察到llvm-optimize的cwd路径，没有遍历其文件或测量大小，更未删除/修改。
+SDB使用已有服务；其是否更新WORKDIR外的内部状态未知。
+未改设计/hq/Gerrit、未安装软件、未读或修改受保护配置、未打开真实sample profile。
+[本轮索引](../runs/m1-ffmpeg-rpi4-thumb-01/attempt-03/index.json)保存失败原文与SHA，ALL-END已记录。
+本轮停止，待指定端点恢复可见后继续。

@@ -78,3 +78,5 @@ nice -n 19 ionice -c3 ffprobe -v error -select_streams v:0 -show_entries stream=
 - Host decode expectation: 4,478,976,000 I420 bytes, SHA-256 91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193. This is not a board oracle result: PLAT must generate and verify its own independent oracle before measurement.
 - Raw source, encode, probe, trace and licensing evidence: temp/m1-ffmpeg-rpi4-thumb-01/attempt-02/. Videos and large trace stay outside Git.
 - ToS remains the preselected primary comparison; Sintel is secondary. No multiple-comparison correction.
+
+Sintel scaling clarification: the 1920×818 source is scaled to 1920×1080 as requested by PM, so the image is stretched vertically. This clip is used only for decode performance and correctness; the stretch does not affect that purpose. No re-encoding was performed for this clarification.

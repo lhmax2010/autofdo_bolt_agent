@@ -16,6 +16,25 @@ from .common import require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
 from .transport import SDB,q,board_path
 
+def parse_cycles_event(text):
+    """Validate one complete event; never match config1/bp_type substrings."""
+    lines=[line.strip() for line in text.splitlines() if line.strip()]
+    require(len(lines)==1,'expected exactly one perf event')
+    name,sep,body=lines[0].partition(':')
+    require(sep and name.strip()=='cycles','expected cycles event')
+    fields={}
+    for fragment in body.split(','):
+        match=re.fullmatch(r"\s*([A-Za-z_][A-Za-z_0-9]*)\s*[:=]\s*(.*?)\s*",fragment)
+        if not match or match[1] not in ['type','config']:continue
+        key,value=match.groups()
+        require(key not in fields,'duplicate perf field: '+key)
+        integer=re.match(r"[+-]?(?:0[xX][0-9a-fA-F]+|[0-9]+)",value)
+        require(integer is not None,'non-integer perf field: '+key)
+        try:fields[key]=int(integer[0],0)
+        except ValueError:require(False,'invalid perf integer: '+key)
+    require(fields==dict(type=0,config=0),'hardware cycles type/config assertions failed')
+    return dict(name='cycles',**fields)
+
 class Experiment:
     def __init__(self,job,job_path):
         self.job=job;self.job_path=Path(job_path).resolve();self.w=Path(job['workdir']).resolve()
@@ -108,6 +127,14 @@ class Experiment:
         self.cleanup.register(dict(kind='run',receipt=str(receipt)))
         t.pull(control,Path(out)/(name+'-control'),receipt)
         require(int(result.strip())==0,'board task failed '+name+' exit '+result.strip(),'environment')
+    def register_run(self,remote,local):
+        """Journal the exact pull destination before any remote mkdir or probe."""
+        board_path(remote,True)
+        receipt=Path(str(local)+'.pull.json')
+        action=dict(kind='run',remote=remote,local=str(local),receipt=str(receipt))
+        self.cleanup.register(action)
+        return action
+
     def pull_run(self,remote,out):
         receipt=Path(str(out)+'.pull.json')
         self.cleanup.register(dict(kind='run',receipt=str(receipt)))
@@ -127,10 +154,11 @@ class Experiment:
         # Executability check and actual hardware-event probe after performance governor.
         t.shell('bash '+q(self.scripts+'/common.sh'))
         perf=self.b+'/tools/perf';remote=self.remote+'/cycles-check'
+        self.register_run(remote,out/'cycles')
         t.shell('mkdir '+q(remote)+' && LD_LIBRARY_PATH='+q(self.b+'/lib')+' '+q(perf)+' record -e cycles -c 1000003 -o '+q(remote+'/perf.data')+' -- sleep 1')
         ev=t.shell('LD_LIBRARY_PATH='+q(self.b+'/lib')+' '+q(perf)+' evlist -v -i '+q(remote+'/perf.data'),True)
         (out/'cycles.evlist').write_text(ev)
-        require(re.search(r'^cycles:',ev,re.M) and re.search(r'\btype\s+0\b',ev) and re.search(r'\bconfig\s+0\b',ev),'hardware cycles assertions failed')
+        save(out/'cycles-assertions.json',parse_cycles_event(ev))
         self.pull_run(remote,out/'cycles')
         text=t.shell('for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq /sys/devices/system/cpu/cpufreq/policy*/cpuinfo_cur_freq; do test ! -r "$p" || printf "frequency\\t%s\\n" "$p"; done; for p in /sys/class/thermal/thermal_zone*/temp; do test ! -r "$p" || printf "temperature\\t%s\\n" "$p"; done; for p in /sys/class/hwmon/hwmon*/in0_lcrit_alarm; do test ! -r "$p" || printf "voltage\\t%s\\n" "$p"; done',True)
         cap={k:[] for k in ['frequency','temperature','voltage']}

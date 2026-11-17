@@ -82,3 +82,49 @@ class LiveTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=os.environ['TMPDIR']) as td:
             p=Path(td)/'inputs.toml';p.write_text(path.read_text().replace(inputs[2]['sha256'],inputs[0]['sha256']))
             with self.assertRaises(GateError):config.load_inputs(p)
+
+    def test_actual_cycles_old_failure_new_pass(self):
+        from afdo_wf.live import parse_cycles_event
+        raw=(Path(__file__).parent/'fixtures/rpi4-cycles.evlist').read_text()
+        self.assertFalse(bool(re.search(r'\btype\s+0\b',raw)))
+        self.assertFalse(bool(re.search(r'\bconfig\s+0\b',raw)))
+        self.assertEqual(parse_cycles_event(raw),dict(name='cycles',type=0,config=0))
+    def test_cycles_old_equal_and_hex(self):
+        from afdo_wf.live import parse_cycles_event
+        for text in ['cycles: type=0, config=0','cycles: type: 0x0 (hardware), config: 0x0']:
+            self.assertEqual(parse_cycles_event(text)['config'],0)
+    def test_software_event_rejected(self):
+        from afdo_wf.live import parse_cycles_event
+        with self.assertRaises(GateError):parse_cycles_event('cpu-clock: type: 1, config: 0')
+    def test_wrong_hardware_config(self):
+        from afdo_wf.live import parse_cycles_event
+        with self.assertRaises(GateError):parse_cycles_event('cycles: type: 0, config: 1')
+    def test_two_events_rejected(self):
+        from afdo_wf.live import parse_cycles_event
+        with self.assertRaises(GateError):parse_cycles_event('cycles: type: 0, config: 0\ncycles: type: 0, config: 0')
+    def test_exact_field_names_required(self):
+        from afdo_wf.live import parse_cycles_event
+        for line in ['cycles: bp_type: 0, config: 0','cycles: type: 0, config1: 0, config2: 0','cycles: sample_type: 0, config1: 0']:
+            with self.assertRaises(GateError):parse_cycles_event(line)
+    def test_probe_registered_before_failed_probe(self):
+        from afdo_wf.live import Experiment
+        from afdo_wf.receipts import Cleanup
+        from afdo_wf.transport import SDB
+        from afdo_wf.common import save,sha256
+        with tempfile.TemporaryDirectory(dir=os.environ['TMPDIR']) as td:
+            root=Path(td);experiment=object.__new__(Experiment);experiment.cleanup=Cleanup(root/'journal',{})
+            remote='/opt/afdo_agent/work/synthetic/cycles-check'
+            action=experiment.register_run(remote,root/'pulled')
+            self.assertEqual(experiment.cleanup.data['cleanup_pending'],[action])
+            calls=[]
+            t=object.__new__(SDB);t.shell=lambda command,readonly=False:'yes'
+            def failed_pull(*args):calls.append('pull');raise GateError('SHA mismatch')
+            t.pull=failed_pull
+            with self.assertRaises(GateError):t.undo(action)
+            self.assertEqual(calls,['pull']);self.assertFalse(Path(action['receipt']).exists())
+            def verified_pull(remote,local,receipt):
+                Path(local).mkdir();file=Path(local)/'data';file.write_text('synthetic')
+                save(receipt,dict(status='verified',remote_dir=remote,local_root=str(local),files={'data':sha256(file)},deleted=True))
+                calls.extend(['verified','delete-exact'])
+            t.pull=verified_pull;t.undo(action)
+            self.assertEqual(calls,['pull','verified','delete-exact'])
