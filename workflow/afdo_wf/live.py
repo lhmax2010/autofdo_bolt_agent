@@ -144,7 +144,7 @@ class Experiment:
         # Check all PATH tools before root; root-only deployed files are checked next.
         deps=['bash','cat','tr','uname','sed','mkdir','sha256sum','chmod','ldd','setsid','sleep','kill','date','awk','readlink','taskset','sort','grep','stat','mv','find','tar','wc','mkfifo','cut','head','tail','tee','rm','ps','gst-launch-1.0','rpm','df']
         t.shell('missing=0; for c in '+shlex.join(deps)+'; do command -v "$c" || missing=1; done; test "$missing" -eq 0',True)
-        errors=self.cleanup.restore(t.identity(),t.undo);require(not errors,'pending cleanup failed: '+str(errors))
+        errors=t.restore_cleanup(self.cleanup);require(not errors,'pending cleanup failed: '+str(errors))
         self.initial=self.state();save(self.d/('initial-'+str(time.time_ns())+'.json'),self.initial)
         old={}
         def stop(signum,frame):raise StopRequested(signum)
@@ -164,7 +164,7 @@ class Experiment:
             yield
         finally:
             try:
-                errors=self.cleanup.restore(t.identity(),t.undo)
+                errors=t.restore_cleanup(self.cleanup)
                 final=self.state()
                 final.update(cleanup_pending=self.cleanup.data['cleanup_pending'],errors=errors,retries=t.retries)
                 save(self.d/('final-'+str(time.time_ns())+'.json'),final)
@@ -590,7 +590,7 @@ class Experiment:
                 except Exception as e:errors.append(str(e))
         require(not errors,'cannot restore state before independent cleanup test')
         child=dict(self.job)
-        child.update(experiment=self.job['experiment']+'-cleanup-test',output=str(out/'injected-job'),
+        child.update(experiment=temporary_experiment_id(self.job['experiment'],'cleanup-test',out/'injected-job'),output=str(out/'injected-job'),
                      injection=dict(preflight=preflight,deployment=deployment,
                                     input=next(x for x in self.inputs if x['role']=='test')))
         childfile=out/'injection-job.json';save(childfile,child)
@@ -630,7 +630,7 @@ class Experiment:
                 except Exception as e:errors.append(str(e))
         require(not errors,'cannot restore state before independent cleanup test')
         child=dict(self.job)
-        child.update(experiment=self.job['experiment']+'-telemetry-check',output=str(out/'telemetry-check-job'),
+        child.update(experiment=temporary_experiment_id(self.job['experiment'],'telemetry-check',out/'telemetry-check-job'),output=str(out/'telemetry-check-job'),
                      telemetry_check=dict(preflight=preflight,deployment=deployment,
                          input=next(x for x in self.inputs if x['role']=='test')))
         childfile=out/'telemetry-check-job.json';save(childfile,child)
@@ -706,6 +706,11 @@ class Experiment:
         finally:
             result.update(end=time.time(),cleanup_pending=self.cleanup.data['cleanup_pending'])
             save(self.d/('run-end-'+str(time.time_ns())+'.json'),result)
+
+def temporary_experiment_id(parent,kind,output):
+    # Fresh attempt/stage output -> fresh board namespace; deterministic on resume.
+    suffix=hashlib.sha256(str(Path(output).resolve()).encode()).hexdigest()[:16]
+    return parent+'-'+kind+'-'+suffix
 
 def remote_token(base,name):return base+'/'+name+'/'
 

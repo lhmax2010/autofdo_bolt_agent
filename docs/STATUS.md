@@ -48,6 +48,13 @@
 - K0 只读源码评估完成：[可行性评估](kernel/autofdo/00_feasibility.md)与[基于 K 的回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已补齐。`0fac5de6` 增量 fetch 首次成功、重试 0 次；K=B+2（force_reclaim 修正、PMUv3），K/C 分叉。37 项独立/29 项累计检查，累计 18 干净、11 失败（其中 2 项已有等价修复）；冲突未手工解决。结论仍 conditional go（ARM32/A32、非 LTO/MFS），旧样本 build-id 未配对；未构建、未接板。首轮 SSH 失败记录保留。
 - K1 在 M1 完成后开始；刷写另须用户确认。
 
+## Workflow M1：58°C冷却余量与清理修正；attempt-11准备（2026-11-17任务）
+
+- [报告第13节](workflow/m1/05_m1_board_e2e.md)：空闲10分钟末温57.939°C；BASE负载后约50秒降到≤58°C，10分钟最低56.478°C，未到56°C。58°C目标可达；只改变冷却等待，设计60°C/80°C判据不变。
+- 清理流程独立登记/取得/恢复root，链接不跟随，空SHA明确拒绝；attempt-09原文夹具与本轮真实退出验证均通过。182项测试、15脚本语法通过。
+- attempt-10 S0–S5、S4恢复、独立计时注入清理通过；发现非正式检查虽有新job/目录但ID仍复用旧固定后缀，保留原件后停止。自身缺陷第3/3次：改为按输出路径生成稳定唯一临时ID；测试通过。父子最终root off、schedutil、RPM1233、pending/errors=[]。没有正式block或性能结论。
+- [attempt-10证据](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-10/run-index.json)已封存；[attempt-11准备](workflow/runs/m1-ffmpeg-rpi4-thumb-01/attempt-11/preparation/index.json)。模块SHA变化不能复用S0–S5，下一attempt从S0重做；此为检查点，不是M1完成。缺陷额度3/3，不再自动增加修补次数。
+
 ## Workflow M1：attempt-09非正式温度门禁停止（2026-11-17任务）
 
 - [第12节停止报告](workflow/m1/05_m1_board_e2e.md#12-pm授权单文件拉回技术失败分类与遥测握手2026-11-17任务)：TechnicalFailure整block一次重试、单tar双层SHA、首尾遥测握手、父拉回核销均实现；171项测试与15脚本语法通过。attempt-08缺左10–30ms、个别缺右20ms，原数据原标签保留。

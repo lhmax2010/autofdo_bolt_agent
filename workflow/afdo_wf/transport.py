@@ -111,7 +111,39 @@ class SDB:
         board_path(remote)
         rc,out,err=self.invoke(["push",str(local),remote])
         self.transport_ok(rc==0,"push failed: "+out+err)
-        require(self.shell("sha256sum "+q(remote),True).split()[0]==sha256(local),"deployment SHA mismatch","identity",3)
+        require(self.file_sha256(remote)==sha256(local),"deployment SHA mismatch","identity",3)
+    def file_sha256(self,path):
+        board_path(path)
+        raw=self.shell('sha256sum '+q(path),True)
+        match=re.fullmatch(r'([0-9a-f]{64})[ \t]+[^\r\n]+\n?',raw)
+        require(match is not None,'missing or malformed deployment SHA: '+path,'identity',3)
+        return match[1]
+
+    def restore_cleanup(self,journal):
+        """Cleanup owns its privilege transition, even after a child restored root off."""
+        actual=self.identity()
+        require(actual==journal.identity,'restore identity mismatch','identity',3)
+        initial_root=self.root_state()
+        needs_root=any(a['kind'] in ['host_artifact','run','process','governor'] for a in journal.data['cleanup_pending'])
+        record=journal.path.parent/'cleanup-sessions'/(str(time.time_ns())+'.json')
+        data=dict(initial_root=initial_root,needs_root=needs_root,status='started')
+        save(record,data)
+        elevated=False;restore_finished=False;errors=[]
+        try:
+            if needs_root and not initial_root:
+                if not any(a['kind']=='root' and a['previous'] is False for a in journal.data['cleanup_pending']):
+                    journal.register(dict(kind='root',previous=False))
+                elevated=True;self.root(True)
+            errors=journal.restore(actual,self.undo);restore_finished=True
+            return errors
+        except BaseException as e:
+            data['error']=repr(e);raise
+        finally:
+            try:
+                if elevated and not restore_finished and self.root_state():self.root(False)
+                data.update(status='ended',errors=errors,final_root=self.root_state(),pending=journal.data['cleanup_pending'])
+            finally:save(record,data)
+
     def remove_host_artifact(self,action):
         remote=action['remote'];board_path(remote)
         exists=self.shell('if test -e '+q(remote)+' || test -L '+q(remote)+'; then printf yes; else printf no; fi',True)
@@ -125,12 +157,14 @@ class SDB:
             if kind=='d':
                 require(any(k.startswith(rel+'/') for k in expected),'unexpected deployment directory '+rel);continue
             require(rel in expected,'unexpected deployment member '+rel)
+            require(not Path(rel).is_absolute() and '..' not in Path(rel).parts,'unsafe deployment member '+rel)
             member=expected[rel];path=remote+('/'+rel if rel else '')
+            # Links are compared using readlink; never resolve or hash through them.
             if kind=='l':require(member['kind']=='link' and self.shell('readlink '+q(path),True).strip()==member['target'],'deployment link changed '+path)
             else:
                 require(kind=='f' and member['kind']=='file','deployment member type changed '+path)
                 require(sha256(member['source'])==member['sha256'],'host original changed '+path)
-                require(self.shell('sha256sum '+q(path),True).split()[0]==member['sha256'],'deployment SHA changed '+path)
+                require(self.file_sha256(path)==member['sha256'],'deployment SHA changed '+path)
         save(action['verification'],dict(remote=remote,actual=actual,expected=expected,status='verified'))
         self.shell('rm -rf -- '+board_path(remote))
 

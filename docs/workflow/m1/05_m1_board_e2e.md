@@ -788,3 +788,44 @@ Q.5第17项披露：本轮新采集3份BBB训练perf script，按两个DSO生成
 按授权pull --rebase取得K0提交1b096d2后，21个同名未跟踪文件阻挡checkout；逐字节比较全部等于远端，先移到本轮git-reconcile/kernel-autofdo-preserved留存，Git随后从远端恢复的21文件SHA全部相同。STATUS暂存于有名stash和本轮快照，仅解决相邻新增段冲突，保留K0远端记录与M1段。M1提交rebase为92ecc97b2d9b6d57ca7d3170a977e9ccd4a4b999，原代码/测试/证据内容不变。未提交的K0设计状态段恢复在工作区、不纳入本次提交；对应未跟踪设计文件及config/、gbs_gcc.conf、gbs_llvm.conf未读未改。保留stash与temp副本供并行会话核对。
 
 本次只做Git同步与文档登记。真实温度停止条件仍有效，没有恢复M1负载或追加测量。检查、SHA对照、rebase与推送输出位于temp/m1-ffmpeg-rpi4-thumb-01/attempt-09/git-reconcile/。
+
+## 13. 起跑冷却余量与独立清理权限（2026-11-17任务）
+
+### 13.1 PM授权、实现及测试
+
+PM授权修改不占自身缺陷次数，仍2/3。等待冷却目标由60°C改为58°C（T_start−2°C），仅更改board/start_gate.sh；等待上限600秒、30秒复查不变。stats.telemetry及设计v0.3原文未改：窗口起跑样本≤60°C、运行温度80°C判据保持原样。不得把58°C误写为新的统计判据。
+
+SDB.restore_cleanup在删除前独立核对设备身份、记录当前root状态与所需权限；必要时先持久化恢复动作再临时root on，按journal清理后恢复。子流程已恢复root off不再使父流程依赖陈旧的root假设。每次清理保存cleanup-sessions记录。链接按readlink目标核验，不跟随链接计算SHA；普通文件核对主机原件与板上SHA，空或格式错误的sha256sum输出给出明确identity错误，消除split()[0]的IndexError。清理失败仍保留待办，不重复失败的状态修改。
+
+180项测试通过（原171项保留，新增9项），15份板上/工作负载脚本bash --posix -n通过。新增夹具覆盖：58°C边界；59°C等待600秒超时；59/60°C仍为clean、60.374/80°C异常；attempt-09真实停止原文对应的root-off旧清理失败/新清理成功；链接不跟随；链接改变拒绝；空SHA显式拒绝；初始root on保持；root off失败不自动重试。旧证据不改。详见attempt-10/tests.log、validation.json、shell-validation.json和workflow/tests/test_cooling_cleanup.py。
+
+逐模块SHA显示live.py、transport.py、start_gate.sh变化；现有收据DAG包含全部workflow模块，不能证明S0–S5输入未变，所以attempt-10从S0重做，不强行复用。复用决定和新旧30模块SHA在reuse-decision.json。新job固定ToS order_seed=2026111720、bootstrap_seed=2026111730，Sintel各+1；正式计划仍须新预试/CV/N/顺序表落盘。旧不完整block不合并。
+
+### 13.2 降温能力实测
+
+先核对RPi4：192.168.108.26:26101，Raspberry Pi 4 Model B Rev1.5、armv7l、6.12.80-arm-rpi4-v7l、tizen-unified-toolchain_20261104.160709，与既有身份相同。performance governor、既有风扇状态；未发现风扇转速或控制接口，物理风扇状态未知且未修改。每10秒记录一次所有thermal zone，两个探测分别建清理日志，在写入前登记，拉回tar及成员SHA验证后删除。初始与结束root off、schedutil、RPM1233，待办与错误为空。
+
+| 曲线 | 样本/时长秒 | 初温 | 末温 | 最低/最高 | 首次≤58°C | ≤56°C |
+|---|---|---:|---:|---|---:|---|
+| 空闲 | 61 / 600.73 | 58.913°C | 57.939°C | 56.965 / 59.400°C | 10.02秒 | 10分钟未达到 |
+| 一轮BASE负载后 | 61 / 600.77 | 61.348°C | 56.965°C | 56.478 / 61.348°C | 50.07秒 | 10分钟未达到 |
+
+58°C冷却目标可达，未触发“空闲10分钟降不到58°C”的停止条件。负载使用attempt-09已验证的BASE运行文件、ToS输入、CPU3与正常perf/观察脚本；退出0，63份maps身份核验通过。这是独立降温诊断，既不作为正式block，也不计算性能比较。负载后曲线到600秒上限结束，不把未达到56°C写成通过。完整逐点曲线、源码脚本、时间/SHA与final在cooling-idle/、cooling-load/和curve-summary.json。
+
+### 13.3 attempt-10阶段与测量结果
+
+attempt-10的S0–S5均通过：BASE/BASE-r/AFDO退出0，BASE-r字节一致、选BASE，两套build-lock differences=[]；两目标AppliedSamples正数记录1985/56。锁定profile SHA `a7439a2f982099050d0f95f00b7d72517ab67836a260cf40680f412a02fa586c`。S4真实SIGTERM退出143，恢复后S3收据SHA不变；三训练后oracle与六次计时前oracle通过。独立计时中断清理通过。
+
+进入非正式检查后发现临时实验ID仍用固定后缀，与attempt-09相同（虽然job路径、SHA、输出目录均为本次新建）。这不符合本轮要求的新临时ID。保留child job与原文后，只向本次非正式检查子进程发SIGTERM；父流程依原门禁退出2，未产生正式block。自动finally成功：父/子root off、schedutil，pending/errors均空，RPM1233。此次真实子流程先root off，父清理仍成功，覆盖了attempt-09的实际失败路径。
+
+自身实现缺陷第3/3次：标识拼接遗漏attempt命名空间。修正为父实验名+用途+输出绝对路径SHA前16位，随新attempt/stage生成新ID，同一恢复路径保持确定性；加入旧固定后缀碰撞/新ID不同、用途与stage隔离夹具。旧live.py重建副本与运行锁SHA完全一致，保存于attempt-10/live-before-id-fix.py，不改原结果。此次不调整判据，也不把被中止的非正式数据计入验收。
+
+由于live模块再次变化，attempt-11必须从S0开始，旧收据不强行复用。后续实际结果在本节补齐；M1尚未完成。
+
+### 13.4 资源、清理、披露与边界
+
+attempt-10已结束，driver墙钟2613.588秒；BASE/BASE-r/AFDO构建墙钟分别122.127/115.690/119.850秒（原值以execution/result.json为准），均退出0。driver及构建采样最低MemAvailable 21070471168B；构建峰值2151804928B；driver峰值694833152B。各构建保留启动内存/load/磁盘与等待记录，6G/5G/200%、-j2/threads1、nice/ionice不变，未触发资源终止。空闲与负载降温scope的memory.peak、原始meminfo独立保存在各resources.json。
+
+收据与原件索引：attempt-10/run-index.json。attempt-10三份训练perf script、convert/001中断和convert/002六份成功profile仅用于本次转换/消费；按Q.5第17项保留路径、SHA与用途，未读既有正式质量评估profile，未做质量矩阵。板上仅本实验/授权afdo目录；root/governor为明确授权状态操作，已恢复。未操作.13、hq、Gerrit、设计或其他构建。系统服务的外部元数据写入未做全机审计；不声称其为零。短scope未完整封存峰值的限制仍保留。
+
+唯一性修正后182项测试与15脚本语法通过。attempt-11新种子ToS order=2026111740、bootstrap=2026111750，Sintel各+1；准备证据在attempt-11/preparation/index.json。当前为运行前检查点，attempt-11尚未完成，后续追加实际验收结果。

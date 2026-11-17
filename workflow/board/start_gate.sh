@@ -3,6 +3,8 @@ set -eu
 here=${0%/*}; . "$here/common.sh"
 capabilities=$1; log=$2
 safe_path "$capabilities"; step_log "$log"
+# PM 2026-11-17: cooling margin only; stats.telemetry still uses 60/80 C.
+cooling_target_mc=58000
 waited=0
 while :; do
     ready=1; count=0
@@ -13,7 +15,7 @@ while :; do
         case "$value" in ''|*[!0-9]*) exit 3;; esac
         printf '%s\t%s\t%s\n' "$(date -u +%s)" "$path" "$value"
         count=$((count+1))
-        test "$value" -le 60000 || ready=0
+        test "$value" -le "$cooling_target_mc" || ready=0
     done < "$capabilities"
     test "$count" -gt 0 || exit 3
     test "$ready" -eq 1 && exit 0
