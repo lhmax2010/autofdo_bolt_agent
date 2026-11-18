@@ -1,34 +1,41 @@
-From 5a541f22082b963a368f065d6150eee0afae4e30 Mon Sep 17 00:00:00 2001
+From 8392aa945cb9bfeedf722f327983691e3a40ff34 Mon Sep 17 00:00:00 2001
 From: Hao Lin <hao.lin@samsung.com>
 Date: Wed, 18 Nov 2026 01:48:01 -0800
-Subject: [PATCH 10/10] [llvm-profgen] Support Linux kernel IP sample profiles
+Subject: [PATCH 10/10] [llvm-profgen] Support Linux kernel IP profiles
 
-Use the perf kernel mmap relocation reference and vmlinux identity to select and translate kernel samples. Reuse DWARF IP attribution and report skipped samples by reason. Exercise ARM and AArch64 with synthetic recordings.
+Select kernel samples using the perf relocation reference and vmlinux
+identity. Drop isolated image misses and reject batches above a 1%
+sample-count limit. Reuse DWARF IP attribution and report the excluded
+samples and their periods.
+
+kernel IP mode; board end-to-end validation pending
 ---
- llvm/docs/CommandGuide/llvm-profgen.rst       |  49 +++-
- .../Inputs/ip-mode/check-kernel-ip.py         | 243 ++++++++++++++++++
+ llvm/docs/CommandGuide/llvm-profgen.rst       |  55 +++-
+ .../Inputs/ip-mode/check-kernel-ip.py         | 298 ++++++++++++++++++
+ .../ip-mode/kernel-perf-6.12.perfscript       |   5 +
  llvm/test/tools/llvm-profgen/ip-kernel.test   |   3 +
  llvm/test/tools/llvm-profgen/ip-options.test  |   2 +-
- llvm/tools/llvm-profgen/IPBoundary.cpp        |  31 +++
+ llvm/tools/llvm-profgen/IPBoundary.cpp        |  31 ++
  llvm/tools/llvm-profgen/IPBoundary.h          |   3 +
- llvm/tools/llvm-profgen/IPIdentity.cpp        |  45 +++-
+ llvm/tools/llvm-profgen/IPIdentity.cpp        |  45 ++-
  llvm/tools/llvm-profgen/IPKernelAddress.h     |  40 +++
- llvm/tools/llvm-profgen/IPPerfReader.cpp      | 241 +++++++++++++++--
- llvm/tools/llvm-profgen/IPPerfReader.h        |  16 ++
- llvm/tools/llvm-profgen/IPQualityReport.cpp   |  27 +-
+ llvm/tools/llvm-profgen/IPPerfReader.cpp      | 250 +++++++++++++--
+ llvm/tools/llvm-profgen/IPPerfReader.h        |  16 +
+ llvm/tools/llvm-profgen/IPQualityReport.cpp   |  28 +-
  llvm/tools/llvm-profgen/ProfiledBinary.cpp    |   2 +
  llvm/tools/llvm-profgen/ProfiledBinary.h      |   1 +
  llvm/tools/llvm-profgen/llvm-profgen.cpp      |   6 +-
  .../tools/llvm-profgen/CMakeLists.txt         |   1 +
- .../llvm-profgen/IPKernelAddressTest.cpp      |  44 ++++
- 16 files changed, 716 insertions(+), 38 deletions(-)
+ .../llvm-profgen/IPKernelAddressTest.cpp      |  44 +++
+ 17 files changed, 792 insertions(+), 38 deletions(-)
  create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/kernel-perf-6.12.perfscript
  create mode 100644 llvm/test/tools/llvm-profgen/ip-kernel.test
  create mode 100644 llvm/tools/llvm-profgen/IPKernelAddress.h
  create mode 100644 llvm/unittests/tools/llvm-profgen/IPKernelAddressTest.cpp
 
 diff --git a/llvm/docs/CommandGuide/llvm-profgen.rst b/llvm/docs/CommandGuide/llvm-profgen.rst
-index 78ade5c0a4a6..9f8109fa5a9a 100644
+index 78ade5c0a4a6..405fb062d36b 100644
 --- a/llvm/docs/CommandGuide/llvm-profgen.rst
 +++ b/llvm/docs/CommandGuide/llvm-profgen.rst
 @@ -98,8 +98,9 @@ only a final valid hexadecimal ``+0xOFFSET`` is separated. A deleted suffix is
@@ -43,7 +50,7 @@ index 78ade5c0a4a6..9f8109fa5a9a 100644
  
  ``--perfdata`` is not admitted in IP mode. Export text on the recording system
  instead; matching perf version numbers alone do not establish cross-host
-@@ -109,6 +110,50 @@ export equivalence. Example conversion::
+@@ -109,6 +110,56 @@ export equivalence. Example conversion::
      --perf-buildid-list=buildids.txt --ip-aggregation=sum \
      --format=extbinary --output=workload.prof --quality-report=quality.json
  
@@ -89,17 +96,23 @@ index 78ade5c0a4a6..9f8109fa5a9a 100644
 +and PID selection, and unknown-PID counts before the PID filter. It also
 +records discarded mapping-symbol data, special executable sections (such as
 +exception vectors, startup and exit code), and samples without a CU or usable
-+line information. Livepatch or guest kernel attribution is outside this mode.
++line information. Kernel target IPs outside the kernel mmap or a file-backed
++executable PT_LOAD, or whose relocation overflows or underflows, are skipped
++and counted in ``samples.kernel_ip.outside_image`` (sample count and period
++sum). Conversion fails when this count exceeds 1% of the selected kernel
++target sample count. Ambiguous overlapping executable segments for ordinary
++code remain an error. Livepatch or guest kernel attribution is outside this
++mode.
 +
  IP options
  ~~~~~~~~~~
  
 diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py
 new file mode 100644
-index 000000000000..82be3b8d13b8
+index 000000000000..b01af5a10fd7
 --- /dev/null
 +++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py
-@@ -0,0 +1,243 @@
+@@ -0,0 +1,298 @@
 +"""Exercise the CLI using the checked-in synthetic ARM/AArch64 DWARF ELFs."""
 +
 +import json
@@ -241,7 +254,7 @@ index 000000000000..82be3b8d13b8
 +assert report["kernel_mmap"]["runtime_anchor"] == start + 4
 +assert report["kernel_mmap"]["elf_anchor"] == 0x10004
 +for key, n in dict(target=2, modules_skipped=1, user_samples=1,
-+                   special_skipped=2, unknown_address=2, unknown_pid=6).items():
++                   special_skipped=2, unknown_address=2, unknown_pid=6, outside_image=0).items():
 +    assert counts(report, key) == n, (key, report)
 +
 +addresses, report, profile = run("pid", lines, options=["--pid=17"])
@@ -298,8 +311,51 @@ index 000000000000..82be3b8d13b8
 +    error="conflicting kernel mmap anchors or ranges")
 +run("overflow-map", [mapping(0xFFFFFFFFFFFFFFF0, 0x20, start), ks],
 +    error="counter overflow")
-+run("outside-mmap", [m, sample(start + length)], error="outside the runtime kernel mmap")
-+run("segment-gap", [m, sample(start + 0x1000)], error="outside executable PT_LOAD")
++# Count outside the mmap, between PT_LOADs and relocation underflow together.
++# Retain the original periods and use sample count for the gate.
++wide_map = mapping(0, start + length, start + 4, ref="_stext")
++outside_mmap = sample(start + length, period=11)
++segment_gap = sample(start + 0x1000, period=13)
++underflow = sample(1, period=17)
++addresses, report, _ = run(
++    "sparse-outside", [wide_map] + [ks] * 300 + [outside_mmap, segment_gap, underflow]
++)
++assert addresses == {0x10000: 300}, addresses
++outside = report["samples"]["kernel_ip"]["outside_image"]
++assert (outside["sample_count"], outside["period_sum"]) == (3, 41), outside
++assert counts(report, "unknown_address") == 0
++
++# At exactly 1% accept. One fewer valid sample crosses the threshold.
++_, report, _ = run("outside-at-limit", [m] + [ks] * 99 + [outside_mmap])
++assert counts(report, "outside_image") == 1
++_, report, _ = run(
++    "outside-over-limit", [m] + [ks] * 98 + [outside_mmap],
++    error="1/99 kernel target samples (1.010%) are outside the image (limit 1%)",
++)
++assert counts(report, "outside_image") == 1
++assert report["samples"]["kernel_ip"]["outside_image"]["period_sum"] == 11
++
++bad_anchor = mapping(start, length, start + 0x1004, ref="_stext")
++_, report, _ = run(
++    "wrong-slide", [bad_anchor] + [ks] * 99 + [sample(start + 0x1000)],
++    error="99/100 kernel target samples (99.000%) are outside the image (limit 1%). "
++          "Check the kernel anchor and vmlinux identity",
++)
++assert counts(report, "outside_image") == 99
++
++# Duplicate the first executable program header in the second one. The
++# threshold never admits a sample with two mappings for ordinary code.
++overlap = work / "a64-overlap"
++elf = bytearray(a64.read_bytes())
++phoff = struct.unpack_from("<Q", elf, 32)[0]
++phsize, phnum = struct.unpack_from("<HH", elf, 54)
++loads = [ph for ph in range(phoff, phoff + phsize * phnum, phsize)
++         if struct.unpack_from("<II", elf, ph) == (1, 5)]
++first, second_load = loads
++elf[second_load:second_load + phsize] = elf[first:first + phsize]
++overlap.write_bytes(elf)
++run("overlapping-segments", [m, ks], binary=overlap,
++    error="kernel IP matches multiple executable PT_LOAD segments")
 +run("broken-trace", [m, "12/12 broken"], error="line 2: IP sample mode: invalid or zero period")
 +run("module-as-binary", [m, ks], binary=module, error="must be a linked ELF image")
 +
@@ -315,6 +371,14 @@ index 000000000000..82be3b8d13b8
 +assert counts(report, "target") == 3
 +assert counts(report, "mapping_data") == 1
 +assert counts(report, "special_section") == 1
++# A large linked-minus-runtime slide may exceed the ARM32 address width.
++_, report, _ = run(
++    "arm32-overflow", [mapping(1, 0xFFFFFFFF, 1, build_id=arm_id)]
++    + [sample(0x105)] * 100 + [sample(0xFFFFFFF0, period=19)],
++    binary=a32,
++)
++assert counts(report, "outside_image") == 1
++assert report["samples"]["kernel_ip"]["outside_image"]["period_sum"] == 19
 +run("arm32-width", [mapping(0xFFFFFF00, 0x200, arm_start, build_id=arm_id),
 +                   sample(0xFFFFFF00)], binary=a32, error="exceeds the ELF address range")
 +bad_class = work / "arm-wrong-machine"
@@ -337,12 +401,27 @@ index 000000000000..82be3b8d13b8
 +assert b"loop:" in profile, profile
 +assert counts(report, "mapping_data") == 1
 +
-+# Same shape as the old ARM32 parser fixture (never match its build-id to BASE).
-+old = mapping(0xC0008000, 0x8000, 0xC0008000,
-+              build_id="395733b9c917cb98309b39cc3ec379c03ac36b3f")
-+run("old-parser-only", [old, sample(0xC0008000)], binary=a32,
-+    error="build-id mismatch")
++# Parse a real perf 6.12 mmap and sampled-IP export. Its old build ID
++# intentionally fails against the synthetic ELF; no symbolization is attempted.
++old_trace = (fixtures / "kernel-perf-6.12.perfscript").read_text().splitlines()
++_, report, _ = run("old-parser-only", old_trace, binary=a32,
++                   error="build-id mismatch")
++assert report["verdict"]["failure_stage"] == "identity"
++assert report["kernel_mmap"]["runtime_anchor"] == 0xC0008000
++assert report["kernel_mmap"]["reference"] == "_text"
++assert counts(report, "target") == 4
 +print("PASS: kernel IP identity, address translation, filtering and DWARF")
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/kernel-perf-6.12.perfscript b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/kernel-perf-6.12.perfscript
+new file mode 100644
+index 000000000000..8eb0664a1a61
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/kernel-perf-6.12.perfscript
+@@ -0,0 +1,5 @@
++      0/0       PERF_RECORD_MMAP2 -1/0: [0xc0008000(0x27cae3c) @ 0xc0008000 <395733b9c917cb98309b39cc3ec379c03ac36b3f>]: ---p [kernel.kallsyms]_text
++  26220/26220       100003  cycles:          c14c4a9c ([kernel.kallsyms])
++  26220/26220       100003  cycles:          c06232f0 ([kernel.kallsyms])
++  26220/26220       100003  cycles:          c04c84e8 ([kernel.kallsyms])
++  26243/26243       100003  cycles:          c053e5b0 ([kernel.kallsyms])
 diff --git a/llvm/test/tools/llvm-profgen/ip-kernel.test b/llvm/test/tools/llvm-profgen/ip-kernel.test
 new file mode 100644
 index 000000000000..db729a0417fe
@@ -588,7 +667,7 @@ index 000000000000..80c73a3e3728
 +
 +#endif
 diff --git a/llvm/tools/llvm-profgen/IPPerfReader.cpp b/llvm/tools/llvm-profgen/IPPerfReader.cpp
-index 273ed4d09c49..a356b33a59de 100644
+index 273ed4d09c49..185f78c5e563 100644
 --- a/llvm/tools/llvm-profgen/IPPerfReader.cpp
 +++ b/llvm/tools/llvm-profgen/IPPerfReader.cpp
 @@ -6,6 +6,8 @@
@@ -600,7 +679,15 @@ index 273ed4d09c49..a356b33a59de 100644
  #include "IPQualityReport.h"
  #include "llvm/ADT/SmallString.h"
  #include "llvm/ADT/StringExtras.h"
-@@ -25,7 +27,7 @@ using namespace llvm;
+@@ -13,6 +15,7 @@
+ #include "llvm/Object/ELFObjectFile.h"
+ #include "llvm/Support/FileSystem.h"
+ #include "llvm/Support/Format.h"
++#include "llvm/Support/FormatVariadic.h"
+ #include "llvm/Support/MemoryBuffer.h"
+ #include "llvm/Support/Path.h"
+ #include "llvm/Support/Regex.h"
+@@ -25,7 +28,7 @@ using namespace llvm;
  using namespace llvm::object;
  
  namespace {
@@ -609,11 +696,12 @@ index 273ed4d09c49..a356b33a59de 100644
    return createStringError(inconvertibleErrorCode(), "IP sample mode: " + What);
  }
  Error add(uint64_t &Value, uint64_t Increment) {
-@@ -87,14 +89,48 @@ bool kernel(StringRef Path) {
+@@ -87,14 +90,49 @@ bool kernel(StringRef Path) {
            (Path.ends_with(".ko") || Path.ends_with(".ko.xz") ||
             Path.ends_with(".ko.zst") || Path.ends_with(".ko.gz")));
  }
 +constexpr StringLiteral KernelDSO = "[kernel.kallsyms]";
++constexpr uint64_t KernelOutsideImageLimitDivisor = 100; // 1% of samples
 +
 +bool moduleDSO(StringRef Path) {
 +  Path = livePath(Path);
@@ -658,7 +746,7 @@ index 273ed4d09c49..a356b33a59de 100644
  Error IPPerfReader::parseLine(StringRef Line) {
    if (Line.contains('\0'))
      return invalid("unrepresentable input line");
-@@ -172,8 +208,11 @@ Error IPPerfReader::parseLine(StringRef Line) {
+@@ -172,8 +210,11 @@ Error IPPerfReader::parseLine(StringRef Line) {
      uint64_t RangeEnd = M.Start, OffsetEnd = M.PageOffset;
      if (Error E = add(RangeEnd, M.Length))
        return E;
@@ -672,7 +760,7 @@ index 273ed4d09c49..a356b33a59de 100644
      M.Permissions = Permissions.str();
      M.Path = Rest.str();
      M.Deleted = deleted(Rest);
-@@ -216,7 +255,9 @@ Error IPPerfReader::parseLine(StringRef Line) {
+@@ -216,7 +257,9 @@ Error IPPerfReader::parseLine(StringRef Line) {
      return invalid("empty DSO path");
    S.Path = Rest.str();
    S.Deleted = deleted(Rest);
@@ -683,7 +771,7 @@ index 273ed4d09c49..a356b33a59de 100644
      return invalid("file DSO is missing dsoff");
    if (Error E = add(Stats.Input, 1))
      return E;
-@@ -246,6 +287,20 @@ Error IPPerfReader::loadBinary(StringRef Path) {
+@@ -246,6 +289,20 @@ Error IPPerfReader::loadBinary(StringRef Path) {
    if (!Object)
      return Object.takeError();
    auto Load = [&](const auto *ELFObject) -> Error {
@@ -704,7 +792,7 @@ index 273ed4d09c49..a356b33a59de 100644
      auto Headers = ELFObject->getELFFile().program_headers();
      if (!Headers)
        return Headers.takeError();
-@@ -259,6 +314,8 @@ Error IPPerfReader::loadBinary(StringRef Path) {
+@@ -259,6 +316,8 @@ Error IPPerfReader::loadBinary(StringRef Path) {
          return E;
        Segments.push_back({H.p_offset, End, H.p_vaddr});
      }
@@ -713,7 +801,7 @@ index 273ed4d09c49..a356b33a59de 100644
      return Error::success();
    };
    const ObjectFile *O = Object->getBinary();
-@@ -273,6 +330,76 @@ Error IPPerfReader::loadBinary(StringRef Path) {
+@@ -273,6 +332,76 @@ Error IPPerfReader::loadBinary(StringRef Path) {
    return invalid("binary must be an ELF object");
  }
  
@@ -790,7 +878,7 @@ index 273ed4d09c49..a356b33a59de 100644
  Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
    if (!Options.Event && Stats.Events.size() > 1)
      return invalid("multiple events require --ip-event");
-@@ -287,43 +414,64 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+@@ -287,43 +416,64 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
        Options.Event
            ? *Options.Event
            : (Stats.Events.empty() ? "unknown" : Stats.Events.begin()->first);
@@ -806,9 +894,9 @@ index 273ed4d09c49..a356b33a59de 100644
                        "other_dso", "unmapped", "target", "unmapped_in_target"})
      Layers[N.str()] = {};
 +  if (Options.Kernel)
-+    for (StringRef N :
-+         {"modules_skipped", "user_samples", "special_skipped",
-+          "unknown_address", "kernel_special_section", "kernel_mapping_data"})
++    for (StringRef N : {"modules_skipped", "user_samples", "special_skipped",
++                        "unknown_address", "outside_image",
++                        "kernel_special_section", "kernel_mapping_data"})
 +      Layers[N.str()] = {};
    std::map<std::string, uint64_t> Files;
    for (const Sample &S : Samples) {
@@ -868,7 +956,7 @@ index 273ed4d09c49..a356b33a59de 100644
          return E;
        if (S.Offset && CollectQuality) {
          auto &C = OtherDSOs[S.Path];
-@@ -342,7 +490,7 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+@@ -342,7 +492,7 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
                            : sys::path::filename(livePath(S.Path)) ==
                                  sys::path::filename(BinaryRealPath);
      if (!Selected) {
@@ -877,7 +965,7 @@ index 273ed4d09c49..a356b33a59de 100644
          return E;
        if (CollectQuality) {
          auto &C = OtherDSOs[S.Path];
-@@ -355,7 +503,7 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+@@ -355,7 +505,7 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
          return E;
        continue;
      }
@@ -886,7 +974,7 @@ index 273ed4d09c49..a356b33a59de 100644
        return E;
      if (Error E = add(Stats.Target, 1))
        return E;
-@@ -366,6 +514,8 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+@@ -366,6 +516,8 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
    if (Options.Event && !Stats.AfterEvent)
      return invalid("event filter selected no samples");
    if (!Stats.Target) {
@@ -895,7 +983,7 @@ index 273ed4d09c49..a356b33a59de 100644
      std::vector<std::pair<std::string, uint64_t>> Top(Files.begin(),
                                                        Files.end());
      llvm::sort(Top, [](const auto &A, const auto &B) {
-@@ -391,7 +541,60 @@ uint64_t IPPerfReader::getMedianPeriod() const {
+@@ -391,7 +543,67 @@ uint64_t IPPerfReader::getMedianPeriod() const {
    return *Middle;
  }
  
@@ -905,26 +993,24 @@ index 273ed4d09c49..a356b33a59de 100644
 +  if (!Boundaries)
 +    return Boundaries.takeError();
 +  const KernelMapping &K = *KernelMap;
++  uint64_t OutsideImage = 0;
 +  for (const Sample *S : SelectedSamples) {
-+    if (S->IP < K.Start || S->IP >= K.End) {
-+      if (Error E = countLayer("unknown_address", *S))
-+        return E;
-+      return invalid("sample IP is outside the runtime kernel mmap");
-+    }
-+    auto VA = translateKernelIP(S->IP, K.RuntimeAnchor, K.LinkAnchor,
-+                                KernelMaxAddress);
-+    if (!VA) {
-+      if (Error E = countLayer("unknown_address", *S))
-+        return E;
-+      return invalid("kernel IP relocation overflow or underflow");
-+    }
-+    unsigned Matches = llvm::count_if(Segments, [&](const Segment &Seg) {
-+      return *VA >= Seg.VAddr && *VA - Seg.VAddr < Seg.End - Seg.Offset;
-+    });
++    std::optional<uint64_t> VA;
++    if (S->IP >= K.Start && S->IP < K.End)
++      VA = translateKernelIP(S->IP, K.RuntimeAnchor, K.LinkAnchor,
++                             KernelMaxAddress);
++    unsigned Matches =
++        VA ? llvm::count_if(Segments,
++                            [&](const Segment &Seg) {
++                              return *VA >= Seg.VAddr &&
++                                     *VA - Seg.VAddr < Seg.End - Seg.Offset;
++                            })
++           : 0;
 +    if (!Matches) {
-+      if (Error E = countLayer("unknown_address", *S))
++      ++OutsideImage;
++      if (Error E = countLayer("outside_image", *S))
 +        return E;
-+      return invalid("kernel IP is outside executable PT_LOAD");
++      continue;
 +    }
 +    auto Exclusion = Boundaries->kernelExclusion(*VA);
 +    if (!Exclusion)
@@ -947,6 +1033,15 @@ index 273ed4d09c49..a356b33a59de 100644
 +    if (Error E = add(C.PeriodSum, S->Period))
 +      return E;
 +  }
++  // Compare integer counts exactly, with no multiplication overflow.
++  if (OutsideImage > Stats.Target / KernelOutsideImageLimitDivisor)
++    return invalid(formatv("{0}/{1} kernel target samples ({2:P3}) are outside "
++                           "the image (limit {3}%). Check the kernel anchor "
++                           "and vmlinux identity",
++                           OutsideImage, Stats.Target,
++                           static_cast<double>(OutsideImage) / Stats.Target,
++                           100 / KernelOutsideImageLimitDivisor)
++                       .str());
 +  return Error::success();
 +}
 +
@@ -1012,7 +1107,7 @@ index 9172d5767f17..f1bf51f926c0 100644
    uint64_t getMedianPeriod() const;
    const AddressCounter &getAddressCounts() const { return Counts; }
 diff --git a/llvm/tools/llvm-profgen/IPQualityReport.cpp b/llvm/tools/llvm-profgen/IPQualityReport.cpp
-index 1887652be9a7..b4f0d8181f25 100644
+index 1887652be9a7..e99d570db5a0 100644
 --- a/llvm/tools/llvm-profgen/IPQualityReport.cpp
 +++ b/llvm/tools/llvm-profgen/IPQualityReport.cpp
 @@ -528,7 +528,9 @@ json::Value IPQualityReport::build() {
@@ -1036,7 +1131,7 @@ index 1887652be9a7..b4f0d8181f25 100644
        bool X = M.Permissions.find('x') != std::string::npos;
        X ? ++Exec : ++NonExec;
        Maps.push_back(
-@@ -637,6 +640,26 @@ json::Value IPQualityReport::build() {
+@@ -637,6 +640,27 @@ json::Value IPQualityReport::build() {
                        "predecessor_no_line"})
      Reasons[R] = Gen(("skid_unadjusted_" + R).str());
    Samples["skid_unadjusted_reasons"] = std::move(Reasons);
@@ -1054,6 +1149,7 @@ index 1887652be9a7..b4f0d8181f25 100644
 +                     {"user_samples", Layer("user_samples")},
 +                     {"special_skipped", Layer("special_skipped")},
 +                     {"unknown_address", Layer("unknown_address")},
++                     {"outside_image", Layer("outside_image")},
 +                     {"unknown_pid", Layer("pid_unknown")},
 +                     {"special_section", Layer("kernel_special_section")},
 +                     {"mapping_data", Layer("kernel_mapping_data")},
