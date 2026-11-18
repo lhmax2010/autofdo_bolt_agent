@@ -362,3 +362,39 @@ system-wide 的分母含其他核与后台程序，不能代替前表的任务�
 归档根 `temp/kernel-afdo-k1/baseline-rpi4-02/`。原始板上 tar、五份 perf.data、kallsyms、温度进程记录、计时输入、分析脚本和 SHA 均已保留。raw kallsyms 和记录地址留在本机归档。M1 接触范围为 attempt-11 BASE.tar/manifest、同一 ToS 输入、计时脚本，以及 attempt-10 空闲降温证据。未读取 M1 的 perf.data 或 profile，本轮没有生成 profile。[重试证据索引](04_k1a_baseline.retry.index.json)
 
 收尾核验退出 `measurement=0 cleanup=0`、governor 恢复为 schedutil、`kptr_restrict=0`、SDB root off/uid5001，boot_id 一致，任务挂载与临时路径均不存在。BASE 部署仍未执行，后续仍需独立授权。
+
+## HDMI 接入后的空闲检查（2026-11-18）
+
+2026-11-18 01:02:53（美国太平洋时间）开始在 `192.168.108.26:26101` 只读检查。DT serial `100000004694d889`，板型 Raspberry Pi 4 Model B Rev 1.5，运行 `6.12.80-arm-rpi4-v7l`。GNU build-id `395733b9c917cb98309b39cc3ec379c03ac36b3f` 和 boot_id `33a42791-2527-4041-a54b-9fe3f88d598b` 均与 K1a 一致。
+
+| DRM 连接器 | status | enabled | DPMS |
+|---|---|---|---|
+| card0-HDMI-A-1 | connected | enabled | On |
+| card0-HDMI-A-2 | disconnected | disabled | On |
+| card0-Writeback-1 | unknown | disabled | On |
+
+首末连接器读数一致。systemd 首末均报告 `display-manager.service` 为 active/running，主 PID 为 543（`/usr/bin/enlightenment`），启动时间戳不变。
+
+### 2 分钟 CPU 观察
+
+每 5 秒读取一次 `/proc/stat`、loadavg、四个 CPU 的 governor 与频率，25 点覆盖 120.00 秒。按每个 5 秒区间的 CPU 忙时差除以墙钟，100% 对应一个逻辑核连续运行。全板合计包括 user、nice、system、irq、softirq、steal，扣除 idle 和 iowait。全板合计平均 **11.33%**，单区间最高 **19.40%**。单个核的最高区间为 7.40%。1 分钟 loadavg 为 0.05–0.26，逐核频率读数范围 1000–1500 MHz，governor 为 `schedutil`。
+
+K1a 接入前的空闲观察中，`enlightenment` 直接测得约 **97.2% 单核**。接入后 SDB 保持 uid 5001，`/proc/543/stat` 和 `schedstat` 返回 Permission denied，systemd 的 CPUAccounting=no，无服务 CPU 使用计数。因此本次没有该进程的直接占用值。**它的进程占用上界为全板合计：120 秒平均不超过 11.33%，各 5 秒区间均不超过 19.40%。** 这排除了在本次观察中持续跑满一个核。
+
+当前 UID 可读的进程计数按 PID 和 starttime 对齐，再按 utime+stime 的区间差排列。每个采样点可见 149–151 个条目，`sugov:0` 在 22/24 个区间排名第一。原始 24 份可见前五名及 CPU 占用在本机 summary 中。由于权限限制，这一排行无法覆盖全板所有进程。占满单核的触发条件未出现，本轮无 perf 线程或内核栈采样。
+
+### 10 分钟空闲温度
+
+2 分钟 CPU 观察结束后单独开始温度序列，每 10 秒取一点。两个可读温度入口是 `thermal_zone0/temp` 和 `hwmon1/temp1_input`，分别由 cpu-thermal 与 cpu_thermal 驱动报告，两个入口顺序读取。hwmon 的温度范围为 53.556–55.504°C，中位 54.530°C。下表统一使用与历史记录一致的 thermal_zone0。温度阶段的全板忙时最高为单核等效 7.90%，各核 governor 保持 `schedutil`，频率读数 600–1500 MHz。
+
+| 空闲曲线 | governor | 点数 / 覆盖 s | 首 / 尾 °C | 最低–最高 °C | 中位 °C |
+|---|---|---:|---:|---:|---:|
+| 本轮 HDMI 接入 | schedutil | 61 / 600.02 | 54.043 / 54.530 | 53.556–55.504 | **54.530** |
+| K1a 60°C 重试基线 | performance | 61 / 599.71 | 59.400 / 58.913 | 58.426–59.887 | 59.400 |
+| M1 attempt-10 cooling-idle | performance | 61 / 600.73 | 58.913 / 57.939 | 56.965–59.400 | 57.939 |
+
+本轮中位温度比 K1a 低 **4.870°C**，比 M1 低 **3.409°C**。三条曲线的 governor、频率和背景活动有差异，室温和物理风扇状态也缺少同步记录。温差表明当前状态有更大的空闲温度余量，无法单独归因于 HDMI。
+
+建议后续测量**保持 HDMI 接入和 TV 显示栈运行**，各变体固定相同的连接器状态、显示内容和 governor。正式计时前用其规定的 `performance` governor 复核空闲段和起跑遥测，确认低背景负载与温度余量在测量条件下仍成立。
+
+原始证据留在 `temp/kernel-afdo-k1/hdmi-idle-rpi4-01/`，`index.json` SHA-256 `8a24458618d82420ff49e0d110fd8b4f0ae672e35818ac96c0c30d12b462c65a`。首次内联采集脚本超过 SDB 服务名称长度，之后用主机调度短只读查询完成全部采样。本轮无板上持久写入，governor、SDB UID、boot ID 和显示服务均保持原状态。
