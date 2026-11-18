@@ -1,0 +1,3894 @@
+{
+  "status": "complete",
+  "artifact_root": "temp/kernel-afdo-k1/baseline-rpi4-02/",
+  "target": "192.168.108.26:26101",
+  "t_start_c": 60,
+  "t_max_c": 80,
+  "measurement_counts": {
+    "warmup": 15,
+    "timed": 50,
+    "record": 5
+  },
+  "capture_sha_verified": true,
+  "board_identity": {
+    "historical_build_id": "0d411ab9ae3244ee307d50d85e12db55d3e94c69",
+    "running_build_id": "395733b9c917cb98309b39cc3ec379c03ac36b3f",
+    "historical_headers": {
+      "compile.h": "#define UTS_MACHINE\t\t\"arm\"\n#define LINUX_COMPILE_BY\t\"abuild\"\n#define LINUX_COMPILE_HOST\t\"linhao-linux\"\n#define LINUX_COMPILER\t\t\"clang version 22.1.8, LLD 22.1.8\"\n",
+      "utsversion.h": "#define UTS_VERSION \"#1 SMP Wed Oct 28 04:12:26 UTC 2026\"\n"
+    },
+    "historical_crc7": {
+      "vermagic": "6.12.80-arm-rpi4-v7l SMP mod_unload modversions ARMv7 p2v8",
+      "build_id": [
+        "917fe0fb2a5976f8cbd57ca71c611dce192f9f07"
+      ],
+      "sha256": "6bf44318d6cecc61d2343e85e004e39aee8a5dcf98a5a75f6822d48bf649fa64"
+    },
+    "board_crc7": {
+      "vermagic": "6.12.80-arm-rpi4-v7l SMP mod_unload modversions ARMv7 p2v8",
+      "build_id": [
+        "917fe0fb2a5976f8cbd57ca71c611dce192f9f07"
+      ],
+      "sha256": "1825939b82c1a3d8b9867bcf1fc62d67fd7314f0ce099cc79f5890a42588abc9"
+    },
+    "historical_zImage_sha256": "a1cf2077f2053f2d779b39a0d9d7482bc636ecb38d5c07caf305fc0889207cd6",
+    "board_zImage_sha256": "d5345f13eada3a3aab8b2fca9f511c608469f708d83a6a2445882e68241cc9af",
+    "board_boot_image": {
+      "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/baseline-rpi4-02/board/source-identity/boot.zImage",
+      "sha256": "d5345f13eada3a3aab8b2fca9f511c608469f708d83a6a2445882e68241cc9af",
+      "offset": 33353,
+      "build_ids": [
+        "b28d4cd3ec398b3cdfe34f88c907eafdfa27e3b2",
+        "395733b9c917cb98309b39cc3ec379c03ac36b3f"
+      ],
+      "banners": [
+        "Linux version 6.12.80-arm-rpi4-v7l (abuild@ip-192-168-56-171) (clang version 22.1.8, LLD 22.1.8) # SMP ",
+        "Linux version 6.12.80-arm-rpi4-v7l (abuild@ip-192-168-56-171) (clang version 22.1.8, LLD 22.1.8) #1 SMP Wed Nov  4 17:05:36 UTC 2026"
+      ],
+      "raw_size": 41725500,
+      "exact_running_notes_occurrences": 1
+    }
+  },
+  "board_file_comparison": {
+    "boot_payload": {
+      "matched": 409,
+      "changed": 1,
+      "missing": 0,
+      "board_only": 3
+    },
+    "modules_payload": {
+      "matched": 0,
+      "changed": 52,
+      "missing": 0,
+      "board_only": 0
+    }
+  },
+  "idle": {
+    "sensors": {
+      "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor": [
+        "performance"
+      ],
+      "/sys/devices/system/cpu/cpu1/cpufreq/scaling_governor": [
+        "performance"
+      ],
+      "/sys/devices/system/cpu/cpu2/cpufreq/scaling_governor": [
+        "performance"
+      ],
+      "/sys/devices/system/cpu/cpu3/cpufreq/scaling_governor": [
+        "performance"
+      ],
+      "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq": [
+        "1500000"
+      ],
+      "/sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq": [
+        "1500000"
+      ],
+      "/sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq": [
+        "1500000"
+      ],
+      "/sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq": [
+        "1500000"
+      ],
+      "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq": [
+        "1500000"
+      ],
+      "/sys/devices/system/cpu/cpu1/cpufreq/cpuinfo_cur_freq": [
+        "1500000"
+      ],
+      "/sys/devices/system/cpu/cpu2/cpufreq/cpuinfo_cur_freq": [
+        "1500000"
+      ],
+      "/sys/devices/system/cpu/cpu3/cpufreq/cpuinfo_cur_freq": [
+        "1500000"
+      ]
+    },
+    "temperature": {
+      "/sys/class/thermal/thermal_zone0/temp": {
+        "count": 61,
+        "elapsed_s": 599.71,
+        "start_mC": 59400,
+        "end_mC": 58913,
+        "min_mC": 58426,
+        "max_mC": 59887,
+        "median_mC": 59400,
+        "first_at_or_below": {
+          "58000": null,
+          "60000": 0.0
+        }
+      }
+    },
+    "loadavg1_minmax": [
+      1.0,
+      1.16
+    ],
+    "top_ticks": [
+      [
+        "enlightenment",
+        58286
+      ],
+      [
+        "runner",
+        858
+      ],
+      [
+        "bash",
+        135
+      ],
+      [
+        "dlog_logger",
+        48
+      ],
+      [
+        "rcu_sched",
+        13
+      ],
+      [
+        "buxton2d",
+        13
+      ],
+      [
+        "stability-monit",
+        8
+      ],
+      [
+        "amd",
+        7
+      ],
+      [
+        "systemd",
+        4
+      ],
+      [
+        "ksoftirqd/0",
+        4
+      ],
+      [
+        "ksoftirqd/3",
+        4
+      ],
+      [
+        "sdbd",
+        4
+      ]
+    ],
+    "top_first": [
+      [
+        "enlightenment",
+        61
+      ]
+    ]
+  },
+  "m1_idle": {
+    "/sys/class/thermal/thermal_zone0/temp": {
+      "count": 61,
+      "elapsed_s": 600.73,
+      "start_mC": 58913,
+      "end_mC": 57939,
+      "min_mC": 56965,
+      "max_mC": 59400,
+      "median_mC": 57939,
+      "first_at_or_below": {
+        "58000": 10.02,
+        "60000": 0.0
+      }
+    }
+  },
+  "m1_curve": {
+    "artifact_path": "temp/m1-ffmpeg-rpi4-thumb-01/attempt-10/cooling-idle/raw/temperature.tsv",
+    "bytes": 3294,
+    "sha256": "8556f8aa9d113abdd99ac3d99c387fe97b02c3093c735ee6b4e73561e2693d49"
+  },
+  "results": {
+    "pipe": {
+      "all": {
+        "n": 10,
+        "mean_s": 13.4333,
+        "median_s": 13.4175,
+        "median_throughput": 37264.76616359232,
+        "cv": 0.00787123212310568,
+        "estimated_uncapped_blocks": 30,
+        "budget": 30,
+        "kernel_fraction": 0.9767084339859132
+      },
+      "clean": {
+        "n": 5,
+        "mean_s": 13.3884,
+        "median_s": 13.402,
+        "median_throughput": 37307.86449783615,
+        "cv": 0.00742130863050691,
+        "estimated_uncapped_blocks": 27,
+        "budget": null,
+        "kernel_fraction": 0.9769272611004488
+      },
+      "timed_tags": {
+        "clean": 5,
+        "telemetry_anomaly": 5
+      },
+      "timed_incidents": {
+        "time-03": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 171919.91,
+          "end": 171934.34,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 62.809
+        },
+        "time-04": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 171950.78,
+          "end": 171965.16,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 62.322
+        },
+        "time-05": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 171981.6,
+          "end": 171996.22,
+          "start_temp_c": 59.887,
+          "max_window_temp_c": 62.322
+        },
+        "time-08": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172064.63,
+          "end": 172079.22,
+          "start_temp_c": 60.861,
+          "max_window_temp_c": 62.809
+        },
+        "time-09": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172095.5,
+          "end": 172109.98,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 62.809
+        }
+      },
+      "warm_and_timed_tags": {
+        "clean": 7,
+        "telemetry_anomaly": 6
+      },
+      "timed_start_range_c": [
+        58.913,
+        60.861
+      ],
+      "max_timed_temp_c": 62.809,
+      "timed_any_over_60": 10,
+      "gate_wait": {
+        "min_s": 0.0,
+        "max_s": 9.59,
+        "median_s": 9.58,
+        "waits_over_zero": 9,
+        "entry_temp_mC_minmax": [
+          57452,
+          59887
+        ]
+      },
+      "record": {
+        "modes": {
+          "U": 48119,
+          "K": 70909
+        },
+        "by_task": [
+          [
+            "sched-pipe",
+            55859
+          ],
+          [
+            "enlightenment",
+            54493
+          ],
+          [
+            "swapper",
+            2807
+          ],
+          [
+            "bash",
+            2364
+          ],
+          [
+            "io.flutter.rast",
+            784
+          ],
+          [
+            "cat",
+            483
+          ],
+          [
+            "dlogsend",
+            388
+          ],
+          [
+            "awk",
+            297
+          ],
+          [
+            "perf",
+            237
+          ],
+          [
+            "sleep",
+            163
+          ],
+          [
+            "dlog_logger",
+            51
+          ],
+          [
+            "ANRMonitor+",
+            47
+          ],
+          [
+            "chmod",
+            46
+          ],
+          [
+            "io.flutter.ui",
+            43
+          ],
+          [
+            "pass",
+            32
+          ],
+          [
+            "buxton2d",
+            32
+          ],
+          [
+            "stability-monit",
+            25
+          ],
+          [
+            "amd",
+            25
+          ],
+          [
+            "tdm_thread",
+            23
+          ],
+          [
+            "wl_egl_thread",
+            20
+          ]
+        ],
+        "kernel_tasks": [
+          [
+            "sched-pipe",
+            52835
+          ],
+          [
+            "enlightenment",
+            10367
+          ],
+          [
+            "swapper",
+            2807
+          ],
+          [
+            "bash",
+            2032
+          ],
+          [
+            "io.flutter.rast",
+            678
+          ],
+          [
+            "cat",
+            413
+          ],
+          [
+            "dlogsend",
+            287
+          ],
+          [
+            "awk",
+            255
+          ],
+          [
+            "perf",
+            147
+          ],
+          [
+            "sleep",
+            139
+          ],
+          [
+            "chmod",
+            42
+          ],
+          [
+            "ANRMonitor+",
+            37
+          ],
+          [
+            "dlog_logger",
+            28
+          ],
+          [
+            "kworker/u16:2-v",
+            20
+          ],
+          [
+            "pass",
+            19
+          ],
+          [
+            "kworker/u19:0-k",
+            16
+          ],
+          [
+            "stability-monit",
+            16
+          ],
+          [
+            "amd",
+            16
+          ],
+          [
+            "buxton2d",
+            15
+          ],
+          [
+            "tdm_thread",
+            14
+          ]
+        ],
+        "cpu_modes": {
+          "001": {
+            "U": 44127,
+            "K": 10491
+          },
+          "000": {
+            "K": 4584,
+            "U": 508
+          },
+          "003": {
+            "K": 53066,
+            "U": 3168
+          },
+          "002": {
+            "K": 2768,
+            "U": 316
+          }
+        },
+        "periods": {
+          "1000003": 119028
+        },
+        "core_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 18877,
+            "fraction_of_kernel": 0.26621444386467163
+          },
+          {
+            "name": "finish_task_switch",
+            "samples": 9228,
+            "fraction_of_kernel": 0.1301386283828569
+          },
+          {
+            "name": "vector_swi",
+            "samples": 4175,
+            "fraction_of_kernel": 0.058878280613180276
+          },
+          {
+            "name": "__rseq_handle_notify_resume",
+            "samples": 3873,
+            "fraction_of_kernel": 0.054619300793975374
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 2656,
+            "fraction_of_kernel": 0.03745645827751061
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 2573,
+            "fraction_of_kernel": 0.036285943956338405
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 2556,
+            "fraction_of_kernel": 0.03604620005923084
+          },
+          {
+            "name": "do_work_pending",
+            "samples": 1959,
+            "fraction_of_kernel": 0.027626958496100636
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 1784,
+            "fraction_of_kernel": 0.025159006614111044
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1216,
+            "fraction_of_kernel": 0.017148739934281967
+          },
+          {
+            "name": "pipe_write",
+            "samples": 1124,
+            "fraction_of_kernel": 0.01585130237346458
+          },
+          {
+            "name": "arm_copy_to_user",
+            "samples": 968,
+            "fraction_of_kernel": 0.013651299552948144
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 925,
+            "fraction_of_kernel": 0.013044888519087845
+          },
+          {
+            "name": "ktime_get_coarse_real_ts64",
+            "samples": 910,
+            "fraction_of_kernel": 0.01283334978634588
+          },
+          {
+            "name": "__fget_files",
+            "samples": 682,
+            "fraction_of_kernel": 0.009617961048668012
+          },
+          {
+            "name": "_raw_spin_lock_irqsave",
+            "samples": 668,
+            "fraction_of_kernel": 0.009420524898108844
+          },
+          {
+            "name": "_copy_from_iter",
+            "samples": 643,
+            "fraction_of_kernel": 0.009067960343538902
+          },
+          {
+            "name": "arm_clear_user",
+            "samples": 616,
+            "fraction_of_kernel": 0.008687190624603365
+          },
+          {
+            "name": "pipe_read",
+            "samples": 591,
+            "fraction_of_kernel": 0.008334626070033423
+          },
+          {
+            "name": "fput",
+            "samples": 577,
+            "fraction_of_kernel": 0.008137189919474255
+          },
+          {
+            "name": "mutex_unlock",
+            "samples": 502,
+            "fraction_of_kernel": 0.007079496255764431
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 490,
+            "fraction_of_kernel": 0.006910265269570858
+          },
+          {
+            "name": "vfs_write",
+            "samples": 456,
+            "fraction_of_kernel": 0.006430777475355738
+          },
+          {
+            "name": "mutex_lock",
+            "samples": 452,
+            "fraction_of_kernel": 0.006374367146624547
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 422,
+            "fraction_of_kernel": 0.005951289681140617
+          },
+          {
+            "name": "fdget_pos",
+            "samples": 412,
+            "fraction_of_kernel": 0.0058102638593126405
+          },
+          {
+            "name": "vfs_read",
+            "samples": 407,
+            "fraction_of_kernel": 0.005739750948398652
+          },
+          {
+            "name": "__audit_syscall_entry",
+            "samples": 382,
+            "fraction_of_kernel": 0.00538718639382871
+          },
+          {
+            "name": "migrate_enable",
+            "samples": 371,
+            "fraction_of_kernel": 0.005232057989817936
+          },
+          {
+            "name": "__audit_syscall_exit",
+            "samples": 324,
+            "fraction_of_kernel": 0.004569236627226445
+          }
+        ],
+        "full_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 18877,
+            "fraction_of_kernel": 0.26621444386467163
+          },
+          {
+            "name": "finish_task_switch",
+            "samples": 9228,
+            "fraction_of_kernel": 0.1301386283828569
+          },
+          {
+            "name": "vector_swi",
+            "samples": 4175,
+            "fraction_of_kernel": 0.058878280613180276
+          },
+          {
+            "name": "__rseq_handle_notify_resume",
+            "samples": 3873,
+            "fraction_of_kernel": 0.054619300793975374
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 2656,
+            "fraction_of_kernel": 0.03745645827751061
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 2573,
+            "fraction_of_kernel": 0.036285943956338405
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 2556,
+            "fraction_of_kernel": 0.03604620005923084
+          },
+          {
+            "name": "do_work_pending",
+            "samples": 1959,
+            "fraction_of_kernel": 0.027626958496100636
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 1784,
+            "fraction_of_kernel": 0.025159006614111044
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1216,
+            "fraction_of_kernel": 0.017148739934281967
+          },
+          {
+            "name": "pipe_write",
+            "samples": 1124,
+            "fraction_of_kernel": 0.01585130237346458
+          },
+          {
+            "name": "arm_copy_to_user",
+            "samples": 968,
+            "fraction_of_kernel": 0.013651299552948144
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 925,
+            "fraction_of_kernel": 0.013044888519087845
+          },
+          {
+            "name": "ktime_get_coarse_real_ts64",
+            "samples": 910,
+            "fraction_of_kernel": 0.01283334978634588
+          },
+          {
+            "name": "__fget_files",
+            "samples": 682,
+            "fraction_of_kernel": 0.009617961048668012
+          },
+          {
+            "name": "_raw_spin_lock_irqsave",
+            "samples": 668,
+            "fraction_of_kernel": 0.009420524898108844
+          },
+          {
+            "name": "_copy_from_iter",
+            "samples": 643,
+            "fraction_of_kernel": 0.009067960343538902
+          },
+          {
+            "name": "arm_clear_user",
+            "samples": 616,
+            "fraction_of_kernel": 0.008687190624603365
+          },
+          {
+            "name": "pipe_read",
+            "samples": 591,
+            "fraction_of_kernel": 0.008334626070033423
+          },
+          {
+            "name": "fput",
+            "samples": 577,
+            "fraction_of_kernel": 0.008137189919474255
+          },
+          {
+            "name": "mutex_unlock",
+            "samples": 502,
+            "fraction_of_kernel": 0.007079496255764431
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 490,
+            "fraction_of_kernel": 0.006910265269570858
+          },
+          {
+            "name": "vfs_write",
+            "samples": 456,
+            "fraction_of_kernel": 0.006430777475355738
+          },
+          {
+            "name": "mutex_lock",
+            "samples": 452,
+            "fraction_of_kernel": 0.006374367146624547
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 422,
+            "fraction_of_kernel": 0.005951289681140617
+          },
+          {
+            "name": "fdget_pos",
+            "samples": 412,
+            "fraction_of_kernel": 0.0058102638593126405
+          },
+          {
+            "name": "vfs_read",
+            "samples": 407,
+            "fraction_of_kernel": 0.005739750948398652
+          },
+          {
+            "name": "__audit_syscall_entry",
+            "samples": 382,
+            "fraction_of_kernel": 0.00538718639382871
+          },
+          {
+            "name": "migrate_enable",
+            "samples": 371,
+            "fraction_of_kernel": 0.005232057989817936
+          },
+          {
+            "name": "__audit_syscall_exit",
+            "samples": 324,
+            "fraction_of_kernel": 0.004569236627226445
+          }
+        ],
+        "modules": [
+          {
+            "name": "proc_tsm",
+            "samples": 4,
+            "fraction_of_kernel": 5.641032873119068e-05
+          },
+          {
+            "name": "kdbus",
+            "samples": 4,
+            "fraction_of_kernel": 5.641032873119068e-05
+          }
+        ],
+        "unresolved": [],
+        "telemetry": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172147.65,
+          "end": 172187.96,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 63.783
+        },
+        "stable_modules": [
+          "brcmfmac",
+          "brcmutil",
+          "btbcm",
+          "dm_bow",
+          "extcon_usb_fixed",
+          "hci_uart",
+          "inform_reboot",
+          "kdbus",
+          "logger",
+          "proc_tsm"
+        ],
+        "wall": 39.297
+      },
+      "record_window_s": 40.30999999999767,
+      "cycles_running_pct_minmax": [
+        100.0,
+        100.0
+      ],
+      "meminfo": {
+        "MemAvailable": [
+          3374760,
+          3366680
+        ],
+        "Slab": [
+          56256,
+          56740
+        ],
+        "SUnreclaim": [
+          41672,
+          41716
+        ],
+        "SwapFree": [
+          1586236,
+          1586236
+        ],
+        "VmallocUsed": [
+          21124,
+          21076
+        ],
+        "Shmem": [
+          242420,
+          230300
+        ]
+      },
+      "vmstat_delta": {
+        "oom_kill": 0,
+        "pgfault": 2896355,
+        "pgmajfault": 0,
+        "pgscan_anon": 0,
+        "pgscan_direct": 0,
+        "pgscan_direct_throttle": 0,
+        "pgscan_file": 0,
+        "pgscan_khugepaged": 0,
+        "pgscan_kswapd": 0,
+        "pgsteal_anon": 0,
+        "pgsteal_direct": 0,
+        "pgsteal_file": 0,
+        "pgsteal_khugepaged": 0,
+        "pgsteal_kswapd": 0,
+        "pswpin": 0,
+        "pswpout": 0
+      }
+    },
+    "syscall": {
+      "all": {
+        "n": 10,
+        "mean_s": 11.3071,
+        "median_s": 11.272,
+        "median_throughput": 1774308.0198722498,
+        "cv": 0.011126851847004965,
+        "estimated_uncapped_blocks": 60,
+        "budget": 40,
+        "kernel_fraction": 0.8723533552367501
+      },
+      "clean": {
+        "n": 4,
+        "mean_s": 11.31325,
+        "median_s": 11.275,
+        "median_throughput": 1773835.9201773836,
+        "cv": 0.009122622428808408,
+        "estimated_uncapped_blocks": 41,
+        "budget": null,
+        "kernel_fraction": 0.8712104841902376
+      },
+      "timed_tags": {
+        "telemetry_anomaly": 6,
+        "clean": 4
+      },
+      "timed_incidents": {
+        "time-01": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172282.46,
+          "end": 172294.67,
+          "start_temp_c": 59.887,
+          "max_window_temp_c": 62.809
+        },
+        "time-04": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172359.08,
+          "end": 172371.39,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 62.322
+        },
+        "time-05": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172378.17,
+          "end": 172390.42,
+          "start_temp_c": 61.348,
+          "max_window_temp_c": 62.322
+        },
+        "time-06": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172397.31,
+          "end": 172409.51,
+          "start_temp_c": 60.861,
+          "max_window_temp_c": 62.809
+        },
+        "time-08": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172445.24,
+          "end": 172457.83,
+          "start_temp_c": 60.861,
+          "max_window_temp_c": 62.809
+        },
+        "time-10": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172494.19,
+          "end": 172506.57,
+          "start_temp_c": 60.861,
+          "max_window_temp_c": 61.348
+        }
+      },
+      "warm_and_timed_tags": {
+        "telemetry_anomaly": 9,
+        "clean": 4
+      },
+      "timed_start_range_c": [
+        58.426,
+        61.348
+      ],
+      "max_timed_temp_c": 62.809,
+      "timed_any_over_60": 10,
+      "gate_wait": {
+        "min_s": 0.0,
+        "max_s": 9.59,
+        "median_s": 4.79,
+        "waits_over_zero": 7,
+        "entry_temp_mC_minmax": [
+          56965,
+          59887
+        ]
+      },
+      "record": {
+        "modes": {
+          "K": 68207,
+          "U": 71412
+        },
+        "by_task": [
+          [
+            "syscall-basic",
+            67046
+          ],
+          [
+            "enlightenment",
+            65295
+          ],
+          [
+            "bash",
+            2827
+          ],
+          [
+            "io.flutter.rast",
+            718
+          ],
+          [
+            "cat",
+            591
+          ],
+          [
+            "swapper",
+            450
+          ],
+          [
+            "dlogsend",
+            433
+          ],
+          [
+            "awk",
+            351
+          ],
+          [
+            "perf",
+            318
+          ],
+          [
+            "sleep",
+            188
+          ],
+          [
+            "dlog_logger",
+            67
+          ],
+          [
+            "ANRMonitor+",
+            57
+          ],
+          [
+            "chmod",
+            52
+          ],
+          [
+            "io.flutter.ui",
+            40
+          ],
+          [
+            "stability-monit",
+            36
+          ],
+          [
+            "buxton2d",
+            34
+          ],
+          [
+            "wl_egl_thread",
+            31
+          ],
+          [
+            "pass",
+            27
+          ],
+          [
+            "sdbd",
+            27
+          ],
+          [
+            "sh",
+            26
+          ]
+        ],
+        "kernel_tasks": [
+          [
+            "syscall-basic",
+            49663
+          ],
+          [
+            "enlightenment",
+            12461
+          ],
+          [
+            "bash",
+            2398
+          ],
+          [
+            "io.flutter.rast",
+            611
+          ],
+          [
+            "cat",
+            517
+          ],
+          [
+            "swapper",
+            450
+          ],
+          [
+            "dlogsend",
+            336
+          ],
+          [
+            "awk",
+            284
+          ],
+          [
+            "perf",
+            203
+          ],
+          [
+            "sleep",
+            155
+          ],
+          [
+            "ANRMonitor+",
+            44
+          ],
+          [
+            "dlog_logger",
+            42
+          ],
+          [
+            "chmod",
+            39
+          ],
+          [
+            "stability-monit",
+            25
+          ],
+          [
+            "sh",
+            23
+          ],
+          [
+            "ksoftirqd/0",
+            21
+          ],
+          [
+            "kworker/u19:0-k",
+            21
+          ],
+          [
+            "sdbd",
+            21
+          ],
+          [
+            "pass",
+            19
+          ],
+          [
+            "taskset",
+            17
+          ]
+        ],
+        "cpu_modes": {
+          "000": {
+            "K": 4136,
+            "U": 664
+          },
+          "003": {
+            "K": 49870,
+            "U": 17510
+          },
+          "002": {
+            "K": 12563,
+            "U": 52844
+          },
+          "001": {
+            "U": 394,
+            "K": 1638
+          }
+        },
+        "periods": {
+          "1000003": 139619
+        },
+        "core_top30": [
+          {
+            "name": "vector_swi",
+            "samples": 40953,
+            "fraction_of_kernel": 0.600422244051197
+          },
+          {
+            "name": "ktime_get_coarse_real_ts64",
+            "samples": 3757,
+            "fraction_of_kernel": 0.05508232292873166
+          },
+          {
+            "name": "__audit_syscall_entry",
+            "samples": 2117,
+            "fraction_of_kernel": 0.03103787001334174
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 2059,
+            "fraction_of_kernel": 0.030187517410236488
+          },
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 2039,
+            "fraction_of_kernel": 0.02989429237468295
+          },
+          {
+            "name": "__audit_syscall_exit",
+            "samples": 1831,
+            "fraction_of_kernel": 0.02684475200492618
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 1079,
+            "fraction_of_kernel": 0.015819490668113244
+          },
+          {
+            "name": "syscall_trace_enter",
+            "samples": 998,
+            "fraction_of_kernel": 0.014631929274121425
+          },
+          {
+            "name": "ret_slow_syscall / ret_to_user",
+            "samples": 907,
+            "fraction_of_kernel": 0.013297755362352838
+          },
+          {
+            "name": "__fget_files",
+            "samples": 740,
+            "fraction_of_kernel": 0.010849326315480816
+          },
+          {
+            "name": "fput",
+            "samples": 588,
+            "fraction_of_kernel": 0.008620816045273946
+          },
+          {
+            "name": "__task_pid_nr_ns",
+            "samples": 543,
+            "fraction_of_kernel": 0.00796105971527849
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 538,
+            "fraction_of_kernel": 0.007887753456390107
+          },
+          {
+            "name": "syscall_trace_exit",
+            "samples": 430,
+            "fraction_of_kernel": 0.006304338264401015
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 315,
+            "fraction_of_kernel": 0.004618294309968185
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 312,
+            "fraction_of_kernel": 0.0045743105546351545
+          },
+          {
+            "name": "__sys_trace",
+            "samples": 291,
+            "fraction_of_kernel": 0.004266424267303942
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 290,
+            "fraction_of_kernel": 0.004251763015526266
+          },
+          {
+            "name": "__ep_eventpoll_poll",
+            "samples": 289,
+            "fraction_of_kernel": 0.004237101763748589
+          },
+          {
+            "name": "ep_done_scan",
+            "samples": 266,
+            "fraction_of_kernel": 0.003899892972862023
+          },
+          {
+            "name": "do_page_fault",
+            "samples": 243,
+            "fraction_of_kernel": 0.0035626841819754573
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 242,
+            "fraction_of_kernel": 0.0035480229301977804
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 235,
+            "fraction_of_kernel": 0.003445394167754043
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 234,
+            "fraction_of_kernel": 0.003430732915976366
+          },
+          {
+            "name": "fdget",
+            "samples": 216,
+            "fraction_of_kernel": 0.003166830383978184
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 216,
+            "fraction_of_kernel": 0.003166830383978184
+          },
+          {
+            "name": "vfs_write",
+            "samples": 215,
+            "fraction_of_kernel": 0.0031521691322005073
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 214,
+            "fraction_of_kernel": 0.0031375078804228304
+          },
+          {
+            "name": "signalfd_poll",
+            "samples": 212,
+            "fraction_of_kernel": 0.0031081853768674767
+          },
+          {
+            "name": "__sys_trace_return",
+            "samples": 206,
+            "fraction_of_kernel": 0.003020217866201416
+          }
+        ],
+        "full_top30": [
+          {
+            "name": "vector_swi",
+            "samples": 40953,
+            "fraction_of_kernel": 0.600422244051197
+          },
+          {
+            "name": "ktime_get_coarse_real_ts64",
+            "samples": 3757,
+            "fraction_of_kernel": 0.05508232292873166
+          },
+          {
+            "name": "__audit_syscall_entry",
+            "samples": 2117,
+            "fraction_of_kernel": 0.03103787001334174
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 2059,
+            "fraction_of_kernel": 0.030187517410236488
+          },
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 2039,
+            "fraction_of_kernel": 0.02989429237468295
+          },
+          {
+            "name": "__audit_syscall_exit",
+            "samples": 1831,
+            "fraction_of_kernel": 0.02684475200492618
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 1079,
+            "fraction_of_kernel": 0.015819490668113244
+          },
+          {
+            "name": "syscall_trace_enter",
+            "samples": 998,
+            "fraction_of_kernel": 0.014631929274121425
+          },
+          {
+            "name": "ret_slow_syscall / ret_to_user",
+            "samples": 907,
+            "fraction_of_kernel": 0.013297755362352838
+          },
+          {
+            "name": "__fget_files",
+            "samples": 740,
+            "fraction_of_kernel": 0.010849326315480816
+          },
+          {
+            "name": "fput",
+            "samples": 588,
+            "fraction_of_kernel": 0.008620816045273946
+          },
+          {
+            "name": "__task_pid_nr_ns",
+            "samples": 543,
+            "fraction_of_kernel": 0.00796105971527849
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 538,
+            "fraction_of_kernel": 0.007887753456390107
+          },
+          {
+            "name": "syscall_trace_exit",
+            "samples": 430,
+            "fraction_of_kernel": 0.006304338264401015
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 315,
+            "fraction_of_kernel": 0.004618294309968185
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 312,
+            "fraction_of_kernel": 0.0045743105546351545
+          },
+          {
+            "name": "__sys_trace",
+            "samples": 291,
+            "fraction_of_kernel": 0.004266424267303942
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 290,
+            "fraction_of_kernel": 0.004251763015526266
+          },
+          {
+            "name": "__ep_eventpoll_poll",
+            "samples": 289,
+            "fraction_of_kernel": 0.004237101763748589
+          },
+          {
+            "name": "ep_done_scan",
+            "samples": 266,
+            "fraction_of_kernel": 0.003899892972862023
+          },
+          {
+            "name": "do_page_fault",
+            "samples": 243,
+            "fraction_of_kernel": 0.0035626841819754573
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 242,
+            "fraction_of_kernel": 0.0035480229301977804
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 235,
+            "fraction_of_kernel": 0.003445394167754043
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 234,
+            "fraction_of_kernel": 0.003430732915976366
+          },
+          {
+            "name": "fdget",
+            "samples": 216,
+            "fraction_of_kernel": 0.003166830383978184
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 216,
+            "fraction_of_kernel": 0.003166830383978184
+          },
+          {
+            "name": "vfs_write",
+            "samples": 215,
+            "fraction_of_kernel": 0.0031521691322005073
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 214,
+            "fraction_of_kernel": 0.0031375078804228304
+          },
+          {
+            "name": "signalfd_poll",
+            "samples": 212,
+            "fraction_of_kernel": 0.0031081853768674767
+          },
+          {
+            "name": "__sys_trace_return",
+            "samples": 206,
+            "fraction_of_kernel": 0.003020217866201416
+          }
+        ],
+        "modules": [
+          {
+            "name": "kdbus",
+            "samples": 5,
+            "fraction_of_kernel": 7.33062588883839e-05
+          },
+          {
+            "name": "proc_tsm",
+            "samples": 3,
+            "fraction_of_kernel": 4.398375533303034e-05
+          },
+          {
+            "name": "logger",
+            "samples": 1,
+            "fraction_of_kernel": 1.4661251777676777e-05
+          }
+        ],
+        "unresolved": [],
+        "telemetry": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172513.48,
+          "end": 172561.8,
+          "start_temp_c": 59.887,
+          "max_window_temp_c": 63.296
+        },
+        "stable_modules": [
+          "brcmfmac",
+          "brcmutil",
+          "btbcm",
+          "dm_bow",
+          "extcon_usb_fixed",
+          "hci_uart",
+          "inform_reboot",
+          "kdbus",
+          "logger",
+          "proc_tsm"
+        ],
+        "wall": 47.307
+      },
+      "record_window_s": 48.31999999997788,
+      "cycles_running_pct_minmax": [
+        100.0,
+        100.0
+      ],
+      "meminfo": {
+        "MemAvailable": [
+          3366872,
+          3359452
+        ],
+        "Slab": [
+          56740,
+          57440
+        ],
+        "SUnreclaim": [
+          41716,
+          41792
+        ],
+        "SwapFree": [
+          1586236,
+          1586236
+        ],
+        "VmallocUsed": [
+          21132,
+          21108
+        ],
+        "Shmem": [
+          230300,
+          246660
+        ]
+      },
+      "vmstat_delta": {
+        "oom_kill": 0,
+        "pgfault": 2792702,
+        "pgmajfault": 0,
+        "pgscan_anon": 0,
+        "pgscan_direct": 0,
+        "pgscan_direct_throttle": 0,
+        "pgscan_file": 0,
+        "pgscan_khugepaged": 0,
+        "pgscan_kswapd": 0,
+        "pgsteal_anon": 0,
+        "pgsteal_direct": 0,
+        "pgsteal_file": 0,
+        "pgsteal_khugepaged": 0,
+        "pgsteal_kswapd": 0,
+        "pswpin": 0,
+        "pswpout": 0
+      }
+    },
+    "tmpfs": {
+      "all": {
+        "n": 10,
+        "mean_s": 3.0091,
+        "median_s": 2.9995000000000003,
+        "median_throughput": 341.3902317052842,
+        "cv": 0.013394582391472152,
+        "estimated_uncapped_blocks": 87,
+        "budget": 40,
+        "kernel_fraction": 0.9939436359547611
+      },
+      "clean": {
+        "n": 7,
+        "mean_s": 3.013714285714286,
+        "median_s": 3.001,
+        "median_throughput": 341.21959346884375,
+        "cv": 0.014513843407088516,
+        "estimated_uncapped_blocks": 102,
+        "budget": null,
+        "kernel_fraction": 0.9939520589289412
+      },
+      "timed_tags": {
+        "clean": 7,
+        "telemetry_anomaly": 3
+      },
+      "timed_incidents": {
+        "time-02": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172623.31,
+          "end": 172627.37,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 61.348
+        },
+        "time-05": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172655.86,
+          "end": 172659.85,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 60.861
+        },
+        "time-09": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172708.79,
+          "end": 172712.79,
+          "start_temp_c": 61.348,
+          "max_window_temp_c": 61.835
+        }
+      },
+      "warm_and_timed_tags": {
+        "clean": 8,
+        "telemetry_anomaly": 5
+      },
+      "timed_start_range_c": [
+        58.913,
+        61.348
+      ],
+      "max_timed_temp_c": 61.835,
+      "timed_any_over_60": 10,
+      "gate_wait": {
+        "min_s": 0.0,
+        "max_s": 9.59,
+        "median_s": 0.0,
+        "waits_over_zero": 2,
+        "entry_temp_mC_minmax": [
+          57452,
+          59887
+        ]
+      },
+      "record": {
+        "modes": {
+          "K": 75855,
+          "U": 46581
+        },
+        "by_task": [
+          [
+            "enlightenment",
+            55089
+          ],
+          [
+            "dd",
+            50895
+          ],
+          [
+            "rm",
+            4113
+          ],
+          [
+            "bash",
+            4077
+          ],
+          [
+            "swapper",
+            3521
+          ],
+          [
+            "io.flutter.rast",
+            864
+          ],
+          [
+            "cat",
+            602
+          ],
+          [
+            "dlogsend",
+            465
+          ],
+          [
+            "awk",
+            372
+          ],
+          [
+            "stat",
+            340
+          ],
+          [
+            "sleep",
+            202
+          ],
+          [
+            "dlog_logger",
+            100
+          ],
+          [
+            "ANRMonitor+",
+            66
+          ],
+          [
+            "io.flutter.ui",
+            61
+          ],
+          [
+            "ksoftirqd/3",
+            59
+          ],
+          [
+            "chmod",
+            55
+          ],
+          [
+            "stability-monit",
+            54
+          ],
+          [
+            "perf",
+            52
+          ],
+          [
+            "taskset",
+            44
+          ],
+          [
+            "amd",
+            43
+          ]
+        ],
+        "kernel_tasks": [
+          [
+            "dd",
+            50719
+          ],
+          [
+            "enlightenment",
+            10101
+          ],
+          [
+            "rm",
+            4062
+          ],
+          [
+            "swapper",
+            3521
+          ],
+          [
+            "bash",
+            3492
+          ],
+          [
+            "io.flutter.rast",
+            742
+          ],
+          [
+            "cat",
+            503
+          ],
+          [
+            "dlogsend",
+            372
+          ],
+          [
+            "awk",
+            301
+          ],
+          [
+            "stat",
+            297
+          ],
+          [
+            "sleep",
+            171
+          ],
+          [
+            "ksoftirqd/3",
+            59
+          ],
+          [
+            "dlog_logger",
+            58
+          ],
+          [
+            "perf",
+            50
+          ],
+          [
+            "chmod",
+            48
+          ],
+          [
+            "ANRMonitor+",
+            42
+          ],
+          [
+            "rcu_sched",
+            40
+          ],
+          [
+            "taskset",
+            39
+          ],
+          [
+            "kworker/u19:0-e",
+            37
+          ],
+          [
+            "stability-monit",
+            35
+          ]
+        ],
+        "cpu_modes": {
+          "000": {
+            "K": 5859,
+            "U": 1003
+          },
+          "002": {
+            "U": 2299,
+            "K": 3664
+          },
+          "003": {
+            "K": 56411,
+            "U": 394
+          },
+          "001": {
+            "K": 9921,
+            "U": 42885
+          }
+        },
+        "periods": {
+          "1000003": 122436
+        },
+        "core_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 9673,
+            "fraction_of_kernel": 0.1275196097818206
+          },
+          {
+            "name": "__memcpy / memcpy / mmiocpy",
+            "samples": 8827,
+            "fraction_of_kernel": 0.11636675235646958
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 8152,
+            "fraction_of_kernel": 0.1074681959000725
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 4377,
+            "fraction_of_kernel": 0.057702194977259244
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 3136,
+            "fraction_of_kernel": 0.0413420341440907
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 3102,
+            "fraction_of_kernel": 0.040893810559620325
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 2265,
+            "fraction_of_kernel": 0.029859600553687957
+          },
+          {
+            "name": "shmem_add_to_page_cache",
+            "samples": 2004,
+            "fraction_of_kernel": 0.026418825390547757
+          },
+          {
+            "name": "filemap_remove_folio",
+            "samples": 1905,
+            "fraction_of_kernel": 0.02511370377694285
+          },
+          {
+            "name": "vector_swi",
+            "samples": 1542,
+            "fraction_of_kernel": 0.020328257860391538
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1465,
+            "fraction_of_kernel": 0.019313163272032165
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 1439,
+            "fraction_of_kernel": 0.018970404060378355
+          },
+          {
+            "name": "__percpu_counter_limited_add",
+            "samples": 1143,
+            "fraction_of_kernel": 0.01506822226616571
+          },
+          {
+            "name": "__clear_user_memset",
+            "samples": 1038,
+            "fraction_of_kernel": 0.013684002372948388
+          },
+          {
+            "name": "try_charge_memcg",
+            "samples": 1026,
+            "fraction_of_kernel": 0.013525805813723552
+          },
+          {
+            "name": "memcg1_commit_charge",
+            "samples": 1021,
+            "fraction_of_kernel": 0.013459890580713204
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 850,
+            "fraction_of_kernel": 0.011205589611759277
+          },
+          {
+            "name": "__copy_to_user_memcpy",
+            "samples": 816,
+            "fraction_of_kernel": 0.010757366027288906
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 795,
+            "fraction_of_kernel": 0.010480522048645443
+          },
+          {
+            "name": "get_page_from_freelist",
+            "samples": 759,
+            "fraction_of_kernel": 0.010005932370970931
+          },
+          {
+            "name": "__fget_files",
+            "samples": 649,
+            "fraction_of_kernel": 0.00855579724474326
+          },
+          {
+            "name": "_raw_spin_lock",
+            "samples": 573,
+            "fraction_of_kernel": 0.00755388570298596
+          },
+          {
+            "name": "xas_load",
+            "samples": 521,
+            "fraction_of_kernel": 0.006868367279678334
+          },
+          {
+            "name": "fput",
+            "samples": 476,
+            "fraction_of_kernel": 0.0062751301825851955
+          },
+          {
+            "name": "get_mem_cgroup_from_mm",
+            "samples": 457,
+            "fraction_of_kernel": 0.0060246522971458705
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 448,
+            "fraction_of_kernel": 0.005906004877727243
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 444,
+            "fraction_of_kernel": 0.0058532726913189635
+          },
+          {
+            "name": "shmem_get_folio_gfp",
+            "samples": 405,
+            "fraction_of_kernel": 0.005339133873838244
+          },
+          {
+            "name": "filemap_get_entry",
+            "samples": 402,
+            "fraction_of_kernel": 0.005299584734032035
+          },
+          {
+            "name": "migrate_enable",
+            "samples": 379,
+            "fraction_of_kernel": 0.004996374662184431
+          }
+        ],
+        "full_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 9673,
+            "fraction_of_kernel": 0.1275196097818206
+          },
+          {
+            "name": "__memcpy / memcpy / mmiocpy",
+            "samples": 8827,
+            "fraction_of_kernel": 0.11636675235646958
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 8152,
+            "fraction_of_kernel": 0.1074681959000725
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 4377,
+            "fraction_of_kernel": 0.057702194977259244
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 3136,
+            "fraction_of_kernel": 0.0413420341440907
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 3102,
+            "fraction_of_kernel": 0.040893810559620325
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 2265,
+            "fraction_of_kernel": 0.029859600553687957
+          },
+          {
+            "name": "shmem_add_to_page_cache",
+            "samples": 2004,
+            "fraction_of_kernel": 0.026418825390547757
+          },
+          {
+            "name": "filemap_remove_folio",
+            "samples": 1905,
+            "fraction_of_kernel": 0.02511370377694285
+          },
+          {
+            "name": "vector_swi",
+            "samples": 1542,
+            "fraction_of_kernel": 0.020328257860391538
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1465,
+            "fraction_of_kernel": 0.019313163272032165
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 1439,
+            "fraction_of_kernel": 0.018970404060378355
+          },
+          {
+            "name": "__percpu_counter_limited_add",
+            "samples": 1143,
+            "fraction_of_kernel": 0.01506822226616571
+          },
+          {
+            "name": "__clear_user_memset",
+            "samples": 1038,
+            "fraction_of_kernel": 0.013684002372948388
+          },
+          {
+            "name": "try_charge_memcg",
+            "samples": 1026,
+            "fraction_of_kernel": 0.013525805813723552
+          },
+          {
+            "name": "memcg1_commit_charge",
+            "samples": 1021,
+            "fraction_of_kernel": 0.013459890580713204
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 850,
+            "fraction_of_kernel": 0.011205589611759277
+          },
+          {
+            "name": "__copy_to_user_memcpy",
+            "samples": 816,
+            "fraction_of_kernel": 0.010757366027288906
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 795,
+            "fraction_of_kernel": 0.010480522048645443
+          },
+          {
+            "name": "get_page_from_freelist",
+            "samples": 759,
+            "fraction_of_kernel": 0.010005932370970931
+          },
+          {
+            "name": "__fget_files",
+            "samples": 649,
+            "fraction_of_kernel": 0.00855579724474326
+          },
+          {
+            "name": "_raw_spin_lock",
+            "samples": 573,
+            "fraction_of_kernel": 0.00755388570298596
+          },
+          {
+            "name": "xas_load",
+            "samples": 521,
+            "fraction_of_kernel": 0.006868367279678334
+          },
+          {
+            "name": "fput",
+            "samples": 476,
+            "fraction_of_kernel": 0.0062751301825851955
+          },
+          {
+            "name": "get_mem_cgroup_from_mm",
+            "samples": 457,
+            "fraction_of_kernel": 0.0060246522971458705
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 448,
+            "fraction_of_kernel": 0.005906004877727243
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 444,
+            "fraction_of_kernel": 0.0058532726913189635
+          },
+          {
+            "name": "shmem_get_folio_gfp",
+            "samples": 405,
+            "fraction_of_kernel": 0.005339133873838244
+          },
+          {
+            "name": "filemap_get_entry",
+            "samples": 402,
+            "fraction_of_kernel": 0.005299584734032035
+          },
+          {
+            "name": "migrate_enable",
+            "samples": 379,
+            "fraction_of_kernel": 0.004996374662184431
+          }
+        ],
+        "modules": [
+          {
+            "name": "proc_tsm",
+            "samples": 6,
+            "fraction_of_kernel": 7.909827961241843e-05
+          },
+          {
+            "name": "logger",
+            "samples": 2,
+            "fraction_of_kernel": 2.6366093204139476e-05
+          },
+          {
+            "name": "hci_uart",
+            "samples": 1,
+            "fraction_of_kernel": 1.3183046602069738e-05
+          },
+          {
+            "name": "kdbus",
+            "samples": 1,
+            "fraction_of_kernel": 1.3183046602069738e-05
+          }
+        ],
+        "unresolved": [],
+        "telemetry": {
+          "classification": "clean",
+          "anomalies": [],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172730.65,
+          "end": 172771.95,
+          "start_temp_c": 59.4,
+          "max_window_temp_c": 63.783
+        },
+        "stable_modules": [
+          "brcmfmac",
+          "brcmutil",
+          "btbcm",
+          "dm_bow",
+          "extcon_usb_fixed",
+          "hci_uart",
+          "inform_reboot",
+          "kdbus",
+          "logger",
+          "proc_tsm"
+        ],
+        "wall": 40.282
+      },
+      "record_window_s": 41.30000000001746,
+      "cycles_running_pct_minmax": [
+        100.0,
+        100.0
+      ],
+      "meminfo": {
+        "MemAvailable": [
+          3358860,
+          3305292
+        ],
+        "Slab": [
+          57440,
+          58200
+        ],
+        "SUnreclaim": [
+          41792,
+          41864
+        ],
+        "SwapFree": [
+          1586236,
+          1586236
+        ],
+        "VmallocUsed": [
+          21156,
+          21092
+        ],
+        "Shmem": [
+          247252,
+          242584
+        ]
+      },
+      "vmstat_delta": {
+        "oom_kill": 0,
+        "pgfault": 2286735,
+        "pgmajfault": 0,
+        "pgscan_anon": 0,
+        "pgscan_direct": 0,
+        "pgscan_direct_throttle": 0,
+        "pgscan_file": 0,
+        "pgscan_khugepaged": 0,
+        "pgscan_kswapd": 0,
+        "pgsteal_anon": 0,
+        "pgsteal_direct": 0,
+        "pgsteal_file": 0,
+        "pgsteal_khugepaged": 0,
+        "pgsteal_kswapd": 0,
+        "pswpin": 0,
+        "pswpout": 0
+      }
+    },
+    "memory": {
+      "all": {
+        "n": 10,
+        "mean_s": 1.7992,
+        "median_s": 1.7959999999999998,
+        "median_throughput": 285.0779510022272,
+        "cv": 0.007646859637784267,
+        "estimated_uncapped_blocks": 29,
+        "budget": 29,
+        "kernel_fraction": 0.9791241689082384
+      },
+      "clean": {
+        "n": 7,
+        "mean_s": 1.7958571428571428,
+        "median_s": 1.795,
+        "median_throughput": 285.2367688022284,
+        "cv": 0.0035861433335066177,
+        "estimated_uncapped_blocks": 7,
+        "budget": null,
+        "kernel_fraction": 0.9793567786053134
+      },
+      "timed_tags": {
+        "telemetry_anomaly": 3,
+        "clean": 7
+      },
+      "timed_incidents": {
+        "time-01": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172853.44,
+          "end": 172856.28,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 60.861
+        },
+        "time-02": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172863.16,
+          "end": 172865.99,
+          "start_temp_c": 59.887,
+          "max_window_temp_c": 60.374
+        },
+        "time-06": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172911.58,
+          "end": 172914.38,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 61.348
+        }
+      },
+      "warm_and_timed_tags": {
+        "telemetry_anomaly": 5,
+        "clean": 8
+      },
+      "timed_start_range_c": [
+        58.913,
+        60.374
+      ],
+      "max_timed_temp_c": 61.348,
+      "timed_any_over_60": 9,
+      "gate_wait": {
+        "min_s": 0.0,
+        "max_s": 9.57,
+        "median_s": 0.0,
+        "waits_over_zero": 1,
+        "entry_temp_mC_minmax": [
+          57939,
+          59887
+        ]
+      },
+      "record": {
+        "modes": {
+          "U": 46321,
+          "K": 63323
+        },
+        "by_task": [
+          [
+            "enlightenment",
+            54190
+          ],
+          [
+            "memory-worker",
+            45429
+          ],
+          [
+            "swapper",
+            3510
+          ],
+          [
+            "bash",
+            2756
+          ],
+          [
+            "io.flutter.rast",
+            799
+          ],
+          [
+            "cat",
+            501
+          ],
+          [
+            "awk",
+            418
+          ],
+          [
+            "dlogsend",
+            410
+          ],
+          [
+            "sleep",
+            178
+          ],
+          [
+            "dlog_logger",
+            83
+          ],
+          [
+            "taskset",
+            82
+          ],
+          [
+            "amd",
+            58
+          ],
+          [
+            "stability-monit",
+            57
+          ],
+          [
+            "ANRMonitor+",
+            53
+          ],
+          [
+            "chmod",
+            49
+          ],
+          [
+            "io.flutter.ui",
+            42
+          ],
+          [
+            "perf",
+            40
+          ],
+          [
+            "tdm_thread",
+            39
+          ],
+          [
+            "buxton2d",
+            34
+          ],
+          [
+            "kworker/u17:1-w",
+            27
+          ]
+        ],
+        "kernel_tasks": [
+          [
+            "memory-worker",
+            44253
+          ],
+          [
+            "enlightenment",
+            10139
+          ],
+          [
+            "swapper",
+            3510
+          ],
+          [
+            "bash",
+            2334
+          ],
+          [
+            "io.flutter.rast",
+            698
+          ],
+          [
+            "cat",
+            432
+          ],
+          [
+            "awk",
+            337
+          ],
+          [
+            "dlogsend",
+            317
+          ],
+          [
+            "sleep",
+            146
+          ],
+          [
+            "taskset",
+            69
+          ],
+          [
+            "dlog_logger",
+            50
+          ],
+          [
+            "chmod",
+            38
+          ],
+          [
+            "perf",
+            38
+          ],
+          [
+            "amd",
+            37
+          ],
+          [
+            "ANRMonitor+",
+            36
+          ],
+          [
+            "stability-monit",
+            35
+          ],
+          [
+            "kworker/u17:1-w",
+            27
+          ],
+          [
+            "tdm_thread",
+            21
+          ],
+          [
+            "ksoftirqd/3",
+            19
+          ],
+          [
+            "buxton2d",
+            17
+          ]
+        ],
+        "cpu_modes": {
+          "001": {
+            "U": 26518,
+            "K": 7514
+          },
+          "000": {
+            "K": 5640,
+            "U": 2039
+          },
+          "003": {
+            "K": 44769,
+            "U": 1451
+          },
+          "002": {
+            "K": 5400,
+            "U": 16313
+          }
+        },
+        "periods": {
+          "1000003": 109644
+        },
+        "core_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 11693,
+            "fraction_of_kernel": 0.18465644394611752
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 9210,
+            "fraction_of_kernel": 0.14544478309618938
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 3862,
+            "fraction_of_kernel": 0.06098889818865183
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 3469,
+            "fraction_of_kernel": 0.05478262242786981
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 3271,
+            "fraction_of_kernel": 0.05165579647205597
+          },
+          {
+            "name": "do_page_fault",
+            "samples": 2752,
+            "fraction_of_kernel": 0.043459722375756044
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 2412,
+            "fraction_of_kernel": 0.03809042527991409
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 2107,
+            "fraction_of_kernel": 0.03327384994393822
+          },
+          {
+            "name": "memcg1_commit_charge",
+            "samples": 1661,
+            "fraction_of_kernel": 0.02623059551821613
+          },
+          {
+            "name": "try_charge_memcg",
+            "samples": 1644,
+            "fraction_of_kernel": 0.02596213066342403
+          },
+          {
+            "name": "vector_swi",
+            "samples": 1464,
+            "fraction_of_kernel": 0.023119561612684175
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1323,
+            "fraction_of_kernel": 0.02089288252293795
+          },
+          {
+            "name": "get_page_from_freelist",
+            "samples": 827,
+            "fraction_of_kernel": 0.013060025583121457
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 814,
+            "fraction_of_kernel": 0.012854728929456912
+          },
+          {
+            "name": "__fget_files",
+            "samples": 747,
+            "fraction_of_kernel": 0.01179666156057041
+          },
+          {
+            "name": "get_mem_cgroup_from_mm",
+            "samples": 616,
+            "fraction_of_kernel": 0.009727902973643067
+          },
+          {
+            "name": "uncharge_folio",
+            "samples": 559,
+            "fraction_of_kernel": 0.008827756107575446
+          },
+          {
+            "name": "fput",
+            "samples": 542,
+            "fraction_of_kernel": 0.008559291252783348
+          },
+          {
+            "name": "charge_memcg",
+            "samples": 518,
+            "fraction_of_kernel": 0.008180282046018034
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 451,
+            "fraction_of_kernel": 0.007122214677131532
+          },
+          {
+            "name": "__mem_cgroup_charge",
+            "samples": 447,
+            "fraction_of_kernel": 0.0070590464760039795
+          },
+          {
+            "name": "_raw_spin_lock_irqsave",
+            "samples": 406,
+            "fraction_of_kernel": 0.006411572414446567
+          },
+          {
+            "name": "migrate_enable",
+            "samples": 333,
+            "fraction_of_kernel": 0.005258752743868737
+          },
+          {
+            "name": "mas_state_walk",
+            "samples": 326,
+            "fraction_of_kernel": 0.00514820839189552
+          },
+          {
+            "name": "__mod_memcg_lruvec_state",
+            "samples": 301,
+            "fraction_of_kernel": 0.004753407134848318
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 280,
+            "fraction_of_kernel": 0.004421774078928667
+          },
+          {
+            "name": "unmap_page_range",
+            "samples": 268,
+            "fraction_of_kernel": 0.00423226947554601
+          },
+          {
+            "name": "_raw_spin_lock",
+            "samples": 257,
+            "fraction_of_kernel": 0.004058556922445241
+          },
+          {
+            "name": "folio_remove_rmap_ptes",
+            "samples": 241,
+            "fraction_of_kernel": 0.0038058841179350314
+          },
+          {
+            "name": "__kmap_local_page_prot",
+            "samples": 241,
+            "fraction_of_kernel": 0.0038058841179350314
+          }
+        ],
+        "full_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 11693,
+            "fraction_of_kernel": 0.18465644394611752
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 9210,
+            "fraction_of_kernel": 0.14544478309618938
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 3862,
+            "fraction_of_kernel": 0.06098889818865183
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 3469,
+            "fraction_of_kernel": 0.05478262242786981
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 3271,
+            "fraction_of_kernel": 0.05165579647205597
+          },
+          {
+            "name": "do_page_fault",
+            "samples": 2752,
+            "fraction_of_kernel": 0.043459722375756044
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 2412,
+            "fraction_of_kernel": 0.03809042527991409
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 2107,
+            "fraction_of_kernel": 0.03327384994393822
+          },
+          {
+            "name": "memcg1_commit_charge",
+            "samples": 1661,
+            "fraction_of_kernel": 0.02623059551821613
+          },
+          {
+            "name": "try_charge_memcg",
+            "samples": 1644,
+            "fraction_of_kernel": 0.02596213066342403
+          },
+          {
+            "name": "vector_swi",
+            "samples": 1464,
+            "fraction_of_kernel": 0.023119561612684175
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1323,
+            "fraction_of_kernel": 0.02089288252293795
+          },
+          {
+            "name": "get_page_from_freelist",
+            "samples": 827,
+            "fraction_of_kernel": 0.013060025583121457
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 814,
+            "fraction_of_kernel": 0.012854728929456912
+          },
+          {
+            "name": "__fget_files",
+            "samples": 747,
+            "fraction_of_kernel": 0.01179666156057041
+          },
+          {
+            "name": "get_mem_cgroup_from_mm",
+            "samples": 616,
+            "fraction_of_kernel": 0.009727902973643067
+          },
+          {
+            "name": "uncharge_folio",
+            "samples": 559,
+            "fraction_of_kernel": 0.008827756107575446
+          },
+          {
+            "name": "fput",
+            "samples": 542,
+            "fraction_of_kernel": 0.008559291252783348
+          },
+          {
+            "name": "charge_memcg",
+            "samples": 518,
+            "fraction_of_kernel": 0.008180282046018034
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 451,
+            "fraction_of_kernel": 0.007122214677131532
+          },
+          {
+            "name": "__mem_cgroup_charge",
+            "samples": 447,
+            "fraction_of_kernel": 0.0070590464760039795
+          },
+          {
+            "name": "_raw_spin_lock_irqsave",
+            "samples": 406,
+            "fraction_of_kernel": 0.006411572414446567
+          },
+          {
+            "name": "migrate_enable",
+            "samples": 333,
+            "fraction_of_kernel": 0.005258752743868737
+          },
+          {
+            "name": "mas_state_walk",
+            "samples": 326,
+            "fraction_of_kernel": 0.00514820839189552
+          },
+          {
+            "name": "__mod_memcg_lruvec_state",
+            "samples": 301,
+            "fraction_of_kernel": 0.004753407134848318
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 280,
+            "fraction_of_kernel": 0.004421774078928667
+          },
+          {
+            "name": "unmap_page_range",
+            "samples": 268,
+            "fraction_of_kernel": 0.00423226947554601
+          },
+          {
+            "name": "_raw_spin_lock",
+            "samples": 257,
+            "fraction_of_kernel": 0.004058556922445241
+          },
+          {
+            "name": "folio_remove_rmap_ptes",
+            "samples": 241,
+            "fraction_of_kernel": 0.0038058841179350314
+          },
+          {
+            "name": "__kmap_local_page_prot",
+            "samples": 241,
+            "fraction_of_kernel": 0.0038058841179350314
+          }
+        ],
+        "modules": [
+          {
+            "name": "proc_tsm",
+            "samples": 3,
+            "fraction_of_kernel": 4.737615084566429e-05
+          },
+          {
+            "name": "kdbus",
+            "samples": 2,
+            "fraction_of_kernel": 3.158410056377619e-05
+          }
+        ],
+        "unresolved": [],
+        "telemetry": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 172960.47,
+          "end": 173000.79,
+          "start_temp_c": 60.374,
+          "max_window_temp_c": 62.322
+        },
+        "stable_modules": [
+          "brcmfmac",
+          "brcmutil",
+          "btbcm",
+          "dm_bow",
+          "extcon_usb_fixed",
+          "hci_uart",
+          "inform_reboot",
+          "kdbus",
+          "logger",
+          "proc_tsm"
+        ],
+        "wall": 39.302
+      },
+      "record_window_s": 40.320000000006985,
+      "cycles_running_pct_minmax": [
+        100.0,
+        100.0
+      ],
+      "meminfo": {
+        "MemAvailable": [
+          3383528,
+          3340668
+        ],
+        "Slab": [
+          58188,
+          58856
+        ],
+        "SUnreclaim": [
+          41888,
+          41888
+        ],
+        "SwapFree": [
+          1586236,
+          1586236
+        ],
+        "VmallocUsed": [
+          21116,
+          21116
+        ],
+        "Shmem": [
+          232668,
+          226872
+        ]
+      },
+      "vmstat_delta": {
+        "oom_kill": 0,
+        "pgfault": 6387444,
+        "pgmajfault": 0,
+        "pgscan_anon": 0,
+        "pgscan_direct": 0,
+        "pgscan_direct_throttle": 0,
+        "pgscan_file": 0,
+        "pgscan_khugepaged": 0,
+        "pgscan_kswapd": 0,
+        "pgsteal_anon": 0,
+        "pgsteal_direct": 0,
+        "pgsteal_file": 0,
+        "pgsteal_khugepaged": 0,
+        "pgsteal_kswapd": 0,
+        "pswpin": 0,
+        "pswpout": 0
+      }
+    },
+    "tos": {
+      "all": {
+        "n": 10,
+        "mean_s": 30.7211,
+        "median_s": 30.700499999999998,
+        "median_throughput": 58.63096692236283,
+        "cv": 0.004089729170078511,
+        "estimated_uncapped_blocks": 9,
+        "budget": 10,
+        "kernel_fraction": 0.01392185502723042
+      },
+      "clean": {
+        "n": 9,
+        "mean_s": 30.717111111111112,
+        "median_s": 30.644,
+        "median_throughput": 58.739068006787626,
+        "cv": 0.004316456326775953,
+        "estimated_uncapped_blocks": 9,
+        "budget": null,
+        "kernel_fraction": 0.013938659196046465
+      },
+      "timed_tags": {
+        "clean": 9,
+        "telemetry_anomaly": 1
+      },
+      "timed_incidents": {
+        "time-09": {
+          "classification": "telemetry_anomaly",
+          "anomalies": [
+            "temperature /sys/class/thermal/thermal_zone0/temp"
+          ],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 173555.75,
+          "end": 173587.53,
+          "start_temp_c": 59.4,
+          "max_window_temp_c": 64.27
+        }
+      },
+      "warm_and_timed_tags": {
+        "clean": 12,
+        "telemetry_anomaly": 1
+      },
+      "timed_start_range_c": [
+        58.913,
+        59.887
+      ],
+      "max_timed_temp_c": 64.27,
+      "timed_any_over_60": 10,
+      "gate_wait": {
+        "min_s": 9.55,
+        "max_s": 9.59,
+        "median_s": 9.58,
+        "waits_over_zero": 14,
+        "entry_temp_mC_minmax": [
+          57939,
+          58913
+        ]
+      },
+      "record": {
+        "modes": {
+          "K": 13582,
+          "U": 83607
+        },
+        "by_task": [
+          [
+            "qtdemux0:sink",
+            45407
+          ],
+          [
+            "enlightenment",
+            45131
+          ],
+          [
+            "bash",
+            2241
+          ],
+          [
+            "gst-plugin-scan",
+            745
+          ],
+          [
+            "io.flutter.rast",
+            621
+          ],
+          [
+            "swapper",
+            496
+          ],
+          [
+            "cat",
+            449
+          ],
+          [
+            "dlogsend",
+            366
+          ],
+          [
+            "awk",
+            280
+          ],
+          [
+            "sleep",
+            159
+          ],
+          [
+            "gst-launch-1.0",
+            120
+          ],
+          [
+            "dlog_logger",
+            58
+          ],
+          [
+            "ANRMonitor+",
+            47
+          ],
+          [
+            "chmod",
+            42
+          ],
+          [
+            "perf",
+            38
+          ],
+          [
+            "sh",
+            32
+          ],
+          [
+            "io.flutter.ui",
+            31
+          ],
+          [
+            "buxton2d",
+            30
+          ],
+          [
+            "sdbd",
+            29
+          ],
+          [
+            "pass",
+            23
+          ]
+        ],
+        "kernel_tasks": [
+          [
+            "enlightenment",
+            8163
+          ],
+          [
+            "bash",
+            1875
+          ],
+          [
+            "io.flutter.rast",
+            528
+          ],
+          [
+            "swapper",
+            496
+          ],
+          [
+            "cat",
+            390
+          ],
+          [
+            "dlogsend",
+            286
+          ],
+          [
+            "qtdemux0:sink",
+            239
+          ],
+          [
+            "gst-plugin-scan",
+            230
+          ],
+          [
+            "awk",
+            223
+          ],
+          [
+            "sleep",
+            131
+          ],
+          [
+            "gst-launch-1.0",
+            63
+          ],
+          [
+            "dlog_logger",
+            36
+          ],
+          [
+            "chmod",
+            36
+          ],
+          [
+            "perf",
+            35
+          ],
+          [
+            "ANRMonitor+",
+            33
+          ],
+          [
+            "sh",
+            28
+          ],
+          [
+            "sdbd",
+            24
+          ],
+          [
+            ":4339",
+            16
+          ],
+          [
+            "kworker/u19:0-k",
+            16
+          ],
+          [
+            "kworker/u16:3-v",
+            14
+          ]
+        ],
+        "cpu_modes": {
+          "000": {
+            "K": 3657,
+            "U": 2549
+          },
+          "003": {
+            "K": 588,
+            "U": 45771
+          },
+          "002": {
+            "U": 34972,
+            "K": 7892
+          },
+          "001": {
+            "K": 1445,
+            "U": 315
+          }
+        },
+        "periods": {
+          "1000003": 97189
+        },
+        "core_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 1513,
+            "fraction_of_kernel": 0.11139743778530407
+          },
+          {
+            "name": "vector_swi",
+            "samples": 1142,
+            "fraction_of_kernel": 0.08408187306729495
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1109,
+            "fraction_of_kernel": 0.08165218671771463
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 697,
+            "fraction_of_kernel": 0.05131792077749963
+          },
+          {
+            "name": "__fget_files",
+            "samples": 498,
+            "fraction_of_kernel": 0.03666617582093948
+          },
+          {
+            "name": "fput",
+            "samples": 417,
+            "fraction_of_kernel": 0.03070240023560595
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 339,
+            "fraction_of_kernel": 0.024959505227506996
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 316,
+            "fraction_of_kernel": 0.023266087468708584
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 251,
+            "fraction_of_kernel": 0.018480341628626124
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 234,
+            "fraction_of_kernel": 0.017228685024296864
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 226,
+            "fraction_of_kernel": 0.01663967015167133
+          },
+          {
+            "name": "do_page_fault",
+            "samples": 211,
+            "fraction_of_kernel": 0.015535267265498453
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 211,
+            "fraction_of_kernel": 0.015535267265498453
+          },
+          {
+            "name": "ktime_get_coarse_real_ts64",
+            "samples": 208,
+            "fraction_of_kernel": 0.01531438668826388
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 193,
+            "fraction_of_kernel": 0.014209983802091002
+          },
+          {
+            "name": "__ep_eventpoll_poll",
+            "samples": 187,
+            "fraction_of_kernel": 0.013768222647621852
+          },
+          {
+            "name": "signalfd_poll",
+            "samples": 185,
+            "fraction_of_kernel": 0.013620968929465469
+          },
+          {
+            "name": "ep_done_scan",
+            "samples": 172,
+            "fraction_of_kernel": 0.012663819761448977
+          },
+          {
+            "name": "fdget",
+            "samples": 172,
+            "fraction_of_kernel": 0.012663819761448977
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 167,
+            "fraction_of_kernel": 0.012295685466058017
+          },
+          {
+            "name": "finish_task_switch",
+            "samples": 159,
+            "fraction_of_kernel": 0.011706670593432484
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 158,
+            "fraction_of_kernel": 0.011633043734354292
+          },
+          {
+            "name": "__audit_syscall_entry",
+            "samples": 143,
+            "fraction_of_kernel": 0.010528640848181416
+          },
+          {
+            "name": "vfs_write",
+            "samples": 130,
+            "fraction_of_kernel": 0.009571491680164924
+          },
+          {
+            "name": "arm_copy_to_user",
+            "samples": 121,
+            "fraction_of_kernel": 0.008908849948461198
+          },
+          {
+            "name": "vfs_read",
+            "samples": 121,
+            "fraction_of_kernel": 0.008908849948461198
+          },
+          {
+            "name": "mod_objcg_state",
+            "samples": 110,
+            "fraction_of_kernel": 0.00809895449860109
+          },
+          {
+            "name": "pipe_poll",
+            "samples": 102,
+            "fraction_of_kernel": 0.007509939625975556
+          },
+          {
+            "name": "_raw_spin_lock_irqsave",
+            "samples": 88,
+            "fraction_of_kernel": 0.0064791635988808716
+          },
+          {
+            "name": "copy_page",
+            "samples": 86,
+            "fraction_of_kernel": 0.006331909880724488
+          }
+        ],
+        "full_top30": [
+          {
+            "name": "_raw_spin_unlock_irqrestore",
+            "samples": 1513,
+            "fraction_of_kernel": 0.11139743778530407
+          },
+          {
+            "name": "vector_swi",
+            "samples": 1142,
+            "fraction_of_kernel": 0.08408187306729495
+          },
+          {
+            "name": "do_sys_poll",
+            "samples": 1109,
+            "fraction_of_kernel": 0.08165218671771463
+          },
+          {
+            "name": "eventfd_write",
+            "samples": 697,
+            "fraction_of_kernel": 0.05131792077749963
+          },
+          {
+            "name": "__fget_files",
+            "samples": 498,
+            "fraction_of_kernel": 0.03666617582093948
+          },
+          {
+            "name": "fput",
+            "samples": 417,
+            "fraction_of_kernel": 0.03070240023560595
+          },
+          {
+            "name": "eventfd_read",
+            "samples": 339,
+            "fraction_of_kernel": 0.024959505227506996
+          },
+          {
+            "name": "arch_local_irq_enable",
+            "samples": 316,
+            "fraction_of_kernel": 0.023266087468708584
+          },
+          {
+            "name": "kunmap_local_indexed",
+            "samples": 251,
+            "fraction_of_kernel": 0.018480341628626124
+          },
+          {
+            "name": "__memset / memset / mmioset",
+            "samples": 234,
+            "fraction_of_kernel": 0.017228685024296864
+          },
+          {
+            "name": "__kmap_local_pfn_prot",
+            "samples": 226,
+            "fraction_of_kernel": 0.01663967015167133
+          },
+          {
+            "name": "do_page_fault",
+            "samples": 211,
+            "fraction_of_kernel": 0.015535267265498453
+          },
+          {
+            "name": "arm_copy_from_user",
+            "samples": 211,
+            "fraction_of_kernel": 0.015535267265498453
+          },
+          {
+            "name": "ktime_get_coarse_real_ts64",
+            "samples": 208,
+            "fraction_of_kernel": 0.01531438668826388
+          },
+          {
+            "name": "handle_mm_fault",
+            "samples": 193,
+            "fraction_of_kernel": 0.014209983802091002
+          },
+          {
+            "name": "__ep_eventpoll_poll",
+            "samples": 187,
+            "fraction_of_kernel": 0.013768222647621852
+          },
+          {
+            "name": "signalfd_poll",
+            "samples": 185,
+            "fraction_of_kernel": 0.013620968929465469
+          },
+          {
+            "name": "ep_done_scan",
+            "samples": 172,
+            "fraction_of_kernel": 0.012663819761448977
+          },
+          {
+            "name": "fdget",
+            "samples": 172,
+            "fraction_of_kernel": 0.012663819761448977
+          },
+          {
+            "name": "percpu_counter_add_batch",
+            "samples": 167,
+            "fraction_of_kernel": 0.012295685466058017
+          },
+          {
+            "name": "finish_task_switch",
+            "samples": 159,
+            "fraction_of_kernel": 0.011706670593432484
+          },
+          {
+            "name": "__copy_from_user_std",
+            "samples": 158,
+            "fraction_of_kernel": 0.011633043734354292
+          },
+          {
+            "name": "__audit_syscall_entry",
+            "samples": 143,
+            "fraction_of_kernel": 0.010528640848181416
+          },
+          {
+            "name": "vfs_write",
+            "samples": 130,
+            "fraction_of_kernel": 0.009571491680164924
+          },
+          {
+            "name": "arm_copy_to_user",
+            "samples": 121,
+            "fraction_of_kernel": 0.008908849948461198
+          },
+          {
+            "name": "vfs_read",
+            "samples": 121,
+            "fraction_of_kernel": 0.008908849948461198
+          },
+          {
+            "name": "mod_objcg_state",
+            "samples": 110,
+            "fraction_of_kernel": 0.00809895449860109
+          },
+          {
+            "name": "pipe_poll",
+            "samples": 102,
+            "fraction_of_kernel": 0.007509939625975556
+          },
+          {
+            "name": "_raw_spin_lock_irqsave",
+            "samples": 88,
+            "fraction_of_kernel": 0.0064791635988808716
+          },
+          {
+            "name": "copy_page",
+            "samples": 86,
+            "fraction_of_kernel": 0.006331909880724488
+          }
+        ],
+        "modules": [
+          {
+            "name": "kdbus",
+            "samples": 5,
+            "fraction_of_kernel": 0.0003681342953909586
+          },
+          {
+            "name": "proc_tsm",
+            "samples": 4,
+            "fraction_of_kernel": 0.0002945074363127669
+          }
+        ],
+        "unresolved": [],
+        "telemetry": {
+          "classification": "clean",
+          "anomalies": [],
+          "missing": [],
+          "throttle_history": "unknown",
+          "start": 173653.51,
+          "end": 173687.83,
+          "start_temp_c": 58.913,
+          "max_window_temp_c": 63.296
+        },
+        "stable_modules": [
+          "brcmfmac",
+          "brcmutil",
+          "btbcm",
+          "dm_bow",
+          "extcon_usb_fixed",
+          "hci_uart",
+          "inform_reboot",
+          "kdbus",
+          "logger",
+          "proc_tsm"
+        ],
+        "wall": 33.298
+      },
+      "record_window_s": 34.31999999997788,
+      "cycles_running_pct_minmax": [
+        100.0,
+        100.0
+      ],
+      "meminfo": {
+        "MemAvailable": [
+          3340372,
+          3358280
+        ],
+        "Slab": [
+          58856,
+          59808
+        ],
+        "SUnreclaim": [
+          41888,
+          42076
+        ],
+        "SwapFree": [
+          1586236,
+          1586236
+        ],
+        "VmallocUsed": [
+          21172,
+          21092
+        ],
+        "Shmem": [
+          226872,
+          232916
+        ]
+      },
+      "vmstat_delta": {
+        "oom_kill": 0,
+        "pgfault": 4522521,
+        "pgmajfault": 1,
+        "pgscan_anon": 0,
+        "pgscan_direct": 0,
+        "pgscan_direct_throttle": 0,
+        "pgscan_file": 0,
+        "pgscan_khugepaged": 0,
+        "pgscan_kswapd": 0,
+        "pgsteal_anon": 0,
+        "pgsteal_direct": 0,
+        "pgsteal_file": 0,
+        "pgsteal_khugepaged": 0,
+        "pgsteal_kswapd": 0,
+        "pswpin": 0,
+        "pswpout": 0
+      }
+    }
+  },
+  "files": {
+    "board-bundle.tar": {
+      "bytes": 103347200,
+      "sha256": "1f5db61f7c55dcf9762019f8c2e5c8ee3e3f4019d773414e92ec5f7b0ec2561d"
+    },
+    "board/analysis.json": {
+      "bytes": 262227,
+      "sha256": "19960447da87007dce70162b5bbb46759770c8e47507cdc2d7349d2593e70f97"
+    },
+    "summary.json": {
+      "bytes": 121080,
+      "sha256": "98fd11e1b2d797309a2f44f0f0e317da4ce7085aed53299f17d226282fc2a8b8"
+    },
+    "cooling-summary.json": {
+      "bytes": 454460,
+      "sha256": "477c146a31ee8731fd1f4b7c2f4625f2845c4cb3b14c5d342ca09a9bb79fc846"
+    },
+    "identity-compare.json": {
+      "bytes": 33265,
+      "sha256": "2b7383d8188d68df9bd0d4c1d7cd08fb68fb91180fe750566f703029cc2a3800"
+    },
+    "historical-kernel-note.json": {
+      "bytes": 285,
+      "sha256": "29a5308f887163f70ee8349b22631dfe9bac6f8713cf3616815026f2864435e1"
+    },
+    "historical-image-identity.jsonl": {
+      "bytes": 521,
+      "sha256": "851ce2e2999c2875e8ecf4bb517410e8f65f051d0e6bab9f7ebe772c7965d608"
+    },
+    "setup-dd-rejection.txt": {
+      "bytes": 1209,
+      "sha256": "1d648300565b337fd0f1c52b9f8d58bb5b9ffaca3f9bb6f69fcd8bed6a084a47"
+    },
+    "attached-idle-awk-first.txt": {
+      "bytes": 15,
+      "sha256": "dffcb05cd05238a555f24fa1e363f9d4cfaabca1aa2be1701fa29faeb853ef77"
+    },
+    "attached-first-suite.txt": {
+      "bytes": 15,
+      "sha256": "dffcb05cd05238a555f24fa1e363f9d4cfaabca1aa2be1701fa29faeb853ef77"
+    },
+    "tos-record-prep.txt": {
+      "bytes": 112,
+      "sha256": "0ba19296e856cba0786f6cf4625c782a29c923a50cf51b4c0095e8355291d205"
+    },
+    "attached-run.txt": {
+      "bytes": 15,
+      "sha256": "ec95fa2828c7430f27ae518d247323c4f1a8f71b70ac36105e626e21a4edeb30"
+    },
+    "cleanup-root-check.txt": {
+      "bytes": 178,
+      "sha256": "6a7cf34c653671e2b0c84fc4b30dfbeda4f8e50d2db15a303cc2391900a9bf1d"
+    },
+    "final-unprivileged.txt": {
+      "bytes": 565,
+      "sha256": "a4238edd76d5f2f75da80d02e99d4d47736210937fc0f5056a0158392f1d3b46"
+    },
+    "board/idle/cooling.tsv": {
+      "bytes": 62033,
+      "sha256": "29207d86ec2e1baf4bc7e32831255c3029694ecbf30f1f1baeef879c2e3c8e90"
+    },
+    "board/governor-switches.tsv": {
+      "bytes": 132213,
+      "sha256": "b85302a088ae486c92da29b2f0a5006521b46b700795cbfbe8ab1e96647b0e69"
+    },
+    "board/END": {
+      "bytes": 24,
+      "sha256": "0f03a0d52ba3edae5abd83d68bbf07d2c08c60076de8dd0b52fc850e6402d034"
+    },
+    "board/source-identity/boot-sha.txt": {
+      "bytes": 38720,
+      "sha256": "06969a76a1f9f4050e06b69697fd2ae09a6e0721e3e66df30faecbdfc587e1db"
+    },
+    "board/source-identity/modules-sha.txt": {
+      "bytes": 7459,
+      "sha256": "a071c722ac97102fce7a6153c6557db8488a07a30983509998aa137973c53b85"
+    },
+    "board/source-identity/running.notes": {
+      "bytes": 84,
+      "sha256": "146a4e2d870f3f65fdc6c6f9ca738e3cabcb83bbf4dc6f96bbcdd18c6776ab35"
+    },
+    "board/source-identity/boot.zImage": {
+      "bytes": 14905760,
+      "sha256": "d5345f13eada3a3aab8b2fca9f511c608469f708d83a6a2445882e68241cc9af"
+    },
+    "board/source-identity/runtime.txt": {
+      "bytes": 2312,
+      "sha256": "a9eb51e8d56023600e69bb36bd8da494402bebd84dc1c2e06c4c26f8979738ca"
+    },
+    "runner-first.sh": {
+      "bytes": 6424,
+      "sha256": "0b6ce344b7794e0ad2fb35d8aee665f1358331728d750d48b799256a6735eee7"
+    },
+    "runner.sh": {
+      "bytes": 6546,
+      "sha256": "3c8d652e8f9b51dcffc0bf2a9eafefc50f10f60c57010d5ed142335ca122dc31"
+    },
+    "diagnostic.sh": {
+      "bytes": 2807,
+      "sha256": "8d618eeccd17b826c6be3eb551d56fbe01ca9130fda9bf1fa1b175bcaf6b6560"
+    },
+    "record-loop-first.sh": {
+      "bytes": 151,
+      "sha256": "05bfc2ea01dbe802527a5f53232430ed22422a169f0343b669ac5e9b19aa2609"
+    },
+    "record-loop.sh": {
+      "bytes": 249,
+      "sha256": "4688e2aeab48f2dd39008e92c89cf47ea9421ff142d64385a702231484eeda20"
+    },
+    "workload.sh": {
+      "bytes": 962,
+      "sha256": "ecc4cb3433c36df620c17ac603a484208f95cc42bb13b9bb4d9d9a2c347f0816"
+    },
+    "memory.c": {
+      "bytes": 2023,
+      "sha256": "533e3897e271fbdff22e1ea4cf76f0a9348cf69e9b1432c870300b8a0bc94aaf"
+    },
+    "memory-worker": {
+      "bytes": 9696,
+      "sha256": "1e25781ff47592da71fba2ab2a23b485cbfa08d309152df8cef4444985bef321"
+    },
+    "analyze.py": {
+      "bytes": 8938,
+      "sha256": "c7b1d2e3917875bcba91678b55696d48464b3ffdc3bcfdbe11815b1e91e0f160"
+    },
+    "cooling-analysis.py": {
+      "bytes": 2894,
+      "sha256": "a34f730bee74badaf79d142c1874884affbafdb2071f9604f3b326bbb3c43487"
+    },
+    "compare-identity.py": {
+      "bytes": 3654,
+      "sha256": "a912c1b8bc14d5cbf7d19d5098cb270d5cca5ebefb01db112ba2d7b0e34a5118"
+    },
+    "board/pipe/record/perf.data": {
+      "bytes": 6775380,
+      "sha256": "c55967eb1244ea722adb2d904d04bdd6e867be4e9740cca08e444e04c78fec27"
+    },
+    "board/pipe/record/kallsyms.before": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/pipe/record/kallsyms.after": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/pipe/record/modules.before": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/pipe/record/modules.after": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/pipe/record/evlist.txt": {
+      "bytes": 585,
+      "sha256": "d549ddf1230c108776aeb2492f7ec208373c1c07b011fb04bbadcb83be978b18"
+    },
+    "board/pipe/record/buildids.txt": {
+      "bytes": 4374,
+      "sha256": "5203601f18bdb6ad881fd2a9b37888f45d8553ac0d7e946706b6d3d1b4febe7c"
+    },
+    "board/pipe/record/samples-ip.txt": {
+      "bytes": 8927100,
+      "sha256": "c0375dae975d850bc795547f80c120977ad06d880177e5d77ba495462b081238"
+    },
+    "board/pipe/record/event-stats.txt": {
+      "bytes": 652,
+      "sha256": "d7948e5ff925032fee0ff7d0d66d601037f2d0a80983f6745bcba0038c82cb05"
+    },
+    "board/syscall/record/perf.data": {
+      "bytes": 7863380,
+      "sha256": "25d5e4bd8cd1dc0dc7de5e4a62ab13709c77bfcb630bfa9338a65aa118a14343"
+    },
+    "board/syscall/record/kallsyms.before": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/syscall/record/kallsyms.after": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/syscall/record/modules.before": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/syscall/record/modules.after": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/syscall/record/evlist.txt": {
+      "bytes": 585,
+      "sha256": "d549ddf1230c108776aeb2492f7ec208373c1c07b011fb04bbadcb83be978b18"
+    },
+    "board/syscall/record/buildids.txt": {
+      "bytes": 4062,
+      "sha256": "b006b6cbb32465620cdd10634450e0e643860b8c2117df26ab8a87a51cb29c7b"
+    },
+    "board/syscall/record/samples-ip.txt": {
+      "bytes": 10471425,
+      "sha256": "834bd8066aa538bd0b82a35f611c70d2283ed60f68efd57d0d18ed9b28d3551c"
+    },
+    "board/syscall/record/event-stats.txt": {
+      "bytes": 652,
+      "sha256": "0be41ec1f720f683f36f48e08ac55b7a9c20f94fb2f9933b6dd407d01bc403b5"
+    },
+    "board/tmpfs/record/perf.data": {
+      "bytes": 7350004,
+      "sha256": "a04e19c0c9b26325ba7302ff38c7a0c6b8fe5f67d0645763ba98fc390d4c714b"
+    },
+    "board/tmpfs/record/kallsyms.before": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/tmpfs/record/kallsyms.after": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/tmpfs/record/modules.before": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/tmpfs/record/modules.after": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/tmpfs/record/evlist.txt": {
+      "bytes": 585,
+      "sha256": "d549ddf1230c108776aeb2492f7ec208373c1c07b011fb04bbadcb83be978b18"
+    },
+    "board/tmpfs/record/buildids.txt": {
+      "bytes": 4697,
+      "sha256": "9813be09aadad344fd405d8fb3286d80e86e602b0de5f4f2c64ac72086144b4d"
+    },
+    "board/tmpfs/record/samples-ip.txt": {
+      "bytes": 9182700,
+      "sha256": "75d38651cf2679e892b2d63de248d2a3e27b6048216c797290a1959e9932ac72"
+    },
+    "board/tmpfs/record/event-stats.txt": {
+      "bytes": 652,
+      "sha256": "9727a879084fb9d77b6edcdc4994825104c6c8bc2b97e379f5b9d3396d44fc5d"
+    },
+    "board/memory/record/perf.data": {
+      "bytes": 6409084,
+      "sha256": "300dbeb3c9b6e7ba89d0504763d1a55d28a229abb25f9874b473e61a6737e62f"
+    },
+    "board/memory/record/kallsyms.before": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/memory/record/kallsyms.after": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/memory/record/modules.before": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/memory/record/modules.after": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/memory/record/evlist.txt": {
+      "bytes": 585,
+      "sha256": "d549ddf1230c108776aeb2492f7ec208373c1c07b011fb04bbadcb83be978b18"
+    },
+    "board/memory/record/buildids.txt": {
+      "bytes": 4640,
+      "sha256": "46b0e406194041fcebec5da882a34d05dcbeb5971fee837068c9e208e87ae05e"
+    },
+    "board/memory/record/samples-ip.txt": {
+      "bytes": 8223300,
+      "sha256": "745eeb9cd834f133d1408ed3e6e6796cd7c68ffd8bfb07a97497da41773b95a8"
+    },
+    "board/memory/record/event-stats.txt": {
+      "bytes": 652,
+      "sha256": "dbd304e375027f0c58d434e2a8c938ce3ffe1de84c2ecf0e3507aee8ec92428a"
+    },
+    "board/tos/record/perf.data": {
+      "bytes": 5704500,
+      "sha256": "d489798f22ce19c7a5623109a1a23a8c06482ed023c5b55d01e451ad7a56662e"
+    },
+    "board/tos/record/kallsyms.before": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/tos/record/kallsyms.after": {
+      "bytes": 4771544,
+      "sha256": "4e9d56ad81d2347ee05c2ba1bcd77e8d64d0ce2e3789a03e173d9ea7d7fc08c1"
+    },
+    "board/tos/record/modules.before": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/tos/record/modules.after": {
+      "bytes": 397,
+      "sha256": "362c0a1dd9cfa3a8d3e50a24c055732186560186fd2b535d1740c2272e82c6a1"
+    },
+    "board/tos/record/evlist.txt": {
+      "bytes": 585,
+      "sha256": "d549ddf1230c108776aeb2492f7ec208373c1c07b011fb04bbadcb83be978b18"
+    },
+    "board/tos/record/buildids.txt": {
+      "bytes": 5352,
+      "sha256": "ffb9a3cc77d41bba869ed27fca2f759ed96a5cc6cf33ef9d72798be66e63ed1f"
+    },
+    "board/tos/record/samples-ip.txt": {
+      "bytes": 7289175,
+      "sha256": "63dee9eddf026954a2deec4d81ba6a015606f78f83f05d4a94f47473fa5e4aa0"
+    },
+    "board/tos/record/event-stats.txt": {
+      "bytes": 652,
+      "sha256": "87fbf570d8d6ad1a0b1d2f9057561a0c40bb3d029d22e9b276b4595b3ca4eb73"
+    }
+  }
+}

@@ -48,6 +48,7 @@
 - K0 只读源码评估完成：[可行性评估](kernel/autofdo/00_feasibility.md)与[基于 K 的回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已补齐。`0fac5de6` 增量 fetch 首次成功、重试 0 次；K=B+2（force_reclaim 修正、PMUv3），K/C 分叉。37 项独立/29 项累计检查，累计 18 干净、11 失败（其中 2 项已有等价修复）；冲突未手工解决。结论仍 conditional go（ARM32/A32、非 LTO/MFS），旧样本 build-id 未配对；未构建、未接板。首轮 SSH 失败记录保留。
 - 用户本轮告知 M1 已完成；K1a BASE 主机构建完成：[构建、身份与刷写/回滚方案](kernel/autofdo/03_k1a_base_kernel_build.md)。K=`0fac5de6`，spec/defconfig 未改；固定 Base `20261030.120529` + Unified `20261104.125239`，130 个依赖 RPM SHA 已冻结。最终尝试 04 GBS=0、4047.18 秒，峰值 5,372,125,184 B；-j2、6G/5G、200%、nice19/idle 与 16GiB 启动门槛保留，前序中止/失败原件保留且遗留挂载已清理。15 个二进制 RPM + 1 SRPM，普通版 PMUv3=y、Thumb2=n、DWARF4=y；原始 vmlinux/zImage build-id `25599043a52ba8e5edf2f7bf4e9bb51aaf9d65a3`。RPM devel/debug ID 被标准后处理重算为 `f2a8fd67…`，后续 profile 必须使用归档原始 vmlinux；两套共 104 个模块 ID 核对通过。未接板/刷写，部署与回滚方案待用户另行确认。
 - K1a 现有内核基线在首轮 58°C 门禁阻塞，600 秒内最低 58.426°C，五项基准均未起跑。已核 RPi4 build-id `395733b9c917cb98309b39cc3ec379c03ac36b3f`、硬件 cycles、初末空闲内存及主机尺寸参照。板上 `/proc/config.gz` 缺失，配置全量差异未知。已复核恢复 uid5001、schedutil、kptr_restrict=0，boot_id 一致。BASE 部署仍待后续授权。[基线报告与证据](kernel/autofdo/04_k1a_baseline.md)
+- K1a 60°C 重试完成，五项各 3 预热 + 10 计时 + 1 system-wide 采样，50 个计时轮中 18 个起跑温度标记原样保留。powersave 门禁全部通过，最长采样等待 9.59 秒。内核周期 pipe 97.67%、syscall 87.24%、tmpfs 99.39%、内存触页 97.91%、ToS 1.39%。优先验证 pipe/内存触页，tmpfs 为第三候选。启动镜像与运行 notes 匹配，确认非历史 c27f160d。原 governor、SDB uid5001、kptr_restrict=0 已核验，未刷写、未重启、未生成 profile。[重试报告](kernel/autofdo/04_k1a_baseline.md#重试60c-起跑与轮间-powersave)
 
 ## Workflow M1：attempt-11自动化端到端验收完成（2026-11-17任务）
 
