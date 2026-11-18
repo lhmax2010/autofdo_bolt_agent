@@ -1,0 +1,75 @@
+From 7fffbec570692c925cbf1f58ea9b1cd1a5d78ac8 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Wed, 18 Nov 2026 06:16:35 -0800
+Subject: [PATCH 7/7] ARM: configs: enable Tizen RPi4 AutoFDO training
+
+Enable AutoFDO in the existing BCM2711 defconfig merged by the spec
+for the regular and RT builds. Keep CONFIG_LOCALVERSION and the
+existing target-specific localversion file as the release prefix.
+
+Allow an optional kernel_localversion RPM macro to set LOCALVERSION
+in both spec phases and extend the modules package paths. The old
+paths end in -v7l or -v8 and would miss modules with a build suffix.
+Use -kbase for the training build so its modules can coexist with
+the original release. An unset macro preserves the existing paths.
+
+Signed-off-by: Hao Lin <hao.lin@samsung.com>
+---
+ arch/arm/configs/tizen_bcm2711_defconfig |  1 +
+ packaging/linux-rpi.spec                 | 10 ++++++----
+ 2 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/configs/tizen_bcm2711_defconfig b/arch/arm/configs/tizen_bcm2711_defconfig
+index e8bb00b4a8b3..4545075fd962 100644
+--- a/arch/arm/configs/tizen_bcm2711_defconfig
++++ b/arch/arm/configs/tizen_bcm2711_defconfig
+@@ -1,4 +1,5 @@
+ CONFIG_LOCALVERSION="-v7l"
++CONFIG_AUTOFDO_CLANG=y
+ # CONFIG_LOCALVERSION_AUTO is not set
+ CONFIG_SYSVIPC=y
+ CONFIG_POSIX_MQUEUE=y
+diff --git a/packaging/linux-rpi.spec b/packaging/linux-rpi.spec
+index 7002e2296e0b..8b14be76d64f 100644
+--- a/packaging/linux-rpi.spec
++++ b/packaging/linux-rpi.spec
+@@ -159,6 +159,7 @@ for building and running eBPF-based monitoring and instrumentation.
+ cp %{SOURCE1001} .
+ 
+ %build
++%{?kernel_localversion:export LOCALVERSION="%{kernel_localversion}"}
+ %{?asan:/usr/bin/gcc-unforce-options}
+ %{?ubsan:/usr/bin/gcc-unforce-options}
+ 
+@@ -229,6 +230,7 @@ for target in %{variant} %{variant}-rt; do
+ done
+ 
+ %install
++%{?kernel_localversion:export LOCALVERSION="%{kernel_localversion}"}
+ QA_SKIP_BUILD_ROOT="DO_NOT_WANT"; export QA_SKIP_BUILD_ROOT
+ 
+ %{?_toolchain:
+@@ -350,16 +352,16 @@ mv /boot/zImage /boot/zImage_rt
+ 
+ %files -n %{variant}-linux-kernel-modules
+ %ifarch aarch64
+-/lib/modules/*%{variant}-v8/
++/lib/modules/*%{variant}-v8%{?kernel_localversion}/
+ %else
+-/lib/modules/*%{variant}-v7l/
++/lib/modules/*%{variant}-v7l%{?kernel_localversion}/
+ %endif
+ 
+ %files -n %{variant}-rt-linux-kernel-modules
+ %ifarch aarch64
+-/lib/modules/*%{variant}-rt-v8/
++/lib/modules/*%{variant}-rt-v8%{?kernel_localversion}/
+ %else
+-/lib/modules/*%{variant}-rt-v7l/
++/lib/modules/*%{variant}-rt-v7l%{?kernel_localversion}/
+ %endif
+ 
+ %files -n %{variant}-linux-kernel-devel
+-- 
+2.43.0
+

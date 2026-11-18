@@ -1,0 +1,91 @@
+From e23625e56c230c228569dced8210bf0ef461ac62 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Wed, 18 Nov 2026 06:16:35 -0800
+Subject: [PATCH 6/7] ARM: enable Clang AutoFDO without function splitting
+
+Select the 6.13 architecture capability. Clang 22 supports ARM
+sample-profile use but rejects machine function splitting for ARM.
+Keep the compiler and ThinLTO linker MFS options specific to x86,
+the existing supported architecture in this backport, and only use
+them with a profile.
+
+Keep global function sections off for ARM. The existing explicit
+hot and unlikely patterns place profiled sections in the main text
+output. Restrict AutoFDO's general TEXT_MAIN wildcard to x86 so
+it does not claim normal ARM special sections prematurely.
+
+The five upstream patches apply without textual conflicts. These
+changes adapt their compiler and linker behavior for ARM32.
+
+Signed-off-by: Hao Lin <hao.lin@samsung.com>
+---
+ arch/arm/Kconfig                  |  1 +
+ include/asm-generic/vmlinux.lds.h |  6 +++---
+ scripts/Makefile.autofdo          | 10 +++++++---
+ 3 files changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 5d73cbfc9e25..5930c6c464e8 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -37,6 +37,7 @@ config ARM
+ 	select ARCH_OPTIONAL_KERNEL_RWX_DEFAULT if CPU_V7
+ 	select ARCH_NEED_CMPXCHG_1_EMU if CPU_V6
+ 	select ARCH_SUPPORTS_ATOMIC_RMW
++	select ARCH_SUPPORTS_AUTOFDO_CLANG
+ 	select ARCH_SUPPORTS_CFI_CLANG
+ 	select ARCH_SUPPORTS_HUGETLBFS if ARM_LPAE
+ 	select ARCH_SUPPORTS_PER_VMA_LOCK
+diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+index dd8006ae6122..a2c7b0a241a9 100644
+--- a/include/asm-generic/vmlinux.lds.h
++++ b/include/asm-generic/vmlinux.lds.h
+@@ -95,14 +95,14 @@
+  * With LTO_CLANG, the linker also splits sections by default, so we need
+  * these macros to combine the sections during the final link.
+  *
+- * With AUTOFDO_CLANG, by default, the linker splits text sections and
+- * regroups functions into subsections.
++ * x86 AutoFDO enables function sections. ARM AutoFDO uses the explicit
++ * hot and unlikely input section patterns in TEXT_TEXT.
+  *
+  * RODATA_MAIN is not used because existing code already defines .rodata.x
+  * sections to be brought in with rodata.
+  */
+ #if defined(CONFIG_LD_DEAD_CODE_DATA_ELIMINATION) || defined(CONFIG_LTO_CLANG) || \
+-defined(CONFIG_AUTOFDO_CLANG)
++    (defined(CONFIG_AUTOFDO_CLANG) && defined(CONFIG_X86))
+ #define TEXT_MAIN .text .text.[0-9a-zA-Z_]*
+ #else
+ #define TEXT_MAIN .text
+diff --git a/scripts/Makefile.autofdo b/scripts/Makefile.autofdo
+index 1caf2457e585..aab2125b3de9 100644
+--- a/scripts/Makefile.autofdo
++++ b/scripts/Makefile.autofdo
+@@ -9,16 +9,20 @@ ifndef CONFIG_DEBUG_INFO
+ endif
+ 
+ ifdef CLANG_AUTOFDO_PROFILE
+-  CFLAGS_AUTOFDO_CLANG += -fprofile-sample-use=$(CLANG_AUTOFDO_PROFILE) -ffunction-sections
+-  CFLAGS_AUTOFDO_CLANG += -fsplit-machine-functions
++  CFLAGS_AUTOFDO_CLANG += -fprofile-sample-use=$(CLANG_AUTOFDO_PROFILE)
++  ifdef CONFIG_X86
++    CFLAGS_AUTOFDO_CLANG += -ffunction-sections -fsplit-machine-functions
++  endif
+ endif
+ 
+ ifdef CONFIG_LTO_CLANG_THIN
+   ifdef CLANG_AUTOFDO_PROFILE
+     KBUILD_LDFLAGS += --lto-sample-profile=$(CLANG_AUTOFDO_PROFILE)
++    ifdef CONFIG_X86
++      KBUILD_LDFLAGS += -plugin-opt=-split-machine-functions
++    endif
+   endif
+   KBUILD_LDFLAGS += --mllvm=-enable-fs-discriminator=true --mllvm=-improved-fs-discriminator=true -plugin-opt=thinlto
+-  KBUILD_LDFLAGS += -plugin-opt=-split-machine-functions
+ endif
+ 
+ export CFLAGS_AUTOFDO_CLANG
+-- 
+2.43.0
+
