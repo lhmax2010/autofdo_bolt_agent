@@ -1,0 +1,1186 @@
+From 5a541f22082b963a368f065d6150eee0afae4e30 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Wed, 18 Nov 2026 01:48:01 -0800
+Subject: [PATCH 10/10] [llvm-profgen] Support Linux kernel IP sample profiles
+
+Use the perf kernel mmap relocation reference and vmlinux identity to select and translate kernel samples. Reuse DWARF IP attribution and report skipped samples by reason. Exercise ARM and AArch64 with synthetic recordings.
+---
+ llvm/docs/CommandGuide/llvm-profgen.rst       |  49 +++-
+ .../Inputs/ip-mode/check-kernel-ip.py         | 243 ++++++++++++++++++
+ llvm/test/tools/llvm-profgen/ip-kernel.test   |   3 +
+ llvm/test/tools/llvm-profgen/ip-options.test  |   2 +-
+ llvm/tools/llvm-profgen/IPBoundary.cpp        |  31 +++
+ llvm/tools/llvm-profgen/IPBoundary.h          |   3 +
+ llvm/tools/llvm-profgen/IPIdentity.cpp        |  45 +++-
+ llvm/tools/llvm-profgen/IPKernelAddress.h     |  40 +++
+ llvm/tools/llvm-profgen/IPPerfReader.cpp      | 241 +++++++++++++++--
+ llvm/tools/llvm-profgen/IPPerfReader.h        |  16 ++
+ llvm/tools/llvm-profgen/IPQualityReport.cpp   |  27 +-
+ llvm/tools/llvm-profgen/ProfiledBinary.cpp    |   2 +
+ llvm/tools/llvm-profgen/ProfiledBinary.h      |   1 +
+ llvm/tools/llvm-profgen/llvm-profgen.cpp      |   6 +-
+ .../tools/llvm-profgen/CMakeLists.txt         |   1 +
+ .../llvm-profgen/IPKernelAddressTest.cpp      |  44 ++++
+ 16 files changed, 716 insertions(+), 38 deletions(-)
+ create mode 100644 llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py
+ create mode 100644 llvm/test/tools/llvm-profgen/ip-kernel.test
+ create mode 100644 llvm/tools/llvm-profgen/IPKernelAddress.h
+ create mode 100644 llvm/unittests/tools/llvm-profgen/IPKernelAddressTest.cpp
+
+diff --git a/llvm/docs/CommandGuide/llvm-profgen.rst b/llvm/docs/CommandGuide/llvm-profgen.rst
+index 78ade5c0a4a6..9f8109fa5a9a 100644
+--- a/llvm/docs/CommandGuide/llvm-profgen.rst
++++ b/llvm/docs/CommandGuide/llvm-profgen.rst
+@@ -98,8 +98,9 @@ only a final valid hexadecimal ``+0xOFFSET`` is separated. A deleted suffix is
+ part of the path before the offset. MMAP, MMAP2, and LOST records are accepted
+ in that export's form. Unknown records, extra stack fields, malformed numbers,
+ truncated records, and zero sample periods are errors. PID/TID -1 means unknown;
+-values below -1 are invalid. Kernel and module samples are counted but do not
+-produce kernel profiles; special DSOs are classified separately.
++values below -1 are invalid. With the default IP target selection, kernel and
++module samples are counted and excluded; special DSOs are classified
++separately.
+ 
+ ``--perfdata`` is not admitted in IP mode. Export text on the recording system
+ instead; matching perf version numbers alone do not establish cross-host
+@@ -109,6 +110,50 @@ export equivalence. Example conversion::
+     --perf-buildid-list=buildids.txt --ip-aggregation=sum \
+     --format=extbinary --output=workload.prof --quality-report=quality.json
+ 
++Linux kernel IP profiles
++~~~~~~~~~~~~~~~~~~~~~~~~
++
++Pass both ``--ip-samples`` and ``--kernel`` to profile the main Linux kernel
++image. Record on the kernel to be profiled and use the matching, linked
++little-endian ARM32 or AArch64 ``vmlinux`` with its symbol table and DWARF
++(or a matching ``--debug-binary``). Preserve the recording's kernel mmap and
++GNU build ID. For example, with sufficient permissions to read the kernel
++reference symbol and collect system-wide samples::
++
++  perf record -a --buildid-mmap -e cycles -c 1000003 -o perf.data -- ./workload
++  LC_ALL=C perf script -i perf.data --show-mmap-events --show-lost-events -F pid,tid,event,period,ip,dsoff > ip.perfscript
++  perf buildid-list -i perf.data > buildids.txt
++  llvm-profgen --ip-samples --kernel --binary=vmlinux --perfscript=ip.perfscript \
++    --perf-buildid-list=buildids.txt --ip-aggregation=sum \
++    --format=extbinary --output=vmlinux.prof --quality-report=quality.json
++
++The perf kernel mmap must have PID -1 and be named
++``[kernel.kallsyms]_text`` or ``[kernel.kallsyms]_stext``. Its printed
++``pgoff`` is the runtime address of the named reference symbol. The tool uses
++the same symbol in ``vmlinux`` to translate sampled IPs, regardless of the
++mmap's printed permissions (which can be ``---p``). Sample DSOs and
++buildid-list entries can also use the bare ``[kernel.kallsyms]`` name.
++Identity uses the complete GNU build ID from the mmap or buildid-list and
++checks any supplied split debug image. ``--allow-missing-build-id`` retains
++the standard explicit waiver for missing evidence. Known conflicts are
++errors. ``--binary-match-regex`` is unavailable in kernel IP mode.
++
++Use a recording from one boot only. Conflicting kernel mmap ranges or
++relocations are rejected. Two boots of the same image at the same addresses
++cannot be distinguished from the exported text. Without ``--pid``, PID -1
++samples are included. Selecting a PID limits the profile to samples
++attributed to that PID and can omit kernel time in kworkers and IRQ handlers.
++
++The ordinary IP DWARF line and inline attribution uses the translated
++sampled PC, without a return-address decrement. Kernel modules, JIT/BPF
++code and unresolved DSOs are skipped. The report records
++``kernel_mmap`` and ``samples.kernel_ip`` in this mode. The latter includes
++target, module, user, special DSO and unknown-address counts after event
++and PID selection, and unknown-PID counts before the PID filter. It also
++records discarded mapping-symbol data, special executable sections (such as
++exception vectors, startup and exit code), and samples without a CU or usable
++line information. Livepatch or guest kernel attribution is outside this mode.
++
+ IP options
+ ~~~~~~~~~~
+ 
+diff --git a/llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py
+new file mode 100644
+index 000000000000..82be3b8d13b8
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/Inputs/ip-mode/check-kernel-ip.py
+@@ -0,0 +1,243 @@
++"""Exercise the CLI using the checked-in synthetic ARM/AArch64 DWARF ELFs."""
++
++import json
++import re
++import struct
++import subprocess
++import sys
++from pathlib import Path
++
++profgen, objcopy, mc, tmp = sys.argv[1:]
++fixtures = Path(__file__).parent
++work = Path(tmp)
++work.mkdir(exist_ok=True)
++kernel = "[kernel.kallsyms]"
++a64_id = "80ef839e96fd9179728db73ba10c229a2637410c"
++arm_id = "0a930787032acb2d70e7f8317fc57fab6337acba"
++a64 = work / "a64"
++no_dwarf = work / "a64-no-dwarf"
++a32 = work / "arm"
++module = work / "example.ko"
++
++
++def exec_tool(args):
++    return subprocess.run([str(x) for x in args], text=True, capture_output=True)
++
++
++def checked(args):
++    p = exec_tool(args)
++    assert p.returncode == 0, (args, p.stdout, p.stderr)
++
++
++checked(
++    [
++        objcopy,
++        "--add-symbol=_text=.text.first:0,global",
++        "--add-symbol=_stext=.text.first:4,global",
++        fixtures / "a64-multi-load.perfbin",
++        no_dwarf,
++    ]
++)
++# Add a small DWARF4 CU and two line sequences to the synthetic two-load
++# ELF. The first subprogram covers both instructions but only the first has a
++# line; a valid sample at 0x10004 is therefore a no-line discard.
++abbrev = bytes([
++    1, 0x11, 1, 0x10, 0x17, 0x11, 0x01, 0x12, 0x06, 0, 0,
++    2, 0x2e, 0, 0x03, 0x08, 0x11, 0x01, 0x12, 0x06,
++    0x3a, 0x0b, 0x3b, 0x0b, 0, 0, 0,
++])
++
++
++def dwarf_length(data):
++    return struct.pack("<I", len(data)) + data
++
++cu = struct.pack("<HIBBIQI", 4, 0, 8, 1, 0, 0x10000, 0x20008)
++for pc, name in [(0x10000, "first"), (0x30000, "second")]:
++    cu += b"\x02" + name.encode() + b"\0" + struct.pack("<QIBB", pc, 8, 1, 1)
++info = dwarf_length(cu + b"\0")
++line_header = bytes([1, 1, 1, 0xfb, 14, 13,
++                     0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1])
++line_header += b"\0kernel.c\0\0\0\0\0"
++line_ops = b""
++for pc, size in [(0x10000, 4), (0x30000, 8)]:
++    line_ops += b"\0\x09\x02" + struct.pack("<Q", pc)
++    line_ops += bytes([1, 2, size, 0, 1, 1])  # copy; advance_pc; end_sequence
++line = dwarf_length(struct.pack("<H", 4) + dwarf_length(line_header) + line_ops)
++dwarf_args = []
++for section, content in [(".debug_abbrev", abbrev), (".debug_info", info),
++                         (".debug_line", line)]:
++    chunk = work / section
++    chunk.write_bytes(content)
++    dwarf_args.append(f"--add-section={section}={chunk}")
++checked([objcopy, *dwarf_args, no_dwarf, a64])
++
++checked(
++    [
++        objcopy,
++        "--add-symbol=_text=.text:0,global",
++        fixtures / "arm-count.perfbin",
++        a32,
++    ]
++)
++checked([mc, "-triple=armv7-none-linux-gnueabi", "-filetype=obj",
++         fixtures / "arm-literal.s", "-o", module])
++
++
++def mapping(start, length, anchor, ref="_text", build_id=a64_id):
++    identity = f"<{build_id}>" if build_id else "00:00 0 0"
++    return f"-1/0 PERF_RECORD_MMAP2 -1/0: [{start:#x}({length:#x}) @ {anchor:#x} {identity}]: ---p {kernel}{ref}"
++
++
++def sample(ip, pid="-1/0", period=7, dso=kernel):
++    return f"{pid} {period} cycles: {ip:x} ({dso})"
++
++
++def run(name, lines, *, binary=a64, options=(), error=None):
++    inp, out, report = (work / (name + ext) for ext in (".perf", ".prof", ".json"))
++    inp.write_text("\n".join(lines) + "\n")
++    out.write_bytes(b"old profile")
++    p = exec_tool(
++        [
++            profgen, "--kernel", "--ip-samples", f"--binary={binary}",
++            f"--perfscript={inp}", "--format=text", "--ip-aggregation=sum",
++            "--ip-weight=sample", "--show-ip-address-counts", f"--output={out}",
++            f"--quality-report={report}", *options,
++        ]
++    )
++    if error is None:
++        assert p.returncode == 0, (name, p.stdout, p.stderr, report.read_text())
++        assert out.read_bytes() != b"old profile"
++    else:
++        assert p.returncode != 0 and error in p.stderr, (name, p.stdout, p.stderr)
++        assert out.read_bytes() == b"old profile", name
++    addrs = {int(i, 16): int(n) for i, n in re.findall(
++        r"IP-ADDRESS 0x([0-9a-fA-F]+) sample_count=(\d+)", p.stdout
++    )}
++    return addrs, json.loads(report.read_text()), out.read_bytes()
++
++
++def counts(report, key):
++    return report["samples"]["kernel_ip"][key]["sample_count"]
++
++
++start = 0xFFFF800000010000
++length = 0x20008
++m = mapping(start, length, start + 4, ref="_stext")
++both = [m, mapping(start, length, start)]
++ks = sample(start, dso=kernel + "+0xdeadbeef")
++second = sample(start + 0x20004, pid="17/17")
++lines = both + [
++    ks, second, sample(0x8000, pid="17/17", dso="/tmp/user+0x20"),
++    sample(0x9000, dso=str(module)), sample(0x9100, dso="[bpf_prog_123]"),
++    sample(0x9200, dso="[unknown]"), sample(0x9300, dso="unknown"),
++    sample(0x9400, dso="/tmp/jit/jitted-123-1.so"),
++]
++addresses, report, profile = run("slide", lines)
++assert addresses == {0x10000: 1, 0x30004: 1}, addresses
++assert b"first:" in profile and b"second:" in profile, profile
++assert report["identity"]["grade"] == "verified"
++assert report["kernel_mmap"]["runtime_anchor"] == start + 4
++assert report["kernel_mmap"]["elf_anchor"] == 0x10004
++for key, n in dict(target=2, modules_skipped=1, user_samples=1,
++                   special_skipped=2, unknown_address=2, unknown_pid=6).items():
++    assert counts(report, key) == n, (key, report)
++
++addresses, report, profile = run("pid", lines, options=["--pid=17"])
++assert addresses == {0x30004: 1}
++assert b"second:" in profile and b"first:" not in profile
++assert counts(report, "unknown_pid") == 6
++
++buildids = work / "buildids"
++buildids.write_text(f"{a64_id} {kernel}\n")
++zero = [mapping(0x10000, length, 0x10000, build_id=None), sample(0x10000),
++        sample(0x30004, pid="17/17")]
++addrs, report, _ = run("zero", zero, options=[f"--perf-buildid-list={buildids}"])
++assert addrs == {0x10000: 1, 0x30004: 1}
++assert report["identity"]["grade"] == "verified-path"
++run("missing-id", zero, error="missing build-id evidence")
++_, report, _ = run("waiver", zero, options=["--allow-missing-build-id"])
++assert report["identity"]["grade"] == "unverified"
++
++buildids.write_text(f"{a64_id} {kernel}\n{arm_id} {kernel}_stext\n")
++run("conflicting-list", lines, options=[f"--perf-buildid-list={buildids}",
++    "--allow-missing-build-id"], error="build-id mismatch")
++run("conflicting-mmap-id",
++    [m, mapping(start, length, start, build_id=arm_id), ks],
++    error="build-id mismatch")
++run("wrong-debug-id", lines,
++    options=[f"--debug-binary={fixtures / 'a64-pie.debug'}"],
++    error="build-id mismatch")
++run("wrong-debug-class", lines, options=[f"--debug-binary={a32}"],
++    error="kernel debug ELF class or machine mismatch")
++debug = work / "matching.debug"
++checked([objcopy, "--only-keep-debug", a64, debug])
++addrs, report, _ = run("matching-debug", lines, options=[f"--debug-binary={debug}"])
++assert addrs == {0x10000: 1, 0x30004: 1}
++assert report["identity"]["grade"] == "verified"
++_, report, _ = run("no-cu", lines, binary=no_dwarf, error="no usable samples")
++assert counts(report, "no_cu") == 2
++_, report, _ = run("no-line", lines + [sample(start + 4)])
++assert counts(report, "in_func_no_line") == 1
++
++run("missing-mmap", [ks], error="missing synthesized kernel mmap")
++run("unnamed-reference", [mapping(start, length, start, ref=""), ks],
++    error="requires a _text or _stext reference suffix")
++run("unknown-reference", [mapping(start, length, start, ref="_other"), ks],
++    error="requires a _text or _stext reference suffix")
++run("missing-elf-symbol", [m, ks], binary=fixtures / "a64-multi-load.perfbin",
++    error="missing ELF kernel anchor _stext")
++run("zero-anchor", [mapping(start, length, 0), ks],
++    error="missing runtime kernel anchor")
++run("anchor-outside-map", [mapping(start, length, start + length), ks],
++    error="runtime kernel anchor is outside the kernel mmap")
++run("other-boot", [m, mapping(start, length, start + 8, ref="_stext"), ks],
++    error="conflicting kernel mmap anchors or ranges")
++run("range-conflict", [m, mapping(start, length - 1, start), ks],
++    error="conflicting kernel mmap anchors or ranges")
++run("overflow-map", [mapping(0xFFFFFFFFFFFFFFF0, 0x20, start), ks],
++    error="counter overflow")
++run("outside-mmap", [m, sample(start + length)], error="outside the runtime kernel mmap")
++run("segment-gap", [m, sample(start + 0x1000)], error="outside executable PT_LOAD")
++run("broken-trace", [m, "12/12 broken"], error="line 2: IP sample mode: invalid or zero period")
++run("module-as-binary", [m, ks], binary=module, error="must be a linked ELF image")
++
++# A32 high runtime VA, with known in-function $d and an executable .plt.
++arm_start = 0xC0001298
++arm_lines = [
++    mapping(arm_start, 0x198, arm_start, build_id=arm_id),
++    sample(0xC000139C), sample(0xC000138C), sample(0xC0001400),
++]
++addrs, report, txt = run("arm32", arm_lines, binary=a32)
++assert addrs == {0x139C: 1}, addrs
++assert b"main:" in txt, txt
++assert counts(report, "target") == 3
++assert counts(report, "mapping_data") == 1
++assert counts(report, "special_section") == 1
++run("arm32-width", [mapping(0xFFFFFF00, 0x200, arm_start, build_id=arm_id),
++                   sample(0xFFFFFF00)], binary=a32, error="exceeds the ELF address range")
++bad_class = work / "arm-wrong-machine"
++elf = bytearray(a32.read_bytes())
++elf[18:20] = (183).to_bytes(2, "little")
++bad_class.write_bytes(elf)
++run("arm32-wrong-machine", arm_lines, binary=bad_class,
++    error="requires ELF32 little-endian ARM or ELF64 little-endian AArch64")
++
++# Thumb state is found from ELF mapping symbols at the translated PC.
++thumb = work / "thumb"
++thumb_id = "dfbdeeb909bf09bf3e93c3327e627d6ad246ffe5"
++checked([objcopy, "--add-symbol=_text=.text:0,global",
++         fixtures / "thumb-count.perfbin", thumb])
++addresses, report, profile = run(
++    "thumb", [mapping(arm_start, 0x128, arm_start, build_id=thumb_id),
++              sample(0xC00012BE), sample(0xC0001340)], binary=thumb,
++)
++assert addresses == {0x12BE: 1}, addresses
++assert b"loop:" in profile, profile
++assert counts(report, "mapping_data") == 1
++
++# Same shape as the old ARM32 parser fixture (never match its build-id to BASE).
++old = mapping(0xC0008000, 0x8000, 0xC0008000,
++              build_id="395733b9c917cb98309b39cc3ec379c03ac36b3f")
++run("old-parser-only", [old, sample(0xC0008000)], binary=a32,
++    error="build-id mismatch")
++print("PASS: kernel IP identity, address translation, filtering and DWARF")
+diff --git a/llvm/test/tools/llvm-profgen/ip-kernel.test b/llvm/test/tools/llvm-profgen/ip-kernel.test
+new file mode 100644
+index 000000000000..db729a0417fe
+--- /dev/null
++++ b/llvm/test/tools/llvm-profgen/ip-kernel.test
+@@ -0,0 +1,3 @@
++# REQUIRES: aarch64-registered-target, arm-registered-target
++# RUN: %python %S/Inputs/ip-mode/check-kernel-ip.py llvm-profgen llvm-objcopy llvm-mc %t | FileCheck %s
++# CHECK: PASS: kernel IP identity, address translation, filtering and DWARF
+diff --git a/llvm/test/tools/llvm-profgen/ip-options.test b/llvm/test/tools/llvm-profgen/ip-options.test
+index e0d591f0cca0..4d20fae5aef6 100644
+--- a/llvm/test/tools/llvm-profgen/ip-options.test
++++ b/llvm/test/tools/llvm-profgen/ip-options.test
+@@ -43,7 +43,7 @@
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-aggregation=sum --format=gcc --populate-profile-symbol-list 2>&1 | FileCheck %s --check-prefix=OPT21
+ # OPT21: option --populate-profile-symbol-list is not supported with --ip-samples
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-aggregation=sum --format=gcc --kernel 2>&1 | FileCheck %s --check-prefix=OPT22
+-# OPT22: option --kernel is not supported with --ip-samples
++# OPT22: IP sample mode requires --perfscript
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-aggregation=sum --format=gcc --show-disassembly-only 2>&1 | FileCheck %s --check-prefix=OPT23
+ # OPT23: option --show-disassembly-only is not supported with --ip-samples
+ # RUN: not llvm-profgen --binary=%S/Inputs/ip-mode/a64-multi-load.perfbin --output=%t.out --ip-samples --ip-aggregation=sum --format=gcc --disassemble-functions=main 2>&1 | FileCheck %s --check-prefix=OPT24
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.cpp b/llvm/tools/llvm-profgen/IPBoundary.cpp
+index 970943a2a42f..884ad3953768 100644
+--- a/llvm/tools/llvm-profgen/IPBoundary.cpp
++++ b/llvm/tools/llvm-profgen/IPBoundary.cpp
+@@ -142,6 +142,37 @@ Expected<bool> IPBoundaryMap::isThumbAddress(uint64_t Address) const {
+   return It->second == 't';
+ }
+ 
++Expected<StringRef> IPBoundaryMap::kernelExclusion(uint64_t Address) const {
++  const Section *Match = nullptr;
++  bool Special = false;
++  for (const Section &S : Sections) {
++    if (Address < S.Begin || Address >= S.End)
++      continue;
++    StringRef Name = S.Name;
++    if (Name == ".head.text" || Name == ".stubs" || Name == ".plt" ||
++        Name == ".iplt" || Name.starts_with(".plt.") ||
++        Name.starts_with(".vectors") || Name.starts_with(".init.") ||
++        Name.starts_with(".exit.")) {
++      Special = true;
++      continue;
++    }
++    if (Match)
++      return boundaryError("ambiguous executable section for kernel IP");
++    Match = &S;
++  }
++  if (!Match)
++    return StringRef("kernel_special_section");
++  if (Special)
++    return boundaryError("ambiguous executable section for kernel IP");
++  auto It = Match->States.upper_bound(Address);
++  if (It == Match->States.begin())
++    return StringRef();
++  --It;
++  if (Match->Conflicts.count(It->first))
++    return boundaryError("conflicting mapping states for kernel IP");
++  return It->second == 'd' ? StringRef("kernel_mapping_data") : StringRef();
++}
++
+ Expected<IPFunctionBoundaries>
+ IPBoundaryMap::enumerate(StringRef Name,
+                          ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
+diff --git a/llvm/tools/llvm-profgen/IPBoundary.h b/llvm/tools/llvm-profgen/IPBoundary.h
+index f245c04fa943..83caeaaa0de6 100644
+--- a/llvm/tools/llvm-profgen/IPBoundary.h
++++ b/llvm/tools/llvm-profgen/IPBoundary.h
+@@ -59,6 +59,9 @@ public:
+   // Metadata-only lookup; ambiguity or missing evidence never proves Thumb.
+   Expected<bool> isThumbAddress(uint64_t Address) const;
+ 
++  /// Empty reason means the address can proceed to DWARF symbolization.
++  Expected<StringRef> kernelExclusion(uint64_t Address) const;
++
+   const std::set<std::string> &sources() const { return Sources; }
+   Expected<IPFunctionBoundaries>
+   enumerate(StringRef Name, ArrayRef<std::pair<uint64_t, uint64_t>> Ranges,
+diff --git a/llvm/tools/llvm-profgen/IPIdentity.cpp b/llvm/tools/llvm-profgen/IPIdentity.cpp
+index d54f0c55ca76..647ac268bf9a 100644
+--- a/llvm/tools/llvm-profgen/IPIdentity.cpp
++++ b/llvm/tools/llvm-profgen/IPIdentity.cpp
+@@ -58,13 +58,24 @@ StringRef name(Grade G) {
+   llvm_unreachable("invalid identity grade");
+ }
+ 
+-Expected<std::string> readObjectIdentity(StringRef Path) {
++Expected<std::string>
++readObjectIdentity(StringRef Path,
++                   std::optional<bool> KernelIsARM = std::nullopt) {
+   auto Object = ObjectFile::createObjectFile(Path);
+   if (!Object)
+     return Object.takeError();
+   const ObjectFile *O = Object->getBinary();
+   if (!isa<ELFObjectFileBase>(O))
+     return identityError("identity input must be an ELF object");
++  if (KernelIsARM) {
++    const auto &ELF = cast<ELFObjectFileBase>(*O);
++    bool Match =
++        *KernelIsARM
++            ? isa<ELF32LEObjectFile>(O) && ELF.getEMachine() == ELF::EM_ARM
++            : isa<ELF64LEObjectFile>(O) && ELF.getEMachine() == ELF::EM_AARCH64;
++    if (!Match)
++      return identityError("kernel debug ELF class or machine mismatch");
++  }
+   // Independent of --use-dwarf-correlation; either section in either object
+   // is sufficient to reject an unadmitted probe build.
+   for (const SectionRef &Section : O->sections()) {
+@@ -82,7 +93,7 @@ Expected<std::string> readObjectIdentity(StringRef Path) {
+ }
+ 
+ using PathIDs = std::map<std::string, std::set<std::string>>;
+-Expected<PathIDs> readBuildIDList(StringRef Path) {
++Expected<PathIDs> readBuildIDList(StringRef Path, bool Kernel) {
+   auto Buffer = MemoryBuffer::getFile(Path);
+   if (!Buffer)
+     return createStringError(Buffer.getError(),
+@@ -114,6 +125,8 @@ Expected<PathIDs> readBuildIDList(StringRef Path) {
+     }
+     if (File.empty())
+       return Bad();
++    if (Kernel && IPPerfReader::isKernelDSO(File))
++      File = "[kernel.kallsyms]";
+     auto &IDs = Result[File.str()];
+     if (!ID.empty())
+       IDs.insert(hexID(parseBuildID(ID)));
+@@ -133,7 +146,10 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+   BinaryID = *ID;
+   BinaryIdentityRead = true;
+   if (Options.DebugBinary) {
+-    auto Debug = readObjectIdentity(*Options.DebugBinary);
++    std::optional<bool> KernelIsARM;
++    if (Options.Kernel)
++      KernelIsARM = KernelMaxAddress == UINT32_MAX;
++    auto Debug = readObjectIdentity(*Options.DebugBinary, KernelIsARM);
+     if (!Debug)
+       return Debug.takeError();
+     DebugID = *Debug;
+@@ -147,12 +163,13 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+       (Options.DebugBinary ? quote(*Options.DebugBinary) : "none") +
+       " build_id=" + displayID(DebugID).str());
+   IdentityDiagnostics.push_back(
+-      "selection=" +
+-      std::string(Options.BinaryMatchRegex ? "regex" : "basename"));
++      "selection=" + std::string(Options.Kernel             ? "kernel-mmap"
++                                 : Options.BinaryMatchRegex ? "regex"
++                                                            : "basename"));
+ 
+   PathIDs List;
+   if (Options.BuildIDList) {
+-    auto Parsed = readBuildIDList(*Options.BuildIDList);
++    auto Parsed = readBuildIDList(*Options.BuildIDList, Options.Kernel);
+     if (!Parsed)
+       return Parsed.takeError();
+     List = std::move(*Parsed);
+@@ -205,9 +222,12 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+     size_t ExecutableCount = 0;
+     for (size_t Index = 0; Index < Mappings.size(); ++Index) {
+       const IPMapping &M = Mappings[Index];
+-      if (M.Path != Path)
++      if (Options.Kernel ? !isKernelDSO(M.Path) : M.Path != Path)
+         continue;
++      // perf's synthesized host kernel MMAP2 may have ---p. The
++      // kernel mmap and the ELF executable segments were validated separately.
+       bool Executable = M.Permissions.find('x') != std::string::npos;
++      bool Required = Options.Kernel || Executable;
+       std::string MappedID =
+           M.BuildID.empty() ? "" : hexID(parseBuildID(M.BuildID));
+       Grade G = Grade::Unverified;
+@@ -219,23 +239,22 @@ Error IPPerfReader::validateIdentity(const IPReaderOptions &Options) {
+         Source = "buildid-list";
+         G = Grade::VerifiedPath;
+       }
+-      if (Executable) {
++      if (Required) {
+         ++ExecutableCount;
+         PathGrade = std::min(PathGrade, G);
+       } else if (G == Grade::Mismatch) {
+         PathGrade = Grade::Mismatch;
+       }
+       Evidence.push_back(
+-          {Path, Source.str(), MappedID,
+-           Executable || G == Grade::Mismatch ? name(G).str() : "not-required",
++          {M.Path, Source.str(), MappedID,
++           Required || G == Grade::Mismatch ? name(G).str() : "not-required",
+            uint64_t(Index)});
+       IdentityDiagnostics.push_back(
+-          "mapping=" + std::to_string(Index) + " path=" + quote(Path) +
++          "mapping=" + std::to_string(Index) + " path=" + quote(M.Path) +
+           " pid=" + std::to_string(M.PID) + " executable=" +
+           (Executable ? "true" : "false") + " source=" + Source.str() +
+           " build_id=" + displayID(MappedID).str() + " result=" +
+-          (Executable || G == Grade::Mismatch ? name(G).str()
+-                                              : "not-required"));
++          (Required || G == Grade::Mismatch ? name(G).str() : "not-required"));
+     }
+     if (!ExecutableCount)
+       PathGrade = std::min(PathGrade, Grade::Unverified);
+diff --git a/llvm/tools/llvm-profgen/IPKernelAddress.h b/llvm/tools/llvm-profgen/IPKernelAddress.h
+new file mode 100644
+index 000000000000..80c73a3e3728
+--- /dev/null
++++ b/llvm/tools/llvm-profgen/IPKernelAddress.h
+@@ -0,0 +1,40 @@
++//===- IPKernelAddress.h - Kernel IP relocation -----------------*- C++ -*-===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#ifndef LLVM_TOOLS_LLVM_PROFGEN_IPKERNELADDRESS_H
++#define LLVM_TOOLS_LLVM_PROFGEN_IPKERNELADDRESS_H
++
++#include <cstdint>
++#include <optional>
++
++namespace llvm {
++
++/// Translate an IP using the difference between two addresses of the same
++/// symbol. Use unsigned magnitudes so both high-half addresses and negative
++/// slides work without signed overflow or an overflowing intermediate sum.
++inline std::optional<uint64_t> translateKernelIP(uint64_t IP,
++                                                 uint64_t RuntimeAnchor,
++                                                 uint64_t LinkAnchor,
++                                                 uint64_t MaxAddress) {
++  if (IP > MaxAddress || RuntimeAnchor > MaxAddress || LinkAnchor > MaxAddress)
++    return std::nullopt;
++  if (RuntimeAnchor >= LinkAnchor) {
++    uint64_t Slide = RuntimeAnchor - LinkAnchor;
++    if (IP < Slide)
++      return std::nullopt;
++    return IP - Slide;
++  }
++  uint64_t Slide = LinkAnchor - RuntimeAnchor;
++  if (Slide > MaxAddress - IP)
++    return std::nullopt;
++  return IP + Slide;
++}
++
++} // namespace llvm
++
++#endif
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.cpp b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+index 273ed4d09c49..a356b33a59de 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.cpp
++++ b/llvm/tools/llvm-profgen/IPPerfReader.cpp
+@@ -6,6 +6,8 @@
+ //
+ //===----------------------------------------------------------------------===//
+ #include "IPPerfReader.h"
++#include "IPBoundary.h"
++#include "IPKernelAddress.h"
+ #include "IPQualityReport.h"
+ #include "llvm/ADT/SmallString.h"
+ #include "llvm/ADT/StringExtras.h"
+@@ -25,7 +27,7 @@ using namespace llvm;
+ using namespace llvm::object;
+ 
+ namespace {
+-Error invalid(StringRef What) {
++Error invalid(const Twine &What) {
+   return createStringError(inconvertibleErrorCode(), "IP sample mode: " + What);
+ }
+ Error add(uint64_t &Value, uint64_t Increment) {
+@@ -87,14 +89,48 @@ bool kernel(StringRef Path) {
+           (Path.ends_with(".ko") || Path.ends_with(".ko.xz") ||
+            Path.ends_with(".ko.zst") || Path.ends_with(".ko.gz")));
+ }
++constexpr StringLiteral KernelDSO = "[kernel.kallsyms]";
++
++bool moduleDSO(StringRef Path) {
++  Path = livePath(Path);
++  return Path.ends_with(".ko") || Path.ends_with(".ko.xz") ||
++         Path.ends_with(".ko.zst") || Path.ends_with(".ko.gz") ||
++         Path.ends_with(".ko.bz2") || Path.ends_with(".ko.lz4") ||
++         Path.ends_with(".ko.lzma");
++}
++
+ bool special(StringRef Path) {
+   // perf pseudo DSOs and JIT map names are not sampled object-file paths.
+   return Path.starts_with("[") || Path.starts_with("//") ||
+          (Path.starts_with("/tmp/perf-") && Path.ends_with(".map")) ||
+          (Path.starts_with("jitted-") && Path.ends_with(".so"));
+ }
++bool unknownDSO(StringRef Path) {
++  return Path == "[unknown]" || Path == "//anon" || Path == "unknown";
++}
++
++bool kernelModeSpecialDSO(StringRef Path) {
++  StringRef Basename = sys::path::filename(Path);
++  return special(Path) ||
++         (Basename.starts_with("jitted-") && Basename.ends_with(".so"));
++}
+ } // namespace
+ 
++bool IPPerfReader::isKernelDSO(StringRef Name) {
++  if (!Name.consume_front(KernelDSO))
++    return false;
++  return Name.empty() || Name == "_text" || Name == "_stext";
++}
++
++Error IPPerfReader::countLayer(StringRef Name, const Sample &S) {
++  if (!CollectQuality)
++    return Error::success();
++  auto &C = Layers[Name.str()];
++  if (Error E = add(C.SampleCount, 1))
++    return E;
++  return add(C.PeriodSum, S.Period);
++}
++
+ Error IPPerfReader::parseLine(StringRef Line) {
+   if (Line.contains('\0'))
+     return invalid("unrepresentable input line");
+@@ -172,8 +208,11 @@ Error IPPerfReader::parseLine(StringRef Line) {
+     uint64_t RangeEnd = M.Start, OffsetEnd = M.PageOffset;
+     if (Error E = add(RangeEnd, M.Length))
+       return E;
+-    if (Error E = add(OffsetEnd, M.Length))
+-      return E;
++    // A synthesized kernel mmap carries a relocation reference address,
++    // not a file offset whose range is PageOffset + Length.
++    if (!ReadOptions.Kernel || !Rest.starts_with(KernelDSO))
++      if (Error E = add(OffsetEnd, M.Length))
++        return E;
+     M.Permissions = Permissions.str();
+     M.Path = Rest.str();
+     M.Deleted = deleted(Rest);
+@@ -216,7 +255,9 @@ Error IPPerfReader::parseLine(StringRef Line) {
+     return invalid("empty DSO path");
+   S.Path = Rest.str();
+   S.Deleted = deleted(Rest);
+-  if (!S.Offset && !special(Rest) && Rest != "[kernel.kallsyms]")
++  if (!S.Offset && !special(Rest) && Rest != "[kernel.kallsyms]" &&
++      !(ReadOptions.Kernel && (moduleDSO(Rest) || unknownDSO(livePath(Rest)) ||
++                               kernelModeSpecialDSO(livePath(Rest)))))
+     return invalid("file DSO is missing dsoff");
+   if (Error E = add(Stats.Input, 1))
+     return E;
+@@ -246,6 +287,20 @@ Error IPPerfReader::loadBinary(StringRef Path) {
+   if (!Object)
+     return Object.takeError();
+   auto Load = [&](const auto *ELFObject) -> Error {
++    if (ReadOptions.Kernel) {
++      const ELFObjectFileBase &ELF = *ELFObject;
++      bool IsARM =
++          isa<ELF32LEObjectFile>(ELF) && ELF.getEMachine() == ELF::EM_ARM;
++      bool IsAArch64 =
++          isa<ELF64LEObjectFile>(ELF) && ELF.getEMachine() == ELF::EM_AARCH64;
++      if (!IsARM && !IsAArch64)
++        return invalid("kernel requires ELF32 little-endian ARM or ELF64 "
++                       "little-endian AArch64");
++      if (ELF.getEType() != ELF::ET_EXEC && ELF.getEType() != ELF::ET_DYN)
++        return invalid("kernel vmlinux must be a linked ELF image "
++                       "(ET_EXEC or ET_DYN)");
++      KernelMaxAddress = IsARM ? UINT32_MAX : UINT64_MAX;
++    }
+     auto Headers = ELFObject->getELFFile().program_headers();
+     if (!Headers)
+       return Headers.takeError();
+@@ -259,6 +314,8 @@ Error IPPerfReader::loadBinary(StringRef Path) {
+         return E;
+       Segments.push_back({H.p_offset, End, H.p_vaddr});
+     }
++    if (ReadOptions.Kernel)
++      return loadKernelMapping(*ELFObject);
+     return Error::success();
+   };
+   const ObjectFile *O = Object->getBinary();
+@@ -273,6 +330,76 @@ Error IPPerfReader::loadBinary(StringRef Path) {
+   return invalid("binary must be an ELF object");
+ }
+ 
++Error IPPerfReader::loadKernelMapping(const ObjectFile &Object) {
++  auto FindAnchor = [&](StringRef Reference) -> Expected<uint64_t> {
++    std::optional<uint64_t> Anchor;
++    for (const SymbolRef &S : Object.symbols()) {
++      auto Name = S.getName();
++      if (!Name)
++        return Name.takeError();
++      if (*Name != Reference)
++        continue;
++      auto Flags = S.getFlags();
++      if (!Flags)
++        return Flags.takeError();
++      if (*Flags & SymbolRef::SF_Undefined)
++        continue;
++      auto Address = S.getAddress();
++      if (!Address)
++        return Address.takeError();
++      if (Anchor && *Anchor != *Address)
++        return invalid("conflicting ELF kernel anchor " + Reference);
++      Anchor = *Address;
++    }
++    if (!Anchor)
++      return invalid("missing ELF kernel anchor " + Reference);
++    if (*Anchor > KernelMaxAddress ||
++        llvm::none_of(Segments, [&](const Segment &Seg) {
++          return *Anchor >= Seg.VAddr &&
++                 *Anchor - Seg.VAddr < Seg.End - Seg.Offset;
++        }))
++      return invalid("ELF kernel anchor is outside executable PT_LOAD");
++    return *Anchor;
++  };
++
++  for (const IPMapping &M : Mappings) {
++    StringRef Reference = livePath(M.Path);
++    if (!Reference.consume_front(KernelDSO))
++      continue;
++    if (Reference != "_text" && Reference != "_stext")
++      return invalid("kernel mmap requires a _text or _stext reference suffix");
++    if (M.Deleted || M.PID != -1)
++      return invalid("expected a live synthesized kernel mmap with pid -1");
++    if (!M.PageOffset)
++      return invalid("missing runtime kernel anchor (zero pgoff)");
++    // Check the last included byte so ARM32 can describe a range ending at
++    // 2^32. parseLine has already validated the 64-bit exclusive end.
++    if (!M.Length || M.PageOffset > KernelMaxAddress ||
++        M.Start + M.Length - 1 > KernelMaxAddress)
++      return invalid("kernel mmap or anchor exceeds the ELF address range");
++    const uint64_t End = M.Start + M.Length;
++    if (M.PageOffset < M.Start || M.PageOffset >= End)
++      return invalid("runtime kernel anchor is outside the kernel mmap");
++    auto Anchor = FindAnchor(Reference);
++    if (!Anchor)
++      return Anchor.takeError();
++    if (KernelMap) {
++      const auto &K = *KernelMap;
++      if (K.Start != M.Start || K.End != End ||
++          translateKernelIP(M.PageOffset, K.RuntimeAnchor, K.LinkAnchor,
++                            KernelMaxAddress) != *Anchor)
++        return invalid("conflicting kernel mmap anchors or ranges; "
++                       "input must come from a single boot");
++    } else {
++      KernelMap =
++          KernelMapping{M.Start, End, M.PageOffset, *Anchor, Reference.str()};
++    }
++  }
++  if (!KernelMap)
++    return invalid("missing synthesized kernel mmap");
++  return Error::success();
++}
++
+ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+   if (!Options.Event && Stats.Events.size() > 1)
+     return invalid("multiple events require --ip-event");
+@@ -287,43 +414,64 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+       Options.Event
+           ? *Options.Event
+           : (Stats.Events.empty() ? "unknown" : Stats.Events.begin()->first);
+-  auto Count = [&](StringRef Name, const Sample &S) -> Error {
+-    if (!CollectQuality)
+-      return Error::success();
+-    auto &C = Layers[Name.str()];
+-    if (Error E = add(C.SampleCount, 1))
+-      return E;
+-    return add(C.PeriodSum, S.Period);
+-  };
+   for (StringRef N : {"after_event", "after_pid", "pid_unknown", "kernel",
+                       "other_dso", "unmapped", "target", "unmapped_in_target"})
+     Layers[N.str()] = {};
++  if (Options.Kernel)
++    for (StringRef N :
++         {"modules_skipped", "user_samples", "special_skipped",
++          "unknown_address", "kernel_special_section", "kernel_mapping_data"})
++      Layers[N.str()] = {};
+   std::map<std::string, uint64_t> Files;
+   for (const Sample &S : Samples) {
+     if (Options.Event && S.Event != *Options.Event)
+       continue;
+-    if (Error E = Count("after_event", S))
++    if (Error E = countLayer("after_event", S))
+       return E;
+     if (S.PID == -1)
+-      if (Error E = Count("pid_unknown", S))
++      if (Error E = countLayer("pid_unknown", S))
+         return E;
+     if (Error E = add(Stats.AfterEvent, 1))
+       return E;
+     if (Options.PID && (S.PID == -1 || uint64_t(S.PID) != *Options.PID))
+       continue;
+-    if (Error E = Count("after_pid", S))
++    if (Error E = countLayer("after_pid", S))
+       return E;
+     if (Error E = add(Stats.AfterPID, 1))
+       return E;
++    if (Options.Kernel) {
++      StringRef DSO = livePath(S.Path);
++      if (isKernelDSO(DSO)) {
++        if (S.Deleted)
++          return invalid("unexpected deleted kernel sample DSO");
++        if (Error E = countLayer("target", S))
++          return E;
++        if (Error E = add(Stats.Target, 1))
++          return E;
++        Candidates.insert(KernelDSO.str());
++        SelectedSamples.push_back(&S);
++        continue;
++      }
++      if (DSO.starts_with(KernelDSO))
++        return invalid("unknown kernel sample DSO reference");
++      StringRef Layer = moduleDSO(DSO)    ? "modules_skipped"
++                        : unknownDSO(DSO) ? "unknown_address"
++                        : kernelModeSpecialDSO(DSO) && DSO != "[vdso]"
++                            ? "special_skipped"
++                            : "user_samples";
++      if (Error E = countLayer(Layer, S))
++        return E;
++      continue;
++    }
+     if (kernel(S.Path)) {
+-      if (Error E = Count("kernel", S))
++      if (Error E = countLayer("kernel", S))
+         return E;
+       if (Error E = add(Stats.Kernel, 1))
+         return E;
+       continue;
+     }
+     if (special(S.Path)) {
+-      if (Error E = Count(S.Offset ? "other_dso" : "unmapped", S))
++      if (Error E = countLayer(S.Offset ? "other_dso" : "unmapped", S))
+         return E;
+       if (S.Offset && CollectQuality) {
+         auto &C = OtherDSOs[S.Path];
+@@ -342,7 +490,7 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+                           : sys::path::filename(livePath(S.Path)) ==
+                                 sys::path::filename(BinaryRealPath);
+     if (!Selected) {
+-      if (Error E = Count("other_dso", S))
++      if (Error E = countLayer("other_dso", S))
+         return E;
+       if (CollectQuality) {
+         auto &C = OtherDSOs[S.Path];
+@@ -355,7 +503,7 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+         return E;
+       continue;
+     }
+-    if (Error E = Count("target", S))
++    if (Error E = countLayer("target", S))
+       return E;
+     if (Error E = add(Stats.Target, 1))
+       return E;
+@@ -366,6 +514,8 @@ Error IPPerfReader::selectSamples(const IPReaderOptions &Options) {
+   if (Options.Event && !Stats.AfterEvent)
+     return invalid("event filter selected no samples");
+   if (!Stats.Target) {
++    if (Options.Kernel)
++      return invalid("no vmlinux samples selected");
+     std::vector<std::pair<std::string, uint64_t>> Top(Files.begin(),
+                                                       Files.end());
+     llvm::sort(Top, [](const auto &A, const auto &B) {
+@@ -391,7 +541,60 @@ uint64_t IPPerfReader::getMedianPeriod() const {
+   return *Middle;
+ }
+ 
++Error IPPerfReader::countKernelAddresses() {
++  auto Boundaries = sampleprof::IPBoundaryMap::load(
++      BinaryPath, ReadOptions.DebugBinary.value_or(""), /*ReadBytes=*/false);
++  if (!Boundaries)
++    return Boundaries.takeError();
++  const KernelMapping &K = *KernelMap;
++  for (const Sample *S : SelectedSamples) {
++    if (S->IP < K.Start || S->IP >= K.End) {
++      if (Error E = countLayer("unknown_address", *S))
++        return E;
++      return invalid("sample IP is outside the runtime kernel mmap");
++    }
++    auto VA = translateKernelIP(S->IP, K.RuntimeAnchor, K.LinkAnchor,
++                                KernelMaxAddress);
++    if (!VA) {
++      if (Error E = countLayer("unknown_address", *S))
++        return E;
++      return invalid("kernel IP relocation overflow or underflow");
++    }
++    unsigned Matches = llvm::count_if(Segments, [&](const Segment &Seg) {
++      return *VA >= Seg.VAddr && *VA - Seg.VAddr < Seg.End - Seg.Offset;
++    });
++    if (!Matches) {
++      if (Error E = countLayer("unknown_address", *S))
++        return E;
++      return invalid("kernel IP is outside executable PT_LOAD");
++    }
++    auto Exclusion = Boundaries->kernelExclusion(*VA);
++    if (!Exclusion)
++      return Exclusion.takeError();
++    // ARM kernels can link several alternative exception vectors at the
++    // same virtual address. Those sections are excluded as a group.
++    if (Matches > 1 && *Exclusion != "kernel_special_section") {
++      if (Error E = countLayer("unknown_address", *S))
++        return E;
++      return invalid("kernel IP matches multiple executable PT_LOAD segments");
++    }
++    if (!Exclusion->empty()) {
++      if (Error E = countLayer(*Exclusion, *S))
++        return E;
++      continue;
++    }
++    auto &C = Counts[*VA];
++    if (Error E = add(C.SampleCount, 1))
++      return E;
++    if (Error E = add(C.PeriodSum, S->Period))
++      return E;
++  }
++  return Error::success();
++}
++
+ Error IPPerfReader::countAddresses() {
++  if (ReadOptions.Kernel)
++    return countKernelAddresses();
+   for (const Sample *S : SelectedSamples) {
+     const Segment *Found = nullptr;
+     for (const Segment &Seg : Segments) {
+diff --git a/llvm/tools/llvm-profgen/IPPerfReader.h b/llvm/tools/llvm-profgen/IPPerfReader.h
+index 9172d5767f17..f1bf51f926c0 100644
+--- a/llvm/tools/llvm-profgen/IPPerfReader.h
++++ b/llvm/tools/llvm-profgen/IPPerfReader.h
+@@ -19,6 +19,9 @@
+ 
+ namespace llvm {
+ class raw_ostream;
++namespace object {
++class ObjectFile;
++}
+ 
+ struct IPAddressCount {
+   uint64_t SampleCount = 0;
+@@ -41,6 +44,7 @@ struct IPReaderOptions {
+   std::optional<uint32_t> PID;
+   std::optional<std::string> BuildIDList, DebugBinary;
+   bool AllowMissingBuildID = false;
++  bool Kernel = false;
+ };
+ 
+ class IPQualityReport;
+@@ -76,6 +80,13 @@ class IPPerfReader {
+     std::map<std::string, uint64_t> Events;
+   } Stats;
+ 
++  struct KernelMapping {
++    uint64_t Start, End, RuntimeAnchor, LinkAnchor;
++    std::string Reference;
++  };
++  std::optional<KernelMapping> KernelMap;
++  uint64_t KernelMaxAddress = 0;
++
+   std::vector<Sample> Samples;
+   std::vector<IPMapping> Mappings;
+   std::vector<Segment> Segments;
+@@ -86,13 +97,18 @@ class IPPerfReader {
+   std::string BinaryID, DebugID;
+   std::string BinaryPath, BinaryRealPath;
+ 
++  Error countLayer(StringRef Name, const Sample &S);
+   Error parseLine(StringRef Line);
+   Error loadBinary(StringRef Path);
+   Error selectSamples(const IPReaderOptions &Options);
++  Error loadKernelMapping(const object::ObjectFile &Object);
++  Error countKernelAddresses();
+   Error countAddresses();
+   Error validateIdentity(const IPReaderOptions &Options);
+ 
+ public:
++  static bool isKernelDSO(StringRef Name);
++
+   Error read(StringRef Trace, StringRef Binary, const IPReaderOptions &Options);
+   uint64_t getMedianPeriod() const;
+   const AddressCounter &getAddressCounts() const { return Counts; }
+diff --git a/llvm/tools/llvm-profgen/IPQualityReport.cpp b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+index 1887652be9a7..b4f0d8181f25 100644
+--- a/llvm/tools/llvm-profgen/IPQualityReport.cpp
++++ b/llvm/tools/llvm-profgen/IPQualityReport.cpp
+@@ -528,7 +528,9 @@ json::Value IPQualityReport::build() {
+                          : Reader.DebugIdentityRead
+                              ? stringOrNone(Reader.DebugID)
+                              : json::Value("unknown")},
+-      {"selection", Reader.ReadOptions.BinaryMatchRegex ? "regex" : "basename"},
++      {"selection", Reader.ReadOptions.Kernel             ? "kernel-mmap"
++                    : Reader.ReadOptions.BinaryMatchRegex ? "regex"
++                                                          : "basename"},
+       {"candidates", Reader.Selected ? json::Value(std::move(Candidates))
+                                      : json::Value("unknown")},
+       {"evidence", Reader.BinaryIdentityRead ? json::Value(std::move(Evidence))
+@@ -541,7 +543,8 @@ json::Value IPQualityReport::build() {
+     if (S.PID >= 0)
+       PIDs.insert(S.PID);
+   for (const auto &M : Reader.Mappings)
+-    if (Reader.Candidates.count(M.Path)) {
++    if (Reader.ReadOptions.Kernel ? IPPerfReader::isKernelDSO(M.Path)
++                                  : Reader.Candidates.count(M.Path) != 0) {
+       bool X = M.Permissions.find('x') != std::string::npos;
+       X ? ++Exec : ++NonExec;
+       Maps.push_back(
+@@ -637,6 +640,26 @@ json::Value IPQualityReport::build() {
+                       "predecessor_no_line"})
+     Reasons[R] = Gen(("skid_unadjusted_" + R).str());
+   Samples["skid_unadjusted_reasons"] = std::move(Reasons);
++  if (Reader.ReadOptions.Kernel) {
++    const auto &K = Reader.KernelMap;
++    if (K)
++      Root["kernel_mmap"] = json::Object{{"reference", K->Reference},
++                                         {"runtime_anchor", K->RuntimeAnchor},
++                                         {"elf_anchor", K->LinkAnchor},
++                                         {"runtime_start", K->Start},
++                                         {"runtime_end_exclusive", K->End}};
++    Samples["kernel_ip"] =
++        json::Object{{"target", Layer("target")},
++                     {"modules_skipped", Layer("modules_skipped")},
++                     {"user_samples", Layer("user_samples")},
++                     {"special_skipped", Layer("special_skipped")},
++                     {"unknown_address", Layer("unknown_address")},
++                     {"unknown_pid", Layer("pid_unknown")},
++                     {"special_section", Layer("kernel_special_section")},
++                     {"mapping_data", Layer("kernel_mapping_data")},
++                     {"no_cu", Gen("no_cu")},
++                     {"in_func_no_line", Gen("in_func_no_line")}};
++  }
+   Root["samples"] = std::move(Samples);
+   json::Object ISA, Source;
+   for (auto &[N, C] : ISACounts)
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.cpp b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+index 6da27398d486..aae860324b7d 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.cpp
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.cpp
+@@ -81,6 +81,8 @@ static cl::opt<bool>
+ 
+ namespace sampleprof {
+ 
++bool ProfiledBinary::kernelOptionEnabled() { return KernelBinary; }
++
+ static const Target *getTarget(const ObjectFile *Obj) {
+   Triple TheTriple = Obj->makeTriple();
+   std::string Error;
+diff --git a/llvm/tools/llvm-profgen/ProfiledBinary.h b/llvm/tools/llvm-profgen/ProfiledBinary.h
+index 3668d99c258c..10fd3d037239 100644
+--- a/llvm/tools/llvm-profgen/ProfiledBinary.h
++++ b/llvm/tools/llvm-profgen/ProfiledBinary.h
+@@ -522,6 +522,7 @@ public:
+   bool usePseudoProbes() const { return UsePseudoProbes; }
+   bool useFSDiscriminator() const { return UseFSDiscriminator; }
+   bool isKernel() const { return IsKernel; }
++  static bool kernelOptionEnabled();
+ 
+   static bool isKernelImageName(StringRef BinaryName) {
+     return BinaryName == "[kernel.kallsyms]" ||
+diff --git a/llvm/tools/llvm-profgen/llvm-profgen.cpp b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+index 2dfd2346880e..3aeda3605bc2 100644
+--- a/llvm/tools/llvm-profgen/llvm-profgen.cpp
++++ b/llvm/tools/llvm-profgen/llvm-profgen.cpp
+@@ -244,7 +244,7 @@ static Error runIPModeCore(IPQualityReport &Report, IPPerfReader &Reader,
+             .Cases({"compress-recursion", "mark-all-context-preinlined"}, true)
+             .Cases({"use-offset", "use-first-loadable-segment-as-base"}, true)
+             .Cases({"update-total-samples", "fill-zero-for-all-funcs"}, true)
+-            .Cases({"populate-profile-symbol-list", "kernel"}, true)
++            .Case("populate-profile-symbol-list", true)
+             .Cases({"show-disassembly-only", "disassemble-functions"}, true)
+             .Cases({"show-source-locations", "show-canonical-fname"}, true)
+             .Cases({"show-pseudo-probe", "infer-missing-frames"}, true)
+@@ -256,6 +256,9 @@ static Error runIPModeCore(IPQualityReport &Report, IPPerfReader &Reader,
+   if (!Rejected.empty())
+     return Fail("option --" + Rejected.front() +
+                 " is not supported with --ip-samples");
++  if (ProfiledBinary::kernelOptionEnabled() &&
++      BinaryMatchRegex.getNumOccurrences())
++    return Fail("--binary-match-regex is not supported with kernel IP samples");
+   if (OutputFilename == "-")
+     return Fail("IP sample mode does not support --output=-");
+   if (PerfDataFilename.getNumOccurrences())
+@@ -283,6 +286,7 @@ static Error runIPModeCore(IPQualityReport &Report, IPPerfReader &Reader,
+     return Fail("IP sample mode: --ip-period-unit must be a positive integer");
+   Report.setSemanticsKnown();
+   IPReaderOptions Options;
++  Options.Kernel = ProfiledBinary::kernelOptionEnabled();
+   if (IPEvent.getNumOccurrences())
+     Options.Event = IPEvent;
+   if (BinaryMatchRegex.getNumOccurrences())
+diff --git a/llvm/unittests/tools/llvm-profgen/CMakeLists.txt b/llvm/unittests/tools/llvm-profgen/CMakeLists.txt
+index 5a658cf70846..db00e464264b 100644
+--- a/llvm/unittests/tools/llvm-profgen/CMakeLists.txt
++++ b/llvm/unittests/tools/llvm-profgen/CMakeLists.txt
+@@ -4,6 +4,7 @@ set(LLVM_LINK_COMPONENTS
+ 
+ add_llvm_unittest(LLVMProfgenTests
+     ContextCompressionTest.cpp
++    IPKernelAddressTest.cpp
+   )
+ 
+ target_link_libraries(LLVMProfgenTests PRIVATE LLVMTestingSupport)
+diff --git a/llvm/unittests/tools/llvm-profgen/IPKernelAddressTest.cpp b/llvm/unittests/tools/llvm-profgen/IPKernelAddressTest.cpp
+new file mode 100644
+index 000000000000..6bd2c95e8f8b
+--- /dev/null
++++ b/llvm/unittests/tools/llvm-profgen/IPKernelAddressTest.cpp
+@@ -0,0 +1,44 @@
++//===- IPKernelAddressTest.cpp - Kernel IP relocation tests -------------===//
++//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#include "../tools/llvm-profgen/IPKernelAddress.h"
++#include "gtest/gtest.h"
++
++using llvm::translateKernelIP;
++
++TEST(IPKernelAddressTest, ZeroSlidePreservesTopArm32Address) {
++  EXPECT_EQ(translateKernelIP(UINT32_MAX, 0xc0008000, 0xc0008000, UINT32_MAX),
++            UINT32_MAX);
++}
++
++TEST(IPKernelAddressTest, PositiveAndNegativeSlide) {
++  EXPECT_EQ(translateKernelIP(0xe0200008, 0xe0008000, 0xc0008000, UINT32_MAX),
++            0xc0200008u);
++  EXPECT_EQ(translateKernelIP(0xbfff0010, 0xc0000000, 0xd0000000, UINT32_MAX),
++            0xcfff0010u);
++}
++
++TEST(IPKernelAddressTest, AArch64HighHalf) {
++  EXPECT_EQ(translateKernelIP(0xffff800030001004ULL, 0xffff800030000000ULL,
++                              0xffff800010000000ULL, UINT64_MAX),
++            0xffff800010001004ULL);
++}
++
++TEST(IPKernelAddressTest, RejectsUnrepresentableResultAndInputs) {
++  EXPECT_EQ(translateKernelIP(0x1000, 0x3000, 0x1000, UINT32_MAX),
++            std::nullopt);
++  EXPECT_EQ(translateKernelIP(0xfffffff0, 0x1000, 0x1020, UINT32_MAX),
++            std::nullopt);
++  EXPECT_EQ(translateKernelIP(UINT64_MAX, 0x1000, 0x1001, UINT64_MAX),
++            std::nullopt);
++  EXPECT_EQ(translateKernelIP(0x100000000ULL, 0x1000, 0x1000, UINT32_MAX),
++            std::nullopt);
++  EXPECT_EQ(translateKernelIP(0x1000, 0x100000000ULL, 0x1000, UINT32_MAX),
++            std::nullopt);
++}
+-- 
+2.43.0
+
