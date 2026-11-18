@@ -46,7 +46,7 @@
 
 - [能力增强方案 v0.1](kernel/autofdo/01_arm_profile_capability_proposal_v0.1.md) 已原样 mv 入库；SHA-256 `be164e5f1372863abc5c0fb80046da13a1a4eb5e37201ee633ebac34869a87b3`；待 Kimi/Codex 评审。
 - K0 只读源码评估完成：[可行性评估](kernel/autofdo/00_feasibility.md)与[基于 K 的回移植清单](kernel/autofdo/02_upstream_backport_inventory.md)已补齐。`0fac5de6` 增量 fetch 首次成功、重试 0 次；K=B+2（force_reclaim 修正、PMUv3），K/C 分叉。37 项独立/29 项累计检查，累计 18 干净、11 失败（其中 2 项已有等价修复）；冲突未手工解决。结论仍 conditional go（ARM32/A32、非 LTO/MFS），旧样本 build-id 未配对；未构建、未接板。首轮 SSH 失败记录保留。
-- K1 在 M1 完成后开始；刷写另须用户确认。
+- 用户本轮告知 M1 已完成；K1a BASE 主机构建完成：[构建、身份与刷写/回滚方案](kernel/autofdo/03_k1a_base_kernel_build.md)。K=`0fac5de6`，spec/defconfig 未改；固定 Base `20261030.120529` + Unified `20261104.125239`，130 个依赖 RPM SHA 已冻结。最终尝试 04 GBS=0、4047.18 秒，峰值 5,372,125,184 B；-j2、6G/5G、200%、nice19/idle 与 16GiB 启动门槛保留，前序中止/失败原件保留且遗留挂载已清理。15 个二进制 RPM + 1 SRPM，普通版 PMUv3=y、Thumb2=n、DWARF4=y；原始 vmlinux/zImage build-id `25599043a52ba8e5edf2f7bf4e9bb51aaf9d65a3`。RPM devel/debug ID 被标准后处理重算为 `f2a8fd67…`，后续 profile 必须使用归档原始 vmlinux；两套共 104 个模块 ID 核对通过。未接板/刷写，部署与回滚方案待用户另行确认。
 
 ## Workflow M1：attempt-11自动化端到端验收完成（2026-11-17任务）
 
