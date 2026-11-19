@@ -1,0 +1,540 @@
+=== version ===
+Smart Development Bridge version 4.2.25
+
+=== connect ===
+192.168.108.13:26101 is already connected
+
+=== devices ===
+List of devices attached 
+192.168.108.13:26101	device    	0
+
+=== probe ===
+
+
+stderr: error: service name too long
+
+=== identity ===
+=== identity ===
++ id -u
+5001
+status=0
++ uname -a
+Linux localhost 6.12.60 #1 SMP PREEMPT Mon Nov 16 20:15:36 UTC 2026 armv7l GNU/Linux
+status=0
++ uname -m
+armv7l
+status=0
++ cat /etc/os-release
+NAME=Tizen
+VERSION="10.0.0 (Tizen10/TV)"
+ID=tizen
+VERSION_ID=10.0.0
+PRETTY_NAME="Tizen 10.0.0 (Tizen10/TV)"
+ANSI_COLOR="0;36"
+CPE_NAME="cpe:/o:tizen:tizen:10.0.0"
+BUILD_ID=T-KSU2EJAKUC-0101-PERF-202611171009
+status=0
++ cat /etc/tizen-release
+Tizen10/TV 10.0.0 (arm)
+VERSION = 10.0.0
+CODENAME = TTEN
+BUILD_ID=T-KSU2EJAKUC-0101-PERF-202611171009
+status=0
++ cat /proc/cpuinfo
+processor	: 0
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 24.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 
+CPU implementer	: 0x41
+CPU architecture: 7
+CPU variant	: 0x0
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 1
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 24.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 
+CPU implementer	: 0x41
+CPU architecture: 7
+CPU variant	: 0x0
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 2
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 24.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 
+CPU implementer	: 0x41
+CPU architecture: 7
+CPU variant	: 0x0
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 3
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 24.00
+Features	: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 
+CPU implementer	: 0x41
+CPU architecture: 7
+CPU variant	: 0x0
+CPU part	: 0xd03
+CPU revision	: 4
+
+Hardware	: Novatek Cortex-A53
+Revision	: 0000
+Serial		: 0000000000000000
+status=0
++ cat /sys/devices/system/cpu/online
+0-3
+status=0
++ cat /sys/devices/system/cpu/present
+0-3
+status=0
++ cat /sys/devices/system/cpu/possible
+0-3
+status=0
++ getconf LONG_BIT
+32
+status=0
++ ls -l /bin/sh
+lrwxrwxrwx 1 root root 4 Nov 12 07:48 /bin/sh -> bash
+status=0
++ od -An -tx1 -N5 /bin/sh
+ 7f 45 4c 46 01
+status=0
+MemTotal:        1601972 kB
++ /proc/device-tree/model
+Novatek NT72671D
++ /proc/device-tree/compatible
+novatek,nt72671d
+nvt,ca53
+__BOARD13_identity_DONE__
+
+=== iomem ===
+=== iomem ===
+  00000000-00000000 : Kernel code
+  00000000-00000000 : Kernel data
+iomem_status=0
+__BOARD13_iomem_DONE__
+
+=== sources ===
+=== sources ===
++ ls -la /sys/bus/coresight/devices/
+ls: cannot access /sys/bus/coresight/devices/: No such file or directory
+status=2
++ ls -la /sys/bus/event_source/devices/
+total 0
+drwxr-xr-x 2 root root 0 Nov 18 21:16 .
+drwxr-xr-x 4 root root 0 Nov 18 21:16 ..
+lrwxrwxrwx 1 root root 0 Nov 18 21:16 armv7_cortex_a7 -> ../../../devices/platform/pmu/armv7_cortex_a7
+lrwxrwxrwx 1 root root 0 Nov 18 21:16 breakpoint -> ../../../devices/breakpoint
+lrwxrwxrwx 1 root root 0 Nov 18 21:16 software -> ../../../devices/software
+lrwxrwxrwx 1 root root 0 Nov 18 21:16 tracepoint -> ../../../devices/tracepoint
+status=0
+__BOARD13_sources_DONE__
+
+=== dmesg ===
+=== dmesg ===
+__BOARD13_dmesg_DONE__
+
+=== configs ===
+=== configs ===
++ ls -l /proc/config.gz
+ls: cannot access /proc/config.gz: No such file or directory
+status=2
+/boot/config-* no visible match
+__BOARD13_configs_DONE__
+
+=== device-tree ===
+NODE /proc/device-tree/parse_leon2
+leon2,parse-leon2
+NODE /proc/device-tree
+novatek,nt72671d
+nvt,ca53
+NODE /proc/device-tree/ahb_clk
+nvt,ahb_clk
+NODE /proc/device-tree/reserved-memory/cma_5
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_3
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_1
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_13
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_11
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_8
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_6
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_4
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/default_cma
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_2
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_14
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_12
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_9
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_10
+shared-dma-pool
+NODE /proc/device-tree/reserved-memory/cma_7
+shared-dma-pool
+NODE /proc/device-tree/cma_va
+nvt_cma
+NODE /proc/device-tree/ntkhdma
+ntk,ntk-hdma
+NODE /proc/device-tree/gpu/power_model@0
+arm,mali-simple-power-model
+NODE /proc/device-tree/gpu
+arm,mali-midgard
+NODE /proc/device-tree/gpu/power_model@1
+arm,mali-g71-power-model
+NODE /proc/device-tree/nvt_usb2_phy@fd184000
+nvt,NT72668-usb2phy
+NODE /proc/device-tree/tztv_frc_tcon
+samsung,tztv-frc-tcon
+NODE /proc/device-tree/cma_osd
+nvt_cma
+NODE /proc/device-tree/periph_clk
+nvt,periph_clk
+NODE /proc/device-tree/i2c@fd000200
+nvt,nt726xx_i2c.2
+NODE /proc/device-tree/uart@fd099000
+ns16550a
+NODE /proc/device-tree/cma_section
+nvt_cma
+NODE /proc/device-tree/cma_subdec
+nvt_cma
+NODE /proc/device-tree/nvt_usb2_phy@fd170000
+nvt,NT72668-usb2phy
+NODE /proc/device-tree/uart@fd090000
+ns16550a
+NODE /proc/device-tree/i2c@fd000500
+nvt,nt726xx_i2c.5
+NODE /proc/device-tree/tztv_system
+samsung,tztv-system
+NODE /proc/device-tree/auth@0xfd770000
+nvt,auth
+NODE /proc/device-tree/cma_pvr
+nvt_cma
+NODE /proc/device-tree/ehci@fc1a0000
+nvt,NT72668-ehci
+NODE /proc/device-tree/clk_mali
+nvt,clk_gpu
+NODE /proc/device-tree/sfc@0xfd081100
+nvt,nvt-sfc.1
+NODE /proc/device-tree/sfc@0xfd081100/demura-flash
+jedec,spi-nor
+spi-nand
+NODE /proc/device-tree/sfc@0xfd081100/tcon-flash
+jedec,spi-nor
+spi-nand
+NODE /proc/device-tree/usben
+samsung,nvt-usben
+NODE /proc/device-tree/psci
+arm,psci-0.2
+NODE /proc/device-tree/ntkxdma
+ntk,ntk-xdma
+NODE /proc/device-tree/nvtstbcgpio@fc040400
+nvt,nvtstbcgpio
+NODE /proc/device-tree/cma_enc_capture
+nvt_cma
+NODE /proc/device-tree/tztv_bootmode@B
+tztv-bootmode
+NODE /proc/device-tree/gpio@fd0f0000
+nvt,nt726xx-gpio
+NODE /proc/device-tree/ndp-qe
+nvt-qe
+NODE /proc/device-tree/i2c@fd000100
+nvt,nt726xx_i2c.1
+NODE /proc/device-tree/decode_leon2
+leon2,decode-leon2
+NODE /proc/device-tree/hdmi-sw
+samsung,tztv-hdmi-sw
+NODE /proc/device-tree/interrupt-controller@ffd00000
+arm,cortex-a7-gic
+PROPERTY reg
+ ff d0 10 00 00 00 10 00 ff d0 20 00 00 00 20 00
+ ff d0 40 00 00 00 20 00 ff d0 60 00 00 00 20 00
+PROPERTY interrupts
+ 00 00 00 01 00 00 00 09 00 00 0f 04
+PROPERTY #interrupt-cells
+ 00 00 00 03
+PROPERTY phandle
+ 00 00 00 01
+NODE /proc/device-tree/tsensor@fd0f0c28
+nvt,tsensor
+NODE /proc/device-tree/i2c@fd000400
+nvt,nt726xx_i2c.4
+NODE /proc/device-tree/i2c@fd000400/tas5747@22
+tas,tas5747
+NODE /proc/device-tree/cma_demux
+nvt_cma
+NODE /proc/device-tree/tztv-micom
+samsung,uart-micom
+NODE /proc/device-tree/ehci@fc1f0000
+nvt,NT72668-ehci
+NODE /proc/device-tree/nvt_irs@fd0ac000
+nvt,nvt-irs
+NODE /proc/device-tree/timer
+arm,armv7-timer
+NODE /proc/device-tree/sfc@0xfd081000
+nvt,nvt-sfc.0
+NODE /proc/device-tree/sfc@0xfd081000/micom-flash
+jedec,spi-nor
+spi-nand
+NODE /proc/device-tree/tztv_kfactory
+samsung,tztv-kfactory
+NODE /proc/device-tree/tztv_jackident
+samsung,tztv-jackident
+NODE /proc/device-tree/nfc@0xfc048000
+nvt,nfc
+NODE /proc/device-tree/cma_videoenc
+nvt_cma
+NODE /proc/device-tree/mmc@fc048300
+nvt,hsmmc
+NODE /proc/device-tree/trustware-cma
+samsung,trustware-cma
+NODE /proc/device-tree/nvt_stbc_ipc@fc040000
+nvt,nvt-stbc-ipc
+NODE /proc/device-tree/nvt-cpufreq
+nvt,nvt72xxx-cpufreq
+NODE /proc/device-tree/tztv_tuner
+samsung,tztv-tuner
+NODE /proc/device-tree/ehci@fc000000
+nvt,NT72668-ehci
+NODE /proc/device-tree/cma_tvkey
+samsung,tvkey_cma
+NODE /proc/device-tree/cma_nagsam
+nvt_cma
+NODE /proc/device-tree/ethernet@fd160000
+nvt,synopsys-mac
+NODE /proc/device-tree/cma_cars
+nvt_cma
+NODE /proc/device-tree/i2c@fd000000
+nvt,nt726xx_i2c.0
+NODE /proc/device-tree/i2c@fd000000/tztv-nvram@50
+nvram,pool
+NODE /proc/device-tree/clk_gen
+nvt,clkgen
+NODE /proc/device-tree/pmu
+arm,cortex-a7-pmu
+PROPERTY interrupts
+ 00 00 00 00 00 00 00 69 00 00 00 04 00 00 00 00
+ 00 00 00 6a 00 00 00 04 00 00 00 00 00 00 00 6b
+ 00 00 00 04 00 00 00 00 00 00 00 6c 00 00 00 04
+PROPERTY interrupt-affinity
+ 00 00 00 0c 00 00 00 0d 00 00 00 0e 00 00 00 0f
+NODE /proc/device-tree/stbc-i2c@fc040a40
+nvt,nt726xx_i2c.7
+NODE /proc/device-tree/cpus/cpu@3
+arm,cortex-a7
+NODE /proc/device-tree/cpus/cpu@1
+arm,cortex-a7
+NODE /proc/device-tree/cpus/cpu@2
+arm,cortex-a7
+NODE /proc/device-tree/cpus/l2-cache0
+cache
+NODE /proc/device-tree/cpus/cpu@0
+arm,cortex-a7
+NODE /proc/device-tree/cma_default
+nvt_cma
+NODE /proc/device-tree/i2c@fd000300
+nvt,nt726xx_i2c.3
+NODE /proc/device-tree/nvt_usb2_phy@fd174000
+nvt,NT72668-usb2phy
+NODE /proc/device-tree/unzip@0xfd6f0000
+nvt,unzip
+NODE /proc/device-tree/atf@0xfd060100
+nvt,atf
+NODE /proc/device-tree/cma_atv
+nvt_cma
+NODE /proc/device-tree/cma_isdb
+nvt_cma
+NODE /proc/device-tree/frc_leon2
+leon2,frc-leon2
+NODE /proc/device-tree/stbc-i2c@fc040a00
+nvt,nt726xx_i2c.6
+NODE /proc/device-tree/nvt_irb@fd0a8000
+nvt,nvt-irb
+find_status=0
+ROOT PROPERTY interrupt-parent
+ 00 00 00 01
+ROOT PROPERTY #address-cells
+ 00 00 00 01
+ROOT PROPERTY #size-cells
+ 00 00 00 01
+__BOARD13_device-tree_DONE__
+
+=== dt-names ===
+directories_scanned=658
+pipeline=0 0
+__BOARD13_DT_NAMES_DONE__
+
+=== pmu-sysfs ===
+=== pmu-sysfs ===
+PMU /sys/bus/event_source/devices/armv7_cortex_a7
+/sys/bus/event_source/devices/armv7_cortex_a7/type = 8
+/sys/bus/event_source/devices/armv7_cortex_a7/cpus = 0-3
+/sys/bus/event_source/devices/armv7_cortex_a7/events/br_immed_retired = event=0x0D
+/sys/bus/event_source/devices/armv7_cortex_a7/events/br_mis_pred = event=0x10
+/sys/bus/event_source/devices/armv7_cortex_a7/events/br_pred = event=0x12
+/sys/bus/event_source/devices/armv7_cortex_a7/events/br_return_retired = event=0x0E
+/sys/bus/event_source/devices/armv7_cortex_a7/events/bus_access = event=0x19
+/sys/bus/event_source/devices/armv7_cortex_a7/events/bus_cycles = event=0x1D
+/sys/bus/event_source/devices/armv7_cortex_a7/events/cid_write_retired = event=0x0B
+/sys/bus/event_source/devices/armv7_cortex_a7/events/cpu_cycles = event=0x11
+/sys/bus/event_source/devices/armv7_cortex_a7/events/exc_return = event=0x0A
+/sys/bus/event_source/devices/armv7_cortex_a7/events/exc_taken = event=0x09
+/sys/bus/event_source/devices/armv7_cortex_a7/events/inst_retired = event=0x08
+/sys/bus/event_source/devices/armv7_cortex_a7/events/inst_spec = event=0x1B
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_cache = event=0x04
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_cache_refill = event=0x03
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_cache_wb = event=0x15
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_tlb_refill = event=0x05
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l1i_cache = event=0x14
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l1i_cache_refill = event=0x01
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l1i_tlb_refill = event=0x02
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l2d_cache = event=0x16
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l2d_cache_refill = event=0x17
+/sys/bus/event_source/devices/armv7_cortex_a7/events/l2d_cache_wb = event=0x18
+/sys/bus/event_source/devices/armv7_cortex_a7/events/ld_retired = event=0x06
+/sys/bus/event_source/devices/armv7_cortex_a7/events/mem_access = event=0x13
+/sys/bus/event_source/devices/armv7_cortex_a7/events/memory_error = event=0x1A
+/sys/bus/event_source/devices/armv7_cortex_a7/events/pc_write_retired = event=0x0C
+/sys/bus/event_source/devices/armv7_cortex_a7/events/st_retired = event=0x07
+/sys/bus/event_source/devices/armv7_cortex_a7/events/sw_incr = event=0x00
+/sys/bus/event_source/devices/armv7_cortex_a7/events/ttbr_write_retired = event=0x1C
+/sys/bus/event_source/devices/armv7_cortex_a7/events/unaligned_ldst_retired = event=0x0F
+/sys/bus/event_source/devices/armv7_cortex_a7/format/event = config:0-7
+PMU /sys/bus/event_source/devices/breakpoint
+/sys/bus/event_source/devices/breakpoint/type = 5
+PMU /sys/bus/event_source/devices/software
+/sys/bus/event_source/devices/software/type = 1
+PMU /sys/bus/event_source/devices/tracepoint
+/sys/bus/event_source/devices/tracepoint/type = 2
+__BOARD13_pmu-sysfs_DONE__
+
+=== perf-permissions ===
+=== perf-permissions ===
++ cat /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict
+2
+1
+status=0
+awk: cmd. line:1: fatal: cannot open file `/proc/kallsyms' for reading (No such file or directory)
+kallsyms_status=2
+PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
++ which perf
+status=1
++ command -v perf
+status=1
+__BOARD13_perf-permissions_DONE__
+
+=== display-and-sessions ===
+=== display-and-sessions ===
++ cat /sys/class/drm/card0-LVDS-1/status
+connected
+status=0
+no match: /sys/class/hdmi/*/status
+no match: /sys/class/display/*/status
++ ls -l /sys/class/drm
+total 0
+lrwxrwxrwx 1 root root    0 Nov 18 21:16 card0 -> ../../devices/platform/ndp-drm/drm/card0
+lrwxrwxrwx 1 root root    0 Nov 18 21:16 card0-LVDS-1 -> ../../devices/platform/ndp-drm/drm/card0/card0-LVDS-1
+lrwxrwxrwx 1 root root    0 Nov 18 21:16 card1 -> ../../devices/platform/ndp-drm-capture/drm/card1
+lrwxrwxrwx 1 root root    0 Nov 18 21:16 renderD128 -> ../../devices/platform/ndp-drm/drm/renderD128
+-r--r--r-- 1 root root 4096 Nov 17 02:03 version
+status=0
++ who
+status=0
+__BOARD13_display-and-sessions_DONE__
+
+=== load ===
+=== load ===
+ PID USER     %CPU %MEM COMMAND
+  83 root      2.3  0.0 zram_bgrecompd
+ 513 root      1.7  0.0 PQ_MPFW_TASK
+  31 root      0.9  0.0 ksoftirqd/2
+  49 root      0.4  0.0 printk
+ 450 root      0.4  0.0 tzdev-tee-threads
+ 539 root      0.3  0.0 SCLR_DP0
+3981 root      0.2  0.0 kworker/u32:2-vd_time_occupy_workqueue
+1368 root      0.2  0.0 RTW_CMD_THREAD
+ 305 root      0.2  0.0 DRV_DBG_UART
+ 461 root      0.1  0.0 DRV_VD
+__BOARD13_load_DONE__
+
+=== temps-cpufreq ===
+=== temps-cpufreq ===
+no match: /sys/class/thermal/thermal_zone*/type
+no match: /sys/class/thermal/thermal_zone*/temp
+/sys/devices/system/cpu/cpufreq/policy0/scaling_governor = performance
+/sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq = 500000
+/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq = 1350000
+/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_min_freq = 500000
+/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq = 1350000
+/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq = 1350000
+/sys/devices/system/cpu/cpufreq/policy0/affected_cpus = 0 1 2 3
+__BOARD13_temps-cpufreq_DONE__
+
+=== cleanup ===
+=== cleanup ===
+uid=5001
+Board probe used stdout only and created no temporary directory.
+__BOARD13_DONE__
+__BOARD13_cleanup_DONE__
+
+=== supplement ===
+uid=5001
+dmesg_pipeline=0 0
+/proc/device-tree/cpus/cpu@0/phandle  00 00 00 0c
+/proc/device-tree/cpus/cpu@0/reg  00 00 00 00
+/proc/device-tree/cpus/cpu@1/phandle  00 00 00 0d
+/proc/device-tree/cpus/cpu@1/reg  00 00 00 01
+/proc/device-tree/cpus/cpu@2/phandle  00 00 00 0e
+/proc/device-tree/cpus/cpu@2/reg  00 00 00 02
+/proc/device-tree/cpus/cpu@3/phandle  00 00 00 0f
+/proc/device-tree/cpus/cpu@3/reg  00 00 00 03
+ 41:      37095          0          0          0 GIC-0 137 Level      arm-pmu       (  10us/  92us) [155674.1119s| +   10250ns]
+ 42:          0      36359          0          0 GIC-0 138 Level      arm-pmu       (   8us/ 129us) [155663.6435s| +    8166ns]
+ 43:          0          0      59130          0 GIC-0 139 Level      arm-pmu       (   9us/  95us) [155676.1018s| +    9000ns]
+ 44:          0          0          0      47286 GIC-0 140 Level      arm-pmu       (  11us/ 132us) [155672.7386s| +   11417ns]
+tztv_mc_debug_print
+__BOARD13_SUPPLEMENT_DONE__
+
+=== root-on ===
+Switched to 'root' account mode
+
+=== root-check-0 ===
+uid=0
+__UID_DONE__
+
+=== iomem-root ===
+0
+  040082c0-04833257 : Kernel code
+  04a34000-04ec8bc7 : Kernel data
+iomem_status=0
+__BOARD13_ROOT_READ_DONE__
+
+=== root-off ===
+Switched to 'sdk user' account mode
+
+=== final-check-0 ===
+uid=5001
+__BOARD13_FINAL_DONE__
+
+=== post ===
+uid=5001
+/proc/net/tcp established=0 listeners=0
+status=0
+/proc/net/tcp6 established=1 listeners=1
+status=0
+/sys/class/drm/card0-LVDS-1/enabled = enabled
+/sys/class/drm/card0-LVDS-1/status = connected
+/sys/devices/system/cpu/cpufreq/policy0/scaling_governor = performance
+__BOARD13_POST_DONE__

@@ -1,0 +1,268 @@
+{
+  "version": {
+    "stdout": "Smart Development Bridge version 4.2.25\n",
+    "source_sha256": {
+      "stdout": "dad49e3128cba9ed107a12933deaf53651627bf5049a607e9bcf865551f75605",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "json": "a21dbec0bfbf63900b968196c62597e3b04c18ed0029c3dab395b17942ba80a6"
+    },
+    "stderr": "",
+    "json": "{\n  \"argv\": [\n    \"sdb\",\n    \"version\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:15:22.681056+00:00\",\n  \"stdout_filtered_to_target\": false\n}\n"
+  },
+  "connect": {
+    "stdout": "192.168.108.13:26101 is already connected\n",
+    "source_sha256": {
+      "stdout": "387efe88834594c9b7a5e0aa4c882f92bdfd41e732c5c2d3d747debe3131b7a3",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "json": "e8e515b89f876bbc4ceff88925fd0dfaff30101098a0a5c653b1be1cc04ab900"
+    },
+    "stderr": "",
+    "json": "{\n  \"argv\": [\n    \"sdb\",\n    \"connect\",\n    \"192.168.108.13:26101\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:15:22.684845+00:00\",\n  \"stdout_filtered_to_target\": false\n}\n"
+  },
+  "devices": {
+    "stdout": "List of devices attached \n192.168.108.13:26101\tdevice    \t0\n",
+    "source_sha256": {
+      "stdout": "6ad49c9d5a63f8f364efc26628180a9ba081d5bff2158fb93ba0b665515b41ae",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": ""
+  },
+  "probe": {
+    "stdout": "",
+    "source_sha256": {
+      "stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "34ee6558335709c98730907902607fedb577258ee9db6cd2e557b72932179cea",
+      "sh": "eae1f0fbc76b15f92fac36bdf17b544ffd9d7fde7af757ab974bf3147626a99d"
+    },
+    "stderr": "error: service name too long\n",
+    "sh": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection identity\nobserve id -u\nobserve uname -a\nobserve uname -m\nfor f in /etc/os-release /etc/tizen-release /proc/cpuinfo /sys/devices/system/cpu/online /sys/devices/system/cpu/present /sys/devices/system/cpu/possible; do observe cat \"$f\"; done\nobserve getconf LONG_BIT\nobserve ls -l /bin/sh\nobserve od -An -tx1 -N5 /bin/sh\ngrep '^MemTotal:' /proc/meminfo\nfor f in /proc/device-tree/model /proc/device-tree/compatible; do\n printf '+ %s\\n' \"$f\"\n tr '\\000' '\\n' < \"$f\"\ndone\nsection iomem\nawk 'tolower($0) ~ /kernel code|kernel data|debug|coresight|trace|etm|ptm|funnel|replicator|etb|etf|etr|tmc|tpiu|\\<cti\\>/' /proc/iomem\nprintf 'iomem_status=%s\\n' \"$?\"\nsection sources\nobserve ls -la /sys/bus/coresight/devices/\nobserve ls -la /sys/bus/event_source/devices/\nsection dmesg\ndmesg 2>&1 | awk 'tolower($0) ~ /coresight|(^|[^[:alnum:]_])(etm|ptm|cti|tmc|tpiu)([^[:alnum:]_]|$)|hw perfevents|permission denied|operation not permitted|failed to read/'\nsection configs\npat='^(# )?CONFIG_(CORESIGHT[^ =]*|PERF_EVENTS|HW_PERF_EVENTS|ARM_PMU[^ =]*|KALLSYMS[^ =]*|DEBUG_INFO[^ =]*|ARM_LPAE|STRICT_KERNEL_RWX|THUMB2_KERNEL|ARM64_PSEUDO_NMI)([ =]|$)'\nobserve ls -l /proc/config.gz\nif test -r /proc/config.gz; then printf '+ zcat /proc/config.gz | grep CONFIG\\n'; zcat /proc/config.gz | grep -E \"$pat\"; fi\nfor f in /boot/config-*; do if test -e \"$f\"; then observe ls -l \"$f\"; grep -E \"$pat\" \"$f\"; else echo '/boot/config-* no visible match'; fi; done\nsection pmu-sysfs\nfor d in /sys/bus/event_source/devices/*; do\n printf 'PMU %s\\n' \"$d\"\n for f in \"$d/type\" \"$d/cpus\" \"$d/cpumask\" \"$d\"/events/* \"$d\"/format/*; do if test -f \"$f\"; then printf '%s = ' \"$f\"; cat \"$f\"; fi; done\ndone\nsection perf-permissions\nobserve cat /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict\nawk '{n++; if ($1 ~ /^0+$/) zero++; else nonzero++} END {printf \"kallsyms rows=%d zero=%d nonzero=%d\\n\", n,zero,nonzero}' /proc/kallsyms\nprintf 'kallsyms_status=%s\\n' \"$?\"\nprintf 'PATH=%s\\n' \"$PATH\"\nobserve which perf\nobserve command -v perf\nif command -v perf >/dev/null 2>&1; then observe perf --version; observe perf version --build-options; fi\nsection display-and-sessions\nps -eo comm | grep -Ei 'enlightenment|weston|sway|kwin|mutter|labwc|wayfire|xorg|xwayland|surfaceflinger|compositor'\nfor f in /sys/class/drm/*/status /sys/class/hdmi/*/status /sys/class/display/*/status; do if test -e \"$f\"; then observe cat \"$f\"; else printf 'no match: %s\\n' \"$f\"; fi; done\nobserve ls -l /sys/class/drm\nobserve who\nsection load\nps -eo pid,user,pcpu,pmem,comm --sort=-pcpu | head -n 11\nsection temps-cpufreq\nfor f in /sys/class/thermal/thermal_zone*/type /sys/class/thermal/thermal_zone*/temp /sys/devices/system/cpu/cpufreq/policy*/scaling_governor /sys/devices/system/cpu/cpufreq/policy*/scaling_min_freq /sys/devices/system/cpu/cpufreq/policy*/scaling_max_freq /sys/devices/system/cpu/cpufreq/policy*/cpuinfo_min_freq /sys/devices/system/cpu/cpufreq/policy*/cpuinfo_max_freq /sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq /sys/devices/system/cpu/cpufreq/policy*/affected_cpus; do\n if test -e \"$f\"; then printf '%s = ' \"$f\"; cat \"$f\"; else echo \"no match: $f\"; fi\ndone\nsection cleanup\nprintf 'uid='; id -u\nprintf 'Board probe used stdout only and created no temporary directory.\\n'\nprintf '__BOARD13_DONE__\\n'\n"
+  },
+  "identity": {
+    "stdout": "\r\n=== identity ===\r\n+ id -u\r\n5001\r\nstatus=0\r\n+ uname -a\r\nLinux localhost 6.12.60 #1 SMP PREEMPT Mon Nov 16 20:15:36 UTC 2026 armv7l GNU/Linux\r\nstatus=0\r\n+ uname -m\r\narmv7l\r\nstatus=0\r\n+ cat /etc/os-release\r\nNAME=Tizen\r\nVERSION=\"10.0.0 (Tizen10/TV)\"\r\nID=tizen\r\nVERSION_ID=10.0.0\r\nPRETTY_NAME=\"Tizen 10.0.0 (Tizen10/TV)\"\r\nANSI_COLOR=\"0;36\"\r\nCPE_NAME=\"cpe:/o:tizen:tizen:10.0.0\"\r\nBUILD_ID=T-KSU2EJAKUC-0101-PERF-202611171009\r\nstatus=0\r\n+ cat /etc/tizen-release\r\nTizen10/TV 10.0.0 (arm)\r\nVERSION = 10.0.0\r\nCODENAME = TTEN\r\nBUILD_ID=T-KSU2EJAKUC-0101-PERF-202611171009\r\nstatus=0\r\n+ cat /proc/cpuinfo\r\nprocessor\t: 0\r\nmodel name\t: ARMv7 Processor rev 4 (v7l)\r\nBogoMIPS\t: 24.00\r\nFeatures\t: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 \r\nCPU implementer\t: 0x41\r\nCPU architecture: 7\r\nCPU variant\t: 0x0\r\nCPU part\t: 0xd03\r\nCPU revision\t: 4\r\n\r\nprocessor\t: 1\r\nmodel name\t: ARMv7 Processor rev 4 (v7l)\r\nBogoMIPS\t: 24.00\r\nFeatures\t: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 \r\nCPU implementer\t: 0x41\r\nCPU architecture: 7\r\nCPU variant\t: 0x0\r\nCPU part\t: 0xd03\r\nCPU revision\t: 4\r\n\r\nprocessor\t: 2\r\nmodel name\t: ARMv7 Processor rev 4 (v7l)\r\nBogoMIPS\t: 24.00\r\nFeatures\t: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 \r\nCPU implementer\t: 0x41\r\nCPU architecture: 7\r\nCPU variant\t: 0x0\r\nCPU part\t: 0xd03\r\nCPU revision\t: 4\r\n\r\nprocessor\t: 3\r\nmodel name\t: ARMv7 Processor rev 4 (v7l)\r\nBogoMIPS\t: 24.00\r\nFeatures\t: half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm aes pmull sha1 sha2 crc32 \r\nCPU implementer\t: 0x41\r\nCPU architecture: 7\r\nCPU variant\t: 0x0\r\nCPU part\t: 0xd03\r\nCPU revision\t: 4\r\n\r\nHardware\t: Novatek Cortex-A53\r\nRevision\t: 0000\r\nSerial\t\t: 0000000000000000\r\nstatus=0\r\n+ cat /sys/devices/system/cpu/online\r\n0-3\r\nstatus=0\r\n+ cat /sys/devices/system/cpu/present\r\n0-3\r\nstatus=0\r\n+ cat /sys/devices/system/cpu/possible\r\n0-3\r\nstatus=0\r\n+ getconf LONG_BIT\r\n32\r\nstatus=0\r\n+ ls -l /bin/sh\r\nlrwxrwxrwx 1 root root 4 Nov 12 07:48 /bin/sh -> bash\r\nstatus=0\r\n+ od -An -tx1 -N5 /bin/sh\r\n 7f 45 4c 46 01\r\nstatus=0\r\nMemTotal:        1601972 kB\r\n+ /proc/device-tree/model\r\nNovatek NT72671D\r\n+ /proc/device-tree/compatible\r\nnovatek,nt72671d\r\nnvt,ca53\r\n__BOARD13_identity_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "5f73adbed584774175b38ccf0b3de7815dec10de6542e9e8827d204f3f0c169b",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "9fa63a63ebdcf11bedfa06dcd29b537212c9723f71338ef8f39a452e8d8d42db",
+      "command": "c0f97fe4eddfa314e38a6673b2ab78ab1fdd642ccb16d04fdd7489a6d80cfd93"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_identity_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection identity\nobserve id -u\nobserve uname -a\nobserve uname -m\nfor f in /etc/os-release /etc/tizen-release /proc/cpuinfo /sys/devices/system/cpu/online /sys/devices/system/cpu/present /sys/devices/system/cpu/possible; do observe cat \"$f\"; done\nobserve getconf LONG_BIT\nobserve ls -l /bin/sh\nobserve od -An -tx1 -N5 /bin/sh\ngrep '^MemTotal:' /proc/meminfo\nfor f in /proc/device-tree/model /proc/device-tree/compatible; do\n printf '+ %s\\n' \"$f\"\n tr '\\000' '\\n' < \"$f\"\ndone\n\nprintf '%s\\n' '__BOARD13_identity_DONE__'\n"
+  },
+  "iomem": {
+    "stdout": "\r\n=== iomem ===\r\n  00000000-00000000 : Kernel code\r\n  00000000-00000000 : Kernel data\r\niomem_status=0\r\n__BOARD13_iomem_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "fd953df20d387cd16e96c20e24d9f6e338aa23c91bc1fbe0e1fa7af695083bdc",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "bab4e20bbbaf9c938e98b4a6a490137ef8600f2f659ecbd701e219410c65da77",
+      "command": "bd522905cc151d8997fba93c79c6ead8999f923e6b0a15e6b447a0a0eb9bce40"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_iomem_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection iomem\nawk 'tolower($0) ~ /kernel code|kernel data|debug|coresight|trace|etm|ptm|funnel|replicator|etb|etf|etr|tmc|tpiu|\\<cti\\>/' /proc/iomem\nprintf 'iomem_status=%s\\n' \"$?\"\n\nprintf '%s\\n' '__BOARD13_iomem_DONE__'\n"
+  },
+  "sources": {
+    "stdout": "\r\n=== sources ===\r\n+ ls -la /sys/bus/coresight/devices/\r\nls: cannot access /sys/bus/coresight/devices/: No such file or directory\r\nstatus=2\r\n+ ls -la /sys/bus/event_source/devices/\r\ntotal 0\r\ndrwxr-xr-x 2 root root 0 Nov 18 21:16 .\r\ndrwxr-xr-x 4 root root 0 Nov 18 21:16 ..\r\nlrwxrwxrwx 1 root root 0 Nov 18 21:16 armv7_cortex_a7 -> ../../../devices/platform/pmu/armv7_cortex_a7\r\nlrwxrwxrwx 1 root root 0 Nov 18 21:16 breakpoint -> ../../../devices/breakpoint\r\nlrwxrwxrwx 1 root root 0 Nov 18 21:16 software -> ../../../devices/software\r\nlrwxrwxrwx 1 root root 0 Nov 18 21:16 tracepoint -> ../../../devices/tracepoint\r\nstatus=0\r\n__BOARD13_sources_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "fdfe2036850a8a8f338dd3ce8a189d0e703168640664806220b3560c9d5c1623",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "7863fb4bfae6af4b2606f6c8a2e2712aa60a0a897e26a6913f15c8b63ac2685f",
+      "command": "fa39ff4ab84c8aa2e36f54fa6bf586ebb6ef5d7108e6647281507d7a2fea56eb"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_sources_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection sources\nobserve ls -la /sys/bus/coresight/devices/\nobserve ls -la /sys/bus/event_source/devices/\n\nprintf '%s\\n' '__BOARD13_sources_DONE__'\n"
+  },
+  "dmesg": {
+    "stdout": "\r\n=== dmesg ===\r\n__BOARD13_dmesg_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "d8d9a6a3b3d56bdc5a0563102366b22f0ec16900961706408ec22fc75def9a2b",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "04c7d3a6a2c0148419f34b2232b7a264c3bfadbe3f9e09aaaec39b5631333c8c",
+      "command": "3e6fb1ee453ef8953f0b40ad5c523aa5cb49a8fbfb24a8c2d75486d8e7899517"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_dmesg_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection dmesg\ndmesg 2>&1 | awk 'tolower($0) ~ /coresight|(^|[^[:alnum:]_])(etm|ptm|cti|tmc|tpiu)([^[:alnum:]_]|$)|hw perfevents|permission denied|operation not permitted|failed to read/'\n\nprintf '%s\\n' '__BOARD13_dmesg_DONE__'\n"
+  },
+  "configs": {
+    "stdout": "\r\n=== configs ===\r\n+ ls -l /proc/config.gz\r\nls: cannot access /proc/config.gz: No such file or directory\r\nstatus=2\r\n/boot/config-* no visible match\r\n__BOARD13_configs_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "604b5b9b122c6c4cb7386453069d79ba7a45a8ea7338aae2453d5572aa8c2077",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "9195222c452370a1bba54d89e200f4144dab388d41fc3f76cdb58c7f0e18e7e5",
+      "command": "57eaf491d6171472331bfdccce88453b174eb1244958bee6d8d0977771cbfc6a"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_configs_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection configs\npat='^(# )?CONFIG_(CORESIGHT[^ =]*|PERF_EVENTS|HW_PERF_EVENTS|ARM_PMU[^ =]*|KALLSYMS[^ =]*|DEBUG_INFO[^ =]*|ARM_LPAE|STRICT_KERNEL_RWX|THUMB2_KERNEL|ARM64_PSEUDO_NMI)([ =]|$)'\nobserve ls -l /proc/config.gz\nif test -r /proc/config.gz; then printf '+ zcat /proc/config.gz | grep CONFIG\\n'; zcat /proc/config.gz | grep -E \"$pat\"; fi\nfor f in /boot/config-*; do if test -e \"$f\"; then observe ls -l \"$f\"; grep -E \"$pat\" \"$f\"; else echo '/boot/config-* no visible match'; fi; done\n\nprintf '%s\\n' '__BOARD13_configs_DONE__'\n"
+  },
+  "device-tree": {
+    "stdout": "NODE /proc/device-tree/parse_leon2\r\nleon2,parse-leon2\r\nNODE /proc/device-tree\r\nnovatek,nt72671d\r\nnvt,ca53\r\nNODE /proc/device-tree/ahb_clk\r\nnvt,ahb_clk\r\nNODE /proc/device-tree/reserved-memory/cma_5\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_3\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_1\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_13\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_11\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_8\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_6\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_4\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/default_cma\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_2\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_14\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_12\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_9\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_10\r\nshared-dma-pool\r\nNODE /proc/device-tree/reserved-memory/cma_7\r\nshared-dma-pool\r\nNODE /proc/device-tree/cma_va\r\nnvt_cma\r\nNODE /proc/device-tree/ntkhdma\r\nntk,ntk-hdma\r\nNODE /proc/device-tree/gpu/power_model@0\r\narm,mali-simple-power-model\r\nNODE /proc/device-tree/gpu\r\narm,mali-midgard\r\nNODE /proc/device-tree/gpu/power_model@1\r\narm,mali-g71-power-model\r\nNODE /proc/device-tree/nvt_usb2_phy@fd184000\r\nnvt,NT72668-usb2phy\r\nNODE /proc/device-tree/tztv_frc_tcon\r\nsamsung,tztv-frc-tcon\r\nNODE /proc/device-tree/cma_osd\r\nnvt_cma\r\nNODE /proc/device-tree/periph_clk\r\nnvt,periph_clk\r\nNODE /proc/device-tree/i2c@fd000200\r\nnvt,nt726xx_i2c.2\r\nNODE /proc/device-tree/uart@fd099000\r\nns16550a\r\nNODE /proc/device-tree/cma_section\r\nnvt_cma\r\nNODE /proc/device-tree/cma_subdec\r\nnvt_cma\r\nNODE /proc/device-tree/nvt_usb2_phy@fd170000\r\nnvt,NT72668-usb2phy\r\nNODE /proc/device-tree/uart@fd090000\r\nns16550a\r\nNODE /proc/device-tree/i2c@fd000500\r\nnvt,nt726xx_i2c.5\r\nNODE /proc/device-tree/tztv_system\r\nsamsung,tztv-system\r\nNODE /proc/device-tree/auth@0xfd770000\r\nnvt,auth\r\nNODE /proc/device-tree/cma_pvr\r\nnvt_cma\r\nNODE /proc/device-tree/ehci@fc1a0000\r\nnvt,NT72668-ehci\r\nNODE /proc/device-tree/clk_mali\r\nnvt,clk_gpu\r\nNODE /proc/device-tree/sfc@0xfd081100\r\nnvt,nvt-sfc.1\r\nNODE /proc/device-tree/sfc@0xfd081100/demura-flash\r\njedec,spi-nor\r\nspi-nand\r\nNODE /proc/device-tree/sfc@0xfd081100/tcon-flash\r\njedec,spi-nor\r\nspi-nand\r\nNODE /proc/device-tree/usben\r\nsamsung,nvt-usben\r\nNODE /proc/device-tree/psci\r\narm,psci-0.2\r\nNODE /proc/device-tree/ntkxdma\r\nntk,ntk-xdma\r\nNODE /proc/device-tree/nvtstbcgpio@fc040400\r\nnvt,nvtstbcgpio\r\nNODE /proc/device-tree/cma_enc_capture\r\nnvt_cma\r\nNODE /proc/device-tree/tztv_bootmode@B\r\ntztv-bootmode\r\nNODE /proc/device-tree/gpio@fd0f0000\r\nnvt,nt726xx-gpio\r\nNODE /proc/device-tree/ndp-qe\r\nnvt-qe\r\nNODE /proc/device-tree/i2c@fd000100\r\nnvt,nt726xx_i2c.1\r\nNODE /proc/device-tree/decode_leon2\r\nleon2,decode-leon2\r\nNODE /proc/device-tree/hdmi-sw\r\nsamsung,tztv-hdmi-sw\r\nNODE /proc/device-tree/interrupt-controller@ffd00000\r\narm,cortex-a7-gic\r\nPROPERTY reg\r\n ff d0 10 00 00 00 10 00 ff d0 20 00 00 00 20 00\r\n ff d0 40 00 00 00 20 00 ff d0 60 00 00 00 20 00\r\nPROPERTY interrupts\r\n 00 00 00 01 00 00 00 09 00 00 0f 04\r\nPROPERTY #interrupt-cells\r\n 00 00 00 03\r\nPROPERTY phandle\r\n 00 00 00 01\r\nNODE /proc/device-tree/tsensor@fd0f0c28\r\nnvt,tsensor\r\nNODE /proc/device-tree/i2c@fd000400\r\nnvt,nt726xx_i2c.4\r\nNODE /proc/device-tree/i2c@fd000400/tas5747@22\r\ntas,tas5747\r\nNODE /proc/device-tree/cma_demux\r\nnvt_cma\r\nNODE /proc/device-tree/tztv-micom\r\nsamsung,uart-micom\r\nNODE /proc/device-tree/ehci@fc1f0000\r\nnvt,NT72668-ehci\r\nNODE /proc/device-tree/nvt_irs@fd0ac000\r\nnvt,nvt-irs\r\nNODE /proc/device-tree/timer\r\narm,armv7-timer\r\nNODE /proc/device-tree/sfc@0xfd081000\r\nnvt,nvt-sfc.0\r\nNODE /proc/device-tree/sfc@0xfd081000/micom-flash\r\njedec,spi-nor\r\nspi-nand\r\nNODE /proc/device-tree/tztv_kfactory\r\nsamsung,tztv-kfactory\r\nNODE /proc/device-tree/tztv_jackident\r\nsamsung,tztv-jackident\r\nNODE /proc/device-tree/nfc@0xfc048000\r\nnvt,nfc\r\nNODE /proc/device-tree/cma_videoenc\r\nnvt_cma\r\nNODE /proc/device-tree/mmc@fc048300\r\nnvt,hsmmc\r\nNODE /proc/device-tree/trustware-cma\r\nsamsung,trustware-cma\r\nNODE /proc/device-tree/nvt_stbc_ipc@fc040000\r\nnvt,nvt-stbc-ipc\r\nNODE /proc/device-tree/nvt-cpufreq\r\nnvt,nvt72xxx-cpufreq\r\nNODE /proc/device-tree/tztv_tuner\r\nsamsung,tztv-tuner\r\nNODE /proc/device-tree/ehci@fc000000\r\nnvt,NT72668-ehci\r\nNODE /proc/device-tree/cma_tvkey\r\nsamsung,tvkey_cma\r\nNODE /proc/device-tree/cma_nagsam\r\nnvt_cma\r\nNODE /proc/device-tree/ethernet@fd160000\r\nnvt,synopsys-mac\r\nNODE /proc/device-tree/cma_cars\r\nnvt_cma\r\nNODE /proc/device-tree/i2c@fd000000\r\nnvt,nt726xx_i2c.0\r\nNODE /proc/device-tree/i2c@fd000000/tztv-nvram@50\r\nnvram,pool\r\nNODE /proc/device-tree/clk_gen\r\nnvt,clkgen\r\nNODE /proc/device-tree/pmu\r\narm,cortex-a7-pmu\r\nPROPERTY interrupts\r\n 00 00 00 00 00 00 00 69 00 00 00 04 00 00 00 00\r\n 00 00 00 6a 00 00 00 04 00 00 00 00 00 00 00 6b\r\n 00 00 00 04 00 00 00 00 00 00 00 6c 00 00 00 04\r\nPROPERTY interrupt-affinity\r\n 00 00 00 0c 00 00 00 0d 00 00 00 0e 00 00 00 0f\r\nNODE /proc/device-tree/stbc-i2c@fc040a40\r\nnvt,nt726xx_i2c.7\r\nNODE /proc/device-tree/cpus/cpu@3\r\narm,cortex-a7\r\nNODE /proc/device-tree/cpus/cpu@1\r\narm,cortex-a7\r\nNODE /proc/device-tree/cpus/cpu@2\r\narm,cortex-a7\r\nNODE /proc/device-tree/cpus/l2-cache0\r\ncache\r\nNODE /proc/device-tree/cpus/cpu@0\r\narm,cortex-a7\r\nNODE /proc/device-tree/cma_default\r\nnvt_cma\r\nNODE /proc/device-tree/i2c@fd000300\r\nnvt,nt726xx_i2c.3\r\nNODE /proc/device-tree/nvt_usb2_phy@fd174000\r\nnvt,NT72668-usb2phy\r\nNODE /proc/device-tree/unzip@0xfd6f0000\r\nnvt,unzip\r\nNODE /proc/device-tree/atf@0xfd060100\r\nnvt,atf\r\nNODE /proc/device-tree/cma_atv\r\nnvt_cma\r\nNODE /proc/device-tree/cma_isdb\r\nnvt_cma\r\nNODE /proc/device-tree/frc_leon2\r\nleon2,frc-leon2\r\nNODE /proc/device-tree/stbc-i2c@fc040a00\r\nnvt,nt726xx_i2c.6\r\nNODE /proc/device-tree/nvt_irb@fd0a8000\r\nnvt,nvt-irb\r\nfind_status=0\r\nROOT PROPERTY interrupt-parent\r\n 00 00 00 01\r\nROOT PROPERTY #address-cells\r\n 00 00 00 01\r\nROOT PROPERTY #size-cells\r\n 00 00 00 01\r\n__BOARD13_device-tree_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "1c8dbd19344c35d72b572197f1c6bc6c7a63707ca15673e9bb3501686103e473",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "93669a95f86989dfcac188ee57a0561c06ddae948f67dc5f79a835298f520654",
+      "command": "35ab8889da46fc8e905d93948ceb36a36449e6620b13a73bb7b49ea58dec7fd0"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_device-tree_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nfind -L /proc/device-tree -type f -name compatible -exec sh -c '\nfor f do\n d=${f%/compatible}\n c=$(tr \"\\000\" \"\\n\" < \"$f\")\n printf \"NODE %s\\n%s\\n\" \"$d\" \"$c\"\n if printf \"%s\\n%s\\n\" \"${d##*/}\" \"$c\" | grep -qiE \"coresight|(^|[^a-z])(etm|ptm|funnel|replicator|etb|etf|etr|tmc|tpiu|stm|cti|pmu)([^a-z]|$)|gic\"; then\n  for name in reg interrupts interrupts-extended interrupt-parent \"#interrupt-cells\" phandle linux,phandle interrupt-names interrupt-affinity status; do\n   if test -r \"$d/$name\"; then printf \"PROPERTY %s\\n\" \"$name\"; od -An -v -tx1 \"$d/$name\"; fi\n  done\n fi\ndone' sh {} +\nprintf 'find_status=%s\\n' \"$?\"\nfor name in interrupt-parent '#address-cells' '#size-cells'; do\n f=/proc/device-tree/$name\n if test -r \"$f\"; then printf 'ROOT PROPERTY %s\\n' \"$name\"; od -An -v -tx1 \"$f\"; fi\ndone\n\nprintf '%s\\n' '__BOARD13_device-tree_DONE__'\n"
+  },
+  "dt-names": {
+    "stdout": "directories_scanned=658\r\npipeline=0 0\r\n__BOARD13_DT_NAMES_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "5ff92a455a960c3982db557a8ef595982a80575f1fa471f76b779ab87077b744",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "b9a9f2b527e57115b6394e4f7ca2815f12b8b015ef9d11a3cb26ab186741d5e4",
+      "command": "e34196532086262d19d98155811eb9203171dd008f673b8232b3abc61dffa85f"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0}\n",
+    "command": "find -L /proc/device-tree -type d -print | awk '\n{n++; node=tolower($0); sub(/^.*\\//,\"\",node); if (node ~ /coresight|(^|[^a-z])(etm|ptm|funnel|replicator|etb|etf|etr|tmc|tpiu|stm|cti)[0-9]*([^a-z]|$)/) print}\nEND {print \"directories_scanned=\" n}'\nprintf 'pipeline=%s\\n' \"${PIPESTATUS[*]}\"\nprintf '__BOARD13_DT_NAMES_DONE__\\n'\n"
+  },
+  "pmu-sysfs": {
+    "stdout": "\r\n=== pmu-sysfs ===\r\nPMU /sys/bus/event_source/devices/armv7_cortex_a7\r\n/sys/bus/event_source/devices/armv7_cortex_a7/type = 8\r\n/sys/bus/event_source/devices/armv7_cortex_a7/cpus = 0-3\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/br_immed_retired = event=0x0D\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/br_mis_pred = event=0x10\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/br_pred = event=0x12\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/br_return_retired = event=0x0E\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/bus_access = event=0x19\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/bus_cycles = event=0x1D\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/cid_write_retired = event=0x0B\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/cpu_cycles = event=0x11\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/exc_return = event=0x0A\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/exc_taken = event=0x09\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/inst_retired = event=0x08\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/inst_spec = event=0x1B\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_cache = event=0x04\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_cache_refill = event=0x03\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_cache_wb = event=0x15\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l1d_tlb_refill = event=0x05\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l1i_cache = event=0x14\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l1i_cache_refill = event=0x01\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l1i_tlb_refill = event=0x02\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l2d_cache = event=0x16\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l2d_cache_refill = event=0x17\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/l2d_cache_wb = event=0x18\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/ld_retired = event=0x06\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/mem_access = event=0x13\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/memory_error = event=0x1A\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/pc_write_retired = event=0x0C\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/st_retired = event=0x07\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/sw_incr = event=0x00\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/ttbr_write_retired = event=0x1C\r\n/sys/bus/event_source/devices/armv7_cortex_a7/events/unaligned_ldst_retired = event=0x0F\r\n/sys/bus/event_source/devices/armv7_cortex_a7/format/event = config:0-7\r\nPMU /sys/bus/event_source/devices/breakpoint\r\n/sys/bus/event_source/devices/breakpoint/type = 5\r\nPMU /sys/bus/event_source/devices/software\r\n/sys/bus/event_source/devices/software/type = 1\r\nPMU /sys/bus/event_source/devices/tracepoint\r\n/sys/bus/event_source/devices/tracepoint/type = 2\r\n__BOARD13_pmu-sysfs_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "d822c71dda54cacdb0b47e4405ed9f819fb762dac7fed0bb3695d2ca5e45c367",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "de1ba50a2336614504cecf61a72e62cf1c32f9c37198bf6c7fc176802e9079b8",
+      "command": "ca5d83393b4dc8999679bc72b79a303b4558e8b754f052fd94b998be1e4a6d17"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_pmu-sysfs_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection pmu-sysfs\nfor d in /sys/bus/event_source/devices/*; do\n printf 'PMU %s\\n' \"$d\"\n for f in \"$d/type\" \"$d/cpus\" \"$d/cpumask\" \"$d\"/events/* \"$d\"/format/*; do if test -f \"$f\"; then printf '%s = ' \"$f\"; cat \"$f\"; fi; done\ndone\n\nprintf '%s\\n' '__BOARD13_pmu-sysfs_DONE__'\n"
+  },
+  "perf-permissions": {
+    "stdout": "\r\n=== perf-permissions ===\r\n+ cat /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict\r\n2\r\n1\r\nstatus=0\r\nawk: cmd. line:1: fatal: cannot open file `/proc/kallsyms' for reading (No such file or directory)\r\nkallsyms_status=2\r\nPATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games\r\n+ which perf\r\nstatus=1\r\n+ command -v perf\r\nstatus=1\r\n__BOARD13_perf-permissions_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "b28affe5f45bce7e126598a1ec1761993dd404f95bc2308be7cb7dc818566c9e",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "b3936b73189c5d965c765dce72031f6879bbc25c7d7eff057c0822f58d96ba61",
+      "command": "deb95e5d1aebfa9a7e22577b0fe732491bf1963903ef98d7b638abba3beb14c9"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_perf-permissions_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection perf-permissions\nobserve cat /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict\nawk '{n++; if ($1 ~ /^0+$/) zero++; else nonzero++} END {printf \"kallsyms rows=%d zero=%d nonzero=%d\\n\", n,zero,nonzero}' /proc/kallsyms\nprintf 'kallsyms_status=%s\\n' \"$?\"\nprintf 'PATH=%s\\n' \"$PATH\"\nobserve which perf\nobserve command -v perf\nif command -v perf >/dev/null 2>&1; then observe perf --version; observe perf version --build-options; fi\n\nprintf '%s\\n' '__BOARD13_perf-permissions_DONE__'\n"
+  },
+  "display-and-sessions": {
+    "stdout": "\r\n=== display-and-sessions ===\r\n+ cat /sys/class/drm/card0-LVDS-1/status\r\nconnected\r\nstatus=0\r\nno match: /sys/class/hdmi/*/status\r\nno match: /sys/class/display/*/status\r\n+ ls -l /sys/class/drm\r\ntotal 0\r\nlrwxrwxrwx 1 root root    0 Nov 18 21:16 card0 -> ../../devices/platform/ndp-drm/drm/card0\r\nlrwxrwxrwx 1 root root    0 Nov 18 21:16 card0-LVDS-1 -> ../../devices/platform/ndp-drm/drm/card0/card0-LVDS-1\r\nlrwxrwxrwx 1 root root    0 Nov 18 21:16 card1 -> ../../devices/platform/ndp-drm-capture/drm/card1\r\nlrwxrwxrwx 1 root root    0 Nov 18 21:16 renderD128 -> ../../devices/platform/ndp-drm/drm/renderD128\r\n-r--r--r-- 1 root root 4096 Nov 17 02:03 version\r\nstatus=0\r\n+ who\r\nstatus=0\r\n__BOARD13_display-and-sessions_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "8ff422f0641d5eb9dff503430efbb616b8a013874d75c9d4bedf9c8406674d0a",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "14619e41923700b7122f2d0b16e2fd76feace986624bc240e19c3a24c2890dd5",
+      "command": "79af9eb9f2302d315030734592c30c93426b8082a0126f1e1b6761f49519c25f"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_display-and-sessions_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection display-and-sessions\nps -eo comm | grep -Ei 'enlightenment|weston|sway|kwin|mutter|labwc|wayfire|xorg|xwayland|surfaceflinger|compositor'\nfor f in /sys/class/drm/*/status /sys/class/hdmi/*/status /sys/class/display/*/status; do if test -e \"$f\"; then observe cat \"$f\"; else printf 'no match: %s\\n' \"$f\"; fi; done\nobserve ls -l /sys/class/drm\nobserve who\n\nprintf '%s\\n' '__BOARD13_display-and-sessions_DONE__'\n"
+  },
+  "load": {
+    "stdout": "\r\n=== load ===\r\n PID USER     %CPU %MEM COMMAND\r\n  83 root      2.3  0.0 zram_bgrecompd\r\n 513 root      1.7  0.0 PQ_MPFW_TASK\r\n  31 root      0.9  0.0 ksoftirqd/2\r\n  49 root      0.4  0.0 printk\r\n 450 root      0.4  0.0 tzdev-tee-threads\r\n 539 root      0.3  0.0 SCLR_DP0\r\n3981 root      0.2  0.0 kworker/u32:2-vd_time_occupy_workqueue\r\n1368 root      0.2  0.0 RTW_CMD_THREAD\r\n 305 root      0.2  0.0 DRV_DBG_UART\r\n 461 root      0.1  0.0 DRV_VD\r\n__BOARD13_load_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "c248c70ca9d86363fcb1e38068b43c57ada0c4ca614f3f8fb760a31997d44d75",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "df10d2f6791d48ce1ffb6861d4ab2ecdc375de76711ddd54e95aa0d8a261b1e0",
+      "command": "3fd479432c8cfb7bca880874f8fd1efb0d187b336dd0fe305b9def3cb76e39f7"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_load_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection load\nps -eo pid,user,pcpu,pmem,comm --sort=-pcpu | head -n 11\n\nprintf '%s\\n' '__BOARD13_load_DONE__'\n"
+  },
+  "temps-cpufreq": {
+    "stdout": "\r\n=== temps-cpufreq ===\r\nno match: /sys/class/thermal/thermal_zone*/type\r\nno match: /sys/class/thermal/thermal_zone*/temp\r\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor = performance\r\n/sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq = 500000\r\n/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq = 1350000\r\n/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_min_freq = 500000\r\n/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq = 1350000\r\n/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq = 1350000\r\n/sys/devices/system/cpu/cpufreq/policy0/affected_cpus = 0 1 2 3\r\n__BOARD13_temps-cpufreq_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "c8d810c678dcd9ecbc78f15586d9b6ff147c09c1df193c0d48a76327c111c3a7",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "444d680817d25040b8c2f5a18be2302b902bd181b4e20e3f1fbbdcaaa1e10a51",
+      "command": "0b0407e6e3be74908fd5ff98cf0b14473ac1822ed9d00e4e951bbdf82ca226c2"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_temps-cpufreq_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection temps-cpufreq\nfor f in /sys/class/thermal/thermal_zone*/type /sys/class/thermal/thermal_zone*/temp /sys/devices/system/cpu/cpufreq/policy*/scaling_governor /sys/devices/system/cpu/cpufreq/policy*/scaling_min_freq /sys/devices/system/cpu/cpufreq/policy*/scaling_max_freq /sys/devices/system/cpu/cpufreq/policy*/cpuinfo_min_freq /sys/devices/system/cpu/cpufreq/policy*/cpuinfo_max_freq /sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq /sys/devices/system/cpu/cpufreq/policy*/affected_cpus; do\n if test -e \"$f\"; then printf '%s = ' \"$f\"; cat \"$f\"; else echo \"no match: $f\"; fi\ndone\n\nprintf '%s\\n' '__BOARD13_temps-cpufreq_DONE__'\n"
+  },
+  "cleanup": {
+    "stdout": "\r\n=== cleanup ===\r\nuid=5001\r\nBoard probe used stdout only and created no temporary directory.\r\n__BOARD13_DONE__\r\n__BOARD13_cleanup_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "867ade952cb3b007edc0715691c617ee609e963f716223390f8f6c5c47f2fa7f",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "3981456739063d09d828d899a9f6e20cba7e743d613b711ae616de8a76e74470",
+      "command": "332afce4a5358b7ea3a3e2926bf3936e31d16632f700c5f6f4e9f153860148a8"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0, \"marker\": \"__BOARD13_cleanup_DONE__\", \"seen\": true}\n",
+    "command": "export LC_ALL=C\nsection() { printf '\\n=== %s ===\\n' \"$*\"; }\nobserve() { printf '+ %s\\n' \"$*\"; \"$@\" 2>&1; printf 'status=%s\\n' \"$?\"; }\nsection cleanup\nprintf 'uid='; id -u\nprintf 'Board probe used stdout only and created no temporary directory.\\n'\nprintf '__BOARD13_DONE__\\n'\n\nprintf '%s\\n' '__BOARD13_cleanup_DONE__'\n"
+  },
+  "supplement": {
+    "stdout": "uid=5001\r\ndmesg_pipeline=0 0\r\n/proc/device-tree/cpus/cpu@0/phandle  00 00 00 0c\r\n/proc/device-tree/cpus/cpu@0/reg  00 00 00 00\r\n/proc/device-tree/cpus/cpu@1/phandle  00 00 00 0d\r\n/proc/device-tree/cpus/cpu@1/reg  00 00 00 01\r\n/proc/device-tree/cpus/cpu@2/phandle  00 00 00 0e\r\n/proc/device-tree/cpus/cpu@2/reg  00 00 00 02\r\n/proc/device-tree/cpus/cpu@3/phandle  00 00 00 0f\r\n/proc/device-tree/cpus/cpu@3/reg  00 00 00 03\r\n 41:      37095          0          0          0 GIC-0 137 Level      arm-pmu       (  10us/  92us) [155674.1119s| +   10250ns]\r\n 42:          0      36359          0          0 GIC-0 138 Level      arm-pmu       (   8us/ 129us) [155663.6435s| +    8166ns]\r\n 43:          0          0      59130          0 GIC-0 139 Level      arm-pmu       (   9us/  95us) [155676.1018s| +    9000ns]\r\n 44:          0          0          0      47286 GIC-0 140 Level      arm-pmu       (  11us/ 132us) [155672.7386s| +   11417ns]\r\ntztv_mc_debug_print\r\n__BOARD13_SUPPLEMENT_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "ea1e54aa83dfe213c1f65bdb48f529158cccf927f3a881fb4a32006afc607451",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "8d5afd2df76a314143d9a42d54a6cd468c1b73de2aea111876e1d8c58eb1cc09"
+    },
+    "stderr": "",
+    "status.json": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"export LC_ALL=C\\nprintf 'uid='; id -u\\ndmesg 2>&1 | awk 'tolower($0) ~ /coresight|(^|[^[:alnum:]_])(etm|ptm|cti|tmc|tpiu)([^[:alnum:]_]|$)|hw perfevents|performance events|armv7.*pmu|permission denied|operation not permitted|failed to read/'\\nprintf 'dmesg_pipeline=%s\\\\n' \\\"${PIPESTATUS[*]}\\\"\\nfor d in /proc/device-tree/cpus/cpu@*; do\\n for n in phandle linux,phandle reg; do f=\\\"$d/$n\\\"; if test -r \\\"$f\\\"; then printf '%s ' \\\"$f\\\"; od -An -v -tx1 \\\"$f\\\"; fi; done\\ndone\\nawk '/^[[:space:]]*[0-9]+:/ && tolower($0) ~ /pmu|perfevent/ {print}' /proc/interrupts\\nps -eo comm | grep -Ei 'sdbd|wayland|display|composit|tztv|tv-service|window|remote|ssh|telnet'\\nif command -v ss >/dev/null 2>&1; then ss -Htn state established '( sport = :26101 )' | awk 'END {print \\\"established_sdb_count=\\\" NR}'; printf 'ss_pipeline=%s\\\\n' \\\"${PIPESTATUS[*]}\\\"; fi\\nfor d in /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin; do if test -d \\\"$d\\\"; then find \\\"$d\\\" -name perf -print; fi; done\\nprintf '__BOARD13_SUPPLEMENT_DONE__\\\\n'\\n\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:17:27.322031+00:00\"\n}\n"
+  },
+  "root-on": {
+    "stdout": "Switched to 'root' account mode\n",
+    "source_sha256": {
+      "stdout": "525daa895e41827b8cef29d3387114916a532c2624880a49c1614e6c987b6477",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "4603f62b470348d6375f163ef07e857cfecb789dbf9e8be710f28fe63bb2d02a"
+    },
+    "stderr": "",
+    "status.json": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"root\",\n    \"on\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:17:27.369949+00:00\"\n}\n"
+  },
+  "root-check-0": {
+    "stdout": "uid=0\r\n__UID_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "9e4959e2a1d533652e188b29402fa78d32a980bc47a763abf50db0bb475d34eb",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "53d13315039ac75ac9e83e7475da61e207362335bcf333ccb91136b88d88ebe4"
+    },
+    "stderr": "",
+    "status.json": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"printf 'uid='; id -u; printf '__UID_DONE__\\\\n'\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:17:27.486838+00:00\"\n}\n"
+  },
+  "iomem-root": {
+    "stdout": "0\r\n  040082c0-04833257 : Kernel code\r\n  04a34000-04ec8bc7 : Kernel data\r\niomem_status=0\r\n__BOARD13_ROOT_READ_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "1ac24d0f710ef0759c9732d881052eb5e02bf28f71c53dc47c42b976c76e2d77",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "8cd5d85af7487ee1d0e576c91a69afb3510e666718437377e90ff522379a1c5a"
+    },
+    "stderr": "",
+    "status.json": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"id -u\\nawk 'tolower($0) ~ /kernel code|kernel data|debug|coresight|trace|etm|ptm|funnel|replicator|etb|etf|etr|tmc|tpiu|\\\\<cti\\\\>/' /proc/iomem\\nprintf 'iomem_status=%s\\\\n' \\\"$?\\\"\\nprintf '__BOARD13_ROOT_READ_DONE__\\\\n'\\n\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:17:27.612050+00:00\"\n}\n"
+  },
+  "root-off": {
+    "stdout": "Switched to 'sdk user' account mode\n",
+    "source_sha256": {
+      "stdout": "6667042b629240d444116555b8f98368ba464e672980623c2dbdb02741c0089d",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "f0d5c857de42b369088cfa6d4a5ea46551f0bd84a5ed7c84e9e59a641cf7944b"
+    },
+    "stderr": "",
+    "status.json": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"root\",\n    \"off\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:17:27.660298+00:00\"\n}\n"
+  },
+  "final-check-0": {
+    "stdout": "uid=5001\r\n__BOARD13_FINAL_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "c133a0436e7838b41b318376e7729f16828e64da6781d8d566038ff549dbc58e",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "07ee1294c844cc110786727722b91f83bd14968ceef0e9bfe47b9d48250d7776"
+    },
+    "stderr": "",
+    "status.json": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"printf 'uid='; id -u; printf '__BOARD13_FINAL_DONE__\\\\n'\"\n  ],\n  \"rc\": 0,\n  \"utc\": \"2026-11-19T05:17:27.776603+00:00\"\n}\n"
+  },
+  "post": {
+    "stdout": "uid=5001\r\n/proc/net/tcp established=0 listeners=0\r\nstatus=0\r\n/proc/net/tcp6 established=1 listeners=1\r\nstatus=0\r\n/sys/class/drm/card0-LVDS-1/enabled = enabled\r\n/sys/class/drm/card0-LVDS-1/status = connected\r\n/sys/devices/system/cpu/cpufreq/policy0/scaling_governor = performance\r\n__BOARD13_POST_DONE__\r\n",
+    "source_sha256": {
+      "stdout": "56de7adcce70a15beca8e904b6e293e1328c30d721083d2c34a13b1a9fa89def",
+      "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status.json": "b9a9f2b527e57115b6394e4f7ca2815f12b8b015ef9d11a3cb26ab186741d5e4",
+      "command": "88f8716e5896d9669f36e624e73ebde57d9c65f3a400f63f360baeeb73a3338a"
+    },
+    "stderr": "",
+    "status.json": "{\"rc\": 0}\n",
+    "command": "printf 'uid='; id -u\nfor p in /proc/net/tcp /proc/net/tcp6; do\n if test -r \"$p\"; then\n  awk -v path=\"$p\" 'NR>1 && toupper($2) ~ /:65F5$/ {if ($4==\"01\") e++;if ($4==\"0A\") l++} END {printf \"%s established=%d listeners=%d\\n\",path,e,l}' \"$p\"\n  printf 'status=%s\\n' \"$?\"\n else printf '%s unavailable\\n' \"$p\"; fi\ndone\nfor f in /sys/class/drm/*/enabled /sys/class/drm/*/status /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; do\n if test -r \"$f\"; then printf '%s = ' \"$f\"; cat \"$f\"; fi\ndone\nprintf '__BOARD13_POST_DONE__\\n'\n"
+  }
+}
