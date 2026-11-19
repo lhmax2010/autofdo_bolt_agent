@@ -108,3 +108,77 @@ Raspberry Pi 官方定义了单次 tryboot 标记和 `0 tryboot` 参数。板上
 普通重启 **1 次已发出，0/3 通过验收**。重启后 build-id、HDMI 与显示栈均未验证。第一次未到达空闲采集入口，三次 10 分钟曲线均未生成，**暂无可量化的安静门禁阈值**。后续仍以每次 10 分钟的后 5 分钟计算稳定窗口中位数，再加预登记余量。两项新基准及静态空子程序已部署到本任务目录并核对 SHA，未开始板上标定或计时。pipe、mmfault、forkexec 的有效轮数均为 0，开机内 CV 和启动间方差均无估计。[重连日志与任务程序](evidence/k1d-a-index.json)
 
 第一次重启前已经卸载启动分区。未执行 tryboot，未写启动分区，未部署内核或模块，也未改变 governor（初始为 `schedutil`）或 `kptr_restrict`（初始为 0）。初始 SDB 为 owner，22:56 切换为 root 取证。300 秒时仍无可用 SDB 会话，`root off` 和板上任务目录清理待恢复连接后执行，当前 root 状态未知。请现场核对显示输出与 SDB 服务后再继续。
+
+## 7. 续 2：PLAT 恢复、开机联网与直启容量（2026-11-18 PST）
+
+### 恢复状态与时间线
+
+现场确认后首次连接仍报 `failed to connect` / `target not found`。随后按用户指示，在主机重启 SDB server 并重试一次，立即得到 owner shell。主机 server 启动记录的端口为 26099，板端仍是 `192.168.108.26:26101`。序列号为 `100000004694d889`，新 boot ID 为 `6a5f0a9b-7d27-41cc-b3b7-1a17589408c7`，首次读取 uptime 为 2,204.02 s。运行 notes SHA 与 K1a 相同，对应 PLAT build-id `395733b9c917cb98309b39cc3ec379c03ac36b3f`。初次读取和末次复核均为 UID 5001（owner），root mode 已关，无需切换。[连接与时钟记录](evidence/k1d-a-index.json)
+
+| 事件 | 实测时间 | 证据 |
+| --- | --- | --- |
+| 首次普通重启请求 | 主机 23:01:08 PST | §6 主机日志 |
+| PLAT 内核启动 | 板钟 07:02:02 UTC | `/proc/stat` 的 `btime`，此后 boot ID 未变 |
+| rootfs p2 挂载 | 开机 +3.163 s | dmesg |
+| TCP SDB socket 开始监听 | 开机 +15.191 s | `sdbd_tcp.socket ActiveEnterTimestampMonotonic` |
+| 恢复 Ethernet MAC 单元完成 | 开机 +16.713 s | `ethernet-mac-setup.service` |
+| ConnMan ready、graphical.target active | 开机 +17.282 s、+18.001 s | systemd 单元时间戳 |
+| eth0 载波 up | 开机 +19.845 s | dmesg |
+| sdbd 进程开始、ready | 开机 +27.081 s、+27.130 s | systemd 单元时间戳 |
+| 主机首次证实 TCP 连接成功 | 主机 23:02:52 PST，距重启请求 104 s | §6 主机 TCP 探测 |
+| 主机首次证实可用 SDB shell | 主机 23:38:18 PST 发起 server 重启后，板钟读取 07:38:46 UTC | 主机启停与定向 shell 记录 |
+
+末次比较时板钟快约 22.7 s。若启动后时差基本稳定，内核约在主机 23:01:39 PST 启动，graphical.target 约在 23:01:57 PST 已到达。跨钟估计不能替代主机的 104 s TCP 实测。没有获取到精确的 IPv4 配置时刻或第一个可用 SDB 协议会话时刻。owner 可读当前 dmesg 和 systemd 状态，但 journalctl 对当前及 `-b -1` 均报权限不足，上一 boot 的持久 journal 可用性未判定。[单元状态和时钟回执](evidence/k1d-a-index.json)
+
+**失败最符合主机 SDB 传输状态异常。** 上轮在 104 s 已证明 TCP 可建立，SDB 仍一度显示 `unknown/offline`，到 300 s 也没有 shell。本轮不改板端状态，仅重启主机 server 就取得同一 boot 的正常会话。板端恢复机制有实际就绪证据，具体握手故障点缺少日志，不能把约 37 分钟的会话证据空档视为板端恢复时间。建议保留 **300 s** 的硬上限，加入 **180 s 传输诊断点**（本次观测的 104 s TCP 时刻加 76 s）。当 TCP 已通但 SDB 仍离线，记录状态并在拥有该主机 SDB 服务的前提下重建 server，再使用剩余时间完成身份验收。正式修改验收超时前，按三次正常重启实测的 SDB shell 最大值加 60 s 余量复核。三次测量尚未补做。
+
+### 现有机制与主机准备工具
+
+该板是 `Tizen11.0/Unified`，构建 `tizen-unified-toolchain_20261104.160709`，ConnMan 1.42、systemd 244、sdbd 3.0.50。读取的 unit 全文、命令输出、文件元数据与 SHA 原件已归档。[只读取证索引](evidence/k1d-a-index.json)
+
+| 路径 | 已核实的作用 | 属主与修改时间（板本地 +0900） | SHA-256 |
+| --- | --- | --- | --- |
+| `/etc/systemd/system/ethernet-mac-setup.service` | 已启用的本机定制 oneshot。等待 eth0 设备，依次 down、设置 MAC `2c:cf:67:a0:72:b5`、up，并排在 ConnMan 之前。 | root:root，2026-11-10 17:52:18 | `f319a1842879a317e33006ed1ce8ae4d109c54bf09fecadb96e28c72be80b14c` |
+| `/usr/lib/systemd/system/connman.service` | 由厂商 `multi-user.target.wants` 链接以及 Ethernet 单元拉起，运行 `connmand`。eth0 现场为 `192.168.108.26/24`，IPv4 lifetime 为 forever，默认网关 `192.168.108.1`。 | root:root，2026-11-05 02:11:08 | `cacfea2326511879e300770b6afb6b48ae01ef81124aecc156c647c3e39bd14a` |
+| `/etc/connman/main.conf` | ConnMan 通用配置。找到持久有线条目 `/var/lib/connman/ethernet_2ccf67a072b5_cable`，owner 无权读内容和 SHA，ConnMan D-Bus 查询也超时。确切 IPv4 配置方式待确认。 | network_fw:network_fw，2026-11-05 02:11:09 | `82ca303bf7bd6bd97d2fbdbebe2dce566458897a47629025286bc8c090f7c03f` |
+| `/usr/lib/systemd/system/sockets.target.wants/sdbd_tcp.socket` | 厂商链接指向 `../sdbd_tcp.socket`。`is-enabled` 的 disabled 状态无法反映此厂商链接，`sockets.target Wants=` 包含该项。 | root:root，2026-11-05 02:48:58 | 链接文本哈希见原件 |
+| `/usr/lib/systemd/system/sdbd_tcp.socket` | `ListenStream=26101`，实机监听 `[::]:26101` 并接受 IPv4。服务为 `sdbd.service`，现有开发模式路径条件和 SMACK 设置保留。 | root:root，2026-11-05 02:48:58 | `90cb4b09782d55b12dc6e11fefd017273103a9349b034d4802c3d09a03b9b20a` |
+| `/usr/lib/systemd/system/sdbd.service` | 以 sdk 用户和组运行 `/usr/sbin/sdbd $SDBD_CMDLINE`。无 socket/service drop-in，`/run/sdbd-env` 不存在。 | root:root，2026-11-05 02:48:58 | `5426f8a156a10f7900af1dd1d16f5e733d3378e98055b53e4b28ad59a497473d` |
+
+当前无已列出的 timer。未取得可读的 vconf 值，现有 socket-activation 路径已经由 systemd 依赖和实测监听证实。
+
+新增 [sdb-tcp-autostart](../../../tools/board/sdb-tcp-autostart/README.md)。`verify` 只读检查。离线 `install` / `uninstall` 默认预览，显式 `--apply` 才写入指定离线树。工具发现现有机制即保留，以新增的 ConnMan provisioning、绑定 IP/接口的厂商 socket drop-in 和 wants 链接完成 staging。安装在首个文件写入前记录每项原状态和新 SHA，原有路径保留，原先不存在的路径按清单回退和核验。主机 `sh -n`、Python 语法和 9 项单元测试通过。首次向板端内联整份脚本超出 SDB 命令长度，改为压缩后通过管道直接运行同一只读脚本，板上没有落盘。实机返回 `EXISTS: 192.168.108.26:26101 via eth0, boot-linked ConnMan and sdbd_tcp.socket`，退出 0。任何板上的 install/uninstall 均未运行。[测试与验收回执](evidence/k1d-a-index.json)
+
+### boot_a 容量、initramfs 与 A/B 槽位
+
+只读解析 §6 的 FAT16 镜像并与 `fsck.fat -n` 对照。总容量 67,108,864 B（64 MiB），簇大小 2,048 B，已有文件和目录使用簇 27,949,056 B，FAT 等固定区 149,504 B，空闲 **39,010,304 B（37.20 MiB）**。现有 413 个普通文件的完整大小收录于 `fat-space.json`。其中 `zImage` 14,905,760 B、`u-boot.bin` 808,272 B、`start4.elf` 2,264,064 B、DTB 56,450 B、`config.txt` 1,716 B、`boot.scr.uimg` 7,520 B、`uboot.env` 16,384 B。K-BASE 实测 zImage 为 **14,965,104 B**。估算 K-BASE-S、K-AFDO 暂以 K-BASE 大小，每个配置文本按一簇。[容量与文件大小原件](evidence/k1d-a-index.json)
+
+| 新增组合（现有文件均保留） | FAT 实占 | 剩余 / 缺口 |
+| --- | ---: | ---: |
+| 四份直启 zImage、压缩 initramfs、两份配置 | 67,444,736 B | 缺 28,434,432 B |
+| PLAT-direct、K-BASE、压缩 initramfs、两份配置 | 37,511,168 B | 余 1,499,136 B |
+| 任意两份 K 变体，按 K-BASE 体量、共用压缩 initramfs 和两份配置 | 37,570,560 B | 估计余 1,439,744 B |
+| 一份直启镜像，例如 K-BASE、压缩 initramfs、两份配置 | 22,603,776 B | 余 16,406,528 B |
+
+最少同时新增一份本阶段所需的直启 zImage、共用压缩 initramfs、`tryboot.txt` 和 `cmdline-afdo.txt`。先验证 PLAT-direct，再切到 K-BASE。若正式 A/B 同时保留两份镜像，取得 K-BASE-S 与 K-AFDO 的实际大小后重新按簇计算，并计入写入期间可能同时存在的临时文件。两份 K-BASE 大小镜像再加一份解压态 CPIO 超出空闲容量。
+
+`ramdisk_a` 是 p7，32 MiB。原件为开头 gzip、其后分区填充，gzip 成员为 **7,632,283 B**，解压为 **14,679,552 B** 的 newc CPIO。提取的主机归档 `initramfs-plat.cpio.gz` SHA-256 为 `ea6c57b47cce3427abcb820c4da7682be52e50e8ac6e9c3dc40c1be4ce235eaf`。CPIO 中 `/init` 指向 `sbin/init`，对应 `/usr/sbin/init` 脚本：[原件和完整 /init](evidence/k1d-a-index.json)
+
+- 44–70、180–295 行读取 `bootmode` 与 `partition_ab`，用分区标签选 rootfs、module、hal 等。正常 slot A 将 p2 用作根分区。
+- 403–529、1000–1040 行按条件执行 verity、fsck 和挂载。提前挂载模块分区，挂载 rootfs、system-data、hal，并准备模块、overlay 等。
+- 962–983 行在 initramfs 路径下执行 `switch_root /sysroot /sbin/init`。沿用实机 bootargs 时没有 `root=`。K-BASE 启用 `CONFIG_CMDLINE_FROM_BOOTLOADER=y`，存在非空固件 cmdline 时不能依靠编译期默认 root 补齐。单加 `root=PARTUUID=4cef3024-c6de-5246-8603-d44bde2e6aae rootfstype=ext4 rootwait ro` 可给出内核根设备，但仍缺少这套 Tizen 早期挂载与检查，当前证据不足以放行无 initramfs 直启。
+- 在主机草案中，以 `initramfs initramfs-plat.cpio.gz followkernel` 指向去掉填充的同一 gzip 成员。U-Boot 解 gzip 后传 CPIO，固件直启可传 gzip，K-BASE 的 `CONFIG_BLK_DEV_INITRD=y`、`CONFIG_RD_GZIP=y` 可解该格式。内核得到同一 CPIO 在内容上等价。仍需在后续授权启动核对 FDT 的 initrd 地址与大小、模块树、DTB/overlay 和显示网络。此轮未生成或写入板上配置。[Raspberry Pi initramfs 文档](https://www.raspberrypi.com/documentation/computers/config_txt.html#initramfs)
+
+A/B 元数据确认 `boot_b=p11`（64 MiB）、`rootfs_b=p12`（3 GiB）、`module_b=p13`（32 MiB）、`ramdisk_b=p14`（32 MiB）、`ramdisk-recovery_b=p15`（32 MiB）及 `hal_b=p16`（256 MiB）。B 槽均未挂载，udev 没有给出文件系统标识。块设备权限为 0660、root:disk，owner 无法读取原始内容，B 槽是否空白及其 SHA 尚未确认。归档 `boot_a` 根目录没有 `autoboot.txt`，`boot_b` 是否有该文件未知。设计按同一 `boot_a` 内的 `tryboot.txt` 验证，不依赖 B 槽。[分区与镜像取证](evidence/k1d-a-index.json)
+
+### cmdline-afdo.txt 草案
+
+下面是一行，沿用现场 U-Boot 路径的 `/proc/cmdline`（去除行尾空格）。草案保留 `bootmode=normal partition_ab=a`，与上述 initramfs 配对。
+
+```text
+cgroup_enable=memory vc_mem.mem_base=0x3ec00000 vc_mem.mem_size=0x40000000 swiotlb=8192 8250.nr_uarts=1 dma.dmachans=0x7f35 bcm2709.serial=0xed6687d3 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 bcm2709.uart_clock=48000000 dwc_otg.lpm_enable=0  bootmode=normal partition_ab=a console=ttyS0,115200n8 earlycon=uart8250,mmio32,0xfe215040 loglevel=4
+```
+
+直启不经过 U-Boot 的变量拼接和 `bootz`。`tryboot.txt` 草案将指定 `cmdline=cmdline-afdo.txt`、ARM32 模式（`arm_64bit=0`）和显式 initramfs。固件可能自动添加部分参数，首次启动应逐项比对 `/proc/cmdline`，特别是重复的参数与串口。预期 FDT 不再有 U-Boot 写入的 `u-boot,version`，`linux,initrd-*` 可变化。保留原 DTB/overlay 和实测 FDT 的 SHA，核对到 ARM32 K-BASE 及后续变体共用的有效硬件配置。[Raspberry Pi config.txt](https://www.raspberrypi.com/documentation/computers/config_txt.html)
+
+本轮板上操作仅为读取，未重启板卡。K1d-a 的剩余重启、安静门禁测量和基准轮次仍待进行，本轮不更改 v0.2 设计。

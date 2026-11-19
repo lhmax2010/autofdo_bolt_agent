@@ -1,0 +1,54 @@
+#!/bin/sh
+# Read-only. Run on the target or via a quoted SDB shell command.
+set -eu
+if [ "$#" -ne 3 ]; then
+    echo "usage: verify IPV4 PORT INTERFACE" >&2
+    exit 2
+fi
+address=$1 port=$2 iface=$3
+case "$address" in ''|*[!0-9.]*) exit 2;; esac
+case "$port" in ''|*[!0-9]*) exit 2;; esac
+case "$iface" in ''|*[!a-zA-Z0-9_.-]*|-*) exit 2;; esac
+export LC_ALL=C SYSTEMD_COLORS=0
+ip=$(command -v ip || :)
+[ -n "$ip" ] || ip=/usr/sbin/ip
+if ! addrs=$("$ip" -4 -o address show dev "$iface"); then
+    echo "REVIEW: cannot read interface addresses"
+    exit 2
+fi
+if ! listening=$(netstat -ltn); then
+    echo "REVIEW: cannot read TCP listeners"
+    exit 2
+fi
+has_address=0
+has_listener=0
+if printf '%s\n' "$addrs" | awk -v wanted="$address" '$3=="inet" {split($4,a,"/"); if(a[1]==wanted) found=1} END {exit !found}'; then
+    has_address=1
+fi
+if printf '%s\n' "$listening" | awk -v ip="$address" -v p="$port" '$NF=="LISTEN" && ($4==ip ":" p || $4=="0.0.0.0:" p || $4==":::" p) {found=1} END {exit !found}'; then
+    has_listener=1
+fi
+boot_link() {
+    for base in /etc/systemd/system /run/systemd/system /usr/lib/systemd/system /lib/systemd/system; do
+        for dir in "$base"/*.wants "$base"/*.requires; do
+            if [ -L "$dir/$1" ]; then return 0; fi
+        done
+    done
+    return 1
+}
+if [ "$has_address:$has_listener" = 1:1 ]; then
+    if systemctl is-active --quiet sdbd_tcp.socket &&
+       systemctl is-active --quiet connman.service &&
+       boot_link sdbd_tcp.socket && boot_link connman.service; then
+        printf 'EXISTS: %s:%s via %s, boot-linked ConnMan and sdbd_tcp.socket\n' "$address" "$port" "$iface"
+        exit 0
+    fi
+    echo "EXISTS: address and listener present; review custom startup provenance before any installation"
+    exit 0
+fi
+if [ "$has_listener" = 1 ] || boot_link sdbd_tcp.socket || systemctl is-active --quiet sdbd_tcp.socket; then
+    echo "REVIEW: existing TCP setup needs manual review; leave it in place"
+    exit 2
+fi
+echo "ABSENT: requested live TCP endpoint not found; inspect the offline image before installation"
+exit 1
