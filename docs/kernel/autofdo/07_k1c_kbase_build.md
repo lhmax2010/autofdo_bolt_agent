@@ -115,3 +115,66 @@ arm-rpi4-rt 的 52 个模块，其原始与 RPM 模块 build-id 均匹配，verm
 
 - K1d 在获得用户刷写授权后核对启动、运行内核 notes、模块加载、PMU cycles、HDMI 和回滚。当前仅有主机产物证据。
 - K1e 用同一次 K-BASE boot 的真实 perf 数据配对原始 vmlinux，核对采样覆盖和 K-AFDO 的 `AppliedSamples` 及节布局。
+
+## 6. K1c 评审收尾核对
+
+### 版本身份与共用模块
+
+PM 决定 K-BASE 和未来的 K-AFDO 均使用 `LOCALVERSION=-kbase`，运行时共用已归档的 K-BASE 模块树。普通版 K-BASE 原始 vmlinux 的 banner 和生成头给出预期 `uname -v` 为 `#1 SMP Wed Nov 18 14:59:26 UTC 2026`，编译身份为 `abuild@linhao-linux`。GBS 构建包装器清除了外部覆盖，这些值来自该次实际构建的 Kbuild 自动值。RT 版独立记录为 `#1 SMP PREEMPT_RT Wed Nov 18 15:19:44 UTC 2026`，采样变体使用普通版。
+
+| K-AFDO 构建输入 | 普通 K-BASE 固定值 |
+| --- | --- |
+| `KBUILD_BUILD_TIMESTAMP` | `Wed Nov 18 14:59:26 UTC 2026` |
+| `KBUILD_BUILD_USER` | `abuild` |
+| `KBUILD_BUILD_HOST` | `linhao-linux` |
+| `KBUILD_BUILD_VERSION` | `1`，本次探针固定以重现 `#1` |
+| `LOCALVERSION` | `-kbase` |
+
+K-AFDO 的 spec 在 %build 中用 RPM 宏展开并 export 前三项，%install 中使用同一 release 后缀。可由 GBS 传入 `--define 'kernel_build_timestamp Wed Nov 18 14:59:26 UTC 2026'`、`--define 'kernel_build_user abuild'`、`--define 'kernel_build_host linhao-linux'`，分别在 spec 中以 `export KBUILD_BUILD_TIMESTAMP="%{kernel_build_timestamp}"` 等引用，时间戳必须保留双引号。本次用 `rpm --eval` 展开后通过原始 `init/Makefile` 生成 UTS_VERSION，复用 `scripts/setlocalversion` 和 `scripts/mkcompile_h` 生成 release 和编译身份。三份结果与 K-BASE 生成头逐字节一致。探针只执行 make 的头文件规则和版本脚本。共用模块的实际可加载性仍需在 K-AFDO 产生后核对 vermagic、Module.symvers 的 CRC 和启动加载结果。
+
+### FS discriminator
+
+K-BASE 原始 vmlinux 的 DWARF4 行表由 `llvm-dwarfdump --debug-line` 读取。地址 `0xc021b13c`、`0xc021b150`、`0xc021b160`、`0xc021b16c` 均属于 `include/trace/events/initcall.h:10` 的 `__traceiter_initcall_level`，discriminator 分别为 3、8、9、11。以相同 GNU build-id `96766cfcbff8c33d83ca38152ad02f6a02dd44d4` 构造一条零 slide 的内核 mmap 和四条合成 IP 样本，用补丁 10 的 `llvm-profgen --ip-samples --kernel` 转换。质量报告为 `verified`、`semantics.fs_discriminator=true`。`llvm-profdata show --sample` 读回四个相对行键 `0.3`、`0.8`、`0.9`、`0.11`，各一条样本。此项验证 ARM32 原始 ELF 的 FS 读取与 profile 写入。
+
+### LLD 排序与链接 map
+
+归档 `.vmlinux.cmd` 使用 LLD 22.1.8，未显式传 `--call-graph-profile-sort`、关闭选项或外部 ordering profile。LLVM 同版本 `lld/ELF/Driver.cpp:getCGProfileSortKind` 默认 `cdsort`，而 `Writer.cpp` 仅在 call-graph profile 非空时按该图排序。检查 `vmlinux.a` 的 2,958 个输入成员，以及归档的 `vmlinux.o`、导出符号和版本对象，均无 `.llvm.call-graph-profile`。K-BASE 的默认排序选项因此没有样本边可用。
+
+K-BASE 的 `CONFIG_VMLINUX_MAP=n`，现有归档以 `System.map` 和节头为布局基准。K-AFDO 记录最终 `ld.lld` argv、归档成员顺序及对象 call-graph section 清单。需要逐输入区分布局时，在诊断用的最终链接命令中追加 `-Map=<绝对路径>`。K-BASE 可用已归档的同一批对象、归档、链接脚本和最终链接输入在临时路径重放这条命令。先核对重放的最终布局，再按输入对象与节名比较 map 中的输出 VMA、大小和排序；保持链接参数一致，用 `System.map` 核对冷热标记和函数地址。此次只核对已归档输入，未执行重链接。
+
+### 同名 local 函数
+
+按 K-BASE ELF 的 `.symtab`，筛选可执行节中的 `STB_LOCAL + STT_FUNC`。同名同地址只算一个实例。34,380 条 local 函数符号中有 462 个名字对应多个地址，合计 1,511 个不同地址实例，比每名只取一项多出 1,049 个。逐项拆开 K1a 原统计中同地址别名，五项基准的核心函数和含模块全量 top 30 与这 462 个名字的精确匹配均为 0。此项使用名字比较，跨构建的同源身份和优化后覆盖不能由名字单独确认。本次未增加 `-funique-internal-linkage-names`。
+
+### 文本增长与 2 MiB 余量
+
+在双方归档中按相同 `vmlinux.a` 成员路径配对，直接读取 ELF 节头。每个对象累加 ARM 链接脚本收入主 `.text` 的输入节，包含热、冷、入口、调度、锁和 fixup 等节，排除 init/exit、unwind 和 debug。汇总为 19,870,960 → 20,048,460 B，净增 177,500 B，能解释最终 178,420 B 中的 99.48%。294 个对象增加、75 个减少，前 20 个合计增加 84,780 B。最终 ELF 与对象净增相差 920 B，包含链接阶段的对齐、填充及其他链接投入物的净影响，此处未进一步拆分。
+
+对象级差异证明增长主要在最终链接前已经出现。K1c 校验的编译命令只新增三项训练标志，另固定变体的 release，因此现有制品支持训练配置影响了代码生成与节大小。未用单旗标编译拆分每项贡献。
+
+| 主文本输入增长排名 | 对象 | K1a BASE B | K-BASE B | 增量 B |
+| ---: | --- | ---: | ---: | ---: |
+| 1 | `drivers/net/usb/r8152.o` | 118,416 | 135,824 | +17,408 |
+| 2 | `sound/soc/soc-dapm.o` | 30,944 | 39,228 | +8,284 |
+| 3 | `fs/nfs/nfs4xdr.o` | 54,308 | 61,684 | +7,376 |
+| 4 | `kernel/events/core.o` | 99,396 | 105,336 | +5,940 |
+| 5 | `net/xfrm/xfrm_state.o` | 33,224 | 38,304 | +5,080 |
+| 6 | `fs/btrfs/send.o` | 71,376 | 75,176 | +3,800 |
+| 7 | `lib/maple_tree.o` | 67,208 | 70,516 | +3,308 |
+| 8 | `fs/f2fs/data.o` | 45,944 | 49,028 | +3,084 |
+| 9 | `net/xfrm/xfrm_policy.o` | 37,748 | 40,724 | +2,976 |
+| 10 | `fs/btrfs/free-space-cache.o` | 34,676 | 37,648 | +2,972 |
+| 11 | `fs/locks.o` | 32,900 | 35,604 | +2,704 |
+| 12 | `drivers/regulator/core.o` | 48,904 | 51,548 | +2,644 |
+| 13 | `kernel/sched/build_policy.o` | 73,780 | 76,336 | +2,556 |
+| 14 | `drivers/net/wireguard/noise.o` | 10,364 | 12,896 | +2,532 |
+| 15 | `drivers/nvmem/core.o` | 12,856 | 15,384 | +2,528 |
+| 16 | `net/ipv6/route.o` | 52,852 | 55,340 | +2,488 |
+| 17 | `block/blk-mq.o` | 43,624 | 45,952 | +2,328 |
+| 18 | `drivers/net/usb/ax88179_178a.o` | 19,064 | 21,376 | +2,312 |
+| 19 | `drivers/android/binder.o` | 79,648 | 81,904 | +2,256 |
+| 20 | `kernel/resource.o` | 12,160 | 14,364 | +2,204 |
+
+`ARM_LPAE=y`、`STRICT_KERNEL_RWX=y`、`DEBUG_ALIGN_RODATA=y` 时，`SECTION_SHIFT=21`，脚本将主文本尾对齐到下一 2 MiB 边界。普通版 K1a BASE 的 `.text` 实尾为 `0xc14f33a8`，到 `_etext=0xc1600000` 余 1,100,888 B。K-BASE 实尾为 `0xc151ec9c`，同一边界余 **922,468 B**。两者对齐后的文本边界相同。该余量描述链接地址，运行时内存仍待启动后测量。
+
+原始记录、脚本和 SHA-256 见[收尾证据索引](evidence/k1c-review-followup-index.json)。
