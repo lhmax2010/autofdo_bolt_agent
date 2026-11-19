@@ -1,0 +1,30 @@
+.syntax unified
+.arch armv7-a
+.arm
+.global _start
+.type _start,%function
+_start:
+    mov r0, #0x4000000
+loop:
+.if CALL_CONTROL || CALL_RETURN
+    bl target
+return_site:
+.else
+    b next_block
+    udf #0
+next_block:
+.endif
+    subs r0, r0, #1
+    bne loop
+    mov r0, #0
+    mov r7, #1
+    svc #0
+.if CALL_CONTROL || CALL_RETURN
+target:
+.if CALL_RETURN
+    bx lr
+.else
+    b return_site
+.endif
+.endif
+.size _start, .-_start
