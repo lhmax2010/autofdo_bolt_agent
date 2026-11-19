@@ -1,0 +1,140 @@
+{
+  "devices-final.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/devices-final.json",
+    "bytes": 186,
+    "sha256": "facee117503f986d7223d498a71dd1a6a74cf02624575baa68c70476ff290e37",
+    "text": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"devices\"\n  ],\n  \"start\": \"2026-11-19T06:24:58.913942+00:00\",\n  \"end\": \"2026-11-19T06:24:58.917461+00:00\",\n  \"rc\": 0\n}\n"
+  },
+  "devices-final.stderr": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/devices-final.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  },
+  "devices-final.stdout": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/devices-final.stdout",
+    "bytes": 60,
+    "sha256": "6ad49c9d5a63f8f364efc26628180a9ba081d5bff2158fb93ba0b665515b41ae",
+    "text": "List of devices attached \n192.168.108.13:26101\tdevice    \t0\n"
+  },
+  "driver.py": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/driver.py",
+    "bytes": 10705,
+    "sha256": "1db45dbd8f4ad0bab73e0af310fd8acacd9c6c15b53b3486b91eaf7a3f67c8c8",
+    "text": "from pathlib import Path\nfrom datetime import datetime, timezone\nimport subprocess, json, shlex, hashlib, re, time, signal\nfrom collections import Counter\nfrom bisect import bisect_right\np=Path(__file__).resolve().parent\nroot=p.parent.parent\nprevious=p.parent/'board13-pmu-20261118'\nremote='/root/afdo_probe-tv13-20261118'\nsdb=['sdb','-s','192.168.108.13:26101']\nenv=f'export LC_ALL=C HOME={remote} TMPDIR={remote} PERF_BUILDID_DIR={remote}/buildid LD_LIBRARY_PATH={remote}; cd {remote} || exit 1; '\ngate=(p/'gate.sh').read_text()\nstate={}\ndef utc(): return datetime.now(timezone.utc).isoformat()\ndef run(label,args,timeout=30,shown=True,keep=True):\n    start=utc()\n    proc=subprocess.run(sdb+args,stdin=subprocess.DEVNULL,capture_output=True,timeout=timeout)\n    if keep:\n        for k in ('stdout','stderr'):\n            (p/f'{label}.{k}').write_bytes(getattr(proc,k))\n        (p/f'{label}.json').write_text(json.dumps(dict(argv=sdb+args,start=start,end=utc(),rc=proc.returncode),indent=2)+'\\n')\n    if shown:\n        print(label,proc.returncode,proc.stdout.decode(errors='replace')[:4500],proc.stderr.decode(errors='replace')[:1500],flush=True)\n    return proc\ndef msg(label,cmd,timeout=30,shown=True,keep=True):\n    script=f'{cmd}\\nrc=$?; printf \"\\\\n__TV_RC__=%s\\\\n\" \"$rc\"; exit \"$rc\"'\n    proc=run(label,['shell',script],timeout,shown,keep)\n    match=re.search(rb'^__TV_RC__=(\\d+)\\s*$',proc.stdout,re.M)\n    rc=int(match[1]) if match and not proc.returncode else None\n    return rc,proc.stdout.decode(errors='replace')\ndef shell(label,cmd,timeout=30,shown=True):\n    rc,out=msg(label,cmd,timeout,shown)\n    if rc != 0:raise RuntimeError(f'{label}: board rc {rc}')\n    return out\ndef occupied(out):\n    s=re.findall(r'sdb-established (\\d+)',out)\n    if len(s)!=2 or sum(map(int,s))!=1:return 'unexpected SDB TCP connection count'\n    for line in out.splitlines():\n        w=line.split()\n        if len(w)>=5 and w[0].isdigit() and re.search(r'^(?:perf(?:$|[-_])|gdb(?:server)?$|stress(?:[-_]|$)|sysbench$|fio$|afdo_|branch-[01]$)',w[-1],re.I):\n            return f'potential concurrent test process: {line}'\n        if len(w)>=6 and w[0].isdigit() and float(w[3])>=5 and w[-1] not in ('sh','bash','ps','awk','head','cat','sed','grep'):\n            return f'high CPU process: {line}'\n    ld=next(line for line in out.splitlines() if re.match(r'^\\d+\\.\\d+ \\d+\\.\\d+ ',line))\n    if float(ld.split()[0])>31:return f'load rose from baseline: {ld}'\ndef check(label,wait=True):\n    for n in range(4 if wait else 1):\n        out=shell(f'gate-{label}-{n}',gate,shown=False)\n        why=occupied(out)\n        print('gate',label,n,'pass' if why is None else why,flush=True)\n        if not why:return\n        if wait and n<3:time.sleep(600)\n    raise RuntimeError(f'shared-board gate: {why}')\ndef inspect_watch(out):\n    freq=[(float(a),int(b)) for a,b in re.findall(r'^FREQ (\\d+(?:\\.\\d+)?) (\\d+)\\s*$',out,re.M)]\n    links=[int(s) for s in re.findall(r'^SDB (\\d+)\\s*$',out,re.M)]\n    bads=[]\n    if not links or any(x!=1 for x in links):bads.append('unexpected SDB TCP count')\n    if any(float(x)>31 for x in re.findall(r'^LOAD (\\d+\\.\\d+)',out,re.M)):bads.append('load above gate')\n    for cpu,comm,owned in re.findall(r'^PROC \\d+ \\d+ (\\d+\\.\\d+) (\\S+) (yes|no)',out,re.M):\n        if owned=='no' and (re.search(r'^(?:perf(?:$|[-_])|gdb(?:server)?$|stress(?:[-_]|$)|fio$|sysbench$|afdo_|branch-[01]$)',comm,re.I) or (float(cpu)>=5 and comm not in ('sh','bash','ps','awk','head','cat','sed','grep','readlink','sleep','cut','tr','taskset'))):\n            bads.append('foreign process '+comm)\n    return {'frequency_readings':freq,'contamination':sorted(set(bads))}\ndef watch(label,command,timeout=45):\n    rc,out=msg(label,env+'./watch.sh '+command,timeout,shown=False)\n    s=inspect_watch(out)\n    s['rc']=rc\n    if not s['frequency_readings']:s['frequency_unavailable']=True\n    state[label]=s\n    print(label,'rc',rc,'freq',sorted(set(v for _,v in s['frequency_readings'])),'contamination',s['contamination'],flush=True)\n    return rc,out\ndef summarize_ips(label,symbols):\n    # Decode sample mode and raw IP without asking perf for symbol names.\n    text=shell(f'sample-{label}-ips',env+f'./perf script -i {label}.data --kallsyms /dev/null -F misc,ip',timeout=120,shown=False)\n    start,tail=text.rsplit('__TV_RC__=',1)\n    counts=Counter()\n    addr_frequency=Counter()\n    unparsable=[]\n    for line in start.splitlines():\n        if not line.strip():continue\n        m=re.fullmatch(r'\\s*([UKHugKSOMDEB]+)\\s+([0-9a-fA-F]+)\\s*',line)\n        if not m:\n            unparsable.append(line[:160]);continue\n        mode='kernel' if 'K' in m[1] and 'U' not in m[1] else 'user' if 'U' in m[1] and 'K' not in m[1] else 'other'\n        counts[mode]+=1\n        if mode=='kernel':addr_frequency[int(m[2],16)]+=1\n    # Symbolize only with an address-bearing table from this same boot.\n    irqs=Counter()\n    asm=Counter()\n    syms=Counter()\n    used={}\n    addresses=sorted(symbols)\n    for ip,n in addr_frequency.items():\n        offset=bisect_right(addresses,ip)-1\n        if offset<0 or not addresses or ip>addresses[-1]:\n            syms['[unknown]']+=n;continue\n        addr=addresses[offset]\n        name=symbols[addr]\n        if ip-addr>1048576:\n            syms['[unknown]']+=n;continue\n        syms[name]+=n;used[name]=hex(addr)\n        if re.search(r'(?:_raw_spin_unlock_irqrestore|arch_local_irq_enable|(?:arch_)?local_irq_restore)(?:$|[.])',name):\n            irqs[name]+=n\n        if re.search(r'^(?:vector_swi|__copy_.*|(?:__)?(?:memcpy|memmove|memset)(?:$|[.]))',name):\n            asm[name]+=n\n    val={'counts':dict(counts),'unparsable_rows':len(unparsable),'unparsable_examples':unparsable[:3],'kernel_top_30':syms.most_common(30),'irq':dict(irqs),'asm_symbol_inference':dict(asm),'used_symbols':used,'kernel_symbolized':sum(n for k,n in syms.items() if k!='[unknown]')}\n    (p/f'sample-{label}-summary.json').write_text(json.dumps(val,indent=2)+'\\n')\n    print(label,'sample modes',val['counts'],'unknown rows',len(unparsable),flush=True)\n\nroot_attempted=False\nowned=False\ntry:\n    check('initial')\n    root_attempted=True\n    run('root-on',['root','on'])\n    shell('root-verify','test \"$(id -u)\" = 0 && id -u')\n    check('before-deploy')\n    (p/'cleanup-journal.json').write_text(json.dumps({'path':remote,'phase':'registered-before-create','utc':utc()},indent=2)+'\\n')\n    shell('mkdir',f'umask 077; mkdir -- {remote}')\n    owned=True\n    manifest=json.loads((previous/'deployment.json').read_text())\n    for name in ('watch.sh','record.sh'):\n        f=p/name\n        manifest[name]={'source':str(f.relative_to(root)),'sha256':hashlib.sha256(f.read_bytes()).hexdigest(),'size':f.stat().st_size}\n    (p/'deployment.json').write_text(json.dumps(manifest,indent=2)+'\\n')\n    for name,item in manifest.items():\n        f=root/item['source']\n        assert hashlib.sha256(f.read_bytes()).hexdigest()==item['sha256'],name\n        res=run('push-'+name,['push',str(f),remote+'/'+name],90,shown=False)\n        if res.returncode:raise RuntimeError('push failed '+name)\n    wanted=''.join(f\"{item['sha256']}  {n}\\n\" for n,item in manifest.items())\n    hash_cmd=env+'printf %s '+shlex.quote(wanted)+' | sha256sum -c -'\n    shell('hashes',hash_cmd)\n    try:\n        shell('loader',env+'/lib/ld-linux.so.3 --list ./perf')\n        shell('perf-version',env+'./perf --version')\n        shell('perf-list-hw',env+'./perf list hw')\n        shell('perf-list-raw',env+'./perf list raw')\n        shell('perf-list',env+'./perf list',shown=False)\n    except Exception:\n        msg('loader-dmesg',\"dmesg | tail -n 100 | grep -Ei 'smack|audit|denied|afdo_probe|perf|mmap|exec' | tail -n 30\")\n        raise\n    shell('chmod-owned',env+'chmod 700 watch.sh record.sh')\n    check('before-count')\n    for trial in range(1,6):\n        for version in (0,1):\n            key=f'stat-{version}-{trial}'\n            rc,_=watch(key,f'taskset -c 3 ./perf stat -x , -e cycles,instructions,r08,r0c,r10,r11,r12,r21 -- ./branch-{version}')\n            if state[key]['contamination']:raise RuntimeError('discarded contaminated count '+key)\n    rc,_=watch('stat-privilege','taskset -c 3 ./perf stat -x , -e cycles:u,cycles:k,instructions:u,instructions:k,r0c:u,r0c:k -- ./branch-1')\n    if state['stat-privilege']['contamination']:raise RuntimeError('discarded contaminated privilege count')\n    check('before-idle')\n    shell('idle-display','cat /sys/class/drm/card0-LVDS-1/status /sys/class/drm/card0-LVDS-1/enabled')\n    rc,_=watch('record-idle','./record.sh idle',timeout=90)\n    if state['record-idle']['contamination']:raise RuntimeError('discarded contaminated idle sample')\n    if rc!=0:raise RuntimeError('idle perf record failed')\n    check('before-load')\n    rc,bench=msg('bench-calibration',env+'taskset -c 3 ./perf bench sched pipe -l 100000',timeout=60)\n    bench_time=re.search(r'Total time:\\s*(\\d+(?:\\.\\d+)?)\\s*\\[sec\\]',bench)\n    if rc==0 and bench_time and float(bench_time[1])>0:\n        loops=int(100000*34/float(bench_time[1]))\n        check('before-load-record')\n        rc,_=watch('record-load',f'./record.sh load {loops}',timeout=120)\n        if state['record-load']['contamination']:\n            state['record-load']['discarded']=True\n        elif rc==0:\n            state['record-load']['fifo_calibration_loops']=loops\n    else:state['record-load']={'skipped':'bench unavailable or no measured duration'}\n    check('before-export',wait=False)\n    sym_proc=run('kallsyms-transient',['shell','cat /proc/kallsyms'],timeout=40,shown=False,keep=False)\n    symbols={}\n    for addr,typ,name in re.findall(rb'^([0-9a-fA-F]+)\\s+([tTwW])\\s+(\\S+)',sym_proc.stdout,re.M):\n        value=int(addr,16)\n        if value:symbols.setdefault(value,name.decode(errors='replace'))\n    state['kallsyms']={'text_addresses_nonzero':len(symbols),'stderr':sym_proc.stderr.decode(errors='replace')[:500],'kept_full_table':False}\n    del sym_proc\n    for name in ('idle','load'):\n        record=state.get('record-'+name,{})\n        if record.get('rc')==0 and not record['contamination']:\n            summarize_ips(name,symbols)\nexcept BaseException as exc:\n    state['stop_reason']=str(exc)\n    raise\nfinally:\n    (p/'state.json').write_text(json.dumps(state,indent=2)+'\\n')\n    try:\n        if owned:\n            shell('cleanup',f'rm -rf -- {remote} && test ! -e {remote} && test ! -L {remote} && echo verified-absent')\n    finally:\n        if root_attempted:\n            run('root-off',['root','off'])\n            shell('final-board-state','test \"$(id -u)\" = 5001 && id -u && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict')\n        run('devices-final',['devices'])\n"
+  },
+  "final-board-state.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/final-board-state.json",
+    "bytes": 417,
+    "sha256": "d9b3886709edb702f098728411211036458836363ac92fe77457d00f7bbfcc80",
+    "text": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"test \\\"$(id -u)\\\" = 5001 && id -u && cat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor /proc/sys/kernel/perf_event_paranoid /proc/sys/kernel/kptr_restrict\\nrc=$?; printf \\\"\\\\n__TV_RC__=%s\\\\n\\\" \\\"$rc\\\"; exit \\\"$rc\\\"\"\n  ],\n  \"start\": \"2026-11-19T06:24:58.777972+00:00\",\n  \"end\": \"2026-11-19T06:24:58.913741+00:00\",\n  \"rc\": 0\n}\n"
+  },
+  "final-board-state.stderr": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/final-board-state.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  },
+  "final-board-state.stdout": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/final-board-state.stdout",
+    "bytes": 40,
+    "sha256": "f6ab8451b8e9bf2a726f6bccfa7595f1b00bd71e2b1e20a81119f6b31c35d4ff",
+    "text": "5001\r\nperformance\r\n2\r\n1\r\n\r\n__TV_RC__=0\r\n"
+  },
+  "gate-before-deploy-0.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/gate-before-deploy-0.json",
+    "bytes": 743,
+    "sha256": "495e51266a73907f8276f9ad9a5284ced935a990a0c71cc3b7a8d75e785d75ef",
+    "text": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"printf 'uid='; id -u\\ncat /proc/loadavg\\nps -eo pid,ppid,user,pcpu,time,comm --sort=-pcpu | head -n 16\\nps -eo pid,ppid,user,pcpu,comm | awk 'tolower($5) ~ /perf|gdb|test|stress|bench|benchmark|trace|sdb|afdo|sleep|bash|python|sh$/'\\nfor f in /proc/net/tcp /proc/net/tcp6; do awk -v f=\\\"$f\\\" 'NR>1 && toupper($2) ~ /:65F5$/ && $4==\\\"01\\\" {n++} END {print f, \\\"sdb-established\\\", n+0}' \\\"$f\\\"; done\\ncat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor\\nprintf '__TV_GATE_DONE__\\\\n'\\n\\nrc=$?; printf \\\"\\\\n__TV_RC__=%s\\\\n\\\" \\\"$rc\\\"; exit \\\"$rc\\\"\"\n  ],\n  \"start\": \"2026-11-19T06:24:07.624756+00:00\",\n  \"end\": \"2026-11-19T06:24:07.907111+00:00\",\n  \"rc\": 0\n}\n"
+  },
+  "gate-before-deploy-0.stderr": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/gate-before-deploy-0.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  },
+  "gate-before-deploy-0.stdout": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/gate-before-deploy-0.stdout",
+    "bytes": 1547,
+    "sha256": "8b6f040907db4e9cb3e09bea7d7307e2382b2303fa75878e875a4ab4de7302cf",
+    "text": "uid=0\r\n28.30 28.27 28.33 1/1327 1979\r\n PID PPID USER     %CPU     TIME COMMAND\r\n1980 1970 root     1200 00:00:00 ps\r\n1970    1 root     16.6 00:00:00 sh\r\n 233    1 root     11.9 05:17:29 enlightenment\r\n1663    1 owner    10.4 04:37:21 source-service\r\n 844    1 root      4.5 01:59:56 avocd\r\n  83    2 root      2.3 01:03:23 zram_bgrecompd\r\n 513    2 root      1.7 00:45:29 PQ_MPFW_TASK\r\n 478  263 owner     1.3 00:35:12 TA_native-home\r\n1653    1 root      0.9 00:25:30 ira_main\r\n  31    2 root      0.9 00:24:05 ksoftirqd/2\r\n 677    1 root      0.8 00:22:20 tvs-daemon\r\n 272    1 root      0.7 00:19:57 boot-helper-dyb\r\n1051    1 root      0.6 00:18:18 security-soluti\r\n 897    1 root      0.6 00:16:56 deviced\r\n 391  263 owner     0.6 00:16:41 wrt-loader\r\n  72    2 root      0.0 kworker/R-trace_contention_worker\r\n  95    2 root      0.0 mmc_trace_vlog\r\n 101    2 root      0.0 kworker/R-trace_aops_worker\r\n 310    2 root      0.0 MLBX_TEST_Thread\r\n 363    1 sdk       0.0 sdbd-service\r\n 387    1 root      0.0 pm_monitor.sh\r\n1659    1 sdk       0.1 sdbd\r\n1800    2 root      0.0 kworker/3:2-trace_contention_worker\r\n1913  387 root      0.0 sleep\r\n1970    1 root      4.1 sh\r\n2063    1 sdk       0.0 sdbd-service\r\n2981    1 sdk       0.0 sdbd-service\r\n3023 1664 root      0.0 sh\r\n3112    1 sdk       0.0 sdbd-service\r\n3301    1 sdk       0.0 sdbd-service\r\n3803    1 sdk       0.0 sdbd-service\r\n3930    1 sdk       0.0 sdbd-service\r\n/proc/net/tcp sdb-established 0\r\n/proc/net/tcp6 sdb-established 1\r\nperformance\r\n__TV_GATE_DONE__\r\n\r\n__TV_RC__=0\r\n"
+  },
+  "gate-initial-0.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/gate-initial-0.json",
+    "bytes": 743,
+    "sha256": "f07a2e19a3cfea34a5f4b09ae32dc5a32d9db5d6e9cce62b963d033df8e1dfbc",
+    "text": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"printf 'uid='; id -u\\ncat /proc/loadavg\\nps -eo pid,ppid,user,pcpu,time,comm --sort=-pcpu | head -n 16\\nps -eo pid,ppid,user,pcpu,comm | awk 'tolower($5) ~ /perf|gdb|test|stress|bench|benchmark|trace|sdb|afdo|sleep|bash|python|sh$/'\\nfor f in /proc/net/tcp /proc/net/tcp6; do awk -v f=\\\"$f\\\" 'NR>1 && toupper($2) ~ /:65F5$/ && $4==\\\"01\\\" {n++} END {print f, \\\"sdb-established\\\", n+0}' \\\"$f\\\"; done\\ncat /sys/devices/system/cpu/cpufreq/policy0/scaling_governor\\nprintf '__TV_GATE_DONE__\\\\n'\\n\\nrc=$?; printf \\\"\\\\n__TV_RC__=%s\\\\n\\\" \\\"$rc\\\"; exit \\\"$rc\\\"\"\n  ],\n  \"start\": \"2026-11-19T06:24:07.198507+00:00\",\n  \"end\": \"2026-11-19T06:24:07.453641+00:00\",\n  \"rc\": 0\n}\n"
+  },
+  "gate-initial-0.stderr": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/gate-initial-0.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  },
+  "gate-initial-0.stdout": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/gate-initial-0.stdout",
+    "bytes": 1228,
+    "sha256": "a76c44b30b14d9fc5743740dba97b8198a7d1a4906b94a0427708f7eb6185344",
+    "text": "uid=5001\r\n28.30 28.27 28.33 4/1325 1919\r\n PID PPID USER     %CPU     TIME COMMAND\r\n1922 1916 owner    1000 00:00:00 ps\r\n1916    1 owner    40.0 00:00:00 sh\r\n  83    2 root      2.3 01:03:23 zram_bgrecompd\r\n 513    2 root      1.7 00:45:29 PQ_MPFW_TASK\r\n  31    2 root      0.9 00:24:05 ksoftirqd/2\r\n  49    2 root      0.4 00:12:33 printk\r\n 450    2 root      0.4 00:11:08 tzdev-tee-threads\r\n 539    2 root      0.3 00:09:29 SCLR_DP0\r\n3981    2 root      0.2 00:00:28 kworker/u32:2-vd_time_occupy_workqueue\r\n1368    2 root      0.2 00:05:28 RTW_CMD_THREAD\r\n 305    2 root      0.2 00:05:19 DRV_DBG_UART\r\n 461    2 root      0.1 00:04:42 DRV_VD\r\n 532    2 root      0.1 00:04:37 CHK5V_NDP_HDMI\r\n4065    2 root      0.1 00:00:23 kworker/u30:1-vd_time_occupy_workqueue\r\n 549    2 root      0.1 00:03:49 VPL_SCLR_CTRL_MONITOR\r\n  72    2 root      0.0 kworker/R-trace_contention_worker\r\n  95    2 root      0.0 mmc_trace_vlog\r\n 101    2 root      0.0 kworker/R-trace_aops_worker\r\n 310    2 root      0.0 MLBX_TEST_Thread\r\n 387    1 root      0.0 pm_monitor.sh\r\n1913  387 root      0.0 sleep\r\n1916    1 owner    11.7 sh\r\n/proc/net/tcp sdb-established 0\r\n/proc/net/tcp6 sdb-established 1\r\nperformance\r\n__TV_GATE_DONE__\r\n\r\n__TV_RC__=0\r\n"
+  },
+  "root-off.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-off.json",
+    "bytes": 194,
+    "sha256": "e6fc3f5e18dc9d68c5730b0b22c4e0afef2589d8a00681ff947331cc63168812",
+    "text": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"root\",\n    \"off\"\n  ],\n  \"start\": \"2026-11-19T06:24:58.730345+00:00\",\n  \"end\": \"2026-11-19T06:24:58.777801+00:00\",\n  \"rc\": 0\n}\n"
+  },
+  "root-off.stderr": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-off.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  },
+  "root-off.stdout": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-off.stdout",
+    "bytes": 36,
+    "sha256": "6667042b629240d444116555b8f98368ba464e672980623c2dbdb02741c0089d",
+    "text": "Switched to 'sdk user' account mode\n"
+  },
+  "root-on.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-on.json",
+    "bytes": 193,
+    "sha256": "2d94727f066e3863b732cdd6f5d125c47fb92eb29a6029b44d2418ab0835256a",
+    "text": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"root\",\n    \"on\"\n  ],\n  \"start\": \"2026-11-19T06:24:07.454420+00:00\",\n  \"end\": \"2026-11-19T06:24:07.503297+00:00\",\n  \"rc\": 0\n}\n"
+  },
+  "root-on.stderr": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-on.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  },
+  "root-on.stdout": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-on.stdout",
+    "bytes": 32,
+    "sha256": "525daa895e41827b8cef29d3387114916a532c2624880a49c1614e6c987b6477",
+    "text": "Switched to 'root' account mode\n"
+  },
+  "root-verify.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-verify.json",
+    "bytes": 282,
+    "sha256": "03a03440b34ea972c78f80bc1d6852d3325c6f0db586eafaa32efaabfa90c265",
+    "text": "{\n  \"argv\": [\n    \"sdb\",\n    \"-s\",\n    \"192.168.108.13:26101\",\n    \"shell\",\n    \"test \\\"$(id -u)\\\" = 0 && id -u\\nrc=$?; printf \\\"\\\\n__TV_RC__=%s\\\\n\\\" \\\"$rc\\\"; exit \\\"$rc\\\"\"\n  ],\n  \"start\": \"2026-11-19T06:24:07.503485+00:00\",\n  \"end\": \"2026-11-19T06:24:07.624562+00:00\",\n  \"rc\": 0\n}\n"
+  },
+  "root-verify.stderr": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-verify.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  },
+  "root-verify.stdout": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/root-verify.stdout",
+    "bytes": 18,
+    "sha256": "4cbb8d78a16a0ef86b153f82597e7b691e8bcd1e21e51fc2a4b30038d5f21741",
+    "text": "0\r\n\r\n__TV_RC__=0\r\n"
+  },
+  "state.json": {
+    "path": "temp/board13-pmu-root-20261118/predeployment/state.json",
+    "bytes": 24,
+    "sha256": "282e59e66e8b73d6112b977171b35d562ce60a4f870034057a636e2f7132dc60",
+    "text": "{\n  \"stop_reason\": \"\"\n}\n"
+  }
+}
