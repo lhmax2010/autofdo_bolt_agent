@@ -2,6 +2,8 @@
 
 截至 2026-11-18 22:24 PST，主机到 `192.168.108.26:26101` 的初始连接失败，K1d-a 板上阶段待完成。已归档设计 v0.2，复核了 K1a 启动链历史证据，并交叉编译了两个基准和静态 RESTART2 辅助程序。基于 `0fac5de6` 的源码，若实际重启使用 BCM2835 watchdog 回调，`0 tryboot` 的尾部关键字会被忽略。EEPROM 版本和实际重启路径仍待板上核查。
 
+第 6 节记录 RPi4 恢复连接后的现场证据，并修正第 3 节缺少固件 notifier 的推断。
+
 ## 1. 设计归档与连接门禁
 
 - 实际输入文件为 `/home/linhao/Downloads/06_k1_design_v0.2.md`。原样复制到 [设计 v0.2](06_k1_design_v0.2.md)，Downloads 原件保留。SHA-256 为 `5c801324e3b863fb6a9d7de92ee56bfdf85d250ab35c1ac743d696fd32054ea3`，单文件提交 `a856ce07d370e6210f387a97f5a1b349cc23624a` 已推送 GitHub main。
@@ -56,3 +58,53 @@ Raspberry Pi 官方定义了单次 tryboot 标记和 `0 tryboot` 参数。板上
 | pipe | CPU3，沿用 K1a 的 `perf bench sched pipe -l 500000`。 | 本轮无计时；CV、启动间方差待测。 |
 
 恢复连接后，先核对 PLAT 身份并完成只读归档。每次正常重启后核对 boot ID 变化、build-id、HDMI 和显示栈，记录 10 分钟的全板忙时、温度和前 5 进程。首启每个基准先 1 轮预热加 10 轮计时，再进入三个启动各自的 1 轮预热加 3 轮计时。计时开窗前在 performance 下即时读取 ≤60°C，最高 80°C；切回 performance 后等 3 秒再核对。启动内 CV 用样本标准差除以均值，启动间初估用每启动三轮的几何均值并报告三组之间的 log 方差。只计真实 PLAT 轮次。任一实际重启后五分钟仍不能连接，则停止后续重启并报告现场处理。
+
+## 6. 板上补做（2026-11-18 PST）
+
+### PLAT 与启动链
+
+22:55:46 PST 首次重连成功。进入 root 前核对 DT serial `100000004694d889` 与内核 release。测前身份为 RPi4 Rev 1.5、`6.12.80-arm-rpi4-v7l`、GNU build-id `395733b9c917cb98309b39cc3ec379c03ac36b3f`、boot ID `dcc453b3-4681-45a6-a182-9a312fcdd56b`。HDMI-A-1 为 connected，enlightenment PID 546。[现场原件索引](evidence/k1d-a-index.json)
+
+| 项目 | 实机结果 |
+| --- | --- |
+| 启动分区备份 | `/dev/mmcblk0p1`（`boot_a`），FAT UUID `404C-7537`，PARTUUID `8cf5ae0c-2697-2540-9e74-bfb6482324c0`。在本任务目录以 `ro,nosuid,nodev,noexec` 挂载，`dd` 只读块设备。主机收到 67,108,864 B，板端和主机 SHA-256 均为 `ec89fb505f4e3a49e35b2044ab19bb4dd69388a53a3bdf5d6e8384a725ab5c9d`。已卸载并在发起重启前再次检查。413 个普通文件的 SHA 清单与 K1a 相同。 |
+| 模块树 | `module_a` 的 p6 以只读方式挂载在 `/usr/lib/modules`。PLAT 树共 123 个条目（含目录及符号链接），73 个普通文件有 SHA-256。 |
+| 启动脚本和配置 | 完整 `config.txt` SHA-256 为 `38a4959985ed44398e9656392c245b554155805808524fc04e556e31cc472925`，指定 `kernel=u-boot.bin`。FAT 无 `cmdline.txt`、无文件名为 `boot.scr` 的文件。实际脚本是 `boot.scr.uimg`，SHA-256 为 `fe89a9cd064da48b1207eb110b710362640842ed1c2a3e9f8cb360b3d4013122`。验证 mkimage header 和 payload CRC 后，剥离 64 B 头和脚本长度表，全文为 `boot.scr.decoded.txt`。 |
+| U-Boot 与 bootargs | 运行 DT 记录 `2025.10-g136798fd1-TIZEN.org`。脚本拼接 `tizen_bootarg`、`rootargs`、`bootmode`、`partition_ab`、`console`、`opts`、`ip_opt`，并通过 `bootz` 传入 DT 和 initrd。现场 DT `chosen/bootargs` 与 `/proc/cmdline` 仅结尾 NUL / 换行不同，内容与 §2 历史记录一致。 |
+| DTB 与 overlays | FAT 归档含 `bcm2711-rpi-4-b.dtb`，配置引用 FAT 中的 `vc4-kms-v3d-pi4`、`dwc2` 和 `i2c1`；脚本使用固件预载的 FDT。现场 `/sys/firmware/fdt` SHA-256 为 `e591ad4a342b4631acd1b18364a0578bc8d3f6d163b9ebba18757b5cf7017ff3`。 |
+| initramfs | dmesg 显示已解包 initramfs 并释放 14,336 KiB。DT 范围 `0x04700000–0x054ffe00`。普通模式下脚本选择 `ramdisk_a`（`/dev/mmcblk0p7`），实机只读拉回的 gzip 解包为 14,679,552 B，等于 DT 区间长度。CPIO 123 条记录，只有空的 `usr/lib/modules` 目录，没有 `.ko`。已核对这份 initramfs 不携带 PLAT 模块，K-BASE 的启动仍需核对挂载 p6 后使用的 `-kbase` 模块树。 |
+
+### tryboot 路径复核
+
+**支持该内核调用路径，端到端 tryboot 留待另轮验证。** `0fac5de6` 的 `drivers/firmware/raspberrypi.c:186–222` 对含 `" tryboot"` 的重启参数置位 `0x1`，先通过 mailbox 发送 `RPI_FIRMWARE_SET_REBOOT_FLAGS`（`0x00038064`），再发送 `RPI_FIRMWARE_NOTIFY_REBOOT`。驱动 probe 设置 `g_pdev` 和 drvdata（384–385 行），初始化时注册 blocking reboot notifier（496–516 行）。`kernel/reboot.c:775–783` 接收 RESTART2 参数，`kernel_restart_prepare(cmd)` 先运行该 notifier（91–96 行），到 `machine_restart(cmd)` 才进入 ARM 的 restart handler 链并由 watchdog 写分区号。因此，同一次 RESTART2 可先请求固件标志再重启。§3 关于 watchdog 仅解析分区号的观察仍成立。mailbox 返回值被忽略，syscall 路径本身无法保证标志实际写入。[K 源码与实机证据](evidence/k1d-a-index.json)
+
+- `CONFIG_RASPBERRYPI_FIRMWARE=y` 见 K defconfig 207 行及 K-BASE 构建 `.config` 1651 行。板上没有 `/proc/config.gz`。PLAT 的 `modules.builtin` 有 `kernel/drivers/firmware/raspberrypi.ko`，`/proc/modules` 无该模块，sysfs 显示驱动已绑定 `soc:firmware`，dmesg 记录连接到 2025-05-14T12:23:36 的固件。这些运行证据与 PLAT 驱动内建一致。[现场证据](evidence/k1d-a-index.json)
+- EEPROM 版本为 `8ba17717fbcedd4c3b6d4bce7e50c7af4155cba9`，构建时间 2023-01-11 17:40:52 UTC，capabilities `0x7f`，当前 DT `tryboot=0`。该版本晚于 Raspberry Pi 4 EEPROM 引入 tryboot 的 2020-10-28，发布说明也记载了对应的 2023-01-11 镜像。板上未执行 tryboot，未部署 §3 的程序。[EEPROM 发布说明](https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware-2711/release-notes.md)
+- 板上 `reboot` 最终指向 `systemctl`（systemd 244），帮助列出 `reboot [ARG]`。实机 ELF 中兼容 `reboot` 和 `systemctl reboot` 路径均调用 `update_reboot_parameter_and_warn`，与上游 v244 的两处参数处理吻合。Tizen 的 `systemd-shutdown` 实际指向 `deviced-shutdown`。其 ELF 静态核查显示先读 `/run/reboot`，否则读 `/run/systemd/reboot-param`，对非空参数调用 ARM `syscall(88, …, 0xa1b2c3d4, param)`，即 RESTART2。由此确认安装版本有传参路径。实机只发出无参数的普通重启。[systemd v244 参数处理](https://github.com/systemd/systemd/blob/v244/src/systemctl/systemctl.c#L3337-L3340)、[兼容命令参数处理](https://github.com/systemd/systemd/blob/v244/src/systemctl/systemctl.c#L8053-L8059)、[实机 ELF 证据](evidence/k1d-a-index.json)
+
+### A72 计数与 perf bench
+
+使用 K1a 同一路径的 perf 6.12.80，SHA-256 `41b9b9a0d41da1b2a600c84ffa482ea05c52af54af094f5c6a2bf52d6aa13138`。CPU3 上执行 100,000 次 Bash 空循环，每组约 1 秒。七项同测与逐项单测均完成，记录的运行占比均为 100%。A72 PMU sysfs 为 `armv8_cortex_a72`，type 10，覆盖 CPU 0–3。事件可见性以 `drivers/perf/arm_pmuv3.c:268–297` 中的 PMCEID 位图为依据。[原始清单和计数](evidence/k1d-a-index.json)
+
+| 事件 | 同测计数 | 单测计数 | sysfs 别名 |
+| --- | ---: | ---: | --- |
+| r01 | 5,879,746 | 7,567,223 | l1i_cache_refill |
+| r02 | 349,754 | 891,665 | l1i_tlb_refill |
+| r08 | 1,918,623,882 | 1,918,965,503 | inst_retired |
+| r10 | 5,618,354 | 5,972,967 | br_mis_pred |
+| r0c | 0 | 0 | 未列出 |
+| r21 | 0 | 0 | 未列出 |
+| r11 | 1,478,794,916 | 1,514,618,726 | cpu_cycles |
+
+`r0c` 与 `r21` 的 raw 打开成功，但同测及单测均为 0，且相应别名未公开。后续机制计数可使用本轮有非零实测的五项。`perf bench` 菜单列出 sched 的 `messaging`、`pipe`、`seccomp-notify`，futex 的 `hash`、`wake`、`wake-parallel`、`requeue`、`lock-pi`，以及 epoll 的 `wait`、`ctl`。syscall 集合还列出 `basic`、`getpgid`、`fork`、`execve`。此步只枚举菜单。[perf 原始输出](evidence/k1d-a-index.json)
+
+### 普通重启验收与基准状态
+
+| 重启 | 发起时间（PST） | 验收 |
+| --- | --- | --- |
+| 1 | 23:01:08 | SDB shell 的主机等待在 8 秒时超时。随后 TCP 26101 在 23:02:52 一度可达，SDB 曾短暂列为 `unknown` / `offline`，未获得 shell 或新 boot ID。23:06:08 到达 300 秒上限，停止。 |
+| 2、3 | 未发起 | 等待现场恢复。 |
+
+普通重启 **1 次已发出，0/3 通过验收**。重启后 build-id、HDMI 与显示栈均未验证。第一次未到达空闲采集入口，三次 10 分钟曲线均未生成，**暂无可量化的安静门禁阈值**。后续仍以每次 10 分钟的后 5 分钟计算稳定窗口中位数，再加预登记余量。两项新基准及静态空子程序已部署到本任务目录并核对 SHA，未开始板上标定或计时。pipe、mmfault、forkexec 的有效轮数均为 0，开机内 CV 和启动间方差均无估计。[重连日志与任务程序](evidence/k1d-a-index.json)
+
+第一次重启前已经卸载启动分区。未执行 tryboot，未写启动分区，未部署内核或模块，也未改变 governor（初始为 `schedutil`）或 `kptr_restrict`（初始为 0）。初始 SDB 为 owner，22:56 切换为 root 取证。300 秒时仍无可用 SDB 会话，`root off` 和板上任务目录清理待恢复连接后执行，当前 root 状态未知。请现场核对显示输出与 SDB 服务后再继续。
