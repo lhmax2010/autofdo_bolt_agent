@@ -1,7 +1,7 @@
 {
-  "status": "awaiting_arm32_tryboot_config_approval",
-  "boot_a_writes": 0,
-  "board_reboots_issued": 0,
+  "status": "passed_returned_to_PLAT_uboot",
+  "boot_a_writes": 4,
+  "board_reboots_issued": 2,
   "target": "192.168.108.26:26101",
   "initial_boot_id": "e3c3050e-86dd-4d6a-b452-bd08ebafd9c9",
   "preflight_free_bytes": 39010304,
@@ -296,12 +296,12 @@
         "sha256": "c60ce69540ef276f3fa5019bdf7b6d3141b961f2cd7788b8f474ef2f608bb961"
       },
       {
-        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/snapshot.sh",
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/preflight-tools/snapshot.sh",
         "bytes": 2191,
         "sha256": "355be6c5e643725b4166db86b4a069cf22966760a036b800f4fa0705ee72edd5"
       },
       {
-        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-boot.sh",
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/preflight-tools/write-boot.sh",
         "bytes": 3911,
         "sha256": "bdeba0d9b56ddf5105e34b42bfb50ed9534752cef41aff2987a01da81f7d6c85"
       },
@@ -311,7 +311,7 @@
         "sha256": "e0132a3c80f0536c0fbc6c4206ad304e8d28e09c771ca12b18e47a71879d67a8"
       },
       {
-        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/compare.py",
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/preflight-tools/compare.py",
         "bytes": 4172,
         "sha256": "f450b4d201ac0522fdbb15261402f3e0e9326e22daefa756a8e0e3aba3fd22b8"
       },
@@ -326,9 +326,695 @@
         "sha256": "55ac5addda4a3d0a9bfc0f25af2456f8d77de6c5bd20376daab1a4a4b6c02201"
       },
       {
-        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/run-all.sh",
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/preflight-tools/run-all.sh",
         "bytes": 4034,
         "sha256": "06abf77bcfae6469f9881802a82349b6090b199b3b0869b50fae3979a509e4f9"
+      }
+    ]
+  },
+  "preflight": {
+    "status": "awaiting_arm32_tryboot_config_approval",
+    "boot_a_writes": 0,
+    "board_reboots_issued": 0,
+    "root_off_verified": true
+  },
+  "final_free_bytes": 16465920,
+  "boots": {
+    "direct": {
+      "issued": "2026-11-19T21:10:56.806-08:00",
+      "first_session_s": 52.161,
+      "recovery_level": "automatic",
+      "boot_id": "dfb5031f-4797-4800-9e80-f3d85933d9b4",
+      "tryboot": 1,
+      "fdt_sha256": "b8564e4258c6c1a7fc59c825770f06cfddbd8999ea39b99f946f9667d37ee8e0"
+    },
+    "return": {
+      "issued": "2026-11-19T21:16:52.833-08:00",
+      "first_session_s": 52.266,
+      "recovery_level": "automatic",
+      "boot_id": "ae70026a-42df-4628-b9ae-9178012556b0",
+      "tryboot": 0,
+      "fdt_sha256": "c848a3e266ed2470854dff23b212823dbb12dfb1964921bc23b9942e1991958e"
+    }
+  },
+  "continuation_groups": {
+    "write-receipts": [
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/post.df",
+        "bytes": 162,
+        "sha256": "fb35e3c2b530c4b4217a733abd8e10af58ba5c855c8f4efbe94fc91c17de7cfb"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/post.files.tsv",
+        "bytes": 12806,
+        "sha256": "b3eb4b87a2dabbebc9129e97977099614276d15d5cde78332d660959df6185df"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/post.mount",
+        "bytes": 239,
+        "sha256": "34180067a4208d7a0949d4cccbe326d2a3f701c6e068a8301d8bd30c8a31807f"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/post.sha256",
+        "bytes": 39058,
+        "sha256": "03a63ddfdd90a11e2ce6f451d2a72cf28d8ee4fbfc1574bd3934c35129359b89"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/post.statfs",
+        "bytes": 21,
+        "sha256": "2d7ecad7c7cf33aee3a20c447e4f62e1a55cb027b83628adef56ed78b722e298"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/pre.df",
+        "bytes": 162,
+        "sha256": "d5a4ef0d181608afe7d90e3199577475cf8360f74eaa3b1929e28bd9d5f38b69"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/pre.files.tsv",
+        "bytes": 12720,
+        "sha256": "1e910e75e270983f6d60775fd5ef7a85e6e6ec6e53c9960e0c1a9d7a3afb9c3a"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/pre.mount",
+        "bytes": 239,
+        "sha256": "34180067a4208d7a0949d4cccbe326d2a3f701c6e068a8301d8bd30c8a31807f"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/pre.sha256",
+        "bytes": 38720,
+        "sha256": "06969a76a1f9f4050e06b69697fd2ae09a6e0721e3e66df30faecbdfc587e1db"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-receipts/pre.statfs",
+        "bytes": 23,
+        "sha256": "3fb64ab9d333280fd00fa66595283bec546b3dd14e4409506ece69f6ce25b392"
+      }
+    ],
+    "direct": [
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/boot-id",
+        "bytes": 37,
+        "sha256": "c2c929144ae4fed61d01bcb2ce8b4f460a7edde253a74d26917fa83be9968c0d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootargs",
+        "bytes": 673,
+        "sha256": "4aa33f348262a3355e98625a48dcaab242160a78152a4528de58141447516768"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/boot-mode",
+        "bytes": 4,
+        "sha256": "b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/build-timestamp",
+        "bytes": 4,
+        "sha256": "e022929e4ab85892d8208246a1b1794eafc3138b01b0180b97bd6acee3584b9e"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/capabilities",
+        "bytes": 4,
+        "sha256": "8226952884d05e8a0d647a443de86906f567aab8d72fe8f844a1ce4b255bb396"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/name",
+        "bytes": 11,
+        "sha256": "f8848f99755348926310ec89bfb17d11581a1b7c7fe9233e533f960e75b835cf"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/partition",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/rsts",
+        "bytes": 4,
+        "sha256": "2de44621c76edf2debbc2df62ccb52c5036b1919dca3af0c0a886cc48dbfaeba"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/tryboot",
+        "bytes": 4,
+        "sha256": "b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/update-timestamp",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/bootloader/version",
+        "bytes": 41,
+        "sha256": "b9d915abde0d35899878e927366ee71fef0b33280fd9651a0bd043bad587f3ab"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/cmdline",
+        "bytes": 673,
+        "sha256": "60c4e06d6dbb9bfbc64bd1967efb973c1e7a93f331b90d03c6f98c2cadd0b82c"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/cpu.arch",
+        "bytes": 80,
+        "sha256": "d5cdf9ecf55b93a05de202278170ff0eee7d311bb48b0d145df2e6bedc41dc32"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/display-net",
+        "bytes": 505,
+        "sha256": "b98014f8c37cd6c373b3c58df705669febcb57485b7df6b1746458dd17426e4e"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/dmesg",
+        "bytes": 40805,
+        "sha256": "a39a4f96504077be34e576276ae5cf625f6968fd1fb96e287f16076175f035ed"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/dmesg-warn",
+        "bytes": 2475,
+        "sha256": "78902c94ca8eb2f79546495c19d1cb934987da76fc920cf24ddb1a03642e3bf8"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/governor",
+        "bytes": 10,
+        "sha256": "370afcec441b514ced2d8c7a6dce776d58ec2fd19d52cc3efe8e80eea1875140"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/kernel.notes",
+        "bytes": 84,
+        "sha256": "146a4e2d870f3f65fdc6c6f9ca738e3cabcb83bbf4dc6f96bbcdd18c6776ab35"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/kptr_restrict",
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/linux,initrd-end",
+        "bytes": 4,
+        "sha256": "614e68156b2d59e05568fddebccf6a4970e0dbd13169dd86832271b89fc3e52a"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/linux,initrd-start",
+        "bytes": 4,
+        "sha256": "8523c1f02231872f9a2d3fbf33db1b48b21e0a5f8e087e5756bfaa96294dbf0f"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/live.fdt",
+        "bytes": 58325,
+        "sha256": "b8564e4258c6c1a7fc59c825770f06cfddbd8999ea39b99f946f9667d37ee8e0"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/modules",
+        "bytes": 398,
+        "sha256": "b11167145215d1c70963380289394ca0ce89200c5f899225feab0c42a8f9b102"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/mounts",
+        "bytes": 2962,
+        "sha256": "0c237881d836b59c9f72f2357630ce225d3cd2842aa6a0af0d7fd0f76b3a2289"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/os_prefix",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/overlay_prefix",
+        "bytes": 10,
+        "sha256": "3aa19251f3bb16449028ec129eec53b4e0b1552c7519bf24bbff30c262146ac0"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/proc-version",
+        "bytes": 133,
+        "sha256": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/runtime.sha256",
+        "bytes": 168,
+        "sha256": "de0a4d66d60ab429e090218eda567da2f4a2e1127fe4661be8a48a58579c5b16"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/uname",
+        "bytes": 90,
+        "sha256": "567e05f317af92177a0de82617f86dd786f2fdd21ceb7aa9b9f4ccb2e0dfad77"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct/uname-machine",
+        "bytes": 7,
+        "sha256": "89f2e800f1d04659475cfb6c9a6a613b7222378b6e290922b6cdb902f6438594"
+      }
+    ],
+    "return": [
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/boot-id",
+        "bytes": 37,
+        "sha256": "5673e052936494f47c1a03eff390f508ad1aef3e0694f1b7d723bf4d5532cb6d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootargs",
+        "bytes": 361,
+        "sha256": "457d01b7403c119868b0b385ca7d0df8930ce5b934c9250e99193229d05bffdb"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/boot-mode",
+        "bytes": 4,
+        "sha256": "b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/build-timestamp",
+        "bytes": 4,
+        "sha256": "e022929e4ab85892d8208246a1b1794eafc3138b01b0180b97bd6acee3584b9e"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/capabilities",
+        "bytes": 4,
+        "sha256": "8226952884d05e8a0d647a443de86906f567aab8d72fe8f844a1ce4b255bb396"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/name",
+        "bytes": 11,
+        "sha256": "f8848f99755348926310ec89bfb17d11581a1b7c7fe9233e533f960e75b835cf"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/partition",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/rsts",
+        "bytes": 4,
+        "sha256": "2de44621c76edf2debbc2df62ccb52c5036b1919dca3af0c0a886cc48dbfaeba"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/tryboot",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/update-timestamp",
+        "bytes": 4,
+        "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/bootloader/version",
+        "bytes": 41,
+        "sha256": "b9d915abde0d35899878e927366ee71fef0b33280fd9651a0bd043bad587f3ab"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/cmdline",
+        "bytes": 361,
+        "sha256": "1a132093c6e7220e981bd54c1a6a7bf780a19927c9787d3c9dcb7149eff106b4"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/cpu.arch",
+        "bytes": 80,
+        "sha256": "d5cdf9ecf55b93a05de202278170ff0eee7d311bb48b0d145df2e6bedc41dc32"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/display-net",
+        "bytes": 505,
+        "sha256": "0476b92b3565f48498e986e66b728fea14a3c4608e3102006ed8dbe5930f68c4"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/dmesg",
+        "bytes": 38240,
+        "sha256": "57e1e6d9f1f6a89e7865d004624f0c5088061cca33d80d4dffde3eef5d02d41d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/dmesg-warn",
+        "bytes": 2418,
+        "sha256": "94b247eeb6107bdb3143a5d9ff6bd505ec61be6a648144a2545073648eedafbe"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/governor",
+        "bytes": 10,
+        "sha256": "370afcec441b514ced2d8c7a6dce776d58ec2fd19d52cc3efe8e80eea1875140"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/kernel.notes",
+        "bytes": 84,
+        "sha256": "146a4e2d870f3f65fdc6c6f9ca738e3cabcb83bbf4dc6f96bbcdd18c6776ab35"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/kptr_restrict",
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/linux,initrd-end",
+        "bytes": 8,
+        "sha256": "d8bb858b77ec3187066339819461c9ffd1c1af59b6fdbe41d99d5c624da0c20a"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/linux,initrd-start",
+        "bytes": 8,
+        "sha256": "8f66dbe31dae51dfb52cbeadb19d066f60fbae6411e0e2deeb0680845e0d3e73"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/live.fdt",
+        "bytes": 58368,
+        "sha256": "c848a3e266ed2470854dff23b212823dbb12dfb1964921bc23b9942e1991958e"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/modules",
+        "bytes": 398,
+        "sha256": "b1201e5a70ad1b5260e99d509ebcad54d418328774a5e93024b7324a6598c15d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/mounts",
+        "bytes": 2962,
+        "sha256": "6aa0affc3d63265f1df6aff39328789876c289ee0d8fbe14210ed38132947635"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/os_prefix",
+        "bytes": 1,
+        "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/overlay_prefix",
+        "bytes": 10,
+        "sha256": "3aa19251f3bb16449028ec129eec53b4e0b1552c7519bf24bbff30c262146ac0"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/proc-version",
+        "bytes": 133,
+        "sha256": "06412982257f23581c7f89f5b491223622e820c620b5d290f4be0d49fd1956ab"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/runtime.sha256",
+        "bytes": 168,
+        "sha256": "27e2a31870b877dfe6009814da07e28c10f0c3c027939c78e03c7796c73345b9"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/u-boot,version",
+        "bytes": 29,
+        "sha256": "de2245b717531ace6c396d290119cda4e198a374ae53ecfbc6136bd27389aa7a"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/uname",
+        "bytes": 90,
+        "sha256": "567e05f317af92177a0de82617f86dd786f2fdd21ceb7aa9b9f4ccb2e0dfad77"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return/uname-machine",
+        "bytes": 7,
+        "sha256": "89f2e800f1d04659475cfb6c9a6a613b7222378b6e290922b6cdb902f6438594"
+      }
+    ],
+    "quiet": [
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet/IDLE_OK",
+        "bytes": 21,
+        "sha256": "1f2f3bf3bc19532634811bcc03499f200ce1158dbff59997e64e4245bc196668"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet/idle.clk_tck",
+        "bytes": 4,
+        "sha256": "eea8254c7500ba3de996aa8ad6af399183f04e17d4a8102fde539dbc93a90012"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet/idle.cpu.tsv",
+        "bytes": 4500,
+        "sha256": "29a9be48458040978d14b31ac5659f7de91544dcb866d9cc5aa94c4d69dd0a4b"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet/idle.proc.prev",
+        "bytes": 5217,
+        "sha256": "ed4219ed388feb9823821bca8da99ab6e2f3319c56f74f866d5b0bda59d72649"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet/idle.temp.tsv",
+        "bytes": 6416,
+        "sha256": "de158d4d478fb060078a77d1199787dd1149d6fb0d9fd5fff8d76749e1d14981"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet/idle.top5.tsv",
+        "bytes": 9233,
+        "sha256": "bf1999e22372c5b396e9a6f03e85550181e9888ab56c1f44505c6e0b2a2eb13e"
+      }
+    ],
+    "retention-receipts": [
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-receipts/retention.df",
+        "bytes": 163,
+        "sha256": "6a090be96c1eaf54af2354db7f8bd9a10bc5593ffd51842ff70b54135b734fff"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-receipts/retention.files.tsv",
+        "bytes": 12806,
+        "sha256": "b3eb4b87a2dabbebc9129e97977099614276d15d5cde78332d660959df6185df"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-receipts/retention.mount",
+        "bytes": 241,
+        "sha256": "56db304a61f5d6a1d65c2e7d3cacac7626323b0b390178a885f20774960b501b"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-receipts/retention.sha256",
+        "bytes": 39058,
+        "sha256": "03a63ddfdd90a11e2ce6f451d2a72cf28d8ee4fbfc1574bd3934c35129359b89"
+      }
+    ],
+    "execution_receipts": [
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/approved-initial.txt",
+        "bytes": 230,
+        "sha256": "236b31ab38e48e2dea876cc8d26d6240fdff66aff512e5d3317d4d8ed73649a4"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/approved-uboot-cpu.arch",
+        "bytes": 80,
+        "sha256": "d5cdf9ecf55b93a05de202278170ff0eee7d311bb48b0d145df2e6bedc41dc32"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/approved-config-proof.txt",
+        "bytes": 368,
+        "sha256": "9f48e722cc4b085292371770f76d183bef48e9811e8aaf0573c67af838d9f2f8"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/approved-run.log",
+        "bytes": 4141,
+        "sha256": "968ffb7c4cb1b23b482e2fa3170496d54c65367e26f8b26965a95572531538ee"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/approved-retry.log",
+        "bytes": 18875,
+        "sha256": "7146b8516f953974beb067c41b372a59a02e21b57958ab53d41a3d8eb9deee33"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/ram-write-stage.txt",
+        "bytes": 20,
+        "sha256": "21ed7981e21537c71f28977910a919d1534249f692bdacef34e6f77d9e46907d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/ram-write-stage-02.txt",
+        "bytes": 20,
+        "sha256": "21ed7981e21537c71f28977910a919d1534249f692bdacef34e6f77d9e46907d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/layout.txt",
+        "bytes": 93,
+        "sha256": "5500866d00560ec6a795cd8fec06e0b83a0d6a32f6bd65c3aedf38208a1b0b6d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/board-write-attempt-1.txt",
+        "bytes": 250,
+        "sha256": "3d32dda9a7234cf22b8563a1a3e4b55aca1e0a2a126cbb7f08488e6a33afdd63"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/board-write.txt",
+        "bytes": 1076,
+        "sha256": "7f3516cd1c075aa0b265c5b6190bca9c64bc99df7d8f386a4567075151c4d92d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-boot-attempt-1.sh",
+        "bytes": 3911,
+        "sha256": "bdeba0d9b56ddf5105e34b42bfb50ed9534752cef41aff2987a01da81f7d6c85"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/run-all-attempt-1.sh",
+        "bytes": 4479,
+        "sha256": "c07a77be77ebe86ddda91f4386b6bce711209546f609feb71296a73828950eec"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/write-boot.sh",
+        "bytes": 4072,
+        "sha256": "08f72113d6ce1c6443de1ed5cce584fe4bfe28a832811b38c0f80ca5a281061d"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/run-all.sh",
+        "bytes": 4517,
+        "sha256": "b9944ba85be04d00f2c02dc1c57d364cf09bb700b3bf3969fa00a66d084c81ab"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/snapshot.sh",
+        "bytes": 2280,
+        "sha256": "cabefae5898e15796e37132028639c36f49f3de0a1552e40b38e78dc8fae5f76"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/compare.py",
+        "bytes": 4518,
+        "sha256": "40ff964de4cdd7654d3d7b97932e3001d753e5dd69f3b17b41abfbc57f22c10f"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct-first-identity.txt",
+        "bytes": 254,
+        "sha256": "d4ccc34a711545dfd0ca0f9ae3554f1a3227a21899dcc0e8793c1efbf1dae31c"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return-first-identity.txt",
+        "bytes": 254,
+        "sha256": "919cad03e48a471a1afa3b4e30eb098dc8ddf3c1c5494dc0cb3eab894586e9e6"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct-reboot.log",
+        "bytes": 5130,
+        "sha256": "591297e92e0f304b5ea3d7f7374147a490d9d9c864b49d6914b6f11c49e4a5a8"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return-reboot.log",
+        "bytes": 5106,
+        "sha256": "368b21d12343caa27837f8e5c9f928b68cb5b9a01845c897ff9b5857820f6575"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/driver.jsonl",
+        "bytes": 1846,
+        "sha256": "995697433ba292bb0b49add4cf01ce245cdca2cf9eb96664a5e318178f784482"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct-comparison.json",
+        "bytes": 2638,
+        "sha256": "59496719b12712111ce493e1a4698a061b10d9633ab189d04483750f1394acc8"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return-comparison.json",
+        "bytes": 1884,
+        "sha256": "db27e56107a74e68530c15d19689b24cc2de7ca8eb6434a36baa38ba29b43818"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/direct-evaluation.txt",
+        "bytes": 2638,
+        "sha256": "59496719b12712111ce493e1a4698a061b10d9633ab189d04483750f1394acc8"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/return-evaluation.txt",
+        "bytes": 1884,
+        "sha256": "db27e56107a74e68530c15d19689b24cc2de7ca8eb6434a36baa38ba29b43818"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet-summary.py",
+        "bytes": 1895,
+        "sha256": "4e48ad22429c4ddc48880d1413a6327cd36396ef695d5a00770d9e6ad40d902b"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet-summary.json",
+        "bytes": 4520,
+        "sha256": "dde02cd8973594cc3f56c5ea79da383039230b0b21496b1bcc8d0743a236780b"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/quiet-summary.txt",
+        "bytes": 815,
+        "sha256": "5c0b9b0462e8f84260ca4bc18715d29d418614de260a4f47abb570af397c2c01"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/final-readonly.txt",
+        "bytes": 420,
+        "sha256": "4b1bed55f66126cadd3dc2e37d80a4b88254d8d6d39a71b0cc32347e03201135"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-audit.sh",
+        "bytes": 871,
+        "sha256": "bdd2b7cbbab672113c2b8c86cb15ac212a5e938d55fd2c5ed8824cdac8e17bc9"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-audit-first.txt",
+        "bytes": 100,
+        "sha256": "c7b21f0f293f97036bcd1d2f0ed41ea9375df52a24d771775db1d069c820efd9"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-transport.txt",
+        "bytes": 489,
+        "sha256": "4f0d5562678f2c2135712da1e1b9bcfe66cbbd00a926c544febcd66b04e2532f"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-sdb.py",
+        "bytes": 1821,
+        "sha256": "075d4109505fa430217fb7e4739d17fb5eec44a6ae465ccdc465eda25c867926"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-recovery.log",
+        "bytes": 933,
+        "sha256": "d439fecb874d3c3d139a69c6043924020eba3bd5d6d971acafbeb88a0148c14c"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-recovery-run.txt",
+        "bytes": 425,
+        "sha256": "ee2ada098c203c7e08d4e2af659f8538c2482fe69dbf6bcd2d2ffd428536db4a"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-marker.txt",
+        "bytes": 22,
+        "sha256": "0c8143f22f794bba148639789eca03303f7c54edff5a1f23a7b72697af9a978e"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/retention-audit.txt",
+        "bytes": 1382,
+        "sha256": "0abe9f3476a099a28ac4058b54fd318c33a5d4fd10fdf352217594991358581b"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/post-retention-owner.txt",
+        "bytes": 84,
+        "sha256": "45ee1811b025f2638ae12981da6a6dcfc733eaccb443a058b57e9a4d759c1e3e"
+      }
+    ],
+    "written_payload": [
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/cmdline-afdo.txt",
+        "bytes": 360,
+        "sha256": "7a6915f4e2bd45a318f7f891dc2a1c0a6c37b87c4c8f175a8c1e03dcabba3917"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/config.diff",
+        "bytes": 262,
+        "sha256": "97098e14c11e63746e81cdc7208838e9042e503b79f7b2548b92df05fde7abfa"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/expected-files.tsv",
+        "bytes": 12720,
+        "sha256": "1e910e75e270983f6d60775fd5ef7a85e6e6ec6e53c9960e0c1a9d7a3afb9c3a"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/expected-post-files.tsv",
+        "bytes": 12806,
+        "sha256": "b3eb4b87a2dabbebc9129e97977099614276d15d5cde78332d660959df6185df"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/expected-post.sha256",
+        "bytes": 39058,
+        "sha256": "03a63ddfdd90a11e2ce6f451d2a72cf28d8ee4fbfc1574bd3934c35129359b89"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/expected.sha256",
+        "bytes": 38720,
+        "sha256": "06969a76a1f9f4050e06b69697fd2ae09a6e0721e3e66df30faecbdfc587e1db"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/initramfs-afdo.gz",
+        "bytes": 7632283,
+        "sha256": "ea6c57b47cce3427abcb820c4da7682be52e50e8ac6e9c3dc40c1be4ce235eaf"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/payload.sha256",
+        "bytes": 330,
+        "sha256": "db9c50343881fa7a2fc3e1a699c3f69030ab3d02989bf3c95eeb87f811d25e50"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/tryboot.txt",
+        "bytes": 1802,
+        "sha256": "31740c59d7cbf23ea3d3c6a3b8eebeb0660ad7646f05dea94091647f2cfa2c54"
+      },
+      {
+        "path": "temp/kernel-afdo-k1/k1d-a/tryboot-plat/payload/zImage-plat-direct",
+        "bytes": 14905760,
+        "sha256": "d5345f13eada3a3aab8b2fca9f511c608469f708d83a6a2445882e68241cc9af"
       }
     ]
   }
