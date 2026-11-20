@@ -124,7 +124,7 @@ class SDB:
         actual=self.identity()
         require(actual==journal.identity,'restore identity mismatch','identity',3)
         initial_root=self.root_state()
-        needs_root=any(a['kind'] in ['host_artifact','run','process','governor'] for a in journal.data['cleanup_pending'])
+        needs_root=any(a['kind'] in ['host_artifact','run','process','governor','empty_directory'] for a in journal.data['cleanup_pending'])
         record=journal.path.parent/'cleanup-sessions'/(str(time.time_ns())+'.json')
         data=dict(initial_root=initial_root,needs_root=needs_root,status='started')
         save(record,data)
@@ -173,6 +173,11 @@ class SDB:
         if kind=='root':self.root(action['previous'])
         elif kind=='governor':self.governor(action['policy'],action['previous'])
         elif kind=='host_artifact':self.remove_host_artifact(action)
+        elif kind=='empty_directory':
+            remote = action['remote']
+            path = q(remote) if remote == '/opt/afdo_agent' else board_path(remote)
+            self.shell('if test -e ' + path + ' || test -L ' + path
+                       + '; then test ! -L ' + path + ' && rmdir -- ' + path + '; fi')
         elif kind=='run':
             receipt=Path(action['receipt'])
             # Unpulled data is never discarded during exception cleanup.

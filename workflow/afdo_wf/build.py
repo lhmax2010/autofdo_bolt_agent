@@ -20,6 +20,42 @@ def resources(workdir):
 
 def can_start(r,experiment=None):return (experiment=='m1-ffmpeg-rpi4-thumb-01' or r['mem_available']>=16*GIB) and r['load1']<.6*r['nproc'] and r['disk_free']>=50*GIB
 
+def active_builds(proc=Path('/proc')):
+    """Inspect process names and executables without retaining command arguments."""
+    found = []
+    for directory in proc.iterdir():
+        if not directory.name.isdecimal():
+            continue
+        try:
+            name = (directory / 'comm').read_text().strip()
+            words = (directory / 'cmdline').read_bytes().split(b'\0')[:2]
+        except FileNotFoundError:
+            continue
+        except PermissionError:
+            words = []
+        names = {name, *(Path(os.fsdecode(word)).name for word in words)}
+        for executable in sorted(names & {'gbs', 'rpmbuild'}):
+            found.append({'pid': int(directory.name), 'executable': executable})
+    return sorted(found, key=lambda entry: entry['pid'])
+
+
+def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=False):
+    start = time.monotonic()
+    history = []
+    while True:
+        sample = resources(workdir)
+        sample['other_builds'] = active_builds()
+        history.append(sample)
+        elapsed = time.monotonic() - start
+        ready = can_start(sample) and (not exclusive or not sample['other_builds'])
+        state = 'ready' if ready else 'timed_out' if elapsed >= timeout else 'waiting'
+        save(destination, dict(status=state, wait_seconds=elapsed, samples=history))
+        if ready:
+            return
+        require(state != 'timed_out', 'host startup gate timed out', 'environment')
+        time.sleep(min(interval, timeout - elapsed))
+
+
 def stop_needed(r,previous_low):
     low=previous_low+1 if r['mem_available']<6*GIB else 0
     return low,low>=2 or r['disk_free']<20*GIB
@@ -37,7 +73,7 @@ def command(config,source,root,unit,macros,repo=None,buildconf=None,verbose=Fals
     if verbose:argv+=['--define','__make /usr/bin/make V=1']
     return argv
 
-def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None):
+def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None,exclusive=False):
     """No automatic retry. Stop only the unique scope created by this call."""
     workdir=Path(workdir).resolve();out=Path(out).resolve()
     require(out.is_relative_to(workdir),'output outside workdir')
@@ -64,7 +100,14 @@ def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None
             peak=max(peak,int(r.get('memory.peak',0)))
         events.append(r);save(out/'resources.json',events);return r
     try:
-        while not can_start(sample(),experiment):
+        def ready():
+            current = sample()
+            if exclusive:
+                current['other_builds'] = active_builds()
+                save(out/'resources.json', events)
+            return can_start(current, experiment) and not current.get('other_builds')
+
+        while not ready():
             require(time.monotonic()-start<wait_seconds,'build start gate timeout','environment')
             time.sleep(min(60 if experiment else 600,max(1,wait_seconds-(time.monotonic()-start))))
         result.update(start_resources=events[-1],wait_seconds=time.monotonic()-start,

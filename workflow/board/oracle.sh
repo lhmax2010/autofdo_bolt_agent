@@ -7,7 +7,7 @@ safe_path "$out"; safe_path "$input"
 test ! -e "$out"; mkdir -p "$out"
 export HOME="$out" TMPDIR="$out" XDG_CACHE_HOME="$out/cache" GST_REGISTRY_1_0="$out/registry.bin" LC_ALL=C
 if test "$variant" = PLAT; then unset LD_LIBRARY_PATH; else
-    safe_path "$variant"; export LD_LIBRARY_PATH="$variant/usr/lib:/opt/afdo_agent/lib"
+    safe_path "$variant"; export LD_LIBRARY_PATH="$variant/${WF_RUNTIME_LIB:-usr/lib}:${WF_PERF_LIB:-/opt/afdo_agent/lib}"
 fi
 hp=''; cp=''; gp=''
 cleanup() {

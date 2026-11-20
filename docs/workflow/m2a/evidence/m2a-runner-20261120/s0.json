@@ -1,0 +1,94 @@
+{
+  "capabilities": {
+    "frequency": [
+      "/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq",
+      "/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_cur_freq"
+    ],
+    "temperature": [
+      "/sys/class/thermal/thermal_zone0/temp"
+    ],
+    "voltage": []
+  },
+  "cooldown": {
+    "initially_at_target": true,
+    "samples": [
+      {
+        "millidegrees": {
+          "/sys/class/thermal/thermal_zone0/temp": 39150
+        },
+        "time": 1795162261.6086416
+      },
+      {
+        "millidegrees": {
+          "/sys/class/thermal/thermal_zone0/temp": 40800
+        },
+        "time": 1795162281.6983557
+      }
+    ],
+    "seconds": 0.24213879800026916,
+    "target_millidegrees": 58000
+  },
+  "fixed_khz": 2400000,
+  "host_resources": {
+    "disk_free": 376221224960,
+    "load1": 2.2197265625,
+    "mem_available": 20328632320,
+    "meminfo": "MemTotal:       32297772 kB\nMemFree:         3381584 kB\nMemAvailable:   19852180 kB\nBuffers:         3195224 kB\nCached:          8442352 kB\nSwapCached:          624 kB\nActive:          2906164 kB\nInactive:       17791900 kB\nActive(anon):    1793980 kB\nInactive(anon):  8253640 kB\nActive(file):    1112184 kB\nInactive(file):  9538260 kB\nUnevictable:      453456 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:        4193672 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:            279620 kB\nWriteback:             0 kB\nAnonPages:       9513832 kB\nMapped:          1311160 kB\nShmem:            987132 kB\nKReclaimable:    6288720 kB\nSlab:            7308540 kB\nSReclaimable:    6288720 kB\nSUnreclaim:      1019820 kB\nKernelStack:       32800 kB\nPageTables:       115924 kB\nSecPageTables:      7564 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343184 kB\nCommitted_AS:   42160068 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       73520 kB\nVmallocChunk:          0 kB\nPercpu:            20160 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   602112 kB\nShmemPmdMapped:        0 kB\nFileHugePages:      6144 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      355460 kB\nDirectMap2M:     4317184 kB\nDirectMap1G:    29360128 kB\n",
+    "nproc": 20,
+    "time": 1795162189.1212516
+  },
+  "identity": {
+    "arch": "aarch64",
+    "build_id": "tizen-unified-toolchain_20261118.083201",
+    "kernel": "6.12.80-arm64-rpi4-v8",
+    "model": "Raspberry Pi 5 Model B Rev 1.1"
+  },
+  "inputs": [
+    {
+      "duration": 60,
+      "id": "bbb-720p-60",
+      "oracle": {
+        "bytes": 2488320000,
+        "caps": "I420,1280x720,30/1,progressive,1/1",
+        "digest": "3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814",
+        "frames": 1800,
+        "threads": 1
+      },
+      "path": "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4",
+      "role": "train",
+      "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4",
+      "start": 0
+    },
+    {
+      "duration": 60,
+      "id": "tos-720p-60",
+      "oracle": {
+        "bytes": 2488320000,
+        "caps": "I420,1280x720,30/1,progressive,1/1",
+        "digest": "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e",
+        "frames": 1800,
+        "threads": 1
+      },
+      "path": "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4",
+      "role": "test",
+      "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1",
+      "start": 0
+    },
+    {
+      "duration": 60,
+      "id": "sintel-1080p-60",
+      "oracle": {
+        "bytes": 4478976000,
+        "caps": "video/x-raw, format=(string)I420, width=(int)1920, height=(int)1080",
+        "digest": "91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193",
+        "frames": 1440,
+        "threads": 1
+      },
+      "path": "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4",
+      "role": "test-secondary",
+      "sha256": "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843",
+      "start": 0
+    }
+  ],
+  "throttle_history": "unknown"
+}

@@ -60,7 +60,7 @@ class Cleanup:
         self.data=json_load(path) if self.path.exists() else dict(identity=identity,cleanup_pending=[])
         require(self.data['identity']==identity,'board changed before restore','identity',3)
     def register(self,action):
-        require(action.get('kind') in ['root','governor','process','run','host_artifact'],'unknown cleanup action')
+        require(action.get('kind') in ['root','governor','process','run','host_artifact','empty_directory'],'unknown cleanup action')
         self.data['cleanup_pending'].append(action);save(self.path,self.data)
     def reconcile_parent(self,receipt):
         r=json_load(receipt)
@@ -85,7 +85,7 @@ class Cleanup:
     def restore(self,actual_identity,undo):
         require(actual_identity==self.identity,'restore identity mismatch','identity',3)
         failures=[]
-        ordered=sorted(reversed(self.data['cleanup_pending']),key=lambda a:{'process':0,'run':2,'host_artifact':1,'governor':3,'root':4}[a['kind']])
+        ordered=sorted(reversed(self.data['cleanup_pending']),key=lambda a:{'process':0,'run':2,'host_artifact':1,'empty_directory':3,'governor':4,'root':5}[a['kind']])
         for action in ordered:
             if action not in self.data['cleanup_pending']:continue
             try:

@@ -51,6 +51,13 @@
 - K1a 60°C 重试完成，五项各 3 预热 + 10 计时 + 1 system-wide 采样，50 个计时轮中 18 个起跑温度标记原样保留。powersave 门禁全部通过，最长采样等待 9.59 秒。内核周期 pipe 97.67%、syscall 87.24%、tmpfs 99.39%、内存触页 97.91%、ToS 1.39%。优先验证 pipe/内存触页，tmpfs 为第三候选。启动镜像与运行 notes 匹配，确认非历史 c27f160d。原 governor、SDB uid5001、kptr_restrict=0 已核验，未刷写、未重启、未生成 profile。[重试报告](kernel/autofdo/04_k1a_baseline.md#重试60c-起跑与轮间-powersave)
 - K1c 完成 [ARM32 回移植与 K-BASE 主机构建](kernel/autofdo/07_k1c_kbase_build.md)。在 `0fac5de6` 上应用五个指定上游补丁和两项本地适配，ARM32 保留 6.13 门禁，停用 MFS 与全局 function-sections。Clang 22.1.8，冻结 RPM 130/130，GBS 退出 0、5,131.22 秒、cgroup 峰值 5,371,985,920 B。与 K1a 的编译命令比较仅有预期训练标志差异，普通版原始 build-id `96766cfcbff8c33d83ca38152ad02f6a02dd44d4`，独立模块目录 `/lib/modules/6.12.80-arm-rpi4-v7l-kbase`。板上启动与运行待 K1d 获授权后验证。
 
+## Workflow M2a：RPi5 runner 与 S0 通过，S1 构建互斥超时（2026-11-20）
+
+- 板型配置覆盖 RPi4 armv7l Thumb-2/A32 与 RPi5 aarch64。新增 `run --stop-after afdo-audit`，RPi5 在 S5 收据之前核对消费与非计时 oracle。186 项测试、M1 归档 48 项命令/路径/收据比较通过。设计 v0.3 与 M1 判定及统计实现保持原样。
+- 按本轮快照规则选 Base 20261030.120529、Unified 20261104.125239，两份共享 RPM-MD 均核验 aarch64 包。aarch64 BASE/AFDO 的 BuildRequires 查询一致。
+- RPi5 S0 通过。perf SHA、动态依赖与硬件 cycles 事件通过。20 秒 CPU3 负载结束后首读 40.80°C，已低于 58°C。S1 按 10 分钟间隔复查，满 3 小时仍有外部 GBS，未启动本次构建。S1 之后的冻结、构建、soname 兼容性、训练、profile 质量、AppliedSamples 与测量均未到达。
+- 停止后 UID 5001、schedutil、RPM 数 1230 恢复并核对，清理待办为空，`/opt/afdo_agent` 已验证不存在。[报告](workflow/m2a/02_runner_and_afdo_audit.md) · [证据索引](workflow/m2a/evidence/m2a-runner-20261120/index.json)
+
 ## Workflow M1：attempt-11自动化端到端验收完成（2026-11-17任务）
 
 - [报告13.5–13.8](workflow/m1/05_m1_board_e2e.md)：单命令S0–S7完成，S4真实SIGTERM退出143后同命令恢复退出0，S0–S3收据复验复用；独立计时中断清理与新ID三轮非正式检查3/3 clean通过。八项成功收据、最终S7 report.json/report.md、固定声明句齐全；30个运行模块SHA不变。

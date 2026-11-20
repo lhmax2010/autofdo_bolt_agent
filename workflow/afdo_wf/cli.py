@@ -65,13 +65,17 @@ def main(argv=None):
     p.add_argument('--package');p.add_argument('--inputs');p.add_argument('--job',required=True)
     p.add_argument('--output');p.add_argument('--receipts')
     p.add_argument('--dry-run',action='store_true');p.add_argument('--redo',action='store_true')
+    p.add_argument('--stop-after', choices=[stage for stage in DAG if stage != 'restore'] + ['afdo-audit'])
     args=p.parse_args(argv)
+    if args.stop_after and args.stage != 'run':
+        p.error('--stop-after requires run')
+    stop = 'rebuild' if args.stop_after == 'afdo-audit' else args.stop_after
     job=json_load(args.job)
     if job.get('live') and not args.dry_run:
         from .live import Experiment
         try:
             require(args.stage=='run','live experiment starts through run')
-            Experiment(job,args.job).run()
+            Experiment(job,args.job).run(stop)
             return 0
         except BaseException as e:
             save(Path(job['output'])/('failure-'+str(__import__('time').time_ns())+'.json'),dict(error=repr(e),reason=getattr(e,'reason','error')))
@@ -86,6 +90,8 @@ def main(argv=None):
         if args.inputs:config.load_inputs(args.inputs)
         job=json_load(args.job)
         stages=list(DAG) if args.stage=='run' else [args.stage]
+        if stop:
+            stages=stages[:stages.index(stop)+1]
         # No partial live run followed by discovering the board interface is dry-only.
         require(args.dry_run or not (set(stages)&BOARD),'board orchestration is dry-run only in phases 1/2','environment')
         for stage in stages:

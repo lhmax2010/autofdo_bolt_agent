@@ -1,0 +1,19 @@
+model = "Raspberry Pi 4"
+arch = "armv7l"
+isas = ["thumb", "a32"]
+runtime_lib = "usr/lib"
+debug_root = "usr/lib/debug"
+gcc_support = "usr/lib/gcc"
+perf = "tools/perf"
+perf_lib = "lib"
+cpu = 3
+observer_cpu = 0
+collect = "rpi4"
+prepare_only = false
+
+report_label = "RPi4"
+
+[telemetry]
+frequency = ["/sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq", "/sys/devices/system/cpu/cpufreq/policy*/cpuinfo_cur_freq"]
+temperature = ["/sys/class/thermal/thermal_zone*/temp"]
+voltage = ["/sys/class/hwmon/hwmon*/in0_lcrit_alarm"]

@@ -1,0 +1,19 @@
+model = "Raspberry Pi 5"
+arch = "aarch64"
+isas = ["a64"]
+runtime_lib = "usr/lib64"
+debug_root = "usr/lib/debug"
+gcc_support = "usr/lib/gcc"
+perf = "tools/perf"
+perf_lib = "lib"
+cpu = 3
+observer_cpu = 0
+collect = "rpi5"
+prepare_only = true
+
+report_label = "RPi5"
+
+[telemetry]
+frequency = ["/sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq", "/sys/devices/system/cpu/cpufreq/policy*/cpuinfo_cur_freq"]
+temperature = ["/sys/class/thermal/thermal_zone*/temp"]
+voltage = ["/sys/class/hwmon/hwmon*/in0_lcrit_alarm"]

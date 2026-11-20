@@ -1,0 +1,160 @@
+{
+  "details": {
+    "capabilities": {
+      "frequency": [
+        "/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq",
+        "/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_cur_freq"
+      ],
+      "temperature": [
+        "/sys/class/thermal/thermal_zone0/temp"
+      ],
+      "voltage": []
+    },
+    "cooldown": {
+      "initially_at_target": true,
+      "samples": [
+        {
+          "millidegrees": {
+            "/sys/class/thermal/thermal_zone0/temp": 39150
+          },
+          "time": 1795162261.6086416
+        },
+        {
+          "millidegrees": {
+            "/sys/class/thermal/thermal_zone0/temp": 40800
+          },
+          "time": 1795162281.6983557
+        }
+      ],
+      "seconds": 0.24213879800026916,
+      "target_millidegrees": 58000
+    },
+    "fixed_khz": 2400000,
+    "host_resources": {
+      "disk_free": 376221224960,
+      "load1": 2.2197265625,
+      "mem_available": 20328632320,
+      "meminfo": "MemTotal:       32297772 kB\nMemFree:         3381584 kB\nMemAvailable:   19852180 kB\nBuffers:         3195224 kB\nCached:          8442352 kB\nSwapCached:          624 kB\nActive:          2906164 kB\nInactive:       17791900 kB\nActive(anon):    1793980 kB\nInactive(anon):  8253640 kB\nActive(file):    1112184 kB\nInactive(file):  9538260 kB\nUnevictable:      453456 kB\nMlocked:              32 kB\nSwapTotal:       4194300 kB\nSwapFree:        4193672 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:            279620 kB\nWriteback:             0 kB\nAnonPages:       9513832 kB\nMapped:          1311160 kB\nShmem:            987132 kB\nKReclaimable:    6288720 kB\nSlab:            7308540 kB\nSReclaimable:    6288720 kB\nSUnreclaim:      1019820 kB\nKernelStack:       32800 kB\nPageTables:       115924 kB\nSecPageTables:      7564 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    20343184 kB\nCommitted_AS:   42160068 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       73520 kB\nVmallocChunk:          0 kB\nPercpu:            20160 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:   602112 kB\nShmemPmdMapped:        0 kB\nFileHugePages:      6144 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      355460 kB\nDirectMap2M:     4317184 kB\nDirectMap1G:    29360128 kB\n",
+      "nproc": 20,
+      "time": 1795162189.1212516
+    },
+    "identity": {
+      "arch": "aarch64",
+      "build_id": "tizen-unified-toolchain_20261118.083201",
+      "kernel": "6.12.80-arm64-rpi4-v8",
+      "model": "Raspberry Pi 5 Model B Rev 1.1"
+    },
+    "inputs": [
+      {
+        "duration": 60,
+        "id": "bbb-720p-60",
+        "oracle": {
+          "bytes": 2488320000,
+          "caps": "I420,1280x720,30/1,progressive,1/1",
+          "digest": "3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814",
+          "frames": 1800,
+          "threads": 1
+        },
+        "path": "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4",
+        "role": "train",
+        "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4",
+        "start": 0
+      },
+      {
+        "duration": 60,
+        "id": "tos-720p-60",
+        "oracle": {
+          "bytes": 2488320000,
+          "caps": "I420,1280x720,30/1,progressive,1/1",
+          "digest": "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e",
+          "frames": 1800,
+          "threads": 1
+        },
+        "path": "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4",
+        "role": "test",
+        "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1",
+        "start": 0
+      },
+      {
+        "duration": 60,
+        "id": "sintel-1080p-60",
+        "oracle": {
+          "bytes": 4478976000,
+          "caps": "video/x-raw, format=(string)I420, width=(int)1920, height=(int)1080",
+          "digest": "91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193",
+          "frames": 1440,
+          "threads": 1
+        },
+        "path": "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4",
+        "role": "test-secondary",
+        "sha256": "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843",
+        "start": 0
+      }
+    ],
+    "throttle_history": "unknown"
+  },
+  "inputs": {
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/ffmpeg-source/packaging/ffmpeg.spec": "8e0e6a04528ad1fc8f4d5026ec1203e04f0bbf95b0658e66901f0b583942737a",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/job.json": "87b839b4064de73fbc60a7d1d72cb17db7958a62bab25eeb289d32e99bd31dde",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/online.conf": "2810aeb05510d18f1ad90dd89893988d2c165865b25134fe29ebd7f5929d3446",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/snapshot-selection.json": "114d246d8b8e1b48502f084f88473453a14d5cd4c95f01882b1b6d23ce98c426",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/__init__.py": "109a8c20f6783a9912e29169fff6b6dac7940167efb7a55427d432ed14cce60b",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/board.py": "734687f162e8e7ae09f8e175db821a833e8483621bff44b1447ee4c465163d41",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/build.py": "b9c1b98bc6b76cc9da462d12cc776a6583e7c28042ba318c35d9a7da21b63d4f",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/build_child.py": "85125715f08acfd8e3df78d0d04cddc9d51cf070c324e513a2bf663a60fb557b",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/buildlock.py": "4e917e845fb4b01dd0b7fc34034268af56b6c4f4ee67209010a85843854e4899",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/cli.py": "8a5a054fc59d0e76f088db7db20fe8af9bedec228b49fddc6ceee4a3728adef8",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/common.py": "dff4df10e788e28214f150b87052a5d49a84c9b1ba9ae296c317e78c2f582a1c",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/config.py": "7831f579ca77a5887448b1ced9772b11599c35b4def1987d0469d6cf63823c33",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/consumption.py": "17719591985492090aefba3f48809abf7e5caefda9d95640b8519000e901387f",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/live.py": "4ca6385c5fc40662be41fca68e6cc4934b187607e6b9e639e6a0f90f4a82c5f6",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/platforms.py": "bf06e61c642991399f782ed5f76d758fd6862acd1772863a9da5425613bca02a",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/profgen.py": "590f548800fcf636bd93da64eb55b1fef8e1fbee5cdbfa98d9f3384d6e3424e1",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/receipts.py": "70845d4160a38ee93ef0b40158d6007fd9889891a662fcdc366529093a5f12fe",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/report.py": "40d3dc5b441b2601cb7469a75f07fbebd2306e6ef56170002edd56043e08b291",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/scheduler.py": "c9d226685075b5f629a8946e9bc9efb5b8fdccc265d6ef95c32365cacbb935e3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/stats.py": "66318a939e9eb8bca7b15ae6076133431290226d27a3f0682fe8b18ef3312887",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/afdo_wf/transport.py": "e7d8bc577790ddad4035ca741c6425ba245b0538c943a5d2c20ea24c23f458ae",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/collect.sh": "7329eb6856781bb5eb968c60f2256f40c41aff4ad76f0d4218b29f36434de31a",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/common.sh": "8da55ac7f8a5883c276c144f888ed4a4545a91fd04d6f36a8de6175fece28379",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/deploy_verify.sh": "3c7561652cc274cd25b074c3d227d03042f3ac76e7f0ee5838090c1e35f7e1ba",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/hash_maps.sh": "a4d25a064f52b29789c6242452be4e9e6dfe96e53849e30f89aeccaf6cdee52e",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/maps.sh": "ff2827ad5569f9b45bf1f9db115202c0909f4f008554e83f95f12d65d74a797c",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/measure.sh": "f641baf536adc9c8ffc81dc717fdf1b0869e63cf936058f7b821bb6268a9647f",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/observe_maps.sh": "46e61f0a1b11dad6d01bd8ce8aa68502c336add841b7d30a10d0fcb709fa3e72",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/oracle.sh": "e5b4f920cb74f885c2426a34b3f825cd4ad8e1505ffe43130b29d8ddb73dd87a",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/proc_tree.sh": "bfafebd4ef0a6093b0b6e14a084229b639b10cc3face83be2eabb4305a8a21ed",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/session.sh": "5675b2adbb458854b519bdce04428ef508c609ef776fbdce58e301f480bf3cdf",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/start_gate.sh": "3e39ca74b5676f3aa22e16b7ac3631e35bb65ea6c847dca0df8bc75814d15019",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/telemetry.sh": "9c6ffdea162f464a879ac4c5879ed90c8f33f3d9fca2d80d69b821f3e451cf89",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/board/watchdog.sh": "64c7dafc624a28156cc1242e0d6ac5032c7fdea44d5197845f7ae0c37c7c5863",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/packages/ffmpeg/build/profiling.patch": "6dd4736e86d7ab34630eca09357b79eab7835f7d7a2de0108b38c6c7d093dc09",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/packages/ffmpeg/inputs.toml": "951aaa225aa648c3ca5417fd8cb4554c7a3702fa6a004cdf7c0e5ff84e2b2688",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/packages/ffmpeg/package-rpi5.toml": "0e439dd78e5889aeac932f1c0b5adcb762ca0890278e1a83c2e060336c3398c0",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/packages/ffmpeg/workloads/decode.sh": "c5c7a6708bf75f3be634bf1e4d286de6a9e3dbae6902536394e05b3f6b12685f",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/packages/ffmpeg/workloads/decoder.json": "56fac700207013e77a88881d954e2983ce2aff959b5523a5c3d59b8e9c9c8cff",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/packages/ffmpeg/workloads/timed.sh": "8cfebef84423feb2b186eed303afc82bb7e7ec741557151bf724d1d14cb2f6f8",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-wt/workflow/platforms/rpi5-aarch64.toml": "c1091e412d8c66e44e5d8d180cab56f4faa5c6698b891f6d387db3a688e6c285",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/llvm-extract/usr/lib64/libLLVM.so.22.1": "06b9971c974f113b16ea49c988b6481f20272e70ba36040358735fa6c91af007",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/rpms-aarch64/perf-extract/usr/bin/perf": "d23f11a13d5b0b21fc1957a883eb0025c80f9a26bcde360b7031b4d3b1348949"
+  },
+  "outputs": {
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/capabilities.tsv": "76328f385ebb1d3edfe4e47eea09abf1223fc5813bf3502d4e7f007849e99b8c",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cooldown.json": "e3aeccc2adacbf963205b8167638c94fd766da0b2ca9d91a548537ebf7922cf3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles-assertions.json": "4bcc43b5226bdcc207aa12b336ad882c0b22b16bccba5f75a8f1acb95267366f",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles.evlist": "324bd20b8c8d778eac02c261532951ca19c9f73d42f90d57a933020180630451",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles.pull.json": "8e8382104607c4b1d4630b79ecf96b48517fc315c1cb4f4879c9897b82c1d157",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles.transfer-b2b2ba6b330246b4b06a3a86eaaf4032.pull.json": "d1ac1f27f45e3be0cd6be3c8c45edc0f7021d899a3829abee1efacef026178e3",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles.transfer-b2b2ba6b330246b4b06a3a86eaaf4032/archive.sha256": "7ffb30cb9d0ba83bd939aac15f4de48f7fc409d20f95f053b88ebdfad61543f8",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles.transfer-b2b2ba6b330246b4b06a3a86eaaf4032/members.sha256": "85355634f32830b5929be8ee366ef9a2837ca1a2e33bef47bcf31c88f0bd6814",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles.transfer-b2b2ba6b330246b4b06a3a86eaaf4032/round.tar": "558432712f445721a971ccd06a38e4476691b290fe8562e4db4d9d9a5694e4e0",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/cycles/perf.data": "87e3b1740bcbeb328f5f9fbcf58d3b2f9490e56cf06ecc1ea3533a98477a2198",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/host-resources.json": "fd76bd33eda672e904c96e94ea20f16065c241fa7e343522fbb60ad9a9562e3b",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/preflight/001/result.json": "7a7b8e999d1994723e5c120b6988aa804dd4feb88ee4f703db0b1bc2398dcc69"
+  },
+  "stage": "preflight",
+  "status": "complete",
+  "time": "2026-11-20T08:11:21.765814+00:00",
+  "upstream": {}
+}

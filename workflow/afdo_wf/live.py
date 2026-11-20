@@ -11,7 +11,7 @@ import signal
 import subprocess
 import tarfile
 import time
-from . import build,buildlock,config,profgen,consumption,stats,board,scheduler
+from . import build,buildlock,config,profgen,consumption,stats,board,scheduler,platforms
 from .common import TechnicalFailure,StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
 from .transport import SDB,q,board_path
@@ -97,7 +97,7 @@ def paired_block(order,run,failed):
             if attempt:raise
 
 
-def foreground_script(control,argv,env=None):
+def foreground_script(control,argv,env=None,observer_cpu=0):
     """Wrapper records load status even on TERM; child scripts own their samplers."""
     return ('#!/bin/bash\nset -u\nchild=\nsampler=\n'
             'finish() { rc=$?; trap - EXIT; if test -n "$child"; then kill -TERM "$child" 2>/dev/null || :; wait "$child" 2>/dev/null || :; fi; '
@@ -106,15 +106,24 @@ def foreground_script(control,argv,env=None):
             'trap finish EXIT\ntrap "exit 143" TERM\ntrap "exit 130" INT\n'
             'printf "%s\\n" "$$" > '+q(control+'/pid')+'\n'+
             ''.join('export '+k+'='+q(v)+'\n' for k,v in (env or {}).items())+
-            'if test -n "${WF_STANDALONE_SAMPLER:-}"; then taskset -c 0 bash "$WF_STANDALONE_SAMPLER" '+q(control+'/telemetry.tsv')+' "$WF_CAPABILITIES" & sampler=$!; sleep 1; fi\n'+
+            'if test -n "${WF_STANDALONE_SAMPLER:-}"; then taskset -c '+str(observer_cpu)+' bash "$WF_STANDALONE_SAMPLER" '+q(control+'/telemetry.tsv')+' "$WF_CAPABILITIES" & sampler=$!; sleep 1; fi\n'+
             shlex.join(list(map(str,argv)))+' & child=$!\nwait "$child"; rc=$?\nchild=\nif test -n "$sampler"; then sleep 2; fi\nexit "$rc"\n')
 
 class Experiment:
+    code = Path(__file__).resolve().parents[1]
+
     def __init__(self,job,job_path):
         self.job=job;self.job_path=Path(job_path).resolve();self.w=Path(job['workdir']).resolve()
         self.d=Path(job['output']).resolve();require(self.d.is_relative_to(self.w),'output boundary')
         self.d.mkdir(parents=True,exist_ok=True)
         self.package=config.load(job['package']);self.inputs=config.load_inputs(job['inputs'])
+        self.platform_name = job.get('platform', 'rpi4-armv7l')
+        self.platform = platforms.load(self.platform_name)
+        unit = self.package['build_units'][0]
+        require(unit['arch'] == self.platform.arch and unit['isa'] in self.platform.isas,
+                'build unit does not match board platform')
+        require(self.package['runtime']['cpu_affinity'] == self.platform.cpu, 'workload CPU differs from board platform')
+        self.platform.check_identity(job['identity'])
         self.serial=job['serial'];self.b='/opt/afdo_agent'
         self.remote=self.b+'/work/'+job['experiment']
         self.scripts=self.b+'/tools/workflow-'+job['experiment']
@@ -130,19 +139,70 @@ class Experiment:
         if check:require(r.returncode==0,'host command failed: '+str(base),'environment')
         return r
     def details(self,store,stage):return store.verify(stage)['details']
+    @property
+    def perf_path(self):
+        return self.b + '/' + self.platform.perf
+
+    @property
+    def perf_environment(self):
+        return 'LD_LIBRARY_PATH=' + q(self.b + '/' + self.platform.perf_lib)
+
+    def runtime_environment(self, deployment):
+        return self.platform.runtime_environment(deployment['remote'], self.b)
+
+    def ensure_board_directories(self):
+        for subdir in ('', 'tools', self.platform.perf_lib, 'inputs', 'variants', 'work'):
+            remote = self.b + ('/' + subdir if subdir else '')
+            state = self.transport.shell(
+                'if test -L ' + q(remote) + '; then printf link; elif test -d ' + q(remote)
+                + '; then printf directory; elif test -e ' + q(remote)
+                + '; then printf other; else printf absent; fi', True,
+            )
+            require(state in ('directory', 'absent'), 'unsafe board directory: ' + remote)
+            if state == 'absent':
+                self.cleanup.register(dict(kind='empty_directory', remote=remote))
+                self.transport.shell('mkdir -- ' + q(remote))
+
+    def deploy_board_tools(self):
+        self.ensure_board_directories()
+        allowed = {self.perf_path}
+        for item in self.job['board_tools']:
+            target = item['target']
+            require(target in allowed or Path(target).parent == Path(self.b) / self.platform.perf_lib,
+                    'unexpected board tool destination')
+            source = Path(item['source'])
+            require(sha256(source) == item['sha256'], 'host board-tool SHA mismatch')
+            exists = self.transport.shell(
+                'if test -f ' + q(target) + '; then printf present; else printf absent; fi', True,
+            )
+            if exists == 'absent':
+                # These files belong to the session and are rechecked/deployed on resume.
+                self.cleanup.register(dict(kind='host_artifact', remote=target, directory=False,
+                    members={'': dict(kind='file', source=str(source), sha256=item['sha256'])},
+                    verification=str(self.d/'board-tools'/ (source.name + '-cleanup.json'))))
+                self.transport.push(source, target)
+                if target == self.perf_path:
+                    self.transport.shell('chmod 755 -- ' + q(target))
+
     def state(self):
         t=self.transport
         return dict(uid=t.shell('id -u',True).strip(),governors=t.governors(),
                     rpm_count=t.shell('rpm -qa | wc -l',True).strip(),
-                    df=t.shell('df -Pk /opt/afdo_agent',True))
+                    df=t.shell('df -Pk '+q('/opt' if self.platform.prepare_only else self.b),True))
     @contextlib.contextmanager
     def session(self):
         t=self.transport
         devices=self.host(['sdb','devices'],self.d/'device-discovery').stdout.decode()
-        require(any(line.startswith(self.serial+'\t') or line.startswith(self.serial+' ') for line in devices.splitlines()),'configured RPi4 is not online','environment')
-        require(t.identity()==self.job['identity'],'board identity mismatch','identity',3)
+        require(any(line.startswith(self.serial+'\t') or line.startswith(self.serial+' ') for line in devices.splitlines()),'configured board is not online','environment')
+        identity = t.identity()
+        self.platform.check_identity(identity)
+        require(identity==self.job['identity'],'board identity mismatch','identity',3)
         # Check all PATH tools before root; root-only deployed files are checked next.
         deps=['bash','cat','tr','uname','sed','mkdir','sha256sum','chmod','ldd','setsid','sleep','kill','date','awk','readlink','taskset','sort','grep','stat','mv','find','tar','wc','mkfifo','cut','head','tail','tee','rm','ps','gst-launch-1.0','rpm','df']
+        if self.platform.prepare_only:
+            deps.append('rmdir')
+            cpuinfo = t.shell("grep -E '^(processor|CPU part|CPU implementer|CPU architecture)' /proc/cpuinfo", True)
+            save(self.d/'platform-identity.json', dict(**identity, kernel_full=t.shell('uname -a', True), cpuinfo=cpuinfo))
         t.shell('missing=0; for c in '+shlex.join(deps)+'; do command -v "$c" || missing=1; done; test "$missing" -eq 0',True)
         errors=t.restore_cleanup(self.cleanup);require(not errors,'pending cleanup failed: '+str(errors))
         self.initial=self.state();save(self.d/('initial-'+str(time.time_ns())+'.json'),self.initial)
@@ -152,12 +212,16 @@ class Experiment:
             for s in [signal.SIGTERM,signal.SIGINT]:old[s]=signal.signal(s,stop)
             if self.initial['uid']!='0':
                 self.cleanup.register(dict(kind='root',previous=False));t.root(True)
+            if self.platform.prepare_only:
+                self.deploy_board_tools()
             for item in self.job['board_tools']:
                 require(t.shell('sha256sum '+q(item['target']),True).split()[0]==item['sha256'],'board tool SHA mismatch','identity',3)
-            t.shell('test -x '+q(self.b+'/tools/perf'),True)
-            ldd=t.shell('LD_LIBRARY_PATH='+q(self.b+'/lib')+' ldd '+q(self.b+'/tools/perf'),True)
+            t.shell('test -x '+q(self.perf_path),True)
+            ldd=t.shell(self.perf_environment+' ldd '+q(self.perf_path),True)
             require('not found' not in ldd,'perf runtime dependency missing')
-            version=t.shell('LD_LIBRARY_PATH='+q(self.b+'/lib')+' '+q(self.b+'/tools/perf')+' --version',True)
+            if self.platform.prepare_only:
+                save(self.d/'board-runtime.json', dict(ldd=ldd, tools=self.job['board_tools']))
+            version=t.shell(self.perf_environment+' '+q(self.perf_path)+' --version',True)
             require(version.strip()=='perf version 6.12.80','perf version mismatch')
             for policy,value in self.initial['governors'].items():
                 self.cleanup.register(dict(kind='governor',policy=policy,previous=value));t.governor(policy,'performance')
@@ -226,10 +290,7 @@ class Experiment:
             self.cleanup.register(dict(kind='run',remote=remote,local=str(local),receipt=str(receipt)))
         t.shell('test ! -e '+q(control)+' && mkdir -p '+q(control))
         script=Path(out)/(name+'-launch.sh')
-        load_env=dict(env or {})
-        if self.scripts+'/measure.sh' not in argv:
-            load_env.update(WF_STANDALONE_SAMPLER=self.scripts+'/telemetry.sh',WF_CAPABILITIES=self.scripts+'/capabilities.tsv')
-        script.write_text(foreground_script(control,argv,load_env))
+        script.write_text(self.launch_script(control, argv, env))
         t.push(script,control+'/launch.sh')
         action=dict(kind='process',pidfile=control+'/pid',command_token=control+'/launch.sh',single_pid=True)
         self.cleanup.register(action)
@@ -249,6 +310,14 @@ class Experiment:
         self.cleanup.data['cleanup_pending'].remove(action);save(self.cleanup.path,self.cleanup.data)
         t.pull(control,Path(out)/(name+'-control'),Path(out)/(name+'-control-pull.json'))
         if int(result)!=0:raise TechnicalFailure('board task failed '+name+' exit '+result)
+
+    def launch_script(self, control, argv, env):
+        load_env = dict(env or {})
+        observer_cpu = int(load_env.get('WF_OBSERVER_CPU', '0'))
+        if self.scripts+'/measure.sh' not in argv:
+            load_env.update(WF_STANDALONE_SAMPLER=self.scripts+'/telemetry.sh',
+                            WF_CAPABILITIES=self.scripts+'/capabilities.tsv')
+        return foreground_script(control, argv, load_env, observer_cpu)
     def register_run(self,remote,local):
         """Journal the exact pull destination before any remote mkdir or probe."""
         board_path(remote,True)
@@ -271,7 +340,7 @@ class Experiment:
         self.ensure_work()
         self.host_artifact(self.scripts,{},True)
         t.shell('test -d '+q(self.b)+' && test -w '+q(self.b)+' && mkdir -p '+q(self.scripts))
-        for f in (self.w/'workflow/board').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
+        for f in (self.code/'board').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
         for f in (Path(self.job['package']).parent/'workloads').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
         for x in self.inputs:
             src=self.job['media'][x['id']]
@@ -281,14 +350,18 @@ class Experiment:
             else:require(existing.split()[0]==x['sha256'],'existing input SHA mismatch')
         # Executability check and actual hardware-event probe after performance governor.
         t.shell('bash '+q(self.scripts+'/common.sh'))
-        perf=self.b+'/tools/perf';remote=self.remote+'/cycles-check'
+        perf=self.perf_path;remote=self.remote+'/cycles-check'
         self.register_run(remote,out/'cycles')
-        t.shell('mkdir '+q(remote)+' && LD_LIBRARY_PATH='+q(self.b+'/lib')+' '+q(perf)+' record -e cycles -c 1000003 -o '+q(remote+'/perf.data')+' -- sleep 1')
-        ev=t.shell('LD_LIBRARY_PATH='+q(self.b+'/lib')+' '+q(perf)+' evlist -v -i '+q(remote+'/perf.data'),True)
+        t.shell('mkdir '+q(remote)+' && '+self.perf_environment+' '+q(perf)+' record -e cycles -c 1000003 -o '+q(remote+'/perf.data')+' -- sleep 1')
+        ev=t.shell(self.perf_environment+' '+q(perf)+' evlist -v -i '+q(remote+'/perf.data'),True)
         (out/'cycles.evlist').write_text(ev)
         save(out/'cycles-assertions.json',parse_cycles_event(ev))
         self.pull_run(remote,out/'cycles')
-        text=t.shell('for p in /sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq /sys/devices/system/cpu/cpufreq/policy*/cpuinfo_cur_freq; do test ! -r "$p" || printf "frequency\\t%s\\n" "$p"; done; for p in /sys/class/thermal/thermal_zone*/temp; do test ! -r "$p" || printf "temperature\\t%s\\n" "$p"; done; for p in /sys/class/hwmon/hwmon*/in0_lcrit_alarm; do test ! -r "$p" || printf "voltage\\t%s\\n" "$p"; done',True)
+        text=t.shell('; '.join(
+            'for p in ' + ' '.join(patterns) + '; do test ! -r "$p" || printf "'
+            + kind + r'\t%s\n" "$p"; done'
+            for kind, patterns in self.platform.telemetry.items()
+        ), True)
         cap={k:[] for k in ['frequency','temperature','voltage']}
         for line in text.splitlines():
             k,p=line.split();cap[k].append(p)
@@ -296,16 +369,43 @@ class Experiment:
         cf=out/'capabilities.tsv';cf.write_text(capability_text(text));self.push_owned(cf,self.scripts+'/capabilities.tsv')
         values={p:int(t.shell('cat '+q(p),True)) for p in cap['frequency']}
         require(len(set(values.values()))==1,'fixed frequency differs between sources')
-        return dict(identity=t.identity(),host_resources=resources,capabilities=cap,fixed_khz=next(iter(values.values())),throttle_history='unknown',inputs=self.inputs)
-    def build_variant(self,variant,out,profile=None):
-        j=self.job;unit=self.package['build_units'][0];macros=dict(unit['macros'])
+        result = dict(identity=t.identity(),host_resources=resources,capabilities=cap,
+                      fixed_khz=next(iter(values.values())),throttle_history='unknown',inputs=self.inputs)
+        if self.platform.prepare_only:
+            result['cooldown'] = self.cooldown(out, cap['temperature'])
+        return result
+
+    def cooldown(self, out, sensors):
+        t = self.transport
+        def sample():
+            values = [int(t.shell('cat ' + q(sensor), True)) for sensor in sensors]
+            history.append(dict(time=time.time(), millidegrees=dict(zip(sensors, values))))
+            save(out/'cooldown.json', history)
+            require(max(values) <= 80000, 'cooldown trial exceeded the temperature limit')
+            return max(values)
+        history = []
+        require(sample() <= 58000, 'cooldown trial starting temperature above 58 C')
+        t.shell('taskset -c ' + str(self.platform.cpu) +
+                ' bash -c ' + q('end=$((SECONDS+20)); while test "$SECONDS" -lt "$end"; do :; done'),
+                timeout=140)
+        start = time.monotonic()
+        while sample() > 58000:
+            require(time.monotonic() - start < 600, 'cooldown trial did not reach 58 C')
+            time.sleep(10)
+        return dict(seconds=time.monotonic()-start, target_millidegrees=58000,
+                    initially_at_target=len(history)==2, samples=history)
+
+    def build_variant(self,variant,out,profile=None,frozen=None):
+        j=self.job if frozen is None else {**self.job, **frozen};unit=self.package['build_units'][0];macros=dict(unit['macros'])
         if profile:
             macros.update(unit['consume_macro']);macros.update(self.package['consumption']['diag_macro'])
             shutil.copyfile(profile,Path(j['source'])/unit['profile_staging'])
         root=self.d/'roots'/(variant+'-'+str(time.time_ns()))
         env=os.environ.copy();env.update(j['build_environment'])
         argv=build.command(j['config'],j['source'],root,unit,macros,j['repo'],j['buildconf'])
-        r=build.execute(argv,j['source'],self.w,out/'execution',env,experiment=j['experiment'])
+        waiver = j['experiment'] if not self.platform.prepare_only else None
+        options = dict(wait_seconds=10800, exclusive=True) if self.platform.prepare_only else {}
+        r=build.execute(argv,j['source'],self.w,out/'execution',env,experiment=waiver,**options)
         require(r['status']=='success','GBS failure: '+str(out/'execution/result.json'),'environment')
         rpms=sorted(root.glob('local/repos/*/*/RPMS/*.rpm'))
         require(rpms,'no built RPMs')
@@ -318,9 +418,9 @@ class Experiment:
         extracted=out/'extracted';build.extract_packages(selected,extracted)
         artifacts={}
         for target in self.package['targets']:
-            runtime=(extracted/target['package_path']).resolve();debug=extracted/'usr/lib/debug'/str(runtime.relative_to(extracted.resolve()))
+            runtime=(extracted/target['package_path']).resolve();debug=extracted/self.platform.debug_root/str(runtime.relative_to(extracted.resolve()))
             artifacts[target['id']]=build.elf_manifest(runtime,str(debug)+'.debug',unit['isa'])
-        scratch=root/'local/BUILD-ROOTS/scratch.armv7l.0';packages=build.rpm_manifest(scratch)
+        scratch=root/'local/BUILD-ROOTS'/f'scratch.{unit["arch"]}.0';packages=build.rpm_manifest(scratch)
         require(packages==j['frozen_packages'],'frozen installed package/header list differs')
         src=locate_build_source(scratch,(out/'execution/build.log').read_text(errors='replace'))
         settings=buildlock.make_settings((src/'ffbuild/config.mak').read_text())
@@ -341,7 +441,55 @@ class Experiment:
         diagnostics=[line for line in log.splitlines() if any(k in line.lower() for k in ['warning:','dwarf version 5','unknown debugging section'])]
         save(out/'diagnostics.json',diagnostics)
         return dict(variant=variant,execution=r,artifacts=artifacts,rpms=inventory,extracted=str(extracted),lock=lock,text=text,build_source=str(src),scratch=str(scratch))
-    def build_base(self,out,store):return self.build_variant('BASE',out)
+    def build_base(self,out,store):
+        if not self.platform.prepare_only:
+            return self.build_variant('BASE', out)
+        frozen = self.freeze_dependencies(out)
+        result = self.build_variant('BASE', out, frozen=frozen)
+        result['frozen'] = frozen
+        result['bound_files'] = [str(path) for path in sorted(Path(frozen['repo']).rglob('*')) if path.is_file()]
+        result['bound_files'].extend(item['path'] for item in result['rpms'])
+        return result
+
+    def freeze_dependencies(self, out):
+        j = self.job
+        unit = self.package['build_units'][0]
+        root = self.d/'roots'/('resolve-'+str(time.time_ns()))
+        env = {**os.environ, **j['build_environment']}
+        receipt = out/'dependency-resolution'
+        # The spec gates profile use with options and a Source entry. Both modes
+        # must have the same effective BuildRequires before freezing the cache.
+        rpm = j['rpmspec']
+        spec = Path(j['source'])/unit['spec']
+        def requirements(extra):
+            args = [*rpm, '--target', unit['arch']]
+            for macro, value in {**unit['macros'], **extra}.items():
+                args += ['--define', f'{macro} {value}']
+            result = self.host([*args, '-q', '--buildrequires', spec], out/'build-requires')
+            return sorted(result.stdout.decode().splitlines())
+        base = requirements({})
+        afdo = requirements({**unit['consume_macro'], **self.package['consumption']['diag_macro']})
+        save(out/'build-requires/requirements.json', dict(base=base, afdo=afdo))
+        require(base and base == afdo, 'BASE and AFDO BuildRequires differ')
+        argv = build.command(j['config'], j['source'], root, unit, unit['macros'])
+        resolved = build.execute(argv, j['source'], self.w, receipt, env, wait_seconds=10800, exclusive=True)
+        require(resolved['status'] == 'success', 'online dependency-resolution build failed: '+str(receipt/'result.json'), 'environment')
+        log = (receipt/'build.log').read_text(errors='replace')
+        resolved_paths = re.findall(r'build conf has been downloaded at:\s*([^\s]+)', log)
+        require(len(set(resolved_paths)) == 1, 'missing or ambiguous resolved build configuration')
+        buildconf = Path(resolved_paths[0]).resolve()
+        require(buildconf.is_relative_to(Path(j['config']).resolve().parent) and buildconf.is_file(),
+                'resolved build configuration escaped experiment or is absent')
+        scratch = root/'local/BUILD-ROOTS'/f'scratch.{unit["arch"]}.0'
+        packages = build.rpm_manifest(scratch)
+        rpms = sorted((root/'local/cache').rglob('*.rpm'))
+        require(rpms, 'no RPMs downloaded in the resolution root')
+        repo = self.w/'temp/gbs-deps-archive'/j['experiment']
+        build.freeze(rpms, buildconf, repo, j['snapshots'])
+        frozen = dict(repo=str(repo), repo_id=sha256(repo/'manifest.json'),
+                      buildconf=str(repo/'resolved.conf'), frozen_packages=packages)
+        save(receipt/'frozen-settings.json', frozen)
+        return frozen
     def deploy_variant(self,result,out):
         variant=result['variant'];remote=self.b+'/variants/'+self.job['experiment']+'-'+variant
         root=Path(result['extracted']);manifest={}
@@ -353,10 +501,10 @@ class Experiment:
                     board_path=remote+'/'+str(real.relative_to(root.resolve())),sha256=sha256(real))
         archive=Path(out)/(variant+'.tar')
         with tarfile.open(archive,'w') as tar:
-            for p in sorted((root/'usr/lib').glob('*.so*')):tar.add(p,arcname=str(p.relative_to(root)),recursive=False)
+            for p in sorted((root/self.platform.runtime_lib).glob('*.so*')):tar.add(p,arcname=str(p.relative_to(root)),recursive=False)
         self.push_owned(archive,self.remote+'/'+variant+'.tar')
         members={}
-        for p in sorted((root/'usr/lib').glob('*.so*')):
+        for p in sorted((root/self.platform.runtime_lib).glob('*.so*')):
             members[str(p.relative_to(root))]=(dict(kind='link',target=os.readlink(p)) if p.is_symlink() else dict(kind='file',source=str(p.resolve()),sha256=sha256(p)))
         self.host_artifact(remote,members,True)
         self.transport.shell('test ! -e '+q(remote)+' && mkdir -p '+q(remote)+' && tar -xf '+q(self.remote+'/'+variant+'.tar')+' -C '+q(remote))
@@ -376,10 +524,20 @@ class Experiment:
         hashes={line.split(None,1)[1].strip():line.split()[0] for line in (local/'mapped-sha256.txt').read_text().splitlines()}
         board.check_maps(text,manifest,self.package['runtime']['must_load'],self.package['runtime']['deploy_set'],hashes)
         return 1
-    def oracle(self,name,x,deployment,out):
+    def oracle_command(self, name, x, deployment):
         remote=self.remote+'/'+name
         variant='PLAT' if deployment is None else deployment['remote']
-        self.launch(name,['bash',self.scripts+'/watchdog.sh','600','bash',self.scripts+'/oracle.sh',remote,variant,x['path']],out)
+        argv = ['bash',self.scripts+'/watchdog.sh','600','bash',self.scripts+'/oracle.sh',remote,variant,x['path']]
+        env = None
+        if self.platform.prepare_only:
+            env = dict(WF_RUNTIME_LIB=self.platform.runtime_lib, WF_PERF_LIB=self.b + '/' + self.platform.perf_lib,
+                       WF_OBSERVER_CPU=str(self.platform.observer_cpu))
+        return argv, env
+
+    def oracle(self,name,x,deployment,out):
+        argv, env = self.oracle_command(name, x, deployment)
+        self.launch(name, argv, out, env)
+        remote = self.remote + '/' + name
         local=self.pull_run(remote,Path(out)/name)
         text=(local/'gst.log').read_text()
         caps=re.findall(r'GstIdentity:framecounter.GstPad:sink: caps = (.*)',text)
@@ -396,25 +554,82 @@ class Experiment:
         else:
             for libname in ['libavcodec.so','libavutil.so']:
                 paths={l.split()[-1] for l in (local/'decoder.maps').read_text().splitlines() if libname in l}
-                require(paths and all(p.startswith('/usr/lib/') for p in paths),'PLAT did not load system library')
+                require(paths and all(p.startswith('/'+self.platform.runtime_lib+'/') for p in paths),'PLAT did not load system library')
         save(Path(out)/(name+'-oracle.json'),actual)
         return actual
     def deploy(self,out,store):
-        base=self.details(store,'build');deployment=self.deploy_variant(base,out)
+        base=self.details(store,'build')
+        compatibility = self.check_board_dependencies(base, out) if self.platform.prepare_only else None
+        deployment=self.deploy_variant(base,out)
         oracles={}
         for x in self.inputs:
             plat=self.oracle('PLAT-'+x['id'],x,None,out)
             actual=self.oracle('BASE-'+x['id'],x,deployment,out)
             board.oracle_check(plat,actual);oracles[x['id']]=plat
-        return dict(deployment=deployment,oracles=oracles)
+        result = dict(deployment=deployment, oracles=oracles)
+        if compatibility is not None:
+            result['compatibility'] = compatibility
+        return result
+
+    def check_board_dependencies(self, base, out):
+        root = Path(base['extracted'])
+        libraries = sorted({path.resolve() for pattern in self.package['runtime']['deploy_set']
+                            for path in root.glob(pattern)})
+        require(libraries, 'no FFmpeg runtime libraries to audit')
+        rows = {}
+        for path in libraries:
+            require(path.is_relative_to(root.resolve()), 'runtime dependency escapes extracted RPM')
+            dynamic = self.host(['readelf', '-dW', path], out).stdout.decode()
+            names = re.findall(r'\(NEEDED\).*?\[([^\]]+)\]', dynamic)
+            rows[path.name] = names
+        names = sorted({needed for deps in rows.values() for needed in deps})
+        system = {}
+        for name in names:
+            require(re.fullmatch(r'[A-Za-z0-9_.+-]+', name), 'invalid DT_NEEDED name')
+            alternatives = [f'/{self.platform.runtime_lib}/{name}', f'/{Path(self.platform.runtime_lib).name}/{name}']
+            command = (
+                'for p in ' + shlex.join(alternatives) + '; do if test -e "$p"; then '
+                'readlink -f "$p"; rpm -qf --qf ' + q(r'%{NAME} %{VERSION}-%{RELEASE} %{ARCH}\n')
+                + ' "$p" || :; exit 0; fi; done'
+            )
+            system[name] = self.transport.shell(command, True).splitlines()
+        versions = {}
+        for name, records in system.items():
+            if len(records) < 2 or len(records[1].split()) != 3:
+                continue
+            package, board_version, arch = records[1].split()
+            host_query = self.host(['rpm', '--root', base['scratch'], '-q', '--qf',
+                '%{VERSION}-%{RELEASE} %{ARCH}\n', package], out, check=False)
+            versions[name] = dict(package=package, board=f'{board_version} {arch}',
+                                  build=host_query.stdout.decode().strip() if host_query.returncode == 0 else None)
+        result = dict(needed=rows, board=system, versions=versions,
+                      missing=[name for name in names if not system[name]])
+        save(out/'soname-compatibility.json', result)
+        require(not result['missing'], 'board missing DT_NEEDED sonames: ' + ', '.join(result['missing']))
+        return result
+    def workload_environment(self, deployment, manifest):
+        env = dict(LD_LIBRARY_PATH=self.runtime_environment(deployment), DEPLOY_MANIFEST=manifest)
+        if self.platform.prepare_only:
+            env['WF_RUNTIME_LIB'] = self.platform.runtime_lib
+            env['WF_OBSERVER_CPU'] = str(self.platform.observer_cpu)
+        return env
+
+    def training_command(self, name, item, deployment):
+        remote = self.remote + '/' + name
+        argv = ['bash', self.scripts+'/collect.sh', remote, self.perf_path,
+                str(self.platform.sampling_period(self.package)), str(self.platform.cpu), '600',
+                'bash', self.scripts+'/timed.sh', 'train', deployment['remote'], item['path'], remote+'/result']
+        env = self.workload_environment(deployment, self.scripts+'/BASE-manifest.json')
+        return argv, env
+
     def collect(self,out,store):
         deployment=self.details(store,'deploy')['deployment'];rows=[]
         x=next(x for x in self.inputs if x['role']=='train')
         for i in range(1,self.package['collect']['runs']+1):
             name='train-'+str(i);remote=self.remote+'/'+name
             self.transport.shell('bash '+q(self.scripts+'/start_gate.sh')+' '+q(self.scripts+'/capabilities.tsv')+' '+q(self.remote+'/'+name+'-temperature.log'))
-            env=dict(LD_LIBRARY_PATH=deployment['remote']+'/usr/lib:'+self.b+'/lib',DEPLOY_MANIFEST=self.scripts+'/BASE-manifest.json')
-            self.launch(name,['bash',self.scripts+'/collect.sh',remote,self.b+'/tools/perf',str(self.package['collect']['period']),str(self.package['runtime']['cpu_affinity']),'600','bash',self.scripts+'/timed.sh','train',deployment['remote'],x['path'],remote+'/result'],out,env)
+            argv, env = self.training_command(name, x, deployment)
+            self.launch(name, argv, out, env)
             local=self.pull_run(remote,Path(out)/name)
             require(int((local/'collect.exit').read_text())==0,'collection exit')
             require('Got EOS' in (local/'collect.log').read_text(),'training EOS absent')
@@ -428,6 +643,8 @@ class Experiment:
     def convert(self,out,store):
         collection=self.details(store,'collect');base=self.details(store,'build');deployment=self.details(store,'deploy')['deployment']
         runs=[];disclosure=[]
+        repo_id = base.get('frozen', {}).get('repo_id', self.job.get('repo_id'))
+        require(repo_id, 'no frozen repository identity')
         for row in collection['runs']:
             for target,a in base['artifacts'].items():
                 artifact={**a,'board_path':next(x['board_path'] for x in deployment['manifest'].values() if x['id']==target)}
@@ -447,14 +664,17 @@ class Experiment:
                         raise
                     return subprocess.CompletedProcess(argv,child.returncode,stdout,stderr)
                 r=profgen.convert(args,profile,quality,runner=runner)
-                runs.append(dict(**r,path=str(profile),dso=target,merge_key=[self.job['repo_id'],'thumb',target,'cycles','period',self.package['collect']['period_unit'],'max/none/none/none']))
+                runs.append(dict(**r,path=str(profile),dso=target,merge_key=[repo_id,a['isa'],target,self.package['collect']['event'],'period',self.package['collect']['period_unit'],'max/none/none/none']))
                 save(out/'conversions.json',runs)
         lock=profgen.merge(self.job['profdata'],runs,out/'autofdo.extbinary',out/'merge')
         return dict(profile=str(out/'autofdo.extbinary'),lock=lock,quality=[r['quality'] for r in runs])
     def rebuild(self,out,store):
         base=self.details(store,'build');converted=self.details(store,'convert')
-        repeat_dir=out/'BASE-r';repeat_dir.mkdir();repeat=self.build_variant('BASE-r',repeat_dir)
-        candidate_dir=out/'AFDO';candidate_dir.mkdir();candidate=self.build_variant('AFDO',candidate_dir,converted['profile'])
+        repeat_dir=out/'BASE-r';repeat_dir.mkdir()
+        candidate_dir=out/'AFDO';candidate_dir.mkdir()
+        frozen = base.get('frozen')
+        repeat = self.build_variant('BASE-r', repeat_dir, frozen=frozen)
+        candidate = self.build_variant('AFDO', candidate_dir, converted['profile'], frozen=frozen)
         comparisons={label:buildlock.compare(base['lock'],v['lock']) for label,v in [('BASE-r',repeat),('AFDO',candidate)]}
         save(out/'buildlock.json',comparisons);require(all(x['passed'] for x in comparisons.values()),'build-lock gate failed')
         identity=lambda v:{t:{k:a[k] for k in ['sha256','debug_sha256','build_id']} for t,a in v['artifacts'].items()}
@@ -465,7 +685,7 @@ class Experiment:
         option_path=consumed_profile_path(candidate['lock']['commands'])
         staged=Path(candidate['scratch'])/option_path.lstrip('/')
         dependency_records=[];dependency_evidence=[]
-        gcc=Path(candidate['scratch'])/'usr/lib/gcc'
+        gcc=Path(candidate['scratch'])/self.platform.gcc_support
         for dependency in sorted(gcc.rglob('*')):
             if dependency.name not in ['libgcc.a','libgcc_eh.a','crtbeginS.o','crtendS.o']:continue
             captured=self.host(['readelf','-p','.GCC.command.line',dependency],out)
@@ -481,13 +701,27 @@ class Experiment:
         c=consumption.evaluate(list(base['artifacts']),self.package['consumption']['object_to_target'],remarks,source_commands,
             converted['lock']['sha256'],staged,base['text'],candidate['text'],option_path)
         save(out/'consumption.json',c);require(c['passed'],'consumption gate failed')
-        return dict(base_repeat=repeat,candidate=candidate,control=control,buildlock=comparisons,consumption=c,offline_reproducible=True)
+        result = dict(base_repeat=repeat,candidate=candidate,control=control,buildlock=comparisons,
+                      consumption=c,offline_reproducible=True)
+        if self.platform.prepare_only:
+            deployment = self.details(store, 'deploy')
+            selected = self.deploy_variant(repeat, out) if control == 'BASE-r' else deployment['deployment']
+            afdo = self.deploy_variant(candidate, out)
+            result['bound_files'] = [item['path'] for variant in (repeat, candidate) for item in variant['rpms']]
+            result['deployments'] = dict(control=selected, candidate=afdo)
+            result['oracles'] = {}
+            for label, variant in [('control', selected), ('candidate', afdo)]:
+                result['oracles'][label] = {}
+                for item in self.inputs:
+                    actual = self.oracle('audit-'+label+'-'+item['id'], item, variant, out)
+                    board.oracle_check(deployment['oracles'][item['id']], actual)
+                    result['oracles'][label][item['id']] = actual
+        return result
     def timed(self,name,x,deployment,out,preflight):
         remote=self.remote+'/'+name
-        env=dict(LD_LIBRARY_PATH=deployment['remote']+'/usr/lib:'+self.b+'/lib',
-                 DEPLOY_MANIFEST=self.scripts+'/'+deployment['variant']+'-manifest.json')
-        self.launch(name,['bash',self.scripts+'/measure.sh',remote,self.b+'/tools/perf',
-            str(self.package['runtime']['cpu_affinity']),'0',self.scripts+'/capabilities.tsv','600',
+        env=self.workload_environment(deployment, self.scripts+'/'+deployment['variant']+'-manifest.json')
+        self.launch(name,['bash',self.scripts+'/measure.sh',remote,self.perf_path,
+            str(self.platform.cpu),str(self.platform.observer_cpu),self.scripts+'/capabilities.tsv','600',
             'bash',self.scripts+'/timed.sh',x['role'],deployment['remote'],x['path'],remote+'/result'],out,env,timeout=1200)
         local=self.pull_run(remote,Path(out)/name)
         require(int((local/'measure.exit').read_text())==0,'timed exit')
@@ -514,9 +748,13 @@ class Experiment:
     def measure_impl(self,out,store):
         rebuilt=self.details(store,'rebuild');base=self.details(store,'build');preflight=self.details(store,'preflight')
         deployment=self.details(store,'deploy')['deployment'];deployment['variant']='BASE'
-        candidate=self.deploy_variant(rebuilt['candidate'],out);candidate['variant']='AFDO'
-        if rebuilt['control']=='BASE-r':
-            deployment=self.deploy_variant(rebuilt['base_repeat'],out);deployment['variant']='BASE-r'
+        if self.platform.prepare_only:
+            candidate = {**rebuilt['deployments']['candidate'], 'variant': 'AFDO'}
+            deployment = {**rebuilt['deployments']['control'], 'variant': rebuilt['control']}
+        else:
+            candidate=self.deploy_variant(rebuilt['candidate'],out);candidate['variant']='AFDO'
+            if rebuilt['control']=='BASE-r':
+                deployment=self.deploy_variant(rebuilt['base_repeat'],out);deployment['variant']='BASE-r'
         comparisons={};oracles={};rows=[]
         for label,dep in [('control',deployment),('candidate',candidate)]:
             for x in self.inputs:oracles['pre-'+label+'-'+x['id']]=self.oracle('pre-'+label+'-'+x['id'],x,dep,out)
@@ -652,7 +890,7 @@ class Experiment:
             self.ensure_work()
             self.host_artifact(self.scripts,{},True)
             self.transport.shell('mkdir -p '+q(self.scripts))
-            for f in (self.w/'workflow/board').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
+            for f in (self.code/'board').glob('*.sh'):self.push_owned(f,self.scripts+'/'+f.name)
             self.push_owned(Path(self.job['package']).parent/'workloads/timed.sh',self.scripts+'/timed.sh')
             cap=out/'capabilities.tsv';cap.write_text(''.join(k+'\t'+p+'\n' for k,v in data['preflight']['capabilities'].items() for p in v))
             self.push_owned(cap,self.scripts+'/capabilities.tsv')
@@ -679,28 +917,44 @@ class Experiment:
             code_shares={'status':'diagnostic only'},consumption=rebuilt['consumption'],oracle=dict(passed=True,records=measured['oracles']),
             measurement_plan={k:v['plan'] for k,v in measured['comparisons'].items()},rounds=measured['rounds'],
             statistics=primary['statistics'],comparisons=measured['comparisons'],
-            limitations=['One RPi4; single-threaded decode; ToS primary and Sintel secondary; no multiple-comparison correction; firmware throttle history unknown'],
+            limitations=['One '+self.platform.report_label+'; single-threaded decode; ToS primary and Sintel secondary; no multiple-comparison correction; firmware throttle history unknown'],
             cleanup_pending=[])
         return report.write(out,payload)
-    def run(self):
+    def run(self, stop_after=None):
         if 'injection' in self.job or 'telemetry_check' in self.job:return self.injected_run()
         inputs=[self.job_path,self.job['package'],self.job['inputs'],self.job['patch']]
-        inputs+=list((self.w/'workflow/afdo_wf').glob('*.py'))+list((self.w/'workflow/board').glob('*.sh'))
+        inputs+=list((self.code/'afdo_wf').glob('*.py'))+list((self.code/'board').glob('*.sh'))
         inputs+=list((Path(self.job['package']).parent/'workloads').glob('*'))
         handlers=dict(preflight=self.preflight,build=self.build_base,deploy=self.deploy,collect=self.collect,
                       convert=self.convert,rebuild=self.rebuild,measure=self.measure,report=self.report)
+        stages = list(handlers)
+        require(stop_after is None or stop_after in stages, 'invalid live stop stage')
+        if stop_after:
+            stages = stages[:stages.index(stop_after)+1]
+        if 'platform' in self.job:
+            inputs.append(platforms.profile_path(self.platform_name))
+        if self.platform.prepare_only:
+            inputs.extend([self.job['config'], self.job['snapshot_evidence'],
+                           Path(self.job['source']) / self.package['build_units'][0]['spec']])
+            inputs.extend(item['source'] for item in self.job['board_tools'])
         def progress(stage,status):
             save(self.d/'progress.json',dict(stage=stage,status=status,time=time.time(),pid=os.getpid()))
         result={'status':'failed','start':time.time()}
         try:
+            if self.platform.prepare_only:
+                build.wait_for_host(self.w, self.d/('host-gate-'+str(time.time_ns())+'.json'))
             with self.session():
                 if (self.d/'receipts/preflight.json').exists():
                     from .receipts import Store
                     Store(self.d/'receipts').verify('preflight')
                     self.ensure_work();self.restore_host_artifacts()
-                result['stages']=scheduler.execute([s for s in handlers if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
-            result['stages']+=scheduler.execute(['report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
-            result['status']='complete'
+                result['stages']=scheduler.execute([s for s in stages if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
+            if 'report' in stages:
+                result['stages']+=scheduler.execute(['report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
+            result['status']='complete' if 'report' in stages else 'stopped'
+            if result['status'] == 'stopped':
+                result['stop_after'] = stages[-1]
+                progress(stages[-1], 'stopped')
         except BaseException as e:
             result['error']=repr(e);raise
         finally:

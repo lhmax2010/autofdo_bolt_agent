@@ -7,7 +7,7 @@ case "$variant:$input:$result" in /opt/afdo_agent/*:/opt/afdo_agent/*:/opt/afdo_
 case "$variant:$input:$result" in *'/../'*|*'/..') exit 2;; esac
 case "$role" in train|pilot|test|tuning|conformance) ;; *) exit 2;; esac
 test ! -e "$result"; test ! -e "$result.i420"
-export LD_LIBRARY_PATH="$variant/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$variant/${WF_RUNTIME_LIB:-usr/lib}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 TIMEFORMAT='%R'
 { time gst-launch-1.0 -e filesrc "location=$input" '!' qtdemux '!' h264parse '!' avdec_h264 max-threads=1 '!' video/x-raw,format=I420,width=1280,height=720,framerate=30/1 '!' filesink "location=$result.i420" > "$result.decode.log" 2>&1; } 2> "$result.seconds"
 grep -q 'Got EOS' "$result.decode.log"
