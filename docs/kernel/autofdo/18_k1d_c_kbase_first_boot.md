@@ -82,3 +82,376 @@ boot_a 写前空闲 16,465,920 B。按 2,048 B 簇，写入中最低预计 1,497
 00:34:14 PST 发出普通 reboot。62.159 秒后 SDB 重连，boot ID `d4cc6a04-0a0c-44c7-ab14-cb20ad08b274`，build-id `395733b9c917cb98309b39cc3ec379c03ac36b3f`，`tryboot=0`，U-Boot 版本属性存在。cmdline 与原始 U-Boot PLAT 逐字节一致，SHA-256 `1a132093c6e7220e981bd54c1a6a7bf780a19927c9787d3c9dcb7149eff106b4`。最终复核 root off、UID 5001，p6 只读、boot_a 无挂载。任务新增的 K-BASE 模块目录、`zImage-kbase` 和更新后的 `tryboot.txt` 均保留。
 
 五分钟安静窗口、PMU 正计数、perf 冒烟 profile 与前十函数、pipe/mmfault/forkexec 单轮均未执行。K1d-d 的七项提交消息整理与 Gerrit sandbox 推送依赖完整验收，本轮未执行。[现有本地提交清单](17_k1d_c_kbase_preflight.md#未执行的运行验收和-k1d-d)
+
+## 收尾
+
+2026-11-20（PST）使用已部署的 `zImage-kbase`、`tryboot.txt` 和 K-BASE 模块树复跑。boot_a 与 p6 本轮无写入。[收尾证据索引](evidence/k1d-c-closeout-index.json)
+
+### FDT 门禁与回溯
+
+用原 K-BASE devel 包中的 DTC `1.7.0-gbcd02b52` 执行 `dtc -I dtb -O dts`。规范化只删除根节点下 `/chosen` 的 `kaslr-seed` 和 `rng-seed`，保留其余 DTS 字节；二进制对齐填充不进入 DTS。用 `cmp` 对照 K1d-b PLAT 直启。若出现其他属性差异，判定失败并保留差异供 PM 审阅。
+
+| FDT 输入 | 判定 |
+| --- | --- |
+| K1d-b PLAT 直启归档 | 基准 |
+| 18 号报告首次 K-BASE 直启归档 | 回溯逐字节一致 |
+| 本轮 K-BASE 直启 | 逐字节一致 |
+
+三份规范化 DTS 均为 67,917 B，SHA-256 为 `66dcc57d2f30bc0a2a7258d9d799b83f05acd663259e14cff9871525437bf237`。没有额外需排除的属性。首次启动的原始 SHA 失败收据保留在上文。
+
+### K-BASE 验收
+
+00:41:31 PST 发出 `systemctl --no-block reboot "0 tryboot"`，52.232 秒后 SDB 恢复。核对 boot ID 从 `d4cc6a04-0a0c-44c7-ab14-cb20ad08b274` 变为 `148ff51a-dc8a-4aa3-a2bd-8088f60bc6d2`。内核 build-id 为 `96766cfcbff8c33d83ca38152ad02f6a02dd44d4`，release 为 `6.12.80-arm-rpi4-v7l-kbase`，机器为 `armv7l`，四核 CPU architecture 均为 7，固件属性 `tryboot=1`。cmdline 与 K1d-b PLAT 直启逐字节一致。rootfs 为槽 A，p6 只读，各板载分区挂载不变。
+
+十个模块重复通过路径、vermagic 与运行时 build-id 检查。HDMI、enlightenment 和 eth0 正常，`dlogutil` 读取本次启动日志成功，D-Bus `ListNames` 返回成功。对照 PLAT 直启的 dmesg 无新增 Oops、BUG、WARNING 或模块加载失败。警告差异再次为外置模块首次 taint 的模块名、journald 和 sdbd-user 的 PID 差异、audit 限速。完成采样及基准后重读 dmesg 和模块列表，无新增上述故障，模块名仍为同一组。
+
+安静基线覆盖 300.00 秒、61 个点，第一次连续 30 秒全板忙时低于 2.91% 的窗口在开机 61.91 秒结束。全窗中位数 1.911%，p90 2.601%，峰值 26.403% 出现在 uptime 86.91 秒附近。温度中位数 71.575°C，范围 70.114–74.497°C。后续冒烟和单轮只判断能否运行，沿用当时的 governor，无性能偏差结论。
+
+`perf stat -a -e cycles:k,cycles:u,instructions:k -- sleep 5` 三个计数均为正，CSV 中各事件运行比例 100%。
+
+| 事件 | 计数 |
+| --- | ---: |
+| `cycles:k` | 183,677,695 |
+| `cycles:u` | 28,199,970 |
+| `instructions:k` | 66,100,130 |
+
+### 冒烟 profile 与 IRQ 恢复窗口
+
+`perf record -a -e cycles -c 1000003 --buildid-mmap -N` 在 CPU3 上运行 pipe 10 秒。主机以补丁 10（`8392aa945cb9`）的 `llvm-profgen --ip-samples --kernel` 转换，用 K-BASE 原始未剥离 vmlinux，传入 perf script 的 mmap、build-id list 与采样事件，输出 extbinary。记录 SHA-256 为 `a262e8045b28d747ccd32a4d435e9ba7ea7d4d07446e9cf90d78b61c5da70cf5`，profile SHA-256 为 `eb89e807b368dc65e59c704fb7fc75257a66eb533628e204551b4163b18bea04`。
+
+转换为 `ok`，身份 `verified`，`fs_discriminator=true`。共 16,485 个样本，其中内核 15,592（含模块），vmlinux 目标 15,591，跳过 1 个模块样本。映像外 0/15,591（0.00%），函数内缺行号 839，写入 614 个位置。质量报告标注固定 period、样本密度低，丢失完整性和采样充分性均为 unknown。本次 profile 只用于冒烟验收。
+
+按 [04 的 IRQ 恢复窗口方法](04_k1a_baseline.md#k1c-评审补充irq-恢复窗口与-c-源码份额)，用采样前后 kallsyms 和模块映射，核得 `_text` slide 为 0。用 K-BASE vmlinux 的可执行 PT_LOAD 字节及 core text 范围识别 A32 `cpsie i` 与 `msr CPSR_c,Rn`。在同一核心符号内统计 IP 距指令 0 或 +4 B 的并集，分母是全部 15,592 个 K 模式样本（含模块）。模块不扫描指令窗口。
+
+| 窗口 | 样本 | 内核份额 |
+| --- | ---: | ---: |
+| 显式 IRQ 函数名 | 5,678 | 36.42% |
+| CPSIE 0/+4 B | 4,435 | 28.44% |
+| MSR 0/+4 B | 5,018 | 32.18% |
+| 并集 0/+4 B | 9,453 | 60.63% |
+| 并集 0/+4/+8 B | 9,481 | 60.81% |
+
+最大点位在 `_raw_spin_unlock_irqrestore` 的 `0xc151ca68`，紧随指令 `0xc151ca6c` 有 4,690 个样本。份额表示靠近候选开 IRQ 指令的 PC；`msr` 的寄存器值与实际中断到达时间不在采样记录中。
+
+按内核 IP 和 profile 写入权重各列前十。左表占比使用全部 K 模式样本，右表来自 `llvm-profdata show --sample`。
+
+| 内核 IP 函数 | 样本（占比） | Profile 函数 | 写入权重 |
+| --- | ---: | --- | ---: |
+| `_raw_spin_unlock_irqrestore` | 4,690（30.08%） | `_raw_spin_unlock_irqrestore` | 4,690 |
+| `finish_task_switch` | 2,396（15.37%） | `finish_task_switch` | 2,396 |
+| `__rseq_handle_notify_resume` | 990（6.35%） | `arch_local_irq_enable` | 988 |
+| `arch_local_irq_enable` | 988（6.34%） | `__rseq_handle_notify_resume` | 919 |
+| `vector_swi` | 707（4.53%） | `__kmap_local_pfn_prot` | 585 |
+| `__kmap_local_pfn_prot` | 604（3.87%） | `kunmap_local_indexed` | 583 |
+| `kunmap_local_indexed` | 587（3.76%） | `arm_copy_from_user` | 383 |
+| `do_work_pending` | 503（3.23%） | `pipe_write` | 232 |
+| `arm_copy_from_user` | 383（2.46%） | `arm_copy_to_user` | 199 |
+| `pipe_write` | 348（2.23%） | `arm_clear_user` | 194 |
+
+### 基准单轮与 PLAT 回程
+
+| 基准 | 参数（均绑 CPU3） | 墙钟 | 结果 |
+| --- | --- | ---: | --- |
+| pipe | `perf bench sched pipe -l 500000` | 12.421 s | 完成，40,423 ops/s |
+| mmfault | 64 MiB，59 次 | 9.940 s | 完成，966,660 minor faults |
+| forkexec | 12,774 次，既有静态 `empty` 子程序 | 14.721 s | 完成 |
+
+00:49:04 PST 发出普通 reboot，62.161 秒后 SDB 恢复。K-BASE 启动和 PLAT 回程都只用本设备断开和轮询重连，未触发 120 秒追加断开或主机 SDB 服务重启。回程 boot ID 为 `d1defd54-5562-42d6-a0e0-d553e4b21f6a`，U-Boot 标记存在，PLAT build-id `395733b9c917cb98309b39cc3ec379c03ac36b3f`，`tryboot=0`。cmdline 与原始 PLAT 逐字节一致。最后 `sdb root off` 并复核 UID 5001，p6 只读，boot_a 无挂载，新增文件保留。
+
+### K1d-d Gerrit sandbox
+
+全部验收及 PLAT 回程通过后，以 `lhmax2025` 新建 `sandbox/lhmax2025/afdo_kernel_arm32`。用 `git ls-remote` 读回，并 fetch 该引用复核 tip 与 tree。tip 为 `67b7b28df8906b11201ae103a8a7072bed6d4538`，tree 为 `0766b898b7b0583c14fa3a09ddb3164bd3b4f4f3`，七项提交的共同基线为 `0fac5de6a63091d141ad1cd3ed9d9e92b8dde708`。逐个核对七个 tree 与本地构建时提交一致。五份上游消息与原始补丁逐字节核对后追加 `Upstream:`，保留 Rong Xu 作者身份及原链接。两个本地提交保留 Hao Lin 的英文消息。Gerrit 提示部分主题行过长，保留原文，分支创建成功。推送内容仅含 linux-rpi 的七项提交。
+
+| K-BASE 本地 SHA | Gerrit SHA |
+| --- | --- |
+| `81f9c0f680d6` | `157104238b9a` |
+| `538b438ff131` | `fad5da00a2a3` |
+| `5afab829f803` | `bcbe11783b66` |
+| `085cb6e00998` | `3e3ec0bdb8a6` |
+| `56c8dc3c5071` | `3ea8cd5b466d` |
+| `e23625e56c23` | `5908bdf40f72` |
+| `7fffbec57069` | `67b7b28df890` |
+
+<details>
+<summary>七条最终提交信息全文</summary>
+
+#### 1. `157104238b9a`
+
+```text
+kbuild: Add AutoFDO support for Clang build
+
+Add the build support for using Clang's AutoFDO. Building the kernel
+with AutoFDO does not reduce the optimization level from the
+compiler. AutoFDO uses hardware sampling to gather information about
+the frequency of execution of different code paths within a binary.
+This information is then used to guide the compiler's optimization
+decisions, resulting in a more efficient binary. Experiments
+showed that the kernel can improve up to 10% in latency.
+
+The support requires a Clang compiler after LLVM 17. This submission
+is limited to x86 platforms that support PMU features like LBR on
+Intel machines and AMD Zen3 BRS. Support for SPE on ARM 1,
+ and BRBE on ARM 1 is part of planned future work.
+
+Here is an example workflow for AutoFDO kernel:
+
+1) Build the kernel on the host machine with LLVM enabled, for example,
+       $ make menuconfig LLVM=1
+    Turn on AutoFDO build config:
+      CONFIG_AUTOFDO_CLANG=y
+    With a configuration that has LLVM enabled, use the following
+    command:
+       scripts/config -e AUTOFDO_CLANG
+    After getting the config, build with
+      $ make LLVM=1
+
+2) Install the kernel on the test machine.
+
+3) Run the load tests. The '-c' option in perf specifies the sample
+   event period. We suggest     using a suitable prime number,
+   like 500009, for this purpose.
+   For Intel platforms:
+      $ perf record -e BR_INST_RETIRED.NEAR_TAKEN:k -a -N -b -c <count> \
+        -o <perf_file> -- <loadtest>
+   For AMD platforms:
+      The supported system are: Zen3 with BRS, or Zen4 with amd_lbr_v2
+     For Zen3:
+      $ cat proc/cpuinfo | grep " brs"
+      For Zen4:
+      $ cat proc/cpuinfo | grep amd_lbr_v2
+      $ perf record --pfm-events RETIRED_TAKEN_BRANCH_INSTRUCTIONS:k -a \
+        -N -b -c <count> -o <perf_file> -- <loadtest>
+
+4) (Optional) Download the raw perf file to the host machine.
+
+5) To generate an AutoFDO profile, two offline tools are available:
+   create_llvm_prof and llvm_profgen. The create_llvm_prof tool is part
+   of the AutoFDO project and can be found on GitHub
+   (https://github.com/google/autofdo), version v0.30.1 or later. The
+   llvm_profgen tool is included in the LLVM compiler itself. It's
+   important to note that the version of llvm_profgen doesn't need to
+   match the version of Clang. It needs to be the LLVM 19 release or
+   later, or from the LLVM trunk.
+      $ llvm-profgen --kernel --binary=<vmlinux> --perfdata=<perf_file> \
+        -o <profile_file>
+   or
+      $ create_llvm_prof --binary=<vmlinux> --profile=<perf_file> \
+        --format=extbinary --out=<profile_file>
+
+   Note that multiple AutoFDO profile files can be merged into one via:
+      $ llvm-profdata merge -o <profile_file>  <profile_1> ... <profile_n>
+
+6) Rebuild the kernel using the AutoFDO profile file with the same config
+   as step 1, (Note CONFIG_AUTOFDO_CLANG needs to be enabled):
+      $ make LLVM=1 CLANG_AUTOFDO_PROFILE=<profile_file>
+
+Co-developed-by: Han Shen <shenhan@google.com>
+Signed-off-by: Han Shen <shenhan@google.com>
+Signed-off-by: Rong Xu <xur@google.com>
+Suggested-by: Sriraman Tallam <tmsriram@google.com>
+Suggested-by: Krzysztof Pszeniczny <kpszeniczny@google.com>
+Suggested-by: Nick Desaulniers <ndesaulniers@google.com>
+Suggested-by: Stephane Eranian <eranian@google.com>
+Tested-by: Yonghong Song <yonghong.song@linux.dev>
+Tested-by: Yabin Cui <yabinc@google.com>
+Tested-by: Nathan Chancellor <nathan@kernel.org>
+Reviewed-by: Kees Cook <kees@kernel.org>
+Tested-by: Peter Jung <ptr1337@cachyos.org>
+Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
+
+Upstream: 315ad8780a129e82e2c5c65ee6e970d91a577acb
+```
+
+#### 2. `fad5da00a2a3`
+
+```text
+vmlinux.lds.h: Adjust symbol ordering in text output section
+
+When the -ffunction-sections compiler option is enabled, each function
+is placed in a separate section named .text.function_name rather than
+putting all functions in a single .text section.
+
+However, using -function-sections can cause problems with the
+linker script. The comments included in include/asm-generic/vmlinux.lds.h
+note these issues.:
+  “TEXT_MAIN here will match .text.fixup and .text.unlikely if dead
+   code elimination is enabled, so these sections should be converted
+   to use ".." first.”
+
+It is unclear whether there is a straightforward method for converting
+a suffix to "..".
+
+This patch modifies the order of subsections within the text output
+section. Specifically, it changes current order:
+  .text.hot, .text, .text_unlikely, .text.unknown, .text.asan
+to the new order:
+  .text.asan, .text.unknown, .text_unlikely, .text.hot, .text
+
+Here is the rationale behind the new layout:
+
+The majority of the code resides in three sections: .text.hot, .text,
+and .text.unlikely, with .text.unknown containing a negligible amount.
+.text.asan is only generated in ASAN builds.
+
+The primary goal is to group code segments based on their execution
+frequency (hotness).
+
+First, we want to place .text.hot adjacent to .text. Since we cannot put
+.text.hot after .text (Due to constraints with -ffunction-sections,
+placing .text.hot after .text is problematic), we need to put
+.text.hot before .text.
+
+Then it comes to .text.unlikely, we cannot put it after .text (same
+-ffunction-sections issue) . Therefore, we position .text.unlikely
+before .text.hot.
+
+.text.unknown and .tex.asan follow the same logic.
+
+This revised ordering effectively reverses the original arrangement (for
+.text.unlikely, .text.unknown, and .tex.asan), maintaining a similar level
+of affinity between sections.
+
+It also places .text.hot section at the beginning of a page to better
+utilize the TLB entry.
+
+Note that the limitation arises because the linker script employs glob
+patterns instead of regular expressions for string matching. While there
+is a method to maintain the current order using complex patterns, this
+significantly complicates the pattern and increases the likelihood of
+errors.
+
+This patch also changes vmlinux.lds.S for the sparc64 architecture to
+accommodate specific symbol placement requirements.
+
+Co-developed-by: Han Shen <shenhan@google.com>
+Signed-off-by: Han Shen <shenhan@google.com>
+Signed-off-by: Rong Xu <xur@google.com>
+Suggested-by: Sriraman Tallam <tmsriram@google.com>
+Suggested-by: Krzysztof Pszeniczny <kpszeniczny@google.com>
+Tested-by: Yonghong Song <yonghong.song@linux.dev>
+Tested-by: Yabin Cui <yabinc@google.com>
+Tested-by: Nathan Chancellor <nathan@kernel.org>
+Reviewed-by: Kees Cook <kees@kernel.org>
+Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
+
+Upstream: 0043ecea2399ffc8bfd99ed9dbbe766e7c79293c
+```
+
+#### 3. `bcbe11783b66`
+
+```text
+vmlinux.lds.h: Add markers for text_unlikely and text_hot sections
+
+Add markers like __hot_text_start, __hot_text_end, __unlikely_text_start,
+and __unlikely_text_end which will be included in System.map. These markers
+indicate how the compiler groups functions, providing valuable information
+to developers about the layout and optimization of the code.
+
+Co-developed-by: Han Shen <shenhan@google.com>
+Signed-off-by: Han Shen <shenhan@google.com>
+Signed-off-by: Rong Xu <xur@google.com>
+Suggested-by: Sriraman Tallam <tmsriram@google.com>
+Tested-by: Yonghong Song <yonghong.song@linux.dev>
+Tested-by: Yabin Cui <yabinc@google.com>
+Tested-by: Nathan Chancellor <nathan@kernel.org>
+Reviewed-by: Kees Cook <kees@kernel.org>
+Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
+
+Upstream: db0b2991ae1aac5ca985ec6fd8ff9bd9b2126c9b
+```
+
+#### 4. `3e3ec0bdb8a6`
+
+```text
+AutoFDO: Enable -ffunction-sections for the AutoFDO build
+
+Enable -ffunction-sections by default for the AutoFDO build.
+
+With -ffunction-sections, the compiler places each function in its own
+section named .text.function_name instead of placing all functions in
+the .text section. In the AutoFDO build, this allows the linker to
+utilize profile information to reorganize functions for improved
+utilization of iCache and iTLB.
+
+Co-developed-by: Han Shen <shenhan@google.com>
+Signed-off-by: Han Shen <shenhan@google.com>
+Signed-off-by: Rong Xu <xur@google.com>
+Suggested-by: Sriraman Tallam <tmsriram@google.com>
+Tested-by: Yonghong Song <yonghong.song@linux.dev>
+Tested-by: Yabin Cui <yabinc@google.com>
+Tested-by: Nathan Chancellor <nathan@kernel.org>
+Reviewed-by: Kees Cook <kees@kernel.org>
+Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
+
+Upstream: 0847420f5e499a7ab518942fff71482179290163
+```
+
+#### 5. `3ea8cd5b466d`
+
+```text
+AutoFDO: Enable machine function split optimization for AutoFDO
+
+Enable the machine function split optimization for AutoFDO in Clang.
+
+Machine function split (MFS) is a pass in the Clang compiler that
+splits a function into hot and cold parts. The linker groups all
+cold blocks across functions together. This decreases hot code
+fragmentation and improves iCache and iTLB utilization.
+
+MFS requires a profile so this is enabled only for the AutoFDO builds.
+
+Co-developed-by: Han Shen <shenhan@google.com>
+Signed-off-by: Han Shen <shenhan@google.com>
+Signed-off-by: Rong Xu <xur@google.com>
+Suggested-by: Sriraman Tallam <tmsriram@google.com>
+Suggested-by: Krzysztof Pszeniczny <kpszeniczny@google.com>
+Tested-by: Yonghong Song <yonghong.song@linux.dev>
+Tested-by: Yabin Cui <yabinc@google.com>
+Tested-by: Nathan Chancellor <nathan@kernel.org>
+Reviewed-by: Kees Cook <kees@kernel.org>
+Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
+
+Upstream: 2fd65f7afd5a73b685a1651cb651ade120b53e15
+```
+
+#### 6. `5908bdf40f72`
+
+```text
+ARM: enable Clang AutoFDO without function splitting
+
+Select the 6.13 architecture capability. Clang 22 supports ARM
+sample-profile use but rejects machine function splitting for ARM.
+Keep the compiler and ThinLTO linker MFS options specific to x86,
+the existing supported architecture in this backport, and only use
+them with a profile.
+
+Keep global function sections off for ARM. The existing explicit
+hot and unlikely patterns place profiled sections in the main text
+output. Restrict AutoFDO's general TEXT_MAIN wildcard to x86 so
+it does not claim normal ARM special sections prematurely.
+
+The five upstream patches apply without textual conflicts. These
+changes adapt their compiler and linker behavior for ARM32.
+
+Signed-off-by: Hao Lin <hao.lin@samsung.com>
+```
+
+#### 7. `67b7b28df890`
+
+```text
+ARM: configs: enable Tizen RPi4 AutoFDO training
+
+Enable AutoFDO in the existing BCM2711 defconfig merged by the spec
+for the regular and RT builds. Keep CONFIG_LOCALVERSION and the
+existing target-specific localversion file as the release prefix.
+
+Allow an optional kernel_localversion RPM macro to set LOCALVERSION
+in both spec phases and extend the modules package paths. The old
+paths end in -v7l or -v8 and would miss modules with a build suffix.
+Use -kbase for the training build so its modules can coexist with
+the original release. An unset macro preserves the existing paths.
+
+Signed-off-by: Hao Lin <hao.lin@samsung.com>
+```
+
+</details>
