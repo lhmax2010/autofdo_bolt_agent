@@ -1,0 +1,60 @@
+From 3a2602c3e12c11c4bf32f2415b02fdf8fe1ee75a Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Fri, 20 Nov 2026 01:48:47 -0800
+Subject: [PATCH 8/8] packaging: allow opt-in AutoFDO profiles and vmlinux link
+ flags
+
+Expose the sample profile as an optional RPM source and print its
+SHA-256 before building. Append optional vmlinux flags only to the
+kernel image link and its kallsyms passes, preserving all existing
+linker flags. Leave the expanded spec unchanged without these macros.
+
+Signed-off-by: Hao Lin <hao.lin@samsung.com>
+---
+ Makefile                 | 2 +-
+ packaging/linux-rpi.spec | 9 ++++++++-
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 77fb4865f39c..1217e4f74cc8 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1176,7 +1176,7 @@ PHONY += vmlinux
+ #   https://savannah.gnu.org/bugs/?61463
+ # For Make > 4.4, the following simple code will work:
+ #  vmlinux: private export LDFLAGS_vmlinux := $(LDFLAGS_vmlinux)
+-vmlinux: private _LDFLAGS_vmlinux := $(LDFLAGS_vmlinux)
++vmlinux: private _LDFLAGS_vmlinux := $(LDFLAGS_vmlinux)$(if $(KBUILD_VMLINUX_EXTRA_LDFLAGS), $(KBUILD_VMLINUX_EXTRA_LDFLAGS))
+ vmlinux: export LDFLAGS_vmlinux = $(_LDFLAGS_vmlinux)
+ vmlinux: vmlinux.o $(KBUILD_LDS) modpost
+ 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.vmlinux
+diff --git a/packaging/linux-rpi.spec b/packaging/linux-rpi.spec
+index 8b14be76d64f..980df2c2da01 100644
+--- a/packaging/linux-rpi.spec
++++ b/packaging/linux-rpi.spec
+@@ -22,7 +22,7 @@ URL: https://www.kernel.org
+ Source0:   linux-kernel-%{version}.tar.xz
+ Source1001: linux-rpi.manifest
+ BuildRoot: %{_tmppath}/%{name}-%{PACKAGE_VERSION}-root
+-
++%{?kernel_autofdo_profile:Source2001: %{kernel_autofdo_profile}}
+ %define fullVersion %{version}_%{buildarch}_%{target_board}
+ 
+ BuildRequires: bc
+@@ -160,6 +160,13 @@ cp %{SOURCE1001} .
+ 
+ %build
+ %{?kernel_localversion:export LOCALVERSION="%{kernel_localversion}"}
++%if 0%{?kernel_autofdo_profile:1}
++export CLANG_AUTOFDO_PROFILE="%{SOURCE2001}"
++sha256sum -- "$CLANG_AUTOFDO_PROFILE" || exit 1
++%endif
++%if 0%{?kernel_vmlinux_extra_ldflags:1}
++export KBUILD_VMLINUX_EXTRA_LDFLAGS="%{kernel_vmlinux_extra_ldflags}"
++%endif
+ %{?asan:/usr/bin/gcc-unforce-options}
+ %{?ubsan:/usr/bin/gcc-unforce-options}
+ 
+-- 
+2.43.0
+
