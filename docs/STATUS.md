@@ -51,6 +51,14 @@
 - K1a 60°C 重试完成，五项各 3 预热 + 10 计时 + 1 system-wide 采样，50 个计时轮中 18 个起跑温度标记原样保留。powersave 门禁全部通过，最长采样等待 9.59 秒。内核周期 pipe 97.67%、syscall 87.24%、tmpfs 99.39%、内存触页 97.91%、ToS 1.39%。优先验证 pipe/内存触页，tmpfs 为第三候选。启动镜像与运行 notes 匹配，确认非历史 c27f160d。原 governor、SDB uid5001、kptr_restrict=0 已核验，未刷写、未重启、未生成 profile。[重试报告](kernel/autofdo/04_k1a_baseline.md#重试60c-起跑与轮间-powersave)
 - K1c 完成 [ARM32 回移植与 K-BASE 主机构建](kernel/autofdo/07_k1c_kbase_build.md)。在 `0fac5de6` 上应用五个指定上游补丁和两项本地适配，ARM32 保留 6.13 门禁，停用 MFS 与全局 function-sections。Clang 22.1.8，冻结 RPM 130/130，GBS 退出 0、5,131.22 秒、cgroup 峰值 5,371,985,920 B。与 K1a 的编译命令比较仅有预期训练标志差异，普通版原始 build-id `96766cfcbff8c33d83ca38152ad02f6a02dd44d4`，独立模块目录 `/lib/modules/6.12.80-arm-rpi4-v7l-kbase`。板上启动与运行待 K1d 获授权后验证。
 
+## Workflow M2a 续：八小时窗口到期，S1 前磁盘门禁阻塞（2026-11-21）
+
+- 独立 worktree 开始 rebase 至 e25f693，确认 9a32faa4 为祖先；收尾 rebase 至 2b506b1，未改 runner。全部 186 测试通过。RPi5 `.25:26101` 的设备树、aarch64、20261118.083201 镜像及 UID 5001 核对通过；固定 Base 20261030.120529 / Unified 20261104.125239 的 repomd/primary HTTP 200、SHA 与旧材料一致。
+- 原 S0 的 44 输入/12 输出 SHA 通过，原 formal 579 文件另存并最终核验未变。使用原 job 与 `--stop-after afdo-audit`，仅进程内适配全局 GBS 锁、外部进程记录、绝对截止和失败收据保全；原收据绑定代码不改。适配器末次探测归档缺口已以旧失败/新通过回归修正，保留两版与监督停止记录。
+- 按 13:00–21:00 PST 的八小时授权窗口，**05:00:00 UTC 退出 2，`host startup gate timed out`**。正式采样跨度 473.376 分钟、49 次；磁盘 13.416–13.441 GiB，49/49 低于 50 GiB；内存 23.401–23.606 GiB、load1 0–3.6211 全通过，外部构建记录 0。未到实际 GBS 包装器，未获取真实 host-gbs.lock，无构建锁遗留。
+- S1 依赖冻结/BASE、SONAME、部署、训练/profile、BASE-r/AFDO、AppliedSamples 与 oracle 均未到达；未配对测量。末次只读核对 UID5001、schedutil、RPM1230、目录不存在、cleanup_pending=[]，监督 MainPID=0。首次 SDB 客户端自动启动原本未运行的 daemon，`/tmp/sdb.log` 与 systemd 运行时 unit 边界例外已登记；未显式重启共享 SDB 服务，未操作其他板/hq/Gerrit。
+- [续跑报告](workflow/m2a/02_runner_and_afdo_audit.md#2026-11-21-续跑八小时窗口到期磁盘门禁阻塞) · [证据索引](workflow/m2a/evidence/m2a-resume-20261121/index.json)。未来恢复仍须重新满足资源、身份与原收据 SHA 门禁；本轮等待授权已到期。
+
 ## Workflow M2a：RPi5 runner 与 S0 通过，S1 构建互斥超时（2026-11-20）
 
 - 板型配置覆盖 RPi4 armv7l Thumb-2/A32 与 RPi5 aarch64。新增 `run --stop-after afdo-audit`，RPi5 在 S5 收据之前核对消费与非计时 oracle。186 项测试、M1 归档 48 项命令/路径/收据比较通过。设计 v0.3 与 M1 判定及统计实现保持原样。

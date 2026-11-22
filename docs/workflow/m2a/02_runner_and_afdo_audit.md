@@ -42,3 +42,52 @@ AArch64 补丁后的两个 RPM spec 模式（BASE 与 with_autofdo=1 + afdo_diag
 ## 收尾与证据
 
 CLI 执行失败路径清理。板上 UID 恢复至 5001，governor 恢复为 schedutil，RPM 数为 1230，与开始一致，清理待办为空。结束时复核 `/opt/afdo_agent` 不存在。[退出后板上核对](evidence/m2a-runner-20261120/board-poststop.txt) 只操作 RPi5，未重启，也未重启主机 SDB 服务。主机侧测试 186 项通过，板上脚本通过 `bash --posix -n`。SDB 或 systemd 自身的系统日志写入未做主机级审计。[证据索引与 SHA](evidence/m2a-runner-20261120/index.json) · [测试输出](evidence/m2a-runner-20261120/workflow-tests.log)
+
+## 2026-11-21 续跑：八小时窗口到期，磁盘门禁阻塞
+
+本轮按 13:00–21:00 PST（21:00–次日 05:00 UTC）的新授权窗口执行。仍用原 `continuation/job.json`、原 `formal-attempt-01` 输出和 `--stop-after afdo-audit`。**2026-11-22 05:00:00 UTC 退出 2，原文为 `host startup gate timed out`。停在 S1 之前的主机启动门禁，未达到 afdo-audit。** 不是上一轮外部 GBS 互斥超时的重复结论。[本轮索引](evidence/m2a-resume-20261121/index.json) · [退出记录](evidence/m2a-resume-20261121/end-v2.txt) · [执行原文](evidence/m2a-resume-20261121/run-v2.log)
+
+### 状态、原收据与固定快照
+
+- 当前独立 worktree 开始时干净，从 `9a32faa41f66311127a4f4f47ba1a3ee4f92390a` fast-forward 到 GitHub main `e25f693fa8c111ff480e8d3e964de145ecbd2e6b`，确认原提交为祖先；提交前再 rebase 到 `2b506b1`，新增内容为内核轨道文档，未改 runner。只使用此 worktree 的索引。[开始状态](evidence/m2a-resume-20261121/git-start.json) · [锁检查](evidence/m2a-resume-20261121/git-lock-pre-final-rebase.json) · [收尾 rebase](evidence/m2a-resume-20261121/final-rebase.txt)
+- 全部 runner **186 项测试通过**。首次调用遗漏 PYTHONPATH，随后完整测试暴露独立 worktree 缺少历史 M1 temp 夹具路径；在本 worktree 的 temp 内建立指向 WORKDIR 既有夹具的链接后，完整重跑通过。两份失败输出均保留；没有修改测试或 runner 判据。[最终测试](evidence/m2a-resume-20261121/workflow-tests-final.log)
+- 只读核验 `.25:26101`：设备树 Raspberry Pi 5 Model B Rev 1.1、aarch64、内核 `6.12.80-arm64-rpi4-v8`、TZ_BUILD_ID `tizen-unified-toolchain_20261118.083201`、UID 5001。镜像 ID 取自 `/etc/tizen-build.conf`；未以 SDB 别名判板。[设备树](evidence/m2a-resume-20261121/board-identity-connected.txt) · [镜像与初态](evidence/m2a-resume-20261121/board-build-identity.txt)
+- S0 收据链的 **44 项输入、12 项输出**逐项 SHA 通过，未重跑 S0。原 formal 的 **579 个文件、199,861 B**另存于 `WORKDIR/temp/m2a-resume-20261121/original-formal/`；最终复核 579/579 未改变，原成功和失败收据均未覆盖。四项同发布主机工具 SHA 也通过。[S0 核验](evidence/m2a-resume-20261121/s0-verification.json) · [原文件清单](evidence/m2a-resume-20261121/original-formal-manifest.json) · [最终复核](evidence/m2a-resume-20261121/original-formal-final-verification.json) · [主机工具](evidence/m2a-resume-20261121/host-tools-recheck.json)
+- Base `20261030.120529`、Unified `20261104.125239` 的共享 repomd 和 primary 均返回 HTTP 200，primary SHA 与 repomd 声明一致；四份文件与上一轮准备材料逐字节一致。本轮未重新选择 snapshot。[可访问性](evidence/m2a-resume-20261121/snapshot-recheck.json) · [字节比较](evidence/m2a-resume-20261121/snapshot-byte-comparison.json)
+
+### 等待、锁策略与受控适配
+
+正式资源采样始于 13:06:37 PST，结束于 21:00:00 PST，跨度 **28,402.563 秒（473.376 分钟）**；八小时授权从 13:00 开始计算，准备和监督进程调整均未顺延截止。共 **49 次探测**，常规相邻间隔 600.011–600.106 秒，最后一次因绝对截止提前至 199.912 秒。界面心跳只读取已保存的结果，不增加门禁采样。49/49 磁盘失败，内存、负载失败均 0，外部 GBS/rpmbuild 非空记录 0。[逐项汇总及原始记录路径](evidence/m2a-resume-20261121/wait-summary.json)
+
+| 启动条件 | 本轮正式采样范围 | 结论 |
+|---|---|---|
+| MemAvailable ≥16 GiB | 23.401–23.606 GiB | 全部通过 |
+| load1 <12 | 0–3.6211 | 全部通过 |
+| 磁盘 ≥50 GiB | 13.416–13.441 GiB | 全部失败，确切阻塞 |
+| 其他 gbs/rpmbuild | 每次均为空 | 无外部进程让行事件 |
+
+新增规则通过本轮进程注入的 [launch.py](evidence/m2a-resume-20261121/launch.py) 实现，原 job 和 S0 绑定的实现文件保持原字节。GBS 包装器在调用原执行器前获取 `WORKDIR/temp/host-gbs.lock`，锁内写 workflow、阶段、PID、开始时间，整个执行器期间持锁；进程扫描保留 PID、用户、启动时间、cwd、脱敏 argv 和读取失败原因；无其他构建时再核资源，等待只到绝对截止。原执行器的 -j2、threads 1、6G/5G、200%、nice 19、ionice idle 和运行中保护不改。已有失败收据采用新文件名保存后续失败，避免覆盖历史。
+
+**本轮在更早的主机启动门禁即阻塞，没有实际调用 GBS 包装器，没有获取真实 host-gbs.lock，也没有构建锁需要释放。** 锁持有/释放与阈值、脱敏、剩余期限传播仅通过隔离的合成检查；不称真实 GBS 验证通过。[适配检查](evidence/m2a-resume-20261121/adapter-checks.txt)
+
+等待期间审查发现第一版适配器在绝对截止抛异常会跳过末次探测归档。保留 [第一版](evidence/m2a-resume-20261121/launch-v1.py) 和前九次记录后，仅停止本轮第一监督服务，改为返回“不准启动”，由原等待器先保存 `timed_out` 及末次探测再退出。旧版缺记录、新版完整记录的回归检查通过；第二监督服务沿用下一次原定采样时间，间隔与截止不变。原 runner 未修补，新增启动适配修正一次。[回归](evidence/m2a-resume-20261121/deadline-regression.txt) · [第一服务停止](evidence/m2a-resume-20261121/supervisor-v1-stop.txt) · [原件再核验](evidence/m2a-resume-20261121/original-formal-recheck-v2.json)
+
+### 未到达项目与恢复状态
+
+| 要求 | 本轮结果 |
+|---|---|
+| S1 依赖解析并集、冻结仓库、BASE 构建及身份审计 | 未启动；没有新增冻结仓库或 BASE 产物 |
+| perf/库部署、板上 SHA/ldd、FFmpeg DT_NEEDED/SONAME 与版本差异 | 未到达；不把历史 S0 部署检查当作本轮重新部署结果 |
+| BASE/PLAT 身份与非计时 oracle | 未执行 |
+| BBB 720p CPU3 R=3、cycles -c1000003、evlist/LOST/样本 | 未采集 |
+| 同发布 profgen max/none/none/none、profile 质量 | 工具 SHA 通过；未转换，无新 profile 或质量结果 |
+| BASE-r/AFDO、构建锁、两目标 AppliedSamples、候选 oracle | 未执行；AppliedSamples 未知，不记作 0 |
+| 配对测量 | 未开始 |
+
+结束后只读复核身份未变、UID **5001**、governor **schedutil**、RPM **1230**、`/opt/afdo_agent` 不存在、cleanup_pending 为空。本轮没有进入板上写入会话，故无本轮部署或 governor/root 改动需要撤销；原 S0 可在未来恢复前重新校验。监督服务 MainPID=0、退出 2；最终 MemoryPeak 未保留，不能报告全程峰值。没有停止外部进程、重启板子、安装 RPM、操作其他板/Gerrit/hq 或修改认证。[板上终态](evidence/m2a-resume-20261121/board-poststop.txt) · [清理日志](evidence/m2a-resume-20261121/cleanup-poststop.json) · [监督服务终态](evidence/m2a-resume-20261121/supervisor-final.txt)
+
+### 边界例外
+
+首次只读 SDB 命令返回目标未找到，并打印 `Server is not running` 与自动启动成功；不是显式执行服务重启。随后仅 `sdb connect 192.168.108.25:26101` 恢复成功。此副作用不能写作“未启动 SDB 服务”。daemon PID 158650 的 stdout/stderr 指向 **`/tmp/sdb.log`**，未读取其内容、删除或改动服务；本轮没有事前/事后完整主机文件审计，无法确认此前遗留全集。[首次原文](evidence/m2a-resume-20261121/board-identity-initial.txt) · [目标连接](evidence/m2a-resume-20261121/sdb-connect.txt) · [描述符核查](evidence/m2a-resume-20261121/sdb-boundary.json)
+
+systemd-run 自动生成的运行时 unit 路径为 **`/run/user/1000/systemd/transient/m2a-resume-20261121-v2.service`**，并可能写系统 journal；这属于采用系统监督器的外部运行时产物，具体 journal 文件未跟踪。SDB 日志由客户端自动启动行为产生；预先确认 daemon 状态可以避免意外触发启动，但本轮首次调用前未做该检查。项目输入、临时材料与证据均留在 WORKDIR，未安装软件或清理其他任务数据。
