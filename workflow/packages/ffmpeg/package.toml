@@ -1,0 +1,58 @@
+schema_version = 1
+[package]
+name = "ffmpeg"
+owner = "Hao Lin"
+source = { gerrit = "platform/upstream/ffmpeg", commit = "5fe76358596f66e955f005094e6f34ca525ab23d" }
+[[build_units]]
+id = "ffmpeg-armv7l-thumb"
+spec = "packaging/ffmpeg.spec"
+patch = "build/profiling.patch"
+arch = "armv7l"
+isa = "thumb"
+macros = { profile_isa = "thumb" }
+consume_macro = { with_autofdo = "1" }
+profile_staging = "packaging/autofdo.extbinary"
+[[targets]]
+id = "libavcodec"
+build_unit = "ffmpeg-armv7l-thumb"
+package_path = "usr/lib/libavcodec.so.62"
+thresholds = {}
+[[targets]]
+id = "libavutil"
+build_unit = "ffmpeg-armv7l-thumb"
+package_path = "usr/lib/libavutil.so.60"
+thresholds = {}
+[runtime]
+deploy_set = ["usr/lib/libav*.so*", "usr/lib/libsw*.so*"]
+must_load = ["libavcodec", "libavutil"]
+env = { LC_ALL = "C" }
+plugin_dirs = []
+cpu_affinity = 3
+timeout_s = 600
+[collect]
+event = "cycles"
+period = 1000003
+runs = 3
+period_unit = 1000003
+# Pilot had no owner-selected minimum share. Zero disables this policy gate.
+min_target_share = 0.0
+[identity]
+allow_unverified_identity = false
+[consumption]
+diag_macro = { afdo_diag = "1" }
+object_to_target = { "libavcodec/" = "libavcodec", "libavutil/" = "libavutil" }
+record_coverage_warn_percent = 0
+sample_coverage_warn_percent = 0
+fail_on_coverage_warning = false
+[command_capture]
+method = "recorded-switches"
+build_config_files = ["ffbuild/config.mak"]
+[measure]
+metric = "seconds"
+better = "lower"
+warmup = 2
+blocks = "pilot"
+epsilon = 0.01
+
+# PM decision 2026-11-17: flag imbalance = abs(marked rounds BASE - AFDO)
+# >= max(2, ceil(0.1*N)); computed by stats, never manually supplied.

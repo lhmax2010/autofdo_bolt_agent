@@ -1,0 +1,31 @@
+# Historical pilot inputs; ToS is not a fresh holdout. A second clip remains a
+# user decision before automated M1 acceptance; this phase does not measure.
+[[inputs]]
+id = "bbb-720p-60"
+path = "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4"
+sha256 = "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4"
+start = 0
+duration = 60
+role = "train"
+oracle = { caps = "I420,1280x720,30/1,progressive,1/1", threads = 1, frames = 1800, bytes = 2488320000, digest = "3a4c3820c576697edd4ca34f3532c8af8ffaf04687955c5d6b35215b9b06c814" }
+[[inputs]]
+id = "tos-720p-60"
+path = "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4"
+sha256 = "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1"
+start = 0
+duration = 60
+role = "test"
+oracle = { caps = "I420,1280x720,30/1,progressive,1/1", threads = 1, frames = 1800, bytes = 2488320000, digest = "4c2610c37b7790240c9158277981ed9c3ac81399e3e9df554ffebb2d2ff80c4e" }
+
+# PM decision 2026-11-17: ToS primary; Sintel secondary, no multiplicity correction.
+[[inputs]]
+id = "sintel-1080p-60"
+path = "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4"
+sha256 = "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843"
+start = 0
+duration = 60
+role = "test-secondary"
+oracle = { caps = "video/x-raw, format=(string)I420, width=(int)1920, height=(int)1080", threads = 1, frames = 1440, bytes = 4478976000, digest = "91d171c0cd99266d0efeee7b9023a77bf39c925ec372bcd1d1e7efaf08ecd193" }
+
+# Sintel source is 1920x818; PM-requested 1920x1080 scaling stretches vertically.
+# Used only for decode performance/correctness; stretching does not affect that purpose.
