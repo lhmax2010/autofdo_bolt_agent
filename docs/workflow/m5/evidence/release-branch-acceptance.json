@@ -1,0 +1,95 @@
+{
+  "workdir_is_clone_root": true,
+  "stages": [
+    "preflight",
+    "build",
+    "deploy",
+    "collect",
+    "convert",
+    "rebuild",
+    "measure",
+    "report",
+    "restore"
+  ],
+  "report_checks": {
+    "m1-rpi4-thumb": {
+      "arch": "armv7l",
+      "primary_estimate": -0.01917156285833259,
+      "primary_bootstrap_ci": [
+        -0.02348799697531906,
+        -0.014492605143159821
+      ],
+      "verdict": "faster"
+    },
+    "m2a-rpi5-aarch64": {
+      "arch": "aarch64",
+      "primary_estimate": 0.0011652649779692874,
+      "primary_bootstrap_ci": [
+        -0.0015497973278482161,
+        0.004007338374010487
+      ],
+      "verdict": "equivalent"
+    }
+  },
+  "skill_sha256": "d9d558c9a2a74ceb6a2beb7d71a9ec2d841d4307befd0af81f1aa4626f2aa25d",
+  "input_manifest_hashes_match": true,
+  "missing_media": {
+    "exit_code": 2,
+    "reason": "gate",
+    "file": "bbb_720p_h264_60s.mp4",
+    "draft_or_run_created": false
+  },
+  "dry_run": {
+    "stage_count": 9,
+    "board_contact": false,
+    "run_directory_created": false
+  },
+  "commit": "c9462eaf5ca65d349a6afee1a1dacbe693caa666",
+  "tree": "a949898ded713a98e98dabcb72ef4c27d173058c",
+  "local_clone": "temp/release-check-2026-11-24",
+  "originals": {
+    "m1-rpi4-thumb": {
+      "original_json_sha256": "49fca5d9c9993102400309b601806e9873ebda60f1a702aad30d22a3826300c9",
+      "original_markdown_sha256": "32e37e58003ece4eaef3e2b519c58722009cfeb325759de94eb70bb3d6fc937d",
+      "original": "temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/stages/report/001",
+      "host_paths_omitted": 94,
+      "evidence_references_omitted": 0,
+      "statistics_exact": true
+    },
+    "m2a-rpi5-aarch64": {
+      "original_json_sha256": "cae609eae488d8b9511e68bc5cb67f243e12540d91ab918a2462f576d2bccbc1",
+      "original_markdown_sha256": "d9612b433d8c5c3318addf72e2bf76fad448f47dc79a12388e4729042447a4e1",
+      "original": "temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/report/001",
+      "host_paths_omitted": 204,
+      "evidence_references_omitted": 3,
+      "statistics_exact": true
+    }
+  },
+  "tests": {
+    "total": 216,
+    "passed": 213,
+    "skipped": [
+      {
+        "test": "test_real_failure_and_partition",
+        "reason": "original attempt-07 compiler diagnostics require AFDO_WF_ATTEMPT07_RUN"
+      },
+      {
+        "test": "test_attempt06_full_identity_passes_revised_rule",
+        "reason": "original attempt-06 maps and deployment receipt require AFDO_WF_ATTEMPT06_RUN"
+      },
+      {
+        "test": "test_attempt05_all_30_still_rejected",
+        "reason": "original attempt-05 map snapshots require AFDO_WF_ATTEMPT05_MAPS"
+      }
+    ],
+    "failed": 0,
+    "logged_seconds": 39.418
+  },
+  "raw_evidence": {
+    "temp/release-check-2026-11-24/.scratch/test-output.log": "df979cedc34bc37261b9211452d6ac8ef8d36df151fa7fa0547ee82d67ab1782",
+    "temp/release-check-2026-11-24/.scratch/explain.json": "87267023460f119719564b9dd42372bfdc1d498d086bf52ec0a0a317bdf8c8cb",
+    "temp/release-check-2026-11-24/.scratch/dry-run.json": "f7815b164e89b6f19b86dd84a06cd27b2d91eed10e729ba258f241e9c454e4df",
+    "temp/release-check-2026-11-24/.scratch/missing-media.stderr": "d40e5c6b8ec23aee8f0156a5806e86a1a7cc2e9757925e7c172c76e9e0ed873f",
+    "temp/release-check-2026-11-24/.scratch/example-reports.stdout": "6aebd35dd22f705dbb97538953c8afdbe0004f9caa7f05e83cc501b751a94354"
+  }
+}

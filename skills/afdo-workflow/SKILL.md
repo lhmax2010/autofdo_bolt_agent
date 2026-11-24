@@ -7,7 +7,14 @@ description: Use afdo_wf for Tizen package AutoFDO and PGO experiment work, incl
 
 ## Setup and authorization
 
-Start at the root of a checkout or linked worktree with Python 3.11 or later. `WORKDIR` is the main project directory that holds `temp/` and the original run artifacts. The checkout supplies the workflow code.
+Start from a fresh clone of the `release` branch. Use a new directory for this workflow.
+
+```bash
+git clone --single-branch --no-tags --branch release "$REPOSITORY" afdo-workflow
+cd afdo-workflow
+```
+
+Set `REPOSITORY` to the remote supplied by the maintainer. `WORKDIR` is the clone root, or the primary worktree of that clone if you use a linked worktree. Run the rest of the commands from the checkout root.
 
 ```bash
 WORKDIR=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
@@ -16,6 +23,8 @@ export PYTHONPATH="$PWD/workflow"
 export PYTHONDONTWRITEBYTECODE=1
 ```
 
+- For inspection and drafting, use Git and Python 3.11 or later.
+- For a live run, have SDB, GBS and the Tizen build environment, the target board and image, the matching board perf tool and libraries, and the package source, build configuration and dependency inputs. Get the project-patched `llvm-profgen` and matching `llvm-profdata` from the maintainer or build them using the [repository build instructions](../../workflow/README.md#build-the-host-profile-tools).
 - You can run `status`, `explain`, `run --dry-run`, and `init` for a new draft, and read existing reports without further approval.
 - Get explicit user approval for every board-contacting `run`, including a resume, for `--redo`, and for any operation that changes board state. Confirm the job and target in that approval.
 - Keep sealed configurations, receipts, and run directories read-only. Use a separate mutable run for new work. Keep workflow-owned board writes under `/opt/afdo_agent/` and preserve the cleanup journal. Do not install RPMs on the board. Delete run directories only after verified-pull through the workflow. Stop only processes owned by this experiment.
@@ -33,8 +42,9 @@ export PYTHONDONTWRITEBYTECODE=1
 | `rebuild` | Rebuild and audit the control and profile-consuming candidate. | Only when the job includes an AFDO audit, to deploy and perform untimed correctness checks. |
 | `measure` | Run the preregistered paired comparison and check correctness and telemetry. | Yes |
 | `report` | Write the report after receipt and cleanup checks. | No |
+| `restore` | Restore the original root and governor state, stop experiment-owned processes, and clean up verified-pull artifacts under the cleanup journal. | Yes, as session cleanup or pending recovery. |
 
-Use `python3 -m afdo_wf explain STAGE` for stage inputs, gates, board operations, outputs, and receipt fields. The enclosing live run can contact the board for session setup and cleanup even when it reuses stage receipts.
+Use `python3 -m afdo_wf explain STAGE` for stage inputs, gates, board operations, outputs, and receipt fields. The enclosing live run can contact the board for session setup and cleanup even when it reuses stage receipts. Report any `cleanup_pending` and recheck board identity before resuming cleanup in a later authorized session.
 
 ## Host build coordination
 
@@ -60,50 +70,48 @@ Reassert identity after reconnecting. If reconnect or identity verification fail
 
 ## Where the inputs live
 
-Use these paths relative to the checkout for configuration and relative to `WORKDIR` for local artifacts.
+Use these configuration files from the checkout.
 
 | Input | RPi4 FFmpeg | RPi5 FFmpeg |
 | --- | --- | --- |
 | Package TOML | `workflow/packages/ffmpeg/package.toml` | `workflow/packages/ffmpeg/package-rpi5.toml` |
 | Input manifest (`--inputs`) | `workflow/packages/ffmpeg/inputs.toml` | Same |
 | Board profile (`--platform`) | `rpi4-armv7l` in `workflow/platforms/rpi4-armv7l.toml` | `rpi5-aarch64` in `workflow/platforms/rpi5-aarch64.toml` |
-| Frozen dependency archive | `temp/m1-pilot-v02-20261116/build/repo/` | `temp/gbs-deps-archive/m2a-ffmpeg-rpi5-aarch64-01/` |
 
-The frozen archives are references for reproducing the recorded jobs. Use the job's repository receipt and manifest to check the archive and build configuration. A new RPi5 preparation job resolves and freezes its own dependencies before building.
+Obtain the exact clips from the maintainer as separate files. Each is an H.264 segment prepared from a Blender Foundation open movie under CC BY 3.0. The input manifest supplies these expected SHA-256 values. `init` checks every file.
 
-The three FFmpeg clips live in separate directories, so pass one `--media ID=FILE` per clip. The draft checks each file against the input manifest.
+| Role | Clip and source | SHA-256 |
+| --- | --- | --- |
+| Training | `bbb_720p_h264_60s.mp4`, Big Buck Bunny, Sunflower edition | `b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4` |
+| Primary test | `tos_720p_h264_60s.mp4`, Tears of Steel, Mango Open Movie Project | `280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1` |
+| Secondary test | `sintel_1080p_h264_60s.mp4`, Sintel, Durian Open Movie Project; scaled to 1920x1080 | `b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843` |
 
-### Preview an FFmpeg RPi5 draft
-
-Use the setup block first. Choose an unused preview directory under `WORKDIR/temp`.
-
-```bash
-PREVIEW="$WORKDIR/temp/m5-init-check-$(date +%F)"
-python3 -m afdo_wf init --workdir "$WORKDIR" --platform rpi5-aarch64 \
-  --package workflow/packages/ffmpeg/package-rpi5.toml \
-  --inputs workflow/packages/ffmpeg/inputs.toml \
-  --media "bbb-720p-60=$WORKDIR/media/bbb_720p_h264_60s.mp4" \
-  --media "tos-720p-60=$WORKDIR/temp/board-round1/tos_720p_h264_60s.mp4" \
-  --media "sintel-1080p-60=$WORKDIR/temp/media_src/sintel_1080p_h264_60s.mp4" \
-  --job "$PREVIEW/job.json" --output "$PREVIEW/run"
-python3 -m afdo_wf run --job "$PREVIEW/job.json" --dry-run
-```
+The maintainer can also provide a verified frozen dependency archive and its build configuration for jobs that use one. A new RPi5 preparation job resolves and freezes its dependencies as part of its build stage.
 
 ## Create, inspect, resume, and redo
 
-Generate a job draft using the package and input TOML files, the board profile, and the local media. For media stored together, use `--media-dir` as below. Choose an unused job path and run directory. `PLATFORM` is `rpi4-armv7l` or `rpi5-aarch64` for the examples here.
+Keep the three files together in `MEDIA_DIR`, or supply a separate `--media ID=FILE` for each input. This RPi5 example uses a new draft path and an unused run directory. For RPi4, use `--platform rpi4-armv7l` and `workflow/packages/ffmpeg/package.toml`.
 
 ```bash
-python3 -m afdo_wf init --package "$PACKAGE" --inputs "$INPUTS" \
-  --platform "$PLATFORM" --media-dir "$MEDIA_DIR" --workdir "$WORKDIR" \
+MEDIA_DIR="$WORKDIR/media"
+JOB="$WORKDIR/jobs/ffmpeg-rpi5.json"
+RUN_DIR="$WORKDIR/runs/ffmpeg-rpi5"
+python3 -m afdo_wf init --workdir "$WORKDIR" --platform rpi5-aarch64 \
+  --package workflow/packages/ffmpeg/package-rpi5.toml \
+  --inputs workflow/packages/ffmpeg/inputs.toml --media-dir "$MEDIA_DIR" \
   --job "$JOB" --output "$RUN_DIR"
+```
+
+If a file is absent, `init` exits 2 with `required local file missing` and the path. If the SHA differs, it exits 3 with `media SHA does not match manifest` and the input ID. In either case it leaves the draft and run paths unused. Ask for the exact file and retry init once it is available. After a successful init, preview the draft.
+
+```bash
 python3 -m afdo_wf run --job "$JOB" --dry-run
 python3 -m afdo_wf explain preflight
 ```
 
 Fill the draft's `missing_for_run` fields with the authorized board identity, tool locks, source and build settings, and seeds. Set `draft=false` after review. Preview again and inspect the planned inputs and board operations before an approved `python3 -m afdo_wf run --job "$JOB"`.
 
-For an interrupted run, first inspect the same job.
+For an interrupted run, inspect the same job on the host that has the original run directory and artifacts. A report copy alone cannot provide receipt status or resume a run. Set `JOB` to that job file and `STAGE` to the stage you want to inspect.
 
 ```bash
 python3 -m afdo_wf status --job "$JOB"
@@ -156,30 +164,14 @@ Use the preregistered epsilon of 1% for these experiments.
 
 Flagged complete pairs remain in the primary analysis. Compare the clean-pair sensitivity result and report counts and causes. Missing pairs, more than 20% flagged or missing pairs, or an absolute difference in variant flagged-round counts of at least `max(2, ceil(0.1 * N))` cap the primary verdict at `inconclusive`. `N` is the planned number of pairs. Report missing telemetry or explicit `unknown` values as unknown.
 
-## Sealed run examples
+## Read-only report examples
 
-Use the setup block above. These are the actual paths relative to `WORKDIR`. Run the following read-only commands from the checkout. The original artifacts must be present in that workspace.
+These copies are available from any fresh clone. They contain the measurements and verdicts with host-specific references omitted. The original job, receipts and artifacts remain with the experiment.
 
 ```bash
-M1_JOB="$WORKDIR/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/job.json"
-M2A_JOB="$WORKDIR/temp/m2a-rpi5-prep-20261119/continuation/job.json"
-printf '\n--- M1 status ---\n'
-python3 -m afdo_wf status --job "$M1_JOB"
-printf '\n--- M1 dry-run ---\n'
-python3 -m afdo_wf run --job "$M1_JOB" --dry-run
-printf '\n--- M2a status ---\n'
-python3 -m afdo_wf status --job "$M2A_JOB"
-printf '\n--- M2a dry-run ---\n'
-python3 -m afdo_wf run --job "$M2A_JOB" --dry-run
-printf '\n--- Explain measure ---\n'
-python3 -m afdo_wf explain measure
-printf '\n--- Explain report ---\n'
-python3 -m afdo_wf explain report
-printf '\n--- M1 report ---\n'
-cat "$WORKDIR/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/stages/report/001/report.md"
-printf '\n--- M2a report ---\n'
-cat "$WORKDIR/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/report/001/report.md"
+cat examples/m1-rpi4-thumb/report.md
+cat examples/m2a-rpi5-aarch64/report.md
 ```
 
-- **M1 ToS** reported -1.92% relative wall time, rounded from the report, with verdict `faster`. Its bootstrap CI lies entirely below -1%.
-- **M2a ToS** reported +0.12% relative wall time, rounded from the report, with verdict `equivalent`. Its bootstrap CI lies within +/-1%.
+- [M1 attempt-11, RPi4 Thumb](../../examples/m1-rpi4-thumb/report.json). ToS reported -1.92% relative wall time, rounded from the report, with verdict `faster`. The bootstrap interval lies entirely below -1%.
+- [M2a, RPi5 AArch64](../../examples/m2a-rpi5-aarch64/report.json). ToS reported +0.12% relative wall time, rounded from the report, with verdict `equivalent`. The bootstrap interval lies within +/-1%.
