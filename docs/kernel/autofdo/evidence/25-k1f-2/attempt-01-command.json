@@ -1,0 +1,41 @@
+{
+  "argv": [
+    "/usr/bin/gbs",
+    "-c",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k1f-2/kbase-s2/gbs.conf",
+    "build",
+    "-A",
+    "armv7l",
+    "--spec",
+    "linux-rpi.spec",
+    "--buildroot",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k1f-2/kbase-s2/gbs-root",
+    "--threads",
+    "1",
+    "--define",
+    "_smp_mflags -j2",
+    "--define",
+    "kernel_localversion -kbase",
+    "--define",
+    "__spec_build_cmd /usr/bin/env JOBS=2 KBUILD_VERBOSE=1 KBUILD_BUILD_TIMESTAMP=%{lua:print(string.char(34,87,101,100,32,78,111,118,32,49,56,32,49,52,58,53,57,58,50,54,32,85,84,67,32,50,48,50,54,34))} KBUILD_BUILD_USER=abuild KBUILD_BUILD_HOST=linhao-linux KBUILD_BUILD_VERSION=1 %{___build_cmd}",
+    "--define",
+    "__spec_install_cmd /usr/bin/env JOBS=2 KBUILD_VERBOSE=1 KBUILD_BUILD_TIMESTAMP=%{lua:print(string.char(34,87,101,100,32,78,111,118,32,49,56,32,49,52,58,53,57,58,50,54,32,85,84,67,32,50,48,50,54,34))} KBUILD_BUILD_USER=abuild KBUILD_BUILD_HOST=linhao-linux KBUILD_BUILD_VERSION=1 %{___build_cmd}",
+    "--include-all",
+    "--define",
+    "kernel_vmlinux_symbol_order kbase-s2-symbol-order.txt"
+  ],
+  "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k1f-2/kbase-s2/export-src",
+  "startup": {
+    "at": 1795507338.4385524,
+    "mem_available": 19656884224,
+    "load1": 9.42333984375,
+    "nproc": 20,
+    "disk_free": 389334052864,
+    "memory.current": "2563338240",
+    "memory.peak": "2721447936",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+    "memory.max": "6442450944",
+    "memory.high": "5368709120",
+    "cpu.max": "200000 100000"
+  }
+}

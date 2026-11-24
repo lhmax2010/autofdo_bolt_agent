@@ -1,0 +1,62 @@
+From be12d5d7d31438be5df6b7d95d7a5193876d3c39 Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Tue, 24 Nov 2026 00:01:55 -0800
+Subject: [PATCH] packaging: support an optional vmlinux symbol ordering file
+
+Expose the symbol ordering file and its checksum as optional RPM
+sources. Verify the checksum before invoking Kbuild and apply the
+ordering file only to the vmlinux link and its kallsyms passes.
+Keep the expanded spec unchanged when the option is unset.
+
+Signed-off-by: Hao Lin <hao.lin@samsung.com>
+---
+ packaging/linux-rpi.spec | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/packaging/linux-rpi.spec b/packaging/linux-rpi.spec
+index 980df2c2da01..d7df0bc109e3 100644
+--- a/packaging/linux-rpi.spec
++++ b/packaging/linux-rpi.spec
+@@ -23,9 +23,9 @@ Source0:   linux-kernel-%{version}.tar.xz
+ Source1001: linux-rpi.manifest
+ BuildRoot: %{_tmppath}/%{name}-%{PACKAGE_VERSION}-root
+ %{?kernel_autofdo_profile:Source2001: %{kernel_autofdo_profile}}
+ %define fullVersion %{version}_%{buildarch}_%{target_board}
+-
++%{?kernel_vmlinux_symbol_order:Source2002: %{kernel_vmlinux_symbol_order}}
+ BuildRequires: bc
+ BuildRequires: module-init-tools
+ BuildRequires: bison
+ BuildRequires: flex
+@@ -38,9 +38,9 @@ BuildRequires: xz-devel
+ BuildRequires: binutils-devel
+ BuildRequires: python3
+ BuildRequires: rsync
+ BuildRequires: dwarves
+-
++%{?kernel_vmlinux_symbol_order:Source2003: %{kernel_vmlinux_symbol_order}.sha256}
+ %description
+ The Linux Kernel, the operating system core itself
+
+ # kernel
+@@ -166,8 +166,20 @@ sha256sum -- "$CLANG_AUTOFDO_PROFILE" || exit 1
+ %endif
+ %if 0%{?kernel_vmlinux_extra_ldflags:1}
+ export KBUILD_VMLINUX_EXTRA_LDFLAGS="%{kernel_vmlinux_extra_ldflags}"
+ %endif
++%if 0%{?kernel_vmlinux_symbol_order:1}
++symbol_order="%{SOURCE2002}"
++read -r expected_sha source_name < "%{SOURCE2003}" || exit 1
++test "$source_name" = "$(basename -- "$symbol_order")" || exit 1
++actual_checksum=$(sha256sum -- "$symbol_order") || exit 1
++if [ "$actual_checksum" != "$expected_sha  $symbol_order" ]; then
++    printf '%s\n' "symbol ordering file SHA-256 mismatch: $symbol_order" >&2
++    exit 1
++fi
++printf '%s\n' "$actual_checksum"
++export KBUILD_VMLINUX_EXTRA_LDFLAGS="${KBUILD_VMLINUX_EXTRA_LDFLAGS:+$KBUILD_VMLINUX_EXTRA_LDFLAGS }--symbol-ordering-file=$symbol_order"
++%endif
+ %{?asan:/usr/bin/gcc-unforce-options}
+ %{?ubsan:/usr/bin/gcc-unforce-options}
+
+ %{?_toolchain:

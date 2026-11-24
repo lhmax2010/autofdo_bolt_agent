@@ -1,0 +1,8 @@
+packaging: support an optional vmlinux symbol ordering file
+
+Expose the symbol ordering file and its checksum as optional RPM
+sources. Verify the checksum before invoking Kbuild and apply the
+ordering file only to the vmlinux link and its kallsyms passes.
+Keep the expanded spec unchanged when the option is unset.
+
+Signed-off-by: Hao Lin <hao.lin@samsung.com>

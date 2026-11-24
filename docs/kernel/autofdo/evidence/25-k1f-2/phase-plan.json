@@ -1,0 +1,120 @@
+{
+  "aa": [
+    [
+      "B",
+      "A"
+    ],
+    [
+      "A",
+      "B"
+    ],
+    [
+      "A",
+      "B"
+    ],
+    [
+      "A",
+      "B"
+    ],
+    [
+      "B",
+      "A"
+    ],
+    [
+      "B",
+      "A"
+    ],
+    [
+      "B",
+      "A"
+    ],
+    [
+      "A",
+      "B"
+    ]
+  ],
+  "aa_variants": {
+    "A": "K-BASE",
+    "B": "K-BASE"
+  },
+  "layout": [
+    [
+      "K-BASE-S2",
+      "K-BASE"
+    ],
+    [
+      "K-BASE",
+      "K-BASE-S2"
+    ],
+    [
+      "K-BASE",
+      "K-BASE-S2"
+    ],
+    [
+      "K-BASE",
+      "K-BASE-S2"
+    ],
+    [
+      "K-BASE",
+      "K-BASE-S2"
+    ],
+    [
+      "K-BASE-S2",
+      "K-BASE"
+    ],
+    [
+      "K-BASE",
+      "K-BASE-S2"
+    ],
+    [
+      "K-BASE-S2",
+      "K-BASE"
+    ],
+    [
+      "K-BASE-S2",
+      "K-BASE"
+    ],
+    [
+      "K-BASE-S2",
+      "K-BASE"
+    ]
+  ],
+  "seed": 20261120,
+  "timing": {
+    "mmfault": "workload elapsed_ns / 1e9, excludes final checksum",
+    "forkexec": "workload elapsed_ns / 1e9",
+    "pipe": "external perf-stat wall seconds",
+    "tmpfs": "external perf-stat wall seconds",
+    "syscall": "external perf-stat wall seconds",
+    "tos": "external perf-stat wall seconds"
+  },
+  "budget": "raw_N = ceil((1.96*1.2533*stdev(paired_log_ratios)/(epsilon/2))**2); N = min(40,max(10,raw_N))",
+  "parameters": {
+    "pipe_loops": 500000,
+    "mmfault_MiB": 64,
+    "mmfault_count": 59,
+    "tmpfs_MiB": 64,
+    "tmpfs_repeats": 8,
+    "syscall_loops": 20000000,
+    "forkexec_count": 12774,
+    "tos": "K1a BASE 60s 1800 frames single-thread decode"
+  },
+  "benchmark_order": [
+    "pipe",
+    "mmfault",
+    "tmpfs",
+    "syscall",
+    "forkexec",
+    "tos"
+  ],
+  "warmups": 1,
+  "timed_rounds": 3,
+  "min_quiet": 30,
+  "max_quiet": 600,
+  "quiet_busy_below_pct": 2.91,
+  "T_start_C": 60,
+  "T_max_C": 80,
+  "stats_sha256": "66318a939e9eb8bca7b15ae6076133431290226d27a3f0682fe8b18ef3312887",
+  "locked_utc": "2026-11-24T07:57:50.365177+00:00",
+  "previous_protocol_sha256": "25afaf163483e131e3826d645fd24e953961f579dddaf002afde449e8bbce273"
+}
