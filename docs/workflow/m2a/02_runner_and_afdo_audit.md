@@ -194,3 +194,9 @@ systemd-run 自动生成的运行时 unit 路径为 **`/run/user/1000/systemd/tr
 - M1 门禁计算 `publishable=true`。已封存 S6 与 S7 收据及 [report.json](evidence/m2a-measure-20261123/report.json)、[report.md](evidence/m2a-measure-20261123/report.md)。转换沿用 S4 的 6 份已验证结果和锁定 profile，S5 的两个库分别有 1,804、63 条正值 AppliedSamples。S7 已登记 S5 一次性修正的原因、范围和证据，封存配置继续引用原文件。
 - 板上已恢复 UID 5001 和 `schedutil`，RPM 数仍为 1230，`/opt/afdo_agent` 已清理，待办为空。S6/S7 没有启动 GBS，之前构建单元已释放共享锁。未重启 SDB 守护进程。 [板上终态](evidence/m2a-measure-20261123/board-poststop.txt) · [共享锁核对](evidence/m2a-measure-20261123/host-gbs-lock-final.txt) · [原件与 SHA 索引](evidence/m2a-measure-20261123/index.json)
 - 运行窗口为 `2026-11-23T23:26:06-08:00` 到 `2026-11-24T02:08:16-08:00`，共 9730 秒。
+
+### S7 封存后的板型配置修正
+
+本实验自有缺陷登记 1/3。S5 的 unclassified recorded command 与本次永久修正同属一个缺陷。AArch64 GCC RPM 将 crtbeginS.o、crtendS.o、libgcc.a 与 libgcc_eh.a 安装在 usr/lib64/gcc。S5 首轮路径证据已保留，第二次 S5 通过一次性路径覆盖完成，本次配置将相同路径写入未来作业用的 rpi5-aarch64.toml。S0–S7 收据和签署这些收据的配置继续保存在原 worktree，配置修改在另一个 worktree 进行。
+
+在原始 AFDO 产物上回放真实 S5 审计，旧配置以 unclassified recorded command 退出。新配置找到四个原始 GCC 对象，核对各自 SHA，得到相同的 5 条 GCC 支持对象命令、391 条 FFmpeg 源码命令和每目标正值 AppliedSamples 数（1,804 / 63）。RPM 构建和板上步骤由归档响应提供，实际读取 .GCC.command.line、编译诊断和构建根内 profile 的审计照常执行。核对了 AArch64 运行库目录、debug 路径与实际提取 ELF。RPi4 的 usr/lib、usr/lib/gcc 配置字节保持一致，M1 的 48 项命令及收据回放全部通过。workflow 测试 187 项通过。 [旧配置失败](evidence/m2a-rpi5-gcc-path-20261124/pre-fix-real-replay.log) · [RPi5 产物回放](evidence/m2a-rpi5-gcc-path-20261124/rpi5-replay-summary.json) · [M1 回放](evidence/m2a-rpi5-gcc-path-20261124/m1-replay-summary.json) · [测试日志](evidence/m2a-rpi5-gcc-path-20261124/tests.log)

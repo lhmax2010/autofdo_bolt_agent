@@ -26,6 +26,16 @@ class PlatformTests(unittest.TestCase):
         self.assertTrue(all(target['package_path'].startswith(board.runtime_lib+'/')
                             for target in package['targets']))
 
+    def test_gcc_support_paths_follow_each_platform_abi(self):
+        for name, runtime_lib, gcc_support in [
+            ('rpi4-armv7l', 'usr/lib', 'usr/lib/gcc'),
+            ('rpi5-aarch64', 'usr/lib64', 'usr/lib64/gcc'),
+        ]:
+            with self.subTest(platform=name):
+                board = platforms.load(name)
+                self.assertEqual(board.runtime_lib, runtime_lib)
+                self.assertEqual(board.gcc_support, gcc_support)
+
     def test_same_address_or_alias_does_not_validate_wrong_hardware(self):
         board = platforms.load('rpi5-aarch64')
         board.check_identity({'model': 'Raspberry Pi 5 Model B Rev 1.1', 'arch': 'aarch64'})

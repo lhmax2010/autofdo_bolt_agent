@@ -55,6 +55,7 @@
 
 - ToS 主比较 40 对，+0.117%，bootstrap 95% CI [-0.155%, +0.401%]，`equivalent`。Sintel 次比较 40 对，+0.162%，bootstrap 95% CI [-0.258%, +0.692%]，`equivalent`。
 - S0–S5 原收据 SHA 保持一致，S7 已登记 S5 的一次性路径修正。M1 门禁 `publishable=true`。清理结束，UID 5001、调速器与 RPM 计数核对通过。
+- S7 封存后，单独修正未来 RPi5 作业的 GCC 对象路径为 `usr/lib64/gcc`。S5 的一次性恢复与本次修正按同一缺陷计 1/3。原始 AFDO 审计回放、M1 48 项回放、187 项 workflow 测试均通过。实验使用的旧配置留在原 worktree。
 - [完整报告与证据](workflow/m2a/02_runner_and_afdo_audit.md#s6s7rpi5-配对测量与报告2026-11-23-至-2026-11-24)
 
 ## Workflow M2a：RPi5 AFDO 审计完成，测量前停止（2026-11-23）
