@@ -1,0 +1,45 @@
+
+libcapi-system-device.so:	file format elf32-littlearm
+
+Disassembly of section .text:
+
+00003ee0 <device_display_get_state>:
+    3ee0: b510         	push	{r4, lr}
+    3ee2: b082         	sub	sp, #0x8
+    3ee4: 4604         	mov	r4, r0
+    3ee6: f7fe ec36    	blx	0x2754 <is_feature_display_supported@plt> @ imm = #-0x1794
+    3eea: b170         	cbz	r0, 0x3f0a <device_display_get_state+0x2a> @ imm = #0x1c
+    3eec: b18c         	cbz	r4, 0x3f12 <device_display_get_state+0x32> @ imm = #0x22
+    3eee: 4811         	ldr	r0, [pc, #0x44]         @ 0x3f34 <device_display_get_state+0x54>
+    3ef0: a901         	add	r1, sp, #0x4
+    3ef2: 4478         	add	r0, pc
+    3ef4: f7fe eca0    	blx	0x2838 <vconf_get_int@plt> @ imm = #-0x16c0
+    3ef8: 2800         	cmp	r0, #0x0
+    3efa: d416         	bmi	0x3f2a <device_display_get_state+0x4a> @ imm = #0x2c
+    3efc: 9801         	ldr	r0, [sp, #0x4]
+    3efe: 2801         	cmp	r0, #0x1
+    3f00: d00a         	beq	0x3f18 <device_display_get_state+0x38> @ imm = #0x14
+    3f02: 2802         	cmp	r0, #0x2
+    3f04: d10a         	bne	0x3f1c <device_display_get_state+0x3c> @ imm = #0x14
+    3f06: 2001         	movs	r0, #0x1
+    3f08: e00c         	b	0x3f24 <device_display_get_state+0x44> @ imm = #0x18
+    3f0a: 2002         	movs	r0, #0x2
+    3f0c: f2cc 0000    	movt	r0, #0xc000
+    3f10: e00d         	b	0x3f2e <device_display_get_state+0x4e> @ imm = #0x1a
+    3f12: f06f 0015    	mvn	r0, #0x15
+    3f16: e00a         	b	0x3f2e <device_display_get_state+0x4e> @ imm = #0x14
+    3f18: 2000         	movs	r0, #0x0
+    3f1a: e003         	b	0x3f24 <device_display_get_state+0x44> @ imm = #0x6
+    3f1c: 3803         	subs	r0, #0x3
+    3f1e: 2801         	cmp	r0, #0x1
+    3f20: d803         	bhi	0x3f2a <device_display_get_state+0x4a> @ imm = #0x6
+    3f22: 2002         	movs	r0, #0x2
+    3f24: 6020         	str	r0, [r4]
+    3f26: 2000         	movs	r0, #0x0
+    3f28: e001         	b	0x3f2e <device_display_get_state+0x4e> @ imm = #0x2
+    3f2a: f04f 30ff    	mov.w	r0, #0xffffffff
+    3f2e: b002         	add	sp, #0x8
+    3f30: bd10         	pop	{r4, pc}
+    3f32: bf00         	nop
+    3f34: 4c64         	ldr	r4, [pc, #0x190]        @ 0x40c8 <device_display_change_state+0x190>
+    3f36: 0000         	movs	r0, r0
