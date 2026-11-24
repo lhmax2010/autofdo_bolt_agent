@@ -1,0 +1,2 @@
+用户已断电上电，并提供了 K-BASE-S 诊断启动的完整控制台日志：内核正常启动至用户态，在首次 modprobe 时触发
+"kernel BUG at kernel/module/version.c:73"（check_modstruct_version，LR 在 bsearch），即在内核自身导出符号表中找不到 module_layout；连续 5 次 oops 后各 modprobe 在 sys_finit_module 的 _raw_spin_lock 上自旋，随后每约 63 秒报 RCU stall，用户态未能拉起网络。请把这段日志存入证据（用户在本会话中提供的原文，原样保存为 evidence 文件并记录 SHA）。
