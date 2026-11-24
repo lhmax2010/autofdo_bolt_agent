@@ -51,6 +51,12 @@
 - K1a 60°C 重试完成，五项各 3 预热 + 10 计时 + 1 system-wide 采样，50 个计时轮中 18 个起跑温度标记原样保留。powersave 门禁全部通过，最长采样等待 9.59 秒。内核周期 pipe 97.67%、syscall 87.24%、tmpfs 99.39%、内存触页 97.91%、ToS 1.39%。优先验证 pipe/内存触页，tmpfs 为第三候选。启动镜像与运行 notes 匹配，确认非历史 c27f160d。原 governor、SDB uid5001、kptr_restrict=0 已核验，未刷写、未重启、未生成 profile。[重试报告](kernel/autofdo/04_k1a_baseline.md#重试60c-起跑与轮间-powersave)
 - K1c 完成 [ARM32 回移植与 K-BASE 主机构建](kernel/autofdo/07_k1c_kbase_build.md)。在 `0fac5de6` 上应用五个指定上游补丁和两项本地适配，ARM32 保留 6.13 门禁，停用 MFS 与全局 function-sections。Clang 22.1.8，冻结 RPM 130/130，GBS 退出 0、5,131.22 秒、cgroup 峰值 5,371,985,920 B。与 K1a 的编译命令比较仅有预期训练标志差异，普通版原始 build-id `96766cfcbff8c33d83ca38152ad02f6a02dd44d4`，独立模块目录 `/lib/modules/6.12.80-arm-rpi4-v7l-kbase`。板上启动与运行待 K1d 获授权后验证。
 
+## Workflow M2a：RPi5 AFDO 审计完成，测量前停止（2026-11-23）
+
+- 独立 worktree 同步并确认 `8ff3613d`、`9a32faa4`。186 项测试、116 项 SHA 核对均通过，复用 S0。RPi5 `.25:26101` 为 aarch64、镜像 `20261118.083201`、UID 5001。Base `20261030.120529` / Unified `20261104.125239` 元数据一致，109 个 RPM 已冻结。6 次 GBS 均在共享锁内通过，累计等待 1.335 秒，峰值 2.187 GiB。
+- BASE、BASE-r、AFDO 构建锁通过，8 个 SONAME 及版本一致。BBB 训练三次，6 次转换均为 `conversion=ok`、`identity=verified`。锁定 profile SHA-256 `db4d4c196cde3afb20803580ed5317d83a7d4a95f0d8f830c5394f1536b99d5a`。
+- 首次 S5 因 AArch64 GCC 支持对象路径错误退出 2。原始构建回归确认路径后，仅在 S5 用 `usr/lib64/gcc` 恢复，S0–S4 收据复用。两个库的正值 AppliedSamples 为 1,804 / 63，三份 oracle 均通过，`--stop-after afdo-audit` 退出 0。板子 UID、governor、RPM 数已恢复并复核，清理待办为空。配对测量待 PM 审核。 [报告与证据](workflow/m2a/02_runner_and_afdo_audit.md#2026-11-23-续跑清理后核验并从-s1-恢复)
+
 ## Workflow M2a 续：八小时窗口到期，S1 前磁盘门禁阻塞（2026-11-21）
 
 - 独立 worktree 开始 rebase 至 e25f693，确认 9a32faa4 为祖先；收尾 rebase 至 2b506b1，未改 runner。全部 186 测试通过。RPi5 `.25:26101` 的设备树、aarch64、20261118.083201 镜像及 UID 5001 核对通过；固定 Base 20261030.120529 / Unified 20261104.125239 的 repomd/primary HTTP 200、SHA 与旧材料一致。

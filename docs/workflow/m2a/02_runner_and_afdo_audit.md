@@ -91,3 +91,60 @@ CLI 执行失败路径清理。板上 UID 恢复至 5001，governor 恢复为 sc
 首次只读 SDB 命令返回目标未找到，并打印 `Server is not running` 与自动启动成功；不是显式执行服务重启。随后仅 `sdb connect 192.168.108.25:26101` 恢复成功。此副作用不能写作“未启动 SDB 服务”。daemon PID 158650 的 stdout/stderr 指向 **`/tmp/sdb.log`**，未读取其内容、删除或改动服务；本轮没有事前/事后完整主机文件审计，无法确认此前遗留全集。[首次原文](evidence/m2a-resume-20261121/board-identity-initial.txt) · [目标连接](evidence/m2a-resume-20261121/sdb-connect.txt) · [描述符核查](evidence/m2a-resume-20261121/sdb-boundary.json)
 
 systemd-run 自动生成的运行时 unit 路径为 **`/run/user/1000/systemd/transient/m2a-resume-20261121-v2.service`**，并可能写系统 journal；这属于采用系统监督器的外部运行时产物，具体 journal 文件未跟踪。SDB 日志由客户端自动启动行为产生；预先确认 daemon 状态可以避免意外触发启动，但本轮首次调用前未做该检查。项目输入、临时材料与证据均留在 WORKDIR，未安装软件或清理其他任务数据。
+
+## 2026-11-23 续跑：清理后核验并从 S1 恢复
+
+### 开工核对
+
+- 独立 worktree `temp/m2a-rpi5-wt` 已 rebase 到 `cc526ab`，含磁盘清理提交 `8ff3613d` 与 M2a runner 提交 `9a32faa4`。186 项 workflow 测试通过。原 job 与 S0 绑定的 runner 文件保持原字节。 [Git 核对](evidence/m2a-resume-20261123/git-start.txt) · [测试日志](evidence/m2a-resume-20261123/workflow-tests.log)
+- 116 项 SHA 核对通过，含 S0 收据的 44 项输入、12 项输出、发布版 profgen/profdata 与加载器的依赖闭包、磁盘清理记录所列 13 个原件及其保全副本。Base `20261030.120529`、Unified `20261104.125239` 的 aarch64 repomd 与 primary 均重新取得 HTTP 200，内容与先前本地记录按 SHA 一致。 [SHA 核验](evidence/m2a-resume-20261123/post-cleanup-sha.json) · [请求及原件索引](evidence/m2a-resume-20261123/index.json)
+- RPi5 `192.168.108.25:26101` 确认 Raspberry Pi 5 Model B Rev 1.1、aarch64、内核 `6.12.80-arm64-rpi4-v8`、`TZ_BUILD_ID=tizen-unified-toolchain_20261118.083201`、UID 5001。主机的 SDB 客户端符号链接目标已不存在。把仍在运行的共享守护进程映像按字节复制到 WORKDIR，核对 SHA 与客户端版本 4.2.25。首次客户端返回 target not found，按授权仅对 `.25:26101` 执行 disconnect/connect，重新读取成功。守护进程 PID 276783 保留。 [身份与客户端证据](evidence/m2a-resume-20261123/index.json)
+- 正式流程验收了板上 perf 6.12.80 与 libLLVM 的逐项 SHA 和 `ldd`，复用原 S0 收据。开跑前另存原 formal 的 583 个文件及其 SHA，以保留后续会更新的状态文件。 [部署闭包](evidence/m2a-resume-20261123/board-runtime.json) · [运行原件索引](evidence/m2a-resume-20261123/index.json)
+
+### 共享锁与资源
+
+本轮在原 CLI 外用一次性启动适配器接入 `temp/host-gbs.lock`。每次 GBS（含依赖解析）在持锁后扫描全主机 gbs/rpmbuild，并再次取资源读数。每 10 分钟复查，等待累计上限 8 小时，构建执行时间不计入等待预算。启动门槛为 16 GiB、load1 <12、50 GiB，无临时豁免。原执行器使用 `-j2`、`--threads 1`、6G/5G/200%、nice 19 与 ionice idle，并保留运行中保护。失败收据沿用新文件名。 [启动适配器](evidence/m2a-resume-20261123/launch.py) · [合成检查](evidence/m2a-resume-20261123/adapter-checks.txt)
+
+| 构建 | 启动内存（GiB） | load1 | 可用磁盘（GiB） | 等待（秒） | 构建（秒） | cgroup 峰值（GiB） |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 在线依赖解析 | 17.70 | 5.03 | 385.59 | 0.159 | 414.04 | 2.168 |
+| 离线 BASE | 19.51 | 3.67 | 382.77 | 0.480 | 286.74 | 1.929 |
+| 离线 BASE-r（首次） | 19.74 | 1.29 | 380.36 | 0.159 | 146.15 | 2.187 |
+| 离线 AFDO（首次） | 19.74 | 2.78 | 378.59 | 0.142 | 151.39 | 2.124 |
+| 离线 BASE-r（恢复） | 19.74 | 1.54 | 376.65 | 0.100 | 147.14 | 1.938 |
+| 离线 AFDO（恢复） | 19.51 | 3.24 | 374.41 | 0.125 | 152.36 | 2.125 |
+
+六次 GBS 启动时均无其他 gbs/rpmbuild，全部退出 0，构建结束后均释放共享锁。累计就绪与锁等待 1.335 秒，最低主机 MemAvailable 17.60 GiB，最高 cgroup memory.peak 2.187 GiB。首次 CLI 22:29:36–22:56:50 PST。恢复 CLI 22:58:46–23:09:45 PST，从第一次启动到最终退出共 40 分 09 秒。 [锁与资源收据](evidence/m2a-resume-20261123/build-resource-summary.json) · [等待记录](evidence/m2a-resume-20261123/wait-budget.jsonl)
+
+### S1–S4：冻结、构建、兼容性与训练
+
+- BASE 和 AFDO 展开的 BuildRequires 均为 `clang`。依赖解析 GBS 成功，固定源解析出 109 个 RPM，冻结归档逐包复核 109/109，实际 Clang 22.1.8-4.1。仓库 ID 为 `0e5493096bdadc96b4ea1ed61bbbb8cef41283d679664823a4350a04ecc81cd0`。离线 BASE、BASE-r 与 AFDO 的安装包/头摘要同解析构建完全相等。 [冻结核验](evidence/m2a-resume-20261123/frozen-verification.json) · [RPM 清单](evidence/m2a-resume-20261123/frozen-manifest.json)
+- BASE 产出 22 个二进制 RPM。两个目标库的运行文件与 debuginfo 的 SHA-1 build-id 均相等。部署 6 个 DSO 的 8 个不同 DT_NEEDED，在板上均有匹配 SONAME。runner 的 `rpm --root` 默认查到了错误的数据库位置，主机构建侧的版本字段为空。对 glibc 使用构建 chroot 的 `var/lib/rpm`，对 FFmpeg 使用实际产出 RPM 复查，8 项版本完全相同（glibc 2.40-2.5，FFmpeg 8.0.1-1，均 aarch64）。 [ELF/RPM 清单](evidence/m2a-resume-20261123/stage-summary.json) · [逐项查证](evidence/m2a-resume-20261123/soname-version-recheck.json)
+- 三个输入的 PLAT 与 BASE oracle 一致。BBB 三次训练均使用 CPU3、硬件 cycles、周期 1,000,003；解码进程 maps、DSO SHA 与 perf build-id 核验通过，三次独立的训练后正确性也通过。导出有 0 条 `PERF_RECORD_LOST`，报告对丢失事件的完整性仍标记为 unknown。 [evlist、build-id 与原件 SHA](evidence/m2a-resume-20261123/profile-quality-summary.json)
+
+| 训练 | 输入样本 | libavcodec 目标 / 可用 | libavutil 目标 / 可用 | 导出 LOST 记录 |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 33,948 | 26,850 / 14,530 | 153 / 104 | 0 |
+| 2 | 33,552 | 26,654 / 14,421 | 139 / 85 | 0 |
+| 3 | 33,959 | 26,921 / 14,582 | 167 / 100 | 0 |
+
+六次转换均用 SHA-256 `67ad21faba787d276a80673c1f324f7c0591d28d76bd37a8bd57de0d86426be6` 的发布版工具与显式 `max/none/none/none`，退出 0，`conversion=ok`、`identity=verified`。可选质量阈值字段为 `not_evaluated`。按 DSO 合并并检查跨 DSO 顶层键，交集为空。最终锁定 profile SHA-256 为 `db4d4c196cde3afb20803580ed5317d83a7d4a95f0d8f830c5394f1536b99d5a`。六份训练转换按 Q.5 第 17 项格式记载。 [质量摘要](evidence/m2a-resume-20261123/profile-quality-summary.json) · [profile 披露](evidence/m2a-resume-20261123/Q5-17.json)
+
+### S5：故障、恢复与审计
+
+第一次 BASE-r、AFDO 构建及 build-lock 核对通过，消费取证以 `unclassified recorded command` 退出 2。原版 AArch64 配置查找 `usr/lib/gcc`，冻结 RPM 实际安装在 `usr/lib64/gcc`。用首轮 AFDO 原件复现失败，随后对后者的 `crtbeginS.o`、`crtendS.o`、`libgcc.a`、`libgcc_eh.a` 核对 RPM 属主、SHA 及 `.GCC.command.line`，5 条非源码记录全部精确匹配。仅在 S5 执行期覆盖该路径，以保留已封存配置的字节和原收据。build-lock 保留全部记录，消费分类及门槛维持原实现。保留第一次失败原件与退出状态。 [失败原文](evidence/m2a-resume-20261123/audit-initial-failure.json) · [真实回归](evidence/m2a-resume-20261123/gcc-support-path-regression.json) · [原构建离线验收](evidence/m2a-resume-20261123/original-afdo-offline-consumption.json) · [S5 恢复适配器](evidence/m2a-resume-20261123/recover-s5.py)
+
+恢复时逐项复验 S0–S4 及其 SHA，原训练、转换及锁定 profile 均复用，重跑 S5。BASE-r 的两套运行与 debuginfo 字节均与 BASE 相同，选 BASE 作对照。BASE-r、AFDO 的构建锁比较均为零差异。捕获并保留 libavcodec 297 条、libavutil 99 条记录，消费门禁逐源码命令核对 295/96 条。构建根内 profile SHA 与锁定值一致，两目标的 `.text` 均改变。 [构建锁](evidence/m2a-resume-20261123/buildlock.json) · [消费来源](evidence/m2a-resume-20261123/consumption-command-provenance.json)
+
+| 目标 | BASE / BASE-r build-id | AFDO build-id | 正值 AppliedSamples |
+| --- | --- | --- | ---: |
+| libavcodec | `bcffda65a8d40cb94d9be2742cedd00adc5e0c8f` | `d3a522590c585393b0eb34674c14f43880d3b422` | 1,804 |
+| libavutil | `873ad239a13b3eb4a6db24e82cc7fe37df81dd24` | `249aea67f6fa9f0689bc85a9c98c46049637d39d` | 63 |
+
+表内 build-id 均为运行文件与 debuginfo 成对验证后的值。对照及 AFDO 在三份视频上的非计时 oracle 全部与 PLAT 一致，变体加载库路径和 SHA 检查通过。S5 收据封存后，`--stop-after afdo-audit` 退出 0，未创建测量或计时报告收据，配对测量等待 PM 审核。 [审计与 oracle](evidence/m2a-resume-20261123/stage-summary.json) · [消费收据](evidence/m2a-resume-20261123/consumption.json) · [全链复验](evidence/m2a-resume-20261123/run-verification.json)
+
+### 清理与留档
+
+结束时板上 UID 5001、`schedutil`、RPM 数 1230，与开始一致。部署目录已清理，cleanup_pending 为空，监督单元已结束。原 formal 的 583 个文件保留，577 个字节不变，6 个更新的状态及诊断文件均保留旧版副本。收尾同步到 `93be07b`，用独立 worktree 提交报告。 [板上终态](evidence/m2a-resume-20261123/board-poststop.txt) · [证据索引及原件 SHA](evidence/m2a-resume-20261123/index.json)
+
+本轮只操作 RPi5 `.25:26101`，未重启板子或主机 SDB 服务。边界例外为共享 SDB 进程原有的 `/tmp/sdb.log` 日志句柄，未读取日志内容。通过 procfs 取用该进程的客户端映像作为缺失主机工具的字节副本，存于 WORKDIR。GBS 日志显示跨架构的 QEMU binfmt 注册步骤，宿主机级系统写入未做全量审计。SONAME 的 RPM 查询路径和 GCC 支持对象路径分别以本轮补查及 S5 适配器处理，封存 runner 配置未改。 [SDB 边界记录](evidence/m2a-resume-20261123/sdb-boundary.json) · [原始构建日志](evidence/m2a-resume-20261123/resolution-build.log)
