@@ -18,7 +18,7 @@ STAGES = {
         ['preflight'], 'Freeze dependencies and build the baseline.',
         ['pinned source, patch and spec', 'GBS config, snapshots or frozen repository',
          'package build unit'],
-        ['host build locks and resource limits', 'frozen dependency identity',
+        ['shared GBS lock, other-build wait and startup resource gates', 'frozen dependency identity',
          'matching runtime and debug build IDs'],
         ['BASE RPMs and ELF manifests', 'dependency and build-lock evidence'], []),
     'deploy': stage(
@@ -43,7 +43,8 @@ STAGES = {
     'rebuild': stage(
         ['convert', 'build'], 'Rebuild and audit the AFDO candidate and control.',
         ['locked profile', 'frozen repository and BASE build lock', 'optimization records'],
-        ['build-lock comparison', 'profile and AppliedSamples consumption', 'correctness when enabled'],
+        ['shared GBS lock, other-build wait and startup resource gates',
+         'build-lock comparison', 'profile and AppliedSamples consumption', 'correctness when enabled'],
         ['BASE-r and AFDO artifacts', 'build-lock and consumption evidence'],
         ['for preparation-platform audits, deploy candidates and verify untimed correctness']),
     'measure': stage(

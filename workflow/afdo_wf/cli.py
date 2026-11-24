@@ -26,7 +26,8 @@ def host_stage(stage,package,job,out):
         macros={**unit['macros']}
         if stage=='rebuild':macros.update(unit['consume_macro']);macros.update(package['consumption']['diag_macro'])
         args=build.command(job['config'],job['source'],job['root'],unit,macros,job.get('repo'),job.get('buildconf'))
-        result=build.execute(args,job['source'],job['workdir'],out/'execution',job.get('env'),job.get('wait_seconds',172800))
+        result = build.execute(args, job['source'], job['workdir'], out/'execution', job.get('env'),
+                               host=job.get('host'), workflow=job.get('experiment', 'workflow'), stage=stage)
         require(result['status']=='success','GBS failed; see execution/result.json',result.get('reason','environment'))
         # Build success alone is never a completed build receipt.
         pairs=job.get('artifact_pairs')
@@ -88,8 +89,9 @@ def host_run(args, job, selected, package_path, inputs_path, output, receipts):
 
     def job_files(value):
         if isinstance(value, dict):
-            for child in value.values():
-                yield from job_files(child)
+            for key, child in value.items():
+                if key != 'gbs_lock':  # Shared runtime state is not a content-bound input.
+                    yield from job_files(child)
         elif isinstance(value, list):
             for child in value:
                 yield from job_files(child)
@@ -101,7 +103,8 @@ def host_run(args, job, selected, package_path, inputs_path, output, receipts):
                 pass
 
     direct += list(job_files(job))
-    handlers = {s: (lambda out, store, s=s: host_stage(s, package, job.get(s, job), out)) for s in selected}
+    settings = {stage: {**job, **job.get(stage, {})} for stage in selected}
+    handlers = {s: (lambda out, store, s=s: host_stage(s, package, settings[s], out)) for s in selected}
     scheduler.execute(selected, handlers, output / 'stages', receipts, direct, first_output=output)
 
 

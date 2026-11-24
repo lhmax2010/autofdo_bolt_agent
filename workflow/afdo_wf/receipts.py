@@ -50,7 +50,7 @@ class Store:
             require(Path(path).is_file() and sha256(path) == digest, 'content changed: ' + path)
         return r
 
-    def complete(self, stage, inputs, outputs, details=None):
+    def complete(self, stage, inputs, outputs, details=None, *, gbs_waits=None):
         bindings = self.redo_bindings()
         upstream = {}
         for name in DAG[stage]:
@@ -68,6 +68,8 @@ class Store:
                  inputs={str(Path(p).resolve()): sha256(p) for p in inputs},
                  outputs={str(Path(p).resolve()): sha256(p) for p in outputs},
                  upstream=upstream, details=details or {})
+        if gbs_waits:
+            r['gbs_waits'] = gbs_waits
         if binding:
             r['redo'] = binding
         save(path, r)
@@ -110,8 +112,10 @@ class Store:
              stage=stage, reason=reason.strip(), time=now.isoformat(), stages=stages))
         return affected
 
-    def failed(self, stage, error):
+    def failed(self, stage, error, *, gbs_waits=None):
         record = dict(stage=stage, **failure_record(error))
+        if gbs_waits:
+            record['gbs_waits'] = gbs_waits
         binding = self.redo_bindings().get(stage)
         if binding:
             record['redo'] = binding

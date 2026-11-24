@@ -1,5 +1,5 @@
 """Serial GBS executor with per-task scope, fresh roots and resource gates."""
-import fcntl
+from contextlib import nullcontext
 import os
 from pathlib import Path
 import re
@@ -9,7 +9,9 @@ import sys
 import subprocess
 import time
 import uuid
-from .common import require, save, sha256, GateError, StopRequested
+from .common import json_load, require, save, sha256, GateError, StopRequested
+from . import host_build
+from .exits import failure_reason
 
 GIB=1024**3
 
@@ -18,25 +20,9 @@ def resources(workdir):
     return dict(time=time.time(),mem_available=int(re.search(r'MemAvailable:\s+(\d+)',mem)[1])*1024,
                 load1=os.getloadavg()[0],nproc=len(os.sched_getaffinity(0)),disk_free=shutil.disk_usage(workdir).free,meminfo=mem)
 
-def can_start(r,experiment=None):return (experiment=='m1-ffmpeg-rpi4-thumb-01' or r['mem_available']>=16*GIB) and r['load1']<.6*r['nproc'] and r['disk_free']>=50*GIB
-
-def active_builds(proc=Path('/proc')):
-    """Inspect process names and executables without retaining command arguments."""
-    found = []
-    for directory in proc.iterdir():
-        if not directory.name.isdecimal():
-            continue
-        try:
-            name = (directory / 'comm').read_text().strip()
-            words = (directory / 'cmdline').read_bytes().split(b'\0')[:2]
-        except FileNotFoundError:
-            continue
-        except PermissionError:
-            words = []
-        names = {name, *(Path(os.fsdecode(word)).name for word in words)}
-        for executable in sorted(names & {'gbs', 'rpmbuild'}):
-            found.append({'pid': int(directory.name), 'executable': executable})
-    return sorted(found, key=lambda entry: entry['pid'])
+def can_start(sample):
+    return (sample['mem_available'] >= 16 * GIB and sample['load1'] < 12
+            and sample['disk_free'] >= 50 * GIB)
 
 
 def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=False):
@@ -44,7 +30,7 @@ def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=F
     history = []
     while True:
         sample = resources(workdir)
-        sample['other_builds'] = active_builds()
+        sample['other_builds'] = host_build.active_builds() if exclusive else []
         history.append(sample)
         elapsed = time.monotonic() - start
         ready = can_start(sample) and (not exclusive or not sample['other_builds'])
@@ -53,7 +39,7 @@ def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=F
         if ready:
             return
         require(state != 'timed_out', 'host startup gate timed out',
-                'lock-timeout' if exclusive and sample['other_builds'] else 'environment')
+                'lock-timeout' if exclusive and sample['other_builds'] else 'gate')
         time.sleep(min(interval, timeout - elapsed))
 
 
@@ -74,21 +60,20 @@ def command(config,source,root,unit,macros,repo=None,buildconf=None,verbose=Fals
     if verbose:argv+=['--define','__make /usr/bin/make V=1']
     return argv
 
-def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None,exclusive=False):
-    """No automatic retry. Stop only the unique scope created by this call."""
-    workdir=Path(workdir).resolve();out=Path(out).resolve()
-    require(out.is_relative_to(workdir),'output outside workdir')
-    out.mkdir(parents=True,exist_ok=False)
-    lock=(workdir/'temp/workflow-build.lock').open('a')
-    try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    except BlockingIOError:raise GateError('another workflow build active','lock-timeout')
-    if experiment is not None:require(experiment=='m1-ffmpeg-rpi4-thumb-01','unknown temporary authorization')
-    if experiment:wait_seconds=3600
+def execute(argv, source, workdir, out, env=None, *, host=None, workflow='workflow',
+            stage='build', invocation='GBS', separate_stderr=False):
+    """Serial GBS execution. Stop only the unique scope created by this call."""
+    workdir = Path(workdir).resolve()
+    out = Path(out).resolve()
+    require(out.is_relative_to(workdir), 'output outside workdir')
+    lock = host_build.lock_path(workdir, host)
+    out.mkdir(parents=True, exist_ok=False)
+    coordination = host_build.BuildCoordination(lock, out / host_build.WAIT_FILE, workflow, stage, invocation)
     events=[];start=time.monotonic();unit='afdo-wf-'+uuid.uuid4().hex+'.scope';p=None;peak=0
     result=dict(status='failed',exit_code=None,unit=unit)
+    error = None
     old={}
     def interrupted(signum,frame):raise StopRequested(signum)
-    for sig in [signal.SIGTERM,signal.SIGINT]:old[sig]=signal.signal(sig,interrupted)
     def sample():
         nonlocal peak
         r=resources(workdir)
@@ -101,24 +86,19 @@ def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None
             peak=max(peak,int(r.get('memory.peak',0)))
         events.append(r);save(out/'resources.json',events);return r
     try:
-        def ready():
-            current = sample()
-            if exclusive:
-                current['other_builds'] = active_builds()
-                save(out/'resources.json', events)
-            return can_start(current, experiment) and not current.get('other_builds')
-
-        while not ready():
-            require(time.monotonic()-start<wait_seconds,'build start gate timeout',
-                    'lock-timeout' if events[-1].get('other_builds') else 'environment')
-            time.sleep(min(60 if experiment else 600,max(1,wait_seconds-(time.monotonic()-start))))
-        result.update(start_resources=events[-1],wait_seconds=time.monotonic()-start,
-                      startup_memory_waiver=experiment,authorization='user current round only' if experiment else None)
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            old[sig] = signal.signal(sig, interrupted)
+        coordination.acquire()
+        ready = coordination.ready(lambda: resources(workdir), can_start)
+        events.append(ready)
+        save(out/'resources.json', events)
+        result.update(start_resources=ready, wait_seconds=time.monotonic()-start)
         launch=['systemd-run','--user','--scope','--unit='+unit,'-p','MemoryMax=6G','-p','MemoryHigh=5G','-p','CPUQuota=200%','nice','-n','19','ionice','-c3',sys.executable,str(Path(__file__).with_name('build_child.py')),str(out/'child-result.json'),*argv]
         save(out/'command.json',dict(argv=launch,cwd=str(source)))
         tick=time.monotonic();low=0
-        with (out/'build.log').open('w') as log:
-            p=subprocess.Popen(launch,cwd=source,env=env,stdout=log,stderr=subprocess.STDOUT)
+        stderr = (out/'stderr.log').open('w') if separate_stderr else nullcontext(subprocess.STDOUT)
+        with stderr as diagnostics, (out/'build.log').open('w') as log:
+            p=subprocess.Popen(launch,cwd=source,env=env,stdout=log,stderr=diagnostics)
             while p.poll() is None:
                 r=sample();low,stop=stop_needed(r,low)
                 if stop:raise GateError('build resource stop','environment')
@@ -126,25 +106,29 @@ def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None
                 except subprocess.TimeoutExpired:pass
         result.update(exit_code=p.returncode,build_seconds=time.monotonic()-tick,status='success' if p.returncode==0 else 'failed')
         if (out/'child-result.json').exists():
-            from .common import json_load
             child=json_load(out/'child-result.json');peak=max(peak,child['memory_peak']);result['child']=child
             require(child['exit_code']==p.returncode,'scope/child exit disagreement')
         else:
             raise GateError('child final receipt absent')
-    except BaseException as e:
-        result.update(error=str(e),reason=getattr(e,'reason','error'))
+        if p.returncode:
+            raise GateError(f'GBS exited {p.returncode}', 'environment')
+    except (Exception, StopRequested, KeyboardInterrupt) as e:
+        error = e
+        result.update(status='failed', error=str(e), reason=failure_reason(e))
         if p is not None and p.poll() is None:
             stopped=subprocess.run(['systemctl','--user','stop',unit],capture_output=True,text=True)
             result['stop_result']=dict(exit_code=stopped.returncode,stdout=stopped.stdout,stderr=stopped.stderr)
             try:result['exit_code']=p.wait(timeout=60)
             except subprocess.TimeoutExpired:result['cleanup_pending']=[unit]
     finally:
+        try:
+            coordination.finish(error)
+        finally:
+            for sig,handler in old.items():signal.signal(sig,handler)
         result.update(ended=time.time(),elapsed_seconds=time.monotonic()-start,memory_peak=peak,
                       min_mem_available=min((r['mem_available'] for r in events),default=None))
         save(out/'result.json',result)
         with (out/'end.log').open('a') as f:f.write('ALL-END 已结束 '+str(result['ended'])+' '+result['status']+'\n')
-        for sig,handler in old.items():signal.signal(sig,handler)
-        lock.close()
     return result
 
 def freeze(rpms,buildconf,dest,snapshots,runner=subprocess.run):

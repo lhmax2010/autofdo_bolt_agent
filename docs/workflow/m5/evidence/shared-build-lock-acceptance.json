@@ -1,0 +1,157 @@
+{
+  "raw_files": {
+    "temp/m5-shared-lock-20261125/m1-final-replay/m1-replay-summary.json": "704cb8ed222a9f6a215da96544572ca18e48737f95c96cad26982a170ae590a8",
+    "temp/m5-shared-lock-20261125/skill-example.stdout": "19061cde60f4b3c42df0ee952c43d1b2243ee24496d7d59dad89fc483f043f32",
+    "temp/m5-shared-lock-20261125/skill-examples-readonly.json": "1dc2618a2f36aafd029461a635fe45a1b879d0c0272d389c0f60a49ed1b2d509",
+    "temp/m5-shared-lock-20261125/skill-init.stdout": "e77cb9acf0f4f546b30bef730d67750399b0272460ef4a7debe44a8e6adbbcb6",
+    "temp/m5-shared-lock-20261125/skill-preview-summary.json": "1a6d4d8a0626be7be9902752a0e39e38c584ec58fc4c41be5f6915b9770c53f0",
+    "temp/m5-shared-lock-20261125/workflow-tests-final.log": "d2152ddb7d7bb6a161621c42605982cd7a4f42f75c94f1fa2357897d90ad51b3"
+  },
+  "replay": {
+    "additive_receipt_fields": {
+      "build": [
+        "gbs_waits"
+      ],
+      "rebuild": [
+        "gbs_waits"
+      ]
+    },
+    "passed": 48
+  },
+  "rpi5_preview": {
+    "arch": "aarch64",
+    "board_contact": false,
+    "config_sha256": {
+      "inputs": {
+        "path": "workflow/packages/ffmpeg/inputs.toml",
+        "sha256": "951aaa225aa648c3ca5417fd8cb4554c7a3702fa6a004cdf7c0e5ff84e2b2688"
+      },
+      "package": {
+        "path": "workflow/packages/ffmpeg/package-rpi5.toml",
+        "sha256": "0e439dd78e5889aeac932f1c0b5adcb762ca0890278e1a83c2e060336c3398c0"
+      },
+      "platform": {
+        "path": "workflow/platforms/rpi5-aarch64.toml",
+        "sha256": "f3a3e394594fc56f021f984d510d525e399ccead64cdf4b41c13a061436cda72"
+      }
+    },
+    "dry_run_exit_code": 0,
+    "file_count_in_preview": 1,
+    "gbs_started": false,
+    "init_exit_code": 0,
+    "job": {
+      "draft": true,
+      "job": "temp/m5-init-check-2026-11-24/job.json",
+      "missing_for_run": [
+        "serial",
+        "identity (exact model, arch, kernel, build_id)",
+        "tools",
+        "board_tools",
+        "source",
+        "patch",
+        "config",
+        "build_environment",
+        "rpm_packages",
+        "profgen",
+        "profdata",
+        "order_seed",
+        "bootstrap_seed",
+        "rpmspec",
+        "snapshots",
+        "snapshot_evidence"
+      ],
+      "sha256": "e23dc0c72d7c18f99211821fa023af6a38f4c967708d9b77aa8cab3c886c9b64"
+    },
+    "media": {
+      "bbb-720p-60": {
+        "file": "media/bbb_720p_h264_60s.mp4",
+        "role": "train",
+        "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4"
+      },
+      "sintel-1080p-60": {
+        "file": "temp/media_src/sintel_1080p_h264_60s.mp4",
+        "role": "test-secondary",
+        "sha256": "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843"
+      },
+      "tos-720p-60": {
+        "file": "temp/board-round1/tos_720p_h264_60s.mp4",
+        "role": "test",
+        "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1"
+      }
+    },
+    "planned_stages": [
+      "preflight",
+      "build",
+      "deploy",
+      "collect",
+      "convert",
+      "rebuild",
+      "measure",
+      "report",
+      "restore"
+    ],
+    "platform": "rpi5-aarch64",
+    "run_directory_created": false
+  },
+  "scope": "linked worktree, host only, GBS scope and process fixtures",
+  "sealed_examples": {
+    "commands_verified": 8,
+    "results": {
+      "M1": {
+        "bootstrap_ci": [
+          -0.02348799697531906,
+          -0.014492605143159821
+        ],
+        "cleanup_pending": 0,
+        "completed_with_matching_inputs": 8,
+        "job": "temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/job.json",
+        "publishable": true,
+        "relative_wall_time": "-1.92%",
+        "report": "temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/stages/report/001/report.md",
+        "report_sha256": "32e37e58003ece4eaef3e2b519c58722009cfeb325759de94eb70bb3d6fc937d",
+        "reused_stages": 9,
+        "unchanged_sealed_files": 15,
+        "verdict": "faster"
+      },
+      "M2a": {
+        "bootstrap_ci": [
+          -0.0015497973278482161,
+          0.004007338374010487
+        ],
+        "cleanup_pending": 0,
+        "completed_with_matching_inputs": 8,
+        "job": "temp/m2a-rpi5-prep-20261119/continuation/job.json",
+        "publishable": true,
+        "relative_wall_time": "+0.12%",
+        "report": "temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/report/001/report.md",
+        "report_sha256": "d9612b433d8c5c3318addf72e2bf76fad448f47dc79a12388e4729042447a4e1",
+        "reused_stages": 9,
+        "unchanged_sealed_files": 16,
+        "verdict": "equivalent"
+      }
+    },
+    "skill_sha256": "e84b5c6d94484069745d0395cdf27194e64cc4540753d1162b5010dccbae22dc"
+  },
+  "skill": {
+    "lines": 185,
+    "sha256": "e84b5c6d94484069745d0395cdf27194e64cc4540753d1162b5010dccbae22dc"
+  },
+  "workflow_tests": {
+    "passed": 216,
+    "shared_lock_cases": [
+      "test_reads_processes_by_name_or_script_and_skips_unrelated_argv",
+      "test_cancellation_after_launch_stops_only_own_scope_then_releases",
+      "test_cancellation_while_waiting_releases_lock",
+      "test_child_failure_releases_lock",
+      "test_combined_lock_and_external_build_timeout",
+      "test_completed_receipt_and_explain_expose_waits",
+      "test_default_and_configured_path",
+      "test_external_build_waits_then_starts",
+      "test_failed_receipt_status_and_cli_exit_8",
+      "test_lock_holder_timeout_does_not_change_peer",
+      "test_resource_timeout_reports_gate",
+      "test_waits_for_existing_flock_without_replacing_file",
+      "test_waits_for_resources_and_rechecks_builders"
+    ]
+  }
+}

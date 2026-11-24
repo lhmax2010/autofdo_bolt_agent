@@ -30,7 +30,7 @@ export PYTHONDONTWRITEBYTECODE=1
 | `deploy` | Deploy the baseline and establish correctness against the platform oracle. | Yes |
 | `collect` | Capture baseline training samples and verify their identity. | Yes |
 | `convert` | Convert samples, check quality, and merge a locked profile. | No |
-| `rebuild` | Rebuild and audit the control and profile-consuming candidate. | Conditional. The RPi5 preparation-platform audit includes deployment and untimed correctness. |
+| `rebuild` | Rebuild and audit the control and profile-consuming candidate. | Only when the job includes an AFDO audit, to deploy and perform untimed correctness checks. |
 | `measure` | Run the preregistered paired comparison and check correctness and telemetry. | Yes |
 | `report` | Write the report after receipt and cleanup checks. | No |
 
@@ -38,11 +38,11 @@ Use `python3 -m afdo_wf explain STAGE` for stage inputs, gates, board operations
 
 ## Host build coordination
 
-Before a live run that can reach GBS, arrange per-build supervision of the shared `$WORKDIR/temp/host-gbs.lock` with `flock`. The supervisor must acquire the lock before **each** GBS invocation, including dependency resolution, and hold it until that invocation ends. Record the lock holder, workflow and stage, PID, and UTC start time while holding the lock. Release it on completion, failure, or cancellation. A lock held by another process must be left intact.
+The CLI acquires `$WORKDIR/temp/host-gbs.lock` with `flock` for each GBS invocation, including dependency resolution. It records the holder, waits for other `gbs` or `rpmbuild` processes across all users, and releases the lock when the invocation finishes, fails, or is cancelled. The combined wait for the lock and other builders is limited to eight hours.
 
-After acquiring the lock and before starting GBS, check for other `gbs` or `rpmbuild` processes across all users. If any are active, wait and recheck every ten minutes. Record their PID, user, start time, working directory and arguments when available. Leave their processes alone. The combined shared-lock and other-build wait is at most eight hours. At the limit, stop, release any lock you hold, and report the recorded waits. This shared lock is a host procedure in addition to the CLI's own locks. Stop before a build if per-build supervision is unavailable.
+Before launching GBS the CLI also rechecks the startup resource gates: `MemAvailable >= 16 GiB`, one-minute load average `< 12`, and at least `50 GiB` free on the `WORKDIR` filesystem. It rechecks unmet conditions every ten minutes and reports a gate failure after at most three hours of resource waiting.
 
-Apply the S0 resource gates before opening a live session and recheck them before a build starts. Require `MemAvailable >= 16 GiB`, one-minute load average `< 12`, and at least `50 GiB` free on the `WORKDIR` filesystem. If a gate is unmet, record the readings and recheck every ten minutes for at most three hours. Keep the thresholds unchanged and stop on timeout. Avoid running GBS on the same host during timed board measurement.
+Inspect `gbs_waits` in the stage receipt or `status` output. Report the wait records on exit 8. Avoid GBS builds on the same host during timed board measurement.
 
 ## Board identity and SDB
 
@@ -58,9 +58,40 @@ sdb -s "$SERIAL" shell 'tr -d "\000" < /proc/device-tree/model; printf "\n"; una
 
 Reassert identity after reconnecting. If reconnect or identity verification fails, stop and report it. Never run `sdb kill-server` or restart the shared SDB service. Leave other devices and connections alone.
 
+## Where the inputs live
+
+Use these paths relative to the checkout for configuration and relative to `WORKDIR` for local artifacts.
+
+| Input | RPi4 FFmpeg | RPi5 FFmpeg |
+| --- | --- | --- |
+| Package TOML | `workflow/packages/ffmpeg/package.toml` | `workflow/packages/ffmpeg/package-rpi5.toml` |
+| Input manifest (`--inputs`) | `workflow/packages/ffmpeg/inputs.toml` | Same |
+| Board profile (`--platform`) | `rpi4-armv7l` in `workflow/platforms/rpi4-armv7l.toml` | `rpi5-aarch64` in `workflow/platforms/rpi5-aarch64.toml` |
+| Frozen dependency archive | `temp/m1-pilot-v02-20261116/build/repo/` | `temp/gbs-deps-archive/m2a-ffmpeg-rpi5-aarch64-01/` |
+
+The frozen archives are references for reproducing the recorded jobs. Use the job's repository receipt and manifest to check the archive and build configuration. A new RPi5 preparation job resolves and freezes its own dependencies before building.
+
+The three FFmpeg clips live in separate directories, so pass one `--media ID=FILE` per clip. The draft checks each file against the input manifest.
+
+### Preview an FFmpeg RPi5 draft
+
+Use the setup block first. Choose an unused preview directory under `WORKDIR/temp`.
+
+```bash
+PREVIEW="$WORKDIR/temp/m5-init-check-$(date +%F)"
+python3 -m afdo_wf init --workdir "$WORKDIR" --platform rpi5-aarch64 \
+  --package workflow/packages/ffmpeg/package-rpi5.toml \
+  --inputs workflow/packages/ffmpeg/inputs.toml \
+  --media "bbb-720p-60=$WORKDIR/media/bbb_720p_h264_60s.mp4" \
+  --media "tos-720p-60=$WORKDIR/temp/board-round1/tos_720p_h264_60s.mp4" \
+  --media "sintel-1080p-60=$WORKDIR/temp/media_src/sintel_1080p_h264_60s.mp4" \
+  --job "$PREVIEW/job.json" --output "$PREVIEW/run"
+python3 -m afdo_wf run --job "$PREVIEW/job.json" --dry-run
+```
+
 ## Create, inspect, resume, and redo
 
-Generate a job draft using the package and input TOML files, the board profile, and the local media. Choose an unused job path and run directory. `PLATFORM` is `rpi4-armv7l` or `rpi5-aarch64` for the examples here.
+Generate a job draft using the package and input TOML files, the board profile, and the local media. For media stored together, use `--media-dir` as below. Choose an unused job path and run directory. `PLATFORM` is `rpi4-armv7l` or `rpi5-aarch64` for the examples here.
 
 ```bash
 python3 -m afdo_wf init --package "$PACKAGE" --inputs "$INPUTS" \

@@ -12,7 +12,7 @@ python3 -m unittest discover -s workflow/tests -v
 python3 -m afdo_wf --help
 ```
 
-The GBS executor uses `-j2` / `--threads 1` in a unique 6G/5G-high/200% scope. Follow the host's shared lock and resource procedures in [STATUS](../docs/STATUS.md).
+The GBS executor uses `-j2` / `--threads 1` in a unique 6G/5G-high/200% scope. The CLI coordinates each GBS invocation through `$WORKDIR/temp/host-gbs.lock`. Set `host.gbs_lock` in the job to override the path when both workflows share a different lock inside `WORKDIR`. See `explain build` and `status --job JOB` for wait evidence.
 
 ## Stage interface
 

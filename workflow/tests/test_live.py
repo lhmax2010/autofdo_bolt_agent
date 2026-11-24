@@ -18,13 +18,11 @@ class LiveTests(unittest.TestCase):
                     self.assertEqual('flag imbalance' in r['primary'].get('cap_reasons',[]),difference>=threshold)
     def test_no_manual_override(self):
         with self.assertRaises(TypeError):stats.analyze([],10,1,clear_flag_imbalance=False)
-    def test_one_experiment_memory_waiver(self):
-        r=dict(mem_available=8*build.GIB,load1=0,nproc=4,disk_free=100*build.GIB)
+    def test_startup_memory_gate_has_no_experiment_waiver(self):
+        r = dict(mem_available=16*build.GIB-1, load1=0, nproc=4, disk_free=100*build.GIB)
         self.assertFalse(build.can_start(r))
-        self.assertFalse(build.can_start(r,'another-experiment'))
-        self.assertTrue(build.can_start(r,'m1-ffmpeg-rpi4-thumb-01'))
-        for k,v in [('load1',2.4),('disk_free',49*build.GIB)]:
-            x={**r,k:v};self.assertFalse(build.can_start(x,'m1-ffmpeg-rpi4-thumb-01'))
+        with self.assertRaises(TypeError):
+            build.can_start(r, 'm1-ffmpeg-rpi4-thumb-01')
     def test_runtime_protection_unchanged(self):
         r=dict(mem_available=5*build.GIB,disk_free=100*build.GIB)
         self.assertEqual(build.stop_needed(r,0),(1,False))

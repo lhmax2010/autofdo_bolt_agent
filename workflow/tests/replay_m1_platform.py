@@ -79,12 +79,16 @@ def replay(job_path, output):
     for stage, record in original.items():
         artifact = archive/'receipts'/f'{stage}.json'
         new = json_load(receipts/f'{stage}.json')
-        compare('receipt schema', set(record), set(new), artifact)
+        # Live GBS attempts now carry additional wait evidence. Archived
+        # responses have no such evidence and keep their original schema.
+        additive = {'gbs_waits'} - set(record) if stage in ('build', 'rebuild') else set()
+        compare('receipt schema', set(record), set(new) - additive, artifact)
         compare('upstream stage names', set(record['upstream']), set(new['upstream']), artifact)
         compare('receipt detail replay', record['details'], new['details'], artifact)
 
     save(output/'m1-replay-summary.json', dict(
         result='pass', replay_checks=checks, stage_count=len(stages),
+        additive_receipt_fields={'build': ['gbs_waits'], 'rebuild': ['gbs_waits']},
         normalization=['new build root', 'receipt timestamps and SHA bindings'],
         execution='command generation and receipt replay using archived responses; no GBS, SDB or profile execution',
     ))

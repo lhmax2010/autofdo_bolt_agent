@@ -106,7 +106,7 @@ class ReceiptTests(Fixture):
 class BuildTests(Fixture):
     def test_resource_start_bounds(self):
         r=dict(mem_available=16*build.GIB,load1=1,nproc=4,disk_free=50*build.GIB);self.assertTrue(build.can_start(r))
-        for k,v in [('mem_available',16*build.GIB-1),('load1',2.4),('disk_free',50*build.GIB-1)]:self.assertFalse(build.can_start({**r,k:v}))
+        for k,v in [('mem_available',16*build.GIB-1),('load1',12),('disk_free',50*build.GIB-1)]:self.assertFalse(build.can_start({**r,k:v}))
     def test_stop_two_low(self):
         r=dict(mem_available=5*build.GIB,disk_free=50*build.GIB)
         self.assertEqual(build.stop_needed(r,0),(1,False));self.assertEqual(build.stop_needed(r,1),(2,True))

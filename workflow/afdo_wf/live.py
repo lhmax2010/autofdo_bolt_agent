@@ -445,9 +445,9 @@ class Experiment:
         root=self.d/'roots'/(variant+'-'+str(time.time_ns()))
         env=os.environ.copy();env.update(j['build_environment'])
         argv=build.command(j['config'],j['source'],root,unit,macros,j['repo'],j['buildconf'])
-        waiver = j['experiment'] if not self.platform.prepare_only else None
-        options = dict(wait_seconds=10800, exclusive=True) if self.platform.prepare_only else {}
-        r=build.execute(argv,j['source'],self.w,out/'execution',env,experiment=waiver,**options)
+        stage = 'build' if variant == 'BASE' else 'rebuild'
+        r = build.execute(argv, j['source'], self.w, out/'execution', env, host=j.get('host'),
+                          workflow=j['experiment'], stage=stage, invocation=variant)
         require(r['status']=='success','GBS failure: '+str(out/'execution/result.json'),r.get('reason','environment'))
         rpms=sorted(root.glob('local/repos/*/*/RPMS/*.rpm'))
         require(rpms,'no built RPMs')
@@ -467,10 +467,16 @@ class Experiment:
         src=locate_build_source(scratch,(out/'execution/build.log').read_text(errors='replace'))
         settings=buildlock.make_settings((src/'ffbuild/config.mak').read_text())
         commands={t:buildlock.recorded_switches(self.host(['readelf','-p','.GCC.command.line',a['debug_path']],out).stdout.decode()) for t,a in artifacts.items()}
+        version_dir = out/'gbs-version'
+        version = build.execute(['gbs', '--version'], j['source'], self.w, version_dir,
+                                host=j.get('host'), workflow=j['experiment'], stage=stage,
+                                invocation=variant+'-version', separate_stderr=True)
+        require(version['status'] == 'success', 'GBS version check failed: '+str(version_dir/'result.json'),
+                version.get('reason', 'environment'))
         lock=dict(source_commit=self.package['package']['source']['commit'],patch_sha=sha256(j['patch']),
             spec_sha=sha256(Path(j['source'])/unit['spec']),source_layout='/'+str(src.relative_to(scratch)),
             frozen_repo_id=j['repo_id'],resolved_buildconf_sha=sha256(j['buildconf']),
-            gbs_version=self.host(['gbs','--version'],out).stdout.decode().strip(),packages=packages,
+            gbs_version=(version_dir/'build.log').read_text().strip(),packages=packages,
             capture_method=self.package['command_capture']['method'],commands=commands,settings=settings,macros=macros,gbs_config_sha=sha256(j['config']))
         save(out/'build-lock.json',lock)
         text={}
@@ -514,7 +520,8 @@ class Experiment:
         save(out/'build-requires/requirements.json', dict(base=base, afdo=afdo))
         require(base and base == afdo, 'BASE and AFDO BuildRequires differ')
         argv = build.command(j['config'], j['source'], root, unit, unit['macros'])
-        resolved = build.execute(argv, j['source'], self.w, receipt, env, wait_seconds=10800, exclusive=True)
+        resolved = build.execute(argv, j['source'], self.w, receipt, env, host=j.get('host'),
+                                 workflow=j['experiment'], stage='build', invocation='dependency-resolution')
         require(resolved['status'] == 'success', 'online dependency-resolution build failed: '+str(receipt/'result.json'), resolved.get('reason', 'environment'))
         log = (receipt/'build.log').read_text(errors='replace')
         resolved_paths = re.findall(r'build conf has been downloaded at:\s*([^\s]+)', log)

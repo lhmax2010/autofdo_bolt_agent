@@ -89,7 +89,7 @@ class PlatformTests(unittest.TestCase):
             ready = dict(mem_available=17*build.GIB, load1=1, nproc=10, disk_free=60*build.GIB)
             samples = [ready.copy(), {**ready, 'mem_available': 15*build.GIB}, ready.copy()]
             with patch.object(build, 'resources', side_effect=samples), \
-                 patch.object(build, 'active_builds', side_effect=[[{'pid': 7, 'executable': 'gbs'}], [], []]), \
+                 patch.object(build.host_build, 'active_builds', side_effect=[[{'pid': 7, 'executable': 'gbs'}], [], []]), \
                  patch.object(build.time, 'sleep') as sleep:
                 build.wait_for_host(directory, result, exclusive=True)
             self.assertEqual([args.args[0] for args in sleep.call_args_list], [600, 600])

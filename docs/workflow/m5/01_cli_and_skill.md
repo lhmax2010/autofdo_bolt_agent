@@ -79,3 +79,26 @@
 在独立 worktree 逐字执行了技能的 Setup 与 Sealed run examples 命令块。两份封存运行的 `status` 均显示 8 个业务阶段完成，直接输入与上游 SHA 匹配，清理待办为 0。两次 dry-run 的 9 条计划均可复用，`explain measure`、`explain report` 与计划元数据一致。两份读出的 report.md 均匹配其收据绑定的 SHA；M1 ToS 为 **−1.92% / faster**，M2a ToS 为 **+0.12% / equivalent**。前后核对的 31 份封存文件的 SHA、大小和修改时间一致。
 
 workflow 全量测试 **203/203** 通过，M1 回放 **48/48** 通过。验收为纯主机，只读演练后停止。 [本轮验收摘要](evidence/skill-review-acceptance.json)
+
+## M5 第一阶段 1b · CLI 共享构建锁
+
+`build` 和 `rebuild` 的每次 GBS 调用共用 [执行入口](../../../workflow/afdo_wf/build.py) 与 [主机协调实现](../../../workflow/afdo_wf/host_build.py)，覆盖依赖解析、BASE、BASE-r、AFDO 和构建审计中的 GBS 版本查询。默认锁为 `WORKDIR/temp/host-gbs.lock`，和内核轨道使用 Linux `flock` 的同一文件。需要覆盖时，在 job 设置 `"host": {"gbs_lock": "temp/another-shared-gbs.lock"}`，并让两条轨道指向同一路径。绝对路径或相对 WORKDIR 的路径均可用，解析后的路径须在 WORKDIR 内。
+
+| 每次调用的顺序 | 行为与结果 |
+| --- | --- |
+| 取共享锁 | 保留文件 inode，持锁后写入工作流标识、阶段、调用、PID 和 UTC 开始时间。等待期间记录观察到的持有者。 |
+| 核查其他构建 | 持锁遍历主机进程，发现其他用户或本用户的 GBS/rpmbuild 就让行，每 10 分钟复查。锁与其他构建等待共用 8 小时预算，超时以 `lock-timeout`（8）退出。 |
+| 复查资源 | 要求 MemAvailable ≥ 16 GiB、load1 < 12、WORKDIR 文件系统剩余 ≥ 50 GiB。每 10 分钟复查，最多等待 3 小时，超时以 `gate`（2）退出。资源等待后的轮询也会重新检查其他构建。 |
+| 执行与释放 | 沿用 6G/5G-high/200% scope、`-j2`、`--threads 1`、nice/ionice。调用成功、失败或取消时释放锁。取消期间只停止本次调用的 scope。 |
+
+每次调用的 `gbs-wait.json` 包含等待阶段、UTC 记录、持有者、其他构建的 PID、用户、启动时间、cwd、argv 和资源读数。进程退出或主机权限限制导致的字段缺失记录在 `unavailable`，进程参数中的凭据字段打码。成功和失败的阶段收据均以可选 `gbs_waits` 记录原件路径、SHA 与内容。`status` 展示成功收据和最近失败的字段，`explain build` 与 `explain rebuild` 描述字段；dry-run 展示解析出的锁路径。历史收据保留原结构。M1 回放只允许 build/rebuild 新增 `gbs_waits`，继续逐项比较其他字段。
+
+| 技能补充 | SKILL.md 位置 |
+| --- | --- |
+| `rebuild` 的板上接触条件 | 第 33 行 |
+| CLI 自动协调主机构建、查看等待记录、exit 8 与计时建议 | 第 39–45 行 |
+| 两板包配置、输入与板型 TOML、媒体、冻结仓库及 RPi5 草稿命令 | 第 61–90 行 |
+
+[验收证据](evidence/shared-build-lock-acceptance.json)记录 216 项 workflow 测试和 48 项 M1 回放。新增 13 项覆盖真实 flock 竞争、等待预算、其他构建的进程取证、资源等待与超时、取消/失败释放、CLI 退出 8、收据与状态。技能的封存示例命令逐字执行，M1、M2a 的八个业务阶段均为 completed，清理待办均为零。31 份核对文件的 SHA、大小和 mtime 一致。按技能直接使用 FFmpeg/RPi5 配置和三份媒体生成了 `temp/m5-init-check-2026-11-24/job.json`，dry-run 输出九条计划，草稿目录下只有 job.json。
+
+本轮使用独立 worktree，仅执行主机测试及只读验收。

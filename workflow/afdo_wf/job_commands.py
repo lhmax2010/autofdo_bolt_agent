@@ -2,7 +2,7 @@
 from pathlib import Path
 import re
 
-from . import config, platforms
+from . import config, host_build, platforms
 from .common import GateError, atomic_write, canonical, json_load, require, sha256
 from .exits import EXIT_CODES
 from .receipts import Store
@@ -56,8 +56,11 @@ def last_failure(store, stage, binding):
         record = optional_object(path)
         if record is not None and (binding is None or record.get('redo') == binding):
             reason = reason_of(record)
-            return dict(path=str(path), reason=reason, exit_code=EXIT_CODES.get(reason),
-                        error=record.get('error'), recorded_reason=record.get('reason'))
+            failure = dict(path=str(path), reason=reason, exit_code=EXIT_CODES.get(reason),
+                           error=record.get('error'), recorded_reason=record.get('reason'))
+            if 'gbs_waits' in record:
+                failure['gbs_waits'] = record['gbs_waits']
+            return failure
     return None
 
 
@@ -89,6 +92,8 @@ def status(output, receipts):
                         and isinstance(record.get('inputs'), dict) and isinstance(record.get('upstream'), dict),
                         'malformed stage receipt: ' + str(path))
                 row['recorded_status'] = record['status']
+                if 'gbs_waits' in record:
+                    row['gbs_waits'] = record['gbs_waits']
                 mismatches = [name for name, expected in record['inputs'].items() if fingerprint(name) != expected]
                 if mismatches:
                     row['input_sha'] = 'mismatch'
@@ -237,8 +242,11 @@ def plan(args, job, selected):
             rows = collection if name=='collect' else measurement if name=='measure' else inputs
             specific['media'] = [{k:r[k] for k in ('id', 'role', 'path', 'sha256', 'start', 'duration')}
                                  | {'host_path':job.get('media', {}).get(r['id'])} for r in rows]
-        if name in ('build', 'rebuild'):
-            specific.update({key:job.get(key) for key in ('source', 'patch', 'config', 'repo', 'snapshot_evidence')})
+        if name in host_build.BUILD_STAGES:
+            build_settings = {**job, **job.get(name, {})}
+            specific.update({key:build_settings.get(key) for key in ('source', 'patch', 'config', 'repo', 'snapshot_evidence')})
+            if build_settings.get('workdir'):
+                specific['gbs_lock'] = str(host_build.lock_path(build_settings['workdir'], build_settings.get('host')))
             specific['build_units'] = [{k:u[k] for k in ('id', 'arch', 'isa', 'spec')} for u in
                                        package['build_units']] if package else []
         if name=='preflight':
@@ -279,5 +287,15 @@ def plan(args, job, selected):
 
 
 def explain(name):
-    return dict(stage=name, **STAGES[name], receipt_fields=RECEIPT_FIELDS,
-                redo_field='redo is present for a replacement receipt and binds the invalidation receipt by SHA')
+    result = dict(stage=name, **STAGES[name], receipt_fields=RECEIPT_FIELDS,
+                  redo_field='redo is present for a replacement receipt and binds the invalidation receipt by SHA')
+    if name in host_build.BUILD_STAGES:
+        result['receipt_fields'] = [*RECEIPT_FIELDS, 'gbs_waits (when GBS was attempted)']
+        result['gbs_waits'] = dict(
+            binding=['file', 'sha256', 'record'], invocation=['path', 'workflow', 'stage', 'invocation',
+                'owner', 'started_utc', 'ended_utc', 'released', 'limits_seconds', 'waited_seconds', 'outcome'],
+            owner=['workflow', 'stage', 'pid', 'started_utc'], checks={
+                'shared-lock': ['time_utc', 'ready', 'observed_owner (when held by a peer)'],
+                'other-builds': ['time_utc', 'ready', 'processes: PID, user, start time, cwd, argv, unavailable fields'],
+                'resources': ['time_utc', 'ready', 'readings: MemAvailable, load1, disk_free']})
+    return result
