@@ -1,0 +1,210 @@
+From https://github.com/lhmax2010/autofdo_bolt_agent
+ * branch              main       -> FETCH_HEAD
+Updating files:  55% (57/102)Updating files:  56% (58/102)Updating files:  57% (59/102)Updating files:  58% (60/102)Updating files:  59% (61/102)Updating files:  60% (62/102)Updating files:  61% (63/102)Updating files:  62% (64/102)Updating files:  63% (65/102)Updating files:  64% (66/102)Updating files:  65% (67/102)Updating files:  66% (68/102)Updating files:  67% (69/102)Updating files:  68% (70/102)Updating files:  69% (71/102)Updating files:  70% (72/102)Updating files:  71% (73/102)Updating files:  72% (74/102)Updating files:  73% (75/102)Updating files:  74% (76/102)Updating files:  75% (77/102)Updating files:  76% (78/102)Updating files:  77% (79/102)Updating files:  78% (80/102)Updating files:  79% (81/102)Updating files:  80% (82/102)Updating files:  81% (83/102)Updating files:  82% (84/102)Updating files:  83% (85/102)Updating files:  84% (86/102)Updating files:  85% (87/102)Updating files:  86% (88/102)Updating files:  87% (89/102)Updating files:  88% (90/102)Updating files:  89% (91/102)Updating files:  90% (92/102)Updating files:  91% (93/102)Updating files:  92% (94/102)Updating files:  93% (95/102)Updating files:  94% (96/102)Updating files:  95% (97/102)Updating files:  96% (98/102)Updating files:  97% (99/102)Updating files:  98% (100/102)Updating files:  99% (101/102)Updating files: 100% (102/102)Updating files: 100% (102/102), done.
+Updating 4dbfdba1..fa814612
+Fast-forward
+ .../24_k1f_1e_shared_modules_and_symbol_order.md   |   58 +
+ .../autofdo/25_k1f_2_kbase_s2_build_and_aa.md      |   69 +
+ .../autofdo/evidence/24-k1f-1e/boot-a-final.sha256 |  418 ++
+ .../evidence/24-k1f-1e/boot-a-initial.sha256       |  418 ++
+ .../autofdo/evidence/24-k1f-1e/choose-order.py     |   76 +
+ docs/kernel/autofdo/evidence/24-k1f-1e/index.json  |  431 +++
+ .../24-k1f-1e/kafdo-direct-dmesg-warning-delta.txt |    5 +
+ .../evidence/24-k1f-1e/kafdo-direct-summary.json   |  122 +
+ .../evidence/24-k1f-1e/kafdo-fdt-comparison.json   |   23 +
+ .../autofdo/evidence/24-k1f-1e/kafdo-reboot.json   |   14 +
+ .../evidence/24-k1f-1e/kafdo-return-plat.json      |    7 +
+ .../evidence/24-k1f-1e/kafdo-return-reboot.json    |   14 +
+ .../evidence/24-k1f-1e/kafdo-smoke-result.json     |   10 +
+ .../evidence/24-k1f-1e/kafdo-smoke-smoke.stderr    |    0
+ .../evidence/24-k1f-1e/kafdo-smoke-smoke.stdout    |   20 +
+ .../24-k1f-1e/kbase-direct-dmesg-warning-delta.txt |    7 +
+ .../evidence/24-k1f-1e/kbase-direct-summary.json   |  122 +
+ .../evidence/24-k1f-1e/kbase-fdt-comparison.json   |   23 +
+ .../evidence/24-k1f-1e/kbase-policy-reboot.json    |   14 +
+ .../24-k1f-1e/kbase-policy-return-plat.json        |    7 +
+ .../24-k1f-1e/kbase-policy-return-reboot.json      |   14 +
+ .../autofdo/evidence/24-k1f-1e/kbase-reboot.json   |   14 +
+ .../evidence/24-k1f-1e/kbase-return-plat.json      |    7 +
+ .../evidence/24-k1f-1e/kbase-return-reboot.json    |   14 +
+ .../evidence/24-k1f-1e/p6-kbase-stripped.sha256    |   72 +
+ .../autofdo/evidence/24-k1f-1e/p6-mount-final.txt  |    2 +
+ .../evidence/24-k1f-1e/p6-plat-after.sha256        |   73 +
+ .../evidence/24-k1f-1e/p6-plat-before.sha256       |   73 +
+ .../evidence/24-k1f-1e/p6-replaced-file-shas.txt   |   58 +
+ .../evidence/24-k1f-1e/p6-temporary-file-shas.txt  |   58 +
+ .../autofdo/evidence/24-k1f-1e/plat-final.json     |    7 +
+ .../autofdo/evidence/24-k1f-1e/relink-argv.jsonl   |   22 +
+ .../evidence/24-k1f-1e/relink-pahole.stderr.txt    |    2 +
+ .../24-k1f-1e/relink-resolve-btfids.stderr.txt     |    2 +
+ .../evidence/24-k1f-1e/relink-sorttable.stderr.txt |    0
+ .../autofdo/evidence/24-k1f-1e/relink-summary.json |   29 +
+ .../evidence/24-k1f-1e/shared-sdb-listener.txt     |    2 +
+ .../autofdo/evidence/24-k1f-1e/signature-host.tsv  |   58 +
+ .../evidence/24-k1f-1e/signature-kbase.json        |    6 +
+ .../autofdo/evidence/24-k1f-1e/signature-plat.json |    6 +
+ .../evidence/24-k1f-1e/stripped-modules.json       |  826 ++++
+ .../evidence/24-k1f-1e/symbol-order-audit.json     | 4037 ++++++++++++++++++++
+ .../autofdo/evidence/24-k1f-1e/symbol-order.txt    | 2935 ++++++++++++++
+ .../autofdo/evidence/24-k1f-1e/tryboot-final.txt   |   76 +
+ .../autofdo/evidence/25-k1f-2/aa-first-END.txt     |    1 +
+ .../autofdo/evidence/25-k1f-2/aa-first-direct.json |  122 +
+ .../autofdo/evidence/25-k1f-2/aa-first-fdt.json    |   23 +
+ .../25-k1f-2/aa-first-governor-switches.tsv        |   60 +
+ .../autofdo/evidence/25-k1f-2/aa-first-meminfo.txt |    6 +
+ .../autofdo/evidence/25-k1f-2/aa-first-quiet.tsv   |    6 +
+ .../autofdo/evidence/25-k1f-2/aa-first-reboot.json |   14 +
+ .../25-k1f-2/aa-first-restored-governors.tsv       |    1 +
+ .../evidence/25-k1f-2/aa-first-temperature.tsv     |   61 +
+ .../autofdo/evidence/25-k1f-2/aa-first-top5.txt    |   36 +
+ .../autofdo/evidence/25-k1f-2/aa-stop-receipt.json |   62 +
+ .../evidence/25-k1f-2/arm-rpi4-compile-argv.json   |  156 +
+ .../25-k1f-2/arm-rpi4-lto-or-kallsyms-argv.json    |   80 +
+ .../25-k1f-2/arm-rpi4-rt-compile-argv.json         |  112 +
+ .../25-k1f-2/arm-rpi4-rt-link-warnings.txt         |    4 +
+ .../25-k1f-2/arm-rpi4-rt-lto-or-kallsyms-argv.json |   80 +
+ .../25-k1f-2/arm-rpi4-rt-symbol-order-audit.json   | 4032 +++++++++++++++++++
+ .../25-k1f-2/arm-rpi4-symbol-order-audit.json      | 4037 ++++++++++++++++++++
+ .../evidence/25-k1f-2/arm-rpi4-zimage-check.json   |   23 +
+ .../evidence/25-k1f-2/attempt-01-command.json      |   41 +
+ .../evidence/25-k1f-2/attempt-01-resources.jsonl   |    7 +
+ .../evidence/25-k1f-2/attempt-01-result.json       |   24 +
+ .../evidence/25-k1f-2/attempt-01-startup.jsonl     |    3 +
+ .../attempt-02-build-checksum-verification.json    |    9 +
+ .../evidence/25-k1f-2/attempt-02-command.json      |   41 +
+ .../evidence/25-k1f-2/attempt-02-resources.jsonl   |   79 +
+ .../evidence/25-k1f-2/attempt-02-result.json       |   24 +
+ .../evidence/25-k1f-2/attempt-02-startup.jsonl     |    3 +
+ .../evidence/25-k1f-2/boot-a-after-aa-switch.df    |    2 +
+ .../25-k1f-2/boot-a-after-aa-switch.sha256         |  418 ++
+ .../evidence/25-k1f-2/boot-a-before-aa.sha256      |  418 ++
+ .../evidence/25-k1f-2/checks-in-progress.json      |   86 +
+ .../autofdo/evidence/25-k1f-2/dependencies.json    |   11 +
+ .../autofdo/evidence/25-k1f-2/frozen-sha256sum.txt |    1 +
+ .../evidence/25-k1f-2/gerrit-0009-after.txt        |    1 +
+ .../evidence/25-k1f-2/gerrit-0009-before.txt       |    1 +
+ .../evidence/25-k1f-2/gerrit-0009-message.txt      |    8 +
+ .../evidence/25-k1f-2/gerrit-0009-verified.txt     |    3 +
+ .../evidence/25-k1f-2/host-lock-attempt-01.json    |   11 +
+ .../evidence/25-k1f-2/host-lock-attempt-02.json    |   11 +
+ docs/kernel/autofdo/evidence/25-k1f-2/index.json   |  514 +++
+ .../autofdo/evidence/25-k1f-2/initial-plat.json    |    7 +
+ .../evidence/25-k1f-2/kernel-source-tip.txt        |    1 +
+ .../evidence/25-k1f-2/kernel-source-tree.txt       |    1 +
+ .../autofdo/evidence/25-k1f-2/phase-plan.json      |  120 +
+ .../autofdo/evidence/25-k1f-2/phase-plan.sha256    |    1 +
+ .../evidence/25-k1f-2/plat-final-verification.json |   38 +
+ .../autofdo/evidence/25-k1f-2/plat-final.json      |    7 +
+ .../evidence/25-k1f-2/plat-return-reboot.json      |   14 +
+ .../autofdo/evidence/25-k1f-2/sdb-listener.txt     |    2 +
+ .../autofdo/evidence/25-k1f-2/spec-noop.sha256     |    4 +
+ .../evidence/25-k1f-2/spec-sha-probe-negative.txt  |    1 +
+ .../evidence/25-k1f-2/spec-sha-probe-positive.txt  |    1 +
+ .../autofdo/evidence/25-k1f-2/symbol-order.sha256  |    1 +
+ .../evidence/25-k1f-2/timing-definition.lock.json  |   15 +
+ .../evidence/25-k1f-2/tryboot-after-aa-switch.txt  |   76 +
+ .../evidence/25-k1f-2/variant-verification.json    |   86 +
+ ...9-packaging-optional-vmlinux-symbol-order.patch |   62 +
+ 102 files changed, 21320 insertions(+)
+ create mode 100644 docs/kernel/autofdo/24_k1f_1e_shared_modules_and_symbol_order.md
+ create mode 100644 docs/kernel/autofdo/25_k1f_2_kbase_s2_build_and_aa.md
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/boot-a-final.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/boot-a-initial.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/choose-order.py
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/index.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-direct-dmesg-warning-delta.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-direct-summary.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-fdt-comparison.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-return-plat.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-return-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-smoke-result.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-smoke-smoke.stderr
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kafdo-smoke-smoke.stdout
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-direct-dmesg-warning-delta.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-direct-summary.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-fdt-comparison.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-policy-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-policy-return-plat.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-policy-return-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-return-plat.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/kbase-return-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/p6-kbase-stripped.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/p6-mount-final.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/p6-plat-after.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/p6-plat-before.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/p6-replaced-file-shas.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/p6-temporary-file-shas.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/plat-final.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/relink-argv.jsonl
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/relink-pahole.stderr.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/relink-resolve-btfids.stderr.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/relink-sorttable.stderr.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/relink-summary.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/shared-sdb-listener.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/signature-host.tsv
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/signature-kbase.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/signature-plat.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/stripped-modules.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/symbol-order-audit.json
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/symbol-order.txt
+ create mode 100644 docs/kernel/autofdo/evidence/24-k1f-1e/tryboot-final.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-END.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-direct.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-fdt.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-governor-switches.tsv
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-meminfo.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-quiet.tsv
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-restored-governors.tsv
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-temperature.tsv
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-first-top5.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/aa-stop-receipt.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-compile-argv.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-lto-or-kallsyms-argv.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-rt-compile-argv.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-rt-link-warnings.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-rt-lto-or-kallsyms-argv.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-rt-symbol-order-audit.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-symbol-order-audit.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/arm-rpi4-zimage-check.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-01-command.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-01-resources.jsonl
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-01-result.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-01-startup.jsonl
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-02-build-checksum-verification.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-02-command.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-02-resources.jsonl
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-02-result.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/attempt-02-startup.jsonl
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/boot-a-after-aa-switch.df
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/boot-a-after-aa-switch.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/boot-a-before-aa.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/checks-in-progress.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/dependencies.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/frozen-sha256sum.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/gerrit-0009-after.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/gerrit-0009-before.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/gerrit-0009-message.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/gerrit-0009-verified.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/host-lock-attempt-01.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/host-lock-attempt-02.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/index.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/initial-plat.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/kernel-source-tip.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/kernel-source-tree.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/phase-plan.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/phase-plan.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/plat-final-verification.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/plat-final.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/plat-return-reboot.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/sdb-listener.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/spec-noop.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/spec-sha-probe-negative.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/spec-sha-probe-positive.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/symbol-order.sha256
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/timing-definition.lock.json
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/tryboot-after-aa-switch.txt
+ create mode 100644 docs/kernel/autofdo/evidence/25-k1f-2/variant-verification.json
+ create mode 100644 docs/kernel/autofdo/patches/kernel/0009-packaging-optional-vmlinux-symbol-order.patch

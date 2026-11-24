@@ -51,6 +51,12 @@
 - K1a 60°C 重试完成，五项各 3 预热 + 10 计时 + 1 system-wide 采样，50 个计时轮中 18 个起跑温度标记原样保留。powersave 门禁全部通过，最长采样等待 9.59 秒。内核周期 pipe 97.67%、syscall 87.24%、tmpfs 99.39%、内存触页 97.91%、ToS 1.39%。优先验证 pipe/内存触页，tmpfs 为第三候选。启动镜像与运行 notes 匹配，确认非历史 c27f160d。原 governor、SDB uid5001、kptr_restrict=0 已核验，未刷写、未重启、未生成 profile。[重试报告](kernel/autofdo/04_k1a_baseline.md#重试60c-起跑与轮间-powersave)
 - K1c 完成 [ARM32 回移植与 K-BASE 主机构建](kernel/autofdo/07_k1c_kbase_build.md)。在 `0fac5de6` 上应用五个指定上游补丁和两项本地适配，ARM32 保留 6.13 门禁，停用 MFS 与全局 function-sections。Clang 22.1.8，冻结 RPM 130/130，GBS 退出 0、5,131.22 秒、cgroup 峰值 5,371,985,920 B。与 K1a 的编译命令比较仅有预期训练标志差异，普通版原始 build-id `96766cfcbff8c33d83ca38152ad02f6a02dd44d4`，独立模块目录 `/lib/modules/6.12.80-arm-rpi4-v7l-kbase`。板上启动与运行待 K1d 获授权后验证。
 
+## Workflow M2a：RPi5 配对测量与 S7 报告完成（2026-11-24）
+
+- ToS 主比较 40 对，+0.117%，bootstrap 95% CI [-0.155%, +0.401%]，`equivalent`。Sintel 次比较 40 对，+0.162%，bootstrap 95% CI [-0.258%, +0.692%]，`equivalent`。
+- S0–S5 原收据 SHA 保持一致，S7 已登记 S5 的一次性路径修正。M1 门禁 `publishable=true`。清理结束，UID 5001、调速器与 RPM 计数核对通过。
+- [完整报告与证据](workflow/m2a/02_runner_and_afdo_audit.md#s6s7rpi5-配对测量与报告2026-11-23-至-2026-11-24)
+
 ## Workflow M2a：RPi5 AFDO 审计完成，测量前停止（2026-11-23）
 
 - 独立 worktree 同步并确认 `8ff3613d`、`9a32faa4`。186 项测试、116 项 SHA 核对均通过，复用 S0。RPi5 `.25:26101` 为 aarch64、镜像 `20261118.083201`、UID 5001。Base `20261030.120529` / Unified `20261104.125239` 元数据一致，109 个 RPM 已冻结。6 次 GBS 均在共享锁内通过，累计等待 1.335 秒，峰值 2.187 GiB。

@@ -148,3 +148,49 @@ systemd-run 自动生成的运行时 unit 路径为 **`/run/user/1000/systemd/tr
 结束时板上 UID 5001、`schedutil`、RPM 数 1230，与开始一致。部署目录已清理，cleanup_pending 为空，监督单元已结束。原 formal 的 583 个文件保留，577 个字节不变，6 个更新的状态及诊断文件均保留旧版副本。收尾同步到 `93be07b`，用独立 worktree 提交报告。 [板上终态](evidence/m2a-resume-20261123/board-poststop.txt) · [证据索引及原件 SHA](evidence/m2a-resume-20261123/index.json)
 
 本轮只操作 RPi5 `.25:26101`，未重启板子或主机 SDB 服务。边界例外为共享 SDB 进程原有的 `/tmp/sdb.log` 日志句柄，未读取日志内容。通过 procfs 取用该进程的客户端映像作为缺失主机工具的字节副本，存于 WORKDIR。GBS 日志显示跨架构的 QEMU binfmt 注册步骤，宿主机级系统写入未做全量审计。SONAME 的 RPM 查询路径和 GCC 支持对象路径分别以本轮补查及 S5 适配器处理，封存 runner 配置未改。 [SDB 边界记录](evidence/m2a-resume-20261123/sdb-boundary.json) · [原始构建日志](evidence/m2a-resume-20261123/resolution-build.log)
+
+## S6–S7：RPi5 配对测量与报告（2026-11-23 至 2026-11-24）
+
+### 前提核对
+
+- 从含 `4dbfdba1` 的最新 main 开始。S0–S5 收据链和已封存的 job、板型配置逐项复验。收尾重新计算各自的 SHA，六份原收据保持一致。GCC 支持对象查找只在 S5 的重建处理函数内。S6、S7 复用已核验的 S5 结果，运行适配器禁止重建。 [前提核对](evidence/m2a-measure-20261123/prerequisites.json) · [最终复验](evidence/m2a-measure-20261123/paired-analysis-verification.json)
+- 仅连接 `192.168.108.25:26101`。确认 RPi5 Model B Rev 1.1、aarch64、镜像 `20261118.083201` 和 UID 5001。起始温度 38.6°C，调速器恢复前后状态以板上收据为准。温度与当前频率均可读。 [板上初态](evidence/m2a-measure-20261123/board-initial.txt)
+- 原 M1 计时、遥测和统计实现保持原样。按本次指令注入顺序和 bootstrap 种子，原 job 字节保持原样。三轮独立遥测试跑均为 clean，故障注入后已复核清理。 [启动适配器](evidence/m2a-measure-20261123/launch.py) · [两组种子与运行记录](evidence/m2a-measure-20261123/measurement-invocation.json)
+
+### S6 配对结果
+
+| 输入 | 新预试轮数 | 预试 BASE CV | 完成对数 N | 相对墙钟变化 | Block bootstrap 95% CI | t 95% CI | 判定 |
+| --- | ---: | ---: | ---: | ---: | --- | --- | --- |
+| ToS 720p（主比较） | 10 | 1.186% | 40/40 | +0.117% | [-0.155%, +0.401%] | [-0.174%, +0.408%] | `equivalent` |
+| Sintel 1080p（次比较） | 10 | 0.978% | 40/40 | +0.162% | [-0.258%, +0.692%] | [-0.331%, +0.657%] | `equivalent` |
+
+相对变化为 `exp(mean(log(T_AFDO / T_BASE))) − 1`。ε 为 1%，bootstrap 重采样 20,000 次。两组各有每变体 2 轮预热，正式对的 AB/BA 顺序按计划执行。Sintel 为次比较，按预登记口径无多重比较校正。
+
+| 输入 | AB/BA 顺序种子 | Bootstrap 种子 | 计划 SHA-256 | 锁定至首条正式命令 |
+| --- | ---: | ---: | --- | ---: |
+| ToS 720p（主比较） | 2026112340 | 2026112350 | `4f48490698aa3d0de9fe7835e018fa9f9934119268ab8a98cabb6e2f4bf24a1a` | 141.348 秒 |
+| Sintel 1080p（次比较） | 2026112341 | 2026112351 | `6dbcf286f03adff5a242c475c3f78d506be4d5b8d1b2dec7dc45b559ad1d5218` | 179.910 秒 |
+
+| 输入 | 标记对 / 缺失对 | 标记轮 BASE / AFDO | 失衡差 / 阈值 | 技术重试 | 有效频率中位数 BASE / AFDO | 频率差 |
+| --- | ---: | ---: | ---: | ---: | --- | ---: |
+| ToS 720p（主比较） | 0 / 0 | 0 / 0 | 0 / 4 | 0 | 2399.78 / 2399.76 MHz | -0.001% |
+| Sintel 1080p（次比较） | 0 / 0 | 0 / 0 | 0 / 4 | 0 | 2399.80 / 2399.78 MHz | -0.001% |
+
+- ToS 720p（主比较）清洁轮敏感性结果为 40 对，+0.117%，bootstrap 95% CI [-0.155%, +0.401%]，`equivalent`。 20% 与失衡封顶规则均未触发。 有效频率差在 0.5% 内。
+
+- Sintel 1080p（次比较）清洁轮敏感性结果为 40 对，+0.162%，bootstrap 95% CI [-0.258%, +0.692%]，`equivalent`。 20% 与失衡封顶规则均未触发。 有效频率差在 0.5% 内。
+
+| 输入 | 变体 | 起跑温度中位数 / 最高（°C） | 计时窗口最低 / 中位数 / 最高（°C） |
+| --- | --- | --- | --- |
+| ToS 720p（主比较） | AFDO | 39.70 / 41.35 | 38.60 / 42.45 / 44.65 |
+| ToS 720p（主比较） | BASE | 39.42 / 40.80 | 38.60 / 42.45 / 45.20 |
+| Sintel 1080p（次比较） | AFDO | 39.15 / 40.25 | 37.50 / 41.90 / 45.20 |
+| Sintel 1080p（次比较） | BASE | 38.88 / 40.80 | 36.95 / 41.90 / 44.65 |
+
+计时使用 58°C 冷却目标、60°C 起跑判据、80°C 上限和 M1 遥测握手。电压与固件降频历史为 unknown。每轮 must-load/deploy-set 检查通过。计时前后共 12 次独立非计时正确性核对，I420 SHA、帧数、字节数和 caps 与归档 PLAT 一致。 [每窗口有效频率](evidence/m2a-measure-20261123/effective-frequency-windows.json) · [配对复验](evidence/m2a-measure-20261123/paired-analysis-verification.json)
+
+### S7、披露与清理
+
+- M1 门禁计算 `publishable=true`。已封存 S6 与 S7 收据及 [report.json](evidence/m2a-measure-20261123/report.json)、[report.md](evidence/m2a-measure-20261123/report.md)。转换沿用 S4 的 6 份已验证结果和锁定 profile，S5 的两个库分别有 1,804、63 条正值 AppliedSamples。S7 已登记 S5 一次性修正的原因、范围和证据，封存配置继续引用原文件。
+- 板上已恢复 UID 5001 和 `schedutil`，RPM 数仍为 1230，`/opt/afdo_agent` 已清理，待办为空。S6/S7 没有启动 GBS，之前构建单元已释放共享锁。未重启 SDB 守护进程。 [板上终态](evidence/m2a-measure-20261123/board-poststop.txt) · [共享锁核对](evidence/m2a-measure-20261123/host-gbs-lock-final.txt) · [原件与 SHA 索引](evidence/m2a-measure-20261123/index.json)
+- 运行窗口为 `2026-11-23T23:26:06-08:00` 到 `2026-11-24T02:08:16-08:00`，共 9730 秒。
