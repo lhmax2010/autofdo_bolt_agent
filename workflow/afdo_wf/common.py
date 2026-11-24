@@ -19,7 +19,8 @@ class GateError(ValueError):
         self.reason, self.code = reason, code
 
 class TechnicalFailure(GateError):
-    def __init__(self,message):super().__init__(message,'environment')
+    def __init__(self, message, reason='environment'):
+        super().__init__(message, reason)
 
 
 def require(condition, message, reason='gate', code=2):
@@ -49,16 +50,19 @@ def canonical(value):
     finite_tree(value)
     return json.dumps(value, sort_keys=True, ensure_ascii=False, allow_nan=False, indent=2)+'\n'
 
-def atomic_write(path, content):
+def atomic_write(path, content, *, exclusive=False):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, name = tempfile.mkstemp(prefix='.'+path.name+'.', dir=path.parent)
     try:
-        with os.fdopen(fd, 'w') as f:
+        with os.fdopen(fd, 'wb' if isinstance(content, bytes) else 'w') as f:
             f.write(content)
             f.flush()
             os.fsync(f.fileno())
-        os.replace(name, path)
+        if exclusive:
+            os.link(name, path)  # Atomically publish a new file without replacing an existing one.
+        else:
+            os.replace(name, path)
         d = os.open(path.parent, os.O_DIRECTORY)
         try:
             os.fsync(d)

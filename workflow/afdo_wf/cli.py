@@ -1,11 +1,17 @@
-"""Host stage CLI. Board stages are explicit dry-run interfaces in phases 1/2."""
+"""AutoFDO workflow commands and their public exit contract."""
 import argparse
+from contextlib import contextmanager
+import fcntl
+import signal
 from pathlib import Path
 import subprocess
 import sys
-from . import config, build, buildlock, profgen, consumption, stats, report
-from .common import GateError, require, json_load, save, sha256
-from .receipts import Store, DAG
+import time
+from . import config, build, buildlock, profgen, consumption, job_commands, report, scheduler
+from .common import GateError, StopRequested, canonical, require, json_load, save, sha256
+from .exits import EXIT_CODES, failure_record
+from .receipts import Store
+from .stages import DAG, RUN_STAGES, STOP_ALIASES
 
 BOARD={'deploy','collect','measure','restore'}
 
@@ -21,7 +27,7 @@ def host_stage(stage,package,job,out):
         if stage=='rebuild':macros.update(unit['consume_macro']);macros.update(package['consumption']['diag_macro'])
         args=build.command(job['config'],job['source'],job['root'],unit,macros,job.get('repo'),job.get('buildconf'))
         result=build.execute(args,job['source'],job['workdir'],out/'execution',job.get('env'),job.get('wait_seconds',172800))
-        require(result['status']=='success','GBS failed; see execution/result.json','environment')
+        require(result['status']=='success','GBS failed; see execution/result.json',result.get('reason','environment'))
         # Build success alone is never a completed build receipt.
         pairs=job.get('artifact_pairs')
         if not pairs:
@@ -59,76 +65,150 @@ def host_stage(stage,package,job,out):
     if stage=='report':return report.write(out,json_load(job['report_input']))
     require(False,'stage not implemented')
 
-def main(argv=None):
-    p=argparse.ArgumentParser(description='AutoFDO workflow phases 1/2; board stages require --dry-run')
-    p.add_argument('stage',choices=[*DAG,'run'])
-    p.add_argument('--package');p.add_argument('--inputs');p.add_argument('--job',required=True)
-    p.add_argument('--output');p.add_argument('--receipts')
-    p.add_argument('--dry-run',action='store_true');p.add_argument('--redo',action='store_true')
-    p.add_argument('--stop-after', choices=[stage for stage in DAG if stage != 'restore'] + ['afdo-audit'])
-    args=p.parse_args(argv)
-    if args.stop_after and args.stage != 'run':
-        p.error('--stop-after requires run')
-    stop = 'rebuild' if args.stop_after == 'afdo-audit' else args.stop_after
-    job=json_load(args.job)
-    if job.get('live') and not args.dry_run:
-        from .live import Experiment
+@contextmanager
+def writer_lock(receipts):
+    receipts.mkdir(parents=True, exist_ok=True)
+    with (receipts / '.writer.lock').open('a') as lock:
         try:
-            require(args.stage=='run','live experiment starts through run')
-            Experiment(job,args.job).run(stop)
-            return 0
-        except BaseException as e:
-            save(Path(job['output'])/('failure-'+str(__import__('time').time_ns())+'.json'),dict(error=repr(e),reason=getattr(e,'reason','error')))
-            print(str(e),file=sys.stderr);return getattr(e,'code',1)
-    args.package=args.package or job.get('package')
-    args.output=args.output or job.get('output')
-    args.receipts=args.receipts or job.get('receipts')
-    require(args.package and args.output and args.receipts,'package/output/receipts required')
-    store=Store(args.receipts)
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise GateError('another command owns this run receipt directory', 'lock-timeout') from exc
+        yield
+
+
+def host_run(args, job, selected, package_path, inputs_path, output, receipts):
+    package = config.load(package_path)
+    if inputs_path:
+        config.load_inputs(inputs_path)
+    require(not set(selected) & BOARD, 'board orchestration requires a live job', 'environment')
+    direct = [package_path, args.job, *([inputs_path] if inputs_path else []), *job.get('input_files', [])]
+    direct += list(Path(__file__).parent.glob('*.py'))
+    direct += list(Path(package_path).parent.rglob('*.sh'))
+    direct += list(Path(package_path).parent.rglob('*.patch'))
+
+    def job_files(value):
+        if isinstance(value, dict):
+            for child in value.values():
+                yield from job_files(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from job_files(child)
+        elif isinstance(value, str) and len(value) < 4096:
+            try:
+                if Path(value).is_file():
+                    yield value
+            except OSError:
+                pass
+
+    direct += list(job_files(job))
+    handlers = {s: (lambda out, store, s=s: host_stage(s, package, job.get(s, job), out)) for s in selected}
+    scheduler.execute(selected, handlers, output / 'stages', receipts, direct, first_output=output)
+
+
+def execute(args, job, selected, package, inputs, output, receipts):
+    require(output and receipts and package, 'job needs package, output and receipt paths')
+    require(not job.get('draft'), 'complete the job draft and set draft=false before running')
+    job_commands.validate_locks(job)
+    if job.get('live'):
+        require(args.stage == 'run', 'live experiment starts through run')
+        require(receipts.is_relative_to(Path(job['workdir']).resolve()), 'receipt directory outside workdir')
+    with writer_lock(receipts):
+        def stopped(signum, _frame):
+            raise StopRequested(signum)
+        previous_term = signal.signal(signal.SIGTERM, stopped)
+        try:
+            if job.get('live'):
+                from .live import Experiment
+                runner = Experiment(job, args.job)
+                runner.run(selected[-1] if args.stop_after else None)
+            else:
+                host_run(args, job, selected, package, inputs, output, receipts)
+        except (Exception, StopRequested, KeyboardInterrupt) as exc:
+            record = failure_record(exc)
+            _, pending = job_commands.cleanup_pending(output, receipts)
+            if pending:
+                record['cause'] = dict(reason=record['reason'], error=record['error'])
+                record['reason'] = 'recovery-required'
+                record['exit_code'] = EXIT_CODES['recovery-required']
+                record['cleanup_pending'] = len(pending)
+            failure = output / ('failure-' + str(time.time_ns()) + '.json')
+            save(failure, record)
+            print(f"{record['reason']} [{record['exit_code']}] {exc}", file=sys.stderr)
+            return record['exit_code']
+        finally:
+            signal.signal(signal.SIGTERM, previous_term)
+    return EXIT_CODES['success']
+
+
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        self.exit(EXIT_CODES['usage'], 'usage [64] ' + message + '\n')
+
+
+def main(argv=None):
+    parser = Parser(description='Run and inspect AutoFDO experiments.')
+    parser.add_argument('stage', nargs='?', choices=[*DAG, 'run', 'status', 'init', 'explain'])
+    parser.add_argument('explained_stage', nargs='?', choices=[*DAG, *STOP_ALIASES])
+    parser.add_argument('--job', help='Job JSON (draft destination for init)')
+    parser.add_argument('--package')
+    parser.add_argument('--inputs')
+    parser.add_argument('--output')
+    parser.add_argument('--receipts')
+    parser.add_argument('--platform', help='Board profile when initializing a job')
+    parser.add_argument('--workdir')
+    parser.add_argument('--experiment')
+    parser.add_argument('--media', action='append', default=[], metavar='ID=FILE')
+    parser.add_argument('--media-dir')
+    parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--redo', choices=RUN_STAGES, metavar='STAGE')
+    parser.add_argument('--reason', help='Operator reason to bind to the redo receipt')
+    parser.add_argument('--stop-after', choices=[*RUN_STAGES, *STOP_ALIASES])
+    args = parser.parse_args(argv)
     try:
-        package=config.load(args.package)
-        if args.inputs:config.load_inputs(args.inputs)
-        job=json_load(args.job)
-        stages=list(DAG) if args.stage=='run' else [args.stage]
-        if stop:
-            stages=stages[:stages.index(stop)+1]
-        # No partial live run followed by discovering the board interface is dry-only.
-        require(args.dry_run or not (set(stages)&BOARD),'board orchestration is dry-run only in phases 1/2','environment')
-        for stage in stages:
-            out=Path(args.output)/stage
+        require(args.stage == 'explain' or args.explained_stage is None, 'unexpected stage argument', 'usage')
+        require(not args.stop_after or args.stage == 'run', '--stop-after requires run', 'usage')
+        require(not args.reason or args.redo, '--reason requires --redo', 'usage')
+        require(not args.redo or args.stage in (None, 'run') and not args.dry_run and not args.stop_after,
+                '--redo is a separate archive operation', 'usage')
+        require(not args.dry_run or args.stage in (*DAG, 'run'), '--dry-run requires a stage or run', 'usage')
+        if args.stage == 'explain':
+            require(args.explained_stage, 'explain requires a stage', 'usage')
+            name = STOP_ALIASES.get(args.explained_stage, args.explained_stage)
+            print(canonical(job_commands.explain(name)), end='')
+            return EXIT_CODES['success']
+        if args.stage == 'init':
+            print(canonical(job_commands.initialize(args)), end='')
+            return EXIT_CODES['success']
+        require(args.job and (args.stage or args.redo), 'command and --job are required', 'usage')
+        job = json_load(args.job)
+        require(isinstance(job, dict), 'job must be a JSON object')
+        package, inputs, output, receipts = job_commands.paths(args, job)
+        if args.redo:
+            require(output and receipts, 'job needs output and receipt paths')
+            if job.get('live'):
+                require(receipts.is_relative_to(Path(job['workdir']).resolve()), 'receipt directory outside workdir')
+            with writer_lock(receipts):
+                _, pending = job_commands.cleanup_pending(output, receipts)
+                require(not pending, 'cleanup_pending must be resolved before redo', 'recovery-required')
+                store = Store(receipts)
+                affected = store.redo(args.redo, args.reason or 'operator requested redo')
+                binding = store.redo_bindings()[args.redo]
+            print(canonical(dict(status='invalidated', stages=[s for s in DAG if s in affected], **binding)), end='')
+        elif args.stage == 'status':
+            require(output and receipts, 'job needs output and receipt paths')
+            print(canonical(job_commands.status(output, receipts)), end='')
+        else:
+            selected = list(DAG if args.dry_run else RUN_STAGES) if args.stage == 'run' else [args.stage]
+            if args.stop_after:
+                stop = STOP_ALIASES.get(args.stop_after, args.stop_after)
+                selected = selected[:selected.index(stop) + 1]
             if args.dry_run:
-                save(out/'plan.json',dict(stage=stage,mode='dry-run',board_contact=False,dependencies=DAG[stage],package_sha256=sha256(args.package),job=job.get(stage,job)))
-                continue
-            if args.redo:store.redo(stage);store.restart(stage)
-            if store.path(stage).exists():
-                old=store.verify(stage)
-                for path in [args.package,args.job,*([args.inputs] if args.inputs else [])]:
-                    require(old['inputs'].get(str(Path(path).resolve()))==sha256(path),'resume invoked with different input; redo required')
-                continue
-            for dependency in DAG[stage]:store.verify(dependency)
-            out.mkdir(parents=True,exist_ok=True)
-            result=host_stage(stage,package,job.get(stage,job),out)
-            save(out/'result.json',result)
-            direct=[args.package,args.job,*([args.inputs] if args.inputs else []),*job.get('input_files',[])]
-            # Bind every implementation script as well as package/workload files.
-            direct+=list(Path(__file__).parent.glob('*.py'))
-            direct+=list(Path(args.package).parent.rglob('*.sh'))
-            direct+=list(Path(args.package).parent.rglob('*.patch'))
-            # Hash existing file-valued job fields, including manifests and locks.
-            def job_files(value):
-                if isinstance(value,dict):
-                    for v in value.values():yield from job_files(v)
-                elif isinstance(value,list):
-                    for v in value:yield from job_files(v)
-                elif isinstance(value,str) and len(value)<4096:
-                    try:
-                        if Path(value).is_file():yield value
-                    except OSError:pass
-            direct+=list(job_files(job))
-            outputs=[x for x in out.rglob('*') if x.is_file()]
-            store.complete(stage,direct,outputs,result)
-        return 0
-    except Exception as e:
-        if args.stage!='run':store.failed(args.stage,e)
-        else:save(Path(args.receipts)/'run.failure.json',dict(status='failed',reason=getattr(e,'reason','error'),error=str(e)))
-        print(str(e),file=sys.stderr);return getattr(e,'code',1)
+                print(canonical(job_commands.plan(args, job, selected)), end='')
+            else:
+                return execute(args, job, selected, package, inputs, output, receipts)
+        return EXIT_CODES['success']
+    except (Exception, StopRequested, KeyboardInterrupt) as exc:
+        record = failure_record(exc)
+        print(f"{record['reason']} [{record['exit_code']}] {exc}", file=sys.stderr)
+        return record['exit_code']

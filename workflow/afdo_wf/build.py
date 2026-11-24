@@ -9,7 +9,7 @@ import sys
 import subprocess
 import time
 import uuid
-from .common import require, save, sha256, GateError
+from .common import require, save, sha256, GateError, StopRequested
 
 GIB=1024**3
 
@@ -52,7 +52,8 @@ def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=F
         save(destination, dict(status=state, wait_seconds=elapsed, samples=history))
         if ready:
             return
-        require(state != 'timed_out', 'host startup gate timed out', 'environment')
+        require(state != 'timed_out', 'host startup gate timed out',
+                'lock-timeout' if exclusive and sample['other_builds'] else 'environment')
         time.sleep(min(interval, timeout - elapsed))
 
 
@@ -80,13 +81,13 @@ def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None
     out.mkdir(parents=True,exist_ok=False)
     lock=(workdir/'temp/workflow-build.lock').open('a')
     try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    except BlockingIOError:raise GateError('another workflow build active','environment')
+    except BlockingIOError:raise GateError('another workflow build active','lock-timeout')
     if experiment is not None:require(experiment=='m1-ffmpeg-rpi4-thumb-01','unknown temporary authorization')
     if experiment:wait_seconds=3600
     events=[];start=time.monotonic();unit='afdo-wf-'+uuid.uuid4().hex+'.scope';p=None;peak=0
     result=dict(status='failed',exit_code=None,unit=unit)
     old={}
-    def interrupted(signum,frame):raise KeyboardInterrupt('signal '+str(signum))
+    def interrupted(signum,frame):raise StopRequested(signum)
     for sig in [signal.SIGTERM,signal.SIGINT]:old[sig]=signal.signal(sig,interrupted)
     def sample():
         nonlocal peak
@@ -108,7 +109,8 @@ def execute(argv,source,workdir,out,env=None,wait_seconds=172800,experiment=None
             return can_start(current, experiment) and not current.get('other_builds')
 
         while not ready():
-            require(time.monotonic()-start<wait_seconds,'build start gate timeout','environment')
+            require(time.monotonic()-start<wait_seconds,'build start gate timeout',
+                    'lock-timeout' if events[-1].get('other_builds') else 'environment')
             time.sleep(min(60 if experiment else 600,max(1,wait_seconds-(time.monotonic()-start))))
         result.update(start_resources=events[-1],wait_seconds=time.monotonic()-start,
                       startup_memory_waiver=experiment,authorization='user current round only' if experiment else None)

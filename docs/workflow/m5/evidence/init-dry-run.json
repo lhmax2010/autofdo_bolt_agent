@@ -1,0 +1,473 @@
+{
+  "arch": "aarch64",
+  "board_contact": false,
+  "cleanup_pending": 0,
+  "draft": true,
+  "live": true,
+  "mode": "dry-run",
+  "model": "Raspberry Pi 5",
+  "output": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run",
+  "planned_live_session": [
+    "check host readiness and exact board identity",
+    "reconcile pending cleanup before stages",
+    "journal root and governor and validate tools",
+    "rehydrate reusable deployments when present",
+    "restore owned state before reporting or exit"
+  ],
+  "platform": "rpi5-aarch64",
+  "serial": null,
+  "stages": [
+    {
+      "action": "run",
+      "board_actions_this_stage": [
+        "verify identity",
+        "journal the session",
+        "check or deploy tools, scripts and media",
+        "probe hardware cycles and telemetry"
+      ],
+      "board_operations": [
+        "verify identity",
+        "journal the session",
+        "check or deploy tools, scripts and media",
+        "probe hardware cycles and telemetry"
+      ],
+      "declared_inputs": {
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "media": [
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4",
+            "id": "bbb-720p-60",
+            "path": "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4",
+            "role": "train",
+            "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4",
+            "start": 0
+          },
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1/tos_720p_h264_60s.mp4",
+            "id": "tos-720p-60",
+            "path": "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4",
+            "role": "test",
+            "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1",
+            "start": 0
+          },
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/media_src/sintel_1080p_h264_60s.mp4",
+            "id": "sintel-1080p-60",
+            "path": "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4",
+            "role": "test-secondary",
+            "sha256": "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843",
+            "start": 0
+          }
+        ],
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "tool_locks": {},
+        "upstream_receipts": {}
+      },
+      "dependencies": [],
+      "gates": [
+        "host resources and tool availability",
+        "board identity and hardware cycles",
+        "thermal and telemetry readiness",
+        "media SHA"
+      ],
+      "inputs": [
+        "job, package and platform",
+        "tool and media SHA locks",
+        "board identity"
+      ],
+      "outputs": [
+        "capabilities and resource records",
+        "hardware event and input evidence"
+      ],
+      "purpose": "Establish host and board readiness.",
+      "recorded_state": "pending",
+      "stage": "preflight"
+    },
+    {
+      "action": "run",
+      "board_actions_this_stage": [],
+      "board_operations": [],
+      "declared_inputs": {
+        "build_units": [
+          {
+            "arch": "aarch64",
+            "id": "ffmpeg-aarch64",
+            "isa": "a64",
+            "spec": "packaging/ffmpeg.spec"
+          }
+        ],
+        "config": null,
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "patch": null,
+        "repo": null,
+        "snapshot_evidence": null,
+        "source": null,
+        "upstream_receipts": {
+          "preflight": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/preflight.json"
+        }
+      },
+      "dependencies": [
+        "preflight"
+      ],
+      "gates": [
+        "host build locks and resource limits",
+        "frozen dependency identity",
+        "matching runtime and debug build IDs"
+      ],
+      "inputs": [
+        "pinned source, patch and spec",
+        "GBS config, snapshots or frozen repository",
+        "package build unit"
+      ],
+      "outputs": [
+        "BASE RPMs and ELF manifests",
+        "dependency and build-lock evidence"
+      ],
+      "purpose": "Freeze dependencies and build the baseline.",
+      "recorded_state": "pending",
+      "stage": "build"
+    },
+    {
+      "action": "run",
+      "board_actions_this_stage": [
+        "verify runtime compatibility when enabled",
+        "deploy BASE",
+        "run untimed PLAT and BASE decoding"
+      ],
+      "board_operations": [
+        "verify runtime compatibility when enabled",
+        "deploy BASE",
+        "run untimed PLAT and BASE decoding"
+      ],
+      "declared_inputs": {
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "media": [
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4",
+            "id": "bbb-720p-60",
+            "path": "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4",
+            "role": "train",
+            "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4",
+            "start": 0
+          },
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1/tos_720p_h264_60s.mp4",
+            "id": "tos-720p-60",
+            "path": "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4",
+            "role": "test",
+            "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1",
+            "start": 0
+          },
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/media_src/sintel_1080p_h264_60s.mp4",
+            "id": "sintel-1080p-60",
+            "path": "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4",
+            "role": "test-secondary",
+            "sha256": "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843",
+            "start": 0
+          }
+        ],
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "upstream_receipts": {
+          "build": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/build.json"
+        }
+      },
+      "dependencies": [
+        "build"
+      ],
+      "gates": [
+        "runtime compatibility",
+        "deployment and loaded-library identity",
+        "PLAT/BASE correctness"
+      ],
+      "inputs": [
+        "BASE runtime manifest",
+        "declared oracles and inputs",
+        "board runtime"
+      ],
+      "outputs": [
+        "deployment manifest",
+        "PLAT and BASE oracle records"
+      ],
+      "purpose": "Prepare the baseline and establish independent correctness.",
+      "recorded_state": "pending",
+      "stage": "deploy"
+    },
+    {
+      "action": "run",
+      "board_actions_this_stage": [
+        "run the training workload and perf",
+        "verify loaded libraries",
+        "pull and verify collection artifacts"
+      ],
+      "board_operations": [
+        "run the training workload and perf",
+        "verify loaded libraries",
+        "pull and verify collection artifacts"
+      ],
+      "declared_inputs": {
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "media": [
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/media/bbb_720p_h264_60s.mp4",
+            "id": "bbb-720p-60",
+            "path": "/opt/afdo_agent/inputs/bbb_720p_h264_60s.mp4",
+            "role": "train",
+            "sha256": "b5e116b9d01cec8e7f697041c53575d36bd96a5928e40faa69e731f9ae2d00a4",
+            "start": 0
+          }
+        ],
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "upstream_receipts": {
+          "deploy": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/deploy.json"
+        }
+      },
+      "dependencies": [
+        "deploy"
+      ],
+      "gates": [
+        "cool-down and workload completion",
+        "loaded-library and perf build IDs",
+        "verified pull"
+      ],
+      "inputs": [
+        "BASE deployment",
+        "training input",
+        "sampling configuration"
+      ],
+      "outputs": [
+        "perf exports, evlists and build IDs",
+        "training correctness evidence"
+      ],
+      "purpose": "Collect training samples from BASE.",
+      "recorded_state": "pending",
+      "stage": "collect"
+    },
+    {
+      "action": "run",
+      "board_actions_this_stage": [],
+      "board_operations": [],
+      "declared_inputs": {
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "upstream_receipts": {
+          "collect": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/collect.json"
+        }
+      },
+      "dependencies": [
+        "collect"
+      ],
+      "gates": [
+        "profile conversion and identity checks",
+        "quality policy",
+        "merge compatibility"
+      ],
+      "inputs": [
+        "perf exports",
+        "paired ELF and debug files",
+        "pinned profgen and profdata"
+      ],
+      "outputs": [
+        "quality reports",
+        "locked profile and disclosure"
+      ],
+      "purpose": "Convert, check and merge samples into the locked profile.",
+      "recorded_state": "pending",
+      "stage": "convert"
+    },
+    {
+      "action": "run",
+      "board_actions_this_stage": [
+        "for preparation-platform audits, deploy candidates and verify untimed correctness"
+      ],
+      "board_operations": [
+        "for preparation-platform audits, deploy candidates and verify untimed correctness"
+      ],
+      "declared_inputs": {
+        "build_units": [
+          {
+            "arch": "aarch64",
+            "id": "ffmpeg-aarch64",
+            "isa": "a64",
+            "spec": "packaging/ffmpeg.spec"
+          }
+        ],
+        "config": null,
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "patch": null,
+        "repo": null,
+        "snapshot_evidence": null,
+        "source": null,
+        "upstream_receipts": {
+          "build": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/build.json",
+          "convert": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/convert.json"
+        }
+      },
+      "dependencies": [
+        "convert",
+        "build"
+      ],
+      "gates": [
+        "build-lock comparison",
+        "profile and AppliedSamples consumption",
+        "correctness when enabled"
+      ],
+      "inputs": [
+        "locked profile",
+        "frozen repository and BASE build lock",
+        "optimization records"
+      ],
+      "outputs": [
+        "BASE-r and AFDO artifacts",
+        "build-lock and consumption evidence"
+      ],
+      "purpose": "Rebuild and audit the AFDO candidate and control.",
+      "recorded_state": "pending",
+      "stage": "rebuild"
+    },
+    {
+      "action": "run",
+      "board_actions_this_stage": [
+        "deploy or rehydrate variants",
+        "verify oracles",
+        "run pilots, warmups and timed pairs"
+      ],
+      "board_operations": [
+        "deploy or rehydrate variants",
+        "verify oracles",
+        "run pilots, warmups and timed pairs"
+      ],
+      "declared_inputs": {
+        "bootstrap_seed": null,
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "media": [
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/board-round1/tos_720p_h264_60s.mp4",
+            "id": "tos-720p-60",
+            "path": "/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4",
+            "role": "test",
+            "sha256": "280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1",
+            "start": 0
+          },
+          {
+            "duration": 60,
+            "host_path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/media_src/sintel_1080p_h264_60s.mp4",
+            "id": "sintel-1080p-60",
+            "path": "/opt/afdo_agent/inputs/sintel_1080p_h264_60s.mp4",
+            "role": "test-secondary",
+            "sha256": "b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843",
+            "start": 0
+          }
+        ],
+        "order_seed": null,
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "upstream_receipts": {
+          "deploy": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/deploy.json",
+          "rebuild": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/rebuild.json"
+        }
+      },
+      "dependencies": [
+        "rebuild",
+        "deploy"
+      ],
+      "gates": [
+        "pre/post correctness",
+        "locked paired plan",
+        "temperature, telemetry and library identity"
+      ],
+      "inputs": [
+        "audited variants and PLAT oracles",
+        "test inputs",
+        "telemetry capability record and seeds"
+      ],
+      "outputs": [
+        "paired rounds, plans and intervals",
+        "sensitivity analysis"
+      ],
+      "purpose": "Collect and analyze paired measurements.",
+      "recorded_state": "pending",
+      "stage": "measure"
+    },
+    {
+      "action": "run",
+      "board_actions_this_stage": [],
+      "board_operations": [],
+      "declared_inputs": {
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "upstream_receipts": {
+          "convert": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/convert.json",
+          "measure": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/preview-only-run/receipts/measure.json"
+        }
+      },
+      "dependencies": [
+        "measure",
+        "convert"
+      ],
+      "gates": [
+        "publishability checks",
+        "complete report fields"
+      ],
+      "inputs": [
+        "measurement and conversion receipts",
+        "build lock, consumption and cleanup evidence"
+      ],
+      "outputs": [
+        "report.json and report.md"
+      ],
+      "purpose": "Write the checked experiment report.",
+      "recorded_state": "pending",
+      "stage": "report"
+    },
+    {
+      "action": "cleanup-on-exit",
+      "board_actions_this_stage": [
+        "restore root and governor",
+        "stop owned processes and clear verified artifacts"
+      ],
+      "board_operations": [
+        "restore root and governor",
+        "stop owned processes and clear verified artifacts"
+      ],
+      "declared_inputs": {
+        "inputs": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/inputs.toml",
+        "job": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-20261124/example-draft.json",
+        "package": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m5-phase1-wt/workflow/packages/ffmpeg/package-rpi5.toml",
+        "upstream_receipts": {}
+      },
+      "dependencies": [],
+      "gates": [
+        "identity before action",
+        "ownership and verified-pull checks"
+      ],
+      "inputs": [
+        "saved board identity",
+        "cleanup journal and verified-pull records"
+      ],
+      "outputs": [
+        "restored session state or cleanup_pending"
+      ],
+      "purpose": "Reconcile the experiment cleanup journal.",
+      "recorded_state": "pending",
+      "stage": "restore"
+    }
+  ]
+}

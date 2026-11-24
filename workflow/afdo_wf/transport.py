@@ -59,6 +59,10 @@ class SDB:
             stderr=r.stderr.decode(errors="replace") if isinstance(r.stderr,bytes) else r.stderr
             stem.with_suffix(".stdout").write_text(stdout);stem.with_suffix(".stderr").write_text(stderr)
             save(stem.with_suffix(".json"),dict(argv=argv,start=start,end=time.time(),exit_code=r.returncode))
+            if r.returncode != 0 and re.search(
+                    r'(?im)^error:.*(?:target not found|device (?:not found|offline)|connection (?:reset|refused))',
+                    stdout + '\n' + stderr):
+                raise TechnicalFailure('SDB target unavailable: ' + str(stem), 'board-unreachable')
             if getattr(self,'technical',False) and args[0] in ['push','pull','shell'] and r.returncode!=0:
                 raise TechnicalFailure('sdb '+args[0]+' exit '+str(r.returncode)+': '+str(stem))
             return r.returncode,stdout,stderr
@@ -231,7 +235,7 @@ class SDB:
         if hasattr(self,'journal'):
             self.journal.register(dict(kind='run',remote=bundle,local=str(transfer)+'-cleanup',receipt=str(bundle_receipt),transfer_bundle=True))
         self.shell('test ! -e '+q(bundle)+' && mkdir '+q(bundle))
-        command='cd '+q(remote)+" && find . -type f -exec sha256sum {} \; | sort"
+        command='cd '+q(remote)+" && find . -type f -exec sha256sum {} \\; | sort"
         self.shell('('+command+') > '+q(bundle+'/members.sha256')+' && tar -cf '+q(bundle+'/round.tar')+' -C '+q(remote)+' . && cd '+q(bundle)+' && sha256sum round.tar members.sha256 > archive.sha256')
         transfer.mkdir(parents=True)
         for name in ['archive.sha256','members.sha256','round.tar']:
@@ -247,6 +251,8 @@ class SDB:
             verified_pull(receipt,local,manifest,remote,verified_empty=not manifest)
             bundle_files={name:sha256(transfer/name) for name in ['archive.sha256','members.sha256','round.tar']}
             verified_pull(bundle_receipt,transfer,bundle_files,bundle)
+        except TechnicalFailure:
+            raise
         except (GateError,OSError,tarfile.TarError,ValueError) as e:
             raise TechnicalFailure('archive verification: '+str(e)) from e
         delete_pulled(receipt,lambda path:self.shell('rm -rf -- '+board_path(path,True)))

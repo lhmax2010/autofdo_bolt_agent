@@ -2,56 +2,121 @@
 from pathlib import Path
 from datetime import datetime, timezone
 import hashlib
-from .common import require, save, json_load, sha256, canonical
-
-DAG={'preflight':[], 'build':['preflight'], 'deploy':['build'], 'collect':['deploy'],
-     'convert':['collect'], 'rebuild':['convert','build'], 'measure':['rebuild','deploy'],
-     'report':['measure','convert'], 'restore':[]}
+import time
+from uuid import uuid4
+from .common import atomic_write, require, save, json_load, sha256
+from .exits import failure_record
+from .stages import DAG
 
 class Store:
-    def __init__(self, directory):
-        self.directory=Path(directory);self.directory.mkdir(parents=True,exist_ok=True)
-    def path(self,stage):
-        require(stage in DAG,'unknown stage');return self.directory/(stage+'.json')
-    def verify(self,stage,stack=()):
-        require(stage not in stack,'receipt cycle')
-        r=json_load(self.path(stage));require(r['stage']==stage and r['status']=='complete','stage not complete')
-        require(set(r['upstream'])==set(DAG[stage]),'receipt dependencies incomplete')
-        for name,expected in r['upstream'].items():
-            self.verify(name,stack+(stage,));require(sha256(self.path(name))==expected,'upstream changed')
-        for path,digest in {**r['inputs'],**r['outputs']}.items():
-            require(Path(path).is_file() and sha256(path)==digest,'content changed: '+path)
+    def __init__(self, directory, *, create=True):
+        self.directory = Path(directory)
+        if create:
+            self.directory.mkdir(parents=True, exist_ok=True)
+
+    def path(self, stage):
+        require(stage in DAG, 'unknown stage')
+        return self.directory / (stage + '.json')
+
+    def redo_bindings(self):
+        """Newest committed invalidation for each stage. Partial archives are inert."""
+        result = {}
+        for path in sorted((self.directory / 'redo').glob('*/receipt.json')):
+            record = json_load(path)
+            digest = sha256(path)
+            for stage in record['stages']:
+                result[stage] = dict(receipt=str(path.resolve()), sha256=digest, reason=record['reason'])
+        return result
+
+    @staticmethod
+    def invalidated(receipt, binding):
+        return (receipt is not None and receipt['status'] == 'invalidated'
+                or binding is not None and (receipt is None or receipt.get('redo') != binding))
+
+    def verify(self, stage, stack=(), *, bindings=None):
+        require(stage not in stack, 'receipt cycle')
+        if bindings is None:
+            bindings = self.redo_bindings()
+        require(self.path(stage).is_file(), 'missing stage receipt: ' + stage)
+        r = json_load(self.path(stage))
+        require(not r.get('redo') or stage in bindings, 'redo receipt missing')
+        require(r['stage'] == stage and r['status'] == 'complete'
+                and not self.invalidated(r, bindings.get(stage)), 'stage not complete')
+        require(set(r['upstream']) == set(DAG[stage]), 'receipt dependencies incomplete')
+        for name, expected in r['upstream'].items():
+            self.verify(name, stack + (stage,), bindings=bindings)
+            require(sha256(self.path(name)) == expected, 'upstream changed')
+        for path, digest in {**r['inputs'], **r['outputs']}.items():
+            require(Path(path).is_file() and sha256(path) == digest, 'content changed: ' + path)
         return r
-    def complete(self,stage,inputs,outputs,details=None):
-        upstream={}
-        for name in DAG[stage]:self.verify(name);upstream[name]=sha256(self.path(name))
-        require(not self.path(stage).exists(),'receipt exists; use redo')
-        r=dict(stage=stage,status='complete',time=datetime.now(timezone.utc).isoformat(),
-               inputs={str(Path(p).resolve()):sha256(p) for p in inputs},
-               outputs={str(Path(p).resolve()):sha256(p) for p in outputs},upstream=upstream,details=details or {})
-        save(self.path(stage),r);return r
-    def redo(self,stage):
-        affected={stage}
-        while True:
-            new=affected|{k for k,v in DAG.items() if set(v)&affected}
-            if new==affected:break
-            affected=new
-        for s in sorted(affected):
-            p=self.path(s)
-            if p.exists():
-                old=json_load(p);digest=sha256(p)
-                archive=self.directory/'history'/s/(digest+'.json')
-                if not archive.exists():save(archive,old)
-                old['status']='invalidated';save(p,old)
+
+    def complete(self, stage, inputs, outputs, details=None):
+        bindings = self.redo_bindings()
+        upstream = {}
+        for name in DAG[stage]:
+            self.verify(name, bindings=bindings)
+            upstream[name] = sha256(self.path(name))
+        path = self.path(stage)
+        old = json_load(path) if path.exists() else None
+        binding = bindings.get(stage)
+        require(old is None or self.invalidated(old, binding), 'receipt exists; use redo')
+        # The pre-M5 invalidated format retained the original under history/.
+        require(old is None or binding is not None or
+                any((self.directory / 'history' / stage).glob('*.json')),
+                'legacy invalidation has no archived receipt')
+        r = dict(stage=stage, status='complete', time=datetime.now(timezone.utc).isoformat(),
+                 inputs={str(Path(p).resolve()): sha256(p) for p in inputs},
+                 outputs={str(Path(p).resolve()): sha256(p) for p in outputs},
+                 upstream=upstream, details=details or {})
+        if binding:
+            r['redo'] = binding
+        save(path, r)
+        return r
+
+    def failure_paths(self, stage):
+        exact = self.directory / (stage + '.failure.json')
+        paths = list(self.directory.glob(stage + '.failure-*.json'))
+        if exact.is_file():
+            paths.append(exact)
+        return sorted(paths, key=lambda p: (p.stat().st_mtime_ns, p.name))
+
+    def redo(self, stage, reason='operator requested redo'):
+        self.path(stage)
+        require(stage != 'restore' and isinstance(reason, str) and reason.strip(),
+                'redo requires a workflow stage and reason')
+        affected = {stage}
+        for name, dependencies in DAG.items():
+            if affected.intersection(dependencies):
+                affected.add(name)
+        now = datetime.now(timezone.utc)
+        archive = self.directory / 'redo' / (now.strftime('%Y%m%dT%H%M%S.%fZ') + '-' + uuid4().hex)
+        archive.mkdir(parents=True, exist_ok=False)
+        stages = {}
+        for name in DAG:
+            if name not in affected:
+                continue
+            active = self.path(name)
+            originals = ([active] if active.is_file() else []) + self.failure_paths(name)
+            saved = []
+            for original in originals:
+                copy = archive / original.name
+                atomic_write(copy, original.read_bytes())
+                digest = sha256(copy)
+                require(sha256(original) == digest, 'receipt changed during redo: ' + str(original))
+                saved.append(dict(original=str(original.resolve()), archive=copy.name, sha256=digest))
+            stages[name] = dict(status='invalidated', archived=saved)
+        # Publish only after every original is durably archived.
+        save(archive / 'receipt.json', dict(schema_version=1, status='invalidated',
+             stage=stage, reason=reason.strip(), time=now.isoformat(), stages=stages))
         return affected
-    def restart(self,stage):
-        """Archive invalidated receipt then remove only its active pointer."""
-        p=self.path(stage)
-        if p.exists():
-            require(json_load(p)['status']=='invalidated','redo required')
-            p.unlink()
-    def failed(self,stage,error):
-        save(self.directory/(stage+'.failure.json'),dict(stage=stage,status='failed',reason=getattr(error,'reason','error'),error=str(error)))
+
+    def failed(self, stage, error):
+        record = dict(stage=stage, **failure_record(error))
+        binding = self.redo_bindings().get(stage)
+        if binding:
+            record['redo'] = binding
+        save(self.directory / (stage + '.failure-' + str(time.time_ns()) + '.json'), record)
+
 
 class Cleanup:
     """Persist intended undo BEFORE mutation. A dropped connection leaves pending work."""

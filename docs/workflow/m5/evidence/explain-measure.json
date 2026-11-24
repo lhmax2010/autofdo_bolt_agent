@@ -1,0 +1,37 @@
+{
+  "board_operations": [
+    "deploy or rehydrate variants",
+    "verify oracles",
+    "run pilots, warmups and timed pairs"
+  ],
+  "dependencies": [
+    "rebuild",
+    "deploy"
+  ],
+  "gates": [
+    "pre/post correctness",
+    "locked paired plan",
+    "temperature, telemetry and library identity"
+  ],
+  "inputs": [
+    "audited variants and PLAT oracles",
+    "test inputs",
+    "telemetry capability record and seeds"
+  ],
+  "outputs": [
+    "paired rounds, plans and intervals",
+    "sensitivity analysis"
+  ],
+  "purpose": "Collect and analyze paired measurements.",
+  "receipt_fields": [
+    "stage",
+    "status",
+    "time",
+    "inputs",
+    "outputs",
+    "upstream",
+    "details"
+  ],
+  "redo_field": "redo is present for a replacement receipt and binds the invalidation receipt by SHA",
+  "stage": "measure"
+}

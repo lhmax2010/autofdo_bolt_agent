@@ -254,9 +254,17 @@ class BoardTests(Fixture):
         r=subprocess.run(['bash','--posix',str(ROOT/'workflow/board/watchdog.sh'),'1','bash','-c','sleep 30'],capture_output=True,text=True,timeout=8)
         self.assertNotEqual(r.returncode,0)
     def test_cli_dry_run(self):
+        import contextlib
+        import io
+        import json
         job=self.file('job','{}')
-        rc=cli.main(['run','--package',str(ROOT/'workflow/packages/ffmpeg/package.toml'),'--job',str(job),'--output',str(self.d/'out'),'--receipts',str(self.d/'receipts'),'--dry-run'])
-        self.assertEqual(rc,0);self.assertEqual(len(list((self.d/'out').glob('*/plan.json'))),9)
+        out=io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc=cli.main(['run','--package',str(ROOT/'workflow/packages/ffmpeg/package.toml'),'--job',str(job),'--output',str(self.d/'out'),'--receipts',str(self.d/'receipts'),'--dry-run'])
+        self.assertEqual(rc,0)
+        self.assertEqual(len(json.loads(out.getvalue())['stages']),9)
+        self.assertFalse((self.d/'out').exists())
+        self.assertFalse((self.d/'receipts').exists())
     def test_cli_no_live_board(self):
         job=self.file('job','{}')
         self.assertNotEqual(cli.main(['deploy','--package',str(ROOT/'workflow/packages/ffmpeg/package.toml'),'--job',str(job),'--output',str(self.d/'out'),'--receipts',str(self.d/'r')]),0)

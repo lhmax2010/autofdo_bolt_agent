@@ -1,0 +1,133 @@
+{
+  "cleanup_pending": 0,
+  "last_run_failure": {
+    "error": "GateError('unclassified recorded command')",
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/failure-1795503410597261408.json",
+    "reason": "gate"
+  },
+  "receipts": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts",
+  "stage_order": [
+    "preflight",
+    "build",
+    "deploy",
+    "collect",
+    "convert",
+    "rebuild",
+    "measure",
+    "report",
+    "restore"
+  ],
+  "stages": {
+    "build": {
+      "dependencies": [
+        "preflight"
+      ],
+      "input_sha": "match",
+      "last_failure": {
+        "error": "online dependency-resolution build failed: /home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/stages/build/001/dependency-resolution/result.json",
+        "exit_code": 4,
+        "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/build.failure.json",
+        "reason": "environment",
+        "recorded_reason": "environment"
+      },
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/build.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "collect": {
+      "dependencies": [
+        "deploy"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/collect.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "convert": {
+      "dependencies": [
+        "collect"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/convert.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "deploy": {
+      "dependencies": [
+        "build"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/deploy.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "measure": {
+      "dependencies": [
+        "rebuild",
+        "deploy"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/measure.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "preflight": {
+      "dependencies": [],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/preflight.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "rebuild": {
+      "dependencies": [
+        "convert",
+        "build"
+      ],
+      "input_sha": "match",
+      "last_failure": {
+        "error": "unclassified recorded command",
+        "exit_code": 2,
+        "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/rebuild.failure-1795503390964637435.json",
+        "reason": "gate",
+        "recorded_reason": "gate"
+      },
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/rebuild.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "report": {
+      "dependencies": [
+        "measure",
+        "convert"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/receipts/report.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "restore": {
+      "dependencies": [],
+      "input_sha": "not_recorded",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m2a-rpi5-prep-20261119/continuation/formal-attempt-01/final-1795514608202665743.json",
+      "status": "completed",
+      "upstream_sha": "not_recorded"
+    }
+  }
+}

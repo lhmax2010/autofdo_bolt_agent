@@ -193,7 +193,9 @@ class Experiment:
     def session(self):
         t=self.transport
         devices=self.host(['sdb','devices'],self.d/'device-discovery').stdout.decode()
-        require(any(line.startswith(self.serial+'\t') or line.startswith(self.serial+' ') for line in devices.splitlines()),'configured board is not online','environment')
+        require(any(parts[0] == self.serial and parts[1] == 'device'
+                    for line in devices.splitlines() if len(parts := line.split()) >= 2),
+                'configured board is not online', 'board-unreachable')
         identity = t.identity()
         self.platform.check_identity(identity)
         require(identity==self.job['identity'],'board identity mismatch','identity',3)
@@ -204,7 +206,7 @@ class Experiment:
             cpuinfo = t.shell("grep -E '^(processor|CPU part|CPU implementer|CPU architecture)' /proc/cpuinfo", True)
             save(self.d/'platform-identity.json', dict(**identity, kernel_full=t.shell('uname -a', True), cpuinfo=cpuinfo))
         t.shell('missing=0; for c in '+shlex.join(deps)+'; do command -v "$c" || missing=1; done; test "$missing" -eq 0',True)
-        errors=t.restore_cleanup(self.cleanup);require(not errors,'pending cleanup failed: '+str(errors))
+        errors=t.restore_cleanup(self.cleanup);require(not errors,'pending cleanup failed: '+str(errors),'recovery-required')
         self.initial=self.state();save(self.d/('initial-'+str(time.time_ns())+'.json'),self.initial)
         old={}
         def stop(signum,frame):raise StopRequested(signum)
@@ -264,6 +266,44 @@ class Experiment:
         self.register_run(self.remote,self.d/('remaining-work-'+str(time.time_ns())))
         self.transport.shell('mkdir -p '+q(self.remote))
 
+    def prune_host_artifacts(self, store):
+        """Keep only artifacts owned by reusable receipts when resuming a run."""
+        registry = self.d / 'host-artifacts.json'
+        if not registry.is_file():
+            return
+        original = json_load(registry)
+        bindings = store.redo_bindings()
+        outputs = {}
+        for stage in ('preflight', 'deploy', 'rebuild', 'measure'):
+            path = store.path(stage)
+            receipt = json_load(path) if path.is_file() else None
+            if receipt and not store.invalidated(receipt, bindings.get(stage)):
+                outputs[stage] = receipt['outputs']
+        retained = {}
+        stage_root = self.d / 'stages'
+
+        def reusable(item):
+            source = Path(item['source'])
+            if not source.is_relative_to(stage_root):
+                return 'preflight' in outputs
+            producer = source.relative_to(stage_root).parts[0]
+            return item['sha256'] == outputs.get(producer, {}).get(str(source))
+
+        for remote, action in original.items():
+            label = remote.removeprefix(self.b+'/variants/'+self.job['experiment']+'-')
+            if label in ('BASE', 'BASE-r', 'AFDO'):
+                tar = original.get(self.remote+'/'+label+'.tar')
+                if tar and reusable(tar['members']['']):
+                    retained[remote] = action
+                continue
+            members = {name:item for name,item in action['members'].items()
+                       if item['kind'] == 'file' and reusable(item)}
+            if members:
+                retained[remote] = {**action, 'members': members}
+        if retained != original:
+            save(self.d/'host-artifact-history'/(str(time.time_ns())+'.json'), original)
+            save(registry, retained)
+
     def restore_host_artifacts(self):
         """Rehydrate verified host artifacts after cleanup, without rerunning S0–S3."""
         records=self.d/'host-artifacts.json'
@@ -303,6 +343,8 @@ class Experiment:
             # No background operator: sdb remains attached until the entire script exits.
             t.shell('bash '+q(control+'/launch.sh')+' > '+q(control+'/stdout')+' 2> '+q(control+'/stderr')+' < /dev/null; _load_rc=$?; test -f '+q(control+'/exit'),timeout=timeout+120)
         except subprocess.TimeoutExpired as e:raise TechnicalFailure('foreground transport timeout: '+str(e)) from e
+        except TechnicalFailure:
+            raise
         except GateError as e:raise TechnicalFailure('foreground transport interrupted or missing exit: '+str(e)) from e
         finally:t.wait_hook=old_hook
         result=t.shell('cat '+q(control+'/exit'),True).strip()
@@ -406,7 +448,7 @@ class Experiment:
         waiver = j['experiment'] if not self.platform.prepare_only else None
         options = dict(wait_seconds=10800, exclusive=True) if self.platform.prepare_only else {}
         r=build.execute(argv,j['source'],self.w,out/'execution',env,experiment=waiver,**options)
-        require(r['status']=='success','GBS failure: '+str(out/'execution/result.json'),'environment')
+        require(r['status']=='success','GBS failure: '+str(out/'execution/result.json'),r.get('reason','environment'))
         rpms=sorted(root.glob('local/repos/*/*/RPMS/*.rpm'))
         require(rpms,'no built RPMs')
         selected=[];inventory=[]
@@ -473,7 +515,7 @@ class Experiment:
         require(base and base == afdo, 'BASE and AFDO BuildRequires differ')
         argv = build.command(j['config'], j['source'], root, unit, unit['macros'])
         resolved = build.execute(argv, j['source'], self.w, receipt, env, wait_seconds=10800, exclusive=True)
-        require(resolved['status'] == 'success', 'online dependency-resolution build failed: '+str(receipt/'result.json'), 'environment')
+        require(resolved['status'] == 'success', 'online dependency-resolution build failed: '+str(receipt/'result.json'), resolved.get('reason', 'environment'))
         log = (receipt/'build.log').read_text(errors='replace')
         resolved_paths = re.findall(r'build conf has been downloaded at:\s*([^\s]+)', log)
         require(len(set(resolved_paths)) == 1, 'missing or ambiguous resolved build configuration')
@@ -485,6 +527,8 @@ class Experiment:
         rpms = sorted((root/'local/cache').rglob('*.rpm'))
         require(rpms, 'no RPMs downloaded in the resolution root')
         repo = self.w/'temp/gbs-deps-archive'/j['experiment']
+        if repo.exists():
+            repo = repo.with_name(repo.name + '-' + root.name)
         build.freeze(rpms, buildconf, repo, j['snapshots'])
         frozen = dict(repo=str(repo), repo_id=sha256(repo/'manifest.json'),
                       buildconf=str(repo/'resolved.conf'), frozen_packages=packages)
@@ -927,7 +971,8 @@ class Experiment:
         inputs+=list((Path(self.job['package']).parent/'workloads').glob('*'))
         handlers=dict(preflight=self.preflight,build=self.build_base,deploy=self.deploy,collect=self.collect,
                       convert=self.convert,rebuild=self.rebuild,measure=self.measure,report=self.report)
-        stages = list(handlers)
+        from .stages import RUN_STAGES
+        stages = list(RUN_STAGES)
         require(stop_after is None or stop_after in stages, 'invalid live stop stage')
         if stop_after:
             stages = stages[:stages.index(stop_after)+1]
@@ -943,10 +988,12 @@ class Experiment:
         try:
             if self.platform.prepare_only:
                 build.wait_for_host(self.w, self.d/('host-gate-'+str(time.time_ns())+'.json'))
+            from .receipts import Store
+            store = Store(self.d/'receipts')
+            reuse_preflight = scheduler.reusable(store, 'preflight', inputs)
             with self.session():
-                if (self.d/'receipts/preflight.json').exists():
-                    from .receipts import Store
-                    Store(self.d/'receipts').verify('preflight')
+                self.prune_host_artifacts(store)
+                if reuse_preflight:
                     self.ensure_work();self.restore_host_artifacts()
                 result['stages']=scheduler.execute([s for s in stages if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
             if 'report' in stages:

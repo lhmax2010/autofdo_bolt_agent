@@ -1,0 +1,126 @@
+{
+  "cleanup_pending": 0,
+  "last_run_failure": {
+    "error": "StopRequested('signal 15')",
+    "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/failure-1794941651693585235.json",
+    "reason": "interrupted"
+  },
+  "receipts": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts",
+  "stage_order": [
+    "preflight",
+    "build",
+    "deploy",
+    "collect",
+    "convert",
+    "rebuild",
+    "measure",
+    "report",
+    "restore"
+  ],
+  "stages": {
+    "build": {
+      "dependencies": [
+        "preflight"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/build.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "collect": {
+      "dependencies": [
+        "deploy"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/collect.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "convert": {
+      "dependencies": [
+        "collect"
+      ],
+      "input_sha": "match",
+      "last_failure": {
+        "error": "signal 15",
+        "exit_code": 130,
+        "path": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/convert.failure.json",
+        "reason": "user-abort",
+        "recorded_reason": "interrupted"
+      },
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/convert.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "deploy": {
+      "dependencies": [
+        "build"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/deploy.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "measure": {
+      "dependencies": [
+        "rebuild",
+        "deploy"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/measure.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "preflight": {
+      "dependencies": [],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/preflight.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "rebuild": {
+      "dependencies": [
+        "convert",
+        "build"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/rebuild.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "report": {
+      "dependencies": [
+        "measure",
+        "convert"
+      ],
+      "input_sha": "match",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/receipts/report.json",
+      "recorded_status": "complete",
+      "status": "completed",
+      "upstream_sha": "match"
+    },
+    "restore": {
+      "dependencies": [],
+      "input_sha": "not_recorded",
+      "reason": null,
+      "receipt": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/m1-ffmpeg-rpi4-thumb-01/attempt-11/formal/final-1794954789955930539.json",
+      "status": "completed",
+      "upstream_sha": "not_recorded"
+    }
+  }
+}

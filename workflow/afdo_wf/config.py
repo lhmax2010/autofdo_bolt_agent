@@ -119,10 +119,13 @@ def load_inputs(path):
         o=x['oracle'];require(set(o)=={'caps','threads','frames','bytes','digest'},'oracle fields')
         for k in ['threads','frames','bytes']:positive(o[k],k,True)
         require(re.fullmatch('[0-9a-f]{64}',o['digest']) is not None,'oracle digest')
-    for a in d['inputs']:
-        for b in d['inputs']:
-            if a['role']=='train' and b['role'] in ['test','test-secondary'] and a['sha256']==b['sha256']:
-                require(max(a['start'],b['start'])>=min(a['start']+a['duration'],b['start']+b['duration']),'train/test overlap')
+    roles = {'train': 'train', 'tuning': 'tuning', 'test': 'test', 'test-secondary': 'test'}
+    for i, a in enumerate(d['inputs']):
+        for b in d['inputs'][i+1:]:
+            left, right = roles.get(a['role']), roles.get(b['role'])
+            if left and right and left != right and a['sha256'] == b['sha256']:
+                require(max(a['start'], b['start']) >= min(a['start']+a['duration'], b['start']+b['duration']),
+                        left+'/'+right+' overlap: '+a['id']+' / '+b['id'])
     return d['inputs']
 
 def hook_result(path):
