@@ -58,3 +58,24 @@
 | init 与功能级只读预览 | RPi5 配置和实际三份素材通过 SHA 检查，新草稿的九阶段计划打印到 stdout，run output 未创建。 | [init 结果](evidence/init-result.json) · [草稿预览](evidence/init-dry-run.json) |
 
 本阶段停止等待 PM 审核。
+
+## PM 审核修订 · SKILL.md 自足化
+
+本轮只修订英文 [SKILL.md](../../../skills/afdo-workflow/SKILL.md) 与本说明。CLI 沿用已通过审核的版本。
+
+| 审核项 | SKILL.md 位置 | 修订 |
+| --- | --- | --- |
+| 1. 适用范围 | 第 3 行 | frontmatter 说明 Tizen AutoFDO/PGO、FFmpeg、两种板型与实验用途。 |
+| 2. 八阶段地图 | 第 24–37 行 | 每段的职责、板上接触及 `explain` 用法。 |
+| 3. 授权边界 | 第 8–22、61–93 行 | 区分可直接执行的主机命令与须明确批准的 live run、resume、redo 和板子状态变更。 |
+| 4. 共享构建锁 | 第 39–45 行 | 每次 GBS 持锁、持有者记录、让行规则、8 小时等待与 S0 三小时资源复查。 |
+| 5. SDB 与身份 | 第 47–59 行 | 只重连目标，以型号、架构和镜像核验身份。 |
+| 6. 退出码动作 | 第 95–109 行 | 每个退出码与处置步骤并列，技能可直接查阅。 |
+| 7. 结果解读 | 第 111–126、153–154 行 | 四种判定、±1% 区间、可发布性、遥测标记与 M1/M2a 示例。 |
+| 8. 封存路径 | 第 128–151 行 | M1 attempt-11、M2a 的实际 job 和报告相对路径。 |
+| 9. 安全规则 | 第 8–22、77–83、105 行 | 封存只读、不在板上安装 RPM、verified-pull、清理与恢复前身份核验。 |
+| 10. 篇幅与语言 | 全文 154 行 | 英文，阶段细节通过 `explain` 查看。 |
+
+在独立 worktree 逐字执行了技能的 Setup 与 Sealed run examples 命令块。两份封存运行的 `status` 均显示 8 个业务阶段完成，直接输入与上游 SHA 匹配，清理待办为 0。两次 dry-run 的 9 条计划均可复用，`explain measure`、`explain report` 与计划元数据一致。两份读出的 report.md 均匹配其收据绑定的 SHA；M1 ToS 为 **−1.92% / faster**，M2a ToS 为 **+0.12% / equivalent**。前后核对的 31 份封存文件的 SHA、大小和修改时间一致。
+
+workflow 全量测试 **203/203** 通过，M1 回放 **48/48** 通过。验收为纯主机，只读演练后停止。 [本轮验收摘要](evidence/skill-review-acceptance.json)
