@@ -1,0 +1,29 @@
+{
+  "status": "passed retrospectively",
+  "prior_build_id": "96766cfcbff8c33d83ca38152ad02f6a02dd44d4",
+  "boot_id": "fb4bb98f-c355-436b-910b-1922588da79a",
+  "fdt": {
+    "mode": "strict",
+    "expected": {
+      "rsts": "0x20",
+      "seeds": [],
+      "bootargs": null
+    },
+    "actual": {
+      "rsts": "0x1020",
+      "seeds": [
+        "kaslr-seed"
+      ],
+      "bootargs": null
+    },
+    "equal": true,
+    "expected_sha256": "74f40dd34b8b23c6355718f70e36cc98cba5c0fd6dfd10e617f29d24924589d2",
+    "actual_sha256": "74f40dd34b8b23c6355718f70e36cc98cba5c0fd6dfd10e617f29d24924589d2",
+    "excluded": [
+      "/chosen/kaslr-seed",
+      "/chosen/rng-seed",
+      "/chosen/bootloader/rsts"
+    ]
+  },
+  "no_reboot": true
+}
