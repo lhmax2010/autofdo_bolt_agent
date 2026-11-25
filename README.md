@@ -14,14 +14,13 @@ provided by the maintainer.
 ```bash
 git clone --single-branch --no-tags --branch release "$REPOSITORY" afdo-workflow
 cd afdo-workflow
-export WORKDIR="$PWD"
-export PYTHONPATH="$PWD/workflow"
-export PYTHONDONTWRITEBYTECODE=1
-python3 -m afdo_wf explain preflight
-python3 -m afdo_wf explain restore
 ```
 
-Use the skill's input manifest and draft commands before planning a live run.
+Follow the skill's Python setup, then use `"$PY" -m afdo_wf doctor` before
+drafting. Clone the media branch in a separate directory as shown in the
+skill. The [RPi5 draft and dry-run example](examples/ffmpeg-rpi5-draft/README.md)
+shows what to expect when all three media hashes match.
+
 A live run requires an authorized Tizen board, SDB, matching board perf tools,
 GBS and its Tizen build environment, the package sources and dependencies,
 matching host profile tools, and the exact media clips supplied separately by
@@ -38,15 +37,15 @@ the maintainer. See the [workflow reference](workflow/README.md), including
 The examples contain historical results rounded as indicated in Markdown.
 Paths and internal evidence references are omitted. For `status` or resume,
 use the job and original run directory on the host that owns the experiment.
-Media, tools, frozen package archives and original experiment artifacts are
-supplied separately.
+The media branch supplies the video files. Get the tools, frozen package
+archives and original experiment artifacts separately.
 
 ## Check the checkout
 
 ```bash
 export TMPDIR="$WORKDIR/.scratch/tests"
 mkdir -p "$TMPDIR"
-python3 -m unittest discover -s workflow/tests -v
+"$PY" -m unittest discover -s workflow/tests -v
 ```
 
 The suite uses Linux core utilities and Bash. Three archive replays are

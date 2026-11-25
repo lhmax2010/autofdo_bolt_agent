@@ -1,12 +1,12 @@
 # AutoFDO workflow reference
 
-Run `python3 -m afdo_wf explain STAGE` after setting up the checkout as described
+Run `"$PY" -m afdo_wf explain STAGE` after setting up the checkout as described
 in the [workflow skill](../skills/afdo-workflow/SKILL.md). For each stage, the CLI
 lists its inputs, outputs, gates and board operations.
 
 ## Job inputs and receipts
 
-Use `init` with the package and media manifests to create a draft. Complete its
+Use `doctor` for local diagnostics, then use `init` with the package and media manifests to create a draft. Complete its
 `missing_for_run` list with the approved device identity, tool paths and
 SHA-256 values, the pinned source and build settings, and measurement seeds.
 The FFmpeg package files identify the source revision, profiling patch and build

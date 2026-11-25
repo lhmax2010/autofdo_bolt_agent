@@ -1,0 +1,48 @@
+{
+  "build_unit": "ffmpeg-aarch64",
+  "config_sha256": {
+    "inputs": {
+      "path": "${WORKDIR}/workflow/packages/ffmpeg/inputs.toml",
+      "sha256": "951aaa225aa648c3ca5417fd8cb4554c7a3702fa6a004cdf7c0e5ff84e2b2688"
+    },
+    "package": {
+      "path": "${WORKDIR}/workflow/packages/ffmpeg/package-rpi5.toml",
+      "sha256": "0e439dd78e5889aeac932f1c0b5adcb762ca0890278e1a83c2e060336c3398c0"
+    },
+    "platform": {
+      "path": "${WORKDIR}/workflow/platforms/rpi5-aarch64.toml",
+      "sha256": "f3a3e394594fc56f021f984d510d525e399ccead64cdf4b41c13a061436cda72"
+    }
+  },
+  "draft": true,
+  "experiment": "job",
+  "inputs": "${WORKDIR}/workflow/packages/ffmpeg/inputs.toml",
+  "live": true,
+  "media": {
+    "bbb-720p-60": "${MEDIA_DIR}/bbb_720p_h264_60s.mp4",
+    "sintel-1080p-60": "${MEDIA_DIR}/sintel_1080p_h264_60s.mp4",
+    "tos-720p-60": "${MEDIA_DIR}/tos_720p_h264_60s.mp4"
+  },
+  "missing_for_run": [
+    "serial",
+    "identity (exact model, arch, kernel, build_id)",
+    "tools",
+    "board_tools",
+    "source",
+    "patch",
+    "config",
+    "build_environment",
+    "rpm_packages",
+    "profgen",
+    "profdata",
+    "order_seed",
+    "bootstrap_seed",
+    "rpmspec",
+    "snapshots",
+    "snapshot_evidence"
+  ],
+  "output": "${WORKDIR}/runs/ffmpeg-rpi5",
+  "package": "${WORKDIR}/workflow/packages/ffmpeg/package-rpi5.toml",
+  "platform": "rpi5-aarch64",
+  "workdir": "${WORKDIR}"
+}

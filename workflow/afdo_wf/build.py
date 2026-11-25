@@ -20,9 +20,19 @@ def resources(workdir):
     return dict(time=time.time(),mem_available=int(re.search(r'MemAvailable:\s+(\d+)',mem)[1])*1024,
                 load1=os.getloadavg()[0],nproc=len(os.sched_getaffinity(0)),disk_free=shutil.disk_usage(workdir).free,meminfo=mem)
 
+def startup_checks(sample):
+    return {
+        'mem_available': dict(value=sample['mem_available'], minimum=16 * GIB,
+                              unit='bytes', passed=sample['mem_available'] >= 16 * GIB),
+        'load1': dict(value=sample['load1'], exclusive_maximum=12,
+                      passed=sample['load1'] < 12),
+        'disk_free': dict(value=sample['disk_free'], minimum=50 * GIB,
+                          unit='bytes', passed=sample['disk_free'] >= 50 * GIB),
+    }
+
+
 def can_start(sample):
-    return (sample['mem_available'] >= 16 * GIB and sample['load1'] < 12
-            and sample['disk_free'] >= 50 * GIB)
+    return all(check['passed'] for check in startup_checks(sample).values())
 
 
 def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=False):
