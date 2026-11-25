@@ -8,6 +8,8 @@ description: Use afdo_wf for Tizen package AutoFDO and PGO experiment work, incl
 ## Setup and authorization
 
 Start from a fresh clone of the `release` branch. Use a new directory for this workflow.
+If the workspace entry in `.clinerules/workflows/afdo-workflow.md` does not
+register automatically, open this file directly and follow it.
 
 ```bash
 git clone --single-branch --no-tags --branch release "$REPOSITORY" afdo-workflow
@@ -45,13 +47,17 @@ export PY
 - For inspection and drafting, use Git and Python 3.11 or later. If setup reports exit 4, report the interpreter prerequisite and stop. Use an existing interpreter.
 - For a live run, have SDB, GBS and the Tizen build environment, the target board and image, the matching board perf tool and libraries, and the package source, build configuration and dependency inputs. Get the project-patched `llvm-profgen` and matching `llvm-profdata` from the maintainer or build them using the [repository build instructions](../../workflow/README.md#build-the-host-profile-tools).
 - You can run `doctor`, `status`, `explain`, `run --dry-run`, and `init` for a new draft, and read existing reports without further approval.
-- Get explicit user approval for every board-contacting `run`, including a resume, for `--redo`, and for any operation that changes board state. Confirm the job and target in that approval.
+- Get explicit user approval before any SDB operation that contacts the board, including a read-only identity probe or reconnect. Also get approval for a board-contacting run or resume, `--redo`, and any board state change. Confirm the target and the operation in that approval.
 - Keep sealed configurations, receipts, and run directories read-only. Use a separate mutable run for new work. Keep workflow-owned board writes under `/opt/afdo_agent/` and preserve the cleanup journal. Do not install RPMs on the board. Delete run directories only after verified-pull through the workflow. Stop only processes owned by this experiment.
 - Launch only modes supported by the current CLI and package configuration. The archived FFmpeg examples below use AutoFDO.
 
 ## Verified run environments
 
-These are the recorded combinations. Other combinations have not been verified.
+The table lists the combinations verified for the recorded runs. Prefer these
+combinations for live runs. You may use other versions and must record any
+deviation in the experiment record as unverified. `doctor` checks availability
+and minimum requirements and reports detected versions. Compare those
+versions with the table yourself.
 
 | Component | M1 RPi4 Thumb | M2a RPi5 AArch64 |
 | --- | --- | --- |
@@ -97,7 +103,7 @@ Inspect `gbs_waits` in the stage receipt or `status` output. Report the wait rec
 
 ## Board identity and SDB
 
-An IP address or alias can refer to a replacement board. Before a live run, resume, or board state change, check the model, architecture and image build ID against the job's `identity`. Check the kernel too when the job pins it. Use the approved endpoint for the identity probe and stop on any mismatch.
+Get user approval before contacting the board, including for the identity probe below. An IP address or alias can refer to a replacement board. Before a live run, resume, or board state change, check the model, architecture and image build ID against the job's `identity`. Check the kernel too when the job pins it. Use the approved endpoint for the identity probe and stop on any mismatch.
 
 If the authorized target disconnects, limit recovery to that endpoint. `SERIAL` is the approved SDB endpoint, including the port when required.
 
@@ -128,7 +134,7 @@ Obtain the exact clips from the separate media checkout. Each is an H.264 segmen
 | Secondary test | `sintel_1080p_h264_60s.mp4`, Sintel, Durian Open Movie Project; scaled to 1920x1080 | `b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843` |
 
 Use a new sibling directory to fetch the media, or choose a fresh directory under
-`$WORKDIR/temp` and set `MEDIA_DIR` to it. The branch also contains attributions.
+`$WORKDIR/temp` and set `MEDIA_DIR` to it. The media checkout contains `ATTRIBUTION.md` with the original sources, credits, license and clip edits.
 
 ```bash
 REPOSITORY=$(git remote get-url origin)
@@ -147,10 +153,9 @@ Run local diagnostics before drafting:
 ```
 
 `doctor` prints `ok`, `missing`, `mismatch` and `unknown` lists. Exit 0 means
-the scan completed. Use it to distinguish host prerequisites and resource
-gates from draft inputs. Missing live tools or unmet build gates still permit
-drafting. Before any live run, address all required checks and repeat with
-`"$PY" -m afdo_wf doctor --job "$JOB"` to verify local tool locks.
+the scan completed. Even if every result is `ok`, a scan without a job only
+covers host checks. Missing live tools or unmet build gates still permit
+drafting. Job readiness requires the job-specific check below.
 
 Keep the three files together in `MEDIA_DIR`, or supply a separate `--media ID=FILE` for each input. This RPi5 example uses a new draft path and an unused run directory. For RPi4, use `--platform rpi4-armv7l` and `workflow/packages/ffmpeg/package.toml`.
 
@@ -192,10 +197,37 @@ output shapes with placeholder paths. Create your own draft with `init`.
 | `repo`, `repo_id`, `buildconf` (RPi4) | Absolute path to the frozen repository, its recorded identifier string, and absolute path to the resolved build configuration. Obtain them from the verified freeze manifest. |
 | `frozen_packages` (RPi4) | Array of sorted `NAME-VERSION-RELEASE.ARCH SHA256HEADER` rows from the frozen installed package receipt. |
 
-Before setting `draft=false`, review the identity and authorization, exact media and tool
-hashes, source and build inputs, dependency freeze evidence, seeds and fresh output paths.
-Check `doctor --job` and dry-run again. Review the planned board operations with the user
-before executing an approved `"$PY" -m afdo_wf run --job "$JOB"`.
+### Record and verify tool locks
+
+In the prepared toolchain, locate the actual loader, libLLVM shared library,
+`llvm-profgen` and `llvm-profdata` used by the job. For each file, set
+`TOOL_FILE` to its local path:
+
+```bash
+realpath -- "$TOOL_FILE"
+sha256sum -- "$TOOL_FILE"
+```
+
+Record the resolved absolute path as `path` and the first field from
+`sha256sum` as `sha256` in `tools`. Hash the local board tools the same way
+and record their local paths as `source` and approved board paths as `target`.
+See the recorded [M1 armv7l locks](../../examples/m1-rpi4-thumb/tool-locks.json)
+and [M2a AArch64 locks](../../examples/m2a-rpi5-aarch64/tool-locks.json).
+They list file names, hashes and the board installation targets. Use your
+own local paths when filling the draft.
+
+Review the identity and authorization, exact media, source and build inputs,
+dependency freeze evidence, seeds and fresh output paths. Before setting
+`draft=false`, run and pass the job-specific check:
+
+```bash
+"$PY" -m afdo_wf doctor --job "$JOB"
+```
+
+Confirm the required host checks and every declared host and board tool lock
+appear under `ok`. Resolve any missing, mismatched or unknown required check
+first. Preview the completed job with dry-run and review the board operations
+with the user before running it.
 
 For an interrupted run, inspect the same job on the host that has the original run directory and artifacts. A report copy alone cannot provide receipt status or resume a run. Set `JOB` to that job file and `STAGE` to the stage you want to inspect.
 
