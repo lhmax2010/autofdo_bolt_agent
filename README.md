@@ -4,7 +4,8 @@ This workflow builds and profiles FFmpeg on Raspberry Pi 4 (armv7l Thumb) and
 Raspberry Pi 5 (AArch64), audits the profile-consuming build, and produces
 paired measurement reports. The [workflow skill](skills/afdo-workflow/SKILL.md)
 is the operator guide for drafting, running, restoring, and interpreting an
-experiment. The CLI implements the stage gates.
+experiment. The CLI implements the stage gates. If the workspace workflow
+entry does not register automatically, open the skill directly and follow it.
 
 ## Start from a fresh clone
 
