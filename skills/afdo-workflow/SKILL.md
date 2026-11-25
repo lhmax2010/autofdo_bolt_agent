@@ -249,6 +249,34 @@ For an explicitly approved redo on a mutable job, record why the stage must run 
 
 Record the redo receipt path and affected stages. Redo archives receipts and invalidates the selected stage and its dependents. A subsequent authorized `run` executes the plan.
 
+## Instrumented PGO
+
+Use the same setup and approval steps. Add `--method pgo` to the FFmpeg
+`init` command. Preview the draft with `run --dry-run` and inspect a stage
+with `"$PY" -m afdo_wf explain collect --method pgo`. Use `status --job` for
+the comparison names and any recorded PGO evidence. Host-only validation
+does not establish package build or board acceptance.
+
+- Prepare the source with `workflow/packages/ffmpeg/build/profiling-pgo.patch`.
+  Enter the verified snapshot configuration and metadata for the dependency
+  union. It includes the target `compiler-rt` package that matches Clang.
+- Set `afdo_profile` to the local absolute path and SHA-256 of the previous
+  locked AutoFDO profile for this board and ISA. The workflow rebuilds the
+  AFDO reference with the common dependency and command lock.
+- Enter `pgo_warning_limits` as an object with non-negative integer limits
+  for `profile-instr-unprofiled` and `profile-instr-out-of-date`. Confirm and
+  record both limits before any PGO build.
+- BASE and PGOGEN build from one frozen dependency set. Three training runs
+  use PGOGEN. The workflow checks runtime symbols, collects exact raw
+  manifests for the completed decoder, and verifies binary IDs before
+  merging with `llvm-profdata`. Setup and plug-in scanner output stays
+  outside the training input set.
+- Rebuild audits PGO consumption of the locked indexed profile, compiler
+  warnings, target code changes and per-target function coverage. Measure
+  uses separate locked plans for PGO versus BASE and PGO versus AFDO. ToS
+  is primary for the BASE comparison. Sintel results are supplementary.
+  Report the mechanism counts separately from paired timing verdicts.
+
 ## Exit codes
 
 | Code | Reason | Action |

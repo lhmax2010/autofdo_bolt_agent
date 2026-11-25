@@ -5,7 +5,7 @@ import tomllib
 from .common import require, positive, finite_tree, json_load
 
 FIELDS = {
-    '': {'schema_version','package','build_units','targets','runtime','collect','identity','consumption','command_capture','measure'},
+    '': {'schema_version','package','build_units','targets','runtime','collect','identity','consumption','command_capture','measure','pgo'},
     'package': {'name','owner','source'},
     'source': {'gerrit','commit'},
     'build_units': {'id','spec','patch','arch','isa','macros','consume_macro','profile_staging'},
@@ -17,6 +17,7 @@ FIELDS = {
     'consumption': {'diag_macro','object_to_target','record_coverage_warn_percent','sample_coverage_warn_percent','fail_on_coverage_warning'},
     'command_capture': {'method','build_config_files'},
     'measure': {'metric','better','warmup','blocks','epsilon'},
+    'pgo': {'patch','profile_staging','runtime_archive'},
 }
 
 def keys(obj, field, required=()):
@@ -44,7 +45,7 @@ def mapping(obj, label):
 
 def validate(c):
     finite_tree(c)
-    keys(c,'',FIELDS[''])
+    keys(c,'',FIELDS['']-{'pgo'})
     require(type(c['schema_version']) is int and c['schema_version']==1,'unsupported schema')
     keys(c['package'],'package',FIELDS['package']); keys(c['package']['source'],'source',FIELDS['source'])
     require(re.fullmatch('[0-9a-f]{40}',c['package']['source']['commit']) is not None,'source commit must be pinned')
@@ -101,6 +102,12 @@ def validate(c):
     positive(m['warmup'],'warmup',True,True)
     if m['blocks']!='pilot':positive(m['blocks'],'blocks',True)
     ratio(m['epsilon'],'epsilon');require(0<float(m['epsilon'])<1,'epsilon bounds')
+    if 'pgo' in c:
+        declared=c['pgo'];keys(declared,'pgo',FIELDS['pgo'])
+        for path in declared.values():relative(path)
+        require(PurePosixPath(declared['profile_staging']).name=='pgo.profdata','invalid PGO staging filename')
+        require(re.fullmatch(r'libclang_rt\.profile-(arm|aarch64)\.a',PurePosixPath(declared['runtime_archive']).name),
+                'invalid compiler-rt profile archive path')
     return c
 
 def load(path):

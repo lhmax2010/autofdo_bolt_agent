@@ -58,3 +58,8 @@ epsilon = 0.01
 
 # PM decision 2026-11-17: flag imbalance = abs(marked rounds BASE - AFDO)
 # >= max(2, ceil(0.1*N)); computed by stats, never manually supplied.
+
+[pgo]
+patch = "build/profiling-pgo.patch"
+profile_staging = "packaging/pgo.profdata"
+runtime_archive = "usr/lib64/clang/22/lib/linux/libclang_rt.profile-aarch64.a"

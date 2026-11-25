@@ -12,6 +12,8 @@ import subprocess
 import tarfile
 import time
 from . import build,buildlock,config,profgen,consumption,stats,board,scheduler,platforms
+from . import pgo
+from .pgo_live import InstrumentedPGO
 from .common import TechnicalFailure,StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
 from .transport import SDB,q,board_path
@@ -109,7 +111,7 @@ def foreground_script(control,argv,env=None,observer_cpu=0):
             'if test -n "${WF_STANDALONE_SAMPLER:-}"; then taskset -c '+str(observer_cpu)+' bash "$WF_STANDALONE_SAMPLER" '+q(control+'/telemetry.tsv')+' "$WF_CAPABILITIES" & sampler=$!; sleep 1; fi\n'+
             shlex.join(list(map(str,argv)))+' & child=$!\nwait "$child"; rc=$?\nchild=\nif test -n "$sampler"; then sleep 2; fi\nexit "$rc"\n')
 
-class Experiment:
+class Experiment(InstrumentedPGO):
     code = Path(__file__).resolve().parents[1]
 
     def __init__(self,job,job_path):
@@ -119,6 +121,7 @@ class Experiment:
         self.package=config.load(job['package']);self.inputs=config.load_inputs(job['inputs'])
         self.platform_name = job.get('platform', 'rpi4-armv7l')
         self.platform = platforms.load(self.platform_name)
+        self.method = pgo.method(job, self.package)
         unit = self.package['build_units'][0]
         require(unit['arch'] == self.platform.arch and unit['isa'] in self.platform.isas,
                 'build unit does not match board platform')
@@ -201,6 +204,8 @@ class Experiment:
         require(identity==self.job['identity'],'board identity mismatch','identity',3)
         # Check all PATH tools before root; root-only deployed files are checked next.
         deps=['bash','cat','tr','uname','sed','mkdir','sha256sum','chmod','ldd','setsid','sleep','kill','date','awk','readlink','taskset','sort','grep','stat','mv','find','tar','wc','mkfifo','cut','head','tail','tee','rm','ps','gst-launch-1.0','rpm','df']
+        if self.method == 'pgo':
+            deps.append('gst-inspect-1.0')
         if self.platform.prepare_only:
             deps.append('rmdir')
             cpuinfo = t.shell("grep -E '^(processor|CPU part|CPU implementer|CPU architecture)' /proc/cpuinfo", True)
@@ -291,7 +296,7 @@ class Experiment:
 
         for remote, action in original.items():
             label = remote.removeprefix(self.b+'/variants/'+self.job['experiment']+'-')
-            if label in ('BASE', 'BASE-r', 'AFDO'):
+            if label in ('BASE', 'BASE-r', 'AFDO', 'PGOGEN', 'PGO'):
                 tar = original.get(self.remote+'/'+label+'.tar')
                 if tar and reusable(tar['members']['']):
                     retained[remote] = action
@@ -356,7 +361,7 @@ class Experiment:
     def launch_script(self, control, argv, env):
         load_env = dict(env or {})
         observer_cpu = int(load_env.get('WF_OBSERVER_CPU', '0'))
-        if self.scripts+'/measure.sh' not in argv:
+        if not any(self.scripts+'/'+name in argv for name in ('measure.sh','pgo_count.sh')):
             load_env.update(WF_STANDALONE_SAMPLER=self.scripts+'/telemetry.sh',
                             WF_CAPABILITIES=self.scripts+'/capabilities.tsv')
         return foreground_script(control, argv, load_env, observer_cpu)
@@ -437,15 +442,21 @@ class Experiment:
         return dict(seconds=time.monotonic()-start, target_millidegrees=58000,
                     initially_at_target=len(history)==2, samples=history)
 
-    def build_variant(self,variant,out,profile=None,frozen=None):
-        j=self.job if frozen is None else {**self.job, **frozen};unit=self.package['build_units'][0];macros=dict(unit['macros'])
+    def build_variant(self,variant,out,profile=None,frozen=None,*,stage=None):
+        j=self.job if frozen is None else {**self.job, **frozen};unit=self.package['build_units'][0]
+        if pgo.method(j)=='pgo':
+            macros=pgo.macros(variant, unit, self.package['consumption']['diag_macro'])
+        else:
+            macros=dict(unit['macros'])
+            if profile:
+                macros.update(unit['consume_macro']);macros.update(self.package['consumption']['diag_macro'])
         if profile:
-            macros.update(unit['consume_macro']);macros.update(self.package['consumption']['diag_macro'])
-            shutil.copyfile(profile,Path(j['source'])/unit['profile_staging'])
+            staging=self.package['pgo']['profile_staging'] if variant=='PGO' else unit['profile_staging']
+            shutil.copyfile(profile,Path(j['source'])/staging)
         root=self.d/'roots'/(variant+'-'+str(time.time_ns()))
         env=os.environ.copy();env.update(j['build_environment'])
         argv=build.command(j['config'],j['source'],root,unit,macros,j['repo'],j['buildconf'])
-        stage = 'build' if variant == 'BASE' else 'rebuild'
+        stage = stage or ('build' if variant == 'BASE' else 'rebuild')
         r = build.execute(argv, j['source'], self.w, out/'execution', env, host=j.get('host'),
                           workflow=j['experiment'], stage=stage, invocation=variant)
         require(r['status']=='success','GBS failure: '+str(out/'execution/result.json'),r.get('reason','environment'))
@@ -515,11 +526,21 @@ class Experiment:
                 args += ['--define', f'{macro} {value}']
             result = self.host([*args, '-q', '--buildrequires', spec], out/'build-requires')
             return sorted(result.stdout.decode().splitlines())
-        base = requirements({})
-        afdo = requirements({**unit['consume_macro'], **self.package['consumption']['diag_macro']})
-        save(out/'build-requires/requirements.json', dict(base=base, afdo=afdo))
-        require(base and base == afdo, 'BASE and AFDO BuildRequires differ')
-        argv = build.command(j['config'], j['source'], root, unit, unit['macros'])
+        if pgo.method(j)=='pgo':
+            variants = {name: requirements(pgo.macros(name, unit, self.package['consumption']['diag_macro']))
+                        for name in pgo.VARIANTS}
+            union = sorted({item for names in variants.values() for item in names})
+            save(out/'build-requires/requirements.json', dict(variants=variants, union=union))
+            require(union and all(names == union for names in variants.values()),
+                    'each PGO build must resolve the same four-variant dependency union')
+            resolve_macros = pgo.macros('BASE', unit, self.package['consumption']['diag_macro'])
+        else:
+            base = requirements({})
+            afdo = requirements({**unit['consume_macro'], **self.package['consumption']['diag_macro']})
+            save(out/'build-requires/requirements.json', dict(base=base, afdo=afdo))
+            require(base and base == afdo, 'BASE and AFDO BuildRequires differ')
+            resolve_macros = unit['macros']
+        argv = build.command(j['config'], j['source'], root, unit, resolve_macros)
         resolved = build.execute(argv, j['source'], self.w, receipt, env, host=j.get('host'),
                                  workflow=j['experiment'], stage='build', invocation='dependency-resolution')
         require(resolved['status'] == 'success', 'online dependency-resolution build failed: '+str(receipt/'result.json'), resolved.get('reason', 'environment'))
@@ -583,6 +604,8 @@ class Experiment:
         if self.platform.prepare_only:
             env = dict(WF_RUNTIME_LIB=self.platform.runtime_lib, WF_PERF_LIB=self.b + '/' + self.platform.perf_lib,
                        WF_OBSERVER_CPU=str(self.platform.observer_cpu))
+        if deployment is not None and deployment.get('variant') == 'PGOGEN':
+            env = {**(env or {}), 'LLVM_PROFILE_FILE': remote+'/setup/%m-%p.profraw'}
         return argv, env
 
     def oracle(self,name,x,deployment,out):
@@ -730,6 +753,24 @@ class Experiment:
         save(out/'buildlock.json',comparisons);require(all(x['passed'] for x in comparisons.values()),'build-lock gate failed')
         identity=lambda v:{t:{k:a[k] for k in ['sha256','debug_sha256','build_id']} for t,a in v['artifacts'].items()}
         control=buildlock.reproducible_control(identity(base),identity(repeat))
+        c=self.audit_sample_profile(base,candidate,converted,out)
+        result = dict(base_repeat=repeat,candidate=candidate,control=control,buildlock=comparisons,
+                      consumption=c,offline_reproducible=True)
+        if self.platform.prepare_only:
+            deployment = self.details(store, 'deploy')
+            selected = self.deploy_variant(repeat, out) if control == 'BASE-r' else deployment['deployment']
+            afdo = self.deploy_variant(candidate, out)
+            result['bound_files'] = [item['path'] for variant in (repeat, candidate) for item in variant['rpms']]
+            result['deployments'] = dict(control=selected, candidate=afdo)
+            result['oracles'] = {}
+            for label, variant in [('control', selected), ('candidate', afdo)]:
+                result['oracles'][label] = {}
+                for item in self.inputs:
+                    actual = self.oracle('audit-'+label+'-'+item['id'], item, variant, out)
+                    board.oracle_check(deployment['oracles'][item['id']], actual)
+                    result['oracles'][label][item['id']] = actual
+        return result
+    def audit_sample_profile(self,base,candidate,converted,out):
         src=Path(candidate['build_source']);remarks=[]
         for prefix in self.package['consumption']['object_to_target']:
             remarks.extend((str(p.relative_to(src)),str(p)) for p in (src/prefix).rglob('*.opt.yaml'))
@@ -752,22 +793,7 @@ class Experiment:
         c=consumption.evaluate(list(base['artifacts']),self.package['consumption']['object_to_target'],remarks,source_commands,
             converted['lock']['sha256'],staged,base['text'],candidate['text'],option_path)
         save(out/'consumption.json',c);require(c['passed'],'consumption gate failed')
-        result = dict(base_repeat=repeat,candidate=candidate,control=control,buildlock=comparisons,
-                      consumption=c,offline_reproducible=True)
-        if self.platform.prepare_only:
-            deployment = self.details(store, 'deploy')
-            selected = self.deploy_variant(repeat, out) if control == 'BASE-r' else deployment['deployment']
-            afdo = self.deploy_variant(candidate, out)
-            result['bound_files'] = [item['path'] for variant in (repeat, candidate) for item in variant['rpms']]
-            result['deployments'] = dict(control=selected, candidate=afdo)
-            result['oracles'] = {}
-            for label, variant in [('control', selected), ('candidate', afdo)]:
-                result['oracles'][label] = {}
-                for item in self.inputs:
-                    actual = self.oracle('audit-'+label+'-'+item['id'], item, variant, out)
-                    board.oracle_check(deployment['oracles'][item['id']], actual)
-                    result['oracles'][label][item['id']] = actual
-        return result
+        return c
     def timed(self,name,x,deployment,out,preflight):
         remote=self.remote+'/'+name
         env=self.workload_environment(deployment, self.scripts+'/'+deployment['variant']+'-manifest.json')
@@ -806,40 +832,56 @@ class Experiment:
             candidate=self.deploy_variant(rebuilt['candidate'],out);candidate['variant']='AFDO'
             if rebuilt['control']=='BASE-r':
                 deployment=self.deploy_variant(rebuilt['base_repeat'],out);deployment['variant']='BASE-r'
-        comparisons={};oracles={};rows=[]
+        oracles={}
         for label,dep in [('control',deployment),('candidate',candidate)]:
             for x in self.inputs:oracles['pre-'+label+'-'+x['id']]=self.oracle('pre-'+label+'-'+x['id'],x,dep,out)
         # Failure cleanup acceptance is an independent job and must finish before
         # this function creates any formal comparison plan.
         injection=self.failure_cleanup_test(out,preflight,deployment)
         check=self.telemetry_check_test(out,preflight,deployment)
+        comparisons,rows=self.measure_pairs(deployment,candidate,out,preflight)
+        for label,dep in [('control',deployment),('candidate',candidate)]:
+            for x in self.inputs:oracles['post-'+label+'-'+x['id']]=self.oracle('post-'+label+'-'+x['id'],x,dep,out)
+        return dict(comparisons=comparisons,oracles=oracles,rounds=rows,injection=injection,telemetry_check=check)
+    def measure_pairs(self,deployment,candidate,out,preflight,*,group=None,seed_offset=0,primary=True):
+        comparisons={};rows=[]
+        labels=dict(BASE='BASE', AFDO='AFDO') if group is None else dict(
+            BASE=deployment['variant'], AFDO=candidate['variant'])
+        deployments={labels['BASE']:deployment,labels['AFDO']:candidate}
+        prefix='' if group is None else group+'-'
         tests=sorted((x for x in self.inputs if x['role'] in ['test','test-secondary']),key=lambda x:x['role']!='test')
         for ix,x in enumerate(tests):
             pilots=[]
+            label = prefix+x['id']
+            paired_counters=[]
             for i in range(10):
-                pilots.append(self.timed('pilot-'+x['id']+'-'+str(i),x,deployment,out,preflight))
+                pilots.append(self.timed('pilot-'+label+'-'+str(i),x,deployment,out,preflight))
             n=stats.budget([r['wall_seconds'] for r in pilots])
-            seed=self.job['order_seed']+ix;bootstrap_seed=self.job['bootstrap_seed']+ix
-            plan=dict(input=x,control=deployment['variant'],candidate='AFDO',N=n,warmup=self.package['measure']['warmup'],
-                      order=stats.order(n,seed),order_seed=seed,bootstrap_seed=bootstrap_seed,
+            seed=self.job['order_seed']+seed_offset+ix
+            bootstrap_seed=self.job['bootstrap_seed']+seed_offset+ix
+            order=stats.order(n,seed, tuple(deployments))
+            plan=dict(input=x,control=deployment['variant'],candidate=candidate['variant'],N=n,warmup=self.package['measure']['warmup'],
+                      order=order,order_seed=seed,bootstrap_seed=bootstrap_seed,
                       epsilon=self.package['measure']['epsilon'],analysis_sha256=sha256(Path(stats.__file__)),
-                      registered_time=time.time(),primary=x['role']=='test',multiple_comparison_correction=False)
+                      registered_time=time.time(),primary=primary and x['role']=='test',multiple_comparison_correction=False)
             planfile=out/(x['id']+'-plan.json');save(planfile,plan)
             save(out/(x['id']+'-plan-lock.json'),dict(sha256=sha256(planfile),time=time.time()))
             for warm in range(plan['warmup']):
-                for label,dep in [('BASE',deployment),('AFDO',candidate)]:
-                    self.timed('warm-'+x['id']+'-'+str(warm)+'-'+label,x,dep,out,preflight)
+                for role,dep in deployments.items():
+                    self.timed('warm-'+label+'-'+str(warm)+'-'+role,x,dep,out,preflight)
             blocks=[]
             for i,order in enumerate(plan['order'],1):
                 checkpoint=list(self.cleanup.data['cleanup_pending'])
-                def one(label,attempt):
-                    dep=deployment if label=='BASE' else candidate
-                    row=self.timed('formal-'+x['id']+'-'+str(i)+'-try'+str(attempt)+'-'+label,x,dep,out,preflight)
+                def one(role,attempt):
+                    dep=deployments[role]
+                    row=self.timed('formal-'+label+'-'+str(i)+'-try'+str(attempt)+'-'+role,x,dep,out,preflight)
+                    if group is not None:
+                        row['comparison']=group
                     row.update(block=i,input=x['id'],attempt=attempt)
                     return row
                 def failed(attempt,pair,error):
                     failed_dir=out/(x['id']+'-block-'+str(i))/('failed-attempt-'+str(attempt))
-                    archived=preserve_partial(out,'formal-'+x['id']+'-'+str(i)+'-try'+str(attempt)+'-',failed_dir)
+                    archived=preserve_partial(out,'formal-'+label+'-'+str(i)+'-try'+str(attempt)+'-',failed_dir)
                     save(failed_dir/'failure.json',dict(attempt=attempt,partial=pair,error=str(error),archived=archived))
                     save(out/(x['id']+'-'+str(i)+'-failed-'+str(attempt)+'.json'),dict(attempt=attempt,partial=pair,error=str(error),archive=str(failed_dir)))
                     for action in self.cleanup.data['cleanup_pending']:
@@ -856,19 +898,19 @@ class Experiment:
                         if a['kind']=='run' and Path(a['receipt']).exists():self.cleanup.reconcile_parent(a['receipt'])
                 pair=paired_block(order,one,failed)
                 rows.extend(pair.values());save(out/'rounds.json',rows)
-                blocks.append(dict(id=i,complete=True,correctness=True,control=pair['BASE']['wall_seconds'],candidate=pair['AFDO']['wall_seconds'],
-                    control_flag=pair['BASE']['telemetry']['classification'],candidate_flag=pair['AFDO']['telemetry']['classification']))
+                control_round,candidate_round=(pair[labels[role]] for role in ('BASE','AFDO'))
+                blocks.append(dict(id=i,complete=True,correctness=True,control=control_round['wall_seconds'],
+                    candidate=candidate_round['wall_seconds'],control_flag=control_round['telemetry']['classification'],
+                    candidate_flag=candidate_round['telemetry']['classification']))
+                paired_counters.append({
+                    name:dict(cycles=row['perf']['cycles'],task_clock_ms=row['perf']['task-clock'])
+                    for name,row in [('control',control_round),('candidate',candidate_round)]})
                 save(out/(x['id']+'-blocks.json'),blocks)
             result=stats.analyze(blocks,n,bootstrap_seed,plan['epsilon'])
-            freq=stats.effective_frequency([dict(control=dict(cycles=next(r for r in rows if r['input']==x['id'] and r['block']==i and r['variant']==deployment['variant'])['perf']['cycles'],
-                task_clock_ms=next(r for r in rows if r['input']==x['id'] and r['block']==i and r['variant']==deployment['variant'])['perf']['task-clock']),
-                candidate=dict(cycles=next(r for r in rows if r['input']==x['id'] and r['block']==i and r['variant']=='AFDO')['perf']['cycles'],
-                task_clock_ms=next(r for r in rows if r['input']==x['id'] and r['block']==i and r['variant']=='AFDO')['perf']['task-clock'])) for i in range(1,n+1)])
+            freq=stats.effective_frequency(paired_counters)
             comparisons[x['id']]=dict(plan=plan,pilots=pilots,statistics=result,effective_frequency=freq)
             save(out/'comparisons.json',comparisons)
-        for label,dep in [('control',deployment),('candidate',candidate)]:
-            for x in self.inputs:oracles['post-'+label+'-'+x['id']]=self.oracle('post-'+label+'-'+x['id'],x,dep,out)
-        return dict(comparisons=comparisons,oracles=oracles,rounds=rows,injection=injection,telemetry_check=check)
+        return comparisons,rows
     def failure_cleanup_test(self,out,preflight,deployment):
         """A separate live process/session, never part of formal result receipts."""
         errors=[]
@@ -978,6 +1020,16 @@ class Experiment:
         inputs+=list((Path(self.job['package']).parent/'workloads').glob('*'))
         handlers=dict(preflight=self.preflight,build=self.build_base,deploy=self.deploy,collect=self.collect,
                       convert=self.convert,rebuild=self.rebuild,measure=self.measure,report=self.report)
+        method=pgo.method(self.job,self.package)
+        if method=='pgo':
+            pgo.validate_thresholds(self.job.get('pgo_warning_limits'))
+            archive=pgo.archive_lock(self.job.get('afdo_profile'))
+            patch=Path(self.job['package']).parent/self.package['pgo']['patch']
+            require(sha256(self.job['patch'])==sha256(patch),'PGO spec patch lock mismatch','identity',3)
+            inputs.append(archive)
+            handlers=dict(preflight=self.pgo_preflight,build=self.pgo_build,deploy=self.pgo_deploy,
+                          collect=self.pgo_collect,convert=self.pgo_convert,rebuild=self.pgo_rebuild,
+                          measure=self.pgo_measure,report=self.pgo_report)
         from .stages import RUN_STAGES
         stages = list(RUN_STAGES)
         require(stop_after is None or stop_after in stages, 'invalid live stop stage')
@@ -985,7 +1037,7 @@ class Experiment:
             stages = stages[:stages.index(stop_after)+1]
         if 'platform' in self.job:
             inputs.append(platforms.profile_path(self.platform_name))
-        if self.platform.prepare_only:
+        if self.platform.prepare_only or method=='pgo':
             inputs.extend([self.job['config'], self.job['snapshot_evidence'],
                            Path(self.job['source']) / self.package['build_units'][0]['spec']])
             inputs.extend(item['source'] for item in self.job['board_tools'])
@@ -993,7 +1045,7 @@ class Experiment:
             save(self.d/'progress.json',dict(stage=stage,status=status,time=time.time(),pid=os.getpid()))
         result={'status':'failed','start':time.time()}
         try:
-            if self.platform.prepare_only:
+            if self.platform.prepare_only or method=='pgo':
                 build.wait_for_host(self.w, self.d/('host-gate-'+str(time.time_ns())+'.json'))
             from .receipts import Store
             store = Store(self.d/'receipts')

@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
-from . import config, build, buildlock, profgen, consumption, doctor, job_commands, report, scheduler
+from . import config, build, buildlock, profgen, consumption, doctor, job_commands, pgo, report, scheduler
 from .common import GateError, StopRequested, canonical, require, json_load, save, sha256
 from .exits import EXIT_CODES, failure_record
 from .receipts import Store
@@ -112,6 +112,11 @@ def execute(args, job, selected, package, inputs, output, receipts):
     require(output and receipts and package, 'job needs package, output and receipt paths')
     require(not job.get('draft'), 'complete the job draft and set draft=false before running')
     job_commands.validate_locks(job)
+    if pgo.method(job) == 'pgo':
+        require(job.get('live'), 'instrumented PGO requires a live job')
+        pgo.method(job, config.load(package))
+        pgo.validate_thresholds(job.get('pgo_warning_limits'))
+        pgo.archive_lock(job.get('afdo_profile'))
     if job.get('live'):
         require(args.stage == 'run', 'live experiment starts through run')
         require(receipts.is_relative_to(Path(job['workdir']).resolve()), 'receipt directory outside workdir')
@@ -158,6 +163,7 @@ def main(argv=None):
     parser.add_argument('--inputs')
     parser.add_argument('--output')
     parser.add_argument('--receipts')
+    parser.add_argument('--method', choices=('autofdo','pgo'), help='Method for init or explain')
     parser.add_argument('--platform', help='Board profile when initializing a job')
     parser.add_argument('--workdir')
     parser.add_argument('--experiment')
@@ -169,6 +175,7 @@ def main(argv=None):
     parser.add_argument('--stop-after', choices=[*RUN_STAGES, *STOP_ALIASES])
     args = parser.parse_args(argv)
     try:
+        require(args.method is None or args.stage in ('init','explain'), '--method requires init or explain', 'usage')
         require(args.stage == 'explain' or args.explained_stage is None, 'unexpected stage argument', 'usage')
         require(not args.stop_after or args.stage == 'run', '--stop-after requires run', 'usage')
         require(not args.reason or args.redo, '--reason requires --redo', 'usage')
@@ -178,7 +185,7 @@ def main(argv=None):
         if args.stage == 'explain':
             require(args.explained_stage, 'explain requires a stage', 'usage')
             name = STOP_ALIASES.get(args.explained_stage, args.explained_stage)
-            print(canonical(job_commands.explain(name)), end='')
+            print(canonical(job_commands.explain(name, args.method or 'autofdo')), end='')
             return EXIT_CODES['success']
         if args.stage == 'init':
             print(canonical(job_commands.initialize(args)), end='')
@@ -206,7 +213,10 @@ def main(argv=None):
             print(canonical(dict(status='invalidated', stages=[s for s in DAG if s in affected], **binding)), end='')
         elif args.stage == 'status':
             require(output and receipts, 'job needs output and receipt paths')
-            print(canonical(job_commands.status(output, receipts)), end='')
+            status = job_commands.status(output, receipts)
+            if pgo.method(job) == 'pgo':
+                status.update(method='pgo', variants=list(pgo.VARIANTS), comparisons=pgo.comparison_metadata())
+            print(canonical(status), end='')
         else:
             selected = list(DAG if args.dry_run else RUN_STAGES) if args.stage == 'run' else [args.stage]
             if args.stop_after:

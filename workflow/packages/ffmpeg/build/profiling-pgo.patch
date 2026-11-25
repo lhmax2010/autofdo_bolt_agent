@@ -1,0 +1,68 @@
+--- a/packaging/ffmpeg.spec
++++ b/packaging/ffmpeg.spec
+@@ -1,3 +1,29 @@
++# Profiling and optional sample-profile consumption (non-LTO).
++%{!?profile_isa:%global profile_isa thumb}
++%global profile_flags -fdebug-info-for-profiling -funique-internal-linkage-names
++%global profile_use %{nil}
++%if 0%{?with_autofdo}
++Source2000: autofdo.extbinary
++%global profile_use -fprofile-sample-use=%{SOURCE2000}
++%if 0%{?afdo_diag}
++%global profile_use %{profile_use} -fsave-optimization-record=yaml -foptimization-record-passes=sample-profile
++%endif
++%endif
++%global pgo_compile %{nil}
++%global pgo_link %{nil}
++%if 0%{?with_pgo_deps} || 0%{?with_pgogen} || 0%{?with_pgo}
++BuildRequires: compiler-rt = 22.1.8-4.1
++%endif
++%if 0%{?with_pgogen}
++%global pgo_compile -fprofile-generate
++%global pgo_link -fprofile-generate
++%endif
++%if 0%{?with_pgo}
++Source2001: pgo.profdata
++%global pgo_compile -fprofile-use=%{SOURCE2001}
++%endif
++BuildRequires: clang
++
+ Name:       ffmpeg
+ Summary:    AV codec lib
+ Version:    8.0.1
+@@ -230,20 +256,32 @@
+ %endif
+
+ CFLAGS="%{optflags} -fPIC -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" "; export CFLAGS
+-export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV"
++export CFLAGS="$CFLAGS -D__TIZEN__ -DTIZEN_FEATURE_LIBAV %{profile_flags} %{profile_use}"
++%ifarch armv7l
++%if "%{profile_isa}" == "a32"
++export CFLAGS="$CFLAGS -marm"
++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --disable-thumb "
++%else
++export CFLAGS="$CFLAGS -mthumb"
++CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-thumb "
++%endif
++%endif
+
++WF_EXTRA_CFLAGS="%{pgo_compile}"
+ %ifarch %{arm}
+-export CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS--extra-cflags=-mfpu=neon"
++WF_EXTRA_CFLAGS="-mfpu=neon $WF_EXTRA_CFLAGS"
+ %endif
+
+ export AR=%{__ar} RANLIB=%{__ranlib}
+-export CC=%{__cc} CXX=%{__cxx}
++export CC=clang CXX=clang++
+
+ ./configure \
+     --prefix=%{_prefix} \
+     --libdir=%{_libdir} \
+     --shlibdir=%{_libdir} \
+     --datadir=%{_datadir}/%{name} \
++    --extra-cflags="$WF_EXTRA_CFLAGS" \
++    --extra-ldflags="-Wl,--build-id=sha1 %{pgo_link}" \
+     $CONFIGURE_OPTIONS
+
+ %build
