@@ -2,7 +2,7 @@
 from pathlib import Path
 import re
 
-from . import config, host_build, platforms
+from . import config, host_build, pgo, platforms
 from .common import GateError, atomic_write, canonical, json_load, require, sha256
 from .exits import EXIT_CODES
 from .receipts import Store
@@ -92,6 +92,8 @@ def status(output, receipts):
                         and isinstance(record.get('inputs'), dict) and isinstance(record.get('upstream'), dict),
                         'malformed stage receipt: ' + str(path))
                 row['recorded_status'] = record['status']
+                if 'pgo_evidence' in record.get('details', {}):
+                    row['pgo_evidence'] = record['details']['pgo_evidence']
                 if 'gbs_waits' in record:
                     row['gbs_waits'] = record['gbs_waits']
                 mismatches = [name for name, expected in record['inputs'].items() if fingerprint(name) != expected]
@@ -168,6 +170,7 @@ def initialize(args):
     package = config.load(locks['package']['path'])
     platform = platforms.load(args.platform)
     platform_package(package, platform)
+    method = pgo.method(dict(method=getattr(args, 'method', None) or 'autofdo'), package)
     inputs = config.load_inputs(locks['inputs']['path'])
     require(inputs and any(r['role']=='train' for r in inputs) and any(r['role']=='test' for r in inputs),
             'at least a training input and a primary test input are required')
@@ -195,7 +198,7 @@ def initialize(args):
     required = ['serial', 'identity (exact model, arch, kernel, build_id)', 'tools', 'board_tools',
                 'source', 'patch', 'config', 'build_environment', 'rpm_packages', 'profgen',
                 'profdata', 'order_seed', 'bootstrap_seed']
-    if platform.prepare_only:
+    if platform.prepare_only or method == 'pgo':
         required += ['rpmspec', 'snapshots', 'snapshot_evidence']
     else:
         required += ['repo', 'repo_id', 'buildconf', 'frozen_packages']
@@ -203,6 +206,9 @@ def initialize(args):
                package=locks['package']['path'], inputs=locks['inputs']['path'], platform=args.platform,
                build_unit=package['build_units'][0]['id'], media=media, config_sha256=locks,
                missing_for_run=required)
+    if method == 'pgo':
+        job['method'] = method
+        required += ['afdo_profile', 'pgo_warning_limits']
     atomic_write(path, canonical(job), exclusive=True)
     return dict(job=str(path), sha256=sha256(path), draft=True, missing_for_run=required)
 
@@ -218,6 +224,7 @@ def validate_locks(job):
 def plan(args, job, selected):
     package_path, inputs_path, output, receipts = paths(args, job)
     package = config.load(package_path) if package_path else None
+    method = pgo.method(job, package)
     inputs = config.load_inputs(inputs_path) if inputs_path else []
     validate_locks(job)
     platform = platforms.load(job.get('platform', 'rpi4-armv7l'))
@@ -229,7 +236,7 @@ def plan(args, job, selected):
     collection = [row for row in inputs if row['role']=='train']
     measurement = [row for row in inputs if row['role'] in ('test', 'test-secondary')]
     for name in selected:
-        stage = STAGES[name]
+        stage = pgo.stage_metadata(name, STAGES[name]) if method == 'pgo' else STAGES[name]
         state = current['stages'][name] if current else {}
         found = state.get('status', 'pending')
         action = ('restore-pending' if found=='cleanup_pending' else
@@ -249,6 +256,10 @@ def plan(args, job, selected):
                 specific['gbs_lock'] = str(host_build.lock_path(build_settings['workdir'], build_settings.get('host')))
             specific['build_units'] = [{k:u[k] for k in ('id', 'arch', 'isa', 'spec')} for u in
                                        package['build_units']] if package else []
+            if method == 'pgo' and package:
+                specific['declared_pgo_patch'] = str(Path(package_path).parent / package['pgo']['patch'])
+                specific['pgo_warning_limits'] = job.get('pgo_warning_limits')
+                specific['afdo_profile'] = job.get('afdo_profile')
         if name=='preflight':
             specific['tool_locks'] = job.get('tools', {})
         if name=='measure':
@@ -267,7 +278,7 @@ def plan(args, job, selected):
             action = 'cleanup-on-exit'
         board_actions = stage['board_operations'] if job.get('live') and action in (
             'run', 'restore-pending', 'cleanup-on-exit') else []
-        if name == 'rebuild' and not platform.prepare_only:
+        if name == 'rebuild' and not platform.prepare_only and method != 'pgo':
             board_actions = []
         report.append(dict(stage=name, action=action, recorded_state=found, declared_inputs=common|specific,
                            board_actions_this_stage=board_actions,
@@ -279,16 +290,24 @@ def plan(args, job, selected):
                    'journal root and governor and validate tools',
                    'rehydrate reusable deployments when present',
                    'restore owned state before reporting or exit']
+    pgo_summary = dict(method=method, variants=list(pgo.VARIANTS), comparisons=pgo.comparison_metadata(),
+                       missing_for_run=job.get('missing_for_run', [])) if method == 'pgo' else {}
     return dict(mode='dry-run', board_contact=False, draft=job.get('draft', False), live=job.get('live', False),
                 platform=job.get('platform','rpi4-armv7l'), model=platform.model, arch=platform.arch,
                 serial=job.get('serial'), output=str(output) if output else None,
                 planned_live_session=session,
-                cleanup_pending=current['cleanup_pending'] if current else 0, stages=report)
+                cleanup_pending=current['cleanup_pending'] if current else 0, stages=report, **pgo_summary)
 
 
-def explain(name):
-    result = dict(stage=name, **STAGES[name], receipt_fields=RECEIPT_FIELDS,
+def explain(name, method='autofdo'):
+    description = pgo.stage_metadata(name, STAGES[name]) if method == 'pgo' else STAGES[name]
+    result = dict(stage=name, **description, receipt_fields=RECEIPT_FIELDS,
                   redo_field='redo is present for a replacement receipt and binds the invalidation receipt by SHA')
+    if method == 'pgo':
+        result['method'] = method
+        result['receipt_details'] = description['outputs']
+        if name in ('measure','report'):
+            result['comparisons'] = pgo.comparison_metadata()
     if name in host_build.BUILD_STAGES:
         result['receipt_fields'] = [*RECEIPT_FIELDS, 'gbs_waits (when GBS was attempted)']
         result['gbs_waits'] = dict(

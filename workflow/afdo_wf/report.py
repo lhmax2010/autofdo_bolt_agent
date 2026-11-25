@@ -16,6 +16,11 @@ def write(directory,data):
                  and not data['cleanup_pending'] and all(q.get('publishable') is True for q in data['quality'].values()))
     if not publishable:
         data['statistics']={**data['statistics'],'primary':{**primary,'verdict':'inconclusive','publication_blocked':True}}
+    if data.get('method') == 'pgo':
+        if not publishable:
+            for inputs in data['comparisons'].values():
+                for row in inputs.values():
+                    row['statistics']['primary'].update(verdict='inconclusive', publication_blocked=True)
     data['publishable']=publishable
     directory=Path(directory)
     save(directory/'report.json',data)
@@ -26,4 +31,17 @@ def write(directory,data):
     for k in sorted(REQUIRED):
         value=json.dumps(data[k],ensure_ascii=False,allow_nan=False).replace('|','\\|').replace('\n',' ')
         lines.append('| '+k+' | '+value+' |')
+    if data.get('method') == 'pgo':
+        lines.extend(['', '## Paired comparisons', '',
+                      '| Comparison | Input | N | Relative time | Bootstrap 95% CI | Verdict |',
+                      '| --- | --- | ---: | ---: | --- | --- |'])
+        for group, inputs in data['comparisons'].items():
+            for name, row in inputs.items():
+                stat = row['statistics']['primary']
+                lo, hi = stat['bootstrap_CI95']
+                lines.append(f"| {group} | {name} | {row['plan']['N']} | {stat['estimate']:+.3%} | "
+                             f"[{lo:+.3%}, {hi:+.3%}] | {stat['verdict']} |")
+        lines.extend(['', '## Mechanism counts', '',
+                      'Diagnostic counts are collected separately and never used for the paired verdicts.', '',
+                      '```json', json.dumps(data['mechanism_counts'], indent=2, sort_keys=True), '```'])
     atomic_write(directory/'report.md','\n'.join(lines)+'\n');return data
