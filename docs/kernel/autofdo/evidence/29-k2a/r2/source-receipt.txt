@@ -1,0 +1,306 @@
+     1	# SPDX-License-Identifier: GPL-2.0-only
+     2	menu "GCOV-based kernel profiling"
+     3	
+     4	config GCOV_KERNEL
+     5		bool "Enable gcov-based kernel profiling"
+     6		depends on DEBUG_FS
+     7		depends on !ARCH_WANTS_NO_INSTR || CC_HAS_NO_PROFILE_FN_ATTR
+     8		select CONSTRUCTORS
+     9		default n
+    10		help
+    11		This option enables gcov-based code profiling (e.g. for code coverage
+    12		measurements).
+    13	
+    14		If unsure, say N.
+    15	
+    16		Additionally specify CONFIG_GCOV_PROFILE_ALL=y to get profiling data
+    17		for the entire kernel. To enable profiling for specific files or
+    18		directories, add a line similar to the following to the respective
+    19		Makefile:
+    20	
+    21		For a single file (e.g. main.o):
+    22		        GCOV_PROFILE_main.o := y
+    23	
+    24		For all files in one directory:
+    25		        GCOV_PROFILE := y
+    26	
+    27		To exclude files from being profiled even when CONFIG_GCOV_PROFILE_ALL
+    28		is specified, use:
+    29	
+    30		        GCOV_PROFILE_main.o := n
+    31		and:
+    32		        GCOV_PROFILE := n
+    33	
+    34		Note that the debugfs filesystem has to be mounted to access
+    35		profiling data.
+    36	
+    37	config ARCH_HAS_GCOV_PROFILE_ALL
+    38		def_bool n
+    39	
+    40	config GCOV_PROFILE_ALL
+    41		bool "Profile entire Kernel"
+    42		depends on !COMPILE_TEST
+    43		depends on GCOV_KERNEL
+    44		depends on ARCH_HAS_GCOV_PROFILE_ALL
+    45		default n
+    46		help
+    47		This options activates profiling for the entire kernel.
+    48	
+    49		If unsure, say N.
+    50	
+    51		Note that a kernel compiled with profiling flags will be significantly
+    52		larger and run slower. Also be sure to exclude files from profiling
+    53		which are not linked to the kernel image to prevent linker errors.
+    54	
+    55	endmenu
+     1	# SPDX-License-Identifier: GPL-2.0
+     2	ccflags-y := -DSRCTREE='"$(srctree)"' -DOBJTREE='"$(objtree)"'
+     3	
+     4	obj-y := base.o fs.o
+     5	obj-$(CONFIG_CC_IS_GCC) += gcc_base.o gcc_4_7.o
+     6	CFLAGS_gcc_base.o += -Wno-missing-prototypes -Wno-missing-declarations
+     7	obj-$(CONFIG_CC_IS_CLANG) += clang.o
+     8	CFLAGS_clang.o += -Wno-missing-prototypes -Wno-missing-declarations
+    50	#include <linux/ratelimit.h>
+    51	#include <linux/slab.h>
+    52	#include <linux/mm.h>
+    53	#include "gcov.h"
+    54	
+    55	typedef void (*llvm_gcov_callback)(void);
+    56	
+    57	struct gcov_info {
+    58		struct list_head head;
+    59	
+    60		const char *filename;
+    61		unsigned int version;
+    62		u32 checksum;
+    63	
+    64		struct list_head functions;
+    65	};
+    66	
+    67	struct gcov_fn_info {
+    68		struct list_head head;
+    69	
+    70		u32 ident;
+    71		u32 checksum;
+    72		u32 cfg_checksum;
+    73	
+    74		u32 num_counters;
+    75		u64 *counters;
+    76	};
+    77	
+    78	static struct gcov_info *current_info;
+    79	
+    80	static LIST_HEAD(clang_gcov_list);
+    81	
+    82	void llvm_gcov_init(llvm_gcov_callback writeout, llvm_gcov_callback flush)
+    83	{
+    84		struct gcov_info *info = kzalloc(sizeof(*info), GFP_KERNEL);
+    85	
+    86		if (!info)
+    87			return;
+    88	
+    89		INIT_LIST_HEAD(&info->head);
+    90		INIT_LIST_HEAD(&info->functions);
+    91	
+    92		mutex_lock(&gcov_lock);
+    93	
+    94		list_add_tail(&info->head, &clang_gcov_list);
+    95		current_info = info;
+    96		writeout();
+    97		current_info = NULL;
+    98		if (gcov_events_enabled)
+    99			gcov_event(GCOV_ADD, info);
+   100	
+   101		mutex_unlock(&gcov_lock);
+   102	}
+   103	EXPORT_SYMBOL(llvm_gcov_init);
+   104	
+   105	void llvm_gcda_start_file(const char *orig_filename, u32 version, u32 checksum)
+   106	{
+   107		current_info->filename = orig_filename;
+   108		current_info->version = version;
+   109		current_info->checksum = checksum;
+   110	}
+   111	EXPORT_SYMBOL(llvm_gcda_start_file);
+   112	
+   113	void llvm_gcda_emit_function(u32 ident, u32 func_checksum, u32 cfg_checksum)
+   114	{
+   115		struct gcov_fn_info *info = kzalloc(sizeof(*info), GFP_KERNEL);
+   116	
+   117		if (!info)
+   118			return;
+   119	
+   120		INIT_LIST_HEAD(&info->head);
+   121		info->ident = ident;
+   122		info->checksum = func_checksum;
+   123		info->cfg_checksum = cfg_checksum;
+   124		list_add_tail(&info->head, &current_info->functions);
+   125	}
+   126	EXPORT_SYMBOL(llvm_gcda_emit_function);
+   127	
+   128	void llvm_gcda_emit_arcs(u32 num_counters, u64 *counters)
+   129	{
+   130		struct gcov_fn_info *info = list_last_entry(&current_info->functions,
+   131				struct gcov_fn_info, head);
+   132	
+   133		info->num_counters = num_counters;
+   134		info->counters = counters;
+   135	}
+   136	EXPORT_SYMBOL(llvm_gcda_emit_arcs);
+   137	
+   138	void llvm_gcda_summary_info(void)
+   139	{
+   140	}
+   141	EXPORT_SYMBOL(llvm_gcda_summary_info);
+   142	
+   143	void llvm_gcda_end_file(void)
+   144	{
+   145	}
+   345	 * gcov_info_free - release memory for profiling data set duplicate
+   346	 * @info: profiling data set duplicate to free
+   347	 */
+   348	void gcov_info_free(struct gcov_info *info)
+   349	{
+   350		struct gcov_fn_info *fn, *tmp;
+   351	
+   352		list_for_each_entry_safe(fn, tmp, &info->functions, head) {
+   353			kvfree(fn->counters);
+   354			list_del(&fn->head);
+   355			kfree(fn);
+   356		}
+   357		kfree(info->filename);
+   358		kfree(info);
+   359	}
+   360	
+   361	/**
+   362	 * convert_to_gcda - convert profiling data set to gcda file format
+   363	 * @buffer: the buffer to store file data or %NULL if no data should be stored
+   364	 * @info: profiling data set to be converted
+   365	 *
+   366	 * Returns the number of bytes that were/would have been stored into the buffer.
+   367	 */
+   368	size_t convert_to_gcda(char *buffer, struct gcov_info *info)
+   369	{
+   370		struct gcov_fn_info *fi_ptr;
+   371		size_t pos = 0;
+   372	
+   373		/* File header. */
+   374		pos += store_gcov_u32(buffer, pos, GCOV_DATA_MAGIC);
+   375		pos += store_gcov_u32(buffer, pos, info->version);
+   376		pos += store_gcov_u32(buffer, pos, info->checksum);
+   377	
+   378		list_for_each_entry(fi_ptr, &info->functions, head) {
+   379			u32 i;
+   380	
+   381			pos += store_gcov_u32(buffer, pos, GCOV_TAG_FUNCTION);
+   382			pos += store_gcov_u32(buffer, pos, 3);
+   383			pos += store_gcov_u32(buffer, pos, fi_ptr->ident);
+   384			pos += store_gcov_u32(buffer, pos, fi_ptr->checksum);
+   385			pos += store_gcov_u32(buffer, pos, fi_ptr->cfg_checksum);
+   386			pos += store_gcov_u32(buffer, pos, GCOV_TAG_COUNTER_BASE);
+   387			pos += store_gcov_u32(buffer, pos, fi_ptr->num_counters * 2);
+   388			for (i = 0; i < fi_ptr->num_counters; i++)
+   389				pos += store_gcov_u64(buffer, pos, fi_ptr->counters[i]);
+   390		}
+   391	
+   392		return pos;
+   393	}
+42: *   object files. Used only when gcov_persist=1.
+72:static int gcov_persist = 1;
+74:static int __init gcov_persist_setup(char *str)
+79:		pr_warn("invalid gcov_persist parameter '%s'\n", str);
+82:	gcov_persist = val;
+83:	pr_info("setting gcov_persist to %d\n", gcov_persist);
+87:__setup("gcov_persist=", gcov_persist_setup);
+150: * gcov_iter_start - reset file iterator to starting position
+288:static int gcov_seq_open(struct inode *inode, struct file *file)
+365:static void reset_node(struct gcov_node *node)
+370:		gcov_info_reset(node->unloaded_info);
+372:		gcov_info_reset(node->loaded_info[i]);
+398:			reset_node(node);
+401:	gcov_info_reset(info);
+497:		node->links[i] = debugfs_create_symlink(deskew(basename),
+512:	.open		= gcov_seq_open,
+556:		node->dentry = debugfs_create_file(deskew(node->name), 0600,
+559:		node->dentry = debugfs_create_dir(node->name, parent->dentry);
+632: * write() implementation for reset file. Reset all profiling data to zero
+635:static ssize_t reset_write(struct file *file, const char __user *addr,
+644:			reset_node(node);
+656:/* read() implementation for reset file. Unused. */
+657:static ssize_t reset_read(struct file *file, char __user *addr, size_t len,
+664:static const struct file_operations gcov_reset_fops = {
+665:	.write	= reset_write,
+666:	.read	= reset_read,
+819:	if (gcov_persist)
+868:	 * /sys/kernel/debug/gcov will be parent for the reset control file
+871:	root_node.dentry = debugfs_create_dir("gcov", NULL);
+873:	 * Create reset file which resets all profiling counts when written
+876:	debugfs_create_file("reset", 0600, root_node.dentry, NULL,
+877:			    &gcov_reset_fops);
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/io_uring/Makefile:5:ifdef CONFIG_GCOV_PROFILE_URING
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/io_uring/Makefile:6:GCOV_PROFILE := y
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/Makefile:747:CFLAGS_GCOV	:= -fprofile-arcs -ftest-coverage
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/Makefile:749:CFLAGS_GCOV	+= -fno-tree-loop-im
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/Makefile:751:export CFLAGS_GCOV
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/scripts/Makefile.lib:153:# on variables GCOV_PROFILE_obj.o, GCOV_PROFILE and CONFIG_GCOV_PROFILE_ALL
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/scripts/Makefile.lib:158:		$(GCOV_PROFILE_$(target-stem).o)$(GCOV_PROFILE)$(if $(is-kernel-object),$(CONFIG_GCOV_PROFILE_ALL))), \
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/scripts/Makefile.lib:159:		$(CFLAGS_GCOV))
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/net/rds/Makefile:20:ifdef CONFIG_GCOV_PROFILE_RDS
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/net/rds/Makefile:21:GCOV_PROFILE := y
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/Kconfig:32:	select ARCH_HAS_GCOV_PROFILE_ALL
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/kernel/trace/Makefile:30:ifdef CONFIG_GCOV_PROFILE_FTRACE
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/kernel/trace/Makefile:31:GCOV_PROFILE := y
+385:#define __noinstr_section(section)					\
+390:#define noinstr __noinstr_section(".noinstr.text")
+402:#define __cpuidle __noinstr_section(".cpuidle.text")
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-imx/cpuidle-imx6sl.c:14:static __cpuidle int imx6sl_enter_wait(struct cpuidle_device *dev,
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-imx/cpuidle-imx5.c:11:static __cpuidle int imx5_cpuidle_enter(struct cpuidle_device *dev,
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-imx/cpuidle-imx6sx.c:33:static __cpuidle int imx6sx_enter_wait(struct cpuidle_device *dev,
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-imx/cpuidle-imx6q.c:20:static __cpuidle int imx6q_enter_wait(struct cpuidle_device *dev,
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-imx/cpuidle-imx7ulp.c:15:static __cpuidle int imx7ulp_enter_wait(struct cpuidle_device *dev,
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-s3c/cpuidle-s3c64xx.c:22:static __cpuidle int s3c64xx_enter_idle(struct cpuidle_device *dev,
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-omap2/omap-mpuss-lowpower.c:227:__cpuidle int omap4_enter_lowpower(unsigned int cpu, unsigned int power_state,
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/mach-omap2/pm34xx.c:178:__cpuidle void omap_sram_idle(bool rcuidle)
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/kernel/cpuidle.c:10:extern struct of_cpuidle_method __cpuidle_method_of_table[];
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/kernel/cpuidle.c:12:static const struct of_cpuidle_method __cpuidle_method_of_table_sentinel
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/kernel/cpuidle.c:13:	__used __section("__cpuidle_method_of_table_end");
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/kernel/cpuidle.c:28:__cpuidle int arm_cpuidle_simple_enter(struct cpuidle_device *dev, struct
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/kernel/cpuidle.c:56: * Search in the __cpuidle_method_of_table array the cpuidle ops matching the
+/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k1/kbase/source/arch/arm/kernel/cpuidle.c:63:	struct of_cpuidle_method *m = __cpuidle_method_of_table;
+1:Using gcov with the Linux kernel
+4:gcov profiling kernel support enables the use of GCC's coverage testing
+5:tool gcov_ with the Linux kernel. Coverage data of a running kernel
+6:is exported in gcov-compatible format via the "gcov" debugfs directory.
+8:directory and use gcov with the ``-o`` option as follows (requires root)::
+11:    # gcov -o /sys/kernel/debug/gcov/tmp/linux-out/kernel spinlock.c
+14:in the current directory. In addition, graphical gcov front-ends such
+25:.. _gcov: https://gcc.gnu.org/onlinedocs/gcc/Gcov.html
+92:The gcov kernel support creates the following files in debugfs:
+94:``/sys/kernel/debug/gcov``
+95:	Parent directory for all gcov-related files.
+97:``/sys/kernel/debug/gcov/reset``
+101:``/sys/kernel/debug/gcov/path/to/compile/dir/file.gcda``
+102:	The actual gcov data file as understood by the gcov
+105:``/sys/kernel/debug/gcov/path/to/compile/dir/file.gcno``
+106:	Symbolic link to a static data file required by the gcov
+115:module unload time. The gcov mechanism provides a means to collect
+121:This behavior can be deactivated by specifying the gcov_persist kernel
+124:        gcov_persist=0
+133:The gcov kernel profiling infrastructure is designed to work out-of-the
+136:must be made, depending on where the gcov tool is used:
+138:.. _gcov-test:
+140:a) gcov is run on the TEST machine
+142:    The gcov tool version on the test machine must be compatible with the
+159:.. _gcov-build:
+161:b) gcov is run on the BUILD machine
+166:    from the gcov directory in sysfs:
+170:    These files can be copied to any location on the build machine. gcov
+180:      [user@build] gcov -o /tmp/coverage/tmp/out/init main.c
+186:GCC and LLVM gcov tools are not necessarily compatible. Use gcov_ to work with
+189:.. _gcov: https://gcc.gnu.org/onlinedocs/gcc/Gcov.html
+192:Build differences between GCC and Clang gcov are handled by Kconfig. It
+193:automatically selects the appropriate gcov format depending on the detected
+229:(see :ref:`Separated build and test machines a. <gcov-test>`):
+262:(see :ref:`Separated build and test machines b. <gcov-build>`):
+269:    GCDA=/sys/kernel/debug/gcov
