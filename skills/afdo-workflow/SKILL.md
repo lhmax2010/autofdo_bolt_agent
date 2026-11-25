@@ -21,14 +21,55 @@ WORKDIR=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
 export WORKDIR
 export PYTHONPATH="$PWD/workflow"
 export PYTHONDONTWRITEBYTECODE=1
+PY=${PY:-python3}
+has_required_python() {
+  command -v "$1" >/dev/null 2>&1 &&
+    "$1" -c 'import sys; raise SystemExit(sys.version_info < (3, 11))'
+}
+if ! has_required_python "$PY"; then
+  PY=
+  for candidate in python3.11 python3.12; do
+    if has_required_python "$candidate"; then
+      PY=$candidate
+      break
+    fi
+  done
+  if [ -z "$PY" ]; then
+    printf '%s\n' 'environment [4] Python 3.11 or newer is required.' >&2
+    exit 4
+  fi
+fi
+export PY
 ```
 
-- For inspection and drafting, use Git and Python 3.11 or later.
+- For inspection and drafting, use Git and Python 3.11 or later. If setup reports exit 4, report the interpreter prerequisite and stop. Use an existing interpreter.
 - For a live run, have SDB, GBS and the Tizen build environment, the target board and image, the matching board perf tool and libraries, and the package source, build configuration and dependency inputs. Get the project-patched `llvm-profgen` and matching `llvm-profdata` from the maintainer or build them using the [repository build instructions](../../workflow/README.md#build-the-host-profile-tools).
-- You can run `status`, `explain`, `run --dry-run`, and `init` for a new draft, and read existing reports without further approval.
+- You can run `doctor`, `status`, `explain`, `run --dry-run`, and `init` for a new draft, and read existing reports without further approval.
 - Get explicit user approval for every board-contacting `run`, including a resume, for `--redo`, and for any operation that changes board state. Confirm the job and target in that approval.
 - Keep sealed configurations, receipts, and run directories read-only. Use a separate mutable run for new work. Keep workflow-owned board writes under `/opt/afdo_agent/` and preserve the cleanup journal. Do not install RPMs on the board. Delete run directories only after verified-pull through the workflow. Stop only processes owned by this experiment.
 - Launch only modes supported by the current CLI and package configuration. The archived FFmpeg examples below use AutoFDO.
+
+## Verified run environments
+
+These are the recorded combinations. Other combinations have not been verified.
+
+| Component | M1 RPi4 Thumb | M2a RPi5 AArch64 |
+| --- | --- | --- |
+| Python and GBS | Python 3.12.3, GBS 2.1.1 | Python 3.12.3, GBS 2.1.1 |
+| SDB client | Version not captured for this run | 4.2.25 |
+| Clang and host LLVM profile tools | 22.1.8 | 22.1.8 |
+| Board perf | 6.12.80, armv7l | 6.12.80, aarch64 |
+| Board image build ID | `tizen-unified-toolchain_20261104.160709` | `tizen-unified-toolchain_20261118.083201` |
+
+The verified LLVM source is Gerrit project `platform/upstream/llvm`, sandbox branch
+`sandbox/lhmax2025/afdo_profgen`, commit `c8942ae1b53099a78a97dca2b64427af6e58432b`.
+Use [workflow/README.md](../../workflow/README.md#build-the-host-profile-tools) for the build
+instructions. The recorded binaries have these SHA-256 values:
+
+| Tool | SHA-256 |
+| --- | --- |
+| `llvm-profgen` | `67ad21faba787d276a80673c1f324f7c0591d28d76bd37a8bd57de0d86426be6` |
+| `llvm-profdata` | `1700cc8924ba608c773a73b7550025189e5e2af3a994ef58ddc6009933d0977e` |
 
 ## Stage map
 
@@ -44,7 +85,7 @@ export PYTHONDONTWRITEBYTECODE=1
 | `report` | Write the report after receipt and cleanup checks. | No |
 | `restore` | Restore the original root and governor state, stop experiment-owned processes, and clean up verified-pull artifacts under the cleanup journal. | Yes, as session cleanup or pending recovery. |
 
-Use `python3 -m afdo_wf explain STAGE` for stage inputs, gates, board operations, outputs, and receipt fields. The enclosing live run can contact the board for session setup and cleanup even when it reuses stage receipts. Report any `cleanup_pending` and recheck board identity before resuming cleanup in a later authorized session.
+Use `"$PY" -m afdo_wf explain STAGE` for stage inputs, gates, board operations, outputs, and receipt fields. The enclosing live run can contact the board for session setup and cleanup even when it reuses stage receipts. Report any `cleanup_pending` and recheck board identity before resuming cleanup in a later authorized session.
 
 ## Host build coordination
 
@@ -78,7 +119,7 @@ Use these configuration files from the checkout.
 | Input manifest (`--inputs`) | `workflow/packages/ffmpeg/inputs.toml` | Same |
 | Board profile (`--platform`) | `rpi4-armv7l` in `workflow/platforms/rpi4-armv7l.toml` | `rpi5-aarch64` in `workflow/platforms/rpi5-aarch64.toml` |
 
-Obtain the exact clips from the maintainer as separate files. Each is an H.264 segment prepared from a Blender Foundation open movie under CC BY 3.0. The input manifest supplies these expected SHA-256 values. `init` checks every file.
+Obtain the exact clips from the separate media checkout. Each is an H.264 segment prepared from a Blender Foundation open movie under CC BY 3.0. The input manifest supplies these expected SHA-256 values. `init` checks every file.
 
 | Role | Clip and source | SHA-256 |
 | --- | --- | --- |
@@ -86,17 +127,37 @@ Obtain the exact clips from the maintainer as separate files. Each is an H.264 s
 | Primary test | `tos_720p_h264_60s.mp4`, Tears of Steel, Mango Open Movie Project | `280fbd41f8772491ebe784aa19a3caed3bb1e8b2e64daef1d2a5a284d1f38ad1` |
 | Secondary test | `sintel_1080p_h264_60s.mp4`, Sintel, Durian Open Movie Project; scaled to 1920x1080 | `b1c762e322350cecb04a38509050d320892ff8cbc8b2a7113418d5ecba4ad843` |
 
+Use a new sibling directory to fetch the media, or choose a fresh directory under
+`$WORKDIR/temp` and set `MEDIA_DIR` to it. The branch also contains attributions.
+
+```bash
+REPOSITORY=$(git remote get-url origin)
+MEDIA_DIR="$(dirname "$WORKDIR")/ffmpeg-media"
+git clone --single-branch --no-tags -b media "$REPOSITORY" "$MEDIA_DIR"
+```
+
 The maintainer can also provide a verified frozen dependency archive and its build configuration for jobs that use one. A new RPi5 preparation job resolves and freezes its dependencies as part of its build stage.
 
 ## Create, inspect, resume, and redo
 
+Run local diagnostics before drafting:
+
+```bash
+"$PY" -m afdo_wf doctor
+```
+
+`doctor` prints `ok`, `missing`, `mismatch` and `unknown` lists. Exit 0 means
+the scan completed. Use it to distinguish host prerequisites and resource
+gates from draft inputs. Missing live tools or unmet build gates still permit
+drafting. Before any live run, address all required checks and repeat with
+`"$PY" -m afdo_wf doctor --job "$JOB"` to verify local tool locks.
+
 Keep the three files together in `MEDIA_DIR`, or supply a separate `--media ID=FILE` for each input. This RPi5 example uses a new draft path and an unused run directory. For RPi4, use `--platform rpi4-armv7l` and `workflow/packages/ffmpeg/package.toml`.
 
 ```bash
-MEDIA_DIR="$WORKDIR/media"
 JOB="$WORKDIR/jobs/ffmpeg-rpi5.json"
 RUN_DIR="$WORKDIR/runs/ffmpeg-rpi5"
-python3 -m afdo_wf init --workdir "$WORKDIR" --platform rpi5-aarch64 \
+"$PY" -m afdo_wf init --workdir "$WORKDIR" --platform rpi5-aarch64 \
   --package workflow/packages/ffmpeg/package-rpi5.toml \
   --inputs workflow/packages/ffmpeg/inputs.toml --media-dir "$MEDIA_DIR" \
   --job "$JOB" --output "$RUN_DIR"
@@ -105,18 +166,43 @@ python3 -m afdo_wf init --workdir "$WORKDIR" --platform rpi5-aarch64 \
 If a file is absent, `init` exits 2 with `required local file missing` and the path. If the SHA differs, it exits 3 with `media SHA does not match manifest` and the input ID. In either case it leaves the draft and run paths unused. Ask for the exact file and retry init once it is available. After a successful init, preview the draft.
 
 ```bash
-python3 -m afdo_wf run --job "$JOB" --dry-run
-python3 -m afdo_wf explain preflight
+"$PY" -m afdo_wf run --job "$JOB" --dry-run
+"$PY" -m afdo_wf explain preflight
 ```
 
-Fill the draft's `missing_for_run` fields with the authorized board identity, tool locks, source and build settings, and seeds. Set `draft=false` after review. Preview again and inspect the planned inputs and board operations before an approved `python3 -m afdo_wf run --job "$JOB"`.
+The [RPi5 draft and preview](../../examples/ffmpeg-rpi5-draft/README.md) illustrate the
+output shapes with placeholder paths. Create your own draft with `init`.
+
+### Fill in the draft
+
+| Key in `missing_for_run` | Format and source |
+| --- | --- |
+| `serial` | Approved SDB selector string, with port when needed. Confirm the selected device. |
+| `identity` | Object with `model`, `arch`, `kernel` and `build_id` strings from the identity probe above. The hint beside `identity` in the list describes these fields. |
+| `tools` | Object keyed by `profgen`, `profdata`, `loader` and `libLLVM` with `{path, sha256}` entries. Use absolute local paths and lowercase SHA-256 from the prepared profile toolchain. |
+| `board_tools` | Array of `{source, target, sha256}` entries. Use absolute local copies of the correct perf and dependencies, their hashes, and platform target paths under `/opt/afdo_agent/`. |
+| `source`, `patch` | Absolute source checkout directory and patch file. Follow the package TOML revision and patch and prepare the spec in the checkout. |
+| `config` | Absolute path to the GBS configuration with pinned Tizen repositories. Obtain the architecture-specific configuration from the build environment. |
+| `build_environment` | Object of environment variable names to strings for the isolated build environment. Use the host build setup and directories for this job. |
+| `rpm_packages` | Array of exact runtime and debuginfo RPM names for the package and library targets. Check the package's spec. |
+| `profgen`, `profdata` | Non-empty argv arrays of strings from the locked toolchain. Include the loader and its library path when required, then the relevant tool path. |
+| `order_seed`, `bootstrap_seed` | Integers selected and preregistered by the experimenter before measurements. |
+| `rpmspec` (RPi5) | Non-empty argv array of strings invoking the configured `rpmspec`, with its loader and macro environment as needed. Use the Tizen build environment. |
+| `snapshots`, `snapshot_evidence` (RPi5) | Object mapping repository names to fixed snapshot IDs, and absolute path to the saved metadata and snapshot evidence. Obtain both from the selected build repositories. |
+| `repo`, `repo_id`, `buildconf` (RPi4) | Absolute path to the frozen repository, its recorded identifier string, and absolute path to the resolved build configuration. Obtain them from the verified freeze manifest. |
+| `frozen_packages` (RPi4) | Array of sorted `NAME-VERSION-RELEASE.ARCH SHA256HEADER` rows from the frozen installed package receipt. |
+
+Before setting `draft=false`, review the identity and authorization, exact media and tool
+hashes, source and build inputs, dependency freeze evidence, seeds and fresh output paths.
+Check `doctor --job` and dry-run again. Review the planned board operations with the user
+before executing an approved `"$PY" -m afdo_wf run --job "$JOB"`.
 
 For an interrupted run, inspect the same job on the host that has the original run directory and artifacts. A report copy alone cannot provide receipt status or resume a run. Set `JOB` to that job file and `STAGE` to the stage you want to inspect.
 
 ```bash
-python3 -m afdo_wf status --job "$JOB"
-python3 -m afdo_wf explain "$STAGE"
-python3 -m afdo_wf run --job "$JOB" --dry-run
+"$PY" -m afdo_wf status --job "$JOB"
+"$PY" -m afdo_wf explain "$STAGE"
+"$PY" -m afdo_wf run --job "$JOB" --dry-run
 ```
 
 Use `stage_order`, receipt paths, `input_sha`, `upstream_sha`, and failure reasons. Report any `cleanup_pending`, and verify the target's identity before any restoration in the next approved session. Follow exit 7 below if recovery is required. After approval and with matching inputs and cleared blockers, resume using the same job and `run`. The runner revalidates receipts before reuse.
@@ -124,9 +210,9 @@ Use `stage_order`, receipt paths, `input_sha`, `upstream_sha`, and failure reaso
 For an explicitly approved redo on a mutable job, record why the stage must run again.
 
 ```bash
-python3 -m afdo_wf --redo "$STAGE" --reason "$REASON" --job "$JOB"
-python3 -m afdo_wf status --job "$JOB"
-python3 -m afdo_wf run --job "$JOB" --dry-run
+"$PY" -m afdo_wf --redo "$STAGE" --reason "$REASON" --job "$JOB"
+"$PY" -m afdo_wf status --job "$JOB"
+"$PY" -m afdo_wf run --job "$JOB" --dry-run
 ```
 
 Record the redo receipt path and affected stages. Redo archives receipts and invalidates the selected stage and its dependents. A subsequent authorized `run` executes the plan.
@@ -144,7 +230,7 @@ Record the redo receipt path and affected stages. Redo archives receipts and inv
 | 6 | `board-unreachable` | Try only the target-specific disconnect and connect procedure if authorized. Stop and report if it fails. Recheck identity before any approved resume. |
 | 7 | `recovery-required` | Stop and report pending actions and their receipt. Ask the user to power-cycle the board on site. In the next approved session verify identity before restoring, and check that the journal is cleared before proceeding. |
 | 8 | `lock-timeout` | Stop and report the lock, observed owners or builders, and wait records. Leave other holders alone. |
-| 64 | `usage` | Correct the command using `python3 -m afdo_wf --help` and the relevant `explain` output. |
+| 64 | `usage` | Correct the command using `"$PY" -m afdo_wf --help` and the relevant `explain` output. |
 | 130 | `user-abort` | Report the last completed stage and cleanup state. Wait for fresh approval before resuming a live run. |
 
 ## Interpret a report

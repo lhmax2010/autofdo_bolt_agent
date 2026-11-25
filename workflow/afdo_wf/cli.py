@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
-from . import config, build, buildlock, profgen, consumption, job_commands, report, scheduler
+from . import config, build, buildlock, profgen, consumption, doctor, job_commands, report, scheduler
 from .common import GateError, StopRequested, canonical, require, json_load, save, sha256
 from .exits import EXIT_CODES, failure_record
 from .receipts import Store
@@ -151,7 +151,7 @@ class Parser(argparse.ArgumentParser):
 
 def main(argv=None):
     parser = Parser(description='Run and inspect AutoFDO experiments.')
-    parser.add_argument('stage', nargs='?', choices=[*DAG, 'run', 'status', 'init', 'explain'])
+    parser.add_argument('stage', nargs='?', choices=[*DAG, 'run', 'status', 'init', 'explain', 'doctor'])
     parser.add_argument('explained_stage', nargs='?', choices=[*DAG, *STOP_ALIASES])
     parser.add_argument('--job', help='Job JSON (draft destination for init)')
     parser.add_argument('--package')
@@ -182,6 +182,12 @@ def main(argv=None):
             return EXIT_CODES['success']
         if args.stage == 'init':
             print(canonical(job_commands.initialize(args)), end='')
+            return EXIT_CODES['success']
+        if args.stage == 'doctor':
+            job = json_load(args.job) if args.job else None
+            require(not args.job or isinstance(job, dict), 'job must be a JSON object')
+            workdir = Path(args.workdir or (job or {}).get('workdir') or Path.cwd()).resolve()
+            print(canonical(doctor.inspect(workdir, job)), end='')
             return EXIT_CODES['success']
         require(args.job and (args.stage or args.redo), 'command and --job are required', 'usage')
         job = json_load(args.job)
