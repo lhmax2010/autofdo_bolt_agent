@@ -1,0 +1,1 @@
+taskset -c 3 gst-launch-1.0 -e filesrc location=/opt/afdo_agent/inputs/tos_720p_h264_60s.mp4 \! qtdemux \! h264parse \! avdec_h264 max-threads=1 \! video/x-raw\,format=I420 \! fakesink sync=false 
