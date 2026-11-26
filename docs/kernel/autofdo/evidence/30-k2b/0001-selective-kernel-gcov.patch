@@ -1,0 +1,110 @@
+From f50a1b01b6c64188c6e2311fdcfbff6526f17f7d Mon Sep 17 00:00:00 2001
+From: Hao Lin <hao.lin@samsung.com>
+Date: Wed, 25 Nov 2026 21:53:28 -0800
+Subject: [PATCH] Enable selective kernel GCOV for the arm-rpi4 laboratory
+ build
+
+Instrument six built-in source directories selected from the sample profile. Apply the GCOV configuration fragment only to the ordinary Raspberry Pi 4 package variant.
+---
+ fs/Makefile                    | 2 ++
+ kernel/Makefile                | 2 ++
+ kernel/configs/k2b-gcov.config | 2 ++
+ kernel/locking/Makefile        | 2 ++
+ kernel/sched/Makefile          | 2 ++
+ lib/Makefile                   | 2 ++
+ mm/Makefile                    | 2 ++
+ packaging/linux-rpi.spec       | 2 +-
+ 8 files changed, 15 insertions(+), 1 deletion(-)
+ create mode 100644 kernel/configs/k2b-gcov.config
+
+diff --git a/fs/Makefile b/fs/Makefile
+index 61679fd587b7..2cf293b9e281 100644
+--- a/fs/Makefile
++++ b/fs/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
++
++GCOV_PROFILE := y
+ #
+ # Makefile for the Linux filesystems.
+ #
+diff --git a/kernel/Makefile b/kernel/Makefile
+index 87866b037fbe..81f32931f735 100644
+--- a/kernel/Makefile
++++ b/kernel/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
++
++GCOV_PROFILE := y
+ #
+ # Makefile for the linux kernel.
+ #
+diff --git a/kernel/configs/k2b-gcov.config b/kernel/configs/k2b-gcov.config
+new file mode 100644
+index 000000000000..3dc487f3a3fe
+--- /dev/null
++++ b/kernel/configs/k2b-gcov.config
+@@ -0,0 +1,2 @@
++CONFIG_GCOV_KERNEL=y
++# CONFIG_GCOV_PROFILE_ALL is not set
+diff --git a/kernel/locking/Makefile b/kernel/locking/Makefile
+index 0db4093d17b8..46e2e7e13017 100644
+--- a/kernel/locking/Makefile
++++ b/kernel/locking/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
++
++GCOV_PROFILE := y
+ # Any varying coverage in these files is non-deterministic
+ # and is generally not a function of system call inputs.
+ KCOV_INSTRUMENT		:= n
+diff --git a/kernel/sched/Makefile b/kernel/sched/Makefile
+index 976092b7bd45..86777201f4ac 100644
+--- a/kernel/sched/Makefile
++++ b/kernel/sched/Makefile
+@@ -1,5 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ 
++GCOV_PROFILE := y
++
+ # The compilers are complaining about unused variables inside an if(0) scope
+ # block. This is daft, shut them up.
+ ccflags-y += $(call cc-disable-warning, unused-but-set-variable)
+diff --git a/lib/Makefile b/lib/Makefile
+index fc878e716825..e3e36b8b8a98 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
++
++GCOV_PROFILE := y
+ #
+ # Makefile for some libs needed in the kernel.
+ #
+diff --git a/mm/Makefile b/mm/Makefile
+index d5639b036166..95c905fff950 100644
+--- a/mm/Makefile
++++ b/mm/Makefile
+@@ -1,4 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
++
++GCOV_PROFILE := y
+ #
+ # Makefile for the linux memory manager.
+ #
+diff --git a/packaging/linux-rpi.spec b/packaging/linux-rpi.spec
+index 8b14be76d64f..a77f5403cae6 100644
+--- a/packaging/linux-rpi.spec
++++ b/packaging/linux-rpi.spec
+@@ -190,7 +190,7 @@ for target in %{variant} %{variant}-rt; do
+ 
+     case $target in
+ 	%{variant})
+-	    EXTRA_FRAGMENTS="%{?lsm_fragment}"
++	    EXTRA_FRAGMENTS="kernel/configs/k2b-gcov.config %{?lsm_fragment}"
+ 	;;
+ 	%{variant}-rt)
+ 	    EXTRA_FRAGMENTS="kernel/configs/rt.config %{?lsm_fragment}"
+-- 
+2.43.0
+
