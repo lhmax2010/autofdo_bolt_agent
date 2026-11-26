@@ -1,6 +1,6 @@
 # K2b 续：独立 K-GCOV 与宿主机重启恢复
 
-**当前停在主机 I/O 门禁。** XZ 镜像与 52 个普通模块已在冻结 buildroot 中落盘。宿主机重启后，串行恢复单元正在等 I/O 压力下降。RPi4 仍运行原 PLAT，p6 和 boot_a 尚未写入。 [证据索引](evidence/31-k2b/index.json)
+**当前等待共享主机锁。** XZ 镜像与 52 个普通模块已在冻结 buildroot 中落盘。宿主机重启后，串行恢复单元按新规则先排队获取共享锁。RPi4 仍运行原 PLAT，p6 和 boot_a 尚未写入。 [证据索引](evidence/31-k2b/index.json)
 
 ## 已完成的构建阶段
 
@@ -23,7 +23,15 @@ Base `20261030.120529` 和 Unified `20261104.125239` 远端目录返回 404。�
 
 宿主机重启前，K2b 守卫连续两次采到可用内存低于 6 GiB，随后终止打包。该构建单元峰值约 5.0 GiB，cgroup 的 OOM 和 OOM kill 都是 0。最后一份资源收据的全局可用内存约 3.6 GiB，load1 约 140。旧启动日志另有阻塞任务记录，随后记录 systemd 关机，证据不足以确定整机失去响应的根因。 [终止前读数](evidence/31-k2b/restart/pre-shutdown-resource-samples.jsonl)
 
-恢复使用保留的镜像、GCNO、`Module.symvers`、生成头文件和 Kbuild 暂存模块。待资源门禁通过后，独立输出目录只用 `-j1` 重建六个 extra 模块，随后核对全部 58 个模块的 ABI、去 BTF 和 p6 容量。当前恢复单元 CPUQuota 为 100%，MemoryHigh 1.5 GiB，MemoryMax 2.5 GiB，禁用 swap，nice 19，I/O 优先级 idle。用户 cgroup 无设备带宽控制器，镜像验证的批量读取在程序内限为 12 MB/s。开工要求可用内存至少 16 GiB、load1 小于 CPU 数的 0.6 倍、磁盘空间至少 50 GiB、全局 I/O full PSI 不超过 5%，并取得共享构建锁。资源门禁最多等待 3 小时。归档时 I/O full PSI 为 56.14%，恢复尚未开工。 [恢复状态](evidence/31-k2b/restart/recovery-state.json) · [资源窗口](evidence/31-k2b/restart/resource-samples.jsonl)
+恢复使用保留的镜像、GCNO、`Module.symvers`、生成头文件和 Kbuild 暂存模块。待资源门禁通过后，独立输出目录只用 `-j1` 重建六个 extra 模块，随后核对全部 58 个模块的 ABI、去 BTF 和 p6 容量。当前恢复单元 CPUQuota 为 100%，MemoryHigh 1.5 GiB，MemoryMax 2.5 GiB，禁用 swap，nice 19，I/O 优先级 idle。用户 cgroup 无设备带宽控制器，镜像验证的批量读取在程序内限为 12 MB/s。开工要求可用内存至少 16 GiB、load1 小于 CPU 数的 0.6 倍、磁盘空间至少 50 GiB、全局 I/O full PSI 的 avg10 不超过 5%，并取得共享构建锁。资源门禁最多等待 3 小时。重启恢复初次归档时 I/O full PSI 的 avg10 为 56.14%，恢复尚未开工。 [恢复状态](evidence/31-k2b/restart/recovery-state.json) · [资源窗口](evidence/31-k2b/restart/resource-samples.jsonl)
+
+## 两轨共用的主机重负载规则
+
+自 2026-11-26 起，K0 的 GBS/rpmbuild、内核和模块构建、打包与压缩、大文件镜像校验、批量下载及大规模 perf 和 profile 分析，统一先对 `WORKDIR/temp/host-gbs.lock` 取独占 flock。锁贯穿资源等待与重型步骤，排队和持锁等待合计最多 8 小时。轻量 SDB 查询、小文件核对和文档无需取锁，tryboot 仍执行既有的主机构建互斥检查。
+
+K2b 恢复单元先取锁，再记录开工读数。要求 `MemAvailable ≥ 16 GiB` 且 `/proc/pressure/io` 的 `full avg60 < 20%`，未通过时持锁每 10 分钟复查。原有 avg10、负载、磁盘和 3 小时资源等待门槛同时生效。保留单核、2.5 GiB 内存上限、禁用 swap 和 idle I/O。运行时守卫记录连续低于 6 GiB 的采样并中止步骤，原有更严的运行中止条件继续生效。中止后按收据报告。 [恢复守卫](evidence/31-k2b/shared-heavy-rule/guard-recovery.py) · [门禁核验](evidence/31-k2b/shared-heavy-rule/gate-check.txt)
+
+当前单元 `kernel-k2b-recovery-shared-gate.service` 已启用新规则。归档时共享锁由另一进程持有，K2b 尚未进行恢复构建或镜像校验。 [新单元状态](evidence/31-k2b/shared-heavy-rule/unit-state.json) · [锁观察](evidence/31-k2b/shared-heavy-rule/lock-observation.txt)
 
 ## 板上状态和未完成项
 
