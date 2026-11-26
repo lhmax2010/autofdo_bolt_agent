@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 import shlex
 
-from . import board, buildlock, pgo, report
+from . import board, buildlock, pgo, pgo_warnings, report
 from .common import GateError, json_load, require, save, sha256
 
 q = shlex.quote
@@ -73,7 +73,7 @@ class InstrumentedPGO:
         archive = (scratch/declared).resolve()
         require(archive.is_file() and archive.is_relative_to(scratch), 'pinned compiler-rt archive is absent')
         arch = self.package['build_units'][0]['arch']
-        owner = self.host(['rpm','--root',scratch,'-qf','--qf','%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}',
+        owner = self.host(['rpm','--dbpath',scratch/'var/lib/rpm','-qf','--qf','%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}',
                            '/'+declared],out).stdout.decode().strip()
         require(owner == 'compiler-rt-22.1.8-4.1.'+arch, 'unexpected compiler-rt package owning profile archive')
         commands = buildlock.recorded_switches(self.host(['readelf','-p','.GCC.command.line',archive],out).stdout.decode())
@@ -135,7 +135,12 @@ class InstrumentedPGO:
             return output.stdout.decode()
         result = pgo.merge_profiles(runs, build['pgo_evidence']['build_ids'],
                                     build['artifacts'], out/pgo.PROFILE_NAME, profdata)
-        result['pgo_evidence'] = {key:result['lock'][key] for key in ('sha256','raw_version','indexed_version','coverage')}
+        ranking = profdata(['show', '--show-topn=20', result['profile']])
+        (out/'profdata-top20.txt').write_text(ranking)
+        top = pgo_warnings.attribute_top(build['generation']['build_source'], pgo_warnings.top_rows(ranking))
+        result['lock']['top20'] = top
+        save(out/'pgo-profile-lock.json', result['lock'])
+        result['pgo_evidence'] = {key:result['lock'][key] for key in ('sha256','raw_version','indexed_version','coverage','top20')}
         return result
 
     def pgo_rebuild(self, out, store):
@@ -162,13 +167,20 @@ class InstrumentedPGO:
         afdo_receipt = self.audit_sample_profile(base, afdo, dict(lock=self.job['afdo_profile']), afdo_audit)
         profile_path = pgo.profile_use_path(candidate['lock']['settings'])
         staged = Path(candidate['scratch'])/profile_path.relative_to('/')
-        matched = pgo.consumption((out/'PGO/execution/build.log').read_text(errors='replace'), self.job['pgo_warning_limits'],
-                                  converted['lock'], staged, base['text'], candidate['text'])
+        log = (out/'PGO/execution/build.log').read_text(errors='replace')
+        compiled = pgo_warnings.compile_objects(log, candidate['build_source'])
+        warnings = pgo_warnings.audit(log, self.job['pgo_warning_policy'],
+                                     self.package['consumption']['object_to_target'], compiled, converted['lock']['top20'])
+        save(out/'pgo-warning-audit.json',warnings)
+        matched = pgo.consumption(converted['lock'], staged, base['text'], candidate['text'], warnings)
         save(out/'pgo-consumption.json', matched)
+        require(warnings['passed'], 'PGO warning build-lock gate failed: '+str(out/'pgo-warning-audit.json'))
         require(matched['passed'], 'PGO consumption gate failed')
         identity = lambda variant: {target:{key:item[key] for key in ('sha256','debug_sha256','build_id')}
                                     for target,item in variant['artifacts'].items()}
         control = buildlock.reproducible_control(identity(base), identity(repeat))
+        save(out/'base-repeat.json', dict(identical=control == 'BASE', base=identity(base), repeat=identity(repeat)))
+        require(control == 'BASE', 'BASE-r and BASE ELF identities differ')
         deployed = self.details(store,'deploy')
         deployments = {
             'BASE': deployed['deployment'] if control == 'BASE' else self.deploy_variant(repeat,out),

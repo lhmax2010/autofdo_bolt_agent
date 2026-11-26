@@ -12,7 +12,7 @@ import subprocess
 import tarfile
 import time
 from . import build,buildlock,config,profgen,consumption,stats,board,scheduler,platforms
-from . import pgo
+from . import pgo, pgo_warnings
 from .pgo_live import InstrumentedPGO
 from .common import TechnicalFailure,StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
@@ -1022,7 +1022,7 @@ class Experiment(InstrumentedPGO):
                       convert=self.convert,rebuild=self.rebuild,measure=self.measure,report=self.report)
         method=pgo.method(self.job,self.package)
         if method=='pgo':
-            pgo.validate_thresholds(self.job.get('pgo_warning_limits'))
+            pgo_warnings.validate(self.job.get('pgo_warning_policy'))
             archive=pgo.archive_lock(self.job.get('afdo_profile'))
             patch=Path(self.job['package']).parent/self.package['pgo']['patch']
             require(sha256(self.job['patch'])==sha256(patch),'PGO spec patch lock mismatch','identity',3)

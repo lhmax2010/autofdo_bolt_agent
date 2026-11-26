@@ -8,7 +8,6 @@ from .common import require, save, sha256
 VARIANTS = ('BASE', 'AFDO', 'PGOGEN', 'PGO')
 CONTROLS = ('BASE', 'AFDO')
 PROFILE_NAME = 'pgo.profdata'
-DIAGNOSTICS = ('profile-instr-unprofiled', 'profile-instr-out-of-date')
 RAW_MAGIC = frozenset({0xff6c70726f667281, 0xff6c70726f665281})
 INDEX_MAGIC = 0x8169666f72706cff
 RAW_NAME = re.compile(r'[0-9]+_[0-9]+-([1-9][0-9]*)\.profraw')
@@ -36,12 +35,6 @@ def archive_lock(lock):
     path = Path(lock['path'])
     require(path.is_file() and sha256(path) == lock['sha256'], 'locked AFDO profile SHA mismatch', 'identity', 3)
     return path
-
-
-def validate_thresholds(limits):
-    require(isinstance(limits, dict) and set(limits) == set(DIAGNOSTICS)
-            and all(type(value) is int and value >= 0 for value in limits.values()),
-            'preregister both PGO warning limits before a live run')
 
 
 def macros(variant, unit, diag_macros):
@@ -127,7 +120,7 @@ def read_inventory(directory, pid, exit_code):
                 'profile filename is not an exact member for the completed decoder PID')
         path = directory/'raw'/name
         require(not path.is_symlink() and path.is_file() and sha256(path) == digest, 'profraw inventory SHA mismatch')
-        rows.append(dict(path=str(path.resolve()), sha256=digest))
+        rows.append(dict(path=str(path.resolve()), sha256=digest, bytes=path.stat().st_size))
         seen.add(name)
     require(rows, 'training profraw inventory is empty')
     require(seen == {p.name for p in (directory/'raw').iterdir()}, 'unlisted profraw training output')
@@ -218,19 +211,14 @@ def merge_profiles(runs, identities, targets, output, execute):
                                                             compatible=True, target_coverage=coverage))
 
 
-def consumption(log, limits, lock, staged, base_text, candidate_text):
-    validate_thresholds(limits)
+def consumption(lock, staged, base_text, candidate_text, warnings):
     require(Path(staged).is_file() and sha256(staged) == lock['sha256'],
             'staged indexed profile SHA mismatch', 'identity', 3)
     require(base_text and set(base_text) == set(candidate_text) == set(lock['coverage']),
             'incomplete PGO target evidence')
-    diagnostics = {key: [line for line in log.splitlines()
-                         if 'warning:' in line and '[' + '-W' + key + ']' in line]
-                   for key in DIAGNOSTICS}
-    counts = {key:len(lines) for key, lines in diagnostics.items()}
     changed = {target: digest != candidate_text[target] for target, digest in base_text.items()}
-    return dict(passed=all(changed.values()) and all(counts[key] <= limits[key] for key in limits),
-                warning_counts=counts, warning_limits=limits, warning_examples={k:v[:5] for k,v in diagnostics.items()},
+    return dict(passed=all(changed.values()) and warnings['passed'],
+                warning_counts=warnings['counts'], warning_audit=warnings,
                 changed_text=changed, coverage=lock['coverage'], staged_sha256=lock['sha256'])
 
 
@@ -243,9 +231,9 @@ def comparison_metadata():
 
 def stage_metadata(name, default):
     descriptions = {
-        'preflight': ('Check the pinned AFDO profile, PGO warning limits and available mechanism events.',
-                      ['AFDO profile path and SHA-256', 'preregistered PGO warning limits'],
-                      ['locked AFDO SHA and PGO warning limits', 'perf event availability'],
+        'preflight': ('Check the pinned AFDO profile, PGO warning policy and available mechanism events.',
+                      ['AFDO profile path and SHA-256', 'preregistered PGO warning policy'],
+                      ['locked AFDO SHA and PGO warning policy', 'perf event availability'],
                       ['mechanism event manifest']),
         'build': ('Freeze the four-variant dependency union and build BASE and PGOGEN.',
                   ['PGO spec patch and compiler-rt from the pinned snapshot'],
@@ -263,7 +251,7 @@ def stage_metadata(name, default):
                     ['raw/indexed version, binary IDs and target function coverage'],
                     ['locked indexed profile and merge manifest']),
         'rebuild': ('Build AFDO from the locked historical profile and audit PGO.',
-                    ['AFDO SHA lock, indexed PGO SHA lock and warning limits'],
+                    ['AFDO SHA lock, indexed PGO SHA lock and warning policy'],
                     ['variant build-lock differences, PGO warnings, profile SHA and changed target text'],
                     ['AFDO and PGO runtimes and per-target consumption']),
         'measure': ('Measure PGO against BASE and AFDO, then count mechanisms separately.',

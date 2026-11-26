@@ -208,7 +208,7 @@ def initialize(args):
                missing_for_run=required)
     if method == 'pgo':
         job['method'] = method
-        required += ['afdo_profile', 'pgo_warning_limits']
+        required += ['afdo_profile', 'pgo_warning_policy']
     atomic_write(path, canonical(job), exclusive=True)
     return dict(job=str(path), sha256=sha256(path), draft=True, missing_for_run=required)
 
@@ -258,7 +258,7 @@ def plan(args, job, selected):
                                        package['build_units']] if package else []
             if method == 'pgo' and package:
                 specific['declared_pgo_patch'] = str(Path(package_path).parent / package['pgo']['patch'])
-                specific['pgo_warning_limits'] = job.get('pgo_warning_limits')
+                specific['pgo_warning_policy'] = job.get('pgo_warning_policy')
                 specific['afdo_profile'] = job.get('afdo_profile')
         if name=='preflight':
             specific['tool_locks'] = job.get('tools', {})

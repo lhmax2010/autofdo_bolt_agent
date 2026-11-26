@@ -54,3 +54,15 @@ FFmpeg spec 以固定源码 5fe76358 及原 profiling 补丁为基础制作 `pro
 - M1 attempt-11 回放 48 项全部通过，包含既有采集、构建、转换命令与收据字段。[M1 回放证据](evidence/m1-replay.json)
 
 本轮停止在阶段 A。PM 确认两个警告上限并审核实现后，阶段 B 先做 RPi5 上的实际冻结、构建、训练与测量验收。
+
+## 阶段 B PM 决定（2026-11-25）
+
+阶段 A 的全局警告计数上限被以下按编译单元的规则替代。RPi5 job 的 `pgo_warning_policy` 锁定了这份规则。
+
+1. `profile-instr-out-of-date` 在包配置声明的目标库编译单元中必须为 0。非目标编译单元只记录。目标库出现此警告时，构建锁失败。
+2. `profile-instr-unprofiled` 记录总数和完整清单，无总量上限。使用发布版 `llvm-profdata show --show-topn=20` 按最大内部块计数确定前 20 个函数。用 PGOGEN 原始对象中编译器写入的 `__llvm_prf_names` 把函数精确关联到对象和编译单元。20 个函数的编译单元都须在 PGO 构建中得到核对；任何一个出现在 unprofiled 清单中均失败。
+3. `profile-instr-missing` 与其他 profile 诊断只记录，包括 IR 后端单独报告的告警。警告审计保留诊断选项、原文、构建日志行号及归属。
+4. PGO 的 GNU make 输出按目标串行写入日志，编译仍用 `-j2`；此设置只用于保全编译单元与诊断的对应。编译器选项仍由既有构建锁审计。缺失或歧义的热函数来源，以及无法核实归属的两类受控诊断，会作为证据不完整阻断审计。
+5. 本轮要求 BASE-r 与 BASE 两个目标库的运行文件 SHA、调试文件 SHA 和 build-id 均一致，审计通过才进行非计时 oracle。许可只到 `--stop-after rebuild`。
+
+RPi5 新 serial 为 `192.168.108.13:26101`，以型号、架构、镜像和内核四项标识断言身份。[阶段 B 执行记录](02_rpi5_execution.md)

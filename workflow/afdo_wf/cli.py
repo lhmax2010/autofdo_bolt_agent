@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
-from . import config, build, buildlock, profgen, consumption, doctor, job_commands, pgo, report, scheduler
+from . import config, build, buildlock, profgen, consumption, doctor, job_commands, pgo, pgo_warnings, report, scheduler
 from .common import GateError, StopRequested, canonical, require, json_load, save, sha256
 from .exits import EXIT_CODES, failure_record
 from .receipts import Store
@@ -115,7 +115,7 @@ def execute(args, job, selected, package, inputs, output, receipts):
     if pgo.method(job) == 'pgo':
         require(job.get('live'), 'instrumented PGO requires a live job')
         pgo.method(job, config.load(package))
-        pgo.validate_thresholds(job.get('pgo_warning_limits'))
+        pgo_warnings.validate(job.get('pgo_warning_policy'))
         pgo.archive_lock(job.get('afdo_profile'))
     if job.get('live'):
         require(args.stage == 'run', 'live experiment starts through run')

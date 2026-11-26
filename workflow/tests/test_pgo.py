@@ -189,20 +189,20 @@ class Instrumented(unittest.TestCase):
         with self.assertRaisesRegex(GateError,'inconsistent raw'):
             pgo.merge_profiles(runs,IDS,TARGETS,self.root/'pgo.profdata',execute)
 
-    def test_consumption_thresholds_and_changed_text(self):
+    def test_consumption_checks_warnings_and_changed_text(self):
         indexed=self.root/'pgo.profdata'
         indexed.write_bytes(b'fixture')
         evidence=dict(sha256=sha256(indexed),coverage=dict.fromkeys(TARGETS,1))
-        logs='file.c:8: warning: profile data may be out of date [-Wprofile-instr-out-of-date]'
-        limits=dict.fromkeys(pgo.DIAGNOSTICS,0)
-        with self.assertRaisesRegex(GateError,'preregister'):
-            pgo.consumption(logs,{},evidence,indexed,{}, {})
-        def assess(new_text):
-            return pgo.consumption(logs,limits,evidence,indexed,dict.fromkeys(TARGETS,'base'),new_text)
-        self.assertFalse(assess(dict.fromkeys(TARGETS,'candidate'))['passed'])
-        limits['profile-instr-out-of-date']=1
-        self.assertFalse(assess(dict(libavcodec='candidate',libavutil='base'))['passed'])
-        self.assertTrue(assess(dict.fromkeys(TARGETS,'candidate'))['passed'])
+        base=dict.fromkeys(TARGETS,'base')
+        candidate=dict.fromkeys(TARGETS,'candidate')
+        self.assertFalse(pgo.consumption(evidence,indexed,base,candidate,
+                                         dict(passed=False,counts={}))['passed'])
+        candidate['libavutil']='base'
+        self.assertFalse(pgo.consumption(evidence,indexed,base,candidate,
+                                         dict(passed=True,counts={}))['passed'])
+        candidate['libavutil']='candidate'
+        self.assertTrue(pgo.consumption(evidence,indexed,base,candidate,
+                                        dict(passed=True,counts={}))['passed'])
 
     def test_mechanisms_have_native_preference_and_only_counts(self):
         candidates=pgo.event_candidates('/sys/bus/event_source/devices/armv8_cortex_a76/events/l1i_cache_refill')
@@ -232,7 +232,7 @@ class Instrumented(unittest.TestCase):
                           '--platform','rpi5-aarch64','--inputs',str(inputs),'--media-dir',str(self.root),
                           '--output',str(output),'--workdir',str(self.root)])
         self.assertEqual(rc,0,error)
-        self.assertIn('pgo_warning_limits',value['missing_for_run'])
+        self.assertIn('pgo_warning_policy',value['missing_for_run'])
         self.assertIn('afdo_profile',value['missing_for_run'])
         rc, plan, error=self.invoke(['run','--dry-run','--job',str(job)])
         self.assertEqual(rc,0,error)
