@@ -1,6 +1,6 @@
 # K2b 续：独立 K-GCOV 与宿主机重启恢复
 
-**当前等待 I/O 开工门禁。** XZ 镜像与 52 个普通模块已在冻结 buildroot 中落盘。宿主机重启后，串行恢复单元按 PM 修订先取共享锁检查资源，未达标则立即释放。RPi4 仍运行原 PLAT，p6 和 boot_a 尚未写入。 [证据索引](evidence/31-k2b/index.json)
+**主机恢复、p6 写入与 PLAT 温度门禁均已通过，等待用户在板旁。** RPi4 仍运行原 PLAT，boot_a 保持原样。 [证据索引](evidence/31-k2b/index.json)
 
 ## 已完成的构建阶段
 
@@ -43,8 +43,18 @@ K2b 恢复单元先取锁，再记录开工读数。要求 `MemAvailable ≥ 16 
 
 主机恢复完成后的顺序为 p6 容量核对与写入、PLAT 5 分钟空闲温度门禁（中位 ≤58°C，每 10 分钟复查，最多 2 小时）、用户在 RPi4 旁时首启。温度等待期间 boot_a 保持原样。此处的部署和训练状态将在取得板上收据后更新。
 
+## 对齐后的恢复结果
+
+04:12:24 PST 拿到共享锁并实际开工。可用内存 21.76 GiB、I/O full avg60 15.33%、磁盘余量 177.08 GiB。04:13:45 PST 完成并释放锁，退出码 0，墙钟 81.3 秒，cgroup 峰值内存 1.30 GiB，无 OOM。XZ zImage 的 SHA-256 为 `f74fc430e35e463cd06aeee87ffebd8bda5c54194e8bc84a319bbb4933c0c698`，与保留的原始 vmlinux 和 raw Image 配对通过。 [恢复收据](evidence/31-k2b/host-recovered/recovery-result.json) · [镜像核对](evidence/31-k2b/host-recovered/image-identity.json)
+
+从原 `linux-tizen-modules-source-11.0.0-0.armv7l.rpm` 串行重建 6 个 extra。源包 SHA-256 为 `ef770d5e8af0532fe4f80748a699e13710025fb0c1218f6504bc9eee1d80dbf5`。58 个模块全部去除 `.BTF`，其中 6 个 extra 同时去除 `.BTF.base`。其余节内容、vermagic `6.12.80-arm-rpi4-v7l-kgcov SMP mod_unload modversions ARMv7 p2v8` 和 `module_layout=0x2f3f1497` 均核对通过。depmod 无输出。327 个已链接 GCNO 已锁定供首启逐节点核对。 [逐模块核对](evidence/31-k2b/host-recovered/module-abi.json) · [预期 GCDA 节点](evidence/31-k2b/host-recovered/expected-gcda.txt)
+
+p6 写前可用 11,354,112 B，模块树估算 3,670,016 B，1.2 倍门槛 4,404,020 B。板上 `du` 读回为 4,165,632 B，写前空间也高于实测的 1.2 倍。只新增 `/lib/modules/6.12.80-arm-rpi4-v7l-kgcov/`，逐文件 SHA 读回通过，PLAT 和 K-BASE 模块树的 SHA 均一致。p6 已恢复只读，剩余 7,684,096 B，UID 5001。 [p6 容量](evidence/31-k2b/host-recovered/p6-preflight.txt) · [写后空间](evidence/31-k2b/host-recovered/p6-after.df) · [模块 SHA](evidence/31-k2b/host-recovered/kgcov-ro.sha256)
+
+按顺序写完 p6 后，在 PLAT 保持原 governor，首个 5 分钟窗口采 30 点，中位 **56.965°C**，范围 55.991–58.426°C。04:19:10 PST 已通过 ≤58°C 门禁，未触发 10 分钟复查。boot_a 尚未写入，未发出 tryboot。 [温度门禁](evidence/31-k2b/host-recovered/temperature-gate.json) · [原始窗口](evidence/31-k2b/host-recovered/temperature-window.tsv)
+
 ## 板上状态和未完成项
 
 宿主机重启后，共享 SDB 一度无监听。端口恢复监听后仅重新连接 RPi4。只读核对确认 PLAT build-id 对应原内核，boot ID 未变，原 cmdline、U-Boot、tryboot=0、UID 5001 与 p6 只读状态均复核通过。重启后的额外 5 分钟只读温度中位数 59.400°C（范围 57.939–60.374°C，30 点），高于首启准备的 58°C 门槛。 [PLAT 身份](evidence/31-k2b/restart/plat-identity.txt) · [温度原件](evidence/31-k2b/restart/plat-thermal.tsv)
 
-六个 extra 模块的重建、58 个模块的最终核验、写入、首启及 15 段训练仍待执行。`.gcda` 导出为 0 段，GCOV 质量、与 IP/R1 的对照及混合候选均无实测结果。恢复单元只处理主机阶段，首启仍需在用户可观察 HDMI 时进行。
+p6 与温度门禁已通过。boot_a 镜像部署、首启和 15 段训练仍待执行。`.gcda` 导出为 0 段，GCOV 质量、与 IP/R1 的对照及混合候选均无实测结果。首启仍需确认用户可在 RPi4 旁观察 HDMI。
