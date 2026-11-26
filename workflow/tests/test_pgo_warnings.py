@@ -51,6 +51,20 @@ class PGOWarnings(unittest.TestCase):
         with self.assertRaisesRegex(GateError,'synchronization proof'):
             warnings.audit('',warnings.POLICY,self.targets,self.objects,self.top)
 
+    def test_quoted_makeflags_export_from_gbs_build_trace(self):
+        log = ("[   65s] + export 'MAKEFLAGS=--output-sync=target  -k'\n"
+               "[   65s] + MAKEFLAGS='--output-sync=target  -k'\n"
+               "[   65s] + /bin/make -j2\n")
+        result = warnings.audit(log, warnings.POLICY, self.targets, self.objects, self.top)
+        self.assertTrue(result['passed'])
+
+    def test_sync_proof_requires_exact_option_in_export_value(self):
+        for export in ("'MAKEFLAGS=--output-sync=target-other -k'",
+                       'MAKEFLAGS=-k OTHER=--output-sync=target'):
+            with self.subTest(export=export), self.assertRaisesRegex(GateError, 'synchronization proof'):
+                warnings.audit('[   65s] + export '+export, warnings.POLICY,
+                               self.targets, self.objects, self.top)
+
     def test_policy_and_ranking_are_locked(self):
         with self.assertRaisesRegex(GateError,'preregister'):
             warnings.validate({})

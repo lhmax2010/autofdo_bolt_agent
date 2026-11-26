@@ -168,7 +168,8 @@ class InstrumentedPGO:
             require(output.returncode == 0, 'llvm-profdata rejected instrumentation profile')
             return output.stdout.decode()
         result = pgo.merge_profiles(runs, build['pgo_evidence']['build_ids'],
-                                    build['artifacts'], out/pgo.PROFILE_NAME, profdata)
+                                    build['artifacts'], out/pgo.PROFILE_NAME, profdata,
+                                    collision_policy=self.job.get('pgo_collision_policy'))
         ranking = profdata(['show', '--topn=20', result['profile']])
         (out/'profdata-top20.txt').write_text(ranking)
         top = pgo_warnings.attribute_top(build['generation']['build_source'], pgo_warnings.top_rows(ranking))

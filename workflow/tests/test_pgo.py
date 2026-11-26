@@ -141,6 +141,58 @@ class Instrumented(unittest.TestCase):
         self.assertEqual(result['lock']['coverage']['libavcodec']['ratio'],1)
         self.assertEqual(sha256(result['profile']),result['lock']['sha256'])
 
+    def collision_merge(self, codec, util, *, policy=pgo.ZERO_DSO_POLICY, indexed=0):
+        runs = self.runs()
+        output = self.root/'pgo.profdata'
+
+        def execute(args):
+            if args[0] == 'merge':
+                return self.executor(args)
+            path = Path(args[-1])
+            if path == output:
+                text = show(list(IDS), ['shared'], 13)
+                return text.replace('[0, 23]',f'[0, {indexed}]')
+            target = path.read_bytes()[8:].decode()
+            count = codec if target == 'libavcodec' else util
+            text = show([TARGETS[target]], ['shared'])
+            return text.replace('[0, 23]',f'[0, {count}]')
+
+        return pgo.merge_profiles(runs,IDS,TARGETS,output,execute,collision_policy=policy)
+
+    def test_all_zero_collision_is_audited_and_allowed(self):
+        result = self.collision_merge(0,0)
+        row, = result['lock']['collisions']
+        self.assertEqual((row['name'],row['hash'],row['dsos'],row['case']),
+                         ('shared','0x0000000000000010',['libavcodec','libavutil'],'all_zero'))
+        self.assertTrue(row['allowed'])
+        self.assertEqual(len(row['sources']),6)
+        self.assertTrue(all(source['counts']==(0,0) for source in row['sources']))
+        self.assertEqual(result['lock']['coverage']['libavcodec']['covered_functions'],0)
+
+    def test_one_nonzero_dso_is_rejected_before_merge(self):
+        with self.assertRaisesRegex(GateError,'attribution is ambiguous'):
+            self.collision_merge(9,0)
+        row, = json_load(self.root/'cross-dso-collisions.json')['keys']
+        self.assertEqual(row['case'],'one_nonzero_dso')
+        self.assertEqual(row['nonzero_dsos'],['libavcodec'])
+        self.assertFalse((self.root/'pgo.profdata').exists())
+
+    def test_multiple_nonzero_dsos_are_rejected_before_merge(self):
+        with self.assertRaisesRegex(GateError,'attribution is ambiguous'):
+            self.collision_merge(9,3)
+        row, = json_load(self.root/'cross-dso-collisions.json')['keys']
+        self.assertEqual(row['case'],'multiple_nonzero_dsos')
+        self.assertFalse((self.root/'pgo-profile-lock.json').exists())
+
+    def test_unapproved_zero_collision_is_still_rejected(self):
+        with self.assertRaisesRegex(GateError,'attribution is ambiguous'):
+            self.collision_merge(0,0,policy=None)
+
+    def test_indexed_collision_must_remain_zero(self):
+        with self.assertRaisesRegex(GateError,'missing or nonzero counters'):
+            self.collision_merge(0,0,indexed=1)
+        self.assertFalse((self.root/'pgo-profile-lock.json').exists())
+
     def test_missing_profraw_for_one_dso_rejected(self):
         runs=self.runs({'libavcodec':TARGETS['libavcodec']})
         with self.assertRaisesRegex(GateError,'missing profraw'):

@@ -217,7 +217,10 @@ def validate_locks(job):
     for name, lock in job.get('config_sha256', {}).items():
         actual = file_lock(lock['path'])
         configured = platforms.profile_path(job['platform']) if name == 'platform' else Path(job[name])
-        require(actual['sha256'] == lock['sha256'] and Path(actual['path']) == configured.resolve(),
+        same_path = Path(actual['path']) == configured.resolve()
+        if not same_path and name=='platform' and job.get('pgo_resume_after_collect'):
+            same_path = sha256(configured) == lock['sha256']
+        require(actual['sha256'] == lock['sha256'] and same_path,
                 'initialized configuration changed: ' + name)
 
 

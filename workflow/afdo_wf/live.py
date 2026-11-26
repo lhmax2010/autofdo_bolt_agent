@@ -12,7 +12,7 @@ import subprocess
 import tarfile
 import time
 from . import build,buildlock,config,profgen,consumption,stats,board,scheduler,platforms
-from . import pgo, pgo_frozen, pgo_warnings
+from . import pgo, pgo_frozen, pgo_resume, pgo_warnings
 from .pgo_live import InstrumentedPGO
 from .common import TechnicalFailure,StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
@@ -1022,6 +1022,7 @@ class Experiment(InstrumentedPGO):
                       convert=self.convert,rebuild=self.rebuild,measure=self.measure,report=self.report)
         method=pgo.method(self.job,self.package)
         if method=='pgo':
+            pgo.validate_collision_policy(self.job.get('pgo_collision_policy'))
             pgo_warnings.validate(self.job.get('pgo_warning_policy'))
             archive=pgo.archive_lock(self.job.get('afdo_profile'))
             patch=Path(self.job['package']).parent/self.package['pgo']['patch']
@@ -1037,6 +1038,10 @@ class Experiment(InstrumentedPGO):
         require(stop_after is None or stop_after in stages, 'invalid live stop stage')
         if stop_after:
             stages = stages[:stages.index(stop_after)+1]
+        resume_collect = 'pgo_resume_after_collect' in self.job
+        if resume_collect:
+            require(method=='pgo' and stop_after=='rebuild','S3 continuation is limited to PGO through rebuild')
+            stages = stages[stages.index('convert'):]
         if 'platform' in self.job:
             inputs.append(platforms.profile_path(self.platform_name))
         if self.platform.prepare_only or method=='pgo':
@@ -1056,12 +1061,17 @@ class Experiment(InstrumentedPGO):
                     build.wait_for_host(self.w, gate)
             from .receipts import Store
             store = Store(self.d/'receipts')
-            reuse_preflight = scheduler.reusable(store, 'preflight', inputs)
+            result['stages'] = []
+            if resume_collect:
+                pgo_resume.after_collect(self.job,store,self.w)
+                result['stages'] = scheduler.execute(['convert'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
+                stages = ['rebuild']
+            reuse_preflight = resume_collect or scheduler.reusable(store, 'preflight', inputs)
             with self.session():
                 self.prune_host_artifacts(store)
                 if reuse_preflight:
                     self.ensure_work();self.restore_host_artifacts()
-                result['stages']=scheduler.execute([s for s in stages if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
+                result['stages']+=scheduler.execute([s for s in stages if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
             if 'report' in stages:
                 result['stages']+=scheduler.execute(['report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
             result['status']='complete' if 'report' in stages else 'stopped'

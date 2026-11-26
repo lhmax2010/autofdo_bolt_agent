@@ -5,11 +5,11 @@ from afdo_wf.common import GateError
 
 
 class SharedHostLimits(unittest.TestCase):
-    def test_startup_io_gate_is_opt_in_and_inclusive(self):
+    def test_startup_io_gate_is_opt_in_and_strict(self):
         ready = dict(mem_available=16*build.GIB, load1=8, disk_free=50*build.GIB)
         self.assertTrue(build.can_start(ready))
-        self.assertTrue(build.can_start(dict(ready, io_full_avg60=20.0)))
-        self.assertFalse(build.can_start(dict(ready, io_full_avg60=20.01)))
+        self.assertTrue(build.can_start(dict(ready, io_full_avg60=19.99)))
+        self.assertFalse(build.can_start(dict(ready, io_full_avg60=20.0)))
 
     def test_shared_host_stops_after_sustained_pressure(self):
         sample = dict(mem_available=16*build.GIB, disk_free=50*build.GIB, io_full_avg60=70)

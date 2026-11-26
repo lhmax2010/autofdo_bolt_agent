@@ -1,4 +1,5 @@
 """Instrumented PGO identity, merge, and consumption gates."""
+from collections import defaultdict
 from pathlib import Path
 import re
 
@@ -15,6 +16,12 @@ BUILD_ID = re.compile(r'[a-f0-9]{40}')
 SHA = re.compile(r'[a-f0-9]{64}')
 PGO_MACROS = {'PGOGEN': {'with_pgogen': '1'}, 'PGO': {'with_pgo': '1'}}
 COMMON_MACROS = {'with_pgo_deps': '1'}
+ZERO_DSO_POLICY = dict(all_zero='allow', one_nonzero_dso='reject', multiple_nonzero_dsos='reject')
+
+
+def validate_collision_policy(policy):
+    require(policy is None or policy == ZERO_DSO_POLICY, 'unsupported cross-DSO collision policy')
+
 
 
 def method(job, package=None):
@@ -147,19 +154,22 @@ def show_profile(path, kind, execute):
     lines = re.findall(
         r'^  (.+):\n    Hash: (0x[0-9a-f]+)\n    Counters: ([0-9]+)\n    Block counts: \[([0-9, ]*)\]$',
         text, re.M)
-    records = {(name, signature): any(int(x) for x in counters.split(',')) for name, signature, _, counters in lines if counters}
+    records = {(name, signature): tuple(map(int,counters.split(',')))
+               for name, signature, _, counters in lines if counters}
     require(len(records) == int(count[1]), 'incomplete instrumentation function records')
     require(all(len(counters.split(',')) == int(n) for _, _, n, counters in lines),
             'instrumentation counter list length mismatch')
     return dict(version=int(version[1]), ids=binary_ids[1].splitlines(), records=records)
 
 
-def merge_profiles(runs, identities, targets, output, execute):
+def merge_profiles(runs, identities, targets, output, execute, *, collision_policy=None):
     """Merge the exact SHA-bound decoder inventory; version checks use llvm-profdata."""
     require(len(runs) == 3 and len({r['id'] for r in runs}) == len(runs), 'expected three independent PGOGEN runs')
     require(targets and all(BUILD_ID.fullmatch(key) for key in identities)
             and set(targets) <= set(identities.values()), 'incomplete PGOGEN build ID inventory')
+    validate_collision_policy(collision_policy)
     members = []
+    sources = defaultdict(list)
     versions = set()
     functions = {}
     used = set()
@@ -185,6 +195,8 @@ def merge_profiles(runs, identities, targets, output, execute):
             require(target not in functions or functions[target] == keys,
                     'PGOGEN function set differs between training runs')
             functions[target] = keys
+            for key, counts in profile['records'].items():
+                sources[key].append(dict(dso=target,build_id=build_id,run=run['id'],counts=counts))
             versions.add(profile['version'])
             members.append(dict(row, run=run['id'], pid=run['pid'], build_id=build_id, binary=target,
                                 raw_version=profile['version']))
@@ -193,6 +205,18 @@ def merge_profiles(runs, identities, targets, output, execute):
     output = Path(output)
     require(not output.exists(), 'indexed profile output already exists')
     save(output.parent/'profraw-merge-manifest.json', members)
+    collisions = []
+    for (name, signature), records in sorted(sources.items()):
+        owners = sorted({record['dso'] for record in records})
+        if len(owners) < 2:
+            continue
+        nonzero = sorted({record['dso'] for record in records if any(record['counts'])})
+        case = ('all_zero' if not nonzero else
+                'one_nonzero_dso' if len(nonzero)==1 else 'multiple_nonzero_dsos')
+        collisions.append(dict(name=name,hash=signature,dsos=owners,nonzero_dsos=nonzero,
+                               case=case,sources=records,allowed=collision_policy==ZERO_DSO_POLICY and not nonzero))
+    save(output.parent/'cross-dso-collisions.json', dict(policy=collision_policy,keys=collisions))
+    require(all(row['allowed'] for row in collisions), 'target DSO function attribution is ambiguous')
     def verify_members():
         require(all(sha256(row['path']) == row['sha256'] for row in members), 'profraw input changed during conversion')
     verify_members()
@@ -200,17 +224,18 @@ def merge_profiles(runs, identities, targets, output, execute):
     verify_members()
     indexed = show_profile(output, 'indexed', execute)
     require(set(indexed['ids']) == merged_ids, 'indexed profile binary IDs differ from raw inputs', 'identity', 3)
+    for row in collisions:
+        counts = indexed['records'].get((row['name'],row['hash']))
+        require(counts is not None and not any(counts), 'merged all-zero collision has missing or nonzero counters')
     coverage = {}
     for target in targets:
         keys = functions[target]
         require(keys and keys <= indexed['records'].keys(), 'indexed profile omitted target functions')
-        require(not any(keys & other for name, other in functions.items() if name != target),
-                'target DSO function attribution is ambiguous')
-        covered = sum(indexed['records'][key] for key in keys)
+        covered = sum(any(indexed['records'][key]) for key in keys)
         coverage[target] = dict(instrumented_functions=len(keys), covered_functions=covered, ratio=covered/len(keys))
     lock = dict(path=str(output), sha256=sha256(output), raw_version=next(iter(versions)),
-                indexed_version=indexed['version'], coverage=coverage, inputs=members)
-    save(output.parent/'pgo-profile-lock.json', lock)
+                indexed_version=indexed['version'], coverage=coverage, inputs=members,
+                collision_policy=collision_policy,collisions=collisions)
     return dict(profile=str(output), lock=lock, quality=dict(publishable=True, identity='verified',
                                                             compatible=True, target_coverage=coverage))
 

@@ -50,7 +50,7 @@ def startup_checks(sample):
     }
     if 'io_full_avg60' in sample and not sample.get('io_pressure_waived'):
         value = sample['io_full_avg60']
-        checks['io_full_avg60'] = dict(value=value, maximum=20, unit='percent', passed=0 <= value <= 20)
+        checks['io_full_avg60'] = dict(value=value, exclusive_maximum=20, unit='percent', passed=0 <= value < 20)
     return checks
 
 

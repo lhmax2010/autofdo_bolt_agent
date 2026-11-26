@@ -2,6 +2,7 @@
 from collections import Counter
 from pathlib import Path, PurePosixPath
 import re
+import shlex
 import struct
 import zlib
 
@@ -14,6 +15,7 @@ POLICY = {OUTDATED: {'target_limit': 0}, UNPROFILED: {'protected_top': 20},
 OBJECT = re.compile(r'(?:CC|CXX|OBJCC|HOSTCC|AS)\s+([^\s]+\.o)$')
 MAKE_ACTION = re.compile(r'(?:HOSTLD|LD|AR|STRIP|GEN|INSTALL|COPY|CP|X86ASM)\s+.+')
 GBS_PREFIX = re.compile(r'^\[\s*\d+s\]\s?')
+MAKEFLAGS_EXPORT = re.compile(r'''^\[\s*\d+s\] \+ export (['"]?MAKEFLAGS=[^\n]*)$''', re.M)
 WARNING = re.compile(r'\bwarning:\s*(.*?)(?:\s+\[-W([^]]+)\])?\s*$')
 BACKEND_PREFIX = re.compile(r'^(.+?\.(?:c|cc|cpp|cxx|m|mm)):\s+(.*)$')
 
@@ -144,9 +146,20 @@ def compile_objects(log, source_root):
     return compiled
 
 
+def has_target_output_sync(log):
+    for assignment in MAKEFLAGS_EXPORT.findall(log):
+        try:
+            value = shlex.split(assignment)[0].removeprefix('MAKEFLAGS=')
+        except ValueError:
+            continue
+        if '--output-sync=target' in value.split():
+            return True
+    return False
+
+
 def audit(log, policy, mapping, compiled, top):
     validate(policy)
-    require(re.search(r'^\[\s*\d+s\] \+ export MAKEFLAGS=.*--output-sync=target', log, re.M),
+    require(has_target_output_sync(log),
             'PGO build log lacks compiler output synchronization proof')
     warnings = []
     active = None
