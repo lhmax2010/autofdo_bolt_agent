@@ -2,7 +2,7 @@
 from pathlib import Path
 import re
 
-from . import buildlock
+from . import buildlock, pgo_frozen
 from .common import require, save, sha256
 
 VARIANTS = ('BASE', 'AFDO', 'PGOGEN', 'PGO')
@@ -37,11 +37,15 @@ def archive_lock(lock):
     return path
 
 
-def macros(variant, unit, diag_macros):
+def macros(variant, unit, diag_macros, split=None):
     require(variant in (*VARIANTS, 'BASE-r'), 'unknown build variant')
-    require(not {'with_pgogen','with_pgo','with_pgo_deps'} & unit['macros'].keys(),
+    require(not {'with_pgogen','with_pgo','with_pgo_deps',pgo_frozen.MACRO} & unit['macros'].keys(),
             'instrumented PGO macros are reserved for variant selection')
-    result = dict(unit['macros'], **COMMON_MACROS)
+    result = dict(unit['macros'])
+    if split is None:
+        result.update(COMMON_MACROS)
+    elif variant == 'PGOGEN':
+        result[pgo_frozen.MACRO] = split['runtime']['evr']
     if variant == 'AFDO':
         result.update(unit['consume_macro'])
         result.update(diag_macros)

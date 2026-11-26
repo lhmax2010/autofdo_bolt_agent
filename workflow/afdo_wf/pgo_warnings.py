@@ -103,7 +103,7 @@ def profile_names(data):
 def top_rows(text):
     rows = re.findall(r'^  (.+), max count = (\d+)$', text, re.M)
     require(len(rows) == 20 and len({name for name, _ in rows}) == len(rows),
-            'expected 20 uniquely named functions in llvm-profdata show --show-topn=20')
+            'expected 20 uniquely named functions in llvm-profdata show --topn=20')
     require([int(count) for _, count in rows] == sorted((int(count) for _, count in rows), reverse=True),
             'llvm-profdata top-20 order is invalid')
     return [dict(function=name, max_count=int(count)) for name, count in rows]

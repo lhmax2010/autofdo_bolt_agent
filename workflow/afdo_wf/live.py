@@ -12,7 +12,7 @@ import subprocess
 import tarfile
 import time
 from . import build,buildlock,config,profgen,consumption,stats,board,scheduler,platforms
-from . import pgo, pgo_warnings
+from . import pgo, pgo_frozen, pgo_warnings
 from .pgo_live import InstrumentedPGO
 from .common import TechnicalFailure,StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
@@ -445,7 +445,7 @@ class Experiment(InstrumentedPGO):
     def build_variant(self,variant,out,profile=None,frozen=None,*,stage=None):
         j=self.job if frozen is None else {**self.job, **frozen};unit=self.package['build_units'][0]
         if pgo.method(j)=='pgo':
-            macros=pgo.macros(variant, unit, self.package['consumption']['diag_macro'])
+            macros=pgo.macros(variant, unit, self.package['consumption']['diag_macro'], j.get('pgo_frozen'))
         else:
             macros=dict(unit['macros'])
             if profile:
@@ -1027,6 +1027,8 @@ class Experiment(InstrumentedPGO):
             patch=Path(self.job['package']).parent/self.package['pgo']['patch']
             require(sha256(self.job['patch'])==sha256(patch),'PGO spec patch lock mismatch','identity',3)
             inputs.append(archive)
+            if split := self.job.get('pgo_frozen'):
+                inputs.extend(pgo_frozen.verify(split, self.w, self.package['build_units'][0]['arch']))
             handlers=dict(preflight=self.pgo_preflight,build=self.pgo_build,deploy=self.pgo_deploy,
                           collect=self.pgo_collect,convert=self.pgo_convert,rebuild=self.pgo_rebuild,
                           measure=self.pgo_measure,report=self.pgo_report)
@@ -1046,7 +1048,12 @@ class Experiment(InstrumentedPGO):
         result={'status':'failed','start':time.time()}
         try:
             if self.platform.prepare_only or method=='pgo':
-                build.wait_for_host(self.w, self.d/('host-gate-'+str(time.time_ns())+'.json'))
+                gate = self.d/('host-gate-'+str(time.time_ns())+'.json')
+                if build.recovery_limits(self.job.get('host')):
+                    build.wait_for_host(self.w, gate, exclusive=True, shared_host_recovery=True,
+                                        waive_io_pressure=build.io_pressure_waived(self.job.get('host')))
+                else:
+                    build.wait_for_host(self.w, gate)
             from .receipts import Store
             store = Store(self.d/'receipts')
             reuse_preflight = scheduler.reusable(store, 'preflight', inputs)

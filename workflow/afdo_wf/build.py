@@ -15,13 +15,32 @@ from .exits import failure_reason
 
 GIB=1024**3
 
-def resources(workdir):
+def recovery_limits(host):
+    enabled = (host or {}).get('shared_host_recovery', False)
+    require(type(enabled) is bool, 'host.shared_host_recovery must be boolean')
+    return enabled
+
+
+def io_pressure_waived(host):
+    flag = (host or {}).get('recovery_io_pressure_waived', False)
+    require(type(flag) is bool and (not flag or recovery_limits(host)),
+            'I/O pressure waiver requires shared-host recovery limits')
+    return flag
+
+
+def resources(workdir, *, shared_host_recovery=False, waive_io_pressure=False):
     mem=Path('/proc/meminfo').read_text()
-    return dict(time=time.time(),mem_available=int(re.search(r'MemAvailable:\s+(\d+)',mem)[1])*1024,
-                load1=os.getloadavg()[0],nproc=len(os.sched_getaffinity(0)),disk_free=shutil.disk_usage(workdir).free,meminfo=mem)
+    sample = dict(time=time.time(),mem_available=int(re.search(r'MemAvailable:\s+(\d+)',mem)[1])*1024,
+                  load1=os.getloadavg()[0],nproc=len(os.sched_getaffinity(0)),disk_free=shutil.disk_usage(workdir).free,meminfo=mem)
+    if shared_host_recovery:
+        io = re.search(r'^full avg10=\S+ avg60=(\d+(?:\.\d+)?) ', Path('/proc/pressure/io').read_text(), re.M)
+        require(io is not None, 'host I/O pressure sampling unavailable', 'environment')
+        sample['io_full_avg60'] = float(io[1])
+        sample['io_pressure_waived'] = waive_io_pressure
+    return sample
 
 def startup_checks(sample):
-    return {
+    checks = {
         'mem_available': dict(value=sample['mem_available'], minimum=16 * GIB,
                               unit='bytes', passed=sample['mem_available'] >= 16 * GIB),
         'load1': dict(value=sample['load1'], exclusive_maximum=12,
@@ -29,17 +48,21 @@ def startup_checks(sample):
         'disk_free': dict(value=sample['disk_free'], minimum=50 * GIB,
                           unit='bytes', passed=sample['disk_free'] >= 50 * GIB),
     }
+    if 'io_full_avg60' in sample and not sample.get('io_pressure_waived'):
+        value = sample['io_full_avg60']
+        checks['io_full_avg60'] = dict(value=value, maximum=20, unit='percent', passed=0 <= value <= 20)
+    return checks
 
 
 def can_start(sample):
     return all(check['passed'] for check in startup_checks(sample).values())
 
 
-def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=False):
+def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=False, *, shared_host_recovery=False, waive_io_pressure=False):
     start = time.monotonic()
     history = []
     while True:
-        sample = resources(workdir)
+        sample = resources(workdir, shared_host_recovery=True, waive_io_pressure=waive_io_pressure) if shared_host_recovery else resources(workdir)
         sample['other_builds'] = host_build.active_builds() if exclusive else []
         history.append(sample)
         elapsed = time.monotonic() - start
@@ -54,7 +77,9 @@ def wait_for_host(workdir, destination, timeout=10800, interval=600, exclusive=F
 
 
 def stop_needed(r,previous_low):
-    low=previous_low+1 if r['mem_available']<6*GIB else 0
+    guarded = 'io_full_avg60' in r
+    pressure = guarded and not r.get('io_pressure_waived') and r['io_full_avg60'] >= 70
+    low = previous_low+1 if r['mem_available'] < (8 if guarded else 6)*GIB or pressure else 0
     return low,low>=2 or r['disk_free']<20*GIB
 
 def command(config,source,root,unit,macros,repo=None,buildconf=None,verbose=False):
@@ -77,6 +102,8 @@ def execute(argv, source, workdir, out, env=None, *, host=None, workflow='workfl
     out = Path(out).resolve()
     require(out.is_relative_to(workdir), 'output outside workdir')
     lock = host_build.lock_path(workdir, host)
+    conservative = recovery_limits(host)
+    waived = io_pressure_waived(host)
     out.mkdir(parents=True, exist_ok=False)
     coordination = host_build.BuildCoordination(lock, out / host_build.WAIT_FILE, workflow, stage, invocation)
     events=[];start=time.monotonic();unit='afdo-wf-'+uuid.uuid4().hex+'.scope';p=None;peak=0
@@ -84,9 +111,11 @@ def execute(argv, source, workdir, out, env=None, *, host=None, workflow='workfl
     error = None
     old={}
     def interrupted(signum,frame):raise StopRequested(signum)
+    def sample_host():
+        return resources(workdir, shared_host_recovery=True, waive_io_pressure=waived) if conservative else resources(workdir)
     def sample():
         nonlocal peak
-        r=resources(workdir)
+        r=sample_host()
         cg=subprocess.run(['systemctl','--user','show',unit,'-p','ControlGroup','--value'],capture_output=True,text=True)
         path=cg.stdout.strip()
         if path.startswith('/'):
@@ -99,11 +128,15 @@ def execute(argv, source, workdir, out, env=None, *, host=None, workflow='workfl
         for sig in (signal.SIGTERM, signal.SIGINT):
             old[sig] = signal.signal(sig, interrupted)
         coordination.acquire()
-        ready = coordination.ready(lambda: resources(workdir), can_start)
+        ready = coordination.ready(sample_host, can_start)
         events.append(ready)
         save(out/'resources.json', events)
         result.update(start_resources=ready, wait_seconds=time.monotonic()-start)
-        launch=['systemd-run','--user','--scope','--unit='+unit,'-p','MemoryMax=6G','-p','MemoryHigh=5G','-p','CPUQuota=200%','nice','-n','19','ionice','-c3',sys.executable,str(Path(__file__).with_name('build_child.py')),str(out/'child-result.json'),*argv]
+        memory_max, memory_high, cpu_quota = ('4G','3G','100%') if conservative else ('6G','5G','200%')
+        launch=['systemd-run','--user','--scope','--unit='+unit,
+                '-p','MemoryMax='+memory_max,'-p','MemoryHigh='+memory_high,'-p','CPUQuota='+cpu_quota,
+                'nice','-n','19','ionice','-c3',sys.executable,str(Path(__file__).with_name('build_child.py')),
+                str(out/'child-result.json'),*argv]
         save(out/'command.json',dict(argv=launch,cwd=str(source)))
         tick=time.monotonic();low=0
         stderr = (out/'stderr.log').open('w') if separate_stderr else nullcontext(subprocess.STDOUT)

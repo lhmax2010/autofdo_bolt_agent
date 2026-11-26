@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 import shlex
 
-from . import board, buildlock, pgo, pgo_warnings, report
+from . import board, buildlock, pgo, pgo_frozen, pgo_warnings, report
 from .common import GateError, json_load, require, save, sha256
 
 q = shlex.quote
@@ -57,16 +57,18 @@ class InstrumentedPGO:
         return identities
 
     def pgo_build(self, out, store):
-        frozen = self.freeze_dependencies(out)
+        split = self.job.get('pgo_frozen')
+        frozen = split['common'] if split else self.freeze_dependencies(out)
+        instrumented = split['pgogen'] if split else frozen
         variants = {}
         for name in ('BASE','PGOGEN'):
             location = out/name
             location.mkdir()
-            variants[name] = self.build_variant(name, location, frozen=frozen, stage='build')
+            variants[name] = self.build_variant(name, location, frozen=instrumented if name=='PGOGEN' else frozen, stage='build')
         base, generation = (variants[name] for name in ('BASE','PGOGEN'))
-        runtime = pgo.check_runtime({
-            target: self.host(['readelf','-sW', artifact['debug_path']], out).stdout.decode()
-            for target, artifact in generation['artifacts'].items()}, generation['artifacts'])
+        symbols = {target: self.host(['readelf','-sW', artifact['debug_path']],out).stdout.decode()
+                   for target,artifact in generation['artifacts'].items()}
+        runtime = pgo.check_runtime(symbols,generation['artifacts'])
         identity = self.pgogen_build_ids(generation, out)
         scratch = Path(generation['scratch']).resolve()
         declared = self.package['pgo']['runtime_archive']
@@ -75,19 +77,51 @@ class InstrumentedPGO:
         arch = self.package['build_units'][0]['arch']
         owner = self.host(['rpm','--dbpath',scratch/'var/lib/rpm','-qf','--qf','%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}',
                            '/'+declared],out).stdout.decode().strip()
-        require(owner == 'compiler-rt-22.1.8-4.1.'+arch, 'unexpected compiler-rt package owning profile archive')
+        expected = split['runtime']['installed_record'].split()[0] if split else 'compiler-rt-22.1.8-4.1.'+arch
+        require(owner == expected, 'unexpected compiler-rt package owning profile archive')
         commands = buildlock.recorded_switches(self.host(['readelf','-p','.GCC.command.line',archive],out).stdout.decode())
         relevant, excluded = pgo.runtime_command_provenance(generation['lock'], commands)
         save(out/'compiler-rt-command-provenance.json', dict(rpm=owner, archive=declared, sha256=sha256(archive),
              archive_records=commands, linked_records=excluded, original_lock_preserved=True))
+        if split:
+            relevant = self.audit_linked_atexit(base,generation,relevant,symbols,archive,out)
+            relevant = pgo_frozen.pgogen_lock(base['lock'],relevant,split)
+            save(out/'pgogen-dependency-deviation.json',split)
         lock = pgo.compare(base['lock'], relevant, 'PGOGEN')
         evidence = dict(runtime=runtime, build_ids=identity, build_lock=lock, runtime_rpm=owner,
                         archive_sha256=sha256(archive), runtime_records={k:len(rows) for k,rows in excluded.items()})
         save(out/'pgogen-gates.json', evidence)
         require(lock['passed'], 'PGOGEN build-lock differences: '+str(lock['differences']))
         return {**base, 'frozen': frozen, 'generation': generation, 'pgo_evidence': evidence,
-                'bound_files': [str(file) for file in Path(frozen['repo']).rglob('*') if file.is_file()]
+                'bound_files': sorted({str(file) for lock in (frozen,instrumented)
+                                                     for file in Path(lock['repo']).rglob('*') if file.is_file()})
                                + [item['path'] for result in variants.values() for item in result['rpms']]}
+
+    def audit_linked_atexit(self,base,generation,candidate,symbols,runtime,out):
+        runtime_symbols = self.host(['readelf','-Ws',runtime],out).stdout.decode()
+        if not re.search(r'\bUND\s+atexit$',runtime_symbols,re.M):
+            return candidate
+        defined = r'\bFUNC\s+LOCAL\s+DEFAULT\s+\d+\s+atexit$'
+        if not all(re.search(defined,text,re.M) for text in symbols.values()):
+            return candidate
+        relative = self.platform.runtime_lib+'/libc_nonshared.a'
+        scratch = Path(generation['scratch'])
+        support = scratch/relative
+        digest = sha256(support)
+        require(digest==sha256(Path(base['scratch'])/relative),'PGOGEN libc support archive changed')
+        owner = self.host(['rpm','--dbpath',scratch/'var/lib/rpm','-qf','--qf',
+                           '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH} %{SHA256HEADER}','/'+relative],
+                          out).stdout.decode().strip()
+        require(owner.startswith('glibc-devel-') and owner in base['lock']['packages'],
+                'PGOGEN libc support archive is not from the frozen baseline')
+        obj = out/'glibc-atexit.o'
+        obj.write_bytes(self.host(['ar','p',support,'atexit.oS'],out).stdout)
+        raw = self.host(['readelf','-p','.GCC.command.line',obj],out).stdout.decode()
+        records = buildlock.recorded_switches(raw)
+        compared,excluded = pgo_frozen.linked_atexit_lock(base['lock'],candidate,records)
+        save(out/'linked-atexit-provenance.json',dict(rpm=owner,archive=relative,archive_sha256=digest,
+             object_sha256=sha256(obj),records=records,excluded=excluded,original_lock_preserved=True))
+        return compared
 
     def pgo_deploy(self, out, store):
         result = self.deploy(out, store)
@@ -135,7 +169,7 @@ class InstrumentedPGO:
             return output.stdout.decode()
         result = pgo.merge_profiles(runs, build['pgo_evidence']['build_ids'],
                                     build['artifacts'], out/pgo.PROFILE_NAME, profdata)
-        ranking = profdata(['show', '--show-topn=20', result['profile']])
+        ranking = profdata(['show', '--topn=20', result['profile']])
         (out/'profdata-top20.txt').write_text(ranking)
         top = pgo_warnings.attribute_top(build['generation']['build_source'], pgo_warnings.top_rows(ranking))
         result['lock']['top20'] = top
