@@ -1,6 +1,6 @@
 # K2b 续：独立 K-GCOV 与宿主机重启恢复
 
-**当前等待共享主机锁。** XZ 镜像与 52 个普通模块已在冻结 buildroot 中落盘。宿主机重启后，串行恢复单元按新规则先排队获取共享锁。RPi4 仍运行原 PLAT，p6 和 boot_a 尚未写入。 [证据索引](evidence/31-k2b/index.json)
+**当前等待 I/O 开工门禁。** XZ 镜像与 52 个普通模块已在冻结 buildroot 中落盘。宿主机重启后，串行恢复单元按 PM 修订先取共享锁检查资源，未达标则立即释放。RPi4 仍运行原 PLAT，p6 和 boot_a 尚未写入。 [证据索引](evidence/31-k2b/index.json)
 
 ## 已完成的构建阶段
 
@@ -25,13 +25,23 @@ Base `20261030.120529` 和 Unified `20261104.125239` 远端目录返回 404。�
 
 恢复使用保留的镜像、GCNO、`Module.symvers`、生成头文件和 Kbuild 暂存模块。待资源门禁通过后，独立输出目录只用 `-j1` 重建六个 extra 模块，随后核对全部 58 个模块的 ABI、去 BTF 和 p6 容量。当前恢复单元 CPUQuota 为 100%，MemoryHigh 1.5 GiB，MemoryMax 2.5 GiB，禁用 swap，nice 19，I/O 优先级 idle。用户 cgroup 无设备带宽控制器，镜像验证的批量读取在程序内限为 12 MB/s。开工要求可用内存至少 16 GiB、load1 小于 CPU 数的 0.6 倍、磁盘空间至少 50 GiB、全局 I/O full PSI 的 avg10 不超过 5%，并取得共享构建锁。资源门禁最多等待 3 小时。重启恢复初次归档时 I/O full PSI 的 avg10 为 56.14%，恢复尚未开工。 [恢复状态](evidence/31-k2b/restart/recovery-state.json) · [资源窗口](evidence/31-k2b/restart/resource-samples.jsonl)
 
-## 两轨共用的主机重负载规则
+## 两轨共用的主机重负载规则（首次归档）
 
 自 2026-11-26 起，K0 的 GBS/rpmbuild、内核和模块构建、打包与压缩、大文件镜像校验、批量下载及大规模 perf 和 profile 分析，统一先对 `WORKDIR/temp/host-gbs.lock` 取独占 flock。锁贯穿资源等待与重型步骤，排队和持锁等待合计最多 8 小时。轻量 SDB 查询、小文件核对和文档无需取锁，tryboot 仍执行既有的主机构建互斥检查。
 
 K2b 恢复单元先取锁，再记录开工读数。要求 `MemAvailable ≥ 16 GiB` 且 `/proc/pressure/io` 的 `full avg60 < 20%`，未通过时持锁每 10 分钟复查。原有 avg10、负载、磁盘和 3 小时资源等待门槛同时生效。保留单核、2.5 GiB 内存上限、禁用 swap 和 idle I/O。运行时守卫记录连续低于 6 GiB 的采样并中止步骤，原有更严的运行中止条件继续生效。中止后按收据报告。 [恢复守卫](evidence/31-k2b/shared-heavy-rule/guard-recovery.py) · [门禁核验](evidence/31-k2b/shared-heavy-rule/gate-check.txt)
 
 当前单元 `kernel-k2b-recovery-shared-gate.service` 已启用新规则。归档时共享锁由另一进程持有，K2b 尚未进行恢复构建或镜像校验。 [新单元状态](evidence/31-k2b/shared-heavy-rule/unit-state.json) · [锁观察](evidence/31-k2b/shared-heavy-rule/lock-observation.txt)
+
+## K2b 恢复门禁对齐
+
+2026-11-26 03:30:24 PST 启用新单元 `kernel-k2b-recovery-aligned.service`。开工前取独占共享锁，锁内只判定 `MemAvailable ≥ 16 GiB`、I/O `full avg60 < 20%` 和磁盘余量 `≥ 50 GiB`。该阶段取消旧 avg10 和 load1 条件。若未通过，先释放锁，再等待 10 分钟复查，资源等待上限 3 小时。符合门禁即开工，完成后释放锁。单核、2.5 GiB 上限、禁用 swap、idle I/O、12 MB/s 校验限速及运行中资源保护保持原值。 [新守卫](evidence/31-k2b/aligned-gate/guard-recovery.py) · [锁内读数](evidence/31-k2b/aligned-gate/admission-checks.jsonl)
+
+前三次锁内检查的 I/O avg60 分别为 35.56%、42.71%、49.16%。同期可用内存分别为 19.57、20.28、23.24 GiB，磁盘余量分别为 145.82、145.77、143.23 GiB。三次均因 I/O 未达到开工条件，检查后均已释放锁。 [单元状态](evidence/31-k2b/aligned-gate/unit-state.json)
+
+上一单元在 01:53 曾获得开工资格，随后在对比 GCNO 目录时因 `Path` 与字符串比较出错而停止。保留原错误，并修正比较类型。轻量清单复核确认六个目录分别有 4、7、63、66、121 和 66 个 GCNO 对应已链接对象，共 327 个。 [旧错误](evidence/31-k2b/aligned-gate/previous-gcno-error.log) · [修正脚本](evidence/31-k2b/aligned-gate/discover-notes.py)
+
+主机恢复完成后的顺序为 p6 容量核对与写入、PLAT 5 分钟空闲温度门禁（中位 ≤58°C，每 10 分钟复查，最多 2 小时）、用户在 RPi4 旁时首启。温度等待期间 boot_a 保持原样。此处的部署和训练状态将在取得板上收据后更新。
 
 ## 板上状态和未完成项
 
