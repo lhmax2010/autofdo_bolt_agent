@@ -1,4 +1,4 @@
-"""Coordinate GBS with the shared host flock and the resource gates."""
+"""Coordinate exclusive builds and shared board timing on the same host flock."""
 from datetime import datetime, timezone
 import fcntl
 import json
@@ -109,17 +109,19 @@ def observed_owner(lock):
 
 
 class BuildCoordination:
-    def __init__(self, path, output, workflow, stage, invocation):
+    def __init__(self, path, output, workflow, stage, invocation, *, shared=False):
         self.path = path
         self.output = output
         self.workflow = workflow
         self.stage = stage
         self.invocation = invocation
+        self.mode = fcntl.LOCK_SH if shared else fcntl.LOCK_EX
         self.lock = None
         self.acquired = False
         self.waiting = None
         self.remaining = dict(coordination=COORDINATION_LIMIT, resources=RESOURCE_LIMIT)
         self.record = dict(path=str(path), workflow=workflow, stage=stage, invocation=invocation,
+                           mode='shared' if shared else 'exclusive',
                            owner=None, started_utc=utc(), checks=[], limits_seconds=self.remaining.copy())
 
     def check(self, phase, **data):
@@ -135,7 +137,7 @@ class BuildCoordination:
 
     def check_deadline(self, budget):
         reason = 'gate' if budget == 'resources' else 'lock-timeout'
-        require(self.remaining[budget] > 0, 'GBS startup timeout: ' + budget, reason,
+        require(self.remaining[budget] > 0, self.invocation + ' startup timeout: ' + budget, reason,
                 2 if reason == 'gate' else 8)
     def pause(self, budget):
         self.account_wait()
@@ -156,7 +158,7 @@ class BuildCoordination:
         self.lock = self.path.open('a+', encoding='utf-8', errors='replace')
         while True:
             try:
-                fcntl.flock(self.lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(self.lock, self.mode | fcntl.LOCK_NB)
             except BlockingIOError:
                 self.check('shared-lock', ready=False, observed_owner=observed_owner(self.lock))
                 self.pause('coordination')
@@ -166,11 +168,13 @@ class BuildCoordination:
                 break
         self.record['owner'] = dict(workflow=self.workflow, stage=self.stage, invocation=self.invocation,
                                     pid=os.getpid(), started_utc=utc())
-        self.lock.seek(0)
-        self.lock.truncate()
-        self.lock.write(canonical(self.record['owner']))
-        self.lock.flush()
-        os.fsync(self.lock.fileno())
+        if self.mode == fcntl.LOCK_EX:
+            self.lock.seek(0)
+            self.lock.truncate()
+            self.lock.write(canonical(self.record['owner']))
+            self.lock.flush()
+            os.fsync(self.lock.fileno())
+        # Shared holders record their own owner metadata in their receipts.
         self.check('shared-lock', ready=True)
 
     def ready(self, read_resources, can_start):

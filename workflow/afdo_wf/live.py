@@ -8,11 +8,12 @@ import re
 import shlex
 import shutil
 import signal
+import statistics
 import subprocess
 import tarfile
 import time
 from . import build,buildlock,config,profgen,consumption,stats,board,scheduler,platforms
-from . import pgo
+from . import pgo, pgo_frozen, pgo_resume, pgo_warnings
 from .pgo_live import InstrumentedPGO
 from .common import TechnicalFailure,StopRequested,require,save,sha256,json_load,GateError
 from .receipts import Cleanup,DAG
@@ -310,7 +311,7 @@ class Experiment(InstrumentedPGO):
             save(registry, retained)
 
     def restore_host_artifacts(self):
-        """Rehydrate verified host artifacts after cleanup, without rerunning S0-S3."""
+        """Rehydrate verified host artifacts after cleanup, without rerunning S0–S3."""
         records=self.d/'host-artifacts.json'
         if not records.exists():return
         for remote,action in json_load(records).items():
@@ -361,7 +362,7 @@ class Experiment(InstrumentedPGO):
     def launch_script(self, control, argv, env):
         load_env = dict(env or {})
         observer_cpu = int(load_env.get('WF_OBSERVER_CPU', '0'))
-        if not any(self.scripts+'/'+name in argv for name in ('measure.sh','pgo_count.sh')):
+        if not any(self.scripts+'/'+name in argv for name in ('measure.sh','pgo_count.sh','pgo_count_stage6.sh')):
             load_env.update(WF_STANDALONE_SAMPLER=self.scripts+'/telemetry.sh',
                             WF_CAPABILITIES=self.scripts+'/capabilities.tsv')
         return foreground_script(control, argv, load_env, observer_cpu)
@@ -445,7 +446,7 @@ class Experiment(InstrumentedPGO):
     def build_variant(self,variant,out,profile=None,frozen=None,*,stage=None):
         j=self.job if frozen is None else {**self.job, **frozen};unit=self.package['build_units'][0]
         if pgo.method(j)=='pgo':
-            macros=pgo.macros(variant, unit, self.package['consumption']['diag_macro'])
+            macros=pgo.macros(variant, unit, self.package['consumption']['diag_macro'], j.get('pgo_frozen'))
         else:
             macros=dict(unit['macros'])
             if profile:
@@ -795,6 +796,8 @@ class Experiment(InstrumentedPGO):
         save(out/'consumption.json',c);require(c['passed'],'consumption gate failed')
         return c
     def timed(self,name,x,deployment,out,preflight):
+        if hasattr(self,'measurement_boot') and self.transport.shell('cat /proc/sys/kernel/random/boot_id',True).strip()!=self.measurement_boot:
+            raise TechnicalFailure('board rebooted between rounds')
         remote=self.remote+'/'+name
         env=self.workload_environment(deployment, self.scripts+'/'+deployment['variant']+'-manifest.json')
         self.launch(name,['bash',self.scripts+'/measure.sh',remote,self.perf_path,
@@ -814,8 +817,12 @@ class Experiment(InstrumentedPGO):
                 perf[fields[2].strip()]=float(fields[0])
         require(set(perf)=={'task-clock','cycles','instructions'} and all(x>0 for x in perf.values()),'perf counters missing')
         start=float((local/'start.monotonic').read_text());end=float((local/'end.monotonic').read_text())
-        telemetry=stats.telemetry(stats.parse_telemetry_tsv((local/'telemetry.tsv').read_text()),start,end,
-                                  preflight['fixed_khz'],preflight['capabilities'])
+        samples=stats.parse_telemetry_tsv((local/'telemetry.tsv').read_text())
+        telemetry=stats.telemetry(samples,start,end,preflight['fixed_khz'],preflight['capabilities'])
+        if getattr(self, 'method', None)=='pgo':
+            within=[s for s in samples if start-1 <= s['time'] <= end+1]
+            temperatures=[value for sample in within for value in sample['temperature'].values() if value is not None]
+            telemetry['temperature_c']=dict(min=min(temperatures),max=max(temperatures),median=statistics.median(temperatures)) if temperatures else None
         row=dict(name=name,wall_seconds=float(wall[-1]),perf=perf,telemetry=telemetry,maps_checked=maps,
                  start=start,end=end,local=str(local),variant=deployment['variant'])
         save(Path(out)/(name+'-row.json'),row)
@@ -843,34 +850,50 @@ class Experiment(InstrumentedPGO):
         for label,dep in [('control',deployment),('candidate',candidate)]:
             for x in self.inputs:oracles['post-'+label+'-'+x['id']]=self.oracle('post-'+label+'-'+x['id'],x,dep,out)
         return dict(comparisons=comparisons,oracles=oracles,rounds=rows,injection=injection,telemetry_check=check)
-    def measure_pairs(self,deployment,candidate,out,preflight,*,group=None,seed_offset=0,primary=True):
+    def measurement_inputs(self):
+        return sorted((x for x in self.inputs if x['role'] in ('test','test-secondary')),
+                      key=lambda x:x['role']!='test')
+
+    def prepare_pair(self, x, deployment, candidate, out, preflight, seed, bootstrap_seed, *, group=None, primary=True):
+        label = x['id'] if group is None else group+'-'+x['id']
+        pilots=[self.timed('pilot-'+label+'-'+str(i),x,deployment,out,preflight) for i in range(10)]
+        times=[row['wall_seconds'] for row in pilots]
+        n=stats.budget(times)
+        variants=('BASE','AFDO') if group is None else (deployment['variant'],candidate['variant'])
+        plan=dict(input=x,control=deployment['variant'],candidate=candidate['variant'],N=n,warmup=self.package['measure']['warmup'],
+                  order=stats.order(n,seed,variants),order_seed=seed,bootstrap_seed=bootstrap_seed,
+                  epsilon=self.package['measure']['epsilon'],analysis_sha256=sha256(Path(stats.__file__)),
+                  registered_time=time.time(),primary=primary and x['role']=='test',multiple_comparison_correction=False)
+        if group is not None:
+            plan['pilot_cv']=statistics.stdev(times)/statistics.mean(times)
+        planfile=out/(x['id']+'-plan.json');save(planfile,plan)
+        save(out/(x['id']+'-plan-lock.json'),dict(sha256=sha256(planfile),time=time.time()))
+        return dict(plan=plan,pilots=pilots)
+
+    def measure_pairs(self,deployment,candidate,out,preflight,*,group=None,seed_offset=0,primary=True,prepared=None):
         comparisons={};rows=[]
         labels=dict(BASE='BASE', AFDO='AFDO') if group is None else dict(
             BASE=deployment['variant'], AFDO=candidate['variant'])
         deployments={labels['BASE']:deployment,labels['AFDO']:candidate}
         prefix='' if group is None else group+'-'
-        tests=sorted((x for x in self.inputs if x['role'] in ['test','test-secondary']),key=lambda x:x['role']!='test')
-        for ix,x in enumerate(tests):
-            pilots=[]
+        for ix,x in enumerate(self.measurement_inputs()):
+            first_row=len(rows)
             label = prefix+x['id']
             paired_counters=[]
-            for i in range(10):
-                pilots.append(self.timed('pilot-'+label+'-'+str(i),x,deployment,out,preflight))
-            n=stats.budget([r['wall_seconds'] for r in pilots])
-            seed=self.job['order_seed']+seed_offset+ix
-            bootstrap_seed=self.job['bootstrap_seed']+seed_offset+ix
-            order=stats.order(n,seed, tuple(deployments))
-            plan=dict(input=x,control=deployment['variant'],candidate=candidate['variant'],N=n,warmup=self.package['measure']['warmup'],
-                      order=order,order_seed=seed,bootstrap_seed=bootstrap_seed,
-                      epsilon=self.package['measure']['epsilon'],analysis_sha256=sha256(Path(stats.__file__)),
-                      registered_time=time.time(),primary=primary and x['role']=='test',multiple_comparison_correction=False)
-            planfile=out/(x['id']+'-plan.json');save(planfile,plan)
-            save(out/(x['id']+'-plan-lock.json'),dict(sha256=sha256(planfile),time=time.time()))
+            collected = (prepared[x['id']] if prepared is not None else
+                         self.prepare_pair(x,deployment,candidate,out,preflight,self.job['order_seed']+seed_offset+ix,
+                                           self.job['bootstrap_seed']+seed_offset+ix,group=group,primary=primary))
+            pilots,plan=collected['pilots'],collected['plan']
+            planfile=out/(x['id']+'-plan.json')
+            lockfile=out/(x['id']+'-plan-lock.json')
+            require(json_load(planfile)==plan and json_load(lockfile)['sha256']==sha256(planfile),'pair plan lock changed')
+            n,bootstrap_seed=plan['N'],plan['bootstrap_seed']
             for warm in range(plan['warmup']):
                 for role,dep in deployments.items():
                     self.timed('warm-'+label+'-'+str(warm)+'-'+role,x,dep,out,preflight)
             blocks=[]
             for i,order in enumerate(plan['order'],1):
+                require(json_load(lockfile)['sha256']==sha256(planfile),'pair plan changed during timing')
                 checkpoint=list(self.cleanup.data['cleanup_pending'])
                 def one(role,attempt):
                     dep=deployments[role]
@@ -888,6 +911,8 @@ class Experiment(InstrumentedPGO):
                         if action.get('local') in archived:
                             action['local']=str(failed_dir/('recovery-'+Path(action['local']).name))
                     save(self.cleanup.path,self.cleanup.data)
+                    if prepared is not None:
+                        self.recover_pgo_block(error, failed_dir)
                     require(self.transport.identity()==self.job['identity'],'identity changed during technical cleanup','identity',3)
                     actions=[a for a in self.cleanup.data['cleanup_pending'] if a not in checkpoint]
                     for a in sorted(reversed(actions),key=lambda a:0 if a['kind']=='process' else 1):
@@ -909,6 +934,16 @@ class Experiment(InstrumentedPGO):
             result=stats.analyze(blocks,n,bootstrap_seed,plan['epsilon'])
             freq=stats.effective_frequency(paired_counters)
             comparisons[x['id']]=dict(plan=plan,pilots=pilots,statistics=result,effective_frequency=freq)
+            if group is not None:
+                temperatures = {}
+                for variant in deployments:
+                    readings = [row['telemetry'].get('temperature_c') for row in rows[first_row:] if row['variant']==variant]
+                    available = [reading for reading in readings if reading]
+                    temperatures[variant] = (dict(min=min(r['min'] for r in available),
+                        max=max(r['max'] for r in available),median_of_round_medians=statistics.median(r['median'] for r in available))
+                        if available else None)
+                failed = sorted(out.glob(x['id']+'-*-failed-*.json'))
+                comparisons[x['id']].update(temperature_c=temperatures,technical_retries=len(failed))
             save(out/'comparisons.json',comparisons)
         return comparisons,rows
     def failure_cleanup_test(self,out,preflight,deployment):
@@ -1013,6 +1048,23 @@ class Experiment(InstrumentedPGO):
             limitations=['One '+self.platform.report_label+'; single-threaded decode; ToS primary and Sintel secondary; no multiple-comparison correction; firmware throttle history unknown'],
             cleanup_pending=[])
         return report.write(out,payload)
+
+    @contextlib.contextmanager
+    def pgo_timing_lock(self, out):
+        from .host_build import BuildCoordination, lock_path
+        record = out / 'measurement-lock.json'
+        coordination = BuildCoordination(lock_path(self.w, self.job.get('host')), record,
+            self.job['experiment'], 'measure', 'S6 board timing', shared=True)
+        error = None
+        try:
+            coordination.acquire()
+            coordination.ready(lambda: build.resources(self.w, shared_host_recovery=True), build.can_start)
+            yield
+        except BaseException as failure:
+            error = failure
+            raise
+        finally:
+            coordination.finish(error)
     def run(self, stop_after=None):
         if 'injection' in self.job or 'telemetry_check' in self.job:return self.injected_run()
         inputs=[self.job_path,self.job['package'],self.job['inputs'],self.job['patch']]
@@ -1022,11 +1074,14 @@ class Experiment(InstrumentedPGO):
                       convert=self.convert,rebuild=self.rebuild,measure=self.measure,report=self.report)
         method=pgo.method(self.job,self.package)
         if method=='pgo':
-            pgo.validate_thresholds(self.job.get('pgo_warning_limits'))
+            pgo.validate_collision_policy(self.job.get('pgo_collision_policy'))
+            pgo_warnings.validate(self.job.get('pgo_warning_policy'))
             archive=pgo.archive_lock(self.job.get('afdo_profile'))
             patch=Path(self.job['package']).parent/self.package['pgo']['patch']
             require(sha256(self.job['patch'])==sha256(patch),'PGO spec patch lock mismatch','identity',3)
             inputs.append(archive)
+            if split := self.job.get('pgo_frozen'):
+                inputs.extend(pgo_frozen.verify(split, self.w, self.package['build_units'][0]['arch']))
             handlers=dict(preflight=self.pgo_preflight,build=self.pgo_build,deploy=self.pgo_deploy,
                           collect=self.pgo_collect,convert=self.pgo_convert,rebuild=self.pgo_rebuild,
                           measure=self.pgo_measure,report=self.pgo_report)
@@ -1035,6 +1090,14 @@ class Experiment(InstrumentedPGO):
         require(stop_after is None or stop_after in stages, 'invalid live stop stage')
         if stop_after:
             stages = stages[:stages.index(stop_after)+1]
+        resume_rebuild = 'pgo_resume_after_rebuild' in self.job
+        resume_collect = 'pgo_resume_after_collect' in self.job and not resume_rebuild
+        if resume_rebuild:
+            require(method=='pgo' and stop_after in (None, 'measure', 'report'),'S5 continuation is limited to measure and report')
+            stages = stages[stages.index('measure'):]
+        if resume_collect:
+            require(method=='pgo' and stop_after=='rebuild','S3 continuation is limited to PGO through rebuild')
+            stages = stages[stages.index('convert'):]
         if 'platform' in self.job:
             inputs.append(platforms.profile_path(self.platform_name))
         if self.platform.prepare_only or method=='pgo':
@@ -1046,15 +1109,27 @@ class Experiment(InstrumentedPGO):
         result={'status':'failed','start':time.time()}
         try:
             if self.platform.prepare_only or method=='pgo':
-                build.wait_for_host(self.w, self.d/('host-gate-'+str(time.time_ns())+'.json'))
+                gate = self.d/('host-gate-'+str(time.time_ns())+'.json')
+                if build.recovery_limits(self.job.get('host')):
+                    build.wait_for_host(self.w, gate, exclusive=True, shared_host_recovery=True,
+                                        waive_io_pressure=build.io_pressure_waived(self.job.get('host')))
+                else:
+                    build.wait_for_host(self.w, gate)
             from .receipts import Store
             store = Store(self.d/'receipts')
-            reuse_preflight = scheduler.reusable(store, 'preflight', inputs)
+            result['stages'] = []
+            if resume_collect:
+                pgo_resume.after_collect(self.job,store,self.w)
+                result['stages'] = scheduler.execute(['convert'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
+                stages = ['rebuild']
+            if resume_rebuild:
+                pgo_resume.after_rebuild(self.job,store,self.w)
+            reuse_preflight = resume_rebuild or resume_collect or scheduler.reusable(store, 'preflight', inputs)
             with self.session():
                 self.prune_host_artifacts(store)
                 if reuse_preflight:
                     self.ensure_work();self.restore_host_artifacts()
-                result['stages']=scheduler.execute([s for s in stages if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
+                result['stages']+=scheduler.execute([s for s in stages if s!='report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
             if 'report' in stages:
                 result['stages']+=scheduler.execute(['report'],handlers,self.d/'stages',self.d/'receipts',inputs,progress)
             result['status']='complete' if 'report' in stages else 'stopped'

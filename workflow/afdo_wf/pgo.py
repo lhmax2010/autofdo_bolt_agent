@@ -1,14 +1,14 @@
 """Instrumented PGO identity, merge, and consumption gates."""
+from collections import defaultdict
 from pathlib import Path
 import re
 
-from . import buildlock
+from . import buildlock, pgo_frozen
 from .common import require, save, sha256
 
 VARIANTS = ('BASE', 'AFDO', 'PGOGEN', 'PGO')
 CONTROLS = ('BASE', 'AFDO')
 PROFILE_NAME = 'pgo.profdata'
-DIAGNOSTICS = ('profile-instr-unprofiled', 'profile-instr-out-of-date')
 RAW_MAGIC = frozenset({0xff6c70726f667281, 0xff6c70726f665281})
 INDEX_MAGIC = 0x8169666f72706cff
 RAW_NAME = re.compile(r'[0-9]+_[0-9]+-([1-9][0-9]*)\.profraw')
@@ -16,6 +16,12 @@ BUILD_ID = re.compile(r'[a-f0-9]{40}')
 SHA = re.compile(r'[a-f0-9]{64}')
 PGO_MACROS = {'PGOGEN': {'with_pgogen': '1'}, 'PGO': {'with_pgo': '1'}}
 COMMON_MACROS = {'with_pgo_deps': '1'}
+ZERO_DSO_POLICY = dict(all_zero='allow', one_nonzero_dso='reject', multiple_nonzero_dsos='reject')
+
+
+def validate_collision_policy(policy):
+    require(policy is None or policy == ZERO_DSO_POLICY, 'unsupported cross-DSO collision policy')
+
 
 
 def method(job, package=None):
@@ -38,17 +44,15 @@ def archive_lock(lock):
     return path
 
 
-def validate_thresholds(limits):
-    require(isinstance(limits, dict) and set(limits) == set(DIAGNOSTICS)
-            and all(type(value) is int and value >= 0 for value in limits.values()),
-            'preregister both PGO warning limits before a live run')
-
-
-def macros(variant, unit, diag_macros):
+def macros(variant, unit, diag_macros, split=None):
     require(variant in (*VARIANTS, 'BASE-r'), 'unknown build variant')
-    require(not {'with_pgogen','with_pgo','with_pgo_deps'} & unit['macros'].keys(),
+    require(not {'with_pgogen','with_pgo','with_pgo_deps',pgo_frozen.MACRO} & unit['macros'].keys(),
             'instrumented PGO macros are reserved for variant selection')
-    result = dict(unit['macros'], **COMMON_MACROS)
+    result = dict(unit['macros'])
+    if split is None:
+        result.update(COMMON_MACROS)
+    elif variant == 'PGOGEN':
+        result[pgo_frozen.MACRO] = split['runtime']['evr']
     if variant == 'AFDO':
         result.update(unit['consume_macro'])
         result.update(diag_macros)
@@ -127,7 +131,7 @@ def read_inventory(directory, pid, exit_code):
                 'profile filename is not an exact member for the completed decoder PID')
         path = directory/'raw'/name
         require(not path.is_symlink() and path.is_file() and sha256(path) == digest, 'profraw inventory SHA mismatch')
-        rows.append(dict(path=str(path.resolve()), sha256=digest))
+        rows.append(dict(path=str(path.resolve()), sha256=digest, bytes=path.stat().st_size))
         seen.add(name)
     require(rows, 'training profraw inventory is empty')
     require(seen == {p.name for p in (directory/'raw').iterdir()}, 'unlisted profraw training output')
@@ -150,19 +154,22 @@ def show_profile(path, kind, execute):
     lines = re.findall(
         r'^  (.+):\n    Hash: (0x[0-9a-f]+)\n    Counters: ([0-9]+)\n    Block counts: \[([0-9, ]*)\]$',
         text, re.M)
-    records = {(name, signature): any(int(x) for x in counters.split(',')) for name, signature, _, counters in lines if counters}
+    records = {(name, signature): tuple(map(int,counters.split(',')))
+               for name, signature, _, counters in lines if counters}
     require(len(records) == int(count[1]), 'incomplete instrumentation function records')
     require(all(len(counters.split(',')) == int(n) for _, _, n, counters in lines),
             'instrumentation counter list length mismatch')
     return dict(version=int(version[1]), ids=binary_ids[1].splitlines(), records=records)
 
 
-def merge_profiles(runs, identities, targets, output, execute):
+def merge_profiles(runs, identities, targets, output, execute, *, collision_policy=None):
     """Merge the exact SHA-bound decoder inventory; version checks use llvm-profdata."""
     require(len(runs) == 3 and len({r['id'] for r in runs}) == len(runs), 'expected three independent PGOGEN runs')
     require(targets and all(BUILD_ID.fullmatch(key) for key in identities)
             and set(targets) <= set(identities.values()), 'incomplete PGOGEN build ID inventory')
+    validate_collision_policy(collision_policy)
     members = []
+    sources = defaultdict(list)
     versions = set()
     functions = {}
     used = set()
@@ -188,6 +195,8 @@ def merge_profiles(runs, identities, targets, output, execute):
             require(target not in functions or functions[target] == keys,
                     'PGOGEN function set differs between training runs')
             functions[target] = keys
+            for key, counts in profile['records'].items():
+                sources[key].append(dict(dso=target,build_id=build_id,run=run['id'],counts=counts))
             versions.add(profile['version'])
             members.append(dict(row, run=run['id'], pid=run['pid'], build_id=build_id, binary=target,
                                 raw_version=profile['version']))
@@ -196,6 +205,18 @@ def merge_profiles(runs, identities, targets, output, execute):
     output = Path(output)
     require(not output.exists(), 'indexed profile output already exists')
     save(output.parent/'profraw-merge-manifest.json', members)
+    collisions = []
+    for (name, signature), records in sorted(sources.items()):
+        owners = sorted({record['dso'] for record in records})
+        if len(owners) < 2:
+            continue
+        nonzero = sorted({record['dso'] for record in records if any(record['counts'])})
+        case = ('all_zero' if not nonzero else
+                'one_nonzero_dso' if len(nonzero)==1 else 'multiple_nonzero_dsos')
+        collisions.append(dict(name=name,hash=signature,dsos=owners,nonzero_dsos=nonzero,
+                               case=case,sources=records,allowed=collision_policy==ZERO_DSO_POLICY and not nonzero))
+    save(output.parent/'cross-dso-collisions.json', dict(policy=collision_policy,keys=collisions))
+    require(all(row['allowed'] for row in collisions), 'target DSO function attribution is ambiguous')
     def verify_members():
         require(all(sha256(row['path']) == row['sha256'] for row in members), 'profraw input changed during conversion')
     verify_members()
@@ -203,34 +224,30 @@ def merge_profiles(runs, identities, targets, output, execute):
     verify_members()
     indexed = show_profile(output, 'indexed', execute)
     require(set(indexed['ids']) == merged_ids, 'indexed profile binary IDs differ from raw inputs', 'identity', 3)
+    for row in collisions:
+        counts = indexed['records'].get((row['name'],row['hash']))
+        require(counts is not None and not any(counts), 'merged all-zero collision has missing or nonzero counters')
     coverage = {}
     for target in targets:
         keys = functions[target]
         require(keys and keys <= indexed['records'].keys(), 'indexed profile omitted target functions')
-        require(not any(keys & other for name, other in functions.items() if name != target),
-                'target DSO function attribution is ambiguous')
-        covered = sum(indexed['records'][key] for key in keys)
+        covered = sum(any(indexed['records'][key]) for key in keys)
         coverage[target] = dict(instrumented_functions=len(keys), covered_functions=covered, ratio=covered/len(keys))
     lock = dict(path=str(output), sha256=sha256(output), raw_version=next(iter(versions)),
-                indexed_version=indexed['version'], coverage=coverage, inputs=members)
-    save(output.parent/'pgo-profile-lock.json', lock)
+                indexed_version=indexed['version'], coverage=coverage, inputs=members,
+                collision_policy=collision_policy,collisions=collisions)
     return dict(profile=str(output), lock=lock, quality=dict(publishable=True, identity='verified',
                                                             compatible=True, target_coverage=coverage))
 
 
-def consumption(log, limits, lock, staged, base_text, candidate_text):
-    validate_thresholds(limits)
+def consumption(lock, staged, base_text, candidate_text, warnings):
     require(Path(staged).is_file() and sha256(staged) == lock['sha256'],
             'staged indexed profile SHA mismatch', 'identity', 3)
     require(base_text and set(base_text) == set(candidate_text) == set(lock['coverage']),
             'incomplete PGO target evidence')
-    diagnostics = {key: [line for line in log.splitlines()
-                         if 'warning:' in line and '[' + '-W' + key + ']' in line]
-                   for key in DIAGNOSTICS}
-    counts = {key:len(lines) for key, lines in diagnostics.items()}
     changed = {target: digest != candidate_text[target] for target, digest in base_text.items()}
-    return dict(passed=all(changed.values()) and all(counts[key] <= limits[key] for key in limits),
-                warning_counts=counts, warning_limits=limits, warning_examples={k:v[:5] for k,v in diagnostics.items()},
+    return dict(passed=all(changed.values()) and warnings['passed'],
+                warning_counts=warnings['counts'], warning_audit=warnings,
                 changed_text=changed, coverage=lock['coverage'], staged_sha256=lock['sha256'])
 
 
@@ -243,9 +260,9 @@ def comparison_metadata():
 
 def stage_metadata(name, default):
     descriptions = {
-        'preflight': ('Check the pinned AFDO profile, PGO warning limits and available mechanism events.',
-                      ['AFDO profile path and SHA-256', 'preregistered PGO warning limits'],
-                      ['locked AFDO SHA and PGO warning limits', 'perf event availability'],
+        'preflight': ('Check the pinned AFDO profile, PGO warning policy and available mechanism events.',
+                      ['AFDO profile path and SHA-256', 'preregistered PGO warning policy'],
+                      ['locked AFDO SHA and PGO warning policy', 'perf event availability'],
                       ['mechanism event manifest']),
         'build': ('Freeze the four-variant dependency union and build BASE and PGOGEN.',
                   ['PGO spec patch and compiler-rt from the pinned snapshot'],
@@ -263,7 +280,7 @@ def stage_metadata(name, default):
                     ['raw/indexed version, binary IDs and target function coverage'],
                     ['locked indexed profile and merge manifest']),
         'rebuild': ('Build AFDO from the locked historical profile and audit PGO.',
-                    ['AFDO SHA lock, indexed PGO SHA lock and warning limits'],
+                    ['AFDO SHA lock, indexed PGO SHA lock and warning policy'],
                     ['variant build-lock differences, PGO warnings, profile SHA and changed target text'],
                     ['AFDO and PGO runtimes and per-target consumption']),
         'measure': ('Measure PGO against BASE and AFDO, then count mechanisms separately.',

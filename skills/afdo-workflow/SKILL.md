@@ -95,11 +95,11 @@ Use `"$PY" -m afdo_wf explain STAGE` for stage inputs, gates, board operations, 
 
 ## Host build coordination
 
-The CLI acquires `$WORKDIR/temp/host-gbs.lock` with `flock` for each GBS invocation, including dependency resolution. It records the holder, waits for other `gbs` or `rpmbuild` processes across all users, and releases the lock when the invocation finishes, fails, or is cancelled. The combined wait for the lock and other builders is limited to eight hours.
+The CLI uses `$WORKDIR/temp/host-gbs.lock` with `flock`. Each GBS invocation, including dependency resolution, takes an exclusive lock. The PGO measurement stage takes a shared lock across pilots, formal rounds, and mechanism counts. Other shared board timing sessions can proceed on their own authorized boards while exclusive host work waits. The combined wait for the lock and other builders is limited to eight hours.
 
 Before launching GBS the CLI also rechecks the startup resource gates: `MemAvailable >= 16 GiB`, one-minute load average `< 12`, and at least `50 GiB` free on the `WORKDIR` filesystem. It rechecks unmet conditions every ten minutes and reports a gate failure after at most three hours of resource waiting.
 
-Inspect `gbs_waits` in the stage receipt or `status` output. Report the wait records on exit 8. Avoid GBS builds on the same host during timed board measurement.
+Inspect `gbs_waits` in a build receipt or `status`. PGO measurement records its shared holder and resource checks in `measurement-lock.json` and checks I/O PSI full avg60 <20% before timing. Locks are released when their operation finishes, fails, or is cancelled. Report the wait records on exit 8.
 
 ## Board identity and SDB
 

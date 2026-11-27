@@ -141,6 +141,58 @@ class Instrumented(unittest.TestCase):
         self.assertEqual(result['lock']['coverage']['libavcodec']['ratio'],1)
         self.assertEqual(sha256(result['profile']),result['lock']['sha256'])
 
+    def collision_merge(self, codec, util, *, policy=pgo.ZERO_DSO_POLICY, indexed=0):
+        runs = self.runs()
+        output = self.root/'pgo.profdata'
+
+        def execute(args):
+            if args[0] == 'merge':
+                return self.executor(args)
+            path = Path(args[-1])
+            if path == output:
+                text = show(list(IDS), ['shared'], 13)
+                return text.replace('[0, 23]',f'[0, {indexed}]')
+            target = path.read_bytes()[8:].decode()
+            count = codec if target == 'libavcodec' else util
+            text = show([TARGETS[target]], ['shared'])
+            return text.replace('[0, 23]',f'[0, {count}]')
+
+        return pgo.merge_profiles(runs,IDS,TARGETS,output,execute,collision_policy=policy)
+
+    def test_all_zero_collision_is_audited_and_allowed(self):
+        result = self.collision_merge(0,0)
+        row, = result['lock']['collisions']
+        self.assertEqual((row['name'],row['hash'],row['dsos'],row['case']),
+                         ('shared','0x0000000000000010',['libavcodec','libavutil'],'all_zero'))
+        self.assertTrue(row['allowed'])
+        self.assertEqual(len(row['sources']),6)
+        self.assertTrue(all(source['counts']==(0,0) for source in row['sources']))
+        self.assertEqual(result['lock']['coverage']['libavcodec']['covered_functions'],0)
+
+    def test_one_nonzero_dso_is_rejected_before_merge(self):
+        with self.assertRaisesRegex(GateError,'attribution is ambiguous'):
+            self.collision_merge(9,0)
+        row, = json_load(self.root/'cross-dso-collisions.json')['keys']
+        self.assertEqual(row['case'],'one_nonzero_dso')
+        self.assertEqual(row['nonzero_dsos'],['libavcodec'])
+        self.assertFalse((self.root/'pgo.profdata').exists())
+
+    def test_multiple_nonzero_dsos_are_rejected_before_merge(self):
+        with self.assertRaisesRegex(GateError,'attribution is ambiguous'):
+            self.collision_merge(9,3)
+        row, = json_load(self.root/'cross-dso-collisions.json')['keys']
+        self.assertEqual(row['case'],'multiple_nonzero_dsos')
+        self.assertFalse((self.root/'pgo-profile-lock.json').exists())
+
+    def test_unapproved_zero_collision_is_still_rejected(self):
+        with self.assertRaisesRegex(GateError,'attribution is ambiguous'):
+            self.collision_merge(0,0,policy=None)
+
+    def test_indexed_collision_must_remain_zero(self):
+        with self.assertRaisesRegex(GateError,'missing or nonzero counters'):
+            self.collision_merge(0,0,indexed=1)
+        self.assertFalse((self.root/'pgo-profile-lock.json').exists())
+
     def test_missing_profraw_for_one_dso_rejected(self):
         runs=self.runs({'libavcodec':TARGETS['libavcodec']})
         with self.assertRaisesRegex(GateError,'missing profraw'):
@@ -189,20 +241,20 @@ class Instrumented(unittest.TestCase):
         with self.assertRaisesRegex(GateError,'inconsistent raw'):
             pgo.merge_profiles(runs,IDS,TARGETS,self.root/'pgo.profdata',execute)
 
-    def test_consumption_thresholds_and_changed_text(self):
+    def test_consumption_checks_warnings_and_changed_text(self):
         indexed=self.root/'pgo.profdata'
         indexed.write_bytes(b'fixture')
         evidence=dict(sha256=sha256(indexed),coverage=dict.fromkeys(TARGETS,1))
-        logs='file.c:8: warning: profile data may be out of date [-Wprofile-instr-out-of-date]'
-        limits=dict.fromkeys(pgo.DIAGNOSTICS,0)
-        with self.assertRaisesRegex(GateError,'preregister'):
-            pgo.consumption(logs,{},evidence,indexed,{}, {})
-        def assess(new_text):
-            return pgo.consumption(logs,limits,evidence,indexed,dict.fromkeys(TARGETS,'base'),new_text)
-        self.assertFalse(assess(dict.fromkeys(TARGETS,'candidate'))['passed'])
-        limits['profile-instr-out-of-date']=1
-        self.assertFalse(assess(dict(libavcodec='candidate',libavutil='base'))['passed'])
-        self.assertTrue(assess(dict.fromkeys(TARGETS,'candidate'))['passed'])
+        base=dict.fromkeys(TARGETS,'base')
+        candidate=dict.fromkeys(TARGETS,'candidate')
+        self.assertFalse(pgo.consumption(evidence,indexed,base,candidate,
+                                         dict(passed=False,counts={}))['passed'])
+        candidate['libavutil']='base'
+        self.assertFalse(pgo.consumption(evidence,indexed,base,candidate,
+                                         dict(passed=True,counts={}))['passed'])
+        candidate['libavutil']='candidate'
+        self.assertTrue(pgo.consumption(evidence,indexed,base,candidate,
+                                        dict(passed=True,counts={}))['passed'])
 
     def test_mechanisms_have_native_preference_and_only_counts(self):
         candidates=pgo.event_candidates('/sys/bus/event_source/devices/armv8_cortex_a76/events/l1i_cache_refill')
@@ -232,7 +284,7 @@ class Instrumented(unittest.TestCase):
                           '--platform','rpi5-aarch64','--inputs',str(inputs),'--media-dir',str(self.root),
                           '--output',str(output),'--workdir',str(self.root)])
         self.assertEqual(rc,0,error)
-        self.assertIn('pgo_warning_limits',value['missing_for_run'])
+        self.assertIn('pgo_warning_policy',value['missing_for_run'])
         self.assertIn('afdo_profile',value['missing_for_run'])
         rc, plan, error=self.invoke(['run','--dry-run','--job',str(job)])
         self.assertEqual(rc,0,error)
@@ -288,3 +340,54 @@ class Instrumented(unittest.TestCase):
         rendered=(self.root/'report.md').read_text()
         self.assertIn('| pgo-vs-afdo | tos | 10 |',rendered)
         self.assertIn('## Mechanism counts',rendered)
+
+    def test_pgo_locks_four_independent_plans_before_timing(self):
+        runner=object.__new__(live.Experiment)
+        runner.inputs=[dict(id='tos',role='test'),dict(id='sintel',role='test-secondary')]
+        runner.job=dict(order_seed=2026112740,bootstrap_seed=2026112750)
+        runner.package=dict(measure=dict(epsilon=.01,warmup=2))
+        pilots=[]
+        def timed(name, item, deployment, out, preflight):
+            self.assertTrue(name.startswith('pilot-'))
+            pilots.append(name)
+            return dict(wall_seconds=1.0)
+        runner.timed=timed
+        deployments={name:dict(variant=name) for name in ('BASE','PGO','AFDO')}
+        registered=runner.prepare_pgo_plans(deployments,self.root,{})
+        self.assertEqual(len(pilots),40)
+        manifest=json_load(self.root/'all-plans-lock.json')['plans']
+        self.assertEqual(len(manifest),4)
+        self.assertTrue(all(sha256(self.root/key)==value for key,value in manifest.items()))
+        self.assertEqual([entry['plan']['order_seed'] for group in registered.values() for entry in group.values()],
+                         list(range(2026112740,2026112744)))
+        self.assertEqual([entry['plan']['bootstrap_seed'] for group in registered.values() for entry in group.values()],
+                         list(range(2026112750,2026112754)))
+        self.assertTrue(all(entry['plan']['N']==10 for group in registered.values() for entry in group.values()))
+
+    def test_mechanism_uses_five_complete_multi_event_rounds_per_variant(self):
+        runner=object.__new__(live.Experiment)
+        runner.platform=SimpleNamespace(cpu=3)
+        runner.scripts,runner.remote='/board/tools','/board/work'
+        runner.push_owned=lambda local,remote: None
+        runner.workload_environment=lambda deployment,manifest: {}
+        runner.verify_maps=lambda local,deployment,input_path: 1
+        commands=[]
+        runner.launch=lambda name,argv,out,env,timeout:commands.append((name,argv))
+        def pull(remote,out):
+            out.mkdir()
+            label=out.name.split('-')[-1]
+            (out/'count.log').write_text('Got EOS')
+            n={'BASE':100,'AFDO':90,'PGO':80}[label]
+            (out/'count.csv').write_text(f'{n};;cycles;20;100.00\n{n*2};;instructions;20;100.00\n')
+            return out
+        runner.pull_run=pull
+        variants={name:dict(variant=name,remote='/board/'+name) for name in ('BASE','AFDO','PGO')}
+        preflight=dict(mechanism_events={name:dict(selected=event) for name,event in
+                                       [('cycles','cycles'),('instructions','instructions'),('missing',None)]})
+        with patch.object(live.Experiment,'perf_path','/board/perf'):
+            got=runner.mechanism_counts(variants,preflight,self.root,dict(role='test',path='/input'))
+        self.assertEqual(len(commands),15)
+        self.assertTrue(all('cycles,instructions' in argv and '3' in argv for _,argv in commands))
+        self.assertEqual(got['paired']['pgo-vs-base']['cycles']['paired_difference'],[-20]*5)
+        self.assertEqual(got['paired']['pgo-vs-afdo']['instructions']['complete_pairs'],5)
+        self.assertEqual(got['paired']['pgo-vs-base']['missing']['complete_pairs'],0)
