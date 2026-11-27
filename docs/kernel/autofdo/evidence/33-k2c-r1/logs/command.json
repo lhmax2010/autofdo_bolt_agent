@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/usr/bin/gbs",
+    "-c",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k2c/r1/gbs.conf",
+    "build",
+    "-A",
+    "armv7l",
+    "--spec",
+    "linux-rpi.spec",
+    "--buildroot",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k2c/r1/gbs-root",
+    "--threads",
+    "1",
+    "--skip-conf-repos",
+    "-D",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k2b-continue/frozen-project.conf",
+    "-R",
+    "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k2b-continue/frozen-rpm-md",
+    "--define",
+    "_smp_mflags -j2",
+    "--define",
+    "kernel_localversion -kbase",
+    "--define",
+    "__spec_build_cmd /usr/bin/env JOBS=2 KBUILD_VERBOSE=1 KBUILD_BUILD_TIMESTAMP=%{lua:print(string.char(34,87,101,100,32,78,111,118,32,49,56,32,49,52,58,53,57,58,50,54,32,85,84,67,32,50,48,50,54,34))} KBUILD_BUILD_USER=abuild KBUILD_BUILD_HOST=linhao-linux KBUILD_BUILD_VERSION=1 %{___build_cmd}",
+    "--define",
+    "__spec_install_cmd /usr/bin/env JOBS=2 KBUILD_VERBOSE=1 KBUILD_BUILD_TIMESTAMP=%{lua:print(string.char(34,87,101,100,32,78,111,118,32,49,56,32,49,52,58,53,57,58,50,54,32,85,84,67,32,50,48,50,54,34))} KBUILD_BUILD_USER=abuild KBUILD_BUILD_HOST=linhao-linux KBUILD_BUILD_VERSION=1 %{___build_cmd}",
+    "--include-all",
+    "--define",
+    "kernel_autofdo_profile K-AFDO-R1.prof"
+  ],
+  "cwd": "/home/linhao/Toolchain/development/llvm_autofdo_bolt_agent/temp/kernel-afdo-k0/k2c/r1/export-src"
+}
