@@ -2,6 +2,8 @@
 from pathlib import Path
 from datetime import datetime, timezone
 import hashlib
+import json
+import os
 import time
 from uuid import uuid4
 from .common import atomic_write, require, save, json_load, sha256
@@ -48,9 +50,57 @@ class Store:
             require(sha256(self.path(name)) == expected, 'upstream changed')
         for path, digest in {**r['inputs'], **r['outputs']}.items():
             require(Path(path).is_file() and sha256(path) == digest, 'content changed: ' + path)
+        if 'output_tree' in r:
+            self.verify_output_tree(r)
         return r
 
-    def complete(self, stage, inputs, outputs, details=None, *, gbs_waits=None):
+    def write_output_tree(self, stage, root):
+        """Bind a large stage's files without retaining its paths or JSON in memory."""
+        root = Path(root).resolve()
+        require(root.is_dir() and root.is_relative_to(self.directory.parent.resolve()) and
+                not self.directory.resolve().is_relative_to(root), 'invalid output tree root')
+        path = (self.directory / (stage + '.outputs-' + str(time.time_ns()) + '.jsonl')).resolve()
+        partial = path.with_suffix('.partial')
+        count = 0
+        digest = hashlib.sha256()
+
+        def unreadable(error):
+            raise error
+
+        with partial.open('xb') as stream:
+            for directory, subdirs, names in os.walk(root, onerror=unreadable):
+                subdirs.sort()
+                for name in sorted(names):
+                    file = Path(directory) / name
+                    if file.is_file():
+                        entry = [file.relative_to(root).as_posix(), sha256(file)]
+                        record = (json.dumps(entry, separators=(',', ':')) + '\n').encode()
+                        stream.write(record)
+                        digest.update(record)
+                        count += 1
+            stream.flush()
+            os.fsync(stream.fileno())
+        require(count > 0, 'empty output tree')
+        os.replace(partial, path)
+        return dict(root=str(root), manifest=str(path), file_count=count), digest.hexdigest()
+
+    def verify_output_tree(self, receipt):
+        tree = receipt['output_tree']
+        root, path = Path(tree['root']), Path(tree['manifest'])
+        require(root.is_absolute() and root.resolve().is_relative_to(self.directory.parent.resolve()), 'output tree outside run')
+        require(str(path) in receipt['outputs'] and path.parent == self.directory.resolve(), 'unbound output tree manifest')
+        count = 0
+        with path.open(encoding='utf-8') as stream:
+            for line in stream:
+                relative, digest = json.loads(line)
+                name = Path(relative)
+                require(name.parts and not name.is_absolute() and '..' not in name.parts, 'unsafe output tree entry')
+                file = root / name
+                require(file.is_file() and sha256(file) == digest, 'content changed: ' + str(file))
+                count += 1
+        require(count > 0 and count == tree['file_count'], 'output tree file count changed')
+
+    def complete(self, stage, inputs, outputs, details=None, *, gbs_waits=None, output_tree=None):
         bindings = self.redo_bindings()
         upstream = {}
         for name in DAG[stage]:
@@ -72,6 +122,9 @@ class Store:
             r['gbs_waits'] = gbs_waits
         if binding:
             r['redo'] = binding
+        if output_tree is not None:
+            r['output_tree'], digest = self.write_output_tree(stage, output_tree)
+            r['outputs'][r['output_tree']['manifest']] = digest
         save(path, r)
         return r
 
