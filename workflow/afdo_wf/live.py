@@ -1048,6 +1048,23 @@ class Experiment(InstrumentedPGO):
             limitations=['One '+self.platform.report_label+'; single-threaded decode; ToS primary and Sintel secondary; no multiple-comparison correction; firmware throttle history unknown'],
             cleanup_pending=[])
         return report.write(out,payload)
+
+    @contextlib.contextmanager
+    def pgo_timing_lock(self, out):
+        from .host_build import BuildCoordination, lock_path
+        record = out / 'measurement-lock.json'
+        coordination = BuildCoordination(lock_path(self.w, self.job.get('host')), record,
+            self.job['experiment'], 'measure', 'S6 board timing', shared=True)
+        error = None
+        try:
+            coordination.acquire()
+            coordination.ready(lambda: build.resources(self.w, shared_host_recovery=True), build.can_start)
+            yield
+        except BaseException as failure:
+            error = failure
+            raise
+        finally:
+            coordination.finish(error)
     def run(self, stop_after=None):
         if 'injection' in self.job or 'telemetry_check' in self.job:return self.injected_run()
         inputs=[self.job_path,self.job['package'],self.job['inputs'],self.job['patch']]

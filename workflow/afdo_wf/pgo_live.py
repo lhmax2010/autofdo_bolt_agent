@@ -339,7 +339,7 @@ class InstrumentedPGO:
                     actual = self.oracle(name, item, deployment, out)
                     board.oracle_check(plat[item['id']], actual)
                     oracles[name] = actual
-        with self.transport.technical_operations():
+        with self.pgo_timing_lock(out), self.transport.technical_operations():
             check('pre')
             injection = self.failure_cleanup_test(out, preflight, deployments['BASE'])
             telemetry = self.telemetry_check_test(out, preflight, deployments['BASE'])

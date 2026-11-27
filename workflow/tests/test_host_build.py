@@ -93,6 +93,49 @@ class SharedBuildLock(unittest.TestCase):
         self.assertEqual(inode, self.lock.stat().st_ino)
         self.assert_released()
 
+    def timing(self):
+        return host_build.BuildCoordination(self.lock, self.root / 'timing.json',
+                                            'synthetic', 'measure', 'timing', shared=True)
+
+    def test_two_timing_holders_share_without_rewriting_lock_metadata(self):
+        self.lock.write_text('last exclusive owner\n')
+        with self.lock.open() as other:
+            fcntl.flock(other, fcntl.LOCK_SH)
+            timing = self.timing()
+            try:
+                timing.acquire()
+                self.assertEqual(timing.record['mode'], 'shared')
+                self.assertEqual(self.lock.read_text(), 'last exclusive owner\n')
+                with self.assertRaises(BlockingIOError):
+                    self.assert_released()
+            finally:
+                timing.finish(None)
+            self.assertEqual(self.sleeps, [])
+        self.assert_released()
+
+    def test_build_waits_for_timing_holder_to_release(self):
+        with self.lock.open('a+') as other:
+            fcntl.flock(other, fcntl.LOCK_SH)
+            self.on_sleep = lambda: fcntl.flock(other, fcntl.LOCK_UN)
+            self.assertEqual(self.run_build()['status'], 'success')
+        self.assertEqual(self.sleeps, [600])
+        self.assertEqual([row['ready'] for row in self.record()['checks'][:2]], [False, True])
+        self.assertEqual(self.record()['mode'], 'exclusive')
+        self.assert_released()
+
+    def test_timing_waits_for_exclusive_holder_to_release(self):
+        with self.lock.open('a+') as other:
+            fcntl.flock(other, fcntl.LOCK_EX)
+            self.on_sleep = lambda: fcntl.flock(other, fcntl.LOCK_UN)
+            timing = self.timing()
+            try:
+                timing.acquire()
+                self.assertEqual([row['ready'] for row in timing.record['checks']], [False, True])
+            finally:
+                timing.finish(None)
+        self.assertEqual(self.sleeps, [600])
+        self.assert_released()
+
     def test_lock_holder_timeout_does_not_change_peer(self):
         self.patch(host_build, 'COORDINATION_LIMIT', new=601)
         with self.lock.open('w+') as owner:
