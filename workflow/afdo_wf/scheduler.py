@@ -24,6 +24,12 @@ def reusable(store, stage, inputs):
     return True
 
 
+def pgo_measurement_outputs(out):
+    """Stable entry points to the full streamed output tree."""
+    names = ('result.json', 'all-plans-lock.json', 'measurement-lock.json', 'measurement-board.json', 'mechanism-counts.json')
+    return [out / name for name in names if (out / name).is_file()] + sorted(out.glob('pgo-vs-*/*-plan*.json'))
+
+
 def execute(stages,handlers,directory,receipt_directory,inputs,notify=None,*,first_output=None):
     store=Store(receipt_directory);directory=Path(directory)
     result=[]
@@ -47,9 +53,12 @@ def execute(stages,handlers,directory,receipt_directory,inputs,notify=None,*,fir
             save(out/'result.json',detail)
             # Large immutable artifacts are bound explicitly by a handler. Build roots
             # themselves are mutable implementation state, never receipt outputs.
-            outputs=[p for p in out.rglob('*') if p.is_file()]
+            large_pgo_measurement = stage == 'measure' and 'pgo_evidence' in detail
+            outputs = (pgo_measurement_outputs(out) if large_pgo_measurement else
+                       [p for p in out.rglob('*') if p.is_file()])
             outputs+=list(map(Path,detail.get('bound_files',[])))
-            store.complete(stage,inputs,outputs,detail, gbs_waits=build_wait_records(stage, outputs))
+            store.complete(stage, inputs, outputs, detail, gbs_waits=build_wait_records(stage, outputs),
+                           output_tree=out if large_pgo_measurement else None)
             result.append(dict(stage=stage,action='completed'))
             if notify:notify(stage,'completed')
         except BaseException as e:
