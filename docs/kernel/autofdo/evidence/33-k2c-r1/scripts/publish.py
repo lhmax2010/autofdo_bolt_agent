@@ -42,7 +42,7 @@ def ci(xs):
 
 def pack_run(d,e):
     fixed=(
-      'host-continuity.jsonl','lock-concurrency.jsonl','logs/result.json','logs/frozen.json','logs/admission.jsonl','logs/resources.jsonl','logs/command.json',
+      'host-continuity.jsonl','lock-concurrency.jsonl','preflight-recovery.json','logs/result.json','logs/frozen.json','logs/admission.jsonl','logs/resources.jsonl','logs/command.json',
       'logs/proof-resources.jsonl','logs/proof-result.json','artifacts/dependencies.json','artifacts/variant-verification.json',
       'board/preregistration.json','board/preregistration.sha256','board/start-cold/passed.json','board/start-cold/windows.jsonl',
       'board/start-cold/samples.jsonl','board/afdo-first.json','board/terminal.json','board/formal-analysis.json','board/mechanism-analysis.json',
@@ -202,6 +202,10 @@ def stage():
         known=[row for row in records if row['pid']==800021 and '-bb' in (row['flags'] or [])]
         if known:
             lines += ['第 9 组第二次尝试检测到了 VS Code Insiders 进程组内的 rpmbuild -bb。该进程在本实验持共享锁的期间出现。保留整组失败记录，重试继续沿用主机构建活动检查。 [进程收据]('+link+'/host-overlap-observer.jsonl)','']
+    history=d/'preflight-recovery.json'
+    if history.is_file():
+        recovery=read(history)
+        lines += [f'首次部署预检因脚本误改上一个候选镜像名而停止，历史提交 {recovery["initial_report_commit"]}。当时尚未部署、重启或计时。修正仅涉及镜像路径替换，并验证 GCOV → R1 和 R1 → HYB 的路径。恢复保留原构建、核验和预登记，重新检查开工温度。 [恢复收据]({link}/preflight-recovery.json)','']
     if state.get('error'):
         lines += [f'停点记录 {state["error"]}。','']
     b=d/'board'

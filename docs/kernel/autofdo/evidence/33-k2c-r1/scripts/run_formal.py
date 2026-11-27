@@ -278,9 +278,9 @@ def initial():
     assert board.sha(BOOT_IMAGE)==AFDO_SHA
     before=OUT/'expected-before-deploy.sha256'
     expected=manifest(before)
-    assert len(expected)==418 and expected['./zImage-kafdo-r1-gcov']=='f0cbc05b553bb16df1d78e03716c3514a97c53c6bd154852280526923df6f464'
+    assert len(expected)==418 and expected['./zImage-kafdo-gcov']=='f0cbc05b553bb16df1d78e03716c3514a97c53c6bd154852280526923df6f464'
     assert './zImage-kafdo-r1' not in expected and board.sha(OUT/'formal-kbase.txt')==expected['./tryboot.txt']
-    for item in ('./tryboot.txt','./zImage-kafdo-r1-gcov'):
+    for item in ('./tryboot.txt','./zImage-kafdo-gcov'):
         del expected[item]
     expected['./zImage-kafdo-r1']=AFDO_SHA
     preserved=OUT/'expected-after-deploy-preserved.sha256'

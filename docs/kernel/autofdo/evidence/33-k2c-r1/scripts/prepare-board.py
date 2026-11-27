@@ -13,8 +13,14 @@ previous_manifest=Path(sys.argv[2])
 previous_image=sys.argv[3]
 args={'gcov':('K-AFDO-GCOV',20261126),'r1':('K-AFDO-R1',20261127),'hyb':('K-AFDO-HYB',20261128)}
 name,seed=args[candidate]
-dry_run=sys.argv[4:]==['--dry-run']
-board=task/candidate/('board-preflight' if dry_run else 'board')
+options=sys.argv[4:]
+dry_run=options==['--dry-run']
+if not options or dry_run:
+    board=task/candidate/('board-preflight' if dry_run else 'board')
+else:
+    assert len(options)==2 and options[0]=='--output-dir'
+    board=Path(options[1]).resolve()
+    assert board.parent==task/candidate
 board.mkdir()
 prior=task.parent/'k1f-3'
 k2b=task.parent/'k2b-continue'
@@ -44,8 +50,16 @@ for file in ('formal-N.lock.json','timing-definition.lock.json','layout-analysis
              'measure.sh','mechanism.sh','smoke.sh','quiet.sh','evaluate-boot.py','fdt-compare.py','temp_check.py'):
     shutil.copy2(prior/file,board/file)
 
-def update(file, edits):
+def replace_image_names(code,previous_image,physical):
+    names={'zImage-kbase-s2':previous_image,'zImage-kafdo':physical}
+    pattern=r'\bzImage-(?:kbase-s2|kafdo)(?![A-Za-z0-9_-])'
+    return re.sub(pattern,lambda match:names[match.group()],code)
+
+
+def update(file, edits, *, adapt_images=False):
     code=(prior/file).read_text()
+    if adapt_images:
+        code=replace_image_names(code,previous_image,physical)
     for old,new in edits:
         assert old in code,(file,old)
         code=code.replace(old,new)
@@ -67,14 +81,12 @@ update('board.py',[
 ])
 update('boot-afdo.sh',[
     ('task=/opt/afdo_agent/k1f-1/k1f-3',f'task={remote}'),
-    ('zImage-kbase-s2',previous_image),
-    ('zImage-kafdo',physical),
     ("s/^kernel=zImage-(kbase|kafdo)$/\\1/p",f"s/^kernel=zImage-(kbase|kafdo-{candidate})$/\\1/p"),
     ('[[ $existing == kbase || $existing == kafdo ]]',f'[[ $existing == kbase || $existing == kafdo-{candidate} ]]'),
     ("s/^kernel=zImage-(kbase|kafdo)$/kernel=zImage-kbase/",f"s/^kernel=zImage-(kbase|kafdo-{candidate})$/kernel=zImage-kbase/"),
     ('sed "s/^kernel=zImage-kbase$/kernel=zImage-$target/"',f'kernel_target=$target\n[[ $target != kafdo ]] || kernel_target=kafdo-{candidate}\nsed "s/^kernel=zImage-kbase$/kernel=zImage-$kernel_target/"'),
     ('$existing != "$target"', '$existing != "$kernel_target"'),
-])
+],adapt_images=True)
 update('run_formal.py',[
     ("previous=OUT.parent/'k1f-2-resume'",f'previous=Path({str(task.parent/"k1f-2-resume")!r})'),
     ("lock_path=OUT.parents[1]/'host-gbs.lock'",f'lock_path=Path({str(task.parents[2]/"temp/host-gbs.lock")!r})'),
@@ -85,10 +97,7 @@ update('run_formal.py',[
     ("VARIANTS = ('K-BASE', 'K-AFDO')",f'VARIANTS = ("K-BASE", {name!r})'),
     ('stats.order(5,SEED,VARIANTS)','stats.order(3,SEED,VARIANTS)'),
     ("k_afdo_zImage_sha256=AFDO_SHA,",f"candidate_zImage_sha256=AFDO_SHA, candidate_profile_sha256={json.loads((task/candidate/'logs/result.json').read_text())['profile_sha256']!r},"),
-    ("expected['./zImage-kbase-s2']=='74e2d17a439d825506607b95e598b67dc78427c62d4a56385f15d19a688bb884'",f"expected['./{previous_image}']=='{files['./'+previous_image]}'"),
-    (("'./zImage-kbase-s2'"),repr('./'+previous_image)),
-    (('./zImage-kafdo'),('./'+physical)),
-    ('{remote}/zImage-kafdo',f'{{remote}}/{physical}'),
+    ('74e2d17a439d825506607b95e598b67dc78427c62d4a56385f15d19a688bb884',files['./'+previous_image]),
     ('k1f3-',f'k2c-{candidate}-'),
     ("raise Stop('quiet gate did not pass within 600 s')","raise Technical('quiet_timeout',label)"),
     ("raise Stop(f'mechanism quiet gate failed: {label}')","raise Technical('quiet_timeout',label)"),
@@ -106,10 +115,16 @@ update('run_formal.py',[
         if not (OUT/'start-cold/passed.json').is_file():
             gate(OUT/'start-cold')
         initial()"""),
-])
+],adapt_images=True)
 from measurement_lock import shared_timing
 formal=board/'run_formal.py'
 formal.write_text(shared_timing(formal.read_text()))
+script=(board/'boot-afdo.sh').read_text()
+assert f'rm -- "$m/{previous_image}"' in script
+assert f'publish_replace "$task/{physical}" {physical}' in script
+program=formal.read_text()
+assert f"expected['./{previous_image}']=='{files['./'+previous_image]}'" in program
+assert f"expected['./{physical}']=AFDO_SHA" in program
 
 for shell in board.glob('*.sh'):
     subprocess.run(['bash','-n',shell],check=True)

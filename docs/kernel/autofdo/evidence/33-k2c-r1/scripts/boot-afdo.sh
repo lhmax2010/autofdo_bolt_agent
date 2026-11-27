@@ -76,7 +76,7 @@ if [[ $mode == deploy ]]; then
     ! test -e "$m/zImage-kafdo-r1"
     ! test -e "$m/zImage-kafdo-r1.tmp"
     ! test -e "$m/tryboot.txt.tmp"
-    [[ -f "$m/zImage-kafdo-r1-gcov" && -f "$m/zImage-kbase" ]]
+    [[ -f "$m/zImage-kafdo-gcov" && -f "$m/zImage-kbase" ]]
     grep -qx 'kernel=zImage-kbase' "$m/tryboot.txt"
 else
     sed '\@  ./tryboot.txt$@d' "$receipts/before.sha256" > "$receipts/preserved.sha256"
@@ -93,7 +93,7 @@ kernel_target=$target
 sed "s/^kernel=zImage-kbase$/kernel=zImage-$kernel_target/" "$receipts/formal.txt" > "$receipts/tryboot.txt"
 fatsize
 if [[ $mode == deploy ]]; then
-    before=$(stat -c '%s' "$m/zImage-kafdo-r1-gcov")
+    before=$(stat -c '%s' "$m/zImage-kafdo-gcov")
     after=$(stat -c '%s' "$task/zImage-kafdo-r1")
     atomic_cost=$(stat -c '%s' "$receipts/tryboot.txt")
     low=$(( (available+(before+block-1)/block-(after+block-1)/block-(atomic_cost+block-1)/block)*block ))
@@ -107,7 +107,7 @@ if [[ $mode == deploy || ( $mode == switch && $existing != "$kernel_target" ) ]]
     inventory > "$receipts/at-write.sha256"
     match "$receipts/at-write.sha256" "$receipts/before.sha256"
     if [[ $mode == deploy ]]; then
-        rm -- "$m/zImage-kafdo-r1-gcov"
+        rm -- "$m/zImage-kafdo-gcov"
         "$helper" syncfs "$m"
         publish_replace "$task/zImage-kafdo-r1" zImage-kafdo-r1
     fi
