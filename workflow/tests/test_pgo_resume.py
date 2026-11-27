@@ -58,3 +58,15 @@ class PGOResume(unittest.TestCase):
             moved.write_text('different platform settings')
             with self.assertRaisesRegex(GateError,'initialized configuration changed'):
                 job_commands.validate_locks(self.next)
+
+    def test_resume_s5_with_new_seeds_only(self):
+        original=self.root/'converted-job.json'
+        save(original,self.next)
+        self.store.complete('convert',[original],[])
+        self.store.complete('rebuild',[original],[],dict(consumption={'passed':True}))
+        measure=dict(self.next,order_seed=2026112740,bootstrap_seed=2026112750,
+                     pgo_resume_after_rebuild=dict(job=str(original),receipt_sha256=sha256(self.store.path('rebuild'))))
+        pgo_resume.after_rebuild(measure,self.store,self.root)
+        measure['serial']='wrong board'
+        with self.assertRaisesRegex(GateError,'changed a locked input'):
+            pgo_resume.after_rebuild(measure,self.store,self.root)

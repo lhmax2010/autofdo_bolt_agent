@@ -340,3 +340,54 @@ class Instrumented(unittest.TestCase):
         rendered=(self.root/'report.md').read_text()
         self.assertIn('| pgo-vs-afdo | tos | 10 |',rendered)
         self.assertIn('## Mechanism counts',rendered)
+
+    def test_pgo_locks_four_independent_plans_before_timing(self):
+        runner=object.__new__(live.Experiment)
+        runner.inputs=[dict(id='tos',role='test'),dict(id='sintel',role='test-secondary')]
+        runner.job=dict(order_seed=2026112740,bootstrap_seed=2026112750)
+        runner.package=dict(measure=dict(epsilon=.01,warmup=2))
+        pilots=[]
+        def timed(name, item, deployment, out, preflight):
+            self.assertTrue(name.startswith('pilot-'))
+            pilots.append(name)
+            return dict(wall_seconds=1.0)
+        runner.timed=timed
+        deployments={name:dict(variant=name) for name in ('BASE','PGO','AFDO')}
+        registered=runner.prepare_pgo_plans(deployments,self.root,{})
+        self.assertEqual(len(pilots),40)
+        manifest=json_load(self.root/'all-plans-lock.json')['plans']
+        self.assertEqual(len(manifest),4)
+        self.assertTrue(all(sha256(self.root/key)==value for key,value in manifest.items()))
+        self.assertEqual([entry['plan']['order_seed'] for group in registered.values() for entry in group.values()],
+                         list(range(2026112740,2026112744)))
+        self.assertEqual([entry['plan']['bootstrap_seed'] for group in registered.values() for entry in group.values()],
+                         list(range(2026112750,2026112754)))
+        self.assertTrue(all(entry['plan']['N']==10 for group in registered.values() for entry in group.values()))
+
+    def test_mechanism_uses_five_complete_multi_event_rounds_per_variant(self):
+        runner=object.__new__(live.Experiment)
+        runner.platform=SimpleNamespace(cpu=3)
+        runner.scripts,runner.remote='/board/tools','/board/work'
+        runner.push_owned=lambda local,remote: None
+        runner.workload_environment=lambda deployment,manifest: {}
+        runner.verify_maps=lambda local,deployment,input_path: 1
+        commands=[]
+        runner.launch=lambda name,argv,out,env,timeout:commands.append((name,argv))
+        def pull(remote,out):
+            out.mkdir()
+            label=out.name.split('-')[-1]
+            (out/'count.log').write_text('Got EOS')
+            n={'BASE':100,'AFDO':90,'PGO':80}[label]
+            (out/'count.csv').write_text(f'{n};;cycles;20;100.00\n{n*2};;instructions;20;100.00\n')
+            return out
+        runner.pull_run=pull
+        variants={name:dict(variant=name,remote='/board/'+name) for name in ('BASE','AFDO','PGO')}
+        preflight=dict(mechanism_events={name:dict(selected=event) for name,event in
+                                       [('cycles','cycles'),('instructions','instructions'),('missing',None)]})
+        with patch.object(live.Experiment,'perf_path','/board/perf'):
+            got=runner.mechanism_counts(variants,preflight,self.root,dict(role='test',path='/input'))
+        self.assertEqual(len(commands),15)
+        self.assertTrue(all('cycles,instructions' in argv and '3' in argv for _,argv in commands))
+        self.assertEqual(got['paired']['pgo-vs-base']['cycles']['paired_difference'],[-20]*5)
+        self.assertEqual(got['paired']['pgo-vs-afdo']['instructions']['complete_pairs'],5)
+        self.assertEqual(got['paired']['pgo-vs-base']['missing']['complete_pairs'],0)

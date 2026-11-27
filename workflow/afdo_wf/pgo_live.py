@@ -1,5 +1,7 @@
 """Live stage adapters for the instrumented PGO method."""
 from pathlib import Path
+import statistics
+import time
 import re
 import shlex
 
@@ -233,32 +235,93 @@ class InstrumentedPGO:
                                       warning_counts=matched['warning_counts'], coverage=matched['coverage']),
                     bound_files=[item['path'] for variant in variants.values() for item in variant['rpms']])
 
+    def recover_pgo_block(self, error, out):
+        """Re-establish only the authorized target before retrying a whole block."""
+        t = self.transport
+        attempts = []
+        if error.reason == 'board-unreachable':
+            self.host(['timeout', '15s', 'sdb', 'disconnect', self.serial], out, check=False)
+            result = self.host(['timeout', '15s', 'sdb', 'connect', self.serial], out, check=False)
+            attempts.append({'reconnected': result.returncode == 0})
+            save(out/'recovery.json', dict(boot_before=self.measurement_boot, actions=attempts))
+            require(result.returncode == 0, 'target-specific SDB reconnect failed', 'board-unreachable')
+        require(t.identity() == self.job['identity'], 'identity changed during measurement', 'identity', 3)
+        boot = t.shell('cat /proc/sys/kernel/random/boot_id', True).strip()
+        if boot != self.measurement_boot:
+            require(any(row['kind']=='root' and not row['previous'] for row in self.cleanup.data['cleanup_pending']),
+                    'reboot recovery is missing the session privilege journal', 'recovery-required')
+            if not t.root_state():
+                t.root(True)
+            for row in self.cleanup.data['cleanup_pending']:
+                if row['kind'] == 'governor':
+                    t.governor(row['policy'], 'performance')
+        save(out/'recovery.json', dict(boot_before=self.measurement_boot, boot_after=boot, actions=attempts))
+        self.measurement_boot = boot
+
+    def prepare_pgo_plans(self, deployments, out, preflight):
+        tests = self.measurement_inputs()
+        require(len(tests)==2 and [row['role'] for row in tests]==['test','test-secondary'],
+                'expected primary and supplemental measurement inputs')
+        registered, digest_manifest = {}, {}
+        for index, control in enumerate(pgo.CONTROLS):
+            group = 'pgo-vs-'+control.lower()
+            location = out/group
+            location.mkdir()
+            plans = registered[group] = {}
+            for i, item in enumerate(tests):
+                offset = len(tests)*index+i
+                plans[item['id']] = self.prepare_pair(item, deployments[control], deployments['PGO'], location, preflight,
+                    self.job['order_seed']+offset, self.job['bootstrap_seed']+offset, group=group, primary=index==0)
+                filename = location/(item['id']+'-plan.json')
+                digest = sha256(filename)
+                require(json_load(location/(item['id']+'-plan-lock.json'))['sha256']==digest,'pair plan lock changed')
+                digest_manifest[str(filename.relative_to(out))] = digest
+        save(out/'all-plans-lock.json', dict(plans=digest_manifest, locked_at=time.time()))
+        return registered
+
     def mechanism_counts(self, deployments, preflight, out, item):
-        result = dict(diagnostic_only=True, event_manifest=preflight['mechanism_events'], variants={})
-        for label, deployment in deployments.items():
-            rows = {}
-            for metric, availability in preflight['mechanism_events'].items():
-                event = availability['selected']
-                if event is None:
-                    rows[metric] = dict(status='unavailable')
-                    continue
-                name = 'pgo-count-'+label+'-'+metric
+        manifest = preflight['mechanism_events']
+        selected = {name:value['selected'] for name,value in manifest.items() if value['selected']}
+        require(set(selected) >= {'cycles','instructions'} and len(set(selected.values()))==len(selected),
+                'invalid preflight mechanism event selections')
+        script = self.scripts+'/pgo_count_stage6.sh'
+        self.push_owned(self.code/'board/pgo_count.sh', script)
+        variants = {label:[] for label in deployments}
+        result = dict(diagnostic_only=True, event_manifest=manifest, runs_per_variant=5, variants=variants)
+        order = ('BASE', 'AFDO', 'PGO')
+        for index in range(5):
+            for label in order[index%3:]+order[:index%3]:
+                deployment = deployments[label]
+                name = f'pgo-count-{index+1}-{label}'
                 remote = self.remote+'/'+name
                 env = self.workload_environment(deployment, self.scripts+'/'+deployment['variant']+'-manifest.json')
-                argv = ['bash', self.scripts+'/pgo_count.sh', remote, self.perf_path, event,
+                env['WF_COUNT_CAPABILITIES'] = self.scripts+'/capabilities.tsv'
+                argv = ['bash', script, remote, self.perf_path, ','.join(selected.values()),
                         str(self.platform.cpu), '600', 'bash', self.scripts+'/timed.sh', item['role'],
                         deployment['remote'], item['path'], remote+'/result']
-                try:
-                    self.launch(name, argv, out, env, timeout=1200)
-                    local = self.pull_run(remote, out/name)
-                    require('Got EOS' in (local/'count.log').read_text(), 'mechanism workload EOS missing')
-                    self.verify_maps(local, deployment, item['path'])
-                    row = pgo.count_value((local/'count.csv').read_text())
-                    require(row is not None, 'mechanism count unavailable')
-                    rows[metric] = dict(status='counted', selected=event, **row)
-                except GateError as error:
-                    rows[metric] = dict(status='failed', selected=event, reason=str(error))
-            result['variants'][label] = rows
+                self.launch(name, argv, out, env, timeout=1200)
+                local = self.pull_run(remote, out/name)
+                require('Got EOS' in (local/'count.log').read_text(), 'mechanism workload EOS missing')
+                self.verify_maps(local, deployment, item['path'])
+                counts = {}
+                for line in (local/'count.csv').read_text().splitlines():
+                    value = pgo.count_value(line)
+                    if value and value['event'] in selected.values():
+                        require(value['event'] not in counts, 'duplicate perf mechanism record')
+                        counts[value['event']] = value
+                variants[label].append(dict(repetition=index+1, counts={name:counts.get(event) for name,event in selected.items()}))
+                save(out/'mechanism-counts.json', result)
+        result['paired'] = {}
+        for control in pgo.CONTROLS:
+            metrics = result['paired']['pgo-vs-'+control.lower()] = {}
+            for metric in manifest:
+                pairs = [(a['counts'].get(metric), b['counts'].get(metric))
+                         for a,b in zip(variants[control], variants['PGO'])]
+                pairs = [(a['count'],b['count']) for a,b in pairs if a and b]
+                metrics[metric] = dict(complete_pairs=len(pairs), paired_difference=[b-a for a,b in pairs],
+                    control_median=statistics.median(a for a,b in pairs) if pairs else None,
+                    pgo_median=statistics.median(b for a,b in pairs) if pairs else None,
+                    median_paired_relative=statistics.median(b/a-1 for a,b in pairs) if pairs and all(a for a,b in pairs) else None)
         save(out/'mechanism-counts.json', result)
         return result
 
@@ -267,6 +330,8 @@ class InstrumentedPGO:
         deployments = self.details(store,'rebuild')['deployments']
         plat = self.details(store,'deploy')['oracles']
         oracles = {}
+        self.measurement_boot = self.transport.shell('cat /proc/sys/kernel/random/boot_id', True).strip()
+        save(out/'measurement-board.json',dict(serial=self.serial,boot_id=self.measurement_boot))
         def check(point):
             for label, deployment in deployments.items():
                 for item in self.inputs:
@@ -280,13 +345,14 @@ class InstrumentedPGO:
             telemetry = self.telemetry_check_test(out, preflight, deployments['BASE'])
             comparisons = {}
             rounds = []
-            per_comparison = sum(item['role'] in ('test', 'test-secondary') for item in self.inputs)
-            for index, control in enumerate(pgo.CONTROLS):
+            registered = self.prepare_pgo_plans(deployments, out, preflight)
+            for rel, digest in json_load(out/'all-plans-lock.json')['plans'].items():
+                require(sha256(out/rel)==digest,'all-plans lock changed before formal rounds')
+            for control in pgo.CONTROLS:
                 group = 'pgo-vs-'+control.lower()
                 location = out/group
-                location.mkdir()
                 pair_results, rows = self.measure_pairs(deployments[control], deployments['PGO'], location, preflight,
-                                                        group=group, seed_offset=per_comparison*index, primary=index==0)
+                                                        group=group, prepared=registered[group])
                 comparisons[group] = pair_results
                 rounds.extend(rows)
             check('post')
@@ -313,7 +379,11 @@ class InstrumentedPGO:
                     rounds=measured['rounds'], statistics=primary['statistics'], comparisons=measured['comparisons'],
                     mechanism_counts=measured['mechanism_counts'],
                     pgo_evidence=dict(profile=converted['pgo_evidence'], audit=rebuilt['pgo_evidence']),
+                    deviations=dict(compiler_rt=self.job.get('pgo_frozen',{}).get('runtime'),
+                                    s5_archived_rebuilds=rebuilt.get('reused_builds',{}),
+                                    all_zero_cross_dso=converted['lock'].get('collisions',[])),
                     limitations=['One '+self.platform.report_label+'; single-threaded decode; ToS primary; '
-                                 'Sintel supplementary; no multiple-comparison correction'],
+                                 'Sintel supplementary; no multiple-comparison correction',
+                                 'Firmware throttle history and voltage status unknown on this board'],
                     cleanup_pending=self.cleanup.data['cleanup_pending'])
         return report.write(out,data)

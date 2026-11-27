@@ -3,12 +3,16 @@ set -eu
 here=${0%/*}; . "$here/common.sh"
 run=$1; perf=$2; event=$3; cpu=$4; limit=$5; shift 5
 safe_path "$run"; safe_path "$perf"
-case "$event" in ''|*[!a-zA-Z0-9_.:/-]*) exit 2;; esac
+case "$event" in ''|*[!a-zA-Z0-9_.:/,-]*) exit 2;; esac
 case "$cpu:$limit" in *[!0-9:]*|:*|*:|*::*) exit 2;; esac
 test ! -e "$run"; mkdir -p "$run"
 export HOME="$run" TMPDIR="$run" XDG_CACHE_HOME="$run/cache" XDG_CONFIG_HOME="$run/config" XDG_STATE_HOME="$run/state"
 export GST_REGISTRY_1_0="$run/registry.bin"
 step_log "$run/count.log"
+if test -n "${WF_COUNT_CAPABILITIES:-}"; then
+    safe_path "$WF_COUNT_CAPABILITIES"
+    bash "$here/start_gate.sh" "$WF_COUNT_CAPABILITIES" "$run/start-gate.log"
+fi
 test -n "${DEPLOY_MANIFEST:-}"; safe_path "$DEPLOY_MANIFEST"
 worker=''; observer=''
 cleanup() {
