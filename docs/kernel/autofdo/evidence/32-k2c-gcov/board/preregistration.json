@@ -1,0 +1,124 @@
+{
+  "formal": [
+    [
+      "K-BASE",
+      "K-AFDO-GCOV"
+    ],
+    [
+      "K-AFDO-GCOV",
+      "K-BASE"
+    ],
+    [
+      "K-BASE",
+      "K-AFDO-GCOV"
+    ],
+    [
+      "K-BASE",
+      "K-AFDO-GCOV"
+    ],
+    [
+      "K-AFDO-GCOV",
+      "K-BASE"
+    ],
+    [
+      "K-AFDO-GCOV",
+      "K-BASE"
+    ],
+    [
+      "K-BASE",
+      "K-AFDO-GCOV"
+    ],
+    [
+      "K-BASE",
+      "K-AFDO-GCOV"
+    ],
+    [
+      "K-AFDO-GCOV",
+      "K-BASE"
+    ],
+    [
+      "K-AFDO-GCOV",
+      "K-BASE"
+    ]
+  ],
+  "mechanism": [
+    [
+      "K-BASE",
+      "K-AFDO-GCOV"
+    ],
+    [
+      "K-AFDO-GCOV",
+      "K-BASE"
+    ],
+    [
+      "K-BASE",
+      "K-AFDO-GCOV"
+    ]
+  ],
+  "seed": 20261126,
+  "n": 10,
+  "repetitions": 20000,
+  "epsilon": 0.01,
+  "primary": "pipe",
+  "formal_N_sha256": "734cc949810798dcbaf1e87a4ae83c3f3645d255f204ebf748b9c1fdbf9ed84b",
+  "workflow_stats_sha256": "66318a939e9eb8bca7b15ae6076133431290226d27a3f0682fe8b18ef3312887",
+  "candidate_zImage_sha256": "f0cbc05b553bb16df1d78e03716c3514a97c53c6bd154852280526923df6f464",
+  "candidate_profile_sha256": "23693afab064fa7ebac233346446db7a647627c3c24f3bfb7b84dc3a90c02fa9",
+  "comparators": [
+    "K-BASE",
+    "K-AFDO-GCOV"
+  ],
+  "mechanism_cpus": [
+    3
+  ],
+  "mechanism_events": [
+    "cycles:k",
+    "instructions:k",
+    "r01",
+    "r02",
+    "r10"
+  ],
+  "mechanism_workloads": [
+    "pipe",
+    "mmfault"
+  ],
+  "time_rule": {
+    "mmfault": "workload elapsed_ns / 1e9, excludes final checksum",
+    "forkexec": "workload elapsed_ns / 1e9",
+    "pipe": "external perf-stat wall seconds",
+    "tmpfs": "external perf-stat wall seconds",
+    "syscall": "external perf-stat wall seconds",
+    "tos": "external perf-stat wall seconds"
+  },
+  "temperature": {
+    "opening_gate": 58,
+    "opening_seconds": 300,
+    "max_measurement_start": 60,
+    "T_max": 80
+  },
+  "parameters": {
+    "pipe_loops": 500000,
+    "mmfault_MiB": 64,
+    "mmfault_count": 59,
+    "tmpfs_MiB": 64,
+    "tmpfs_repeats": 8,
+    "syscall_loops": 20000000,
+    "forkexec_count": 12774,
+    "tos": "K1a BASE 60s 1800 frames single-thread decode"
+  },
+  "benchmark_order": [
+    "pipe",
+    "mmfault",
+    "tmpfs",
+    "syscall",
+    "forkexec",
+    "tos"
+  ],
+  "warmups": 1,
+  "timed_rounds": 3,
+  "quiet_busy_below_pct": 2.91,
+  "min_quiet_seconds": 30,
+  "max_quiet_seconds": 600,
+  "before_manifest_sha256": "596976e1333463d3bf9e55cc8b19310d748f891f0169d432347b38f1cb0e1062",
+  "locked_utc": "2026-11-27T05:27:17.389679+00:00"
+}
